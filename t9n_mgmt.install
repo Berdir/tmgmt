@@ -40,12 +40,16 @@ function t9n_mgmt_schema() {
         'unsigned' => TRUE,
       ),
     ),
+    'primary key' => array('tmid'),
+    'unique keys' => array(
+      'source' => array('plugin', 'item_type', 'item_id', 'item_rid'),
+    ),
   );
 
   $schema['t9n_mgmt_job'] = array(
     'description' => 'A translation job represents a translation order that can be assigned to a translator.',
     'fields' => array(
-      'tmjid' => array(
+      'tjid' => array(
         'description' => 'The identifier of the translation job',
         'type' => 'serial',
         'not null' => TRUE,
@@ -119,6 +123,10 @@ function t9n_mgmt_schema() {
         'serialize' => TRUE,
       ),
     ),
+    'primary key' => array('tjid'),
+    'keys' => array(
+      'state' => array('state'),
+    ),
   );
 
   $schema['t9n_mgmt_translator'] = array(
@@ -144,6 +152,7 @@ function t9n_mgmt_schema() {
         'serialize' => TRUE,
       ),
     ),
+    'primary key' => array('name'),
   );
   return $schema;
 }
