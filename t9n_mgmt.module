@@ -71,3 +71,50 @@ function t9n_mgmt_entity_info() {
     ),
   );
 }
+
+/**
+ * Loads a translation map.
+ */
+function t9n_mgmt_map_load($tmid, $reset = FALSE) {
+  $maps = t9n_mgmt_map_load_multiple(array($tmid), array(), $reset);
+  return $maps ? reset($maps) : FALSE;
+}
+
+/**
+ * Loads translation maps.
+ */
+function t9n_mgmt_map_load_multiple(array $tmids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('t9n_mgmt_map', $tmids, $conditions, $reset);
+}
+
+/**
+ * Loads a translation job.
+ */
+function t9n_mgmt_job_load($tjid, $reset = FALSE) {
+  $jobs = t9n_mgmt_job_load_multiple(array($tjid), array(), $reset);
+  return $jobs ? reset($jobs) : FALSE;
+}
+
+/**
+ * Loads translation jobs.
+ */
+function t9n_mgmt_job_load_multiple(array $tjids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('t9n_mgmt_job', $tjids, $conditions, $reset);
+}
+
+
+
+/**
+ * Loads a translator.
+ */
+function t9n_mgmt_translator_load($tid, $reset = FALSE) {
+  $translators = t9n_mgmt_translator_load_multiple(array($tid), array(), $reset);
+  return $translators ? reset($translators) : FALSE;
+}
+
+/**
+ * Loads translation maps.
+ */
+function t9n_mgmt_translator_load_multiple(array $tids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('t9n_mgmt_translator', $tids, $conditions, $reset);
+}
