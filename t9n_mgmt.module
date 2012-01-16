@@ -15,6 +15,7 @@ function t9n_mgmt_entity_info() {
       'label callback' => 'entity_class_label',
       // @todo Do we need fields here?
       'fieldable' => FALSE,
+      'translate' => FALSE,
       'entity keys' => array(
         'id' => 'tmid',
       ),
@@ -36,8 +37,32 @@ function t9n_mgmt_entity_info() {
       'label callback' => 'entity_class_label',
       // @todo Add field integration.
       'fieldable' => FALSE,
+      'translate' => FALSE,
       'entity keys' => array(
         'id' => 'tjid',
+      ),
+      'bundles' => array(),
+      'view modes' => array(
+        'full' => array(
+          'label' => t('Full'),
+          'custom settings' => FALSE,
+        ),
+      ),
+    ),
+    't9n_mgmt_translator' => array(
+      'label' => t('Translation Management Translator'),
+      'module' => 't9n_mgmt',
+      'controller class' => 'TranslationManagementTranslatorController',
+      'entity class' => 'TranslationManagementTranslator',
+      'base table' => 't9n_mgmt_translator',
+      'uri callback' => 'entity_class_uri',
+      'label callback' => 'entity_class_label',
+      'fieldable' => FALSE,
+      'translate' => FALSE,
+      'entity keys' => array(
+        'id' => 'tid',
+        'name' => 'name',
+        'label' => 'label',
       ),
       'bundles' => array(),
       'view modes' => array(

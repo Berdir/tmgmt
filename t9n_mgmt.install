@@ -132,6 +132,11 @@ function t9n_mgmt_schema() {
   $schema['t9n_mgmt_translator'] = array(
     'description' => 'A translator is a combination of a translator type and type specific configuration',
     'fields' => array(
+      'tid' => array(
+        'description' => 'The identifier of the translator',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
       'name' => array(
         'description' => 'Machine name identifier of the translator',
         'type' => 'varchar',
@@ -152,7 +157,10 @@ function t9n_mgmt_schema() {
         'serialize' => TRUE,
       ),
     ),
-    'primary key' => array('name'),
+    'primary key' => array('tid'),
+    'unique keys' => array(
+      'name' => array('name'),
+    )
   );
   return $schema;
 }
