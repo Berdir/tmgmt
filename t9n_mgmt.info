@@ -3,7 +3,7 @@ core = 7.x
 
 dependencies[]=entity
 
-files[]=t9n_mgmt.controller.inc
-files[]=t9n_mgmt.entity.inc
+files[]=includes/t9n_mgmt.controller.inc
+files[]=includes/t9n_mgmt.entity.inc
 files[]=t9n_mgmt.test
 
