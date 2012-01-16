@@ -1,0 +1,151 @@
+<?php
+
+/**
+ * @file
+ * Installation hooks for the Translation Management module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function t9n_mgmt_schema() {
+  $schema['t9n_mgmt_map'] = array(
+    'description' => 'A translation map represents an item that needs to be translated.',
+    'fields' => array(
+      'tmid' => array(
+        'description' => 'The identifier of the translation map',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'plugin' => array(
+        'description' => 'Indicates the plugin which provides this item',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+      ),
+      'item_type' => array(
+        'description' => 'The type of the item, e.g. the entity type',
+        'type' => 'varchar',
+        'length' => 128,
+      ),
+      'item_id' => array(
+        'description' => 'The unique id (within the given item type) of the item',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'item_rid' => array(
+        'description' => 'The revision id of the item, if supported',
+        'type' => 'int',
+        'unsigned' => TRUE,
+      ),
+    ),
+  );
+
+  $schema['t9n_mgmt_job'] = array(
+    'description' => 'A translation job represents a translation order that can be assigned to a translator.',
+    'fields' => array(
+      'tmjid' => array(
+        'description' => 'The identifier of the translation job',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'tmid' => array(
+        'description' => 'The identifier of the translation map',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'source_language' => array(
+        'description' => 'The source language of the data',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+      ),
+      'target_language' => array(
+        'description' => 'The language into the data should be translated',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+      ),
+      'state' => array(
+        'description' => 'The state of the translation job',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'description' => 'Created timestamp',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'changed' => array(
+        'description' => 'Changed timestamp',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'translator' => array(
+        'description' => 'Machine name of the translator',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+      ),
+      'translator_context' => array(
+        'description' => 'Translator specific configuration and context for this job',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+      'data' => array(
+        'description' => 'Structured data that should be translated',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+      'translated_data' => array(
+        'description' => 'Structured translated data',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+      'response' => array(
+        'description' => 'The raw response from the translator',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+  );
+
+  $schema['t9n_mgmt_translator'] = array(
+    'description' => 'A translator is a combination of a translator type and type specific configuration',
+    'fields' => array(
+      'name' => array(
+        'description' => 'Machine name identifier of the translator',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'Label of the translator',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => TRUE,
+      ),
+      'settings' => array(
+        'description' => 'Translator specific settings',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+  );
+  return $schema;
+}
+
+
