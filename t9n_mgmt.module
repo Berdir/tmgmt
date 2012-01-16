@@ -1,3 +1,49 @@
 <?php
 
-
+/**
+ * Implements hook_entity_info().
+ */
+function t9n_mgmt_entity_info() {
+  return array(
+    't9n_mgmt_map' => array(
+      'label' => t('Translation Management Map'),
+      // @todo
+      'controller class' => 'TranslationManagementMapController',
+      'base table' => 't9n_mgmt_map',
+      // @todo
+      'uri callback' => 'translation_management_map_uri',
+      // @todo Do we need fields here?
+      'fieldable' => FALSE,
+      'entity keys' => array(
+        'id' => 'tmid',
+      ),
+      'bundles' => array(),
+      'view modes' => array(
+        'full' => array(
+          'label' => t('Full'),
+          'custom settings' => FALSE,
+        ),
+      ),
+    ),
+    't9n_mgmt_job' => array(
+      'label' => t('Translation Management Job'),
+      // @todo
+      'controller class' => 'TranslationManagementJobController',
+      'base table' => 't9n_mgmt_job',
+      // @todo
+      'uri callback' => 'translation_management_job_uri',
+      // @todo Add field integration.
+      'fieldable' => FALSE,
+      'entity keys' => array(
+        'id' => 'tjid',
+      ),
+      'bundles' => array(),
+      'view modes' => array(
+        'full' => array(
+          'label' => t('Full'),
+          'custom settings' => FALSE,
+        ),
+      ),
+    ),
+  );
+}
