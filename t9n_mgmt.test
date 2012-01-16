@@ -5,3 +5,109 @@
  * Contains tests for Translation management
  */
 
+/**
+ *
+ */
+class TranslationManagementCRUDTestCase extends DrupalWebTestCase {
+
+  /**
+   * Implement getInfo().
+   */
+  function getInfo() {
+    return array(
+      'name' => t('CRUD tests'),
+      'description' => t('Basic crud operations for maps, jobs and translators'),
+      'group' => t('Translation Management'),
+    );
+  }
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp() {
+    parent::setUp(array('entity', 't9n_mgmt'));
+  }
+
+  /**
+   * Test crud operations of translators.
+   */
+  function testTranslators() {
+    $translator = new TranslationManagementTranslator();
+    $translator->name = $this->randomName();
+    $translator->label = $this->randomString();
+    $translator->settings = array(
+      'key' => $this->randomName(),
+      'another_key' => $this->randomName(),
+    );
+    $this->assertEqual(SAVED_NEW, $translator->save());
+
+    // Assert that the translater was assigned a tid.
+    $this->assertTrue($translator->tid > 0);
+
+    // @todo: Provide wrappers.
+    $loaded_translators = entity_load('t9n_mgmt_translator', array($translator->tid));
+    $this->assertEqual(1, count($loaded_translators));
+    $loaded_translator = reset($loaded_translators);
+
+    $this->assertEqual($translator->name, $loaded_translator->name);
+    $this->assertEqual($translator->label, $loaded_translator->label);
+    $this->assertEqual($translator->settings, $loaded_translator->settings);
+
+    // Update the settings.
+    $translator->settings['new_key'] = $this->randomString();
+    $this->assertEqual(SAVED_UPDATED, $translator->save());
+
+    $loaded_translators = entity_load('t9n_mgmt_translator', array($translator->tid));
+    $this->assertEqual(1, count($loaded_translators));
+    $loaded_translator = reset($loaded_translators);
+
+    $this->assertEqual($translator->name, $loaded_translator->name);
+    $this->assertEqual($translator->label, $loaded_translator->label);
+    $this->assertEqual($translator->settings, $loaded_translator->settings);
+
+    // Delete the translator, make sure the translator is gone.
+    $translator->delete();
+    $loaded_translators = entity_load('t9n_mgmt_translator', array($translator->tid));
+    $this->assertEqual(0, count($loaded_translators));
+  }
+
+  /**
+   * Test crud operations of maps.
+   */
+  function testMaps() {
+    $map = new TranslationManagementMap();
+    $map->plugin = $this->randomName();
+    $map->item_type = $this->randomName();
+    $map->item_id = 5;
+    $this->assertEqual(SAVED_NEW, $map->save());
+
+    // Assert that the translater was assigned a tid.
+    $this->assertTrue($map->tmid > 0);
+
+    // @todo: Provide wrappers.
+    $loaded_maps = entity_load('t9n_mgmt_map', array($map->tmid));
+    $this->assertEqual(1, count($loaded_maps));
+    $loaded_map = reset($loaded_maps);
+
+    $this->assertEqual($map->plugin, $loaded_map->plugin);
+    $this->assertEqual($map->item_type, $loaded_map->item_type);
+    $this->assertEqual($map->item_id, $loaded_map->item_id);
+
+    // Update the settings.
+    $map->item_id = 6;
+    $this->assertEqual(SAVED_UPDATED, $map->save());
+
+    $loaded_maps = entity_load('t9n_mgmt_map', array($map->tmid));
+    $this->assertEqual(1, count($loaded_maps));
+    $loaded_map = reset($loaded_maps);
+
+    $this->assertEqual($map->plugin, $loaded_map->plugin);
+    $this->assertEqual($map->item_type, $loaded_map->item_type);
+    $this->assertEqual($map->item_id, $loaded_map->item_id);
+
+    // Delete the translator, make sure the translator is gone.
+    $map->delete();
+    $loaded_maps = entity_load('t9n_mgmt_map', array($map->tmid));
+    $this->assertEqual(0, count($loaded_maps));
+  }
+}

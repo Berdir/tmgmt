@@ -34,15 +34,10 @@ function t9n_mgmt_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'item_rid' => array(
-        'description' => 'The revision id of the item, if supported',
-        'type' => 'int',
-        'unsigned' => TRUE,
-      ),
     ),
     'primary key' => array('tmid'),
     'unique keys' => array(
-      'source' => array('plugin', 'item_type', 'item_id', 'item_rid'),
+      'source' => array('plugin', 'item_type', 'item_id'),
     ),
   );
 
