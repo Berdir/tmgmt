@@ -17,6 +17,20 @@ class TranslationManagementTranslatorController extends EntityAPIControllerExpor
  */
 class TranslationManagementJobController extends EntityAPIController {
 
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
+
+    if (empty($entity->tjid)) {
+      $entity->created = REQUEST_TIME;
+    }
+
+    $entity->changed = REQUEST_TIME;
+
+    // @todo: Define states.
+    $entity->state = 0;
+
+    return parent::save($entity, $transaction);
+  }
+
 }
 
 /**

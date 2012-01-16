@@ -6,9 +6,96 @@
  */
 
 /**
- *
+ * Base class for tests.
  */
-class TranslationManagementCRUDTestCase extends DrupalWebTestCase {
+class TranslationManagementBaseTestCase extends DrupalWebTestCase {
+
+  /**
+   * Creates, saves and returns a translator.
+   *
+   * @return TranslationManagementTranslator
+   */
+  function createTranslator() {
+    $translator = new TranslationManagementTranslator();
+    $translator->name = $this->randomName();
+    $translator->label = $this->randomString();
+    $translator->settings = array(
+      'key' => $this->randomName(),
+      'another_key' => $this->randomName(),
+    );
+    $this->assertEqual(SAVED_NEW, $translator->save());
+
+    // Assert that the translater was assigned a tid.
+    $this->assertTrue($translator->tid > 0);
+    return $translator;
+  }
+
+  /**
+   * Creates, saves and returns a translation map.
+   *
+   * @return TranslationManagementMap
+   */
+  function createMap() {
+    $map = new TranslationManagementMap();
+    $map->plugin = $this->randomName();
+    $map->item_type = $this->randomName();
+    $map->item_id = 5;
+    $this->assertEqual(SAVED_NEW, $map->save());
+
+    // Assert that the translater was assigned a tid.
+    $this->assertTrue($map->tmid > 0);
+    return $map;
+  }
+
+  /**
+   * Creates, saves and returns a translation job.
+   *
+   * @return TranslationManagementJob
+   */
+  function createJob(TranslationManagementMap $map) {
+    $job = new TranslationManagementJob();
+    $job->tmid = $map->tmid;
+    $job->source_language = 'en';
+    $job->target_language = 'de';
+    $job->data = array(
+      'title' => array(
+        '#text' => $this->randomString(),
+        '#label' => $this->randomString(),
+        '#translate' => TRUE,
+      ),
+      'field_body' => array(
+        0 => array(
+          '#text' => $this->randomString(),
+          '#label' => $this->randomString(),
+          '#translate' => FALSE,
+          '#comment' => $this->randomString(),
+        ),
+      ),
+      'field_collection' => array(
+        0 => array(
+          'field_whatever' => array(
+            0 => array(
+              '#text' => $this->randomString(),
+              '#label' => $this->randomString(),
+              '#translate' => TRUE,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    $this->assertEqual(SAVED_NEW, $job->save());
+
+    // Assert that the translater was assigned a tid.
+    $this->assertTrue($job->tjid > 0);
+    return $job;
+  }
+}
+
+/**
+ * Basic CRUD tests.
+ */
+class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCase {
 
   /**
    * Implement getInfo().
@@ -32,17 +119,7 @@ class TranslationManagementCRUDTestCase extends DrupalWebTestCase {
    * Test crud operations of translators.
    */
   function testTranslators() {
-    $translator = new TranslationManagementTranslator();
-    $translator->name = $this->randomName();
-    $translator->label = $this->randomString();
-    $translator->settings = array(
-      'key' => $this->randomName(),
-      'another_key' => $this->randomName(),
-    );
-    $this->assertEqual(SAVED_NEW, $translator->save());
-
-    // Assert that the translater was assigned a tid.
-    $this->assertTrue($translator->tid > 0);
+    $translator = $this->createTranslator();
 
     // @todo: Provide wrappers.
     $loaded_translators = entity_load('t9n_mgmt_translator', array($translator->tid));
@@ -75,14 +152,7 @@ class TranslationManagementCRUDTestCase extends DrupalWebTestCase {
    * Test crud operations of maps.
    */
   function testMaps() {
-    $map = new TranslationManagementMap();
-    $map->plugin = $this->randomName();
-    $map->item_type = $this->randomName();
-    $map->item_id = 5;
-    $this->assertEqual(SAVED_NEW, $map->save());
-
-    // Assert that the translater was assigned a tid.
-    $this->assertTrue($map->tmid > 0);
+    $map = $this->createMap();
 
     // @todo: Provide wrappers.
     $loaded_maps = entity_load('t9n_mgmt_map', array($map->tmid));
@@ -109,5 +179,43 @@ class TranslationManagementCRUDTestCase extends DrupalWebTestCase {
     $map->delete();
     $loaded_maps = entity_load('t9n_mgmt_map', array($map->tmid));
     $this->assertEqual(0, count($loaded_maps));
+  }
+
+  /**
+   * Test crud operations of maps.
+   */
+  function testJobs() {
+    $job = $this->createJob($this->createMap());
+
+    // @todo: Provide wrappers.
+    $loaded_jobs = entity_load('t9n_mgmt_job', array($job->tjid));
+    $this->assertEqual(1, count($loaded_jobs));
+    $loaded_job = reset($loaded_jobs);
+
+    $this->assertEqual($job->tmid, $loaded_job->tmid);
+    $this->assertEqual($job->source_language, $loaded_job->source_language);
+    $this->assertEqual($job->target_language, $loaded_job->target_language);
+    $this->assertEqual($job->data, $loaded_job->data);
+
+    // Assert that the created and changed information has been set to the
+    // default value.
+    $this->assertTrue($loaded_job->created > 0);
+    $this->assertTrue($loaded_job->changed > 0);
+    $this->assertEqual(0, $loaded_job->state);
+
+    // Update the settings.
+    $job->response = $this->randomString();
+    $this->assertEqual(SAVED_UPDATED, $job->save());
+
+    $loaded_jobs = entity_load('t9n_mgmt_job', array($job->tjid));
+    $this->assertEqual(1, count($loaded_jobs));
+    $loaded_job = reset($loaded_jobs);
+
+    $this->assertEqual($job->response, $loaded_job->response);
+
+    // Delete the translator, make sure the translator is gone.
+    $job->delete();
+    $loaded_jobs = entity_load('t9n_mgmt_job', array($job->tjid));
+    $this->assertEqual(0, count($loaded_jobs));
   }
 }

@@ -10,6 +10,11 @@
  */
 class TranslationManagementTranslator extends Entity {
 
+  // @todo: Add documentation.
+  public $name;
+  public $label;
+  public $settings;
+
   /**
    * Overrides Entity::__construct().
    */
@@ -23,6 +28,15 @@ class TranslationManagementTranslator extends Entity {
  * Entity class for the t9n_mgmt_job entity.
  */
 class TranslationManagementJob extends Entity {
+
+  // @todo: Add documentation.
+  public $tmid;
+  public $state;
+  public $source_language;
+  public $target_language;
+  public $data;
+  public $translated_data;
+  public $response;
 
   /**
    * Overrides Entity::__construct().
@@ -44,6 +58,10 @@ class TranslationManagementMap extends Entity {
    * @var varchar
    */
   public $plugin;
+
+  // @todo: Add documentation.
+  public $item_type;
+  public $item_id;
 
   /**
    * Overrides Entity::__construct().
