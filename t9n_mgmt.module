@@ -7,11 +7,12 @@ function t9n_mgmt_entity_info() {
   return array(
     't9n_mgmt_map' => array(
       'label' => t('Translation Management Map'),
-      // @todo
+      'module' => 't9n_mgmt',
       'controller class' => 'TranslationManagementMapController',
+      'entity class' => 'TranslationManagementMap',
       'base table' => 't9n_mgmt_map',
-      // @todo
-      'uri callback' => 'translation_management_map_uri',
+      'uri callback' => 'entity_class_uri',
+      'label callback' => 'entity_class_label',
       // @todo Do we need fields here?
       'fieldable' => FALSE,
       'entity keys' => array(
@@ -27,11 +28,12 @@ function t9n_mgmt_entity_info() {
     ),
     't9n_mgmt_job' => array(
       'label' => t('Translation Management Job'),
-      // @todo
+      'module' => 't9n_mgmt',
       'controller class' => 'TranslationManagementJobController',
+      'entity class' => 'TranslationManagementJob',
       'base table' => 't9n_mgmt_job',
-      // @todo
-      'uri callback' => 'translation_management_job_uri',
+      'uri callback' => 'entity_class_uri',
+      'label callback' => 'entity_class_label',
       // @todo Add field integration.
       'fieldable' => FALSE,
       'entity keys' => array(
