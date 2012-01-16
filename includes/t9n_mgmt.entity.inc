@@ -29,8 +29,32 @@ class TranslationManagementTranslator extends Entity {
  */
 class TranslationManagementJob extends Entity {
 
-  // @todo: Add more states.
+  /**
+   * A new translation job, not yet submitted to a translator.
+   */
   const STATE_NEW = 0;
+
+  /**
+   * A translation job that has been submitted to the translator.
+   */
+  const STATE_SUBMITTED = 1;
+
+  /**
+   * A translation job that has been rejected by the translator.
+   *
+   * The response contains information why the job was rejected.
+   */
+  const STATE_REJECTED = 2;
+
+  /**
+   * The translation job was translated and needs to be reviewed.
+   */
+  const STATE_REVIEW = 3;
+
+  /**
+   * The translation has been accepted and the job is finished.
+   */
+  const STATE_ACCEPTED = 4;
 
   // @todo: Add documentation.
   public $tmid;
