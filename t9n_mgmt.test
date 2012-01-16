@@ -164,6 +164,21 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
     $this->assertEqual($map->item_type, $loaded_map->item_type);
     $this->assertEqual($map->item_id, $loaded_map->item_id);
 
+
+    // Get the map.
+    $loaded_map = t9n_mgmt_map_get($map->plugin, $map->item_type, $map->item_id);
+    $this->assertEqual($map->tmid, $loaded_map->tmid);
+
+    // Get a non-existing map without autocreation.
+    $this->assertFalse(t9n_mgmt_map_get('nonexisting', 'none', 5));
+
+    // Get a non-existing map with autocreation.
+    $new_map = t9n_mgmt_map_get('plugin', 'type', 3, TRUE);
+    $this->assertTrue($new_map->tmid > 0);
+    $this->assertEqual('plugin', $new_map->plugin);
+    $this->assertEqual('type', $new_map->item_type);
+    $this->assertEqual('3', $new_map->item_id);
+
     // Delete the translator, make sure the translator is gone.
     $map->delete();
     $this->assertFalse(t9n_mgmt_map_load($map->tmid));

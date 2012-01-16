@@ -82,6 +82,54 @@ function t9n_mgmt_map_load_multiple(array $tmids = array(), $conditions = array(
 }
 
 /**
+ * Gets the map for the passed in arguments.
+ *
+ * @param $plugin
+ *   Name of the source plugin.
+ *
+ * @param $item_type
+ *   Item type.
+ *
+ * @param $item_id
+ *   Item ID.
+ *
+ * @param $autocreate
+ *   (Optional) If TRUE, create the map if not yet existent. Defaults to FALSE.
+ *
+ * @return TranslationManagementMap
+ *   A translation map if existing or autocreated, FALSE otherwise.
+ *
+ */
+function t9n_mgmt_map_get($plugin, $item_type, $item_id, $autocreate = FALSE) {
+  $tmid = db_select('t9n_mgmt_map', 'tm')
+    ->fields('tm', array('tmid'))
+    ->condition('plugin', $plugin)
+    ->condition('item_type', $item_type)
+    ->condition('item_id', $item_id)
+    ->execute()
+    ->fetchField();
+
+  // If we found a translation map id, return the map.
+  if ($tmid) {
+    return t9n_mgmt_map_load($tmid);
+  }
+
+  // If autocreate is set to TRUE, create a new map.
+  if ($autocreate) {
+    $map = entity_create('t9n_mgmt_map', array(
+      'item_type' => $item_type,
+      'item_id' => $item_id,
+      'plugin' => $plugin,
+    ));
+    $map->save();
+    return $map;
+  }
+
+  // Otherwise, return FALSE.
+  return FALSE;
+}
+
+/**
  * Loads a translation job.
  */
 function t9n_mgmt_job_load($tjid, $reset = FALSE) {
