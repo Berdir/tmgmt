@@ -29,6 +29,9 @@ class TranslationManagementTranslator extends Entity {
  */
 class TranslationManagementJob extends Entity {
 
+  // @todo: Add more states.
+  const STATE_NEW = 0;
+
   // @todo: Add documentation.
   public $tmid;
   public $state;

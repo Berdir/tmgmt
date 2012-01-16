@@ -15,7 +15,6 @@ function t9n_mgmt_entity_info() {
       'label callback' => 'entity_class_label',
       // @todo Do we need fields here?
       'fieldable' => FALSE,
-      'translate' => FALSE,
       'entity keys' => array(
         'id' => 'tmid',
       ),
@@ -37,7 +36,6 @@ function t9n_mgmt_entity_info() {
       'label callback' => 'entity_class_label',
       // @todo Add field integration.
       'fieldable' => FALSE,
-      'translate' => FALSE,
       'entity keys' => array(
         'id' => 'tjid',
       ),
@@ -58,7 +56,6 @@ function t9n_mgmt_entity_info() {
       'uri callback' => 'entity_class_uri',
       'label callback' => 'entity_class_label',
       'fieldable' => FALSE,
-      'translate' => FALSE,
       'entity keys' => array(
         'id' => 'tid',
         'name' => 'name',

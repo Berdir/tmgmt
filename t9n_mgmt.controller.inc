@@ -25,8 +25,9 @@ class TranslationManagementJobController extends EntityAPIController {
 
     $entity->changed = REQUEST_TIME;
 
-    // @todo: Define states.
-    $entity->state = 0;
+    if (!isset($entity->state)) {
+      $entity->state = TranslationManagementJob::STATE_NEW;
+    }
 
     return parent::save($entity, $transaction);
   }
