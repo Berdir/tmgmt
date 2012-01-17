@@ -143,3 +143,18 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
   }
 
 }
+
+/**
+ * Default controller class response.
+ */
+class TMGMTDefaultTranslatorResponse {
+  public $status;
+  public $message;
+  //public $job;
+  
+  function __construct($status, $message) {
+    
+  }
+  
+  
+}
