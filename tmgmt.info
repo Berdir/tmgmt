@@ -1,8 +1,7 @@
 name = Translation Management Core
-group = Translation Management
+package = Translation Management
 core = 7.x
 
-package = Multilingual - Internationalization
 
 dependencies[] = entity
 

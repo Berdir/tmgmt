@@ -1,5 +1,5 @@
 name = User Service
-group = Translation Management
+package = Translation Management
 core = 7.x
 
 dependencies[] = tmgmt
