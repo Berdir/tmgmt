@@ -4,4 +4,4 @@ core = 7.x
 
 dependencies[] = tmgmt
 
-files[] = includes/tmgmt_user.plugin.inc
+files[] = tmgmt_user.plugin.inc

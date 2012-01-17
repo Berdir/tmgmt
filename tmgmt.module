@@ -156,7 +156,7 @@ function tmgmt_translator_plugin_info($plugin = NULL) {
  *   The controller object for the given source plugin.
  */
 function tmgmt_translator_plugin_controller($plugin) {
-  return _tmgmt_plugin_controler('source', $plugin);
+  return _tmgmt_plugin_controller('source', $plugin);
 }
 
 /**
@@ -179,7 +179,7 @@ function tmgmt_source_plugin_info($plugin = NULL) {
  *   The controller object for the given source plugin.
  */
 function tmgmt_source_plugin_controller($plugin) {
-  return _tmgmt_plugin_controler('source', $plugin);
+  return _tmgmt_plugin_controller('source', $plugin);
 }
 
 /**

@@ -52,9 +52,9 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
 class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
 
   /**
-   * Implement getInfo().
+   * Implements getInfo().
    */
-  function getInfo() {
+  static function getInfo() {
     return array(
       'name' => t('CRUD tests'),
       'description' => t('Basic crud operations for jobs and translators'),
@@ -141,5 +141,53 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     // Delete the translator, make sure the translator is gone.
     $job->delete();
     $this->assertFalse(tmgmt_job_load($job->tjid));
+  }
+}
+
+
+/**
+ * Basic CRUD tests.
+ */
+class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => t('Plugin tests'),
+      'description' => t('Verifies basic functionality of source and translator plugins'),
+      'group' => t('Translation Management'),
+    );
+  }
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp() {
+    parent::setUp(array('entity', 'tmgmt', 'tmgmt_test'));
+  }
+
+  function testBasicWorkflow() {
+
+    // Trigger a translation job into german.
+    $de_job = tmgmt_test_trigger_job('de');
+    $translator = $de_job->getTranslatorPlugin();
+    $translator->submit($de_job);
+
+    // Trigger a translation job into spanish.
+    $es_job = tmgmt_test_trigger_job('es');
+    $translator = $es_job->getTranslatorPlugin();
+    $translator->submit($es_job);
+
+    // Trigger a translation job into italian.
+    $it_job = tmgmt_test_trigger_job('it');
+    $translator = $it_job->getTranslatorPlugin();
+    $translator->submit($it_job);
+
+    // Trigger a translation job into chinese.
+    $zh_job = tmgmt_test_trigger_job('zh-hans');
+    $translator = $it_job->getTranslatorPlugin();
+    $translator->submit($zh_job);
   }
 }
