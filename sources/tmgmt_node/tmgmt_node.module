@@ -12,11 +12,8 @@ function tmgmt_node_tmgmt_source_plugin_info() {
   return array(
     'node' => array(
       'label' => t('Node'),
-      'description' => t('Handles nodes'),
+      'description' => t('Source handler for nodes.'),
       'controller class' => 'TMGMTNodeSourcePluginController',
-      'flatten' => TRUE,
-      'settings' => array(
-      ),
     ),
   );
 }

@@ -152,7 +152,7 @@ function tmgmt_translator_plugin_info($plugin = NULL) {
  * @param $plugin
  *   The machine-readable name of a service plugin.
  *
- * @return TMGMTServicePluginControllerInterface
+ * @return TMGMTTranslatorPluginControllerInterface
  *   The controller object for the given source plugin.
  */
 function tmgmt_translator_plugin_controller($plugin) {
