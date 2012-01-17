@@ -1,7 +1,6 @@
-name = User Service
+name = Local User Translator
+description = Assigns translation jobs to users in your local database.
 package = Translation Management
 core = 7.x
-
 dependencies[] = tmgmt
-
 files[] = includes/tmgmt_user.plugin.inc
