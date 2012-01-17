@@ -79,7 +79,7 @@ function tmgmt_schema() {
   $schema['tmgmt_job_item'] = array(
     'description' => 'A job item connects a source to a translation job',
     'fields' => array(
-       'tjid' => array(
+       'tjiid' => array(
         'description' => 'The identifier of the translation job',
         'type' => 'int',
         'not null' => TRUE,
@@ -110,7 +110,7 @@ function tmgmt_schema() {
       ),
     ),
     'unique keys' => array(
-      'source' => array('tjid', 'plugin', 'item_type', 'item_id'),
+      'source' => array('tjiid', 'plugin', 'item_type', 'item_id'),
     ),
   );
 

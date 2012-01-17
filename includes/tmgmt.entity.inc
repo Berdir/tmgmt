@@ -68,6 +68,79 @@ class TMGMTTranslator extends Entity {
 /**
  * Entity class for the tmgmt_job entity.
  */
+class TMGMTJobItem extends Entity {
+
+  /**
+   * The source plugin that provides the item.
+   *
+   * @see TMGMTMap::getPluginController().
+   *
+   * @var varchar
+   */
+  public $plugin;
+
+  /**
+   * Type of this item, used by the plugin to identify it.
+   *
+   * @var string
+   */
+  public $item_type;
+
+  /**
+   * Id of the item.
+   *
+   * @var integer
+   */
+  public $item_id;
+
+  /**
+   * The translated data in the same structure.
+   *
+   * Only the parts that actually are translated are present in this array.
+   *
+   * @var array
+   */
+  public $translated_data;
+
+  /**
+   * Array of the data to be translated.
+   *
+   * The structure is similar to the form API in the way that it is a possibly
+   * nested array with the following properties whose presence indicate that the
+   * current element is a text that might need to be translated.
+   *
+   * - #text: The text to be translated.
+   * - #label: The label that might be shown to the translator.
+   * - #comment: (Optional) A comment with additional information.
+   * - #translate: Either TRUE or FALSE. Only text that has this property set to
+   *   TRUE must be translated.
+   *
+   * The key can be an alphanumeric string.
+   *
+   * @return
+   *   A data array structured in the
+   *
+   * @see TMGMTJobItem::getFlattenedData()
+   */
+  public function getSourceData() {
+    return $this->getSourceController()->getData($this->item_type, $this->item_id);
+  }
+
+
+  /**
+   * Returns the configured plugin controller.
+   *
+   * @return TMGMTSourcePluginControllerInterface
+   */
+  public function getSourceController() {
+    return tmgmt_source_plugin_controller($this->plugin);
+  }
+
+}
+
+/**
+ * Entity class for the tmgmt_job entity.
+ */
 class TMGMTJob extends Entity {
 
   /**
@@ -105,29 +178,6 @@ class TMGMTJob extends Entity {
   public $tjid;
 
   /**
-   * The source plugin that provides the item.
-   *
-   * @see TMGMTMap::getPluginController().
-   *
-   * @var varchar
-   */
-  public $plugin;
-
-  /**
-   * Type of this item, used by the plugin to identify it.
-   *
-   * @var string
-   */
-  public $item_type;
-
-  /**
-   * Id of the item.
-   *
-   * @var integer
-   */
-  public $item_id;
-
-  /**
    * Current state of the translation job
    * @var type
    */
@@ -146,36 +196,6 @@ class TMGMTJob extends Entity {
    * @var varchar
    */
   public $target_language;
-
-  /**
-   * Array of the data to be translated.
-   *
-   * The structure is similar to the form API in the way that it is a possibly
-   * nested array with the following properties whose presence indicate that the
-   * current element is a text that might need to be translated.
-   *
-   * - #text: The text to be translated.
-   * - #label: The label that might be shown to the translator.
-   * - #comment: (Optional) A comment with additional information.
-   * - #translate: Either TRUE or FALSE. Only text that has this property set to
-   *   TRUE must be translated.
-   *
-   * The key can be an alphanumeric string.
-   *
-   * @see TMGMTJob::getFlattenedData()
-   *
-   * @var array
-   */
-  public $data;
-
-  /**
-   * The translated data in the same structure.
-   *
-   * Only the parts that actually are translated are present in this array.
-   *
-   * @var array
-   */
-  public $translated_data;
 
   /**
    * Response message from the translator.
@@ -227,15 +247,6 @@ class TMGMTJob extends Entity {
       return tmgmt_translator_load_by_name($this->translator);
     }
     return FALSE;
-  }
-
-  /**
-   * Returns the configured plugin controller.
-   *
-   * @return TMGMTSourcePluginControllerInterface
-   */
-  public function getSourceController() {
-    return tmgmt_source_plugin_controller($this->plugin);
   }
 
 }

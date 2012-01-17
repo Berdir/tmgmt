@@ -4,37 +4,48 @@
  * Implements hook_entity_info().
  */
 function tmgmt_entity_info() {
-  return array(
-    'tmgmt_job' => array(
-      'label' => t('Translation Management Job'),
-      'module' => 'tmgmt',
-      'controller class' => 'TMGMTJobController',
-      'entity class' => 'TMGMTJob',
-      'base table' => 'tmgmt_job',
-      'uri callback' => 'entity_class_uri',
-      'label callback' => 'entity_class_label',
-      'entity keys' => array(
-        'id' => 'tjid',
-      ),
-    ),
-    'tmgmt_translator' => array(
-      'label' => t('Translation Management Translator'),
-      'module' => 'tmgmt',
-      'controller class' => 'TMGMTTranslatorController',
-      'entity class' => 'TMGMTTranslator',
-      'base table' => 'tmgmt_translator',
-      'exportable' => TRUE,
-      // @todo: Fix entity api to check if the entitycache module is enabled.
-      //'entity cache' => TRUE,
-      'uri callback' => 'entity_class_uri',
-      'label callback' => 'entity_class_label',
-      'entity keys' => array(
-        'id' => 'tid',
-        'name' => 'name',
-        'label' => 'label',
-      ),
+  $info['tmgmt_job_item'] = array(
+    'label' => t('Translation Management Job Item'),
+    'module' => 'tmgmt',
+    'controller class' => 'TMGMTJobItemController',
+    'entity class' => 'TMGMTJobItem',
+    'base table' => 'tmgmt_job_item',
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'tjiid',
     ),
   );
+  $info['tmgmt_job'] = array(
+    'label' => t('Translation Management Job'),
+    'module' => 'tmgmt',
+    'controller class' => 'TMGMTJobController',
+    'entity class' => 'TMGMTJob',
+    'base table' => 'tmgmt_job',
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'tjid',
+    ),
+  );
+  $info['tmgmt_translator'] = array(
+    'label' => t('Translation Management Translator'),
+    'module' => 'tmgmt',
+    'controller class' => 'TMGMTTranslatorController',
+    'entity class' => 'TMGMTTranslator',
+    'base table' => 'tmgmt_translator',
+    'exportable' => TRUE,
+    // @todo: Fix entity api to check if the entitycache module is enabled.
+    //'entity cache' => TRUE,
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'tid',
+      'name' => 'name',
+      'label' => 'label',
+    ),
+  );
+  return $info;
 }
 
 /**
