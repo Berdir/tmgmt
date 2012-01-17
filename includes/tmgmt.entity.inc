@@ -222,9 +222,9 @@ class TMGMTJob extends Entity {
    * @return TMGMTTranslator
    *   Either the translator entity or FALSE if none has been set yet.
    */
-  public function getTranslator() {
+  public function getTranslatorPlugin() {
     if ($this->translator) {
-      return tmgmt_translator_load_by_name($this->translator);
+      return tmgmt_translator_plugin_controller($this->translator);
     }
     return FALSE;
   }
