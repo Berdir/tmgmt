@@ -8,8 +8,8 @@ function tmgmt_entity_info() {
     'tmgmt_job' => array(
       'label' => t('Translation Management Job'),
       'module' => 'tmgmt',
-      'controller class' => 'TranslationManagementJobController',
-      'entity class' => 'TranslationManagementJob',
+      'controller class' => 'TMGMTJobController',
+      'entity class' => 'TMGMTJob',
       'base table' => 'tmgmt_job',
       'uri callback' => 'entity_class_uri',
       'label callback' => 'entity_class_label',
@@ -20,8 +20,8 @@ function tmgmt_entity_info() {
     'tmgmt_translator' => array(
       'label' => t('Translation Management Translator'),
       'module' => 'tmgmt',
-      'controller class' => 'TranslationManagementTranslatorController',
-      'entity class' => 'TranslationManagementTranslator',
+      'controller class' => 'TMGMTTranslatorController',
+      'entity class' => 'TMGMTTranslator',
       'base table' => 'tmgmt_translator',
       'exportable' => TRUE,
       // @todo: Fix entity api to check if the entitycache module is enabled.
@@ -38,67 +38,7 @@ function tmgmt_entity_info() {
 }
 
 /**
- * Loads a translation map.
- */
-function tmgmt_map_load($tmid, $reset = FALSE) {
-  $maps = tmgmt_map_load_multiple(array($tmid), array(), $reset);
-  return $maps ? reset($maps) : FALSE;
-}
-
-/**
- * Loads translation maps.
- */
-function tmgmt_map_load_multiple(array $tmids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('tmgmt_map', $tmids, $conditions, $reset);
-}
-
-/**
- * Gets the map for the passed in arguments.
- *
- * @param $plugin
- *   Name of the source plugin.
- * @param $item_type
- *   Item type.
- * @param $item_id
- *   Item ID.
- * @param $autocreate
- *   (Optional) If TRUE, create the map if not yet existent. Defaults to FALSE.
- *
- * @return TranslationManagementMap
- *   A translation map if existing or autocreated, FALSE otherwise.
- *
- */
-function tmgmt_map_get($plugin, $item_type, $item_id, $autocreate = FALSE) {
-  $tmid = db_select('tmgmt_map', 'tm')
-    ->fields('tm', array('tmid'))
-    ->condition('plugin', $plugin)
-    ->condition('item_type', $item_type)
-    ->condition('item_id', $item_id)
-    ->execute()
-    ->fetchField();
-
-  // If we found a translation map id, return the map.
-  if ($tmid) {
-    return tmgmt_map_load($tmid);
-  }
-
-  // If autocreate is set to TRUE, create a new map.
-  if ($autocreate) {
-    $map = entity_create('tmgmt_map', array(
-      'item_type' => $item_type,
-      'item_id' => $item_id,
-      'plugin' => $plugin,
-    ));
-    $map->save();
-    return $map;
-  }
-
-  // Otherwise, return FALSE.
-  return FALSE;
-}
-
-/**
- * Implementation of hook_forms().
+ * Implements hook_forms().
  */
 function tmgmt_forms() {
   $info = array();
@@ -166,7 +106,7 @@ function tmgmt_translator_plugin_info($plugin = NULL) {
  * @param $plugin
  *   The machine-readable name of a service plugin.
  *
- * @return TranslationManagementServicePluginControllerInterface
+ * @return TMGMTServicePluginControllerInterface
  *   The controller object for the given source plugin.
  */
 function tmgmt_translator_plugin_controller($plugin) {
@@ -189,7 +129,7 @@ function tmgmt_source_plugin_info($plugin = NULL) {
  * @param $plugin
  *   The machine-readable name of a source plugin.
  *
- * @return TranslationManagementSourcePluginControllerInterface
+ * @return TMGMTSourcePluginControllerInterface
  *   The controller object for the given source plugin.
  */
 function tmgmt_source_plugin_controller($plugin) {
@@ -229,14 +169,14 @@ function _tmgmt_plugin_info($type, $plugin = NULL) {
  * @param $plugin
  *   The machine-readable name of a source plugin.
  *
- * @return TranslationManagementSourcePluginControllerInterface
+ * @return TMGMTSourcePluginControllerInterface
  *   The controller object for the given source plugin.
  */
 function _tmgmt_plugin_controller($type, $plugin) {
   $cache = &drupal_static(__FUNCTION__);
   if (!isset($cache[$type][$plugin])) {
     $info = tmgmt_plugin_info($type, $plugin);
-    $class = isset($info['controller class']) ? $info['controller class'] : 'TranslationManagementDefault' . ucfirst($type) . 'PluginController';
+    $class = isset($info['controller class']) ? $info['controller class'] : 'TMGMTDefault' . ucfirst($type) . 'PluginController';
     $cache[$type][$plugin] = new $class($plugin);
   }
   return $cache[$type][$plugin];

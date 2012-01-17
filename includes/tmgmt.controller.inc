@@ -8,14 +8,14 @@
 /**
  * Controller class for the tmgmt_translator entity.
  */
-class TranslationManagementTranslatorController extends EntityAPIControllerExportable {
+class TMGMTTranslatorController extends EntityAPIControllerExportable {
 
 }
 
 /**
  * Controller class for the tmgmt_job entity.
  */
-class TranslationManagementJobController extends EntityAPIController {
+class TMGMTJobController extends EntityAPIController {
 
   public function save($entity, DatabaseTransaction $transaction = NULL) {
 
@@ -26,7 +26,7 @@ class TranslationManagementJobController extends EntityAPIController {
     $entity->changed = REQUEST_TIME;
 
     if (!isset($entity->state)) {
-      $entity->state = TranslationManagementJob::STATE_NEW;
+      $entity->state = TMGMTJob::STATE_NEW;
     }
 
     return parent::save($entity, $transaction);
@@ -37,6 +37,6 @@ class TranslationManagementJobController extends EntityAPIController {
 /**
  * Controller class for the tmgmt_map entity.
  */
-class TranslationManagementMapController extends EntityAPIController {
+class TMGMTMapController extends EntityAPIController {
 
 }

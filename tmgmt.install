@@ -18,23 +18,6 @@ function tmgmt_schema() {
         'type' => 'serial',
         'not null' => TRUE,
       ),
-      'plugin' => array(
-        'description' => 'Indicates the plugin which provides this item',
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-      ),
-      'item_type' => array(
-        'description' => 'The type of the item, e.g. the entity type',
-        'type' => 'varchar',
-        'length' => 128,
-      ),
-      'item_id' => array(
-        'description' => 'The unique id (within the given item type) of the item',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
       'source_language' => array(
         'description' => 'The source language of the data',
         'type' => 'varchar',
@@ -80,12 +63,43 @@ function tmgmt_schema() {
         'type' => 'varchar',
         'length' => 256,
       ),
-      'data' => array(
-        'description' => 'Structured data that should be translated',
-        'type' => 'text',
+      'response' => array(
+        'description' => 'The response from the translator, e.g. when the order placement fails.',
+        'type' => 'varchar',
+        'length' => '255',
+      ),
+    ),
+    'primary key' => array('tjid'),
+    'keys' => array(
+      'state' => array('state'),
+      'translator_id' => array('translator_id'),
+    ),
+  );
+
+  $schema['tmgmt_job_item'] = array(
+    'description' => 'A job item connects a source to a translation job',
+    'fields' => array(
+       'tjid' => array(
+        'description' => 'The identifier of the translation job',
+        'type' => 'int',
         'not null' => TRUE,
-        'size' => 'big',
-        'serialize' => TRUE,
+      ),
+      'plugin' => array(
+        'description' => 'Indicates the plugin which provides this item',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+      ),
+      'item_type' => array(
+        'description' => 'The type of the item, e.g. the entity type',
+        'type' => 'varchar',
+        'length' => 128,
+      ),
+      'item_id' => array(
+        'description' => 'The unique id (within the given item type) of the item',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
       ),
       'translated_data' => array(
         'description' => 'Structured translated data',
@@ -94,19 +108,9 @@ function tmgmt_schema() {
         'size' => 'big',
         'serialize' => TRUE,
       ),
-      'response' => array(
-        'description' => 'The response from the translator, e.g. when the order placement fails.',
-        'type' => 'varchar',
-        'length' => '255',
-      ),
     ),
-    'primary key' => array('tjid'),
     'unique keys' => array(
-      'source' => array('plugin', 'item_type', 'item_id'),
-    ),
-    'keys' => array(
-      'state' => array('state'),
-      'translator_id' => array('translator_id'),
+      'source' => array('tjid', 'plugin', 'item_type', 'item_id'),
     ),
   );
 

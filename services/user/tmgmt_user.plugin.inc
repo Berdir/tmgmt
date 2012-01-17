@@ -5,7 +5,7 @@
  * Provides the user translator plugin controller.
  */
 
-class TranslationManagementUserTranslatorPluginController extends TranslationManagementDefaultTranslatorPluginController {
+class TMGMTUserTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
 }
 

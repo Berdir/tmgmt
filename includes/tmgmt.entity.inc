@@ -8,7 +8,7 @@
 /**
  * Entity class for the tmgmt_translator entity.
  */
-class TranslationManagementTranslator extends Entity {
+class TMGMTTranslator extends Entity {
 
   /**
    * The ID of the translator.
@@ -34,7 +34,7 @@ class TranslationManagementTranslator extends Entity {
   /**
    * Plugin name of the translator.
    *
-   * @see TranslationManagementTranslator::getPluginController().
+   * @see TMGMTTranslator::getPluginController().
    *
    * @type string
    */
@@ -57,7 +57,7 @@ class TranslationManagementTranslator extends Entity {
   /**
    * Returns the translator plugin controller of this translator.
    *
-   * @return TranslationManagementTranslatorPluginControllerInterface
+   * @return TMGMTTranslatorPluginControllerInterface
    */
   public function getTranslatorController() {
     return tmgmt_translator_plugin_controller($this->plugin);
@@ -68,7 +68,7 @@ class TranslationManagementTranslator extends Entity {
 /**
  * Entity class for the tmgmt_job entity.
  */
-class TranslationManagementJob extends Entity {
+class TMGMTJob extends Entity {
 
   /**
    * A new translation job, not yet submitted to a translator.
@@ -107,7 +107,7 @@ class TranslationManagementJob extends Entity {
   /**
    * The source plugin that provides the item.
    *
-   * @see TranslationManagementMap::getPluginController().
+   * @see TMGMTMap::getPluginController().
    *
    * @var varchar
    */
@@ -162,7 +162,7 @@ class TranslationManagementJob extends Entity {
    *
    * The key can be an alphanumeric string.
    *
-   * @see TranslationManagementJob::getFlattenedData()
+   * @see TMGMTJob::getFlattenedData()
    *
    * @var array
    */
@@ -189,7 +189,7 @@ class TranslationManagementJob extends Entity {
   /**
    * Reference to the used translator of this job.
    *
-   * @see TranslationManagementJob::getTranslator().
+   * @see TMGMTJob::getTranslator().
    *
    * @var string
    */
@@ -219,7 +219,7 @@ class TranslationManagementJob extends Entity {
   /**
    * Returns the translator for this job.
    *
-   * @return TranslationManagementTranslator
+   * @return TMGMTTranslator
    *   Either the translator entity or FALSE if none has been set yet.
    */
   public function getTranslator() {
@@ -232,7 +232,7 @@ class TranslationManagementJob extends Entity {
   /**
    * Returns the configured plugin controller.
    *
-   * @return TranslationManagementSourcePluginControllerInterface
+   * @return TMGMTSourcePluginControllerInterface
    */
   public function getSourceController() {
     return tmgmt_source_plugin_controller($this->plugin);

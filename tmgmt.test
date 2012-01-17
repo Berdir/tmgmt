@@ -8,15 +8,15 @@
 /**
  * Base class for tests.
  */
-class TranslationManagementBaseTestCase extends DrupalWebTestCase {
+class TMGMTBaseTestCase extends DrupalWebTestCase {
 
   /**
    * Creates, saves and returns a translator.
    *
-   * @return TranslationManagementTranslator
+   * @return TMGMTTranslator
    */
   function createTranslator() {
-    $translator = new TranslationManagementTranslator();
+    $translator = new TMGMTTranslator();
     $translator->name = $this->randomName();
     $translator->label = $this->randomString();
     $translator->settings = array(
@@ -33,41 +33,12 @@ class TranslationManagementBaseTestCase extends DrupalWebTestCase {
   /**
    * Creates, saves and returns a translation job.
    *
-   * @return TranslationManagementJob
+   * @return TMGMTJob
    */
   function createJob() {
-    $job = new TranslationManagementJob();
-    $job->plugin = $this->randomName();
-    $job->item_type = $this->randomName();
-    $job->item_id = 5;
+    $job = new TMGMTJob();
     $job->source_language = 'en';
     $job->target_language = 'de';
-    $job->data = array(
-      'title' => array(
-        '#text' => $this->randomString(),
-        '#label' => $this->randomString(),
-        '#translate' => TRUE,
-      ),
-      'field_body' => array(
-        0 => array(
-          '#text' => $this->randomString(),
-          '#label' => $this->randomString(),
-          '#translate' => FALSE,
-          '#comment' => $this->randomString(),
-        ),
-      ),
-      'field_collection' => array(
-        0 => array(
-          'field_whatever' => array(
-            0 => array(
-              '#text' => $this->randomString(),
-              '#label' => $this->randomString(),
-              '#translate' => TRUE,
-            ),
-          ),
-        ),
-      ),
-    );
 
     $this->assertEqual(SAVED_NEW, $job->save());
 
@@ -80,7 +51,7 @@ class TranslationManagementBaseTestCase extends DrupalWebTestCase {
 /**
  * Basic CRUD tests.
  */
-class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCase {
+class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
 
   /**
    * Implement getInfo().
@@ -135,12 +106,8 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
 
     $loaded_job = tmgmt_job_load($job->tjid);
 
-    $this->assertEqual($job->plugin, $loaded_job->plugin);
-    $this->assertEqual($job->item_type, $loaded_job->item_type);
-    $this->assertEqual($job->item_id, $loaded_job->item_id);
     $this->assertEqual($job->source_language, $loaded_job->source_language);
     $this->assertEqual($job->target_language, $loaded_job->target_language);
-    $this->assertEqual($job->data, $loaded_job->data);
 
     // Assert that the created and changed information has been set to the
     // default value.

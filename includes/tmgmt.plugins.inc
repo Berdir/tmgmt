@@ -8,7 +8,7 @@
 /**
  * Interface for source plugin controllers.
  */
-interface TranslationManagementSourcePluginControllerInterface {
+interface TMGMTSourcePluginControllerInterface {
 
   /**
    * Constructor.
@@ -20,7 +20,7 @@ interface TranslationManagementSourcePluginControllerInterface {
 /**
  * Default controller class for source plugins.
  */
-class TranslationManagementDefaultSourcePluginController implements TranslationManagementSourcePluginControllerInterface {
+class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginControllerInterface {
 
   protected $pluginType;
   protected $pluginInfo;
@@ -38,7 +38,7 @@ class TranslationManagementDefaultSourcePluginController implements TranslationM
 /**
  * Interface for service plugin controllers.
  */
-interface TranslationManagementTranslatorPluginControllerInterface {
+interface TMGMTTranslatorPluginControllerInterface {
 
   /**
    * Constructor.
@@ -48,13 +48,13 @@ interface TranslationManagementTranslatorPluginControllerInterface {
   /**
    * Submit callback.
    *
-   * @param $job TranslationManagementJob
-   *   The TranslationManagementJob that should be submitted.
+   * @param $job TMGMTJob
+   *   The TMGMTJob that should be submitted.
    *
    * @return boolean
    *   TRUE if the job has been successfully submitted, FALSE otherwise.
    */
-  public function submit(TranslationManagementJob $job);
+  public function submit(TMGMTJob $job);
 
   /**
    * Receive callback.
@@ -70,7 +70,7 @@ interface TranslationManagementTranslatorPluginControllerInterface {
 /**
  * Default controller class for service plugins.
  */
-class TranslationManagementDefaultTranslatorPluginController implements TranslationManagementTranslatorPluginControllerInterface {
+class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginControllerInterface {
 
   protected $pluginType;
   protected $pluginInfo;
@@ -86,7 +86,7 @@ class TranslationManagementDefaultTranslatorPluginController implements Translat
   /**
    * Submit callback.
    */
-  public function submit(TranslationManagementJob $job) {
+  public function submit(TMGMTJob $job) {
     return TRUE;
   }
 

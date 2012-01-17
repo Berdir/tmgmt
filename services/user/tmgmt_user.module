@@ -12,7 +12,7 @@ function tmgmt_user_tmgmt_translator_plugin_info() {
   return 'user' => array(
     'label' => t('Local user'),
     'description' => t('Description'),
-    'controller class' => 'TranslationManagementUserTranslatorPluginController',
+    'controller class' => 'TMGMTUserTranslatorPluginController',
     'flatten' => TRUE,
     'settings' => array(
 
