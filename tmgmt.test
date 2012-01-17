@@ -36,9 +36,7 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
    * @return TMGMTJob
    */
   function createJob() {
-    $job = new TMGMTJob();
-    $job->source_language = 'en';
-    $job->target_language = 'de';
+    $job = tmgmt_job_create('en', 'de');
 
     $this->assertEqual(SAVED_NEW, $job->save());
 
@@ -122,6 +120,23 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $loaded_job = tmgmt_job_load($job->tjid);
 
     $this->assertEqual($job->response, $loaded_job->response);
+
+    // Test the job items.
+    $item1 = tmgmt_job_item_create('plugin', 'type', 5);
+    $item2 = tmgmt_job_item_create('plugin', 'type', 4);
+    tmgmt_job_add_item($job, $item1);
+    tmgmt_job_add_item($job, $item2);
+
+    // Load and compare the items.
+    $items = $job->getItems();
+    $this->assertEqual(2, count($items));
+
+    $this->assertEqual($item1->plugin, $items[$item1->tjiid]->plugin);
+    $this->assertEqual($item1->item_type, $items[$item1->tjiid]->item_type);
+    $this->assertEqual($item1->item_id, $items[$item1->tjiid]->item_id);
+    $this->assertEqual($item2->plugin, $items[$item2->tjiid]->plugin);
+    $this->assertEqual($item2->item_type, $items[$item2->tjiid]->item_type);
+    $this->assertEqual($item2->item_id, $items[$item2->tjiid]->item_id);
 
     // Delete the translator, make sure the translator is gone.
     $job->delete();

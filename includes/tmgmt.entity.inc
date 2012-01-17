@@ -237,7 +237,37 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Returns the translator for this job.
+   * Adds the item to the translation job.
+   *
+   * @param $item
+   *    The translation job item.
+   *
+   * @return TMGMTJobItem
+   *   The updated item
+   */
+  public function addItem(TMGMTJobItem $item) {
+    return tmgmt_job_add_item($this, $item);
+  }
+
+  /**
+   * Returns the job items.
+   *
+   * @return
+   *   Array of translation job items.
+   */
+  public function getItems() {
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'tmgmt_job_item');
+    $query->propertyCondition('tjid', $this->tjid);
+    $results = $query->execute();
+
+    if (!empty($results['tmgmt_job_item'])) {
+      return tmgmt_job_item_load_multiple(array_keys($results['tmgmt_job_item']));
+    }
+  }
+
+  /**
+   * Returns the translator plugin for this job.
    *
    * @return TMGMTTranslatorPluginControllerInterface
    *   The translator plugin controller or FALSE.

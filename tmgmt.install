@@ -80,6 +80,11 @@ function tmgmt_schema() {
     'description' => 'A job item connects a source to a translation job',
     'fields' => array(
        'tjiid' => array(
+        'description' => 'The identifier of the translation job item',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+       'tjid' => array(
         'description' => 'The identifier of the translation job',
         'type' => 'int',
         'not null' => TRUE,
@@ -109,8 +114,9 @@ function tmgmt_schema() {
         'serialize' => TRUE,
       ),
     ),
+    'primary key' => array('tjiid'),
     'unique keys' => array(
-      'source' => array('tjiid', 'plugin', 'item_type', 'item_id'),
+      'source' => array('tjid', 'plugin', 'item_type', 'item_id'),
     ),
   );
 
