@@ -45,6 +45,26 @@ interface TranslationManagementTranslatorPluginControllerInterface {
    */
   public function __construct($plugin);
 
+  /**
+   * Submit callback.
+   *
+   * @param $job TranslationManagementJob
+   *   The TranslationManagementJob that should be submitted.
+   *
+   * @return boolean
+   *   TRUE if the job has been successfully submitted, FALSE otherwise.
+   */
+  public function submit(TranslationManagementJob $job);
+
+  /**
+   * Receive callback.
+   *
+   * @param $object
+   *   The processed object that has been returned by the internal or external
+   *   translation service.
+   */
+  public function receive($object);
+
 }
 
 /**
@@ -61,6 +81,20 @@ class TranslationManagementDefaultTranslatorPluginController implements Translat
   public function __construct($plugin) {
     $this->pluginType = $plugin;
     $this->pluginInfo = tmgmt_translator_plugin_info($plugin);
+  }
+
+  /**
+   * Submit callback.
+   */
+  public function submit(TranslationManagementJob $job) {
+    return TRUE;
+  }
+
+  /**
+   * Receive callback.
+   */
+  public function receive($object) {
+    
   }
 
 }
