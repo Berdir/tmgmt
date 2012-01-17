@@ -22,6 +22,8 @@ interface TMGMTSourcePluginControllerInterface {
 
   /**
    * Saves a translation.
+   *
+   * @todo: Handle failures.
    */
   public function saveTranslation(TMGMTJobItem $job_item);
 

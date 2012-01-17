@@ -288,6 +288,14 @@ function tmgmt_job_add_item(TMGMTJob $job, TMGMTJobItem $item) {
   return $item;
 }
 
+function tmgmt_job_save_translations(TMGMTJob $job) {
+  if ($job->state == TMGMTJob::STATE_ACCEPTED) {
+    foreach ($job->getItems() as $item) {
+      $item->getSourceController()->saveTranslation($item);
+    }
+  }
+}
+
 /**
  *
  * @param type $data
@@ -317,3 +325,4 @@ function tmgmt_unflatten_data($flattened_data) {
   }
   return $data;
 }
+

@@ -183,16 +183,39 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $translator = $es_job->getTranslatorPlugin();
     $translator->requestTranslation($es_job);
 
-    debug($es_job->getItems());
+    $es_job = tmgmt_job_load($es_job->tjid);
+    $this->assertEqual(TMGMTJob::STATE_REVIEW, $es_job->state);
+
+    foreach ($es_job->getItems() as $item) {
+      // Check the translated text. n has been replaced with ñ.
+      $expected_text = 'Text for job item with type ' . $item->item_type . ' añd id ' . $item->item_id . '.';
+
+      $this->assertEqual($expected_text, $item->translated_data['dummy']['deep_nesting']['#text']);
+    }
+
+    // @todo adapt to state changing methods once implemented.
+    $es_job->state = TMGMTJob::STATE_ACCEPTED;
+    $es_job->save();
+    tmgmt_job_save_translations($es_job);
+
+    // Check if the translations have been "saved".
+    foreach ($es_job->getItems() as $item) {
+      $this->assertTrue(variable_get('tmgmt_test_saved_translation_' . $item->item_type . '_' . $item->item_id, FALSE));
+    }
 
     // Trigger a translation job into italian.
     $it_job = tmgmt_test_trigger_job('it');
     $translator = $it_job->getTranslatorPlugin();
     $translator->requestTranslation($it_job);
+    $this->assertEqual(TMGMTJob::STATE_REJECTED, $it_job->state);
+    // @todo Change once the response pattern has been implemented.
+    $this->assertEqual('Translation into italian not supported', $it_job->response);
 
     // Trigger a translation job into chinese.
     $zh_job = tmgmt_test_trigger_job('zh-hans');
     $translator = $it_job->getTranslatorPlugin();
     $translator->requestTranslation($zh_job);
+    // Still new.
+    $this->assertEqual(TMGMTJob::STATE_NEW, $zh_job->state);
   }
 }

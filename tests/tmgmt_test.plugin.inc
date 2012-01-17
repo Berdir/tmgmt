@@ -63,6 +63,7 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
   }
 
   public function saveTranslation(TMGMTJobItem $job_item) {
-
+    // Set a variable that can be checked later for a given job item.
+    variable_set('tmgmt_test_saved_translation_' . $job_item->item_type . '_' . $job_item->item_id, TRUE);
   }
 }
