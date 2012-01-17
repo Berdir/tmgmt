@@ -55,3 +55,21 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
 /**
  * @} End of "addtogroup hooks".
  */
+
+/**
+ * @defgroup job Translation Jobs
+ *
+ * @todo
+ */
+
+/**
+ * @defgroup translator Translators
+ *
+ * @todo
+ */
+
+/**
+ * @defgroup source Translation source
+ *
+ * @todo
+ */
