@@ -123,7 +123,7 @@ class TMGMTJobItem extends Entity {
    * @see TMGMTJobItem::getFlattenedData()
    */
   public function getSourceData() {
-    return $this->getSourceController()->getData($this->item_type, $this->item_id);
+    return $this->getSourceController()->getData($this);
   }
 
 

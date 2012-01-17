@@ -6,12 +6,13 @@
  */
 
 class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController {
-  
+
   public function __construct($plugin) {
     parent::__construct($plugin);
   }
-  
-  public function getTranslationStructure($node) {
+
+  public function getData(TMGMTJobItem $job_item) {
+    $node = node_load($job_item->item_id);
     // Get all the fields that can be translated and arrange their values into
     // a specific structure.
     $structure = array();
@@ -26,7 +27,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     }
     return $structure;
   }
-  
+
   public function saveTranslation(TMGMTJobItem $job_item) {
     // @todo: Save the translation.
     // There are a few cases here:
@@ -35,5 +36,5 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     // 2. If we have field translation, we have to update only some fields of
     // the node. There is an issue here with the title.
   }
-  
+
 }

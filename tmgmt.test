@@ -173,21 +173,26 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     // Trigger a translation job into german.
     $de_job = tmgmt_test_trigger_job('de');
     $translator = $de_job->getTranslatorPlugin();
-    $translator->submit($de_job);
+    $translator->requestTranslation($de_job);
+
+    $de_job = tmgmt_job_load($de_job->tjid);
+    $this->assertEqual(TMGMTJob::STATE_SUBMITTED, $de_job->state);
 
     // Trigger a translation job into spanish.
     $es_job = tmgmt_test_trigger_job('es');
     $translator = $es_job->getTranslatorPlugin();
-    $translator->submit($es_job);
+    $translator->requestTranslation($es_job);
+
+    debug($es_job->getItems());
 
     // Trigger a translation job into italian.
     $it_job = tmgmt_test_trigger_job('it');
     $translator = $it_job->getTranslatorPlugin();
-    $translator->submit($it_job);
+    $translator->requestTranslation($it_job);
 
     // Trigger a translation job into chinese.
     $zh_job = tmgmt_test_trigger_job('zh-hans');
     $translator = $it_job->getTranslatorPlugin();
-    $translator->submit($zh_job);
+    $translator->requestTranslation($zh_job);
   }
 }

@@ -298,13 +298,22 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
   // Each element is either a text (has #text property defined) or has children,
   // not both.
   if (!empty($data['#text'])) {
-    $flattened_data[$prefix . $key] = $data;
+    $flattened_data[$prefix] = $data;
   }
   else {
+    $prefix = !empty($prefix) ? $prefix . ':' : '';
     foreach (element_children($data) as $key) {
-      $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key . ':');
+      $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key);
     }
   }
 
   return $flattened_data;
+}
+
+function tmgmt_unflatten_data($flattened_data) {
+  $data = array();
+  foreach ($flattened_data as $key => $flattened_data_entry) {
+    drupal_array_set_nested_value($data, explode(':', $key), $flattened_data_entry);
+  }
+  return $data;
 }

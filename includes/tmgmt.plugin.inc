@@ -14,12 +14,12 @@ interface TMGMTSourcePluginControllerInterface {
    * Constructor.
    */
   public function __construct($plugin);
-  
+
   /**
    * Returns an array with the data structured for translation.
    */
-  public function getTranslationStructure($data);
-  
+  public function getData(TMGMTJobItem $job_item);
+
   /**
    * Saves a translation.
    */
@@ -30,7 +30,7 @@ interface TMGMTSourcePluginControllerInterface {
 /**
  * Default controller class for source plugins.
  */
-class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginControllerInterface {
+abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginControllerInterface {
 
   protected $pluginType;
   protected $pluginInfo;
@@ -42,10 +42,6 @@ class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginControllerI
     $this->pluginType = $plugin;
     $this->pluginInfo = tmgmt_source_plugin_info($plugin);
   }
-  
-  public abstract function getTranslationStructure($data);
-  
-  public abstract function saveTranslation(TMGMTJobItem $job_item);
 
 }
 
@@ -61,9 +57,9 @@ interface TMGMTTranslatorPluginControllerInterface {
 
   /**
    * Check whether this service can handle this translation job.
-   * 
+   *
    * @param TMGMTJob $job
-   * 
+   *
    * @return boolean
    */
   public function canTranslate(TMGMTJob $job);
@@ -85,12 +81,12 @@ interface TMGMTTranslatorPluginControllerInterface {
    * @param TMGMTJob $job
    */
   public function cancelTranslation(TMGMTJob $job);
-  
+
   /**
    * Get status for translation job
    *
    * @param TMGMTJob $job
-   * 
+   *
    * @return int
    *   Job status
    */
@@ -115,9 +111,9 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
 
   /**
    * Check whether this service can handle this translation job.
-   * 
+   *
    * @param TMGMTJob $job
-   * 
+   *
    * @return boolean
    */
   public function canTranslate(TMGMTJob $job) {
@@ -137,18 +133,18 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
    */
   public function cancelTranslation(TMGMTJob $job) {
   }
-  
+
   /**
    * Get status for translation job
    *
    * @param TMGMTJob $job
-   * 
+   *
    * @return int
    *   Job status (T.Mgmt)
    */
   public function getJobStatus(TMGMTJob $job) {
   }
-  
+
   /**
    * Get setting for this Service
    */
@@ -165,10 +161,10 @@ class TMGMTDefaultTranslatorResponse {
   public $status;
   public $message;
   //public $job;
-  
+
   function __construct($status, $message) {
-    
+
   }
-  
-  
+
+
 }
