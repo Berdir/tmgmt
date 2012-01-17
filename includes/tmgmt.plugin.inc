@@ -7,6 +7,8 @@
 
 /**
  * Interface for source plugin controllers.
+ *
+ * @ingroup source
  */
 interface TMGMTSourcePluginControllerInterface {
 
@@ -31,6 +33,8 @@ interface TMGMTSourcePluginControllerInterface {
 
 /**
  * Default controller class for source plugins.
+ *
+ * @ingroup source
  */
 abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginControllerInterface {
 
@@ -49,6 +53,8 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
 
 /**
  * Interface for service plugin controllers.
+ *
+ * @ingroup translator
  */
 interface TMGMTTranslatorPluginControllerInterface {
 
@@ -88,6 +94,8 @@ interface TMGMTTranslatorPluginControllerInterface {
 
 /**
  * Default controller class for service plugins.
+ *
+ * @ingroup translator
  */
 class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginControllerInterface {
 
@@ -149,6 +157,8 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
 
 /**
  * Interface for handling responses communication with translation providers.
+ *
+ * @ingroup translator
  */
 interface TMGMTranslatorResponseInterface {
 

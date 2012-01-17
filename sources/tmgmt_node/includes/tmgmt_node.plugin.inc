@@ -5,6 +5,9 @@
  * Provides the node source controller.
  */
 
+/**
+ * @ingroup source
+ */
 class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController {
 
   public function __construct($plugin) {

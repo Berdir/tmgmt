@@ -7,12 +7,16 @@
 
 /**
  * Controller class for the tmgmt_translator entity.
+ *
+ * @ingroup translator
  */
 class TMGMTTranslatorController extends EntityAPIControllerExportable {
 
 }
 /**
  * Controller class for the tmgmt_translator entity.
+ *
+ * @ingroup job
  */
 class TMGMTJobItemController extends EntityAPIController {
 
@@ -20,6 +24,8 @@ class TMGMTJobItemController extends EntityAPIController {
 
 /**
  * Controller class for the tmgmt_job entity.
+ *
+ * @ingroup job
  */
 class TMGMTJobController extends EntityAPIController {
 

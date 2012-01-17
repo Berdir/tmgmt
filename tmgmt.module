@@ -84,6 +84,11 @@ function tmgmt_forms() {
 }
 
 /**
+ * @addtogroup job
+ * @{
+ */
+
+/**
  * Loads a translation job.
  */
 function tmgmt_job_load($tjid, $reset = FALSE) {
@@ -111,121 +116,6 @@ function tmgmt_job_item_load($tjiid, $reset = FALSE) {
  */
 function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('tmgmt_job_item', $tjiids, $conditions, $reset);
-}
-
-/**
- * Loads a translator.
- */
-function tmgmt_translator_load($tid, $reset = FALSE) {
-  $translators = tmgmt_translator_load_multiple(array($tid), array(), $reset);
-  return $translators ? reset($translators) : FALSE;
-}
-
-/**
- * Loads a translator based on the name.
- */
-function tmgmt_translator_load_by_name($name, $reset = FALSE) {
-  $translators = tmgmt_translator_load_multiple(array(), array('name' => $name), $reset);
-  return $translators ? reset($translators) : FALSE;
-}
-
-/**
- * Loads translation maps.
- */
-function tmgmt_translator_load_multiple(array $tids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('tmgmt_translator', $tids, $conditions, $reset);
-}
-
-/**
- * Determines all available service plugins.
- *
- * @param $plugin
- *   The machine-readable name of a service plugin.
- */
-function tmgmt_translator_plugin_info($plugin = NULL) {
-  return _tmgmt_plugin_info('translator', $plugin);
-}
-
-/**
- * Determines the controller class for a given service plugin.
- *
- * @param $plugin
- *   The machine-readable name of a service plugin.
- *
- * @return TMGMTTranslatorPluginControllerInterface
- *   The controller object for the given source plugin.
- */
-function tmgmt_translator_plugin_controller($plugin) {
-  return _tmgmt_plugin_controller('translator', $plugin);
-}
-
-/**
- * Determines all available source object plugins.
- *
- * @param $plugin
- *   The machine-readable name of a source plugin.
- */
-function tmgmt_source_plugin_info($plugin = NULL) {
-  return _tmgmt_plugin_info('source', $plugin);
-}
-
-/**
- * Determines the controller class for a given source plugin.
- *
- * @param $plugin
- *   The machine-readable name of a source plugin.
- *
- * @return TMGMTSourcePluginControllerInterface
- *   The controller object for the given source plugin.
- */
-function tmgmt_source_plugin_controller($plugin) {
-  return _tmgmt_plugin_controller('source', $plugin);
-}
-
-/**
- * Discovers all available source object plugins.
- *
- * @param $plugin
- *   The machine-readable name of a source plugin.
- */
-function _tmgmt_plugin_info($type, $plugin = NULL) {
-  $info = &drupal_static(__FUNCTION__);
-  if (!isset($info[$type])) {
-    $info[$type] = array();
-    foreach (module_implements('tmgmt_' . $type . '_plugin_info') as $module) {
-      foreach (module_invoke($module, 'tmgmt_' . $type . '_plugin_info') as $key => $item) {
-        $info[$type][$key] = $item;
-        $info[$type][$key]['module'] = $module;
-        $info[$type][$key]['plugin'] = $key;
-      }
-    }
-    drupal_alter('tmgmt_' . $type . '_plugin_info', $info);
-  }
-  if (isset($plugin) && isset($info[$type][$plugin])) {
-    return $info[$type][$plugin];
-  }
-  else if (!isset($plugin)) {
-    return $info[$type];
-  }
-}
-
-/**
- * Determines the controller class for a given plugin type.
- *
- * @param $plugin
- *   The machine-readable name of a source plugin.
- *
- * @return TMGMTSourcePluginControllerInterface
- *   The controller object for the given source plugin.
- */
-function _tmgmt_plugin_controller($type, $plugin) {
-  $cache = &drupal_static(__FUNCTION__);
-  if (!isset($cache[$type][$plugin])) {
-    $info = _tmgmt_plugin_info($type, $plugin);
-    $class = isset($info['controller class']) ? $info['controller class'] : 'TMGMTDefault' . ucfirst($type) . 'PluginController';
-    $cache[$type][$plugin] = new $class($plugin);
-  }
-  return $cache[$type][$plugin];
 }
 
 /**
@@ -282,7 +172,7 @@ function tmgmt_job_create($source_language, $target_language, array $values = ar
  * @todo Probably it is better to return the return value of the ->save() method
  * here since we might want to check if the item was successfully added to
  * the job.
- * 
+ *
  * @return TMGMTJobItem
  *   The updated job item.
  */
@@ -304,6 +194,161 @@ function tmgmt_job_save_translations(TMGMTJob $job) {
       $item->getSourceController()->saveTranslation($item);
     }
   }
+}
+
+/**
+ * Updates the status of a job to the status supplied by the response object.
+ *
+ * @param TMGMTJob $job
+ *   The translation Job.
+ * @param TMGMTranslatorResponseInterface $response
+ *   The response object.
+ *
+ * @return bool
+ *   TRUE if the status of the job entity has been updated, FALSE otherwise.
+ */
+function tmgmt_job_update_status_from_response(TMGMTJob $job, TMGMTranslatorResponseInterface $response) {
+  if (($status = $response->toStatus()) !== NULL) {
+    return $job->setStatus($status);
+  }
+  return FALSE;
+}
+
+/**
+ * @} End of "addtogroup job".
+ */
+
+/**
+ * @addtogroup translator
+ * @{
+ */
+
+/**
+ * Loads a translator.
+ */
+function tmgmt_translator_load($tid, $reset = FALSE) {
+  $translators = tmgmt_translator_load_multiple(array($tid), array(), $reset);
+  return $translators ? reset($translators) : FALSE;
+}
+
+/**
+ * Loads a translator based on the name.
+ */
+function tmgmt_translator_load_by_name($name, $reset = FALSE) {
+  $translators = tmgmt_translator_load_multiple(array(), array('name' => $name), $reset);
+  return $translators ? reset($translators) : FALSE;
+}
+
+/**
+ * Loads translation maps.
+ */
+function tmgmt_translator_load_multiple(array $tids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('tmgmt_translator', $tids, $conditions, $reset);
+}
+
+/**
+ * Determines all available service plugins.
+ *
+ * @param $plugin
+ *   The machine-readable name of a service plugin.
+ */
+function tmgmt_translator_plugin_info($plugin = NULL) {
+  return _tmgmt_plugin_info('translator', $plugin);
+}
+
+/**
+ * Determines the controller class for a given service plugin.
+ *
+ * @param $plugin
+ *   The machine-readable name of a service plugin.
+ *
+ * @return TMGMTTranslatorPluginControllerInterface
+ *   The controller object for the given source plugin.
+ */
+function tmgmt_translator_plugin_controller($plugin) {
+  return _tmgmt_plugin_controller('translator', $plugin);
+}
+
+/**
+ * @} End of "addtogroup translator".
+ */
+
+/**
+ * @addtogroup source
+ * @{
+ */
+
+/**
+ * Determines all available source object plugins.
+ *
+ * @param $plugin
+ *   The machine-readable name of a source plugin.
+ */
+function tmgmt_source_plugin_info($plugin = NULL) {
+  return _tmgmt_plugin_info('source', $plugin);
+}
+
+/**
+ * Determines the controller class for a given source plugin.
+ *
+ * @param $plugin
+ *   The machine-readable name of a source plugin.
+ *
+ * @return TMGMTSourcePluginControllerInterface
+ *   The controller object for the given source plugin.
+ */
+function tmgmt_source_plugin_controller($plugin) {
+  return _tmgmt_plugin_controller('source', $plugin);
+}
+
+/**
+ * @} End of "addtogroup source".
+ */
+
+/**
+ * Discovers all available source object plugins.
+ *
+ * @param $plugin
+ *   The machine-readable name of a source plugin.
+ */
+function _tmgmt_plugin_info($type, $plugin = NULL) {
+  $info = &drupal_static(__FUNCTION__);
+  if (!isset($info[$type])) {
+    $info[$type] = array();
+    foreach (module_implements('tmgmt_' . $type . '_plugin_info') as $module) {
+      foreach (module_invoke($module, 'tmgmt_' . $type . '_plugin_info') as $key => $item) {
+        $info[$type][$key] = $item;
+        $info[$type][$key]['module'] = $module;
+        $info[$type][$key]['plugin'] = $key;
+      }
+    }
+    drupal_alter('tmgmt_' . $type . '_plugin_info', $info);
+  }
+  if (isset($plugin) && isset($info[$type][$plugin])) {
+    return $info[$type][$plugin];
+  }
+  else if (!isset($plugin)) {
+    return $info[$type];
+  }
+}
+
+/**
+ * Determines the controller class for a given plugin type.
+ *
+ * @param $plugin
+ *   The machine-readable name of a source plugin.
+ *
+ * @return TMGMTSourcePluginControllerInterface
+ *   The controller object for the given source plugin.
+ */
+function _tmgmt_plugin_controller($type, $plugin) {
+  $cache = &drupal_static(__FUNCTION__);
+  if (!isset($cache[$type][$plugin])) {
+    $info = _tmgmt_plugin_info($type, $plugin);
+    $class = isset($info['controller class']) ? $info['controller class'] : 'TMGMTDefault' . ucfirst($type) . 'PluginController';
+    $cache[$type][$plugin] = new $class($plugin);
+  }
+  return $cache[$type][$plugin];
 }
 
 /**
@@ -367,22 +412,4 @@ function tmgmt_unflatten_data($flattened_data) {
     drupal_array_set_nested_value($data, explode(':', $key), $flattened_data_entry);
   }
   return $data;
-}
-
-/**
- * Updates the status of a job to the status supplied by the response object.
- *
- * @param TMGMTJob $job
- *   The translation Job.
- * @param TMGMTranslatorResponseInterface $response
- *   The response object.
- *
- * @return bool
- *   TRUE if the status of the job entity has been updated, FALSE otherwise.
- */
-function tmgmt_job_update_status_from_response(TMGMTJob $job, TMGMTranslatorResponseInterface $response) {
-  if (($status = $response->toStatus()) !== NULL) {
-    return $job->setStatus($status);
-  }
-  return FALSE;
 }

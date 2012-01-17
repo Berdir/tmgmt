@@ -7,6 +7,8 @@
 
 /**
  * Entity class for the tmgmt_translator entity.
+ *
+ * @ingroup translator
  */
 class TMGMTTranslator extends Entity {
 
@@ -67,6 +69,8 @@ class TMGMTTranslator extends Entity {
 
 /**
  * Entity class for the tmgmt_job entity.
+ *
+ * @ingroup job
  */
 class TMGMTJobItem extends Entity {
 
@@ -140,6 +144,8 @@ class TMGMTJobItem extends Entity {
 
 /**
  * Entity class for the tmgmt_job entity.
+ *
+ * @ingroup job
  */
 class TMGMTJob extends Entity {
 

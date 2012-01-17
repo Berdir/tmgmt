@@ -7,6 +7,8 @@
 
 /**
  * Implements hook_tmgmt_source_plugin_info().
+ *
+ * @ingroup source
  */
 function tmgmt_node_tmgmt_source_plugin_info() {
   return array(
@@ -28,7 +30,7 @@ function tmgmt_node_init(){
 
 /**
  * Implements hook_tmgmt_source_translation_structure() for the text module.
- * 
+ *
  * @todo: this hook should probably be placed elsewhere.
  */
 function text_tmgmt_source_translation_structure($field_name, $node, $info, $instance) {

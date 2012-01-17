@@ -5,12 +5,17 @@
  * Provides the user translator plugin controller.
  */
 
+/**
+ * @ingroup translator
+ */
 class TMGMTUserTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
 }
 
 /**
  * Default controller class response.
+ *
+ * @translator
  */
 class TMGMTUserTranslatorResponse implements TMGMTranslatorResponseInterface {
 
