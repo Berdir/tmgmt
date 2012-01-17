@@ -94,6 +94,11 @@ function t9n_mgmt_schema() {
         'size' => 'big',
         'serialize' => TRUE,
       ),
+      'translator_id' => array(
+        'description' => 'Remote identifier of this translation job',
+        'type' => 'varchar',
+        'length' => 256,
+      ),
       'data' => array(
         'description' => 'Structured data that should be translated',
         'type' => 'text',
@@ -117,6 +122,7 @@ function t9n_mgmt_schema() {
     'primary key' => array('tjid'),
     'keys' => array(
       'state' => array('state'),
+      'translator_id' => array('translator_id'),
     ),
   );
 
@@ -138,6 +144,12 @@ function t9n_mgmt_schema() {
         'description' => 'Label of the translator',
         'type' => 'varchar',
         'length' => 256,
+        'not null' => TRUE,
+      ),
+      'plugin' => array(
+        'description' => 'Name of the translator service plugin',
+        'type' => 'varchar',
+        'length' => 128,
         'not null' => TRUE,
       ),
       'settings' => array(
