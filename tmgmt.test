@@ -31,30 +31,15 @@ class TranslationManagementBaseTestCase extends DrupalWebTestCase {
   }
 
   /**
-   * Creates, saves and returns a translation map.
-   *
-   * @return TranslationManagementMap
-   */
-  function createMap() {
-    $map = new TranslationManagementMap();
-    $map->plugin = $this->randomName();
-    $map->item_type = $this->randomName();
-    $map->item_id = 5;
-    $this->assertEqual(SAVED_NEW, $map->save());
-
-    // Assert that the translater was assigned a tid.
-    $this->assertTrue($map->tmid > 0);
-    return $map;
-  }
-
-  /**
    * Creates, saves and returns a translation job.
    *
    * @return TranslationManagementJob
    */
-  function createJob(TranslationManagementMap $map) {
+  function createJob() {
     $job = new TranslationManagementJob();
-    $job->tmid = $map->tmid;
+    $job->plugin = $this->randomName();
+    $job->item_type = $this->randomName();
+    $job->item_id = 5;
     $job->source_language = 'en';
     $job->target_language = 'de';
     $job->data = array(
@@ -103,7 +88,7 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
   function getInfo() {
     return array(
       'name' => t('CRUD tests'),
-      'description' => t('Basic crud operations for maps, jobs and translators'),
+      'description' => t('Basic crud operations for jobs and translators'),
       'group' => t('Translation Management'),
     );
   }
@@ -143,56 +128,16 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
   }
 
   /**
-   * Test crud operations of maps.
-   */
-  function testMaps() {
-    $map = $this->createMap();
-
-    $loaded_map = tmgmt_map_load($map->tmid);
-
-    $this->assertEqual($map->plugin, $loaded_map->plugin);
-    $this->assertEqual($map->item_type, $loaded_map->item_type);
-    $this->assertEqual($map->item_id, $loaded_map->item_id);
-
-    // Update the settings.
-    $map->item_id = 6;
-    $this->assertEqual(SAVED_UPDATED, $map->save());
-
-    $loaded_map = tmgmt_map_load($map->tmid);
-
-    $this->assertEqual($map->plugin, $loaded_map->plugin);
-    $this->assertEqual($map->item_type, $loaded_map->item_type);
-    $this->assertEqual($map->item_id, $loaded_map->item_id);
-
-
-    // Get the map.
-    $loaded_map = tmgmt_map_get($map->plugin, $map->item_type, $map->item_id);
-    $this->assertEqual($map->tmid, $loaded_map->tmid);
-
-    // Get a non-existing map without autocreation.
-    $this->assertFalse(tmgmt_map_get('nonexisting', 'none', 5));
-
-    // Get a non-existing map with autocreation.
-    $new_map = tmgmt_map_get('plugin', 'type', 3, TRUE);
-    $this->assertTrue($new_map->tmid > 0);
-    $this->assertEqual('plugin', $new_map->plugin);
-    $this->assertEqual('type', $new_map->item_type);
-    $this->assertEqual('3', $new_map->item_id);
-
-    // Delete the translator, make sure the translator is gone.
-    $map->delete();
-    $this->assertFalse(tmgmt_map_load($map->tmid));
-  }
-
-  /**
-   * Test crud operations of maps.
+   * Test crud operations of jobs.
    */
   function testJobs() {
-    $job = $this->createJob($this->createMap());
+    $job = $this->createJob();
 
     $loaded_job = tmgmt_job_load($job->tjid);
 
-    $this->assertEqual($job->tmid, $loaded_job->tmid);
+    $this->assertEqual($job->plugin, $loaded_job->plugin);
+    $this->assertEqual($job->item_type, $loaded_job->item_type);
+    $this->assertEqual($job->item_id, $loaded_job->item_id);
     $this->assertEqual($job->source_language, $loaded_job->source_language);
     $this->assertEqual($job->target_language, $loaded_job->target_language);
     $this->assertEqual($job->data, $loaded_job->data);

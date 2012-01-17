@@ -56,10 +56,11 @@ class TranslationManagementTranslator extends Entity {
 
   /**
    * Returns the translator plugin controller of this translator.
-   * @return type
+   *
+   * @return TranslationManagementTranslatorPluginControllerInterface
    */
-  public function getPluginController() {
-    return t9n_mgmt_service_plugin_controller($this->plugin);
+  public function getTranslatorController() {
+    return tmgmt_translator_plugin_controller($this->plugin);
   }
 
 }
@@ -104,13 +105,27 @@ class TranslationManagementJob extends Entity {
   public $tjid;
 
   /**
-   * ID of the translation map this job belongs to.
+   * The source plugin that provides the item.
    *
-   * @see TranslationManagementJob::getMap().
+   * @see TranslationManagementMap::getPluginController().
    *
-   * @var type
+   * @var varchar
    */
-  public $tmid;
+  public $plugin;
+
+  /**
+   * Type of this item, used by the plugin to identify it.
+   *
+   * @var string
+   */
+  public $item_type;
+
+  /**
+   * Id of the item.
+   *
+   * @var integer
+   */
+  public $item_id;
 
   /**
    * Current state of the translation job
@@ -209,56 +224,9 @@ class TranslationManagementJob extends Entity {
    */
   public function getTranslator() {
     if ($this->translator) {
-      return t9n_mgmt_translator_load_by_name($this->translator);
+      return tmgmt_translator_load_by_name($this->translator);
     }
     return FALSE;
-  }
-
-  /**
-   * Returns the translation map of this job.
-   *
-   * @return TranslationManagementMap
-   *   The translation map entity for this job.
-   */
-  public function getMap() {
-    return t9n_mgmt_map_load($this->tmid);
-  }
-
-}
-
-/**
- * Entity class for the tmgmt_map entity.
- */
-class TranslationManagementMap extends Entity {
-
-  /**
-   * The source plugin that provides the item.
-   *
-   * @see TranslationManagementMap::getPluginController().
-   *
-   * @var varchar
-   */
-  public $plugin;
-
-  /**
-   * Type of this item, used by the plugin to identify it.
-   *
-   * @var string
-   */
-  public $item_type;
-
-  /**
-   * Id of the item.
-   *
-   * @var integer
-   */
-  public $item_id;
-
-  /**
-   * Overrides Entity::__construct().
-   */
-  public function __construct(array $values = array()) {
-    parent::__construct($values, 'tmgmt_map');
   }
 
   /**
@@ -266,8 +234,9 @@ class TranslationManagementMap extends Entity {
    *
    * @return TranslationManagementSourcePluginControllerInterface
    */
-  public function getPluginController() {
-    return t9n_mgmt_source_plugin_controller($this->plugin);
+  public function getSourceController() {
+    return tmgmt_source_plugin_controller($this->plugin);
   }
 
 }
+

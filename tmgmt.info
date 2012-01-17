@@ -2,6 +2,8 @@ name = Translation Management Core
 group = Translation Management
 core = 7.x
 
+package = Multilingual - Internationalization
+
 dependencies[] = entity
 
 files[] = includes/tmgmt.controller.inc

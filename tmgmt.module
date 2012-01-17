@@ -5,24 +5,6 @@
  */
 function tmgmt_entity_info() {
   return array(
-    'tmgmt_map' => array(
-      'label' => t('Translation Management Map'),
-      'module' => 'tmgmt',
-      'controller class' => 'TranslationManagementMapController',
-      'entity class' => 'TranslationManagementMap',
-      'base table' => 'tmgmt_map',
-      'uri callback' => 'entity_class_uri',
-      'label callback' => 'entity_class_label',
-      'entity keys' => array(
-        'id' => 'tmid',
-      ),
-      'view modes' => array(
-        'full' => array(
-          'label' => t('Full'),
-          'custom settings' => FALSE,
-        ),
-      ),
-    ),
     'tmgmt_job' => array(
       'label' => t('Translation Management Job'),
       'module' => 'tmgmt',
@@ -34,12 +16,6 @@ function tmgmt_entity_info() {
       'entity keys' => array(
         'id' => 'tjid',
       ),
-      'view modes' => array(
-        'full' => array(
-          'label' => t('Full'),
-          'custom settings' => FALSE,
-        ),
-      ),
     ),
     'tmgmt_translator' => array(
       'label' => t('Translation Management Translator'),
@@ -48,19 +24,14 @@ function tmgmt_entity_info() {
       'entity class' => 'TranslationManagementTranslator',
       'base table' => 'tmgmt_translator',
       'exportable' => TRUE,
-      'entity cache' => TRUE,
+      // @todo: Fix entity api to check if the entitycache module is enabled.
+      //'entity cache' => TRUE,
       'uri callback' => 'entity_class_uri',
       'label callback' => 'entity_class_label',
       'entity keys' => array(
         'id' => 'tid',
         'name' => 'name',
         'label' => 'label',
-      ),
-      'view modes' => array(
-        'full' => array(
-          'label' => t('Full'),
-          'custom settings' => FALSE,
-        ),
       ),
     ),
   );
@@ -167,8 +138,8 @@ function tmgmt_translator_load($tid, $reset = FALSE) {
 /**
  * Loads a translator based on the name.
  */
-function t9n_mgmt_translator_load_by_name($name, $reset = FALSE) {
-  $translators = t9n_mgmt_translator_load_multiple(array(), array('name' => $name), $reset);
+function tmgmt_translator_load_by_name($name, $reset = FALSE) {
+  $translators = tmgmt_translator_load_multiple(array(), array('name' => $name), $reset);
   return $translators ? reset($translators) : FALSE;
 }
 

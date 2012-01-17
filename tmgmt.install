@@ -9,11 +9,12 @@
  * Implements hook_schema().
  */
 function tmgmt_schema() {
-  $schema['tmgmt_map'] = array(
-    'description' => 'A translation map represents an item that needs to be translated.',
+
+  $schema['tmgmt_job'] = array(
+    'description' => 'A translation job represents a translation order that can be assigned to a translator.',
     'fields' => array(
-      'tmid' => array(
-        'description' => 'The identifier of the translation map',
+      'tjid' => array(
+        'description' => 'The identifier of the translation job',
         'type' => 'serial',
         'not null' => TRUE,
       ),
@@ -32,26 +33,6 @@ function tmgmt_schema() {
         'description' => 'The unique id (within the given item type) of the item',
         'type' => 'int',
         'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('tmid'),
-    'unique keys' => array(
-      'source' => array('plugin', 'item_type', 'item_id'),
-    ),
-  );
-
-  $schema['tmgmt_job'] = array(
-    'description' => 'A translation job represents a translation order that can be assigned to a translator.',
-    'fields' => array(
-      'tjid' => array(
-        'description' => 'The identifier of the translation job',
-        'type' => 'serial',
-        'not null' => TRUE,
-      ),
-      'tmid' => array(
-        'description' => 'The identifier of the translation map',
-        'type' => 'int',
         'not null' => TRUE,
       ),
       'source_language' => array(
@@ -120,6 +101,9 @@ function tmgmt_schema() {
       ),
     ),
     'primary key' => array('tjid'),
+    'unique keys' => array(
+      'source' => array('plugin', 'item_type', 'item_id'),
+    ),
     'keys' => array(
       'state' => array('state'),
       'translator_id' => array('translator_id'),
@@ -158,6 +142,21 @@ function tmgmt_schema() {
         'not null' => TRUE,
         'size' => 'big',
         'serialize' => TRUE,
+      ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        // Set the default to ENTITY_CUSTOM without using the constant as it is
+        // not safe to use it at this point.
+        'default' => 0x01,
+        'size' => 'tiny',
+        'description' => 'The exportable status of the entity.',
+      ),
+      'module' => array(
+        'description' => 'The name of the providing module if the entity has been defined in code.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
       ),
     ),
     'primary key' => array('tid'),
