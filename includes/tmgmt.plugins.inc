@@ -94,7 +94,7 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
    * Receive callback.
    */
   public function receive($object) {
-    
+
   }
 
 }

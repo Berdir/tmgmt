@@ -11,6 +11,12 @@
 class TMGMTTranslatorController extends EntityAPIControllerExportable {
 
 }
+/**
+ * Controller class for the tmgmt_translator entity.
+ */
+class TMGMTJobItemController extends EntityAPIController {
+
+}
 
 /**
  * Controller class for the tmgmt_job entity.
@@ -34,9 +40,3 @@ class TMGMTJobController extends EntityAPIController {
 
 }
 
-/**
- * Controller class for the tmgmt_map entity.
- */
-class TMGMTMapController extends EntityAPIController {
-
-}
