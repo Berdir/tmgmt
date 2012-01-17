@@ -12,11 +12,29 @@ function tmgmt_node_tmgmt_source_plugin_info() {
   return array(
     'node' => array(
       'label' => t('Node'),
-      'description' => t('Handles nodes'),
+      'description' => t('Source handler for nodes.'),
       'controller class' => 'TMGMTNodeSourcePluginController',
-      'flatten' => TRUE,
-      'settings' => array(
-      ),
     ),
   );
+}
+
+/**
+ * Implements hook_tmgmt_source_translation_structure() for the text module.
+ * 
+ * @todo: this hook should probably be placed elsewhere.
+ */
+function text_tmgmt_source_translation_structure($field_name, $node, $info) {
+  // @todo: there may be a problem if the user changes the order of the values
+  // in the case of a field with multiple values...
+  $field_lang = field_language('node', $node, $field_name);
+  $structure = array();
+  foreach ($node->{$field_name}[$field_lang] as $key => $value) {
+    $structure[] = $value['value'];
+  }
+  if (count($structure)) {
+    return array(
+      'values' => $structure,
+    );
+  }
+  return FALSE;
 }

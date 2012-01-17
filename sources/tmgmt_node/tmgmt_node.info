@@ -1,6 +1,7 @@
-name = Translation Management Node
+name = Node Source
 description = Node source plugin for the Translation Management system.
-dependencies[] = tmgmt
+package = Translation Management
 core = 7.x
-
+dependencies[] = tmgmt
+dependencies[] = node
 files[] = includes/tmgmt_node.plugin.inc
