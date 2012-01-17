@@ -288,6 +288,12 @@ function tmgmt_job_add_item(TMGMTJob $job, TMGMTJobItem $item) {
   return $item;
 }
 
+/**
+ * Propagates the returned job item translations to the sources.
+ *
+ * @param $job
+ *   The translation job, needs to be accepted.
+ */
 function tmgmt_job_save_translations(TMGMTJob $job) {
   if ($job->state == TMGMTJob::STATE_ACCEPTED) {
     foreach ($job->getItems() as $item) {
@@ -297,8 +303,24 @@ function tmgmt_job_save_translations(TMGMTJob $job) {
 }
 
 /**
+ * Converts a nested data array into a flattened structure with a combined key.
  *
- * @param type $data
+ * This function can be used by translators to help with the data conversion.
+ *
+ * Nested keys will be joined together using a colon, so for example
+ * $data['key1']['key2']['key3'] will be converted into
+ * $flattened_data['key1:key2:key3'].
+ *
+ * @param $data
+ *   The nested array structure that should be flattened.
+ * @param $prefix
+ *   Internal use only, indicates the current key prefix when recursing into
+ *   the data array.
+ *
+ * @return
+ *   The flattened data array.
+ *
+ * @see tmgmt_unflatten_data().
  */
 function tmgmt_flatten_data($data, $prefix = NULL) {
   $flattened_data = array();
@@ -318,6 +340,23 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
   return $flattened_data;
 }
 
+/**
+ * Converts a flattened data structure into a nested array.
+ *
+ * This function can be used by translators to help with the data conversion.
+ *
+ * Nested keys will be created based on the colon, so for example
+ * $flattened_data['key1:key2:key3'] will be converted into
+ * $data['key1']['key2']['key3'].
+ *
+ * @param $data
+ *   The flattened data array.
+ *
+ * @return
+ *   The nested data array.
+ *
+ * @see tmgmt_flatten_data().
+ */
 function tmgmt_unflatten_data($flattened_data) {
   $data = array();
   foreach ($flattened_data as $key => $flattened_data_entry) {
@@ -325,4 +364,3 @@ function tmgmt_unflatten_data($flattened_data) {
   }
   return $data;
 }
-
