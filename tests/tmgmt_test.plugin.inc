@@ -23,7 +23,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
 
         foreach ($job->getItems() as $item) {
           /* @var $item TMGMTJobItem */
-          foreach ($item->getFlattenedSourceData() as $key => $data_entry) {
+          foreach (tmgmt_flatten_data($item->getSourceData()) as $key => $data_entry) {
             // Translate into spanish!
             $item->updateTranslatedData($key, str_replace('n', 'ñ', $data_entry['#text']));
           }

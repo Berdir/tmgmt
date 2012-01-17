@@ -143,7 +143,7 @@ function tmgmt_translator_load_multiple(array $tids = array(), $conditions = arr
  *   The machine-readable name of a service plugin.
  */
 function tmgmt_translator_plugin_info($plugin = NULL) {
-  return _tmgmt_plugin_info('source', $plugin);
+  return _tmgmt_plugin_info('translator', $plugin);
 }
 
 /**
@@ -156,7 +156,7 @@ function tmgmt_translator_plugin_info($plugin = NULL) {
  *   The controller object for the given source plugin.
  */
 function tmgmt_translator_plugin_controller($plugin) {
-  return _tmgmt_plugin_controller('source', $plugin);
+  return _tmgmt_plugin_controller('translator', $plugin);
 }
 
 /**
@@ -221,7 +221,7 @@ function _tmgmt_plugin_info($type, $plugin = NULL) {
 function _tmgmt_plugin_controller($type, $plugin) {
   $cache = &drupal_static(__FUNCTION__);
   if (!isset($cache[$type][$plugin])) {
-    $info = tmgmt_plugin_info($type, $plugin);
+    $info = _tmgmt_plugin_info($type, $plugin);
     $class = isset($info['controller class']) ? $info['controller class'] : 'TMGMTDefault' . ucfirst($type) . 'PluginController';
     $cache[$type][$plugin] = new $class($plugin);
   }
@@ -286,4 +286,25 @@ function tmgmt_job_add_item(TMGMTJob $job, TMGMTJobItem $item) {
   $item->tjid = $job->identifier();
   $item->save();
   return $item;
+}
+
+/**
+ *
+ * @param type $data
+ */
+function tmgmt_flatten_data($data, $prefix = NULL) {
+  $flattened_data = array();
+
+  // Each element is either a text (has #text property defined) or has children,
+  // not both.
+  if (!empty($data['#text'])) {
+    $flattened_data[$prefix . $key] = $data;
+  }
+  else {
+    foreach (element_children($data) as $key) {
+      $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key . ':');
+    }
+  }
+
+  return $flattened_data;
 }
