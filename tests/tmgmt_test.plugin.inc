@@ -8,7 +8,7 @@
 class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::submit().
+   * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   function requestTranslation(TMGMTJob $job) {
     // Do something different based on the target language.
@@ -63,6 +63,44 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
   }
 
   public function saveTranslation(TMGMTJobItem $job_item) {
+
+  }
+}
+
+class TMGMTTestTranslatorResponse implements TMGMTranslatorResponseInterface {
+
+  /**
+   * @var $response
+   */
+  protected $response;
+
+  /**
+   * Constructor.
+   *
+   * @param $response
+   */
+  public function __construct($response) {
+    $this->response = $response;
+  }
+
+  /**
+   * Implements TMGMTranslatorResponseInterface::getResponse().
+   */
+  public function getResponse() {
+    return $this->response;
+  }
+
+  /**
+   * Implements TMGMTranslatorResponseInterface::toStatus().
+   */
+  public function toStatus() {
+
+  }
+
+  /**
+   * Implements TMGMTranslatorResponseInterface::toString().
+   */
+  public function toString() {
 
   }
 }

@@ -289,8 +289,12 @@ function tmgmt_job_add_item(TMGMTJob $job, TMGMTJobItem $item) {
 }
 
 /**
+ * Flattens a translation data array.
  *
- * @param type $data
+ * @param $data
+ * @param null $prefix
+ *
+ * @return array
  */
 function tmgmt_flatten_data($data, $prefix = NULL) {
   $flattened_data = array();
@@ -310,10 +314,35 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
   return $flattened_data;
 }
 
+/**
+ * Unflattens a translation data array.
+ *
+ * @param $flattened_data
+ *
+ * @return array
+ */
 function tmgmt_unflatten_data($flattened_data) {
   $data = array();
   foreach ($flattened_data as $key => $flattened_data_entry) {
     drupal_array_set_nested_value($data, explode(':', $key), $flattened_data_entry);
   }
   return $data;
+}
+
+/**
+ * Updates the status of a job to the status supplied by the response object.
+ *
+ * @param TMGMTJob $job
+ *   The translation Job.
+ * @param TMGMTranslatorResponseInterface $response
+ *   The response object.
+ *
+ * @return bool
+ *   TRUE if the status of the job entity has been updated, FALSE otherwise.
+ */
+function tmgmt_job_update_status_from_response(TMGMTJob $job, TMGMTranslatorResponseInterface $response) {
+  if (($status = $response->toStatus()) !== NULL) {
+    return $job->setStatus($status);
+  }
+  return FALSE;
 }

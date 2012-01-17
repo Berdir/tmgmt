@@ -279,5 +279,47 @@ class TMGMTJob extends Entity {
     return FALSE;
   }
 
-}
+  /**
+   * Returns the status of the job. Can be one of TMGMTJob::STATE_NEW,
+   * TMGMTJob::STATE_SUBMITTED TMGMTJob::STATE_REJECTED, TMGMTJob::STATE_REVIEW,
+   * TMGMTJob::STATE_ACCEPTED or NULL if the status hasn't been defined yet.
+   *
+   * @return
+   *   The status of the job.
+   */
+  public function getStatus() {
+    if (isset($this->status)) {
+      return $this->status;
+    }
+    return NULL;
+  }
 
+  /**
+   * Updates the status of the job.
+   *
+   * @param $status
+   *   The new status of the job. Has to be one of TMGMTJob::STATE_NEW,
+   *   TMGMTJob::STATE_SUBMITTED, TMGMTJob::STATE_REJECTED,
+   *   TMGMTJob::STATE_REVIEW or TMGMTJob::STATE_ACCEPTED.
+   */
+  public function setStatus($status) {
+    // Return FALSE if the status already matches the supplied $status.
+    if ($this->getStatus == $status) {
+      return FALSE;
+    }
+    // Fire certain actions specific to the status update and return TRUE if
+    // the status was updated. Return FALSE otherwise.
+    switch ($status) {
+      case self::STATE_ACCEPTED:
+      case self::STATE_NEW:
+      case self::STATE_REJECTED:
+      case self::STATE_REVIEW:
+      case self::STATE_SUBMITTED:
+        $this->status = $status;
+        return TRUE;
+      default:
+        return FALSE;
+    }
+  }
+
+}
