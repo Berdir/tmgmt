@@ -6,14 +6,14 @@
  */
 
 /**
- * Controller class for the t9n_mgmt_translator entity.
+ * Controller class for the tmgmt_translator entity.
  */
 class TranslationManagementTranslatorController extends EntityAPIControllerExportable {
 
 }
 
 /**
- * Controller class for the t9n_mgmt_job entity.
+ * Controller class for the tmgmt_job entity.
  */
 class TranslationManagementJobController extends EntityAPIController {
 
@@ -35,7 +35,7 @@ class TranslationManagementJobController extends EntityAPIController {
 }
 
 /**
- * Controller class for the t9n_mgmt_map entity.
+ * Controller class for the tmgmt_map entity.
  */
 class TranslationManagementMapController extends EntityAPIController {
 

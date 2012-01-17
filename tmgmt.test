@@ -112,7 +112,7 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('entity', 't9n_mgmt'));
+    parent::setUp(array('entity', 'tmgmt'));
   }
 
   /**
@@ -121,7 +121,7 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
   function testTranslators() {
     $translator = $this->createTranslator();
 
-    $loaded_translator = t9n_mgmt_translator_load($translator->tid);
+    $loaded_translator = tmgmt_translator_load($translator->tid);
 
     $this->assertEqual($translator->name, $loaded_translator->name);
     $this->assertEqual($translator->label, $loaded_translator->label);
@@ -131,7 +131,7 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
     $translator->settings['new_key'] = $this->randomString();
     $this->assertEqual(SAVED_UPDATED, $translator->save());
 
-    $loaded_translator = t9n_mgmt_translator_load($translator->tid);
+    $loaded_translator = tmgmt_translator_load($translator->tid);
 
     $this->assertEqual($translator->name, $loaded_translator->name);
     $this->assertEqual($translator->label, $loaded_translator->label);
@@ -139,7 +139,7 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
 
     // Delete the translator, make sure the translator is gone.
     $translator->delete();
-    $this->assertFalse(t9n_mgmt_translator_load($translator->tid));
+    $this->assertFalse(tmgmt_translator_load($translator->tid));
   }
 
   /**
@@ -148,7 +148,7 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
   function testMaps() {
     $map = $this->createMap();
 
-    $loaded_map = t9n_mgmt_map_load($map->tmid);
+    $loaded_map = tmgmt_map_load($map->tmid);
 
     $this->assertEqual($map->plugin, $loaded_map->plugin);
     $this->assertEqual($map->item_type, $loaded_map->item_type);
@@ -158,7 +158,7 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
     $map->item_id = 6;
     $this->assertEqual(SAVED_UPDATED, $map->save());
 
-    $loaded_map = t9n_mgmt_map_load($map->tmid);
+    $loaded_map = tmgmt_map_load($map->tmid);
 
     $this->assertEqual($map->plugin, $loaded_map->plugin);
     $this->assertEqual($map->item_type, $loaded_map->item_type);
@@ -166,14 +166,14 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
 
 
     // Get the map.
-    $loaded_map = t9n_mgmt_map_get($map->plugin, $map->item_type, $map->item_id);
+    $loaded_map = tmgmt_map_get($map->plugin, $map->item_type, $map->item_id);
     $this->assertEqual($map->tmid, $loaded_map->tmid);
 
     // Get a non-existing map without autocreation.
-    $this->assertFalse(t9n_mgmt_map_get('nonexisting', 'none', 5));
+    $this->assertFalse(tmgmt_map_get('nonexisting', 'none', 5));
 
     // Get a non-existing map with autocreation.
-    $new_map = t9n_mgmt_map_get('plugin', 'type', 3, TRUE);
+    $new_map = tmgmt_map_get('plugin', 'type', 3, TRUE);
     $this->assertTrue($new_map->tmid > 0);
     $this->assertEqual('plugin', $new_map->plugin);
     $this->assertEqual('type', $new_map->item_type);
@@ -181,7 +181,7 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
 
     // Delete the translator, make sure the translator is gone.
     $map->delete();
-    $this->assertFalse(t9n_mgmt_map_load($map->tmid));
+    $this->assertFalse(tmgmt_map_load($map->tmid));
   }
 
   /**
@@ -190,7 +190,7 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
   function testJobs() {
     $job = $this->createJob($this->createMap());
 
-    $loaded_job = t9n_mgmt_job_load($job->tjid);
+    $loaded_job = tmgmt_job_load($job->tjid);
 
     $this->assertEqual($job->tmid, $loaded_job->tmid);
     $this->assertEqual($job->source_language, $loaded_job->source_language);
@@ -207,12 +207,12 @@ class TranslationManagementCRUDTestCase extends TranslationManagementBaseTestCas
     $job->response = $this->randomString();
     $this->assertEqual(SAVED_UPDATED, $job->save());
 
-    $loaded_job = t9n_mgmt_job_load($job->tjid);
+    $loaded_job = tmgmt_job_load($job->tjid);
 
     $this->assertEqual($job->response, $loaded_job->response);
 
     // Delete the translator, make sure the translator is gone.
     $job->delete();
-    $this->assertFalse(t9n_mgmt_job_load($job->tjid));
+    $this->assertFalse(tmgmt_job_load($job->tjid));
   }
 }

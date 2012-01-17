@@ -1,1 +1,1 @@
-Translation Management (t9n_mgt)
+Translation Management (tmgt)

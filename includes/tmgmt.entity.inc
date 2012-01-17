@@ -6,7 +6,7 @@
  */
 
 /**
- * Entity class for the t9n_mgmt_translator entity.
+ * Entity class for the tmgmt_translator entity.
  */
 class TranslationManagementTranslator extends Entity {
 
@@ -49,13 +49,13 @@ class TranslationManagementTranslator extends Entity {
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
-    parent::__construct($values, 't9n_mgmt_translator');
+    parent::__construct($values, 'tmgmt_translator');
   }
 
 }
 
 /**
- * Entity class for the t9n_mgmt_job entity.
+ * Entity class for the tmgmt_job entity.
  */
 class TranslationManagementJob extends Entity {
 
@@ -189,13 +189,13 @@ class TranslationManagementJob extends Entity {
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
-    parent::__construct($values, 't9n_mgmt_job');
+    parent::__construct($values, 'tmgmt_job');
   }
 
 }
 
 /**
- * Entity class for the t9n_mgmt_map entity.
+ * Entity class for the tmgmt_map entity.
  */
 class TranslationManagementMap extends Entity {
 
@@ -224,7 +224,7 @@ class TranslationManagementMap extends Entity {
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
-    parent::__construct($values, 't9n_mgmt_map');
+    parent::__construct($values, 'tmgmt_map');
   }
 
 }

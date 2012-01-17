@@ -8,8 +8,8 @@
 /**
  * Implements hook_schema().
  */
-function t9n_mgmt_schema() {
-  $schema['t9n_mgmt_map'] = array(
+function tmgmt_schema() {
+  $schema['tmgmt_map'] = array(
     'description' => 'A translation map represents an item that needs to be translated.',
     'fields' => array(
       'tmid' => array(
@@ -41,7 +41,7 @@ function t9n_mgmt_schema() {
     ),
   );
 
-  $schema['t9n_mgmt_job'] = array(
+  $schema['tmgmt_job'] = array(
     'description' => 'A translation job represents a translation order that can be assigned to a translator.',
     'fields' => array(
       'tjid' => array(
@@ -126,7 +126,7 @@ function t9n_mgmt_schema() {
     ),
   );
 
-  $schema['t9n_mgmt_translator'] = array(
+  $schema['tmgmt_translator'] = array(
     'description' => 'A translator is a combination of a translator type and type specific configuration',
     'fields' => array(
       'tid' => array(

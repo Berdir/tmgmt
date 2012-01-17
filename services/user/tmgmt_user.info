@@ -1,0 +1,7 @@
+name = User Service
+group = Translation Management
+core = 7.x
+
+dependencies[] = tmgmt
+
+files[] = includes/tmgmt_user.plugin.inc

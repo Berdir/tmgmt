@@ -30,7 +30,7 @@ class TranslationManagementDefaultSourcePluginController implements TranslationM
    */
   public function __construct($plugin) {
     $this->pluginType = $plugin;
-    $this->pluginInfo = t9n_mgmt_source_plugin_info($plugin);
+    $this->pluginInfo = tmgmt_source_plugin_info($plugin);
   }
 
 }
@@ -38,7 +38,7 @@ class TranslationManagementDefaultSourcePluginController implements TranslationM
 /**
  * Interface for service plugin controllers.
  */
-interface TranslationManagementServicePluginControllerInterface {
+interface TranslationManagementTranslatorPluginControllerInterface {
 
   /**
    * Constructor.
@@ -50,7 +50,7 @@ interface TranslationManagementServicePluginControllerInterface {
 /**
  * Default controller class for service plugins.
  */
-class TranslationManagementDefaultServicePluginController implements TranslationManagementServicePluginControllerInterface {
+class TranslationManagementDefaultTranslatorPluginController implements TranslationManagementTranslatorPluginControllerInterface {
 
   protected $pluginType;
   protected $pluginInfo;
@@ -60,7 +60,7 @@ class TranslationManagementDefaultServicePluginController implements Translation
    */
   public function __construct($plugin) {
     $this->pluginType = $plugin;
-    $this->pluginInfo = t9n_mgmt_service_plugin_info($plugin);
+    $this->pluginInfo = tmgmt_translator_plugin_info($plugin);
   }
 
 }
