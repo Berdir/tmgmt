@@ -11,14 +11,17 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     parent::__construct($plugin);
   }
   
+  /**
+   * @todo: comments about the returned structure.
+   */
   public function getTranslationStructure($node) {
     // Get all the fields that can be translated and arrange their values into
     // a specific structure.
     $structure = array();
-    foreach (array_keys(field_info_instances('node', $node->type)) as $field_name) {
+    foreach (field_info_instances('node', $node->type) as $field_name => $field_instance) {
       $info = field_info_field($field_name);
       if ($info['translatable']) {
-        $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info);
+        $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info, $field_instance);
         if ($field_structure) {
           $structure[$field_name] = $field_structure;
         }
