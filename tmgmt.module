@@ -165,6 +165,14 @@ function tmgmt_translator_load($tid, $reset = FALSE) {
 }
 
 /**
+ * Loads a translator based on the name.
+ */
+function t9n_mgmt_translator_load_by_name($name, $reset = FALSE) {
+  $translators = t9n_mgmt_translator_load_multiple(array(), array('name' => $name), $reset);
+  return $translators ? reset($translators) : FALSE;
+}
+
+/**
  * Loads translation maps.
  */
 function tmgmt_translator_load_multiple(array $tids = array(), $conditions = array(), $reset = FALSE) {

@@ -34,6 +34,8 @@ class TranslationManagementTranslator extends Entity {
   /**
    * Plugin name of the translator.
    *
+   * @see TranslationManagementTranslator::getPluginController().
+   *
    * @type string
    */
   public $plugin;
@@ -50,6 +52,14 @@ class TranslationManagementTranslator extends Entity {
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_translator');
+  }
+
+  /**
+   * Returns the translator plugin controller of this translator.
+   * @return type
+   */
+  public function getPluginController() {
+    return t9n_mgmt_service_plugin_controller($this->plugin);
   }
 
 }
@@ -184,12 +194,34 @@ class TranslationManagementJob extends Entity {
    */
   public $translator_id;
 
-
   /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_job');
+  }
+
+  /**
+   * Returns the translator for this job.
+   *
+   * @return TranslationManagementTranslator
+   *   Either the translator entity or FALSE if none has been set yet.
+   */
+  public function getTranslator() {
+    if ($this->translator) {
+      return t9n_mgmt_translator_load_by_name($this->translator);
+    }
+    return FALSE;
+  }
+
+  /**
+   * Returns the translation map of this job.
+   *
+   * @return TranslationManagementMap
+   *   The translation map entity for this job.
+   */
+  public function getMap() {
+    return t9n_mgmt_map_load($this->tmid);
   }
 
 }
@@ -201,6 +233,8 @@ class TranslationManagementMap extends Entity {
 
   /**
    * The source plugin that provides the item.
+   *
+   * @see TranslationManagementMap::getPluginController().
    *
    * @var varchar
    */
@@ -225,6 +259,15 @@ class TranslationManagementMap extends Entity {
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_map');
+  }
+
+  /**
+   * Returns the configured plugin controller.
+   *
+   * @return TranslationManagementSourcePluginControllerInterface
+   */
+  public function getPluginController() {
+    return t9n_mgmt_source_plugin_controller($this->plugin);
   }
 
 }
