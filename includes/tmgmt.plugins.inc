@@ -14,6 +14,16 @@ interface TMGMTSourcePluginControllerInterface {
    * Constructor.
    */
   public function __construct($plugin);
+  
+  /**
+   * Returns an array with the data structured for translation.
+   */
+  public function getTranslationStructure($data);
+  
+  /**
+   * Saves a translation.
+   */
+  public function saveTranslation(TMGMTJobItem $job_item);
 
 }
 
@@ -32,6 +42,10 @@ class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginControllerI
     $this->pluginType = $plugin;
     $this->pluginInfo = tmgmt_source_plugin_info($plugin);
   }
+  
+  public abstract function getTranslationStructure($data);
+  
+  public abstract function saveTranslation(TMGMTJobItem $job_item);
 
 }
 
