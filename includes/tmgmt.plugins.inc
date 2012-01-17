@@ -46,6 +46,15 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function __construct($plugin);
 
   /**
+   * Check whether this service can handle this translation job.
+   * 
+   * @param TMGMTJob $job
+   * 
+   * @return boolean
+   */
+  public function canTranslate(TMGMTJob $job);
+
+  /**
    * Submit callback.
    *
    * @param $job TMGMTJob
@@ -54,17 +63,24 @@ interface TMGMTTranslatorPluginControllerInterface {
    * @return boolean
    *   TRUE if the job has been successfully submitted, FALSE otherwise.
    */
-  public function submit(TMGMTJob $job);
+  public function requestTranslation(TMGMTJob $job);
 
   /**
-   * Receive callback.
+   * Cancel translation job
    *
-   * @param $object
-   *   The processed object that has been returned by the internal or external
-   *   translation service.
+   * @param TMGMTJob $job
    */
-  public function receive($object);
-
+  public function cancelTranslation(TMGMTJob $job);
+  
+  /**
+   * Get status for translation job
+   *
+   * @param TMGMTJob $job
+   * 
+   * @return int
+   *   Job status
+   */
+  public function getJobStatus(TMGMTJob $job);
 }
 
 /**
@@ -84,17 +100,46 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
   }
 
   /**
+   * Check whether this service can handle this translation job.
+   * 
+   * @param TMGMTJob $job
+   * 
+   * @return boolean
+   */
+  public function canTranslate(TMGMTJob $job) {
+    return FALSE;
+  }
+  /**
    * Submit callback.
    */
-  public function submit(TMGMTJob $job) {
+  public function requestTranslation(TMGMTJob $job) {
     return TRUE;
   }
 
   /**
-   * Receive callback.
+   * Cancel translation job
+   *
+   * @param TMGMTJob $job
    */
-  public function receive($object) {
-
+  public function cancelTranslation(TMGMTJob $job) {
+  }
+  
+  /**
+   * Get status for translation job
+   *
+   * @param TMGMTJob $job
+   * 
+   * @return int
+   *   Job status (T.Mgmt)
+   */
+  public function getJobStatus(TMGMTJob $job) {
+  }
+  
+  /**
+   * Get setting for this Service
+   */
+  protected function getOption($name, $default = NULL) {
+    return variable_get('tmgmt_' . $this->pluginType . '_' . $name, $default);
   }
 
 }
