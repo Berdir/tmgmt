@@ -12,14 +12,19 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
   }
   
   public function getTranslationStructure($node) {
-    // For the moment, return only the title.
-    // @todo: iterate over all the fields and return the ones that have to be
-    // translated.
-    return array(
-      'node_field_title' => array(
-        '#value' => $node->title,
-      ),
-    );
+    // Get all the fields that can be translated and arrange their values into
+    // a specific structure.
+    $structure = array();
+    foreach (array_keys(field_info_instances('node', $node->type)) as $field_name) {
+      $info = field_info_field($field_name);
+      if ($info['translatable']) {
+        $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info);
+        if ($field_structure) {
+          $structure[$field_name] = $field_structure;
+        }
+      }
+    }
+    return $structure;
   }
   
   public function saveTranslation(TMGMTJobItem $job_item) {
