@@ -60,3 +60,48 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
     variable_set('tmgmt_test_saved_translation_' . $job_item->item_type . '_' . $job_item->item_id, TRUE);
   }
 }
+
+class TMGMTTestTranslatorResponse implements TMGMTranslatorResponseInterface {
+
+  /**
+   * @var $response
+   */
+  protected $response;
+
+  /**
+   * Constructor.
+   *
+   * @param $response
+   */
+  public function __construct($response) {
+    $this->response = $response;
+  }
+
+  /**
+   * Implements TMGMTranslatorResponseInterface::getResponse().
+   */
+  public function getResponse() {
+    return $this->response;
+  }
+
+  /**
+   * Implements TMGMTranslatorResponseInterface::tostate().
+   */
+  public function tostate() {
+
+  }
+
+  /**
+   * Implements TMGMTranslatorResponseInterface::toString().
+   */
+  public function toString() {
+
+  }
+
+  /**
+   * Implements TMGMTranslatorResponseInterface::toJobState().
+   */
+  function toJobState() {
+
+  }
+}
