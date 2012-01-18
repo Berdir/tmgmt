@@ -269,6 +269,34 @@ class TMGMTJob extends Entity {
     parent::__construct($values, 'tmgmt_job');
   }
 
+
+  /**
+   * Propagates the returned job item translations to the sources.
+   */
+  function saveTranslation() {
+    if ($this->state == self::STATE_ACCEPTED) {
+      foreach ($this->getItems() as $item) {
+        $item->getSourceController()->saveTranslation($item);
+      }
+    }
+  }
+
+  /**
+   * Updates the status of a job to the status supplied by the response object.
+   *
+   * @param TMGMTranslatorResponseInterface $response
+   *   The response object.
+   *
+   * @return bool
+   *   TRUE if the status of the job entity has been updated, FALSE otherwise.
+   */
+  function setStatusFromResponse(TMGMTranslatorResponseInterface $response) {
+    if (($status = $response->toStatus()) !== NULL) {
+      return $this->setStatus($status);
+    }
+    return FALSE;
+  }
+
   /**
    * Adds the item to the translation job.
    *

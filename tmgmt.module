@@ -183,38 +183,6 @@ function tmgmt_job_add_item(TMGMTJob $job, TMGMTJobItem $item) {
 }
 
 /**
- * Propagates the returned job item translations to the sources.
- *
- * @param $job
- *   The translation job, needs to be accepted.
- */
-function tmgmt_job_save_translations(TMGMTJob $job) {
-  if ($job->state == TMGMTJob::STATE_ACCEPTED) {
-    foreach ($job->getItems() as $item) {
-      $item->getSourceController()->saveTranslation($item);
-    }
-  }
-}
-
-/**
- * Updates the status of a job to the status supplied by the response object.
- *
- * @param TMGMTJob $job
- *   The translation Job.
- * @param TMGMTranslatorResponseInterface $response
- *   The response object.
- *
- * @return bool
- *   TRUE if the status of the job entity has been updated, FALSE otherwise.
- */
-function tmgmt_job_update_status_from_response(TMGMTJob $job, TMGMTranslatorResponseInterface $response) {
-  if (($status = $response->toStatus()) !== NULL) {
-    return $job->setStatus($status);
-  }
-  return FALSE;
-}
-
-/**
  * @} End of "addtogroup job".
  */
 
