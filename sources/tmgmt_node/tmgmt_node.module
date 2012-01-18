@@ -6,6 +6,7 @@
 
 /**
  * implementation of hook_menu().
+ * adds a tab to every node to show pending jobs and to create new jobs.
  */
 function tmgmt_node_menu() {
 
@@ -13,7 +14,8 @@ function tmgmt_node_menu() {
 
   $items['node/%node/create-job'] = array(
     'title' => 'translation management',
-    'page callback' => 'tmgmt_node_translator_settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tmgmt_node_translator_settings_form', 1),
     'access callback' => '_translation_tab_access',
     'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
@@ -23,35 +25,20 @@ function tmgmt_node_menu() {
   return $items;
 }
 
-function tmgmt_node_translator_settings() {
-//  $job = tmgmt_job_item_load($item_id, $item_type, $plugin);
-//  $status = $job->getStatus();
-  $status = 'foo';
-  switch ($status) {
-    case 'in arbeit':
-      return 'in arbeit';
-    default:
-      return drupal_get_form('tmgmt_node_translator_settings_form');
-  }
-}
-
 /**
- * implementing hook_form()
+ * Form for the node translator settings form.
  */
-function tmgmt_node_translator_settings_form($form, &$form_state) {
-  $form = array();
-
+function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
 
   $language_options = array();
+  // get all avalible languages from core translation module.
   $avalible_languages = language_list();
+  // prepare language array with all avalible languages but the sourcelanguage.
   foreach ($avalible_languages as $language) {
-    $language_options[$language->language] = $language->name;
+    if($language->language != $node->language) {
+      $language_options[$language->language] = $language->name;
+    }
   }
-
-  $node = node_load(arg(1));
-  $node_language = $language_options[$node->language];
-
-  unset($language_options[$node->language]);
 
   $form['source_language'] = array(
     '#type' => 'textfield',
@@ -69,32 +56,32 @@ function tmgmt_node_translator_settings_form($form, &$form_state) {
     '#options' => $language_options,
   );
 
+  // TODO: Filter translater by supported languages
   $translator_plugins = tmgmt_translator_plugin_info();
   foreach ($translator_plugins as $translator_plugin) {
     $services[$translator_plugin['plugin']] = $translator_plugin['label'];
-    $descriptions[$translator_plugin['plugin']] = $translator_plugin['description'];
   }
-  dsm($descriptions);
 
-  dsm($translator_plugins);
   $form['translation_service'] = array(
     '#type' => 'select',
     '#title' => t('translation type'),
-//    '#default_value' => '',
     '#options' => $services,
   );
 
-  $form['description'] = array(
-    '#type' => 'container',
-    '#states' => array(
-      'visible' => array('select[name="translation_service"]' => array('value' => 'dummy_translator')),
-    ),
-  );
-  $form['description']['markup'] = array(
-//    '#markup' => ,
-  );
-
-
+  // translator description, depending on the selected translatorplugin.
+  foreach ($translator_plugins as $translator_plugin) {
+    $form['description'][$translator_plugin['plugin']] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array('select[name="translation_service"]' => array('value' => $translator_plugin['plugin'])),
+      ),
+    );
+    $form['description'][$translator_plugin['plugin']]['markup'] = array(
+      '#type' => 'item',
+      '#title' => t('about this service'),
+      '#markup' => $translator_plugin['description'],
+    );
+  }
 
   $form['nid'] = array(
     '#type' => 'hidden',
@@ -104,22 +91,24 @@ function tmgmt_node_translator_settings_form($form, &$form_state) {
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('create job'),
-    '#weight' => 5,
+    '#weight' => 50,
   );
   return $form;
 }
 
 /**
- *
+ * node translator submit function.
+ * will create a job with the node as item.
  */
 function tmgmt_node_translator_settings_form_submit($form, &$form_state) {
 
   $values = $form_state['values'];
   $job = tmgmt_job_create($values['source_language'], $values['target_language']);
   $job->save();
-  $item = tmgmt_job_item_create('node', 'node_translation', $values['nid']);
+  $item = tmgmt_job_item_create('node', 'node', $values['nid']);
   $job->addItem($item);
   dsm($job->getItems());
+  
 }
 
 /**
@@ -184,17 +173,17 @@ function text_tmgmt_source_translation_structure($field_name, $node, $field_info
     );
     }
   }
-  /*$structure['metadata']['label'] = array(
+  /* $structure['metadata']['label'] = array(
     '#label' => 'Label',
     '#text' => $instance['label'],
     '#translate' => TRUE,
-  );
-  if ($instance['description']) {
-    $structure['metadata']['description'] = array(
-      '#label' => 'Description',
-      '#text' => $instance['description'],
-      '#translate' => TRUE,
     );
-  }*/
+    if ($instance['description']) {
+    $structure['metadata']['description'] = array(
+    '#label' => 'Description',
+    '#text' => $instance['description'],
+    '#translate' => TRUE,
+    );
+    } */
   return $structure;
 }
