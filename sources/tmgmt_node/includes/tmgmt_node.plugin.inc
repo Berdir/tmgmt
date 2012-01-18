@@ -46,13 +46,13 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     $structure = array();
     foreach (field_info_instances('node', $node->type) as $field_name => $field_instance) {
       $info = field_info_field($field_name);
-      if ($info['translatable']) {
-        $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info, $field_instance);
-        if ($field_structure) {
-          $structure[$field_name] = $field_structure;
-        }
+      $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info, $field_instance);
+      if ($field_structure) {
+        $structure[$field_name] = $field_structure;
       }
     }
+    $structure['node_title'][0]['value']['#label'] = 'Title';
+    $structure['node_title'][0]['value']['#text'] = $node->title;
     return $structure;
   }
 
@@ -118,16 +118,13 @@ class TMGMTNodeSourceContentTranslation implements TMGMTNodeSourceTranslationInt
       $tnode = new stdClass();
       $tnode->language = $job->target_language;
       $tnode->translation_source = $node;
-      // @todo: The title field will not probably be shared.
-      $shared_fields = array('title', 'type', 'uid', 'status', 'comment', 'promote', 'sticky');
+      $shared_fields = array('type', 'uid', 'status', 'comment', 'promote', 'sticky');
       foreach ($shared_fields as $shared_field) {
         $tnode->{$shared_field} = $node->{$shared_field};
       }
     }
     // Time to put the translated data into the node.
-    // Do we need to unflat the data here?
-    $translated_data = tmgmt_unflatten_data($job_item->translated_data);
-    tmgmt_node_update_node_translation($tnode, $translated_data, $job->target_language);
+    tmgmt_node_update_node_translation($tnode, $job_item->translated_data, $job->target_language);
   }
   
 }
