@@ -41,17 +41,18 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
    */
   public function getData(TMGMTJobItem $job_item) {
     $node = node_load($job_item->item_id);
+    $job = tmgmt_job_load($job_item->tjid);
     // Get all the fields that can be translated and arrange their values into
     // a specific structure.
     $structure = array();
     foreach (field_info_instances('node', $node->type) as $field_name => $field_instance) {
       $info = field_info_field($field_name);
-      $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info, $field_instance);
+      $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info, $field_instance, $job);
       if ($field_structure) {
         $structure[$field_name] = $field_structure;
       }
     }
-    $structure['node_title'][0]['value']['#label'] = 'Title';
+    $structure['node_title'][0]['value']['#label'] = t('Node title', array(), array('langcode' => $job->source_language));
     $structure['node_title'][0]['value']['#text'] = $node->title;
     return $structure;
   }
