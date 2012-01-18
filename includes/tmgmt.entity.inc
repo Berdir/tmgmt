@@ -388,6 +388,7 @@ class TMGMTJob extends Entity {
     switch ($state) {
       case self::STATE_ACCEPTED:
       case self::STATE_NEW:
+      case self::STATE_PREPARED:
       case self::STATE_REJECTED:
       case self::STATE_REVIEW:
       case self::STATE_SUBMITTED:
