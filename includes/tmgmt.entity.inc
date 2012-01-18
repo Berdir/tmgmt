@@ -184,36 +184,41 @@ class TMGMTJobItem extends Entity {
 class TMGMTJob extends Entity {
 
   /**
-   * A new translation job, not yet submitted to a translator.
+   * A new translation job, can not yet be submitted.
    */
   const STATE_NEW = 0;
 
   /**
+   * A prepared translation job, not yet submitted to a translator.
+   */
+  const STATE_PREPARED = 1;
+
+  /**
    * A translation job that has been submitted to the translator.
    */
-  const STATE_SUBMITTED = 1;
+  const STATE_SUBMITTED = 2;
 
   /**
    * A translation job that has been rejected by the translator.
    *
    * The response contains information why the job was rejected.
    */
-  const STATE_REJECTED = 2;
+  const STATE_REJECTED = 3;
 
   /**
    * The translation job was translated and needs to be reviewed.
    */
-  const STATE_REVIEW = 3;
+  const STATE_REVIEW = 4;
 
   /**
    * The translation has been accepted and the job is finished.
    */
-  const STATE_ACCEPTED = 4;
+  const STATE_ACCEPTED = 5;
 
   /**
    * The translation job has been cancelled.
    */
-  const STATE_CANCELLED = 5;
+  const STATE_CANCELLED = 6;
 
   /**
    * Translation job identifier.
