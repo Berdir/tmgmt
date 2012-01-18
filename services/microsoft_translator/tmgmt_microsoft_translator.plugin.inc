@@ -63,10 +63,12 @@ class TMGMTMicrosoftTranslator extends TMGMTDefaultTranslatorPluginController {
         ));
 
         $options = array(
-          'method' => 'POST',
-          'data' => $query_data,
+          // @todo - for some reason post is returning 202 status and service is not translating things, maybe check this later.
+          //'method' => 'POST',
+          //'data' => $query_data,
+          'headers' => array('Content-Type' => 'text/plain')
         );
-        $result = drupal_http_request($translate_url, $options);
+        $result = drupal_http_request($translate_url. '?' . $query_data, $options);
 
         switch ($result->code) {
           case 200:
