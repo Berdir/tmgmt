@@ -69,13 +69,33 @@ function tmgmt_node_translator_settings_form($form, &$form_state) {
     '#options' => $language_options,
   );
 
-  dsm(tmgmt_translator_plugin_info());
-//  $form['translation_service'] = array(
-//    '#type' => 'select',
-//    '#title' => t('translation type'),
-////    '#default_value' => '',
-//    '#options' => $services,
-//  );
+  $translator_plugins = tmgmt_translator_plugin_info();
+  foreach ($translator_plugins as $translator_plugin) {
+    $services[$translator_plugin['plugin']] = $translator_plugin['label'];
+    $descriptions[$translator_plugin['plugin']] = $translator_plugin['description'];
+  }
+  dsm($descriptions);
+
+  dsm($translator_plugins);
+  $form['translation_service'] = array(
+    '#type' => 'select',
+    '#title' => t('translation type'),
+//    '#default_value' => '',
+    '#options' => $services,
+  );
+
+  $form['description'] = array(
+    '#type' => 'container',
+    '#states' => array(
+      'visible' => array('select[name="translation_service"]' => array('value' => 'dummy_translator')),
+    ),
+  );
+  $form['description']['markup'] = array(
+//    '#markup' => ,
+  );
+
+
+
   $form['nid'] = array(
     '#type' => 'hidden',
     '#value' => $node->nid,
