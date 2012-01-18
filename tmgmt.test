@@ -187,14 +187,11 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     foreach ($es_job->getItems() as $item) {
       // Check the translated text. n has been replaced with ñ.
       $expected_text = 'Text for job item with type ' . $item->item_type . ' añd id ' . $item->item_id . '.';
-
       $this->assertEqual($expected_text, $item->translated_data['dummy']['deep_nesting']['#text']);
     }
 
-    // @todo adapt to state changing methods once implemented.
-    $es_job->state = TMGMTJob::STATE_ACCEPTED;
-    $es_job->save();
-    $es_job->saveTranslations();
+    $es_job->setStateFromResponse(new TMGMTTranslatorResponse(TMGMTJob::STATE_ACCEPTED, t('Job accepted')));
+    $es_job->propagateTranslatedData();
 
     // Check if the translations have been "saved".
     foreach ($es_job->getItems() as $item) {
@@ -212,6 +209,6 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $zh_job = tmgmt_test_trigger_job('zh-hans');
     $zh_job->requestTranslation();
     // Still new.
-    $this->assertEqual(TMGMTJob::STATE_NEW, $zh_job->state);
+    $this->assertEqual(TMGMTJob::STATE_PREPARED, $zh_job->state);
   }
 }

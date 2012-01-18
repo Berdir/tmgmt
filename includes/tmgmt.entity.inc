@@ -307,7 +307,7 @@ class TMGMTJob extends Entity {
   /**
    * Propagates the returned job item translations to the sources.
    */
-  public function saveTranslations() {
+  public function propagateTranslatedData() {
     if ($this->state == self::STATE_ACCEPTED) {
       foreach ($this->getItems() as $item) {
         $item->getSourceController()->saveTranslation($item);
@@ -325,8 +325,10 @@ class TMGMTJob extends Entity {
    *   TRUE if the state of the job entity has been updated, FALSE otherwise.
    */
   public function setStateFromResponse(TMGMTTranslatorResponseInterface $response) {
-    if (($state = $response->toJobState()) !== NULL) {
+    if ((($message = $response->toString()) !== NULL)) {
       $this->response[REQUEST_TIME][] = $response->toString();
+    }
+    if (($state = $response->toJobState()) !== NULL) {
       return $this->setState($state);
     }
     return FALSE;
@@ -361,7 +363,6 @@ class TMGMTJob extends Entity {
     $query->entityCondition('entity_type', 'tmgmt_job_item');
     $query->propertyCondition('tjid', $this->tjid);
     $results = $query->execute();
-
     if (!empty($results['tmgmt_job_item'])) {
       return tmgmt_job_item_load_multiple(array_keys($results['tmgmt_job_item']));
     }
@@ -441,4 +442,26 @@ class TMGMTJob extends Entity {
     return $this->getState() == TMGMTJob::STATE_CANCELLED;
   }
 
+  /**
+   *
+   */
+  public function getSourceData() {
+    $data = array();
+    foreach ($this->getItems() as $key => $item) {
+      $data[$key] = $item->getSourceData();
+    }
+    return $data;
+  }
+
+  /**
+   * @param $data
+   */
+  public function addTranslatedData($data) {
+    $items = $this->getItems();
+    foreach ($data as $key => $value) {
+      if (isset($items[$key])) {
+        $items[$key]->addTranslatedData($data[$key]);
+      }
+    }
+  }
 }

@@ -53,6 +53,9 @@ class TMGMTTranslatorMetadataController extends EntityDefaultMetadataController 
 }
 
 /**
+ * Populates all entity property descriptions with the values from the
+ * description of the corresponding entity base table.
+ *
  * @param array $info
  *
  * @return array

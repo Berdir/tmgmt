@@ -34,7 +34,6 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
     if (isset($languages[$job->source_language]) && isset($languages[$job->target_language])) {
       return TRUE;
     }
-
     // What to return if we can not query service and can not get supported
     // languages, for what ever reason? For now it is safer to return FALSE.
     return FALSE;
@@ -46,66 +45,57 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Here we will acutally query source and get translations.
    */
   public function requestTranslation(TMGMTJob $job) {
-    // @todo - who is handling cron||batch here, we or some other controler?
-
+    // @todo - who is handling cron / batch here, we or some other controler?
     $translate_url = $this->translatorURL . '/Translate';
-
-    foreach ($job->getItems() as $item) {
-      /* @var $item TMGMTJobItem */
-      $data = tmgmt_flatten_data($item->getSourceData());
-      foreach ($data as $key => $value) {
-        if (isset($value['#translate']) && $value['#translate'] === FALSE) {
-          continue;
-        }
-
-        $query_data = drupal_http_build_query(array(
-          'appId'       => $this->bingAPIID,
-          'from'        => $job->source_language,
-          'to'          => $job->target_language,
-          'contentType' => 'text/plain', // @todo - we probably need to have this
-                                        // changed based on context, because we
-                                        // need to support html also.
-          'text'        => $value['#text'], // @todo - if length is more then
-                                          // 10000 chars we need to split request.
-        ));
-
-        $options = array(
-          // @todo - for some reason post is returning 202 status and service
-          // is not translating things, maybe check this later.
-          //'method' => 'POST',
-          //'data' => $query_data,
-          'headers' => array('Content-Type' => 'text/plain')
-        );
-        $result = drupal_http_request($translate_url. '?' . $query_data, $options);
-        switch ($result->code) {
-          case 200:
-            // Lets leave DOMDocument for now because this service enable us
-            // to send array of translation sources, and we will probably use
-            // this soon.
-            $dom = new DOMDocument;
-            $dom->loadXML($result->data);
-            $string_items = $dom->getElementsByTagName('string');
-            $data[$key]['#text'] = $string_items->item(0)->nodeValue;
-            break;
-          case 400:
-            return new TMGMTTranslatorResponse(TMGMTJob::STATE_REJECTED, $result->data);
-            break;
-          default:
-            // @todo - we need to think here more what to do if service is not
-            // responding for some items and is responding for some others.
-            // Ideally we should save sources that we manage to translate and
-            // not just return.
-            debug($result);
-            return new TMGMTTranslatorResponse(NULL, $result->data);
-            break;
-        }
+    // Pull the source data array from through the job and flatten it..
+    $data = tmgmt_flatten_data($job->getSourceData());
+    foreach ($data as $key => $value) {
+      if (isset($value['#translate']) && $value['#translate'] === FALSE) {
+        continue;
       }
 
-      $item->addTranslatedData(tmgmt_unflatten_data($data));
+      $query_data = drupal_http_build_query(array(
+        'appId'       => $this->bingAPIID,
+        'from'        => $job->source_language,
+        'to'          => $job->target_language,
+        'contentType' => 'text/plain',
+        // @todo - if length is more then 10000 chars we need to split request.
+        'text'        => $value['#text'],
+      ));
+
+      $options = array(
+        // @todo - for some reason post is returning 202 status and service
+        // is not translating things, maybe check this later.
+        //'method' => 'POST',
+        //'data' => $query_data,
+        'headers' => array('Content-Type' => 'text/plain')
+      );
+      $result = drupal_http_request($translate_url. '?' . $query_data, $options);
+      switch ($result->code) {
+        case 200:
+          // Lets leave DOMDocument for now because this service enable us
+          // to send array of translation sources, and we will probably use
+          // this soon.
+          $dom = new DOMDocument;
+          $dom->loadXML($result->data);
+          $string_items = $dom->getElementsByTagName('string');
+          $data[$key]['#text'] = $string_items->item(0)->nodeValue;
+          break;
+        case 400:
+          return new TMGMTTranslatorResponse(TMGMTJob::STATE_REJECTED, $result->data);
+          break;
+        default:
+          // @todo - we need to think here more what to do if service is not
+          // responding for some items and is responding for some others.
+          // Ideally we should save sources that we manage to translate and
+          // not just return.
+          debug($result);
+          return new TMGMTTranslatorResponse(NULL, $result->data);
+          break;
+      }
     }
-
-    $job->save();
-
+    // Save the translated data through the job.
+    $job->addTranslatedData(tmgmt_unflatten_data($data));
     return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Microsoft Translator translation completed.'));
   }
 
@@ -119,7 +109,6 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
 
     if (!isset($languages)) {
       $languages = array();
-
       $res = drupal_http_request($this->translatorURL . '/GetLanguagesForTranslate' . '?appId=' . $this->bingAPIID);
       if ($res->code == 200) {
         $dom = new DOMDocument;

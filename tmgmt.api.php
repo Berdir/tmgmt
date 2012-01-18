@@ -114,7 +114,7 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * @code
  * $job->setState(TMGMTJob::STATE_ACCEPTED);
  * $job->save();
- * $job->saveTranslations();
+ * $job->propagateTranslatedData();
  * @endcode
  */
 

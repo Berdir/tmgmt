@@ -49,6 +49,6 @@ function tmgmt_rules_job_accept_translation(TMGMTJob $job) {
   if ($job->getState() == TMGMTJob::STATE_REVIEW) {
     $job->setState(TMGMTJob::STATE_ACCEPTED);
     $job->save();
-    $job->saveTranslations();
+    $job->propagateTranslatedData();
   }
 }

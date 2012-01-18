@@ -20,7 +20,7 @@ interface TMGMTSourcePluginControllerInterface {
   /**
    * Returns an array with the data structured for translation.
    *
-   * @see TMGMTJobItem::getSourceData()
+   * @see TMGMTJobItem::getSourceData().
    */
   public function getData(TMGMTJobItem $job_item);
 

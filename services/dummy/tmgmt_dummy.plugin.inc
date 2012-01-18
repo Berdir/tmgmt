@@ -18,11 +18,7 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   function requestTranslation(TMGMTJob $job) {
-    foreach ($job->getItems() as $item) {
-      // Use original data as translated data.
-      $data = $item->getSourceData();
-      $item->addTranslatedData($data);
-    }
+    $job->addTranslatedData($job->getSourceData());
     return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Dummy translation completed.'));
   }
 
