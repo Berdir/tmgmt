@@ -23,5 +23,33 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     parent::setUp(array('tmgmt_i18n_string', 'tmgmt_test'));
   }
 
-  // TODO: Create an actual test.
+  function testNodeSource() {
+    $source_text = $this->randomName();
+    $string_name = 'some:string:' . $this->randomName();
+
+    $string = i18n_string($string_name, $source_text);
+dpm($string);
+
+    // Create the new job and job item.
+    $job = $this->createJob();
+    $job->translator = 'test_translator';
+    $job->translator_context = array();
+
+    $item1 = tmgmt_job_item_create('i18n_string', 'i18n_string', $string_name);
+
+    $data = tmgmt_flatten_data($item1->getSourceData());
+    debug($data);
+    $job->addItem($item1);
+
+    // Check the structure of the imported data.
+    $this->assertEqual($item1->item_id, $string_name, t('String is correctly saved'));
+
+
+
+    $job->requestTranslation();
+
+    foreach ($job->getItems() as $item) {
+      debug($item);
+    }
+  }
 }

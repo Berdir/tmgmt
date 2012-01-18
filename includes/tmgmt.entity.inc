@@ -82,6 +82,13 @@ class TMGMTJobItem extends Entity {
    * @var varchar
    */
   public $plugin;
+  
+  /**
+   * The identifier of the translation job.
+   *
+   * @var int
+   */
+  public $tjid;
 
   /**
    * Type of this item, used by the plugin to identify it.
@@ -204,7 +211,7 @@ class TMGMTJob extends Entity {
   const STATE_ACCEPTED = 4;
 
   /**
-   * The translation job has been cancelled..
+   * The translation job has been cancelled.
    */
   const STATE_CANCELLED = 5;
 
@@ -236,11 +243,11 @@ class TMGMTJob extends Entity {
   public $target_language;
 
   /**
-   * Response message from the translator.
+   * Response log from the translator.
    *
-   * Can for example be used if the job has been rejected by the translator.
+   * An array of response messages keyed by the time of the occurence.
    *
-   * @var string
+   * @var array
    */
   public $response;
 
@@ -274,11 +281,10 @@ class TMGMTJob extends Entity {
     parent::__construct($values, 'tmgmt_job');
   }
 
-
   /**
    * Propagates the returned job item translations to the sources.
    */
-  function saveTranslation() {
+  function saveTranslations() {
     if ($this->state == self::STATE_ACCEPTED) {
       foreach ($this->getItems() as $item) {
         $item->getSourceController()->saveTranslation($item);
@@ -289,14 +295,15 @@ class TMGMTJob extends Entity {
   /**
    * Updates the state of a job to the state supplied by the response object.
    *
-   * @param TMGMTranslatorResponseInterface $response
+   * @param TMGMTTranslatorResponseInterface $response
    *   The response object.
    *
    * @return bool
    *   TRUE if the state of the job entity has been updated, FALSE otherwise.
    */
-  function setStateFromResponse(TMGMTranslatorResponseInterface $response) {
-    if (($state = $response->toJobstate()) !== NULL) {
+  function setStateFromResponse(TMGMTTranslatorResponseInterface $response) {
+    if (($state = $response->toJobState()) !== NULL) {
+      $this->response[REQUEST_TIME][] = $response->toString();
       return $this->setState($state);
     }
     return FALSE;
@@ -312,7 +319,12 @@ class TMGMTJob extends Entity {
    *   The updated item
    */
   public function addItem(TMGMTJobItem $item) {
-    return tmgmt_job_add_item($this, $item);
+    // Save the job if it hasn't yet been saved.
+    if (empty($this->tjid)) {
+      $this->save();
+    }
+    $item->tjid = $this->tjid;
+    $item->save();
   }
 
   /**
@@ -378,6 +390,31 @@ class TMGMTJob extends Entity {
         return TRUE;
     }
     return FALSE;
+  }
+
+  /**
+   * Request the translation of a job from the translator.
+   *
+   * @return
+   *   The updated job status.
+   */
+  function requestTranslation() {
+    $translator = $this->getTranslatorPlugin();
+    $response = $translator->requestTranslation($this);
+    debug($response);
+    $this->setStateFromResponse($response);
+    $this->save();
+    return $this->getState();
+  }
+
+  /**
+   * Request the translation of a job from the translator.
+   */
+  function cancelTranslation() {
+    $translator = $this->getTranslatorPlugin();
+    $response = $translator->cancelTranslation($this);
+    $this->setStateFromResponse($response);
+    return $this->getState() == TMGMTJob::STATE_CANCELLED;
   }
 
 }

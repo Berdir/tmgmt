@@ -1,9 +1,126 @@
 <?php
-
 /**
  * @file
  * Source plugin for the Translation Management system that handles nodes.
  */
+
+/**
+ * implementation of hook_menu().
+ * adds a tab to every node to show pending jobs and to create new jobs.
+ */
+function tmgmt_node_menu() {
+
+  $items = array();
+
+  $items['node/%node/create-job'] = array(
+    'title' => 'translation management',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tmgmt_node_translator_settings_form', 1),
+    'access callback' => '_translation_tab_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 20
+  );
+
+  return $items;
+}
+
+/**
+ * Form for the node translator settings form.
+ */
+function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
+
+  // Check for pending jobs.
+//  $jobs = tmgmt_get_jobs('node','node',$node->vid);
+  if(!empty($jobs)) {
+
+  }
+
+  $language_options = array();
+  // get all avalible languages from core translation module.
+  $avalible_languages = language_list();
+  // prepare language array with all avalible languages but the sourcelanguage.
+  foreach ($avalible_languages as $language) {
+    if($language->language != $node->language) {
+      $language_options[$language->language] = $language->name;
+    }
+  }
+
+  $form['source_language'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Source language'),
+    '#description' => t('The source language which has to be translated'),
+    '#default_value' => array($node->language),
+    '#attributes' => array('readonly' => 'readonly'),
+  );
+
+  $form['target_language'] = array(
+    '#type' => 'select',
+    '#title' => t('Target language'),
+    '#description' => t('The target language'),
+    '#default_value' => 'german',
+    '#options' => $language_options,
+  );
+
+  // TODO: Filter translater by supported languages
+  $translator_plugins = tmgmt_translator_plugin_info();
+  foreach ($translator_plugins as $translator_plugin) {
+    $services[$translator_plugin['plugin']] = $translator_plugin['label'];
+  }
+
+  $form['translation_service'] = array(
+    '#type' => 'select',
+    '#title' => t('translation type'),
+    '#options' => $services,
+  );
+
+  // translator description, depending on the selected translatorplugin.
+  foreach ($translator_plugins as $translator_plugin) {
+    $form['description'][$translator_plugin['plugin']] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array('select[name="translation_service"]' => array('value' => $translator_plugin['plugin'])),
+      ),
+    );
+    $form['description'][$translator_plugin['plugin']]['markup'] = array(
+      '#type' => 'item',
+      '#title' => t('about this service'),
+      '#markup' => $translator_plugin['description'],
+    );
+  }
+
+  $form['nid'] = array(
+    '#type' => 'hidden',
+    '#value' => $node->nid,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('create job'),
+    '#weight' => 50,
+  );
+  return $form;
+}
+
+/**
+ * node translator submit function.
+ * will create a job with the node as item.
+ */
+function tmgmt_node_translator_settings_form_submit($form, &$form_state) {
+
+  $values = $form_state['values'];
+
+  // create the job object.
+  $job = tmgmt_job_create($values['source_language'], $values['target_language']);
+
+  // add the selected translator.
+  $job->translator = $values['translation_service'];
+  $job->save();
+  // create a job item and add it to the job.
+  $item = tmgmt_job_item_create('node', 'node', $values['nid']);
+  $job->addItem($item);
+
+}
 
 /**
  * Implements hook_tmgmt_source_plugin_info().
@@ -20,12 +137,27 @@ function tmgmt_node_tmgmt_source_plugin_info() {
   );
 }
 
-function tmgmt_node_init(){
-  foreach (field_info_instances('node', 'article') as $field_name) {
-      //$info = field_info_field($field_name);
-      //field_info
-      dpm($field_name);
+/**
+ * Updates a node translation.
+ *
+ * @param object $node
+ *   The translated node object (the target).
+ *
+ * @param array $translated_data
+ *   An array with the structured translated data.
+ *   @see TMGMTNodeSourcePluginController::getData().
+ */
+function tmgmt_node_update_node_translation($node, $translated_data, $target_language) {
+  $index = 0;
+  foreach ($translated_data as $field_name => $values) {
+    $tdata = array();
+    foreach ($values as $_key => $_value) {
+      $tdata[$_key] = $_value['#text'];
+    }
+    $node->{$field_name}[$target_language][$index] = $tdata;
+    $index++;
   }
+  node_save($node);
 }
 
 /**
@@ -33,26 +165,36 @@ function tmgmt_node_init(){
  *
  * @todo: this hook should probably be placed elsewhere.
  */
-function text_tmgmt_source_translation_structure($field_name, $node, $info, $instance) {
+function text_tmgmt_source_translation_structure($field_name, $node, $field_info, $instance) {
   // @todo: there may be a problem if the user changes the order of the values
   // in the case of a field with multiple values...
   $field_lang = field_language('node', $node, $field_name);
   $structure = array();
   foreach ($node->{$field_name}[$field_lang] as $key => $value) {
-    $structure['value_'.$key] = array(
-      'title' => 'Value nr. ' . $key,
-      'value' => $value['value'],
+    $structure[$key]['value'] = array(
+      '#label' => 'Value nr. ' . $key,
+      '#text' => $value['value'],
+      '#translate' => TRUE,
     );
-  }
-  $structure['label'] = array(
-    'title' => 'Label',
-    'value' => $instance['label'],
-  );
-  if ($instance['description']) {
-    $structure['description'] = array(
-      'title' => 'Description',
-      'value' => $instance['description'],
+    if ($field_info['type'] == 'text_with_summary') {
+      $structure[$key]['summary'] = array(
+      '#label' => 'Summary nr. ' . $key,
+      '#text' => $value['summary'],
+      '#translate' => TRUE,
     );
+    }
   }
+  /* $structure['metadata']['label'] = array(
+    '#label' => 'Label',
+    '#text' => $instance['label'],
+    '#translate' => TRUE,
+    );
+    if ($instance['description']) {
+    $structure['metadata']['description'] = array(
+    '#label' => 'Description',
+    '#text' => $instance['description'],
+    '#translate' => TRUE,
+    );
+    } */
   return $structure;
 }

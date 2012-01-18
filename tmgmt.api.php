@@ -81,13 +81,10 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  *
  * @code
  * $job = tmgmt_job_create('en', $target_language);
- * // Job needs to be saved first.
- * // @todo: Fix this.
- * $job->save();
  *
  * for ($i = 1; $i < 3; $i++) {
  *   $item = tmgmt_job_item_create('test_source', 'test', $i);
- *   tmgmt_job_add_item($job, $item);
+ *   $job->addItem($item);
  * }
  * @endcode
  *
@@ -103,8 +100,7 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * $job->save();
  *
  * // Get the translator plugin and request a translation.
- * $translator = $job->getTranslatorPlugin();
- * $translator->requestTranslation($job);
+ * $job->requestTranslation();
  * @endcode
  *
  * The translation plugin will then request the text from the source plugin.
@@ -116,11 +112,9 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * // to save the translation.
  *
  * @code
- * // @todo: Avoid direct state assignements.
- * $job->state = TMGMTJob::STATE_ACCEPTED;
+ * $job->setState(TMGMTJob::STATE_ACCEPTED);
  * $job->save();
- * tmgmt_job_save_translations($job);
- * // @todo: Does this need a new state?
+ * $job->saveTranslations();
  * @endcode
  */
 

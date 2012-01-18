@@ -60,7 +60,14 @@ function tmgmt_forms() {
   foreach (tmgmt_translator_plugin_info() as $plugin => $info) {
     $info['tmgmt_' . $plugin . '_translator_settings_form'] = array(
       'callback' => 'tmgmt_translator_settings_form',
-      'wrapper' => 'tmgmt_translator_settings_form_defaults',
+      'wrapper_callback' => 'tmgmt_translator_settings_form_defaults',
+    );
+  }
+  foreach (tmgmt_source_plugin_info() as $plugin => $info) {
+    $info['tmgmt_' . $plugin . '_source_settings_form'] = array(
+      'callback' => 'tmgmt_source_settings_form',
+      // @todo Do we need a wrapper callback for source settings forms?
+      //'wrapper_callback' => '',
     );
   }
   return $info;
@@ -84,6 +91,33 @@ function tmgmt_job_load($tjid, $reset = FALSE) {
  */
 function tmgmt_job_load_multiple(array $tjids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('tmgmt_job', $tjids, $conditions, $reset);
+}
+
+/**
+ * Queries the database for all job entities
+ * @param $source_type
+ * @param $item_type
+ * @param $item_id
+ *
+ * @return
+ *   An array of job entities.
+ */
+function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
+  $query = new EntityFieldQuery();
+  $query->fields('tjid');
+  $query->entityCondition('entity_type', 'tmgmt_job_item');
+  $query->propertyCondition('source_type', $source_type);
+  $query->propertyCondition('item_type', $item_type);
+  $query->propertyCondition('item_id', $item_id);
+  $tjids = array();
+  foreach ($query->execute() as $item) {
+    $tjids[$item->tjid] = $item->tjid;
+  }
+  $jobs = array();
+  if (!empty($tjids)) {
+    $jobs = tmgmt_job_load_multiple($tjids);
+  }
+  return $jobs;
 }
 
 /**
@@ -142,27 +176,6 @@ function tmgmt_job_create($source_language, $target_language, array $values = ar
     'source_language' => $source_language,
     'target_language' => $target_language,
   )));
-}
-
-/**
- * Add an item to a translation job.
- *
- * @param $job
- *   The translation job.
- * @param $item
- *   The translation job item.
- *
- * @todo Probably it is better to return the return value of the ->save() method
- * here since we might want to check if the item was successfully added to
- * the job.
- *
- * @return TMGMTJobItem
- *   The updated job item.
- */
-function tmgmt_job_add_item(TMGMTJob $job, TMGMTJobItem $item) {
-  $item->tjid = $job->identifier();
-  $item->save();
-  return $item;
 }
 
 /**
@@ -324,7 +337,6 @@ function _tmgmt_plugin_controller($type, $plugin) {
  */
 function tmgmt_flatten_data($data, $prefix = NULL) {
   $flattened_data = array();
-
   // Each element is either a text (has #text property defined) or has children,
   // not both.
   if (!empty($data['#text'])) {
@@ -336,7 +348,6 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
       $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key);
     }
   }
-
   return $flattened_data;
 }
 
