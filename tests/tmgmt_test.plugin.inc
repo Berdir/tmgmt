@@ -91,9 +91,9 @@ class TMGMTTestTranslatorResponse implements TMGMTranslatorResponseInterface {
   }
 
   /**
-   * Implements TMGMTranslatorResponseInterface::toStatus().
+   * Implements TMGMTranslatorResponseInterface::tostate().
    */
-  public function toStatus() {
+  public function tostate() {
 
   }
 

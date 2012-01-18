@@ -204,6 +204,11 @@ class TMGMTJob extends Entity {
   const STATE_ACCEPTED = 4;
 
   /**
+   * The translation job has been cancelled..
+   */
+  const STATE_CANCELLED = 5;
+
+  /**
    * Translation job identifier.
    *
    * @var integer
@@ -282,17 +287,17 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Updates the status of a job to the status supplied by the response object.
+   * Updates the state of a job to the state supplied by the response object.
    *
    * @param TMGMTranslatorResponseInterface $response
    *   The response object.
    *
    * @return bool
-   *   TRUE if the status of the job entity has been updated, FALSE otherwise.
+   *   TRUE if the state of the job entity has been updated, FALSE otherwise.
    */
-  function setStatusFromResponse(TMGMTranslatorResponseInterface $response) {
-    if (($status = $response->toJobStatus()) !== NULL) {
-      return $this->setStatus($status);
+  function setStateFromResponse(TMGMTranslatorResponseInterface $response) {
+    if (($state = $response->toJobstate()) !== NULL) {
+      return $this->setState($state);
     }
     return FALSE;
   }
@@ -341,44 +346,38 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Returns the status of the job. Can be one of the job status constants.
+   * Returns the state of the job. Can be one of the job state constants.
    *
    * @return
-   *   The status of the job.
+   *   The state of the job.
    */
-  public function getStatus() {
-    if (isset($this->status)) {
-      return $this->status;
+  public function getState() {
+    if (isset($this->state)) {
+      return $this->state;
     }
     return NULL;
   }
 
   /**
-   * Updates the status of the job.
+   * Updates the state of the job.
    *
-   * @param $status
-   *   The new status of the job. Has to be one of TMGMTJob::STATE_NEW,
-   *   TMGMTJob::STATE_SUBMITTED, TMGMTJob::STATE_REJECTED,
-   *   TMGMTJob::STATE_REVIEW or TMGMTJob::STATE_ACCEPTED.
+   * @param $state
+   *   The new state of the job. Has to be one of the state constants defined
+   *   in the state
    */
-  public function setStatus($status) {
-    // Return FALSE if the status already matches the supplied $status.
-    if ($this->getStatus == $status) {
-      return FALSE;
-    }
-    // Fire certain actions specific to the status update and return TRUE if
-    // the status was updated. Return FALSE otherwise.
-    switch ($status) {
+  public function setState($state) {
+    // Return TRUE if the state could be set. Return FALSE otherwise.
+    switch ($state) {
       case self::STATE_ACCEPTED:
       case self::STATE_NEW:
       case self::STATE_REJECTED:
       case self::STATE_REVIEW:
       case self::STATE_SUBMITTED:
-        $this->status = $status;
+      case self::STATE_CANCELLED;
+        $this->state = $state;
         return TRUE;
-      default:
-        return FALSE;
     }
+    return FALSE;
   }
 
 }
