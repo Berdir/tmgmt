@@ -70,7 +70,7 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * and the type and id, which the source plugin then uses to identify it later
  * on.
  *
- * <?php
+ * <code>
  * $job = tmgmt_job_create('en', $target_language);
  * // Job needs to be saved first.
  * // @todo: Fix this.
@@ -80,17 +80,18 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  *   $item = tmgmt_job_item_create('test_source', 'test', $i);
  *   tmgmt_job_add_item($job, $item);
  * }
- * ?>
+ * </endcode>
  *
  * Once a job has been created, it can be assigned to a translator plugin, which
  * is the service that is going to do the translation.
  *
- * <?php
+ * <code>
  * $job->translator = 'test_translator';
  * // Translator specific settings.
  * $job->translator_context = array(
  *   'prioritoy' => 5,
  * );
+ * </endcode>
  *
  * // Get the translator plugin and request a translation.
  * $translator = $job->getTranslatorPlugin();
@@ -105,13 +106,13 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * The translation can now be reviewed, accepted and the source plugins be told
  * // to save the translation.
  *
- * <?php
+ * <code>
  * // @todo: Avoid direct state assignements.
  * $job->state = TMGMTJob::STATE_ACCEPTED;
  * $job->save();
  * tmgmt_job_save_translations($job);
  * // @todo: Does this need a new state?
- * ?>
+ * </endcode>
  */
 
 /**
