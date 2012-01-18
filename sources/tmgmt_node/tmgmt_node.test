@@ -20,7 +20,9 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_node', 'tmgmt_test'));
+    parent::setUp(array('tmgmt_node', 'tmgmt_test', 'translation'));
+
+    variable_set('language_content_type_page', TRANSLATION_ENABLED);
   }
 
   function testNodeSource() {
@@ -36,13 +38,13 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
 
     // Check the structure of the imported data.
     $this->assertEqual($item1->item_id, $node->vid, t('Node identifier is correctly saved'));
+    $data = $item1->getSourceData();
+    debug($data);
+    //$this->assertEqual($first, $second)
 
     $job->requestTranslation();
 
-    foreach ($job->getItems() as $item) {
-      debug($item);
-      $this->assertTrue(strpos($item->translated_data, $node->title) !== FALSE, t('Node title is correctly translated.'));
-
-    }
+    debug($item->translated_data);
+    $this->assertTrue(strpos($item->translated_data, $node->title) !== FALSE, t('Node title is correctly translated.'));
   }
 }
