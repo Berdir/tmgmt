@@ -82,7 +82,7 @@ class TMGMTJobItem extends Entity {
    * @var varchar
    */
   public $plugin;
-  
+
   /**
    * The identifier of the translation job.
    *
@@ -184,36 +184,41 @@ class TMGMTJobItem extends Entity {
 class TMGMTJob extends Entity {
 
   /**
-   * A new translation job, not yet submitted to a translator.
+   * A new translation job, can not yet be submitted.
    */
   const STATE_NEW = 0;
 
   /**
+   * A prepared translation job, not yet submitted to a translator.
+   */
+  const STATE_PREPARED = 1;
+
+  /**
    * A translation job that has been submitted to the translator.
    */
-  const STATE_SUBMITTED = 1;
+  const STATE_SUBMITTED = 2;
 
   /**
    * A translation job that has been rejected by the translator.
    *
    * The response contains information why the job was rejected.
    */
-  const STATE_REJECTED = 2;
+  const STATE_REJECTED = 3;
 
   /**
    * The translation job was translated and needs to be reviewed.
    */
-  const STATE_REVIEW = 3;
+  const STATE_REVIEW = 4;
 
   /**
    * The translation has been accepted and the job is finished.
    */
-  const STATE_ACCEPTED = 4;
+  const STATE_ACCEPTED = 5;
 
   /**
    * The translation job has been cancelled.
    */
-  const STATE_CANCELLED = 5;
+  const STATE_CANCELLED = 6;
 
   /**
    * Translation job identifier.
@@ -342,6 +347,7 @@ class TMGMTJob extends Entity {
     if (!empty($results['tmgmt_job_item'])) {
       return tmgmt_job_item_load_multiple(array_keys($results['tmgmt_job_item']));
     }
+    return array();
   }
 
   /**
@@ -382,6 +388,7 @@ class TMGMTJob extends Entity {
     switch ($state) {
       case self::STATE_ACCEPTED:
       case self::STATE_NEW:
+      case self::STATE_PREPARED:
       case self::STATE_REJECTED:
       case self::STATE_REVIEW:
       case self::STATE_SUBMITTED:
@@ -401,7 +408,6 @@ class TMGMTJob extends Entity {
   function requestTranslation() {
     $translator = $this->getTranslatorPlugin();
     $response = $translator->requestTranslation($this);
-    debug($response);
     $this->setStateFromResponse($response);
     $this->save();
     return $this->getState();

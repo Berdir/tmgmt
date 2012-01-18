@@ -8,6 +8,7 @@ function tmgmt_entity_info() {
     'label' => t('Translation Management Job Item'),
     'module' => 'tmgmt',
     'controller class' => 'TMGMTJobItemController',
+    'metadata controller class' => 'TMGMTJobItemMetadataController',
     'entity class' => 'TMGMTJobItem',
     'base table' => 'tmgmt_job_item',
     'uri callback' => 'entity_class_uri',
@@ -20,6 +21,7 @@ function tmgmt_entity_info() {
     'label' => t('Translation Management Job'),
     'module' => 'tmgmt',
     'controller class' => 'TMGMTJobController',
+    'metadata controller class' => 'TMGMTJobMetadataController',
     'entity class' => 'TMGMTJob',
     'base table' => 'tmgmt_job',
     'uri callback' => 'entity_class_uri',
@@ -32,6 +34,7 @@ function tmgmt_entity_info() {
     'label' => t('Translation Management Translator'),
     'module' => 'tmgmt',
     'controller class' => 'TMGMTTranslatorController',
+    'metadata controller class' => 'TMGMTTranslatorMetadataController',
     'entity class' => 'TMGMTTranslator',
     'base table' => 'tmgmt_translator',
     'exportable' => TRUE,
@@ -49,26 +52,6 @@ function tmgmt_entity_info() {
 }
 
 /**
- * Implements hook_entity_property_info().
- */
-function tmgmt_entity_property_info() {
-  $info = array();
-  $job_properties = &$info['tmgmt_job']['properties'];
-
-  $job_properties['tjid'] = array(
-    'label' => t("Job ID"),
-    'type' => 'integer',
-    'description' => t("The unique job ID."),
-  );
-  $job_properties['source_language'] = array(
-    'label' => t("Source language"),
-    'type' => 'text',
-    'description' => t("The machine readable name of the source pl"),
-  );
-  return $info;
-}
-
-/**
  * Implements hook_forms().
  */
 function tmgmt_forms() {
@@ -77,7 +60,14 @@ function tmgmt_forms() {
   foreach (tmgmt_translator_plugin_info() as $plugin => $info) {
     $info['tmgmt_' . $plugin . '_translator_settings_form'] = array(
       'callback' => 'tmgmt_translator_settings_form',
-      'wrapper' => 'tmgmt_translator_settings_form_defaults',
+      'wrapper_callback' => 'tmgmt_translator_settings_form_defaults',
+    );
+  }
+  foreach (tmgmt_source_plugin_info() as $plugin => $info) {
+    $info['tmgmt_' . $plugin . '_source_settings_form'] = array(
+      'callback' => 'tmgmt_source_settings_form',
+      // @todo Do we need a wrapper callback for source settings forms?
+      //'wrapper_callback' => '',
     );
   }
   return $info;
@@ -102,6 +92,30 @@ function tmgmt_job_load($tjid, $reset = FALSE) {
 function tmgmt_job_load_multiple(array $tjids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('tmgmt_job', $tjids, $conditions, $reset);
 }
+
+/**
+ * Queries the database for all job entities that host a job item that
+ * links to a specific source object.
+ *
+ * @param $source_type
+ *   The source type.
+ * @param $item_type
+ *   The source item type.
+ * @param $item_id
+ *   The source item id.
+ *
+ * @return
+ *   An array of job entities.
+ */
+function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
+  $query = db_select('tmgmt_job', 'tj')->fields('tj', array('tjid'));
+  $query->innerJoin('tmgmt_job_item', 'tji', 'tj.tjid = tji.tjid');
+  $jobs = $query->execute()->fetchCol();
+  if (!empty($jobs)) {
+    return tmgmt_job_load_multiple($jobs);
+  }
+  return array();
+} 
 
 /**
  * Loads a translation job item.
@@ -320,7 +334,6 @@ function _tmgmt_plugin_controller($type, $plugin) {
  */
 function tmgmt_flatten_data($data, $prefix = NULL) {
   $flattened_data = array();
-
   // Each element is either a text (has #text property defined) or has children,
   // not both.
   if (!empty($data['#text'])) {
@@ -332,7 +345,6 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
       $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key);
     }
   }
-
   return $flattened_data;
 }
 
