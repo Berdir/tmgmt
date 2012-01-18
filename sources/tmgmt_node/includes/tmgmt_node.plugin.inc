@@ -108,7 +108,6 @@ class TMGMTNodeSourceContentTranslation implements TMGMTNodeSourceTranslationInt
       // language, so load it.
       $tnode = node_load($translations[$job->target_language]->nid);
     }
-    drupal_set_message('here');
     // If the $tnode is still NULL, we have to create a new node.
     if (is_null($tnode)) {
       $tnode = clone $node;
