@@ -119,7 +119,7 @@ function tmgmt_job_load_multiple(array $tjids = array(), $conditions = array(), 
  * @return
  *   An array of job entities.
  */
-function tmgmt_job_load_multiple_from_source($source_type, $item_type, $item_id) {
+function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
   $query = new EntityFieldQuery();
   $query->fields('tjid');
   $query->entityCondition('entity_type', 'tmgmt_job_item');
