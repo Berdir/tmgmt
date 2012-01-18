@@ -291,7 +291,7 @@ class TMGMTJob extends Entity {
    *   TRUE if the status of the job entity has been updated, FALSE otherwise.
    */
   function setStatusFromResponse(TMGMTranslatorResponseInterface $response) {
-    if (($status = $response->toStatus()) !== NULL) {
+    if (($status = $response->toJobStatus()) !== NULL) {
       return $this->setStatus($status);
     }
     return FALSE;
@@ -341,9 +341,7 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Returns the status of the job. Can be one of TMGMTJob::STATE_NEW,
-   * TMGMTJob::STATE_SUBMITTED TMGMTJob::STATE_REJECTED, TMGMTJob::STATE_REVIEW,
-   * TMGMTJob::STATE_ACCEPTED or NULL if the status hasn't been defined yet.
+   * Returns the status of the job. Can be one of the job status constants.
    *
    * @return
    *   The status of the job.
