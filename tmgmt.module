@@ -8,6 +8,7 @@ function tmgmt_entity_info() {
     'label' => t('Translation Management Job Item'),
     'module' => 'tmgmt',
     'controller class' => 'TMGMTJobItemController',
+    'metadata controller class' => 'TMGMTJobItemMetadataController',
     'entity class' => 'TMGMTJobItem',
     'base table' => 'tmgmt_job_item',
     'uri callback' => 'entity_class_uri',
@@ -20,6 +21,7 @@ function tmgmt_entity_info() {
     'label' => t('Translation Management Job'),
     'module' => 'tmgmt',
     'controller class' => 'TMGMTJobController',
+    'metadata controller class' => 'TMGMTJobMetadataController',
     'entity class' => 'TMGMTJob',
     'base table' => 'tmgmt_job',
     'uri callback' => 'entity_class_uri',
@@ -32,6 +34,7 @@ function tmgmt_entity_info() {
     'label' => t('Translation Management Translator'),
     'module' => 'tmgmt',
     'controller class' => 'TMGMTTranslatorController',
+    'metadata controller class' => 'TMGMTTranslatorMetadataController',
     'entity class' => 'TMGMTTranslator',
     'base table' => 'tmgmt_translator',
     'exportable' => TRUE,
@@ -45,164 +48,6 @@ function tmgmt_entity_info() {
       'label' => 'label',
     ),
   );
-  return $info;
-}
-
-/**
- * Implements hook_entity_property_info().
- */
-function tmgmt_entity_property_info() {
-  $info = array();
-  $job_properties = &$info['tmgmt_job']['properties'];
-
-  $job_properties['tjid'] = array(
-    'label' => t("Job ID"),
-    'type' => 'integer',
-    'description' => t("The unique job ID."),
-    'schema field' => 'tjid',
-  );
-  $job_properties['source_language'] = array(
-    'label' => t("Source language"),
-    'type' => 'text',
-    'description' => t("The machine readable name of the source pl"),
-    'schema field' => 'source_language',
-  	//@todo 'options list' =>
-  );
-  $job_properties['target_language'] = array(
-    'label' => t("Target language"),
-    'type' => 'text',
-    'description' => t("The language the data should be translated into"),
-    'schema field' => 'target_language',
-    // @todo 'options list' =>
-  );
-  $job_properties['state'] = array(
-    'label' => t("Job state"),
-    'type' => 'integer',
-    'description' => t("Current state of a translation job"),
-    'schema field' => 'state',
-    // @todo 'options list' =>
-  );
-  $job_properties['created'] = array(
-    'label' => t("Create date"),
-    'type' => 'integer',
-    'description' => t("Creation timestamp of a job"),
-    'schema field' => 'created',
-  );
-  $job_properties['changed'] = array(
-    'label' => t("Change date"),
-    'type' => 'integer',
-    'description' => t("Changed timestamp date of a job"),
-    'schema field' => 'changed',
-  );
-  $job_properties['translator'] = array(
-    'label' => t("Translator"),
-    'type' => 'text',
-    'description' => t('Machine name of the translator'),
-    'schema field' => 'translator',
-  );
-  $job_properties['translator_context'] = array(
-    'label' => t("Translator"),
-    'type' => 'text',
-    'description' => t('Translator specific configuration and context for this job'),
-    'schema field' => 'translator_context',
-  );
-  $job_properties['translator_id'] = array(
-    'label' => t("Translator ID"),
-    'type' => 'text',
-    'description' => t('Remote identifier of this translation job'),
-    'schema field' => 'translator_id',
-  );
-  $job_properties['response'] = array(
-    'label' => t("Translator Response"),
-    'type' => 'text',
-    'description' => t('The response from the translator, e.g. when the order placement fails.'),
-    'schema field' => 'response',
-  );
-  
-  $job_item_properties = &$info['tmgmt_job_item']['properties'];
-  
-  $job_item_properties['tjiid'] = array(
-    'label' => t("Job item ID"),
-    'type' => 'integer',
-    'description' => t('The identifier of the translation job item'),
-    'schema field' => 'tjiid',
-  );
-  $job_item_properties['tjid'] = array(
-    'label' => t("Job item ID"),
-    'type' => 'integer',
-    'description' => t('The foreign key for the translation job record'),
-    'schema field' => 'tjid',
-  );
-  $job_item_properties['plugin'] = array(
-    'label' => t("Item plugin"),
-    'type' => 'text',
-    'description' => t('Indicates the plugin which provides this item'),
-    'schema field' => 'plugin',
-  );
-  $job_item_properties['item_type'] = array(
-    'label' => t("Item type"),
-    'type' => 'text',
-    'description' => t('The type of the item, e.g. the entity type'),
-    'schema field' => 'item_type',
-  );
-  $job_item_properties['item_id'] = array(
-    'label' => t("Item ID"),
-    'type' => 'integer',
-    'description' => t('The unique id (within the given item type) of the item'),
-    'schema field' => 'item_id',
-  );
-  $job_item_properties['translated_data'] = array(
-    'label' => t("Translated data"),
-    'type' => 'text',
-    'description' => t('Structured translated data'),
-    'schema field' => 'translated_data',
-  );
-
-  $translator_properties = &$info['tmgmt_translator']['properties']
-  
-  $translator_properties['tid'] = array(
-    'label' => t("Translator ID"),
-    'type' => 'integer',
-    'description' => t('The identifier of the translator'),
-    'schema field' => 'tid',
-  );
-  $translator_properties['name'] = array(
-    'label' => t("Name"),
-    'type' => 'text',
-    'description' => t('Machine name identifier of the translator'),
-    'schema field' => 'name',
-  );
-  $translator_properties['label'] = array(
-    'label' => t("Label"),
-    'type' => 'text',
-    'description' => t('Label of the translator'),
-    'schema field' => 'label',
-  );
-  $translator_properties['plugin'] = array(
-    'label' => t("Plugin"),
-    'type' => 'text',
-    'description' => t('Name of the translator service plugin'),
-    'schema field' => 'plugin',
-  );
-  $translator_properties['settings'] = array(
-    'label' => t("Settings"),
-    'type' => 'text',
-    'description' => t('Translator specific settings'),
-    'schema field' => 'settings',
-  );
-  $translator_properties['status'] = array(
-    'label' => t("Status"),
-    'type' => 'integer',
-    'description' => t('The exportable status of the entity.'),
-    'schema field' => 'status',
-  );
-  $translator_properties['module'] = array(
-    'label' => t("Module"),
-    'type' => 'text',
-    'description' => t('The name of the providing module if the entity has been defined in code.'),
-    'schema field' => 'module',
-  );
-  
   return $info;
 }
 
