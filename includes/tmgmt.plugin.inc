@@ -165,14 +165,6 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
 interface TMGMTranslatorResponseInterface {
 
   /**
-   * Returns the original response from the translation provider.
-   *
-   * @return
-   *   The original response from the translation provider.
-   */
-  function getResponse();
-
-  /**
    * Translates the response of the translation provider into a message that
    * can be displayed to the user.
    *
@@ -191,6 +183,47 @@ interface TMGMTranslatorResponseInterface {
    * @return
    *   A valid status for a TranslationManagementJob entity or NULL.
    */
-  function toStatus();
+  function toJobStatus();
 
 }
+
+/**
+ * Interface for handling responses communication with translation providers.
+ *
+ * @ingroup translator
+ */
+class TMGMTranslatorResponse implements TMGMTranslatorResponseInterface {
+  protected $code;
+  protected $string;
+  
+  public __construct($code, $string) {
+    $this->code = $code;
+    $this->string = $string;
+  }
+
+  /**
+   * Translates the response of the translation provider into a message that
+   * can be displayed to the user.
+   *
+   * @return string
+   *   A message that describes the response from the translation provider.
+   */
+  function toString() {
+    return $this->string;
+  }
+
+  /**
+   * Returns a valid Translation Management job status depending on the response
+   * of the translator plugin. Has to be one of TMGMTJob::STATE_NEW,
+   * TMGMTJob::STATE_SUBMITTED TMGMTJob::STATE_REJECTED, TMGMTJob::STATE_REVIEW,
+   * TMGMTJob::STATE_ACCEPTED or NULL if the response of the translation
+   * provider could not be mapped to a valid job status.
+   *
+   * @return
+   *   A valid status for a TranslationManagementJob entity or NULL.
+   */
+  function toJobStatus() {
+    return $this->code;
+  }
+}
+
