@@ -5,38 +5,6 @@
  * Source plugin for the Translation Management system that handles nodes.
  */
 
-function tmgmt_node_menu() {
-  $items['node/%node/tgmt_node_translate'] = array(
-    'type' => MENU_LOCAL_TASK,
-    'title' => 'Translate node',
-    'page callback' => 'tmgmt_node_translate',
-    'page arguments' => array(1),
-    'access callback' => TRUE,
-  );
-  return $items;
-}
-
-function tmgmt_node_translate($node) {
-  $target_language = 'de';
-  if ($node->language == 'de') {
-    $target_language = 'en';
-  }
-  $source = new TMGMTNodeSourcePluginController('node');
-  $job = tmgmt_job_create($node->language, $target_language);
-  // Job needs to be saved first.
-  // @todo: Fix this.
-  $job->save();
-  
-  $job_item = tmgmt_job_item_create('node', 'node', $node->nid);
-  $job_item->translated_data = tmgmt_flatten_data($job_item->getSourceData());
-  $job->addItem($job_item);
-  //$job_item->tjid = $job->tjid;
-  
-  $source->saveTranslation($job_item);
-  //drupal_set_message('Translated node: ' .$tnode->nid);
-  return array('#markup' => 'test');
-}
-
 /**
  * Implements hook_tmgmt_source_plugin_info().
  *
@@ -65,14 +33,12 @@ function tmgmt_node_tmgmt_source_plugin_info() {
 function tmgmt_node_update_node_translation($node, $translated_data, $target_language) {
   $index = 0;
   foreach ($translated_data as $field_name => $values) {
-    foreach ($values['values'] as $value) {
-      $tdata = array();
-      foreach ($value as $_key => $_value) {
-        $tdata[$_key] = $_value['#text'];
-      }
-      $node->{$field_name}[$target_language][$index] = $tdata;
-      $index++;
+    $tdata = array();
+    foreach ($values as $_key => $_value) {
+      $tdata[$_key] = $_value['#text'];
     }
+    $node->{$field_name}[$target_language][$index] = $tdata;
+    $index++;
   }
   node_save($node);
 }
@@ -88,13 +54,13 @@ function text_tmgmt_source_translation_structure($field_name, $node, $field_info
   $field_lang = field_language('node', $node, $field_name);
   $structure = array();
   foreach ($node->{$field_name}[$field_lang] as $key => $value) {
-    $structure['values'][$key]['value'] = array(
+    $structure[$key]['value'] = array(
       '#label' => 'Value nr. ' . $key,
       '#text' => $value['value'],
       '#translate' => TRUE,
     );
     if ($field_info['type'] == 'text_with_summary') {
-      $structure['values'][$key]['summary'] = array(
+      $structure[$key]['summary'] = array(
       '#label' => 'Summary nr. ' . $key,
       '#text' => $value['summary'],
       '#translate' => TRUE,
