@@ -5,6 +5,9 @@
  * Rules integration.
  */
 
+/**
+ * Implements hook_rules_action_info().
+ */
 function tmgmt_rules_action_info() {
   return array(
     'tmgmt_rules_job_request_translation' => array(
@@ -41,9 +44,8 @@ function tmgmt_rules_job_request_translation(TMGMTJob $job) {
   }
 }
 
-
 /**
- * Rules callback to request a translation of a job.
+ * Rules callback to accept a translation of a job.
  */
 function tmgmt_rules_job_accept_translation(TMGMTJob $job) {
   if ($job->getState() == TMGMTJob::STATE_REVIEW) {
