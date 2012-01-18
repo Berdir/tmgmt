@@ -55,7 +55,7 @@ function _tmgmt_override_property_description($info, $entity_type) {
   $schema = tmgmt_schema();
   $fields = $schema[$entity_info['base table']]['fields'];
   $properties = &$info[$entity_type]['properties'];
-  foreach ($properties as $name => $info) {
+  foreach ($properties as $name => $property_info) {
     if (isset($fields[$name]['description'])) {
       $properties[$name]['description'] = $fields[$name]['description'];
     }
