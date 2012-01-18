@@ -58,7 +58,7 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
   );
   $form['source_language'] = array(
     '#type' => 'hidden',
-    '#value' => array($node->language),
+    '#value' => $node->language,
   );
 
   $form['target_language'] = array(
