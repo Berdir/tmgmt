@@ -82,6 +82,13 @@ class TMGMTJobItem extends Entity {
    * @var varchar
    */
   public $plugin;
+  
+  /**
+   * The identifier of the translation job.
+   *
+   * @var int
+   */
+  public $tjid;
 
   /**
    * Type of this item, used by the plugin to identify it.

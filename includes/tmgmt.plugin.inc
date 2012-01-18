@@ -194,7 +194,7 @@ class TMGMTranslatorResponse implements TMGMTranslatorResponseInterface {
   protected $code;
   protected $string;
   
-  public __construct($code, $string) {
+  public function __construct($code, $string) {
     $this->code = $code;
     $this->string = $string;
   }
