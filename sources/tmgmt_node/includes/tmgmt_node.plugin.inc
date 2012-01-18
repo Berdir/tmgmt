@@ -20,7 +20,6 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
    * A real example could be:
    * array(
    *   'field_text_example' => array(
-   *      'values' => array(
    *        0 => array(
    *          'value' => array(
    *            '#text' => "Some example text",
@@ -37,7 +36,6 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
    *            '#label' => "Value nr. 1",
    *          )
    *        ),
-   *      )
    *   )
    * )
    */
