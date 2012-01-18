@@ -43,6 +43,9 @@ function tmgmt_test_trigger_job($target_language = 'de') {
   $job->translator = 'test_translator';
   $job->translator_context = array();
 
+  $job->setState(TMGMTJob::STATE_PREPARED);
+  $job->save();
+
   return $job;
 }
 

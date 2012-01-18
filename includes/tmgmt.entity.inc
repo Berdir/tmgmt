@@ -347,6 +347,7 @@ class TMGMTJob extends Entity {
     if (!empty($results['tmgmt_job_item'])) {
       return tmgmt_job_item_load_multiple(array_keys($results['tmgmt_job_item']));
     }
+    return array();
   }
 
   /**
@@ -387,6 +388,7 @@ class TMGMTJob extends Entity {
     switch ($state) {
       case self::STATE_ACCEPTED:
       case self::STATE_NEW:
+      case self::STATE_PREPARED:
       case self::STATE_REJECTED:
       case self::STATE_REVIEW:
       case self::STATE_SUBMITTED:
@@ -406,7 +408,6 @@ class TMGMTJob extends Entity {
   function requestTranslation() {
     $translator = $this->getTranslatorPlugin();
     $response = $translator->requestTranslation($this);
-    debug($response);
     $this->setStateFromResponse($response);
     $this->save();
     return $this->getState();

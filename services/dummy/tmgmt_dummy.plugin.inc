@@ -23,7 +23,6 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
       $data = $item->getSourceData();
       $item->addTranslatedData($data);
     }
-    $job->save();
     return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Dummy translation completed.'));
   }
 
