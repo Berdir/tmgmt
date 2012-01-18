@@ -287,9 +287,27 @@ class TMGMTJob extends Entity {
   }
 
   /**
+   * Static method to retrieve a labeled list of all available states.
+   *
+   * @return array
+   *   A list of all available states.
+   */
+  static function getStatesList() {
+    return array(
+      self::STATE_NEW => t('New'),
+      self::STATE_PREPARED => t('Prepared'),
+      self::STATE_SUBMITTED => t('Submitted'),
+      self::STATE_REJECTED => t('Rejected'),
+      self::STATE_REVIEW => t('Needs review'),
+      self::STATE_ACCEPTED => t('Accepted'),
+      self::STATE_CANCELLED => t('Cancelled'),
+    );
+  }
+
+  /**
    * Propagates the returned job item translations to the sources.
    */
-  function saveTranslations() {
+  public function saveTranslations() {
     if ($this->state == self::STATE_ACCEPTED) {
       foreach ($this->getItems() as $item) {
         $item->getSourceController()->saveTranslation($item);
@@ -306,7 +324,7 @@ class TMGMTJob extends Entity {
    * @return bool
    *   TRUE if the state of the job entity has been updated, FALSE otherwise.
    */
-  function setStateFromResponse(TMGMTTranslatorResponseInterface $response) {
+  public function setStateFromResponse(TMGMTTranslatorResponseInterface $response) {
     if (($state = $response->toJobState()) !== NULL) {
       $this->response[REQUEST_TIME][] = $response->toString();
       return $this->setState($state);
@@ -403,7 +421,7 @@ class TMGMTJob extends Entity {
    * @return
    *   The updated job status.
    */
-  function requestTranslation() {
+  public function requestTranslation() {
     $translator = $this->getTranslatorPlugin();
     $response = $translator->requestTranslation($this);
     debug($response);
@@ -415,7 +433,7 @@ class TMGMTJob extends Entity {
   /**
    * Request the translation of a job from the translator.
    */
-  function cancelTranslation() {
+  public function cancelTranslation() {
     $translator = $this->getTranslatorPlugin();
     $response = $translator->cancelTranslation($this);
     $this->setStateFromResponse($response);
