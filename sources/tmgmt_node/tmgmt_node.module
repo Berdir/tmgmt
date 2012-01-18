@@ -148,14 +148,16 @@ function tmgmt_node_tmgmt_source_plugin_info() {
  *   @see TMGMTNodeSourcePluginController::getData().
  */
 function tmgmt_node_update_node_translation($node, $translated_data, $target_language) {
-  $index = 0;
   foreach ($translated_data as $field_name => $values) {
-    $tdata = array();
-    foreach ($values as $_key => $_value) {
-      $tdata[$_key] = $_value['#text'];
+    $index = 0;
+    foreach ($values as $key => $value) {
+      $tdata = array();
+      foreach ($value as $input_name => $input_value) {
+        $tdata[$input_name] = $input_value['#text'];
+      }
+      $node->{$field_name}[$target_language][$index] = $tdata;
+      $index++;
     }
-    $node->{$field_name}[$target_language][$index] = $tdata;
-    $index++;
   }
   node_save($node);
 }
@@ -176,7 +178,7 @@ function text_tmgmt_source_translation_structure($field_name, $node, $field_info
       '#text' => $value['value'],
       '#translate' => TRUE,
     );
-    if ($field_info['type'] == 'text_with_summary') {
+    if ($field_info['type'] == 'text_with_summary' && !empty($value['summary'])) {
       $structure[$key]['summary'] = array(
       '#label' => 'Summary nr. ' . $key,
       '#text' => $value['summary'],
