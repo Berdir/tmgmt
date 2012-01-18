@@ -115,7 +115,7 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
     return tmgmt_job_load_multiple($jobs);
   }
   return array();
-} 
+}
 
 /**
  * Loads a translation job item.
@@ -230,6 +230,20 @@ function tmgmt_translator_plugin_controller($plugin) {
   return _tmgmt_plugin_controller('translator', $plugin);
 }
 
+/**
+ * Returns an array of all available translator plugins with the labels as
+ * values and the machine-readable name as the key.
+ *
+ * @return array
+ *   An array of the labels of all available plugins.
+ */
+function tmgmt_translator_plugin_labels() {
+  $list = array();
+  foreach (tmgmt_translator_plugin_info() as $key => $info) {
+    $list[$key] = $info['label'];
+  }
+  return $list;
+}
 /**
  * @} End of "addtogroup translator".
  */

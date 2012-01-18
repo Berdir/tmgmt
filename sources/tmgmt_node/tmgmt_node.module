@@ -58,7 +58,7 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
   );
   $form['source_language'] = array(
     '#type' => 'hidden',
-    '#value' => array($node->language),
+    '#value' => $node->language,
   );
 
   $form['target_language'] = array(
@@ -70,15 +70,12 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
   );
 
   // TODO: Filter translater by supported languages
-  $translator_plugins = tmgmt_translator_plugin_info();
-  foreach ($translator_plugins as $translator_plugin) {
-    $services[$translator_plugin['plugin']] = $translator_plugin['label'];
-  }
+  $translator_plugins = tmgmt_translator_plugin_labels();
 
   $form['translation_service'] = array(
     '#type' => 'select',
     '#title' => t('Translation type'),
-    '#options' => $services,
+    '#options' => $translator_plugins,
     '#ajax' => array(
       'callback' => 'tmgmt_node_get_translator_options',
       'wrapper' => 'tmgmt-translator-options',
@@ -95,22 +92,8 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
   $form['options']['description'] = array(
     '#type' => 'item',
     '#title' => t('About this service'),
-    '#markup' => $translator_plugin['description'],
+    '#markup' => reset($translator_plugins),
   );
-  // translator description, depending on the selected translatorplugin.
-//  foreach ($translator_plugins as $translator_plugin) {
-//    $form['description'][$translator_plugin['plugin']] = array(
-//      '#type' => 'container',
-//      '#states' => array(
-//        'visible' => array('select[name="translation_service"]' => array('value' => $translator_plugin['plugin'])),
-//      ),
-//    );
-//    $form['description'][$translator_plugin['plugin']]['markup'] = array(
-//      '#type' => 'item',
-//      '#title' => t('About this service'),
-//      '#markup' => $translator_plugin['description'],
-//    );
-//  }
 
   $form['nid'] = array(
     '#type' => 'hidden',
@@ -123,6 +106,21 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
     '#weight' => 50,
   );
   return $form;
+}
+
+/**
+ * ajax callbackfunction to fetch the options provided by a translator.
+ */
+function tmgmt_node_get_translator_options($form, &$form_state) {
+  $active_translator = $form_state['values']['translation_service'];
+  $translator = tmgmt_translator_plugin_info($active_translator);
+
+  $form['options']['description'] = array(
+    '#type' => 'item',
+    '#title' => t('About this service'),
+    '#markup' => t($translator['description']),
+  );
+  return $form['options'];
 }
 
 /**
@@ -209,7 +207,7 @@ function text_tmgmt_source_translation_structure($field_name, $node, $field_info
   // in the case of a field with multiple values...
   $field_lang = field_language('node', $node, $field_name);
   $structure = array();
-  if (!empty ($node->{$field_name})) {
+  if (!empty($node->{$field_name})) {
     foreach ($node->{$field_name}[$field_lang] as $key => $value) {
       $structure[$key]['value'] = array(
         '#label' => t('!field_name: Value nr. !count', array('!field_name' => $instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
@@ -218,10 +216,10 @@ function text_tmgmt_source_translation_structure($field_name, $node, $field_info
       );
       if ($field_info['type'] == 'text_with_summary' && !empty($value['summary'])) {
         $structure[$key]['summary'] = array(
-        '#label' => t('!field_name: Summary nr. !count',array('!field_name' => $instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
-        '#text' => $value['summary'],
-        '#translate' => TRUE,
-      );
+          '#label' => t('!field_name: Summary nr. !count',array('!field_name' => $instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
+          '#text' => $value['summary'],
+          '#translate' => TRUE
+        );
       }
     }
   }

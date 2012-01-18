@@ -9,7 +9,6 @@
  * Implements hook_schema().
  */
 function tmgmt_schema() {
-
   $schema['tmgmt_job'] = array(
     'description' => 'A translation job represents a translation order that can be assigned to a translator.',
     'fields' => array(
