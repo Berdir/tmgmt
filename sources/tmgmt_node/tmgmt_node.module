@@ -70,7 +70,7 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
   );
 
   // TODO: Filter translater by supported languages
-  $translator_plugins = tmgmt_translator_labeled_list();
+  $translator_plugins = tmgmt_translator_plugin_labels();
 
   $form['translation_service'] = array(
     '#type' => 'select',
