@@ -115,12 +115,7 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
     return tmgmt_job_load_multiple($jobs);
   }
   return array();
-}
-
-function tmgmt_init() {
-  dpm(tmgmt_job_load_multiple_by_source('test', 'test', 1));
-}
-
+} 
 
 /**
  * Loads a translation job item.
