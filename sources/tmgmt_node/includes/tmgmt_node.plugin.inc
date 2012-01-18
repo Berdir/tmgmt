@@ -85,5 +85,4 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
       tmgmt_node_update_node_translation($tnode, $job_item->translated_data, $job->target_language);
     }
   }
-
 }

@@ -5,22 +5,22 @@
  * Provides Microsoft Translator plugin controller.
  */
 
-class TMGMTMicrosoftTranslator extends TMGMTDefaultTranslatorPluginController {
+class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * Bing API ID. - @todo this is maybe also in configuration, check?
-   * 
-   * @var string 
+   *
+   * @var string
    */
   protected $bingAPIID = 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369';
-  
-  // @todo - or maybe this is configurable optin - chech how we deal with 
+
+  // @todo - or maybe this is configurable optin - chech how we deal with
   // configurations.
   protected $translatorURL = 'http://api.microsofttranslator.com/v2/Http.svc';
-  
+
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
-   * 
+   *
    * We will check are source and target language supported.
    */
   public function canTranslate(TMGMTJob $job) {
@@ -35,39 +35,43 @@ class TMGMTMicrosoftTranslator extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
-   * 
+   *
    * Here we will acutally query source and get translations.
    */
   public function requestTranslation(TMGMTJob $job) {
     // @todo - who is handling cron||batch here, we or some other controler?
-    
+
     $translate_url = $this->translatorURL . '/Translate';
-    
+
     foreach ($job->getItems() as $item) {
+      debug($item);
       /* @var $item TMGMTJobItem */
       $data = tmgmt_flatten_data($item->getSourceData());
+      dpm($data);
       foreach ($data as $key => $value) {
         if ($value['#translate'] == FALSE) {
           continue;
         }
-        
+
         $query_data = drupal_http_build_query(array(
           'appId'       => $this->bingAPIID,
           'from'        => $job->source_language,
           'to'          => $job->target_language,
-          'contentType' => 'text/plain', // @todo - we probably need to have this 
+          'contentType' => 'text/plain', // @todo - we probably need to have this
                                         // changed based on context, because we
                                         // need to support html also.
-          'text'        => $value['#text'], // @todo - if length is more then 
+          'text'        => $value['#text'], // @todo - if length is more then
                                           // 10000 chars we need to split request.
         ));
 
         $options = array(
           'method' => 'POST',
           'data' => $query_data,
+          'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
         );
         $result = drupal_http_request($translate_url, $options);
 
+        debug($result);
         switch ($result->code) {
           case 200:
             // Lets leave DOMDocument for now because this service enable us
@@ -77,6 +81,7 @@ class TMGMTMicrosoftTranslator extends TMGMTDefaultTranslatorPluginController {
             $dom->loadXML($res->data);
             $string_items = $dom->getElementsByTagName('string');
             $data[$key]['#text'] = $string_items->item(0)->nodeValue;
+            debug($string_items->item(0)->nodeValue);
             break;
           case 400:
             return new TMGMTTranslatorResponse(NULL, $result->data);
@@ -88,23 +93,23 @@ class TMGMTMicrosoftTranslator extends TMGMTDefaultTranslatorPluginController {
             break;
         }
       }
-      
+
       $item->addTranslatedData(tmgmt_unflatten_data($data));
     }
-    
+
     $job->save();
-    
+
     return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Microsoft Translator translation completed.'));
-  } 
+  }
 
   /**
    * Returns array of service supported languages.
-   * 
+   *
    * @return array
    */
   public function getSupportedLanguages() {
     $languages = &drupal_static(__FUNCTION__);
-    
+
     if (!isset($languages)) {
       $languages = array();
 
@@ -118,8 +123,8 @@ class TMGMTMicrosoftTranslator extends TMGMTDefaultTranslatorPluginController {
         }
       }
     }
-    
+
     return $languages;
   }
-  
+
 }

@@ -7,4 +7,5 @@ dependencies[] = translation
 files[] = includes/tmgmt.controller.inc
 files[] = includes/tmgmt.entity.inc
 files[] = includes/tmgmt.plugin.inc
+files[] = tmgmt.info.inc
 files[] = tmgmt.test
