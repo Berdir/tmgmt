@@ -77,7 +77,6 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
           'headers' => array('Content-Type' => 'text/plain')
         );
         $result = drupal_http_request($translate_url. '?' . $query_data, $options);
-        debug($result);
         switch ($result->code) {
           case 200:
             // Lets leave DOMDocument for now because this service enable us
