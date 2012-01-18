@@ -139,10 +139,10 @@ function tmgmt_node_tmgmt_source_plugin_info() {
 
 /**
  * Updates a node translation.
- * 
+ *
  * @param object $node
  *   The translated node object (the target).
- * 
+ *
  * @param array $translated_data
  *   An array with the structured translated data.
  *   @see TMGMTNodeSourcePluginController::getData().
