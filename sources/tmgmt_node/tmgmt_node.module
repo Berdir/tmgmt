@@ -1,9 +1,101 @@
 <?php
-
 /**
  * @file
  * Source plugin for the Translation Management system that handles nodes.
  */
+
+/**
+ * implementation of hook_menu().
+ */
+function tmgmt_node_menu() {
+
+  $items = array();
+
+  $items['node/%node/create-job'] = array(
+    'title' => 'translation management',
+    'page callback' => 'tmgmt_node_translator_settings',
+//    'page arguments' => array('tmgmt_node_translator_settings'),
+    'access callback' => '_translation_tab_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 20
+  );
+
+  return $items;
+}
+
+function tmgmt_node_translator_settings() {
+
+//  $job = tmgmt_job_item_load($item_id, $item_type, $plugin);
+//  $status = $job->getStatus();
+  $status = 'foo';
+  switch ($status) {
+    case 'in arbeit':
+      return 'in arbeit';
+    default:
+      return drupal_get_form('tmgmt_node_translator_settings_form');
+  }
+}
+
+function tmgmt_node_translator_settings_form($form, &$form_state) {
+  $form = array();
+
+
+  $language_options = array();
+  $avalible_languages = language_list();
+  foreach ($avalible_languages as $language) {
+    $language_options[$language->language] = $language->name;
+  }
+
+  $node = node_load(arg(1));
+  $node_language = $language_options[$node->language];
+
+  unset($language_options[$node->language]);
+
+  $form['source_language'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Source language'),
+    '#description' => t('The source language which has to be translated'),
+    '#default_value' => array($node->language),
+    '#attributes' => array('readonly' => 'readonly'),
+  );
+
+  $form['target_language'] = array(
+    '#type' => 'select',
+    '#title' => t('Target language'),
+    '#description' => t('The target language'),
+    '#default_value' => 'german',
+    '#options' => $language_options,
+  );
+  $form['nid'] = array(
+    '#type' => 'hidden',
+    '#value' => $node->nid,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('create job'),
+    '#weight' => 5,
+  );
+  return $form;
+}
+
+function tmgmt_node_translator_settings_form_submit($form, &$form_state) {
+
+  $values = $form_state['values'];
+  $job = tmgmt_job_create($values['source_language'], $values['target_language']);
+  dsm($job);
+  $item = tmgmt_job_item_create('node', 'node_translation', $values['nid']);
+  $job->addItem($item);
+  dsm($job->getItems());
+  /*
+    // $item->save();
+    tmgmt_job_add_item($job, $item);
+    $job->save();
+    dsm($job);
+    dsm($item);
+   * */
+}
 
 /**
  * Implements hook_tmgmt_source_plugin_info().
