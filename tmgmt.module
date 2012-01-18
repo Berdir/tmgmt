@@ -126,8 +126,9 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
   $query->propertyCondition('source_type', $source_type);
   $query->propertyCondition('item_type', $item_type);
   $query->propertyCondition('item_id', $item_id);
+  $results = $query->execute();
   $tjids = array();
-  foreach ($query->execute() as $item) {
+  foreach ($results['tmgmt_job_item'] as $item) {
     $tjids[$item->tjid] = $item->tjid;
   }
   $jobs = array();
