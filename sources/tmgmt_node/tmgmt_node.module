@@ -13,7 +13,7 @@ function tmgmt_node_menu() {
   $items = array();
 
   $items['node/%node/create-job'] = array(
-    'title' => 'translation management',
+    'title' => t('Translation management'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tmgmt_node_translator_settings_form', 1),
     'access callback' => '_translation_tab_access',
@@ -33,8 +33,8 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
 
   // Check for pending jobs.
   $jobs = tmgmt_job_load_multiple_by_source('node', 'node', $node->vid);
-  if(!empty($jobs)) {
-    foreach($jobs as $job) {
+  if (!empty($jobs)) {
+    foreach ($jobs as $job) {
 //      dsm($job);
     }
   }
@@ -44,17 +44,21 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
   $avalible_languages = language_list();
   // prepare language array with all avalible languages but the sourcelanguage.
   foreach ($avalible_languages as $language) {
-    if($language->language != $node->language) {
+    if ($language->language != $node->language) {
       $language_options[$language->language] = $language->name;
+    } else {
+      $node_language = $language->name;
     }
   }
 
-  $form['source_language'] = array(
-    '#type' => 'textfield',
+  $form['source_language_display'] = array(
+    '#type' => 'item',
     '#title' => t('Source language'),
-    '#description' => t('The source language which has to be translated'),
-    '#default_value' => array($node->language),
-    '#attributes' => array('readonly' => 'readonly'),
+    '#markup' => $node_language,
+  );
+  $form['source_language'] = array(
+    '#type' => 'hidden',
+    '#value' => array($node->language),
   );
 
   $form['target_language'] = array(
@@ -73,24 +77,40 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
 
   $form['translation_service'] = array(
     '#type' => 'select',
-    '#title' => t('translation type'),
+    '#title' => t('Translation type'),
     '#options' => $services,
+    '#ajax' => array(
+      'callback' => 'tmgmt_node_get_translator_options',
+      'wrapper' => 'tmgmt-translator-options',
+      'method' => 'replace',
+    ),
   );
 
+  $form['options'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div id="tmgmt-translator-options">',
+    '#suffix' => '</div>',
+  );
+
+  $form['options']['description'] = array(
+    '#type' => 'item',
+    '#title' => t('About this service'),
+    '#markup' => $translator_plugin['description'],
+  );
   // translator description, depending on the selected translatorplugin.
-  foreach ($translator_plugins as $translator_plugin) {
-    $form['description'][$translator_plugin['plugin']] = array(
-      '#type' => 'container',
-      '#states' => array(
-        'visible' => array('select[name="translation_service"]' => array('value' => $translator_plugin['plugin'])),
-      ),
-    );
-    $form['description'][$translator_plugin['plugin']]['markup'] = array(
-      '#type' => 'item',
-      '#title' => t('about this service'),
-      '#markup' => $translator_plugin['description'],
-    );
-  }
+//  foreach ($translator_plugins as $translator_plugin) {
+//    $form['description'][$translator_plugin['plugin']] = array(
+//      '#type' => 'container',
+//      '#states' => array(
+//        'visible' => array('select[name="translation_service"]' => array('value' => $translator_plugin['plugin'])),
+//      ),
+//    );
+//    $form['description'][$translator_plugin['plugin']]['markup'] = array(
+//      '#type' => 'item',
+//      '#title' => t('About this service'),
+//      '#markup' => $translator_plugin['description'],
+//    );
+//  }
 
   $form['nid'] = array(
     '#type' => 'hidden',
