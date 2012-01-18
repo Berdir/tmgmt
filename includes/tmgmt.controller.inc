@@ -43,6 +43,4 @@ class TMGMTJobController extends EntityAPIController {
 
     return parent::save($entity, $transaction);
   }
-
 }
-

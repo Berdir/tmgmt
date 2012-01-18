@@ -43,7 +43,7 @@ class TMGMTTranslatorMetadataController extends EntityDefaultMetadataController 
 }
 
 /**
- * @param array $properties
+ * @param array $info
  *
  * @return array
  *   The altered properties array.

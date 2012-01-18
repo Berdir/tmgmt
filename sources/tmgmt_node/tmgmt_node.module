@@ -13,7 +13,7 @@ function tmgmt_node_menu() {
   $items = array();
 
   $items['node/%node/create-job'] = array(
-    'title' => 'translation management',
+    'title' => t('Translation management'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tmgmt_node_translator_settings_form', 1),
     'access callback' => '_translation_tab_access',
@@ -30,10 +30,13 @@ function tmgmt_node_menu() {
  */
 function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
 
-  // Check for pending jobs.
-//  $jobs = tmgmt_get_jobs('node','node',$node->vid);
-  if(!empty($jobs)) {
 
+  // Check for pending jobs.
+  $jobs = tmgmt_job_load_multiple_by_source('node', 'node', $node->vid);
+  if (!empty($jobs)) {
+    foreach ($jobs as $job) {
+//      dsm($job);
+    }
   }
 
   $language_options = array();
@@ -41,17 +44,21 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
   $avalible_languages = language_list();
   // prepare language array with all avalible languages but the sourcelanguage.
   foreach ($avalible_languages as $language) {
-    if($language->language != $node->language) {
+    if ($language->language != $node->language) {
       $language_options[$language->language] = $language->name;
+    } else {
+      $node_language = $language->name;
     }
   }
 
-  $form['source_language'] = array(
-    '#type' => 'textfield',
+  $form['source_language_display'] = array(
+    '#type' => 'item',
     '#title' => t('Source language'),
-    '#description' => t('The source language which has to be translated'),
-    '#default_value' => array($node->language),
-    '#attributes' => array('readonly' => 'readonly'),
+    '#markup' => $node_language,
+  );
+  $form['source_language'] = array(
+    '#type' => 'hidden',
+    '#value' => array($node->language),
   );
 
   $form['target_language'] = array(
@@ -70,24 +77,40 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
 
   $form['translation_service'] = array(
     '#type' => 'select',
-    '#title' => t('translation type'),
+    '#title' => t('Translation type'),
     '#options' => $services,
+    '#ajax' => array(
+      'callback' => 'tmgmt_node_get_translator_options',
+      'wrapper' => 'tmgmt-translator-options',
+      'method' => 'replace',
+    ),
   );
 
+  $form['options'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div id="tmgmt-translator-options">',
+    '#suffix' => '</div>',
+  );
+
+  $form['options']['description'] = array(
+    '#type' => 'item',
+    '#title' => t('About this service'),
+    '#markup' => $translator_plugin['description'],
+  );
   // translator description, depending on the selected translatorplugin.
-  foreach ($translator_plugins as $translator_plugin) {
-    $form['description'][$translator_plugin['plugin']] = array(
-      '#type' => 'container',
-      '#states' => array(
-        'visible' => array('select[name="translation_service"]' => array('value' => $translator_plugin['plugin'])),
-      ),
-    );
-    $form['description'][$translator_plugin['plugin']]['markup'] = array(
-      '#type' => 'item',
-      '#title' => t('about this service'),
-      '#markup' => $translator_plugin['description'],
-    );
-  }
+//  foreach ($translator_plugins as $translator_plugin) {
+//    $form['description'][$translator_plugin['plugin']] = array(
+//      '#type' => 'container',
+//      '#states' => array(
+//        'visible' => array('select[name="translation_service"]' => array('value' => $translator_plugin['plugin'])),
+//      ),
+//    );
+//    $form['description'][$translator_plugin['plugin']]['markup'] = array(
+//      '#type' => 'item',
+//      '#title' => t('About this service'),
+//      '#markup' => $translator_plugin['description'],
+//    );
+//  }
 
   $form['nid'] = array(
     '#type' => 'hidden',
@@ -120,6 +143,10 @@ function tmgmt_node_translator_settings_form_submit($form, &$form_state) {
   $item = tmgmt_job_item_create('node', 'node', $values['nid']);
   $job->addItem($item);
 
+  // Mark the job as prepared.
+  $job->setState(TMGMTJob::STATE_PREPARED);
+  $job->save();
+  drupal_set_message(t('Translation job has been created.'));
 }
 
 /**
@@ -149,13 +176,23 @@ function tmgmt_node_tmgmt_source_plugin_info() {
  */
 function tmgmt_node_update_node_translation($node, $translated_data, $target_language) {
   foreach ($translated_data as $field_name => $values) {
+    // Special case for the node title.
+    if ($field_name == 'node_title') {
+      $node->title = $values[0]['value']['#text'];
+      continue;
+    }
     $index = 0;
+    $field_info = field_info_field($field_name);
     foreach ($values as $key => $value) {
       $tdata = array();
       foreach ($value as $input_name => $input_value) {
         $tdata[$input_name] = $input_value['#text'];
       }
-      $node->{$field_name}[$target_language][$index] = $tdata;
+      $field_lang = LANGUAGE_NONE;
+      if ($field_info['translatable']) {
+        $field_lang = $target_language;
+      }
+      $node->{$field_name}[$field_lang][$index] = $tdata;
       $index++;
     }
   }
@@ -172,31 +209,21 @@ function text_tmgmt_source_translation_structure($field_name, $node, $field_info
   // in the case of a field with multiple values...
   $field_lang = field_language('node', $node, $field_name);
   $structure = array();
-  foreach ($node->{$field_name}[$field_lang] as $key => $value) {
-    $structure[$key]['value'] = array(
-      '#label' => 'Value nr. ' . $key,
-      '#text' => $value['value'],
-      '#translate' => TRUE,
-    );
-    if ($field_info['type'] == 'text_with_summary' && !empty($value['summary'])) {
-      $structure[$key]['summary'] = array(
-      '#label' => 'Summary nr. ' . $key,
-      '#text' => $value['summary'],
-      '#translate' => TRUE,
-    );
+  if (!empty ($node->{$field_name})) {
+    foreach ($node->{$field_name}[$field_lang] as $key => $value) {
+      $structure[$key]['value'] = array(
+        '#label' => 'Value nr. ' . $key,
+        '#text' => $value['value'],
+        '#translate' => TRUE,
+      );
+      if ($field_info['type'] == 'text_with_summary' && !empty($value['summary'])) {
+        $structure[$key]['summary'] = array(
+        '#label' => 'Summary nr. ' . $key,
+        '#text' => $value['summary'],
+        '#translate' => TRUE,
+      );
+      }
     }
   }
-  /* $structure['metadata']['label'] = array(
-    '#label' => 'Label',
-    '#text' => $instance['label'],
-    '#translate' => TRUE,
-    );
-    if ($instance['description']) {
-    $structure['metadata']['description'] = array(
-    '#label' => 'Description',
-    '#text' => $instance['description'],
-    '#translate' => TRUE,
-    );
-    } */
   return $structure;
 }
