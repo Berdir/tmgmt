@@ -15,6 +15,12 @@ class TMGMTJobItemMetadataController extends EntityDefaultMetadataController {
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
     _tmgmt_override_property_description($info);
+    
+    $properties['tjid'] = array(
+      'description' => t('Corresponding job entity.'),
+      'type' => 'tmgmt_job',
+    ) + $properties['tjid'];
+    
     return $info;
   }
   
