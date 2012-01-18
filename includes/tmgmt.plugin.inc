@@ -19,6 +19,8 @@ interface TMGMTSourcePluginControllerInterface {
 
   /**
    * Returns an array with the data structured for translation.
+   *
+   * @see TMGMTJobItem::getSourceData()
    */
   public function getData(TMGMTJobItem $job_item);
 
@@ -136,14 +138,14 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
   }
 
   /**
-   * Get status for translation job
+   * Get state for translation job
    *
    * @param TMGMTJob $job
    *
    * @return int
-   *   Job status (T.Mgmt)
+   *   Job state
    */
-  public function getJobStatus(TMGMTJob $job) {
+  public function getJobState(TMGMTJob $job) {
   }
 
   /**
@@ -163,14 +165,6 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
 interface TMGMTranslatorResponseInterface {
 
   /**
-   * Returns the original response from the translation provider.
-   *
-   * @return
-   *   The original response from the translation provider.
-   */
-  function getResponse();
-
-  /**
    * Translates the response of the translation provider into a message that
    * can be displayed to the user.
    *
@@ -180,15 +174,59 @@ interface TMGMTranslatorResponseInterface {
   function toString();
 
   /**
-   * Returns a valid Translation Management job status depending on the response
-   * of the translator plugin. Has to be one of TMGMTJob::STATE_NEW,
-   * TMGMTJob::STATE_SUBMITTED TMGMTJob::STATE_REJECTED, TMGMTJob::STATE_REVIEW,
-   * TMGMTJob::STATE_ACCEPTED or NULL if the response of the translation
-   * provider could not be mapped to a valid job status.
+   * Returns a valid Translation Management job state depending on the response
+   * of the translator plugin. Has to be one of the defined state constants or
+   * NULL if the reponse of the provider could not be mapped to a valid job
+   * state.
    *
    * @return
-   *   A valid status for a TranslationManagementJob entity or NULL.
+   *   A valid state for a TranslationManagementJob entity or NULL.
    */
-  function toStatus();
+  function toJobState();
 
 }
+
+/**
+ * Interface for handling responses communication with translation providers.
+ *
+ * @ingroup translator
+ */
+class TMGMTranslatorResponse implements TMGMTranslatorResponseInterface {
+
+  /**
+   * @var
+   */
+  protected $code;
+
+  /**
+   * @var
+   */
+  protected $string;
+
+  /**
+   * Constructor.
+   *
+   * @param $code
+   * @param $string
+   */
+  public function __construct($code, $string) {
+    $this->code = $code;
+    $this->string = $string;
+  }
+
+  /**
+   * Implements TMGMTranslatorResponseInterface::toString(),
+   */
+  function toString() {
+    return $this->string;
+  }
+
+  /**
+   * Implements TMGMTranslatorResponseInterface::toJobState(),
+   */
+  function toJobState() {
+    return $this->code;
+  }
+
+}
+

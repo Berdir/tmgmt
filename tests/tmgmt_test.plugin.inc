@@ -29,8 +29,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
 
             $data[$key]['#text'] = str_replace('n', 'ñ', $data_entry['#text']);
           }
-          $item->translated_data = tmgmt_unflatten_data($data);
-          $item->save();
+          $item->addTranslatedData(tmgmt_unflatten_data($data));
         }
         break;
 
@@ -92,9 +91,9 @@ class TMGMTTestTranslatorResponse implements TMGMTranslatorResponseInterface {
   }
 
   /**
-   * Implements TMGMTranslatorResponseInterface::toStatus().
+   * Implements TMGMTranslatorResponseInterface::tostate().
    */
-  public function toStatus() {
+  public function tostate() {
 
   }
 

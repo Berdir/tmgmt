@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Source plugin for the Translation Management system that handles i18n strings.
+ */
+
+/**
+ * Implements hook_tmgmt_source_plugin_info().
+ *
+ * @ingroup source
+ */
+function tmgmt_ni18n_string_tmgmt_source_plugin_info() {
+  return array(
+    'i18n_string' => array(
+      'label' => t('i18n String'),
+      'description' => t('Source handler for i18n strings.'),
+      'controller class' => 'TMGMTI18nStringSourcePluginController',
+    ),
+  );
+}
