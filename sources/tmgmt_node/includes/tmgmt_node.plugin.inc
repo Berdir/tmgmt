@@ -46,130 +46,43 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     $structure = array();
     foreach (field_info_instances('node', $node->type) as $field_name => $field_instance) {
       $info = field_info_field($field_name);
-      if ($info['translatable']) {
-        $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info, $field_instance);
-        if ($field_structure) {
-          $structure[$field_name] = $field_structure;
-        }
+      $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info, $field_instance);
+      if ($field_structure) {
+        $structure[$field_name] = $field_structure;
       }
     }
+    $structure['node_title'][0]['value']['#label'] = 'Title';
+    $structure['node_title'][0]['value']['#text'] = $node->title;
     return $structure;
   }
 
   public function saveTranslation(TMGMTJobItem $job_item) {
     $node = node_load($job_item->item_id);
-    if (is_object($node)) {
-      $locale_setting = variable_get('language_content_type_' . $node->type, 0);
-      $translation_saver = TMGMTNodeSourceTranslationFactory::getTranslationSaver($locale_setting);
-      if ($translation_saver) {
-        $translation_saver->saveTranslation($job_item);
-      }
-    }
-  }
-
-}
-
-/**
- * Class that has as its own purpose to implement a static function that can
- * return a Translation Saver object.
- */
-class TMGMTNodeSourceTranslationFactory {
-  public static function getTranslationSaver($setting) {
-    switch ($setting) {
-      case 2:{
-        return new TMGMTNodeSourceContentTranslation();
-      }
-      case 4: {
-        return new TMGMTNodeSourceFieldTranslation();
-      }
-    default :
-      return NULL;
-    }
-  }
-}
-
-/**
- * Interface for classes that can save a translation.
- */
-interface TMGMTNodeSourceTranslationInterface {
-  public function saveTranslation(TMGMTJobItem $job_item);
-}
-
-/**
- * Class for saving content translations.
- */
-class TMGMTNodeSourceContentTranslation implements TMGMTNodeSourceTranslationInterface {
-
-  public function saveTranslation(TMGMTJobItem $job_item) {
-    $node = node_load($job_item->item_id);
     $job = tmgmt_job_load($job_item->tjid);
-    // in $tnode we will have the translated node.
-    $tnode = NULL;
-    if (empty($node->tnid)) {
-      // We have no translation source nid, this is a new set, so create it.
-      $node->tnid = $node->nid;
-      node_save($node);
-    }
-    $translations = translation_node_get_translations($node->tnid);
-
-    if (isset($translations[$job->target_language])) {
-      // We have already a translation for the source node for the target
-      // language, so load it.
-      $tnode = node_load($translations[$job->target_language]->nid);
-    }
-    // If the $tnode is still NULL, we have to create a new node.
-    if (is_null($tnode)) {
-      $tnode = new stdClass();
-      $tnode->language = $job->target_language;
-      $tnode->translation_source = $node;
-      // @todo: The title field will not probably be shared.
-      $shared_fields = array('title', 'type', 'uid', 'status', 'comment', 'promote', 'sticky');
-      foreach ($shared_fields as $shared_field) {
-        $tnode->{$shared_field} = $node->{$shared_field};
+    if (is_object($node) && is_object($job)) {
+      // in $tnode we will have the translated node.
+      $tnode = NULL;
+      if (empty($node->tnid)) {
+        // We have no translation source nid, this is a new set, so create it.
+        $node->tnid = $node->nid;
+        node_save($node);
       }
-    }
-    // Time to put the translated data into the node.
-    // Do we need to unflat the data here?
-    $translated_data = tmgmt_unflatten_data($job_item->translated_data);
-    tmgmt_node_update_node_translation($tnode, $translated_data, $job->target_language);
-  }
-  
-}
+      $translations = translation_node_get_translations($node->tnid);
 
-/**
- * Class for saving field translations.
- */
-class TMGMTNodeSourceFieldTranslation implements TMGMTNodeSourceTranslationInterface {
-
-  public function saveTranslation(TMGMTJobItem $job_item) {
-    $node = node_load($job_item->item_id);
-    $job = tmgmt_job_load($job_item->tjid);
-    // Do we need to unflat the data here?
-    $translated_data = tmgmt_unflatten_data($job_item->translated_data);
-    tmgmt_node_update_node_translation($node, $translated_data, $job->target_language);
-    // @todo: refactor this.
-    if (module_exists('entity_translation')) {
-      db_delete('entity_translation')
-        ->condition('entity_type', 'node')
-        ->condition('entity_id', $node->nid)
-        ->condition('language', $job->target_language)
-        ->execute();
-
-      $columns = array('entity_type', 'entity_id', 'language', 'source', 'uid', 'status', 'translate', 'created', 'changed');
-      $query = db_insert('entity_translation')->fields($columns);
-      $values = array(
-        'entity_type' => 'node',
-        'entity_id' => $node->nid,
-        'language' => $job->target_language,
-        'source' => $job->source_language,
-        'uid' => $node->uid,
-        'status' => $node->status,
-        'translate' => 0,
-        'created' => REQUEST_TIME,
-        'changed' => REQUEST_TIME,
-      );
-      $query->values($values)->execute();
+      if (isset($translations[$job->target_language])) {
+        // We have already a translation for the source node for the target
+        // language, so load it.
+        $tnode = node_load($translations[$job->target_language]->nid);
+      }
+      // If the $tnode is still NULL, we have to create a new node.
+      if (is_null($tnode)) {
+        $tnode = clone $node;
+        unset($tnode->nid, $tnode->vid);
+        $tnode->language = $job->target_language;
+        $tnode->translation_source = $node;
+      }
+      // Time to put the translated data into the node.
+      tmgmt_node_update_node_translation($tnode, $job_item->translated_data, $job->target_language);
     }
   }
-
 }
