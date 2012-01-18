@@ -3,23 +3,16 @@
 /**
  * @file
  * Provides Microsoft Translator plugin controller.
- * 
- * Check @link http://msdn.microsoft.com/en-us/library/dd576287.aspx Microsoft 
+ *
+ * Check @link http://msdn.microsoft.com/en-us/library/dd576287.aspx Microsoft
  * Translator @endlink. Note that we are using HTTP API.
  */
 
 class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginController {
 
   /**
-   * Bing API ID. - @todo this is maybe also in configuration, check?
-   *
-   * @var string
-   */
-  protected $bingAPIID = 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369';
-
-  /**
    * Translation service URL.
-   * 
+   *
    * @var string
    */
   protected $translatorURL = 'http://api.microsofttranslator.com/v2/Http.svc';
@@ -30,12 +23,17 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * We will check are source and target language supported.
    */
   public function canTranslate(TMGMTJob $job) {
+    $bing_api_id = $this->getOption('bing_api_id');
+    if (empty($bing_api_id)) {
+      return FALSE;
+    }
+
     $languages = $this->getSupportedLanguages();
     if (isset($languages[$job->source_language]) && isset($languages[$job->target_language])) {
       return TRUE;
     }
 
-    // What to return if we can not query service and can not get supported 
+    // What to return if we can not query service and can not get supported
     // languages, for what ever reason? For now it is safer to return FALSE.
     return FALSE;
   }
@@ -59,7 +57,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
         }
 
         $query_data = drupal_http_build_query(array(
-          'appId'       => $this->bingAPIID,
+          'appId'       => $this->getOption('bing_api_id'),
           'from'        => $job->source_language,
           'to'          => $job->target_language,
           'contentType' => 'text/plain', // @todo - we probably need to have this
@@ -70,11 +68,11 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
         ));
 
         $options = array(
-          // @todo - for some reason post is returning 202 status and service 
-          // is not translating things, maybe check this later.
+          // For some reason post is returning 202 status and service
+          // is not translating things. @todo - maybe check this later.
           //'method' => 'POST',
           //'data' => $query_data,
-          'headers' => array('Content-Type' => 'text/plain')
+          'headers' => array('Content-Type' => 'text/plain'),
         );
         $result = drupal_http_request($translate_url. '?' . $query_data, $options);
 
@@ -122,7 +120,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
     if (!isset($languages)) {
       $languages = array();
 
-      $res = drupal_http_request($this->translatorURL . '/GetLanguagesForTranslate' . '?appId=' . $this->bingAPIID);
+      $res = drupal_http_request($this->translatorURL . '/GetLanguagesForTranslate' . '?appId=' . $this->getOption('bing_api_id'));
       if ($res->code == 200) {
         $dom = new DOMDocument;
         $dom->loadXML($res->data);
