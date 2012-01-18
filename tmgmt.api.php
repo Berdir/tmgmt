@@ -6,7 +6,7 @@
  */
 
 /**
- * @addtogroup hooks
+ * @addtogroup source
  * @{
  */
 
@@ -33,6 +33,15 @@ function hook_tmgmt_source_plugin_info_alter(&$info) {
 }
 
 /**
+ * @} End of "addtogroup translator".
+ */
+
+/**
+ * @addtogroup translator
+ * @{
+ */
+
+/**
  * Provide information about translator plugins.
  */
 function hook_tmgmt_translator_plugin_info() {
@@ -53,17 +62,17 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
 }
 
 /**
- * @} End of "addtogroup hooks".
+ * @} End of "addtogroup translator".
  */
 
 /**
  * @defgroup job Translation Jobs
  *
  * A single task to translate something into a given language using a @link
- * translator Translator @endlink.
+ * translator translator @endlink.
  *
  * Attached to these jobs are job items, which specifiy which @link source
- * Sources @endlink are to be translated.
+ * sources @endlink are to be translated.
  *
  * To create a new translation job, first create a job and then assign items to
  * each. Each item needs to specificy the source plugin that should be used
@@ -91,12 +100,12 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * $job->translator_context = array(
  *   'prioritoy' => 5,
  * );
- * @endcode
+ * $job->save();
  *
  * // Get the translator plugin and request a translation.
  * $translator = $job->getTranslatorPlugin();
  * $translator->requestTranslation($job);
- * ?>
+ * @endcode
  *
  * The translation plugin will then request the text from the source plugin.
  * Depending on the plugin, the text might be sent to an external service
@@ -118,11 +127,37 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
 /**
  * @defgroup translator Translators
  *
- * @todo
+ * A translator plugin integrates a translation service.
+ *
+ * To define a translator, hook_tmgmt_translator_plugin_info() needs to be
+ * implemented and a controller class (specificed in the info) created.
+ *
+ * A translator plugin is then responsible for sending out a translation job and
+ * storing the translated texts back into the job and marking it as needs review
+ * once it's finished.
+ *
+ * TBD.
  */
 
 /**
  * @defgroup source Translation source
  *
- * @todo
+ * A source plugin represents translatable elements on a site.
+ *
+ * For example nodes, but also plain strings, menu items, other entities and so
+ * on.
+ *
+ * To define a source, hook_tmgmt_source_plugin_info() needs to be implemented
+ * and a controller class (specificed in the info) created.
+ *
+ * A source has three separate tasks.
+ *
+ * - Allows to reate a new @link job translation job @endlink and assign job
+ *   items to itself.
+ * - Extract the translatable text into a nested array when
+ *   requested to do in their implementation of
+ *   TMGMTSourcePluginControllerInterface::getData().
+ * - Save the accepted translations returned by the translation plugin in their
+ *   sources in their implementation of
+ *   TMGMTSourcePluginControllerInterface::saveTranslation().
  */

@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * Basic i18n String Source tests.
+ */
+class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => t('i18n String Source tests'),
+      'description' => t('Exporting source data from i18n string and saving translations back'),
+      'group' => t('Translation Management'),
+    );
+  }
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp() {
+    parent::setUp(array('tmgmt_i18n_string', 'tmgmt_test'));
+  }
+
+  // TODO: Create an actual test.
+}

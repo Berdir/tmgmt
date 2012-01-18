@@ -13,6 +13,7 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
   function canTranslate(TMGMTJob $job) {
     return TRUE;
   }
+
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
@@ -20,11 +21,11 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
     foreach ($job->getItems() as $item) {
       // Use original data as translated data.
       $data = $item->getSourceData();
-      $item->translated_data = $data;
-      $item->save();
+      $item->addTranslatedData($data);
     }
     $job->save();
     return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Dummy translation completed.'));
   }
+
 }
 

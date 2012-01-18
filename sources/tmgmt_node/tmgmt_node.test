@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * Basic Node Source tests.
+ */
+class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => t('Node Source tests'),
+      'description' => t('Exporting source data from nodes and saving translations back to nodes'),
+      'group' => t('Translation Management'),
+    );
+  }
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp() {
+    parent::setUp(array('tmgmt_node', 'tmgmt_test'));
+  }
+
+  function testNodeSource() {
+    $node = $this->drupalCreateNode();
+
+    // Create the new job and job item.
+    $job = $this->createJob();
+    $job->translator = 'test_translator';
+    $job->translator_context = array();
+    $translator = $job->getTranslatorPlugin();
+
+    $item1 = tmgmt_job_item_create('node', 'entity', $node->vid);
+    tmgmt_job_add_item($job, $item1);
+
+    // Check the structure of the imported data.
+    $this->assertEqual($item1->item_id, $node->vid, t('Node identifier is correctly saved'));
+
+    $translator->requestTranslation($job);
+
+    foreach ($job->getItems() as $item) {
+      debug($item);
+      $this->assertTrue(strpos($item->translated_data, $node->title) !== FALSE, t('Node title is correctly translated.'));
+
+    }
+  }
+}

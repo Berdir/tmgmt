@@ -137,7 +137,6 @@ class TMGMTJobItem extends Entity {
     return $this->getSourceController()->getData($this);
   }
 
-
   /**
    * Returns the configured plugin controller.
    *
@@ -145,6 +144,34 @@ class TMGMTJobItem extends Entity {
    */
   public function getSourceController() {
     return tmgmt_source_plugin_controller($this->plugin);
+  }
+
+  /**
+   * Add translated data to a job item.
+   *
+   * Note: This does not merge existing data which already exists below the
+   * defined key and will replace it.
+   *
+   * @param $translated_data
+   *   Nested array of translated data. Can either be a single text entry, the
+   *   whole data structure or parts of it.
+   * @param $key
+   *   (Optional) Either a flattened key (a 'key1:key2:key3' string) or a nested
+   *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
+   *   means that it will replace the whole translated data array.
+   */
+  public function addTranslatedData($translated_data, $key = array()) {
+    if (empty($key)) {
+      $key = array();
+    }
+    if (!is_array($key)) {
+      $key = explode(':', $key);
+    }
+    if (!is_array($this->translated_data)) {
+      $this->translated_data = array();
+    }
+    drupal_array_set_nested_value($this->translated_data, $key, $translated_data);
+    $this->save();
   }
 
 }
@@ -182,6 +209,11 @@ class TMGMTJob extends Entity {
    * The translation has been accepted and the job is finished.
    */
   const STATE_ACCEPTED = 4;
+
+  /**
+   * The translation job has been cancelled..
+   */
+  const STATE_CANCELLED = 5;
 
   /**
    * Translation job identifier.
@@ -249,6 +281,34 @@ class TMGMTJob extends Entity {
     parent::__construct($values, 'tmgmt_job');
   }
 
+
+  /**
+   * Propagates the returned job item translations to the sources.
+   */
+  function saveTranslation() {
+    if ($this->state == self::STATE_ACCEPTED) {
+      foreach ($this->getItems() as $item) {
+        $item->getSourceController()->saveTranslation($item);
+      }
+    }
+  }
+
+  /**
+   * Updates the state of a job to the state supplied by the response object.
+   *
+   * @param TMGMTranslatorResponseInterface $response
+   *   The response object.
+   *
+   * @return bool
+   *   TRUE if the state of the job entity has been updated, FALSE otherwise.
+   */
+  function setStateFromResponse(TMGMTranslatorResponseInterface $response) {
+    if (($state = $response->toJobstate()) !== NULL) {
+      return $this->setState($state);
+    }
+    return FALSE;
+  }
+
   /**
    * Adds the item to the translation job.
    *
@@ -293,46 +353,38 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Returns the status of the job. Can be one of TMGMTJob::STATE_NEW,
-   * TMGMTJob::STATE_SUBMITTED TMGMTJob::STATE_REJECTED, TMGMTJob::STATE_REVIEW,
-   * TMGMTJob::STATE_ACCEPTED or NULL if the status hasn't been defined yet.
+   * Returns the state of the job. Can be one of the job state constants.
    *
    * @return
-   *   The status of the job.
+   *   The state of the job.
    */
-  public function getStatus() {
-    if (isset($this->status)) {
-      return $this->status;
+  public function getState() {
+    if (isset($this->state)) {
+      return $this->state;
     }
     return NULL;
   }
 
   /**
-   * Updates the status of the job.
+   * Updates the state of the job.
    *
-   * @param $status
-   *   The new status of the job. Has to be one of TMGMTJob::STATE_NEW,
-   *   TMGMTJob::STATE_SUBMITTED, TMGMTJob::STATE_REJECTED,
-   *   TMGMTJob::STATE_REVIEW or TMGMTJob::STATE_ACCEPTED.
+   * @param $state
+   *   The new state of the job. Has to be one of the state constants defined
+   *   in the state
    */
-  public function setStatus($status) {
-    // Return FALSE if the status already matches the supplied $status.
-    if ($this->getStatus == $status) {
-      return FALSE;
-    }
-    // Fire certain actions specific to the status update and return TRUE if
-    // the status was updated. Return FALSE otherwise.
-    switch ($status) {
+  public function setState($state) {
+    // Return TRUE if the state could be set. Return FALSE otherwise.
+    switch ($state) {
       case self::STATE_ACCEPTED:
       case self::STATE_NEW:
       case self::STATE_REJECTED:
       case self::STATE_REVIEW:
       case self::STATE_SUBMITTED:
-        $this->status = $status;
+      case self::STATE_CANCELLED;
+        $this->state = $state;
         return TRUE;
-      default:
-        return FALSE;
     }
+    return FALSE;
   }
 
 }
