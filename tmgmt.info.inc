@@ -34,6 +34,7 @@ function _tmgmt_override_property_description(&$properties) {
   
   $keys = array_keys($properties);
   $table = $keys[0];
+  module_load_install('tmgmt');
   $schema = tmgmt_schema();
   foreach ($properties[$table]['properties'] as $name => $info) {
     if (isset($schema[$table]['fields'][$name]['description'])) {
