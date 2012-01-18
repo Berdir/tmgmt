@@ -11,13 +11,6 @@
 class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginController {
 
   /**
-   * Bing API ID. - @todo this is maybe also in configuration, check?
-   *
-   * @var string
-   */
-  protected $bingAPIID = 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369';
-
-  /**
    * Translation service URL.
    *
    * @var string
@@ -30,6 +23,11 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * We will check are source and target language supported.
    */
   public function canTranslate(TMGMTJob $job) {
+    $bing_api_id = $this->getOption('bing_api_id');
+    if (empty($bing_api_id)) {
+      return FALSE;
+    }
+
     $languages = $this->getSupportedLanguages();
     if (isset($languages[$job->source_language]) && isset($languages[$job->target_language])) {
       return TRUE;
@@ -47,6 +45,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   public function requestTranslation(TMGMTJob $job) {
     // @todo - who is handling cron / batch here, we or some other controler?
     $translate_url = $this->translatorURL . '/Translate';
+
     // Pull the source data array from through the job and flatten it..
     $data = tmgmt_flatten_data($job->getSourceData());
     foreach ($data as $key => $value) {
@@ -109,7 +108,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
 
     if (!isset($languages)) {
       $languages = array();
-      $res = drupal_http_request($this->translatorURL . '/GetLanguagesForTranslate' . '?appId=' . $this->bingAPIID);
+      $res = drupal_http_request($this->translatorURL . '/GetLanguagesForTranslate' . '?appId=' . $this->getOption('bing_api_id'));
       if ($res->code == 200) {
         $dom = new DOMDocument;
         $dom->loadXML($res->data);
