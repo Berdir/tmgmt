@@ -10,7 +10,7 @@
  *
  * @ingroup source
  */
-function tmgmt_ni18n_string_tmgmt_source_plugin_info() {
+function tmgmt_i18n_string_tmgmt_source_plugin_info() {
   return array(
     'i18n_string' => array(
       'label' => t('i18n String'),
