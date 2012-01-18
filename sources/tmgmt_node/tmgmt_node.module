@@ -14,7 +14,6 @@ function tmgmt_node_menu() {
   $items['node/%node/create-job'] = array(
     'title' => 'translation management',
     'page callback' => 'tmgmt_node_translator_settings',
-//    'page arguments' => array('tmgmt_node_translator_settings'),
     'access callback' => '_translation_tab_access',
     'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
@@ -25,7 +24,6 @@ function tmgmt_node_menu() {
 }
 
 function tmgmt_node_translator_settings() {
-
 //  $job = tmgmt_job_item_load($item_id, $item_type, $plugin);
 //  $status = $job->getStatus();
   $status = 'foo';
@@ -37,6 +35,9 @@ function tmgmt_node_translator_settings() {
   }
 }
 
+/**
+ * implementing hook_form()
+ */
 function tmgmt_node_translator_settings_form($form, &$form_state) {
   $form = array();
 
@@ -67,6 +68,14 @@ function tmgmt_node_translator_settings_form($form, &$form_state) {
     '#default_value' => 'german',
     '#options' => $language_options,
   );
+
+  dsm(tmgmt_translator_plugin_info());
+//  $form['translation_service'] = array(
+//    '#type' => 'select',
+//    '#title' => t('translation type'),
+////    '#default_value' => '',
+//    '#options' => $services,
+//  );
   $form['nid'] = array(
     '#type' => 'hidden',
     '#value' => $node->nid,
@@ -80,21 +89,17 @@ function tmgmt_node_translator_settings_form($form, &$form_state) {
   return $form;
 }
 
+/**
+ *
+ */
 function tmgmt_node_translator_settings_form_submit($form, &$form_state) {
 
   $values = $form_state['values'];
   $job = tmgmt_job_create($values['source_language'], $values['target_language']);
-  dsm($job);
+  $job->save();
   $item = tmgmt_job_item_create('node', 'node_translation', $values['nid']);
   $job->addItem($item);
   dsm($job->getItems());
-  /*
-    // $item->save();
-    tmgmt_job_add_item($job, $item);
-    $job->save();
-    dsm($job);
-    dsm($item);
-   * */
 }
 
 /**
