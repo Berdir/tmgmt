@@ -20,39 +20,34 @@ function tmgmt_node_tmgmt_source_plugin_info() {
   );
 }
 
-function tmgmt_node_init(){
-  foreach (field_info_instances('node', 'article') as $field_name) {
-      //$info = field_info_field($field_name);
-      //field_info
-      dpm($field_name);
-  }
-}
-
 /**
  * Implements hook_tmgmt_source_translation_structure() for the text module.
  *
  * @todo: this hook should probably be placed elsewhere.
  */
-function text_tmgmt_source_translation_structure($field_name, $node, $info, $instance) {
+function text_tmgmt_source_translation_structure($field_name, $node, $field_info, $instance) {
   // @todo: there may be a problem if the user changes the order of the values
   // in the case of a field with multiple values...
   $field_lang = field_language('node', $node, $field_name);
   $structure = array();
   foreach ($node->{$field_name}[$field_lang] as $key => $value) {
-    $structure['value_'.$key] = array(
-      'title' => 'Value nr. ' . $key,
-      'value' => $value['value'],
+    $structure['values'][$key] = array(
+      '#label' => 'Value nr. ' . $key,
+      '#text' => $value['value'],
+      '#translate' => TRUE,
     );
   }
-  $structure['label'] = array(
-    'title' => 'Label',
-    'value' => $instance['label'],
+  /*$structure['metadata']['label'] = array(
+    '#label' => 'Label',
+    '#text' => $instance['label'],
+    '#translate' => TRUE,
   );
   if ($instance['description']) {
-    $structure['description'] = array(
-      'title' => 'Description',
-      'value' => $instance['description'],
+    $structure['metadata']['description'] = array(
+      '#label' => 'Description',
+      '#text' => $instance['description'],
+      '#translate' => TRUE,
     );
-  }
+  }*/
   return $structure;
 }
