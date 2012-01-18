@@ -8,6 +8,7 @@ function tmgmt_entity_info() {
     'label' => t('Translation Management Job Item'),
     'module' => 'tmgmt',
     'controller class' => 'TMGMTJobItemController',
+    'metadata controller class' => 'TMGMTJobItemMetadataController',
     'entity class' => 'TMGMTJobItem',
     'base table' => 'tmgmt_job_item',
     'uri callback' => 'entity_class_uri',
@@ -20,6 +21,7 @@ function tmgmt_entity_info() {
     'label' => t('Translation Management Job'),
     'module' => 'tmgmt',
     'controller class' => 'TMGMTJobController',
+    'metadata controller class' => 'TMGMTJobMetadataController',
     'entity class' => 'TMGMTJob',
     'base table' => 'tmgmt_job',
     'uri callback' => 'entity_class_uri',
@@ -32,6 +34,7 @@ function tmgmt_entity_info() {
     'label' => t('Translation Management Translator'),
     'module' => 'tmgmt',
     'controller class' => 'TMGMTTranslatorController',
+    'metadata controller class' => 'TMGMTTranslatorMetadataController',
     'entity class' => 'TMGMTTranslator',
     'base table' => 'tmgmt_translator',
     'exportable' => TRUE,
@@ -44,26 +47,6 @@ function tmgmt_entity_info() {
       'name' => 'name',
       'label' => 'label',
     ),
-  );
-  return $info;
-}
-
-/**
- * Implements hook_entity_property_info().
- */
-function tmgmt_entity_property_info() {
-  $info = array();
-  $job_properties = &$info['tmgmt_job']['properties'];
-
-  $job_properties['tjid'] = array(
-    'label' => t("Job ID"),
-    'type' => 'integer',
-    'description' => t("The unique job ID."),
-  );
-  $job_properties['source_language'] = array(
-    'label' => t("Source language"),
-    'type' => 'text',
-    'description' => t("The machine readable name of the source pl"),
   );
   return $info;
 }
