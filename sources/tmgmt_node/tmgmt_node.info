@@ -5,3 +5,4 @@ core = 7.x
 dependencies[] = tmgmt
 dependencies[] = node
 files[] = includes/tmgmt_node.plugin.inc
+files[] = tmgmt_node.test
