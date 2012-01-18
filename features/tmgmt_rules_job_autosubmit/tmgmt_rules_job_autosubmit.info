@@ -5,6 +5,6 @@ description = "Automatically submits created translation jobs to the configured 
 features[rules_config][] = "rules_auto_accept_a_translation_job"
 features[rules_config][] = "rules_auto_submit_a_translation_job"
 name = "Auto-Submit a Translation Job"
-package = "Features"
+package = "Translation Management"
 project = "tmgmt_rules_job_autosubmit"
 version = "7.x-0.1"
