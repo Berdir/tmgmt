@@ -30,10 +30,13 @@ function tmgmt_node_menu() {
  */
 function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
 
-  // Check for pending jobs.
-//  $jobs = tmgmt_get_jobs('node','node',$node->vid);
-  if(!empty($jobs)) {
 
+  // Check for pending jobs.
+  $jobs = tmgmt_job_load_multiple_by_source('node', 'node', $node->vid);
+  if(!empty($jobs)) {
+    foreach($jobs as $job) {
+//      dsm($job);
+    }
   }
 
   $language_options = array();
@@ -120,6 +123,7 @@ function tmgmt_node_translator_settings_form_submit($form, &$form_state) {
   $item = tmgmt_job_item_create('node', 'node', $values['nid']);
   $job->addItem($item);
 
+  drupal_set_message(t("Job wurde erstellt!"));
 }
 
 /**
