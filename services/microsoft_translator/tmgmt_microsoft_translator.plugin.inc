@@ -52,7 +52,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       /* @var $item TMGMTJobItem */
       $data = tmgmt_flatten_data($item->getSourceData());
       foreach ($data as $key => $value) {
-        if (empty($value['#translate'])) {
+        if (isset($value['#translate']) && $value['#translate'] === FALSE) {
           continue;
         }
 
@@ -75,8 +75,6 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
           'headers' => array('Content-Type' => 'text/plain'),
         );
         $result = drupal_http_request($translate_url. '?' . $query_data, $options);
-
-        debug($result);
         switch ($result->code) {
           case 200:
             // Lets leave DOMDocument for now because this service enable us
@@ -86,16 +84,16 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
             $dom->loadXML($result->data);
             $string_items = $dom->getElementsByTagName('string');
             $data[$key]['#text'] = $string_items->item(0)->nodeValue;
-            debug($string_items->item(0)->nodeValue);
             break;
           case 400:
-            return new TMGMTTranslatorResponse(NULL, $result->data);
+            return new TMGMTTranslatorResponse(TMGMTJob::STATE_REJECTED, $result->data);
             break;
           default:
             // @todo - we need to think here more what to do if service is not
             // responding for some items and is responding for some others.
             // Ideally we should save sources that we manage to translate and
             // not just return.
+            debug($result);
             return new TMGMTTranslatorResponse(NULL, $result->data);
             break;
         }
