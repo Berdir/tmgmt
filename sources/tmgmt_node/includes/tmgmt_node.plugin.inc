@@ -22,12 +22,20 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
    *   'field_text_example' => array(
    *      'values' => array(
    *        0 => array(
-   *          '#text' => "Some example text",
-   *          '#label' => "Value nr. 0",
+   *          'value' => array(
+   *            '#text' => "Some example text",
+   *            '#label' => "Value nr. 0",
+   *          ),
+   *          'summary' => array(
+   *            '#text' => "Some example summary",
+   *            '#label' => "Summary nr. 0",
+   *          ),
    *        ),
    *        1 => array(
-   *          '#text' => "A second example text",
-   *          '#label' => "Value nr. 1",
+   *          'value' => array(
+   *            '#text' => "A second example text",
+   *            '#label' => "Value nr. 1",
+   *          )
    *        ),
    *      )
    *   )
@@ -119,18 +127,9 @@ class TMGMTNodeSourceContentTranslation implements TMGMTNodeSourceTranslationInt
       }
     }
     // Time to put the translated data into the node.
-    // 
-    // @todo: change how the field values are assigned to the nodes, it
-    // has to be a better way.
-    // 
     // Do we need to unflat the data here?
     $translated_data = tmgmt_unflatten_data($job_item->translated_data);
-    foreach ($translated_data as $field_name => $values) {
-      foreach ($values['values'] as $value) {
-        $tnode->{$field_name}[$job->target_language][] = array('value' => $value['#text']);
-      }
-    }
-    node_save($tnode);
+    tmgmt_node_update_node_translation($tnode, $translated_data, $job->target_language);
   }
   
 }
@@ -140,21 +139,12 @@ class TMGMTNodeSourceContentTranslation implements TMGMTNodeSourceTranslationInt
  */
 class TMGMTNodeSourceFieldTranslation implements TMGMTNodeSourceTranslationInterface {
 
- public function saveTranslation(TMGMTJobItem $job_item) {
+  public function saveTranslation(TMGMTJobItem $job_item) {
     $node = node_load($job_item->item_id);
     $job = tmgmt_job_load($job_item->tjid);
-    // This is the case when the field translation is enabled.
-    // @todo: change how the field values are assigned to the nodes, it
-    // has to be a better way.
-    // 
     // Do we need to unflat the data here?
     $translated_data = tmgmt_unflatten_data($job_item->translated_data);
-    foreach ($translated_data as $field_name => $values) {
-      foreach ($values['values'] as $value) {
-        $node->{$field_name}[$job->target_language][] = array('value' => $value['#text']);
-      }
-    }
-    node_save($node);
+    tmgmt_node_update_node_translation($node, $translated_data, $job->target_language);
     // @todo: refactor this.
     if (module_exists('entity_translation')) {
       db_delete('entity_translation')
