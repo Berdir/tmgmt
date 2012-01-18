@@ -51,12 +51,10 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
     $translate_url = $this->translatorURL . '/Translate';
 
     foreach ($job->getItems() as $item) {
-      debug($item);
       /* @var $item TMGMTJobItem */
       $data = tmgmt_flatten_data($item->getSourceData());
-      dpm($data);
       foreach ($data as $key => $value) {
-        if ($value['#translate'] == FALSE) {
+        if (empty($value['#translate'])) {
           continue;
         }
 
@@ -87,7 +85,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
             // to send array of translation sources, and we will probably use
             // this soon.
             $dom = new DOMDocument;
-            $dom->loadXML($res->data);
+            $dom->loadXML($result->data);
             $string_items = $dom->getElementsByTagName('string');
             $data[$key]['#text'] = $string_items->item(0)->nodeValue;
             debug($string_items->item(0)->nodeValue);
