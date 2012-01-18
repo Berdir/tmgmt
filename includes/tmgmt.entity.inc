@@ -236,11 +236,11 @@ class TMGMTJob extends Entity {
   public $target_language;
 
   /**
-   * Response message from the translator.
+   * Response log from the translator.
    *
-   * Can for example be used if the job has been rejected by the translator.
+   * An array of response messages keyed by the time of the occurence.
    *
-   * @var string
+   * @var array
    */
   public $response;
 
@@ -277,7 +277,7 @@ class TMGMTJob extends Entity {
   /**
    * Propagates the returned job item translations to the sources.
    */
-  function saveTranslation() {
+  function saveTranslations() {
     if ($this->state == self::STATE_ACCEPTED) {
       foreach ($this->getItems() as $item) {
         $item->getSourceController()->saveTranslation($item);
@@ -288,14 +288,15 @@ class TMGMTJob extends Entity {
   /**
    * Updates the state of a job to the state supplied by the response object.
    *
-   * @param TMGMTranslatorResponseInterface $response
+   * @param TMGMTTranslatorResponseInterface $response
    *   The response object.
    *
    * @return bool
    *   TRUE if the state of the job entity has been updated, FALSE otherwise.
    */
-  function setStateFromResponse(TMGMTranslatorResponseInterface $response) {
-    if (($state = $response->toJobstate()) !== NULL) {
+  function setStateFromResponse(TMGMTTranslatorResponseInterface $response) {
+    if (($state = $response->toJobState()) !== NULL) {
+      $this->response[REQUEST_TIME][] = $response->toString();
       return $this->setState($state);
     }
     return FALSE;
@@ -396,7 +397,7 @@ class TMGMTJob extends Entity {
     debug($response);
     $this->setStateFromResponse($response);
     $this->save();
-    return $this->getStatus();
+    return $this->getState();
   }
 
   /**
@@ -406,7 +407,7 @@ class TMGMTJob extends Entity {
     $translator = $this->getTranslatorPlugin();
     $response = $translator->cancelTranslation($this);
     $this->setStateFromResponse($response);
-    return $this->getStatus() == TMGMTJob::STATE_CANCELLED;
+    return $this->getState() == TMGMTJob::STATE_CANCELLED;
   }
 
 }

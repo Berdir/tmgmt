@@ -194,7 +194,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     // @todo adapt to state changing methods once implemented.
     $es_job->state = TMGMTJob::STATE_ACCEPTED;
     $es_job->save();
-    tmgmt_job_save_translations($es_job);
+    $es_job->saveTranslations();
 
     // Check if the translations have been "saved".
     foreach ($es_job->getItems() as $item) {
@@ -205,8 +205,8 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $it_job = tmgmt_test_trigger_job('it');
     $it_job->requestTranslation();
     $this->assertEqual(TMGMTJob::STATE_REJECTED, $it_job->state);
-    // @todo Change once the response pattern has been implemented.
-    $this->assertEqual('Translation into italian not supported', $it_job->response);
+    $last_response = end($it_job->response);
+    $this->assertEqual(t('Translation into italian not supported'), reset($last_response));
 
     // Trigger a translation job into chinese.
     $zh_job = tmgmt_test_trigger_job('zh-hans');

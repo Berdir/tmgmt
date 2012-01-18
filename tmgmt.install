@@ -64,9 +64,11 @@ function tmgmt_schema() {
         'length' => 256,
       ),
       'response' => array(
-        'description' => 'The response from the translator, e.g. when the order placement fails.',
-        'type' => 'varchar',
-        'length' => '255',
+        'description' => 'Response Log from the translator',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'serialize' => TRUE,
       ),
     ),
     'primary key' => array('tjid'),
@@ -153,7 +155,7 @@ function tmgmt_schema() {
         'size' => 'big',
         'serialize' => TRUE,
       ),
-      'state' => array(
+      'status' => array(
         'type' => 'int',
         'not null' => TRUE,
         // Set the default to ENTITY_CUSTOM without using the constant as it is

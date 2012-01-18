@@ -193,14 +193,14 @@ class TMGMTTranslatorResponse implements TMGMTTranslatorResponseInterface {
   }
 
   /**
-   * Implements TMGMTranslatorResponseInterface::toString(),
+   * Implements TMGMTTranslatorResponseInterface::toString(),
    */
   function toString() {
     return $this->string;
   }
 
   /**
-   * Implements TMGMTranslatorResponseInterface::toJobState(),
+   * Implements TMGMTTranslatorResponseInterface::toJobState(),
    */
   function toJobState() {
     return $this->code;
