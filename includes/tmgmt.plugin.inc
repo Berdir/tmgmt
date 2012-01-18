@@ -193,10 +193,24 @@ interface TMGMTranslatorResponseInterface {
  * @ingroup translator
  */
 class TMGMTranslatorResponse implements TMGMTranslatorResponseInterface {
+
+  /**
+   * @var
+   */
   protected $code;
+
+  /**
+   * @var
+   */
   protected $string;
-  
-  public __construct($code, $string) {
+
+  /**
+   * Constructor.
+   *
+   * @param $code
+   * @param $string
+   */
+  public function __construct($code, $string) {
     $this->code = $code;
     $this->string = $string;
   }
@@ -225,5 +239,6 @@ class TMGMTranslatorResponse implements TMGMTranslatorResponseInterface {
   function toJobStatus() {
     return $this->code;
   }
+
 }
 

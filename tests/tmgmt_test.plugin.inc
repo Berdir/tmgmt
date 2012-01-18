@@ -29,7 +29,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
 
             $data[$key]['#text'] = str_replace('n', 'ñ', $data_entry['#text']);
           }
-          tmgmt_job_item_add_translated_data($item, tmgmt_unflatten_data($data));
+          $item->addTranslatedData(tmgmt_unflatten_data($data));
         }
         break;
 

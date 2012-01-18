@@ -130,7 +130,6 @@ class TMGMTJobItem extends Entity {
     return $this->getSourceController()->getData($this);
   }
 
-
   /**
    * Returns the configured plugin controller.
    *
@@ -138,6 +137,34 @@ class TMGMTJobItem extends Entity {
    */
   public function getSourceController() {
     return tmgmt_source_plugin_controller($this->plugin);
+  }
+
+  /**
+   * Add translated data to a job item.
+   *
+   * Note: This does not merge existing data which already exists below the
+   * defined key and will replace it.
+   *
+   * @param $translated_data
+   *   Nested array of translated data. Can either be a single text entry, the
+   *   whole data structure or parts of it.
+   * @param $key
+   *   (Optional) Either a flattened key (a 'key1:key2:key3' string) or a nested
+   *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
+   *   means that it will replace the whole translated data array.
+   */
+  public function addTranslatedData($translated_data, $key = array()) {
+    if (empty($key)) {
+      $key = array();
+    }
+    if (!is_array($key)) {
+      $key = explode(':', $key);
+    }
+    if (!is_array($this->translated_data)) {
+      $this->translated_data = array();
+    }
+    drupal_array_set_nested_value($this->translated_data, $key, $translated_data);
+    $this->save();
   }
 
 }
