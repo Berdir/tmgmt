@@ -82,7 +82,7 @@ class TMGMTJobItem extends Entity {
    * @var varchar
    */
   public $plugin;
-  
+
   /**
    * The identifier of the translation job.
    *
@@ -342,6 +342,7 @@ class TMGMTJob extends Entity {
     if (!empty($results['tmgmt_job_item'])) {
       return tmgmt_job_item_load_multiple(array_keys($results['tmgmt_job_item']));
     }
+    return array();
   }
 
   /**
@@ -401,7 +402,6 @@ class TMGMTJob extends Entity {
   function requestTranslation() {
     $translator = $this->getTranslatorPlugin();
     $response = $translator->requestTranslation($this);
-    debug($response);
     $this->setStateFromResponse($response);
     $this->save();
     return $this->getState();

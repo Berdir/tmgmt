@@ -120,6 +120,8 @@ function tmgmt_node_translator_settings_form_submit($form, &$form_state) {
   $item = tmgmt_job_item_create('node', 'node', $values['nid']);
   $job->addItem($item);
 
+  // Mark the job as prepared.
+  $job->setState(TMGMTJob::STATE_PREPARED);
 }
 
 /**
