@@ -75,16 +75,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
  */
 class TMGMTNodeSourceTranslationFactory {
   public static function getTranslationSaver($setting) {
-    switch ($setting) {
-      case 2:{
-        return new TMGMTNodeSourceContentTranslation();
-      }
-      case 4: {
-        return new TMGMTNodeSourceFieldTranslation();
-      }
-    default :
-      return NULL;
-    }
+    return new TMGMTNodeSourceContentTranslation();
   }
 }
 
@@ -117,56 +108,16 @@ class TMGMTNodeSourceContentTranslation implements TMGMTNodeSourceTranslationInt
       // language, so load it.
       $tnode = node_load($translations[$job->target_language]->nid);
     }
+    drupal_set_message('here');
     // If the $tnode is still NULL, we have to create a new node.
     if (is_null($tnode)) {
-      $tnode = new stdClass();
+      $tnode = clone $node;
+      unset($tnode->nid, $tnode->vid);
       $tnode->language = $job->target_language;
       $tnode->translation_source = $node;
-      $shared_fields = array('type', 'uid', 'status', 'comment', 'promote', 'sticky');
-      foreach ($shared_fields as $shared_field) {
-        $tnode->{$shared_field} = $node->{$shared_field};
-      }
     }
     // Time to put the translated data into the node.
     tmgmt_node_update_node_translation($tnode, $job_item->translated_data, $job->target_language);
   }
   
-}
-
-/**
- * Class for saving field translations.
- */
-class TMGMTNodeSourceFieldTranslation implements TMGMTNodeSourceTranslationInterface {
-
-  public function saveTranslation(TMGMTJobItem $job_item) {
-    $node = node_load($job_item->item_id);
-    $job = tmgmt_job_load($job_item->tjid);
-    // Do we need to unflat the data here?
-    $translated_data = tmgmt_unflatten_data($job_item->translated_data);
-    tmgmt_node_update_node_translation($node, $translated_data, $job->target_language);
-    // @todo: refactor this.
-    if (module_exists('entity_translation')) {
-      db_delete('entity_translation')
-        ->condition('entity_type', 'node')
-        ->condition('entity_id', $node->nid)
-        ->condition('language', $job->target_language)
-        ->execute();
-
-      $columns = array('entity_type', 'entity_id', 'language', 'source', 'uid', 'status', 'translate', 'created', 'changed');
-      $query = db_insert('entity_translation')->fields($columns);
-      $values = array(
-        'entity_type' => 'node',
-        'entity_id' => $node->nid,
-        'language' => $job->target_language,
-        'source' => $job->source_language,
-        'uid' => $node->uid,
-        'status' => $node->status,
-        'translate' => 0,
-        'created' => REQUEST_TIME,
-        'changed' => REQUEST_TIME,
-      );
-      $query->values($values)->execute();
-    }
-  }
-
 }
