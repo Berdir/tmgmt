@@ -237,8 +237,17 @@ function tmgmt_translator_plugin_controller($plugin) {
  * @return array
  *   An array of the labels of all available plugins.
  */
-function tmgmt_translator_plugin_labels() {
-  return _tmgmt_plugin_labels('translator');
+function tmgmt_translator_plugin_labels($available_only = FALSE) {
+  $translators = _tmgmt_plugin_labels('translator');
+  if ($available_only) {
+    foreach ($translators as $name => $label) {
+      $plugin = tmgmt_translator_plugin_controller($name);
+      if (!$plugin->isAvailable()) {
+        unset($translators[$name]);
+      }
+    }
+  }
+  return $translators;
 }
 
 /**

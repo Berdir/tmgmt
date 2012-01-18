@@ -18,18 +18,24 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   protected $translatorURL = 'http://api.microsofttranslator.com/v2/Http.svc';
 
   /**
+   * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
+   */
+  public function isAvailable() {
+    if ($this->getOption('bing_api_id')) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
    *
    * We will check are source and target language supported.
    */
   public function canTranslate(TMGMTJob $job) {
-    $bing_api_id = $this->getOption('bing_api_id');
-    if (empty($bing_api_id)) {
-      return FALSE;
-    }
-
     $languages = $this->getSupportedLanguages();
-    if (isset($languages[$job->source_language]) && isset($languages[$job->target_language])) {
+    if ($this->isAvailable() && isset($languages[$job->source_language]) && isset($languages[$job->target_language])) {
+      // The job is only translatable if the translator is available too.
       return TRUE;
     }
     // What to return if we can not query service and can not get supported
@@ -54,7 +60,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       }
 
       $query_data = drupal_http_build_query(array(
-        'appId'       => $this->bingAPIID,
+        'appId'       => variable_get(''),
         'from'        => $job->source_language,
         'to'          => $job->target_language,
         'contentType' => 'text/plain',
