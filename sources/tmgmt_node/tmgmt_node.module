@@ -30,6 +30,12 @@ function tmgmt_node_menu() {
  */
 function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
 
+  // Check for pending jobs.
+//  $jobs = tmgmt_get_jobs('node','node',$node->vid);
+  if(!empty($jobs)) {
+
+  }
+
   $language_options = array();
   // get all avalible languages from core translation module.
   $avalible_languages = language_list();
@@ -103,12 +109,17 @@ function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
 function tmgmt_node_translator_settings_form_submit($form, &$form_state) {
 
   $values = $form_state['values'];
+
+  // create the job object.
   $job = tmgmt_job_create($values['source_language'], $values['target_language']);
+
+  // add the selected translator.
+  $job->translator = $values['translation_service'];
   $job->save();
+  // create a job item and add it to the job.
   $item = tmgmt_job_item_create('node', 'node', $values['nid']);
   $job->addItem($item);
-  dsm($job->getItems());
-  
+
 }
 
 /**
