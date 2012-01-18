@@ -204,6 +204,11 @@ class TMGMTJob extends Entity {
   const STATE_ACCEPTED = 4;
 
   /**
+   * Translation job has been cancelled.
+   */
+  const STATE_CANCELLED = 5;
+
+  /**
    * Translation job identifier.
    *
    * @var integer
@@ -269,17 +274,28 @@ class TMGMTJob extends Entity {
     parent::__construct($values, 'tmgmt_job');
   }
 
-  /**
-   * Adds the item to the translation job.
-   *
-   * @param $item
-   *    The translation job item.
-   *
-   * @return TMGMTJobItem
-   *   The updated item
-   */
+ /**
+  * Add an item to the translation job.
+  *
+  * @param $job
+  *   The translation job.
+  * @param $item
+  *   The translation job item.
+  *
+  * @todo Probably it is better to return the return value of the ->save() method
+  * here since we might want to check if the item was successfully added to
+  * the job.
+  *
+  * @return TMGMTJobItem
+  *   The updated job item.
+  */
   public function addItem(TMGMTJobItem $item) {
-    return tmgmt_job_add_item($this, $item);
+    // Save the job if it hasn't yet been saved.
+    if (empty($this->tjid)) {
+      $this->save();
+    }
+    $item->tjid = $this->tjid;
+    $item->save();
   }
 
   /**
@@ -353,6 +369,31 @@ class TMGMTJob extends Entity {
       default:
         return FALSE;
     }
+  }
+
+  /**
+   * Request the translation of a job from the translator.
+   *
+   * @return
+   *   The updated job status.
+   */
+  function requestTranslation() {
+    $translator = $this->getTranslatorPlugin();
+    $response = $translator->requestTranslation($this);
+    debug($response);
+    $this->setStateFromResponse($response);
+    $this->save();
+    return $this->getStatus();
+  }
+
+  /**
+   * Request the translation of a job from the translator.
+   */
+  function cancelTranslation() {
+    $translator = $this->getTranslatorPlugin();
+    $response = $translator->cancelTranslation($this);
+    $this->setStateFromResponse($response);
+    return $this->getStatus() == TMGMTJob::STATE_CANCELLED;
   }
 
 }

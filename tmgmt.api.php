@@ -81,13 +81,10 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  *
  * @code
  * $job = tmgmt_job_create('en', $target_language);
- * // Job needs to be saved first.
- * // @todo: Fix this.
- * $job->save();
  *
  * for ($i = 1; $i < 3; $i++) {
  *   $item = tmgmt_job_item_create('test_source', 'test', $i);
- *   tmgmt_job_add_item($job, $item);
+ *   $job->addItem($item);
  * }
  * @endcode
  *

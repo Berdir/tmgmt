@@ -14,13 +14,10 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     // Do something different based on the target language.
     switch ($job->target_language) {
       case 'de':
-        $job->state = TMGMTJob::STATE_SUBMITTED;
-
+        return new TMGMTTranslatorResponse(TMGMTJob::STATE_SUBMITTED, t('Test submit'));
         break;
 
       case 'es':
-        $job->state = TMGMTJob::STATE_REVIEW;
-
         foreach ($job->getItems() as $item) {
           /* @var $item TMGMTJobItem */
           $data = tmgmt_flatten_data($item->getSourceData());
@@ -31,21 +28,18 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
           }
           $item->addTranslatedData(tmgmt_unflatten_data($data));
         }
+        return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Test translation created'));
         break;
 
       case 'it':
-        $job->state = TMGMTJob::STATE_REJECTED;
-        $job->response = 'Translation into italian not supported';
+        return new TMGMTTranslatorResponse(TMGMTJob::STATE_REJECTED, t('Translation into italian not supported'));
         break;
 
       case 'zh-hans':
         // Target not reachable.
-        return FALSE;
+        return new TMGMTTranslatorResponse(NULL, t('Service not reachable'));
         break;
     }
-
-    // @todo: Who nees to save the job?
-    $job->save();
   }
 }
 
@@ -64,43 +58,5 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
   public function saveTranslation(TMGMTJobItem $job_item) {
     // Set a variable that can be checked later for a given job item.
     variable_set('tmgmt_test_saved_translation_' . $job_item->item_type . '_' . $job_item->item_id, TRUE);
-  }
-}
-
-class TMGMTTestTranslatorResponse implements TMGMTranslatorResponseInterface {
-
-  /**
-   * @var $response
-   */
-  protected $response;
-
-  /**
-   * Constructor.
-   *
-   * @param $response
-   */
-  public function __construct($response) {
-    $this->response = $response;
-  }
-
-  /**
-   * Implements TMGMTranslatorResponseInterface::getResponse().
-   */
-  public function getResponse() {
-    return $this->response;
-  }
-
-  /**
-   * Implements TMGMTranslatorResponseInterface::toStatus().
-   */
-  public function toStatus() {
-
-  }
-
-  /**
-   * Implements TMGMTranslatorResponseInterface::toString().
-   */
-  public function toString() {
-
   }
 }

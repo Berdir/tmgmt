@@ -80,7 +80,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * @param $job TMGMTJob
    *   The TMGMTJob that should be submitted.
    *
-   * @return boolean
+   * @return TMGMTTranslatorResponseInterface
    *   TRUE if the job has been successfully submitted, FALSE otherwise.
    */
   public function requestTranslation(TMGMTJob $job);
@@ -99,7 +99,7 @@ interface TMGMTTranslatorPluginControllerInterface {
  *
  * @ingroup translator
  */
-class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginControllerInterface {
+abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginControllerInterface {
 
   protected $pluginType;
   protected $pluginInfo;
@@ -120,12 +120,6 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
    * @return boolean
    */
   public function canTranslate(TMGMTJob $job) {
-    return FALSE;
-  }
-  /**
-   * Submit callback.
-   */
-  public function requestTranslation(TMGMTJob $job) {
     return TRUE;
   }
 
@@ -135,17 +129,7 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
    * @param TMGMTJob $job
    */
   public function cancelTranslation(TMGMTJob $job) {
-  }
-
-  /**
-   * Get status for translation job
-   *
-   * @param TMGMTJob $job
-   *
-   * @return int
-   *   Job status (T.Mgmt)
-   */
-  public function getJobStatus(TMGMTJob $job) {
+    return TMGMTTranslatorResponse(TMGMTJob::STATE_CANCELLED, t('Canceled'));
   }
 
   /**
@@ -162,7 +146,7 @@ class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginCon
  *
  * @ingroup translator
  */
-interface TMGMTranslatorResponseInterface {
+interface TMGMTTranslatorResponseInterface {
 
   /**
    * Translates the response of the translation provider into a message that
@@ -192,7 +176,7 @@ interface TMGMTranslatorResponseInterface {
  *
  * @ingroup translator
  */
-class TMGMTranslatorResponse implements TMGMTranslatorResponseInterface {
+class TMGMTTranslatorResponse implements TMGMTTranslatorResponseInterface {
 
   /**
    * @var
@@ -204,12 +188,6 @@ class TMGMTranslatorResponse implements TMGMTranslatorResponseInterface {
    */
   protected $string;
 
-  /**
-   * Constructor.
-   *
-   * @param $code
-   * @param $string
-   */
   public function __construct($code, $string) {
     $this->code = $code;
     $this->string = $string;

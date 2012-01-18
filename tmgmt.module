@@ -162,27 +162,6 @@ function tmgmt_job_create($source_language, $target_language, array $values = ar
 }
 
 /**
- * Add an item to a translation job.
- *
- * @param $job
- *   The translation job.
- * @param $item
- *   The translation job item.
- *
- * @todo Probably it is better to return the return value of the ->save() method
- * here since we might want to check if the item was successfully added to
- * the job.
- *
- * @return TMGMTJobItem
- *   The updated job item.
- */
-function tmgmt_job_add_item(TMGMTJob $job, TMGMTJobItem $item) {
-  $item->tjid = $job->identifier();
-  $item->save();
-  return $item;
-}
-
-/**
  * Propagates the returned job item translations to the sources.
  *
  * @param $job

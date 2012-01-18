@@ -124,8 +124,8 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     // Test the job items.
     $item1 = tmgmt_job_item_create('plugin', 'type', 5);
     $item2 = tmgmt_job_item_create('plugin', 'type', 4);
-    tmgmt_job_add_item($job, $item1);
-    tmgmt_job_add_item($job, $item2);
+    $job->addItem($item1);
+    $job->addItem($item2);
 
     // Load and compare the items.
     $items = $job->getItems();
@@ -172,16 +172,14 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     // Trigger a translation job into german.
     $de_job = tmgmt_test_trigger_job('de');
-    $translator = $de_job->getTranslatorPlugin();
-    $translator->requestTranslation($de_job);
+    $de_job->requestTranslation();
 
     $de_job = tmgmt_job_load($de_job->tjid);
     $this->assertEqual(TMGMTJob::STATE_SUBMITTED, $de_job->state);
 
     // Trigger a translation job into spanish.
     $es_job = tmgmt_test_trigger_job('es');
-    $translator = $es_job->getTranslatorPlugin();
-    $translator->requestTranslation($es_job);
+    $es_job->requestTranslation();
 
     $es_job = tmgmt_job_load($es_job->tjid);
     $this->assertEqual(TMGMTJob::STATE_REVIEW, $es_job->state);
@@ -205,16 +203,14 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     // Trigger a translation job into italian.
     $it_job = tmgmt_test_trigger_job('it');
-    $translator = $it_job->getTranslatorPlugin();
-    $translator->requestTranslation($it_job);
+    $it_job->requestTranslation();
     $this->assertEqual(TMGMTJob::STATE_REJECTED, $it_job->state);
     // @todo Change once the response pattern has been implemented.
     $this->assertEqual('Translation into italian not supported', $it_job->response);
 
     // Trigger a translation job into chinese.
     $zh_job = tmgmt_test_trigger_job('zh-hans');
-    $translator = $it_job->getTranslatorPlugin();
-    $translator->requestTranslation($zh_job);
+    $zh_job->requestTranslation();
     // Still new.
     $this->assertEqual(TMGMTJob::STATE_NEW, $zh_job->state);
   }
