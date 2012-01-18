@@ -158,16 +158,15 @@ interface TMGMTTranslatorResponseInterface {
   function toString();
 
   /**
-   * Returns a valid Translation Management job status depending on the response
-   * of the translator plugin. Has to be one of TMGMTJob::STATE_NEW,
-   * TMGMTJob::STATE_SUBMITTED TMGMTJob::STATE_REJECTED, TMGMTJob::STATE_REVIEW,
-   * TMGMTJob::STATE_ACCEPTED or NULL if the response of the translation
-   * provider could not be mapped to a valid job status.
+   * Returns a valid Translation Management job state depending on the response
+   * of the translator plugin. Has to be one of the defined state constants or
+   * NULL if the reponse of the provider could not be mapped to a valid job
+   * state.
    *
    * @return
-   *   A valid status for a TranslationManagementJob entity or NULL.
+   *   A valid state for a TranslationManagementJob entity or NULL.
    */
-  function toJobStatus();
+  function toJobState();
 
 }
 
@@ -194,27 +193,16 @@ class TMGMTTranslatorResponse implements TMGMTTranslatorResponseInterface {
   }
 
   /**
-   * Translates the response of the translation provider into a message that
-   * can be displayed to the user.
-   *
-   * @return string
-   *   A message that describes the response from the translation provider.
+   * Implements TMGMTranslatorResponseInterface::toString(),
    */
   function toString() {
     return $this->string;
   }
 
   /**
-   * Returns a valid Translation Management job status depending on the response
-   * of the translator plugin. Has to be one of TMGMTJob::STATE_NEW,
-   * TMGMTJob::STATE_SUBMITTED TMGMTJob::STATE_REJECTED, TMGMTJob::STATE_REVIEW,
-   * TMGMTJob::STATE_ACCEPTED or NULL if the response of the translation
-   * provider could not be mapped to a valid job status.
-   *
-   * @return
-   *   A valid status for a TranslationManagementJob entity or NULL.
+   * Implements TMGMTranslatorResponseInterface::toJobState(),
    */
-  function toJobStatus() {
+  function toJobState() {
     return $this->code;
   }
 

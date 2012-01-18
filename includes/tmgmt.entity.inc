@@ -204,7 +204,7 @@ class TMGMTJob extends Entity {
   const STATE_ACCEPTED = 4;
 
   /**
-   * Translation job has been cancelled.
+   * The translation job has been cancelled.
    */
   const STATE_CANCELLED = 5;
 
@@ -274,21 +274,42 @@ class TMGMTJob extends Entity {
     parent::__construct($values, 'tmgmt_job');
   }
 
- /**
-  * Add an item to the translation job.
-  *
-  * @param $job
-  *   The translation job.
-  * @param $item
-  *   The translation job item.
-  *
-  * @todo Probably it is better to return the return value of the ->save() method
-  * here since we might want to check if the item was successfully added to
-  * the job.
-  *
-  * @return TMGMTJobItem
-  *   The updated job item.
-  */
+  /**
+   * Propagates the returned job item translations to the sources.
+   */
+  function saveTranslation() {
+    if ($this->state == self::STATE_ACCEPTED) {
+      foreach ($this->getItems() as $item) {
+        $item->getSourceController()->saveTranslation($item);
+      }
+    }
+  }
+
+  /**
+   * Updates the state of a job to the state supplied by the response object.
+   *
+   * @param TMGMTranslatorResponseInterface $response
+   *   The response object.
+   *
+   * @return bool
+   *   TRUE if the state of the job entity has been updated, FALSE otherwise.
+   */
+  function setStateFromResponse(TMGMTranslatorResponseInterface $response) {
+    if (($state = $response->toJobstate()) !== NULL) {
+      return $this->setState($state);
+    }
+    return FALSE;
+  }
+
+  /**
+   * Adds the item to the translation job.
+   *
+   * @param $item
+   *    The translation job item.
+   *
+   * @return TMGMTJobItem
+   *   The updated item
+   */
   public function addItem(TMGMTJobItem $item) {
     // Save the job if it hasn't yet been saved.
     if (empty($this->tjid)) {
@@ -329,46 +350,38 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Returns the status of the job. Can be one of TMGMTJob::STATE_NEW,
-   * TMGMTJob::STATE_SUBMITTED TMGMTJob::STATE_REJECTED, TMGMTJob::STATE_REVIEW,
-   * TMGMTJob::STATE_ACCEPTED or NULL if the status hasn't been defined yet.
+   * Returns the state of the job. Can be one of the job state constants.
    *
    * @return
-   *   The status of the job.
+   *   The state of the job.
    */
-  public function getStatus() {
-    if (isset($this->status)) {
-      return $this->status;
+  public function getState() {
+    if (isset($this->state)) {
+      return $this->state;
     }
     return NULL;
   }
 
   /**
-   * Updates the status of the job.
+   * Updates the state of the job.
    *
-   * @param $status
-   *   The new status of the job. Has to be one of TMGMTJob::STATE_NEW,
-   *   TMGMTJob::STATE_SUBMITTED, TMGMTJob::STATE_REJECTED,
-   *   TMGMTJob::STATE_REVIEW or TMGMTJob::STATE_ACCEPTED.
+   * @param $state
+   *   The new state of the job. Has to be one of the state constants defined
+   *   in the state
    */
-  public function setStatus($status) {
-    // Return FALSE if the status already matches the supplied $status.
-    if ($this->getStatus == $status) {
-      return FALSE;
-    }
-    // Fire certain actions specific to the status update and return TRUE if
-    // the status was updated. Return FALSE otherwise.
-    switch ($status) {
+  public function setState($state) {
+    // Return TRUE if the state could be set. Return FALSE otherwise.
+    switch ($state) {
       case self::STATE_ACCEPTED:
       case self::STATE_NEW:
       case self::STATE_REJECTED:
       case self::STATE_REVIEW:
       case self::STATE_SUBMITTED:
-        $this->status = $status;
+      case self::STATE_CANCELLED;
+        $this->state = $state;
         return TRUE;
-      default:
-        return FALSE;
     }
+    return FALSE;
   }
 
   /**
