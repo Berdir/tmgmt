@@ -202,7 +202,7 @@ function tmgmt_node_update_node_translation($node, $translated_data, $target_lan
  *
  * @todo: this hook should probably be placed elsewhere.
  */
-function text_tmgmt_source_translation_structure($field_name, $node, $field_info, $instance) {
+function text_tmgmt_source_translation_structure($field_name, $node, $field_info, $instance, $job) {
   // @todo: there may be a problem if the user changes the order of the values
   // in the case of a field with multiple values...
   $field_lang = field_language('node', $node, $field_name);
@@ -210,15 +210,15 @@ function text_tmgmt_source_translation_structure($field_name, $node, $field_info
   if (!empty($node->{$field_name})) {
     foreach ($node->{$field_name}[$field_lang] as $key => $value) {
       $structure[$key]['value'] = array(
-        '#label' => 'Value nr. ' . $key,
+        '#label' => t('!field_name: Value nr. !count', array('!field_name' => $instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
         '#text' => $value['value'],
         '#translate' => TRUE,
       );
       if ($field_info['type'] == 'text_with_summary' && !empty($value['summary'])) {
         $structure[$key]['summary'] = array(
-          '#label' => 'Summary nr. ' . $key,
+          '#label' => t('!field_name: Summary nr. !count',array('!field_name' => $instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
           '#text' => $value['summary'],
-          '#translate' => TRUE,
+          '#translate' => TRUE
         );
       }
     }

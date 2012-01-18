@@ -3,6 +3,9 @@
 /**
  * @file
  * Provides Microsoft Translator plugin controller.
+ * 
+ * Check @link http://msdn.microsoft.com/en-us/library/dd576287.aspx Microsoft 
+ * Translator @endlink. Note that we are using HTTP API.
  */
 
 class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginController {
@@ -14,8 +17,11 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    */
   protected $bingAPIID = 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369';
 
-  // @todo - or maybe this is configurable optin - chech how we deal with
-  // configurations.
+  /**
+   * Translation service URL.
+   * 
+   * @var string
+   */
   protected $translatorURL = 'http://api.microsofttranslator.com/v2/Http.svc';
 
   /**
@@ -29,7 +35,8 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       return TRUE;
     }
 
-    // @todo - What to return if we can not query for what ever reason?
+    // What to return if we can not query service and can not get supported 
+    // languages, for what ever reason? For now it is safer to return FALSE.
     return FALSE;
   }
 
@@ -63,7 +70,8 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
         ));
 
         $options = array(
-          // @todo - for some reason post is returning 202 status and service is not translating things, maybe check this later.
+          // @todo - for some reason post is returning 202 status and service 
+          // is not translating things, maybe check this later.
           //'method' => 'POST',
           //'data' => $query_data,
           'headers' => array('Content-Type' => 'text/plain')
@@ -88,6 +96,8 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
           default:
             // @todo - we need to think here more what to do if service is not
             // responding for some items and is responding for some others.
+            // Ideally we should save sources that we manage to translate and
+            // not just return.
             return new TMGMTTranslatorResponse(NULL, $result->data);
             break;
         }
