@@ -11,38 +11,38 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   function requestTranslation(TMGMTJob $job) {
-    // The dummy translation prefixes strings with the target language.
-    $data = tmgmt_flatten_data($job->getSourceData());
-    foreach ($data as $key => $value) {
-      $data[$key]['#text'] = $job->target_language . '_' . $value['#text'];
-    }
-    $job->addTranslatedData(tmgmt_unflatten_data($data));
 
-    // Do something different based on the target language.
-    switch ($job->target_language) {
-      case 'de':
+    // Do something different based on the action, if defined.
+    $action = isset($job->translator_context['action']) ? $job->translator_context['action'] : '';
+    switch ($action) {
+      case 'submit':
         $job->submitted('Test submit');
+        return;
         break;
 
-      case 'es':
+      case 'reject':
+        $job->rejected(t('Translation into italian not supported'));
+        return;
+        break;
+
+      case 'fail':
+        // Target not reachable.
+        $job->addMessage('Service not reachable');
+        return;
+        break;
+
+      case 'translate':
+      default:
+        // The dummy translation prefixes strings with the target language.
         $data = tmgmt_flatten_data($job->getSourceData());
         foreach ($data as $key => $value) {
-          // Translate into spanish!
-          $data[$key]['#text'] = str_replace('n', 'ñ', $value['#text']);
+          $data[$key]['#text'] = $job->target_language . '_' . $value['#text'];
         }
         $job->addTranslatedData(tmgmt_unflatten_data($data));
         $job->needsReview('Test translation created');
         break;
-
-      case 'it':
-        $job->rejected(t('Translation into italian not supported'));
-        break;
-
-      case 'zh-hans':
-        // Target not reachable.
-        return $job->addMessage('Service not reachable');
-        break;
     }
+    return TRUE;
   }
 
   /**

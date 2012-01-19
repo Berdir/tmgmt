@@ -95,7 +95,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
           // responding for some items and is responding for some others.
           // Ideally we should save sources that we manage to translate and
           // not just return.
-          $job->addMessage($result->data);
+          $job->addMessage('Error from server: @error', array('@error' => $result->data));
           return;
           break;
       }

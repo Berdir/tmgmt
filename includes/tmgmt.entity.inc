@@ -367,7 +367,7 @@ class TMGMTJob extends Entity {
    * Propagates the returned job item translations to the sources.
    */
   public function propagateTranslatedData() {
-    if ($this->state == self::STATE_ACCEPTED) {
+    if ($this->isAccepted()) {
       foreach ($this->getItems() as $item) {
         $item->getSourceController()->saveTranslation($item);
       }
@@ -415,13 +415,14 @@ class TMGMTJob extends Entity {
    * Returns the job items.
    *
    * @return
-   *   Array of translation job items.
+   *   Array of translation job messages.
    */
   public function getMessages() {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'tmgmt_job_message');
     $query->propertyCondition('tjid', $this->tjid);
     $results = $query->execute();
+    debug($results);
     if (!empty($results['tmgmt_job_message'])) {
       return tmgmt_job_message_load_multiple(array_keys($results['tmgmt_job_message']));
     }
@@ -515,7 +516,7 @@ class TMGMTJob extends Entity {
    * @see TMGMTJob::addLogMessage()
    */
   public function accepted($message = NULL, $arguments = array()) {
-    $this->setState(TMGMTJob::STATE_REVIEW);
+    $this->setState(TMGMTJob::STATE_ACCEPTED);
     $this->addMessage($message);
     $this->propagateTranslatedData();
   }
