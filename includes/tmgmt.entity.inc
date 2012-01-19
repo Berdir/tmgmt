@@ -493,7 +493,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @see TMGMTJob::addLogMessage()
    */
   public function accepted($message = NULL, $arguments = array()) {
-    $this->setState(TMGMTJob::STATE_ACCEPTED);
+    $this->setState(TMGMT_JOB_STATE_ACCEPTED);
     $this->addMessage($message);
     $this->propagateTranslatedData();
   }
@@ -525,7 +525,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @see TMGMTJob::addLogMessage()
    */
   public function cancelled($message = NULL, $arguments = array()) {
-    $this->setState(TMGMTJob::STATE_CANCELLED);
+    $this->setState(TMGMT_JOB_STATE_CANCELLED);
     $this->addMessage($message);
   }
 
