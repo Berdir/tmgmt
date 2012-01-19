@@ -5,7 +5,7 @@
  */
 function tmgmt_node_views_default_views() {
   $views = array();
-
+  
   $view = new view;
   $view->name = 'job_items_current_node';
   $view->description = '';
@@ -26,50 +26,24 @@ function tmgmt_node_views_default_views() {
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['grouping'] = array(
+    0 => array(
+      'field' => 'source_language',
+      'rendered' => 1,
+    ),
+  );
   $handler->display->display_options['style_options']['columns'] = array(
-    'tjiid' => 'tjiid',
-    'item_id' => 'item_id',
-    'item_type' => 'item_type',
-    'plugin' => 'plugin',
-    'rendered_entity' => 'rendered_entity',
     'tjid' => 'tjid',
-    'tjiid_1' => 'tjiid_1',
+    'state' => 'state',
+    'translator' => 'translator',
+    'source_language' => 'source_language',
+    'target_language' => 'target_language',
+    'created' => 'created',
+    'changed' => 'changed',
+    'nothing' => 'nothing',
   );
   $handler->display->display_options['style_options']['default'] = '-1';
   $handler->display->display_options['style_options']['info'] = array(
-    'tjiid' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'item_id' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'item_type' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'plugin' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'rendered_entity' => array(
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
     'tjid' => array(
       'sortable' => 0,
       'default_sort_order' => 'asc',
@@ -77,9 +51,49 @@ function tmgmt_node_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
-    'tjiid_1' => array(
+    'state' => array(
       'sortable' => 0,
       'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'translator' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'source_language' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'target_language' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'created' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'changed' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'nothing' => array(
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
@@ -92,7 +106,12 @@ function tmgmt_node_views_default_views() {
   $handler->display->display_options['relationships']['tjid']['id'] = 'tjid';
   $handler->display->display_options['relationships']['tjid']['table'] = 'tmgmt_job_item';
   $handler->display->display_options['relationships']['tjid']['field'] = 'tjid';
-  $handler->display->display_options['relationships']['tjid']['required'] = 0;
+  $handler->display->display_options['relationships']['tjid']['required'] = 1;
+  /* Relationship: Translation Management Job Item: Content */
+  $handler->display->display_options['relationships']['job_item_to_node']['id'] = 'job_item_to_node';
+  $handler->display->display_options['relationships']['job_item_to_node']['table'] = 'tmgmt_job_item';
+  $handler->display->display_options['relationships']['job_item_to_node']['field'] = 'job_item_to_node';
+  $handler->display->display_options['relationships']['job_item_to_node']['required'] = 1;
   /* Field: Translation Management Job: Translation management job ID */
   $handler->display->display_options['fields']['tjid']['id'] = 'tjid';
   $handler->display->display_options['fields']['tjid']['table'] = 'tmgmt_job';
@@ -261,20 +280,18 @@ function tmgmt_node_views_default_views() {
   $handler->display->display_options['fields']['nothing']['hide_empty'] = 0;
   $handler->display->display_options['fields']['nothing']['empty_zero'] = 0;
   $handler->display->display_options['fields']['nothing']['hide_alter_empty'] = 0;
-  /* Contextual filter: Translation Management Job Item: Item_id */
-  $handler->display->display_options['arguments']['item_id']['id'] = 'item_id';
-  $handler->display->display_options['arguments']['item_id']['table'] = 'tmgmt_job_item';
-  $handler->display->display_options['arguments']['item_id']['field'] = 'item_id';
-  $handler->display->display_options['arguments']['item_id']['default_action'] = 'not found';
-  $handler->display->display_options['arguments']['item_id']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['item_id']['default_argument_skip_url'] = 0;
-  $handler->display->display_options['arguments']['item_id']['summary']['number_of_records'] = '0';
-  $handler->display->display_options['arguments']['item_id']['summary']['format'] = 'default_summary';
-  $handler->display->display_options['arguments']['item_id']['summary_options']['items_per_page'] = '25';
-  $handler->display->display_options['arguments']['item_id']['specify_validation'] = 1;
-  $handler->display->display_options['arguments']['item_id']['validate']['type'] = 'numeric';
-  $handler->display->display_options['arguments']['item_id']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['item_id']['not'] = 0;
+  /* Contextual filter: Content translation: Translation set node ID */
+  $handler->display->display_options['arguments']['tnid']['id'] = 'tnid';
+  $handler->display->display_options['arguments']['tnid']['table'] = 'node';
+  $handler->display->display_options['arguments']['tnid']['field'] = 'tnid';
+  $handler->display->display_options['arguments']['tnid']['relationship'] = 'job_item_to_node';
+  $handler->display->display_options['arguments']['tnid']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['tnid']['default_argument_skip_url'] = 0;
+  $handler->display->display_options['arguments']['tnid']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['tnid']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['tnid']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['tnid']['break_phrase'] = 0;
+  $handler->display->display_options['arguments']['tnid']['not'] = 0;
   $translatables['job_items_current_node'] = array(
     t('Master'),
     t('more'),
@@ -284,6 +301,7 @@ function tmgmt_node_views_default_views() {
     t('Asc'),
     t('Desc'),
     t('Translation Management Job'),
+    t('Content'),
     t('Job id'),
     t('.'),
     t(','),
