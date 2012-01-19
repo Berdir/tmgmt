@@ -1,0 +1,45 @@
+<?php
+/**
+ * @file
+ * Source plugin for the Translation Management system that handles entities.
+ */
+
+/**
+ * Implements hook_tmgmt_source_plugin_info().
+ *
+ * @ingroup source
+ */
+function tmgmt_entity_tmgmt_source_plugin_info() {
+  return array(
+    'entity' => array(
+      'label' => t('Entity'),
+      'description' => t('Source handler for entities.'),
+      'controller class' => 'TMGMTEntitySourcePluginController',
+    ),
+  );
+}
+
+/**
+ * Updates an entity translation.
+ *
+ * @param object $entity
+ *   The translated entity object (the target).
+ *
+ * @param array $translated_data
+ *   An array with the structured translated data.
+ *   @see TMGMTEntitySourcePluginController::getData().
+ */
+function tmgmt_entity_update_entity_translation($entity, $entity_type, $translated_data, $target_language) {
+  foreach ($translated_data as $field_name => $values) {
+    $index = 0;
+    foreach ($values as $key => $value) {
+      $tdata = array();
+      foreach ($value as $input_name => $input_value) {
+        $tdata[$input_name] = $input_value['#text'] . ' ' . $target_language;
+      }
+      $entity->{$field_name}[$target_language][$index] = $tdata;
+      $index++;
+    }
+  }
+  entity_save($entity_type, $entity);
+}

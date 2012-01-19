@@ -1,0 +1,7 @@
+name = Entity Source
+description = Entity source plugin for the Translation Management system.
+package = Translation Management
+core = 7.x
+dependencies[] = tmgmt
+dependencies[] = node
+files[] = includes/tmgmt_entity.plugin.inc
