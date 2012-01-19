@@ -160,5 +160,28 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
         }
         return $languages;
     }
+    
+    /**
+     * Defines plugin settings form. 
+     * 
+     * @param $form array
+     * @param $form_state array
+     */
+    public function settingsForm($form, &$form_state) {
+      $form['api_public_key'] = array(
+        '#type' => 'textfield',
+        '#title' => t('myGengo API Public key'),
+        '#default_value' => $this->getOption('api_public_key', ''),
+        '#description' => t('Please enter yout myGengo API Public key.'),
+      );
+
+      $form['api_private_key'] = array(
+        '#type' => 'textfield',
+        '#title' => t('myGengo API Private key'),
+        '#default_value' => $this->getOption('api_private_key', ''),
+        '#description' => t('Please enter your myGengo API Private key.'),
+      );
+      return $form;
+    }
 
 }
