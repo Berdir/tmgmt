@@ -134,5 +134,22 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
     }
     return $languages;
   }
+  
+  /**
+   * Defines plugin settings form. 
+   * 
+   * @param $form array
+   * @param $form_state array
+   */
+  public function settingsForm($form, &$form_state) {
+    $form['bing_api_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Bing API ID'),
+      // @todo - remove default test bing id before production release.
+      '#default_value' => $this->getOption('bing_api_id', 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369'),
+      '#description' => t('Please enter yout Bing API ID, you can generate one on the !link.', array('!link' => l('http://www.bing.com/developers/appids.aspx', 'http://www.bing.com/developers/appids.aspx.'))),
+    );
+    return $form;
+  }
 
 }
