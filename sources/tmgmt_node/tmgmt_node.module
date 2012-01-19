@@ -185,26 +185,24 @@ function tmgmt_node_tmgmt_source_plugin_info() {
  *
  * @param array $translated_data
  *   An array with the structured translated data.
- *   @see TMGMTNodeSourcePluginController::getData().
+ * 
+ * @see TMGMTNodeSourcePluginController::getData()
  */
 function tmgmt_node_update_node_translation($node, $translated_data, $target_language) {
   foreach ($translated_data as $field_name => $values) {
-    // Special case for the nodelg  title.
+    // Special case for the node  title.
     if ($field_name == 'node_title') {
       $node->title = $values[0]['value']['#text'];
       continue;
     }
     $index = 0;
     $field_info = field_info_field($field_name);
-    foreach ($values as $key => $value) {
+    foreach ($values as $delta => $value) {
       $tdata = array();
       foreach ($value as $input_name => $input_value) {
         $tdata[$input_name] = $input_value['#text'];
       }
-      $field_lang = LANGUAGE_NONE;
-      if ($field_info['translatable']) {
-        $field_lang = $target_language;
-      }
+      $field_lang = $field_info['translatable'] ? $target_language : LANGUAGE_NONE;
       $node->{$field_name}[$field_lang][$index] = array_merge($node->{$field_name}[$field_lang][$index], $tdata);
       $index++;
     }
@@ -221,3 +219,4 @@ function tmgmt_node_views_api() {
     'path' => drupal_get_path('module', 'tmgmt_node') . '/includes/views',
   );
 }
+
