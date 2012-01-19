@@ -305,13 +305,92 @@ class TMGMTJob extends Entity {
   }
 
   /**
+   * Returns if the state of this transaction is new.
+   *
+   * @return
+   *   TRUE if the state is new, FALSE otherwise.
+   */
+  public function isNew() {
+    return $this->getState() == TMGMTJob::STATE_NEW;
+  }
+
+  /**
+   * Returns if the state of this transaction is prepared.
+   *
+   * @return
+   *   TRUE if the state is prepared, FALSE otherwise.
+   */
+  public function isPrepared() {
+    return $this->getState() == TMGMTJob::STATE_PREPARED;
+  }
+
+  /**
+   * Returns if the state of this transaction is submitted.
+   *
+   * @return
+   *   TRUE if the state is submitted, FALSE otherwise.
+   */
+  public function isSubmitted() {
+    return $this->getState() == TMGMTJob::STATE_SUBMITTED;
+  }
+
+  /**
+   * Returns if the state of this transaction is rejected.
+   *
+   * @return
+   *   TRUE if the state is rejected, FALSE otherwise.
+   */
+  public function isRejected() {
+    return $this->getState() == TMGMTJob::STATE_REJECTED;
+  }
+
+  /**
+   * Returns if the state of this transaction is needs review.
+   *
+   * @return
+   *   TRUE if the state is needs review, FALSE otherwise.
+   */
+  public function isNeedsReview() {
+    return $this->getState() == TMGMTJob::STATE_REVIEW;
+  }
+
+  /**
+   * Returns if the state of this transaction is accepted.
+   *
+   * @return
+   *   TRUE if the state is accepted, FALSE otherwise.
+   */
+  public function isAccepted() {
+    return $this->getState() == TMGMTJob::STATE_ACCEPTED;
+  }
+
+  /**
+   * Returns if the state of this transaction is cancelled.
+   *
+   * @return
+   *   TRUE if the state is cancelled, FALSE otherwise.
+   */
+  public function isCancelled() {
+    return $this->getState() == TMGMTJob::STATE_CANCELLED;
+  }
+
+  /**
    * Propagates the returned job item translations to the sources.
    */
-  public function saveTranslations() {
+  public function propagateTranslatedData() {
     if ($this->state == self::STATE_ACCEPTED) {
       foreach ($this->getItems() as $item) {
         $item->getSourceController()->saveTranslation($item);
       }
+    }
+  }
+
+  /**
+   * @param TMGMTTranslatorResponseInterface $response
+   */
+  public function addResponse(TMGMTTranslatorResponseInterface $response) {
+    if ((($message = $response->toString()) !== NULL)) {
+      $this->response[REQUEST_TIME][] = $response->toString();
     }
   }
 
@@ -325,8 +404,8 @@ class TMGMTJob extends Entity {
    *   TRUE if the state of the job entity has been updated, FALSE otherwise.
    */
   public function setStateFromResponse(TMGMTTranslatorResponseInterface $response) {
+    $this->addResponse($response);
     if (($state = $response->toJobState()) !== NULL) {
-      $this->response[REQUEST_TIME][] = $response->toString();
       return $this->setState($state);
     }
     return FALSE;
@@ -361,7 +440,6 @@ class TMGMTJob extends Entity {
     $query->entityCondition('entity_type', 'tmgmt_job_item');
     $query->propertyCondition('tjid', $this->tjid);
     $results = $query->execute();
-
     if (!empty($results['tmgmt_job_item'])) {
       return tmgmt_job_item_load_multiple(array_keys($results['tmgmt_job_item']));
     }
@@ -418,6 +496,22 @@ class TMGMTJob extends Entity {
   }
 
   /**
+   * Checks whether a job is translatable by checking if it is prepared and
+   * the translator can handle it.
+   *
+   * @return bool
+   *   TRUE if the job is prepared and can be translated, FALSE otherwise.
+   */
+  public function isTranslatable() {
+    if ($this->isPrepared() && $plugin = $this->getTranslatorPlugin()) {
+      if ($plugin->canTranslate($this)) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * Request the translation of a job from the translator.
    *
    * @return
@@ -432,13 +526,63 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Request the translation of a job from the translator.
+   * Attempts to cancel the translation job.
+   *
+   * Already accepted jobs can not be cancelled, submitted jobs only if
+   * supported by the translator plugin.
+   *
+   * @return
+   *   TRUE if the translation job was cancelled, FALSE otherwise.
    */
   public function cancelTranslation() {
-    $translator = $this->getTranslatorPlugin();
-    $response = $translator->cancelTranslation($this);
-    $this->setStateFromResponse($response);
-    return $this->getState() == TMGMTJob::STATE_CANCELLED;
+    // Already accepted translation jobs can't be cancelled.
+    if ($this->isAccepted()) {
+      return FALSE;
+    }
+    // If the job is not currently pending by the translator (submitted), we can
+    // cancel without any checks.
+    if (!$this->isSubmitted()) {
+      $this->setState(TMGMTJob::STATE_CANCELLED);
+    }
+    else {
+      // Otherwise, ask the translator if this job can be cancelled.
+      $translator = $this->getTranslatorPlugin();
+      $response = $translator->cancelTranslation($this);
+      $this->setStateFromResponse($response);
+    }
+    $this->save();
+    return $this->isCancelled();
+  }
+
+  /**
+   * Returns the source data of all job items.
+   *
+   * @return
+   *   A nested array with the source data where the most upper key is the job
+   *   item id.
+   */
+  public function getSourceData() {
+    $data = array();
+    foreach ($this->getItems() as $key => $item) {
+      $data[$key] = $item->getSourceData();
+    }
+    return $data;
+  }
+
+  /**
+   * Store translated data back into the items.
+   *
+   * @param $data
+   *   Partially or complete translated data, the most upper key needs to be
+   *   the translation job item id.
+   */
+  public function addTranslatedData($data) {
+    $items = $this->getItems();
+    foreach ($data as $key => $value) {
+      if (isset($items[$key])) {
+        $items[$key]->addTranslatedData($value);
+      }
+    }
   }
 
 }

@@ -66,13 +66,29 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function __construct($plugin);
 
   /**
+   * Checks whether a translator is available.
+   *
+   * @return bool
+   *   TRUE if the translator plugin is available, FALSE otherwise.
+   */
+  public function isAvailable();
+
+  /**
    * Check whether this service can handle this translation job.
    *
    * @param TMGMTJob $job
+   *   The TMGMTJob entity that should be submitted.
    *
    * @return boolean
+   *   TRUE if the job can be processed and translated, FALSE otherwise.
    */
   public function canTranslate(TMGMTJob $job);
+
+  /**
+   * @param $source_language
+   * @return mixed
+   */
+  public function getSupportedTargetLanguages($source_language);
 
   /**
    * Submit callback.
@@ -86,9 +102,10 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function requestTranslation(TMGMTJob $job);
 
   /**
-   * Cancel translation job
+   * Cancels a translation job.
    *
    * @param TMGMTJob $job
+   *   The TMGMTJob entity that should have its translation cancelled.
    */
   public function cancelTranslation(TMGMTJob $job);
 
@@ -113,27 +130,28 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Check whether this service can handle this translation job.
-   *
-   * @param TMGMTJob $job
-   *
-   * @return boolean
+   * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
-  public function canTranslate(TMGMTJob $job) {
+  public function isAvailable() {
     return TRUE;
   }
 
   /**
-   * Cancel translation job
-   *
-   * @param TMGMTJob $job
+   * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
    */
-  public function cancelTranslation(TMGMTJob $job) {
-    return TMGMTTranslatorResponse(TMGMTJob::STATE_CANCELLED, t('Canceled'));
+  public function canTranslate(TMGMTJob $job) {
+    return $this->isAvailable();
   }
 
   /**
-   * Get setting for this Service
+   * Implements TMGMTTranslatorPluginControllerInterface::cancelTranslation().
+   */
+  public function cancelTranslation(TMGMTJob $job) {
+    return new TMGMTTranslatorResponse(TMGMTJob::STATE_CANCELLED, t('Canceled'));
+  }
+
+  /**
+   * Get settings for this Service
    */
   protected function getOption($name, $default = NULL) {
     return variable_get('tmgmt_' . $this->pluginType . '_' . $name, $default);
@@ -187,6 +205,12 @@ class TMGMTTranslatorResponse implements TMGMTTranslatorResponseInterface {
    */
   protected $string;
 
+  /**
+   * Constructor.
+   *
+   * @param $code
+   * @param $string
+   */
   public function __construct($code, $string) {
     $this->code = $code;
     $this->string = $string;

@@ -18,12 +18,17 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   function requestTranslation(TMGMTJob $job) {
-    foreach ($job->getItems() as $item) {
-      // Use original data as translated data.
-      $data = $item->getSourceData();
-      $item->addTranslatedData($data);
-    }
+    $job->addTranslatedData($job->getSourceData());
     return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Dummy translation completed.'));
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
+   */
+  function getSupportedTargetLanguages($source_language) {
+    $languages = entity_metadata_language_list();
+    unset($languages[LANGUAGE_NONE], $languages[$source_language]);
+    return drupal_map_assoc(array_keys($languages));
   }
 
 }

@@ -13,31 +13,10 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
   public function __construct($plugin) {
     parent::__construct($plugin);
   }
+
   /**
    * Returns the data from the fields as a structure that can be processed by
    * the Translation Management system.
-   *
-   * A real example could be:
-   * array(
-   *   'field_text_example' => array(
-   *        0 => array(
-   *          'value' => array(
-   *            '#text' => "Some example text",
-   *            '#label' => "Value nr. 0",
-   *          ),
-   *          'summary' => array(
-   *            '#text' => "Some example summary",
-   *            '#label' => "Summary nr. 0",
-   *          ),
-   *        ),
-   *        1 => array(
-   *          'value' => array(
-   *            '#text' => "A second example text",
-   *            '#label' => "Value nr. 1",
-   *          )
-   *        ),
-   *   )
-   * )
    */
   public function getData(TMGMTJobItem $job_item) {
     $node = node_load($job_item->item_id);
@@ -57,6 +36,9 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     return $structure;
   }
 
+  /**
+   * Overriden.
+   */
   public function saveTranslation(TMGMTJobItem $job_item) {
     $node = node_load($job_item->item_id);
     $job = tmgmt_job_load($job_item->tjid);

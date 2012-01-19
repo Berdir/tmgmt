@@ -36,8 +36,6 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
 
     $item1 = tmgmt_job_item_create('i18n_string', 'i18n_string', $string_name);
 
-    //$item1->setContext();
-
     $data = $item1->getSourceData();
     $this->assertEqual($source_text, $data['#text']);
 
@@ -48,6 +46,6 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
 
     $job->requestTranslation();
 
-    $this->assertEqual(i18n_string_translate($string_name, $source_text, array('langcode' => 'de')), 'TODO');
+    $this->assertEqual(i18n_string_translate($string_name, $source_text, array('langcode' => 'de')), $source_text);
   }
 }

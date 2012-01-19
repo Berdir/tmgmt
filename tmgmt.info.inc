@@ -6,6 +6,12 @@ class TMGMTJobMetadataController extends EntityDefaultMetadataController {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
 
+    // Make the created and changed property appear as date.
+    $properties['changed']['type'] = $properties['created']['type'] = 'date';
+
+    // Add the options list for the available languages.
+    $properties['target_language']['options list'] = $properties['source_language']['options list'] = 'entity_metadata_language_list';
+
     // Add the options list for the defined state constants.
     $properties['state']['options list'] = array('TMGMTJob', 'getStatesList');
 
@@ -28,6 +34,10 @@ class TMGMTJobItemMetadataController extends EntityDefaultMetadataController {
       'type' => 'tmgmt_job',
     ) + $properties['tjid'];
 
+
+    // Add the options list for all available source plugins.
+    $properties['plugin']['options list'] = 'tmgmt_source_plugin_labels';
+
     return _tmgmt_override_property_description($info, $this->type);
   }
 
@@ -43,6 +53,9 @@ class TMGMTTranslatorMetadataController extends EntityDefaultMetadataController 
 }
 
 /**
+ * Populates all entity property descriptions with the values from the
+ * description of the corresponding entity base table.
+ *
  * @param array $info
  *
  * @return array
@@ -55,7 +68,7 @@ function _tmgmt_override_property_description($info, $entity_type) {
   $schema = tmgmt_schema();
   $fields = $schema[$entity_info['base table']]['fields'];
   $properties = &$info[$entity_type]['properties'];
-  foreach ($properties as $name => $info) {
+  foreach ($properties as $name => $property_info) {
     if (isset($fields[$name]['description'])) {
       $properties[$name]['description'] = $fields[$name]['description'];
     }

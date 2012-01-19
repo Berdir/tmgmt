@@ -237,13 +237,19 @@ function tmgmt_translator_plugin_controller($plugin) {
  * @return array
  *   An array of the labels of all available plugins.
  */
-function tmgmt_translator_plugin_labels() {
-  $list = array();
-  foreach (tmgmt_translator_plugin_info() as $key => $info) {
-    $list[$key] = $info['label'];
+function tmgmt_translator_plugin_labels($available_only = FALSE) {
+  $translators = _tmgmt_plugin_labels('translator');
+  if ($available_only) {
+    foreach ($translators as $name => $label) {
+      $plugin = tmgmt_translator_plugin_controller($name);
+      if (!$plugin->isAvailable()) {
+        unset($translators[$name]);
+      }
+    }
   }
-  return $list;
+  return $translators;
 }
+
 /**
  * @} End of "addtogroup translator".
  */
@@ -274,6 +280,17 @@ function tmgmt_source_plugin_info($plugin = NULL) {
  */
 function tmgmt_source_plugin_controller($plugin) {
   return _tmgmt_plugin_controller('source', $plugin);
+}
+
+/**
+ * Returns an array of all available source plugins with the labels as
+ * values and the machine-readable name as the key.
+ *
+ * @return array
+ *   An array of the labels of all available plugins.
+ */
+function tmgmt_source_plugin_labels() {
+  return _tmgmt_plugin_labels('source');
 }
 
 /**
@@ -324,6 +341,22 @@ function _tmgmt_plugin_controller($type, $plugin) {
     $cache[$type][$plugin] = new $class($plugin);
   }
   return $cache[$type][$plugin];
+}
+
+/**
+ * Returns an array of labels of all available plugins of a given type with the
+ * machine-readable name as the key.
+ *
+ * @return array
+ *   An array of the labels of all available plugins.
+ */
+function _tmgmt_plugin_labels($type) {
+  $list = array();
+  $plugin_info = 'tmgmt_' . $type . '_plugin_info';
+  foreach ($plugin_info() as $key => $info) {
+    $list[$key] = $info['label'];
+  }
+  return $list;
 }
 
 /**
