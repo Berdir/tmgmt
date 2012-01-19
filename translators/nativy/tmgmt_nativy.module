@@ -1,0 +1,127 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * 
+ * Provides functions for translation provider nativy.com.
+ */
+
+
+/*
+ * Implements hook_menu().
+ */
+function tmgmt_nativy_menu() {
+  
+  $items['soaptest'] = array(
+    'title' => 'Testcallback',
+    'type' => MENU_CALLBACK,
+    'page callback' => 'nativy_test_page',
+    'access arguments' => array('access content'),
+  );
+  
+  $items['admin/config/services/nativy'] = array(
+    'title' => 'Nativy Translator',
+    'description' => 'Configure Nativy Translator service.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tmgmt_nativy_settings'),
+    'access arguments' => array('administer site configuration'),
+  );
+  
+  return $items;
+}
+
+/**
+ * Implements hook_tmgmt_translator_plugin_info().
+ */
+function tmgmt_nativy_tmgmt_translator_plugin_info() {
+  return array(
+    'nativy' => array(
+      'label' => t('Nativy translator'),
+      'description' => t('Nativy translator plugin that returns translations from nativy.com.'),
+      'controller class' => 'TMGMTNativyTranslatorController',
+    ),
+  );
+}
+
+/**
+ * Form callback used to configure nativy.com translation service.
+ *
+ * @ingroup forms
+ */
+function tmgmt_nativy_settings() {
+  
+  $form['tmgmt_nativy_username'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Nativy.com username'),
+    '#default_value' => variable_get('tmgmt_nativy_username'),
+    '#description' => t('Please enter your username for your account on nativy.com.'),
+  );
+  
+  $form['tmgmt_nativy_password'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Nativy.com password'),
+    '#default_value' => variable_get('tmgmt_nativy_password'),
+    '#description' => t('Please enter your password for your account on nativy.com.'),
+  );
+
+  return system_settings_form($form);
+}
+
+/*
+ * Used for development purposes only!
+ */
+function tmgmt_nativy_test_page() {
+
+  $client = new SoapClient("http://test.nativy.com/nis/nis.asmx?WSDL", array('soap_version' => SOAP_1_2, 'trace' => 1));
+  
+  /*//$client->AuthenticateUser(AuthenticateUser $parameters)
+  //$client->SecuredWebServiceHeader = array('Username' => 'demonis@nativy.com', 'Password' => 'A9!x57M');
+  $client->SecuredWebServiceHeader->Username = 'demonis@nativy.com';
+  $client->SecuredWebServiceHeader->Password = 'A9!x57M';
+  
+  $auth = new AuthenticateUser();
+  $header = new SoapHeader('http://www.nativy.com/nis', 'SecuredWebServiceHeader', $auth); //array('Username' => 'demonis@nativy.com', 'Password' => 'A9!x57M'));
+  //$headers[] = new SoapHeader('http://www.nativy.com/nis', 'SecuredWebServiceHeader.Username', 'demonis@nativy.com');
+  //$headers[] = new SoapHeader('http://www.nativy.com/nis', 'SecuredWebServiceHeader.Password', 'A9!x57M');
+  $client->__setSoapHeaders(array($header));
+  */
+
+  $auth->Username = 'demonis@nativy.com';
+  $auth->Password = 'A9!x57M';
+  $authvalues = new SoapVar($auth, SOAP_ENC_OBJECT);
+  $header =  new SoapHeader('http://www.nativy.com/nis', "SecuredWebServiceHeader", $authvalues, false);
+  $client->__setSoapHeaders(array($header));                                        
+  $response = $client->AuthenticateUser();
+  /*
+  $doc = new DOMDocument();
+  $path = drupal_get_path('module', 'nativy');
+  $doc->load($path . '/Auth.xml');
+  $request = $doc->saveXML();
+  dsm($request, 'ba');
+  $response = $client->__doRequest($request, "http://test.nativy.com", "https://www.nativy.com/nis/AuthenticateUser", 2);
+  //
+  */
+  
+  dpm($client->__getLastRequestHeaders(), 'timeeeeeeeeeee');
+  
+  dpm($client, 'client');
+  dpm($response, 'response');
+  dpm($client->__getFunctions(), 'functions');
+  dpm($client->__getTypes(), 'types');
+  
+  return 'TESTPAGE';
+}
+
+/*
+ * Used for development purposes only!
+ */
+class AuthenticateUser {
+  public $Username;
+  public $Password;
+  
+  public function __construct() {
+    $this->Username = 'demonis@nativy.com';
+    $this->Password = 'A9!x57M';
+  }
+}
