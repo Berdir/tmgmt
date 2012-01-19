@@ -11,32 +11,38 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   function requestTranslation(TMGMTJob $job) {
-    // The dummy translation prefixes strings with the target language.
-    $data = tmgmt_flatten_data($job->getSourceData());
-    foreach ($data as $key => $value) {
-      $data[$key]['#text'] = $job->target_language . '_' . $value['#text'];
-    }
-    $job->addTranslatedData(tmgmt_unflatten_data($data));
 
-    // Do something different based on the target language.
-    switch ($job->target_language) {
-      case 'de':
-        return new TMGMTTranslatorResponse(TMGMTJob::STATE_SUBMITTED, t('Test submit'));
+    // Do something different based on the action, if defined.
+    $action = isset($job->translator_context['action']) ? $job->translator_context['action'] : '';
+    switch ($action) {
+      case 'submit':
+        $job->submitted('Test submit');
+        return;
         break;
 
-      case 'es':
-        return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Test translation created'));
+      case 'reject':
+        $job->rejected(t('Translation into italian not supported'));
+        return;
         break;
 
-      case 'it':
-        return new TMGMTTranslatorResponse(TMGMTJob::STATE_REJECTED, t('Translation into italian not supported'));
-        break;
-
-      case 'zh-hans':
+      case 'fail':
         // Target not reachable.
-        return new TMGMTTranslatorResponse(NULL, t('Service not reachable'));
+        $job->addMessage('Service not reachable');
+        return;
+        break;
+
+      case 'translate':
+      default:
+        // The dummy translation prefixes strings with the target language.
+        $data = tmgmt_flatten_data($job->getSourceData());
+        foreach ($data as $key => $value) {
+          $data[$key]['#text'] = $job->target_language . '_' . $value['#text'];
+        }
+        $job->addTranslatedData(tmgmt_unflatten_data($data));
+        $job->needsReview('Test translation created');
         break;
     }
+    return TRUE;
   }
 
   /**

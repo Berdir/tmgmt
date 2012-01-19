@@ -30,23 +30,3 @@ function tmgmt_test_tmgmt_source_plugin_info() {
     ),
   );
 }
-
-function tmgmt_test_trigger_job($target_language = 'de') {
-  $job = tmgmt_job_create('en', $target_language);
-
-  for ($i = 1; $i < 3; $i++) {
-    $item = tmgmt_job_item_create('test_source', 'test', $i);
-    $job->addItem($item);
-  }
-
-  // Manually specify the translator for now.
-  $job->translator = 'test_translator';
-  $job->translator_context = array();
-
-  $job->prepared();
-  $job->save();
-
-  return $job;
-}
-
-

@@ -87,21 +87,23 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
           $data[$key]['#text'] = $string_items->item(0)->nodeValue;
           break;
         case 400:
-          return new TMGMTTranslatorResponse(TMGMTJob::STATE_REJECTED, $result->data);
+          $job->rejected($result->data);
+          return;
           break;
         default:
           // @todo - we need to think here more what to do if service is not
           // responding for some items and is responding for some others.
           // Ideally we should save sources that we manage to translate and
           // not just return.
-          debug($result);
-          return new TMGMTTranslatorResponse(NULL, $result->data);
+          $job->addMessage('Error from server: @error', array('@error' => $result->data));
+          return;
           break;
       }
     }
     // Save the translated data through the job.
     $job->addTranslatedData(tmgmt_unflatten_data($data));
-    return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Microsoft Translator translation completed.'));
+    // Mark this string as translatable.
+    $job->needsReview('Microsoft Translator translation completed.');
   }
 
   /**
@@ -133,6 +135,23 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       }
     }
     return $languages;
+  }
+  
+  /**
+   * Defines plugin settings form. 
+   * 
+   * @param $form array
+   * @param $form_state array
+   */
+  public function settingsForm($form, &$form_state) {
+    $form['bing_api_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Bing API ID'),
+      // @todo - remove default test bing id before production release.
+      '#default_value' => $this->getOption('bing_api_id', 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369'),
+      '#description' => t('Please enter yout Bing API ID, you can generate one on the !link.', array('!link' => l('http://www.bing.com/developers/appids.aspx', 'http://www.bing.com/developers/appids.aspx.'))),
+    );
+    return $form;
   }
 
 }
