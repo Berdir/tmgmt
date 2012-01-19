@@ -24,6 +24,9 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     // Get all the fields that can be translated and arrange their values into
     // a specific structure.
     $structure = array();
+    $structure['#label'] = node_type_get_name($node);
+    $structure['node_title'][0]['value']['#label'] = t('Node title', array(), array('langcode' => $job->source_language));
+    $structure['node_title'][0]['value']['#text'] = $node->title;
     foreach (field_info_instances('node', $node->type) as $field_name => $field_instance) {
       $info = field_info_field($field_name);
       $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info, $field_instance, $job_item);
@@ -31,8 +34,6 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
         $structure[$field_name] = $field_structure;
       }
     }
-    $structure['node_title'][0]['value']['#label'] = t('Node title', array(), array('langcode' => $job->source_language));
-    $structure['node_title'][0]['value']['#text'] = $node->title;
     return $structure;
   }
 
