@@ -1,0 +1,90 @@
+<?php
+
+/**
+ * Basic Node Source tests.
+ */
+class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => t('Entity Source tests'),
+      'description' => t('Exporting source data from entities and saving translations back to entities.'),
+      'group' => t('Translation Management'),
+    );
+  }
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp() {
+    parent::setUp(array('tmgmt_entity', 'tmgmt_test'));
+    variable_set('language_content_type_article', 1);
+  }
+
+  function testEntitySource() {
+    // Add a language.
+    $admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types'));
+    $this->drupalLogin($admin_user);
+
+    $edit = array(
+      'langcode' => 'de',
+    );
+    $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
+    $this->assertText('de', t('Language added successfully.'));
+    $this->assertEqual($this->getUrl(), url('admin/config/regional/language', array('absolute' => TRUE)), t('Correct page redirection.'));
+    
+    // Nodes are also entities, so we can use them for testing.
+    // Make the body field translatable.
+    $field_info = field_info_field('body');
+    $field_info['translatable'] = 1;
+    field_update_field($field_info);
+    $field_info = field_info_field('body');
+    $this->assertEqual($field_info['translatable'], 1, t('The Body field is not translatable'));
+    
+    // Set "Article" content type to use multilingual support.
+    $this->drupalGet('admin/structure/types/manage/article');
+    $this->assertText(t('Multilingual support'), t('Multilingual support fieldset present on content type configuration form.'));
+    $edit = array(
+      'language_content_type' => 1,
+    );
+    $this->drupalPost('admin/structure/types/manage/article', $edit, t('Save content type'));
+    
+    //$this->assertEqual(variable_get('language_content_type_article'), 1, t('The translation is not enabled for the article content type.'));
+    
+    $edit = array(
+      'type' => 'article',
+      'body' => array('en' => array(array('value' => $this->randomString(32)))),
+      'language' => 'en',
+    );
+    $node = $this->drupalCreateNode($edit);
+    
+    // Create a job to translate this node.
+    //debug($node);    
+    
+    $job = $this->createJob();
+    $job->translator = 'test_translator';
+    $job->translator_context = array();
+    $job->save();
+    
+    $item = tmgmt_job_item_create('entity', 'node', $node->nid);
+    $job->addItem($item);
+    $job->save();
+    // Dummy translation, just put the source data.  
+    $item->addTranslatedData($item->getSourceData());
+    $job->setState(TMGMT_JOB_STATE_ACCEPTED);
+    $job->save();
+    // Does not work... the fields are not saved (altough, when manually tested it works...)
+    $job->propagateTranslatedData();
+    // for debugging...
+    $result = db_select('field_data_body', 'f')
+        ->fields('f')
+        ->execute();
+    foreach ($result as $value) {
+      debug($value);
+    }
+
+  }
+}

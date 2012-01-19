@@ -10,7 +10,7 @@
  */
 function tmgmt_dummy_tmgmt_translator_plugin_info() {
   return array(
-    'dummy_translator' => array(
+    'dummy' => array(
       'label' => t('Dummy translator'),
       'description' => t('Dummy translator that returns source text.'),
       'controller class' => 'TMGMTDummyTranslator',

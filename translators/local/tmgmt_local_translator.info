@@ -1,0 +1,6 @@
+name = Local Translator
+description = Get translation from local users.
+package = Translation Management
+core = 7.x
+dependencies[] = tmgmt
+files[] = tmgmt_local_translator.plugin.inc
