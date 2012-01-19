@@ -4,70 +4,100 @@
  * @file
  * Provides myGengo translation plugin controller.
  */
+class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
 
-class TMGMTMyGengnoController extends TMGMTDefaultTranslatorPluginController {
+    /**
+     * Translation service URL.
+     *
+     * @var string
+     */
+    protected $apiURL = 'http://api.mygengo.com/v1.1/';
+    protected $sandboxURL = 'http://api.sandbox.mygengo.com/v1.1/';
+    protected $useSandbox = TRUE;
 
-  /**
-   * Translation service URL.
-   *
-   * @var string
-   */
-  protected $translatorURL = 'http://api.microsofttranslator.com/v2/Http.svc';
+    /**
+     *  requestFromGengo($endpoint, $data = array())
+     *
+     *  Builds, signs and fires a request to myGengo's API. Will fire to a different url
+     *  if on the sandbox.
+     *
+     *  Authentication rituals are documented here: http://mygengo.com/api/developer-docs/authentication/
+     *
+     *  It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
+     *  respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
+     */
+    public function requestFromGengo($endpoint, $data = array()) {
+        $options = array(
+            'headers' => array(
+                'User-Agent' => 'Drupal myGengo Translation Interface v0.1',
+                'Accept' => 'application/json'
+            )
+        );
 
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
-   */
-  public function isAvailable() {
-    if ($this->getOption('api_key')) {
-      return TRUE;
+        $timestamp = gmdate('U');
+
+        /**
+         *  If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
+         *  get a little more annoying...
+         */
+        if($options->method == 'GET' || $options->method == 'DELETE') { 
+            $request_data = drupal_http_build_query(array_merge(array(
+                'api_key' => $this->getOption('api_public_key'),
+                'api_sig' => hash_hmac('sha1', $timestamp, $this->getOption('api_private_key')),
+                'ts' => $timestamp
+            ), $data));
+
+            $url = ($this->useSandbox ? $this->sandboxURL : $this->apiURL) . $endpoint . '?';
+            $response = drupal_http_request($url.$query_data, $options);
+        } else {
+            // POST/PUT
+        }
+
+        $results = json_decode($response->data);
+        if($results->opstat == 'ok' && isset($results->response)) {
+            return $results->response;
+        } else {
+            // TODO: Raise an actual error. >_>
+            return 'x';
+        }
     }
-    return FALSE;
-  }
 
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
-   *
-   * We will check are source and target language supported.
-   */
-  public function canTranslate(TMGMTJob $job) {
-    // @todo - add specific myGengo implementation.
-
-    $languages = $this->getSupportedLanguages();
-    if ($this->isAvailable() && isset($languages[$job->source_language]) && isset($languages[$job->target_language])) {
-      // The job is only translatable if the translator is available too.
-      return TRUE;
+    /**
+     * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
+     */
+    public function isAvailable() {
+        if($this->getOption('api_public_key') && $this->getOption('api_private_key')) {
+            return TRUE;
+        }
+        return FALSE;
     }
-    // What to return if we can not query service and can not get supported
-    // languages, for what ever reason? For now it is safer to return FALSE.
-    return FALSE;
-  }
 
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
-   *
-   * Here we will acutally query source and get translations.
-   */
-  public function requestTranslation(TMGMTJob $job) {
-    // @todo - add specific myGengo implementation.
+    /**
+     * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
+     *
+     * We will check are source and target language supported.
+     */
+    public function canTranslate(TMGMTJob $job) {
+        if($this->isAvailable()) {
+            $targets = $this->getSupportedTargetLanguages($job->source_language);
+            if(in_array($job->target_language, $targets)) return TRUE;
+        }
+        
+        return FALSE;
+    }
 
-    // @todo - who is handling cron / batch here, we or some other controler?
-    $translate_url = $this->translatorURL . '/Translate';
-
-    // Pull the source data array from through the job and flatten it..
-    $data = tmgmt_flatten_data($job->getSourceData());
-    foreach ($data as $key => $value) {
-      if (isset($value['#translate']) && $value['#translate'] === FALSE) {
-        continue;
-      }
-
-      $query_data = drupal_http_build_query(array(
-        'appId'       => $this->getOption('bing_api_id'),
-        'from'        => $job->source_language,
-        'to'          => $job->target_language,
-        'contentType' => 'text/plain',
-        // @todo - if length is more then 10000 chars we need to split request.
-        'text'        => $value['#text'],
-      ));
+    /**
+     * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
+     *
+     * Here we will acutally query source and get translations.
+     */
+    public function requestTranslation(TMGMTJob $job) {
+        // Pull the source data array from through the job and flatten it..
+        $data = tmgmt_flatten_data($job->getSourceData());
+        foreach($data as $key => $value) {
+            if (isset($value['#translate']) && $value['#translate'] === FALSE) {
+                continue;
+            }
 
       $options = array(
         // @todo - for some reason post is returning 202 status and service
@@ -104,37 +134,31 @@ class TMGMTMyGengnoController extends TMGMTDefaultTranslatorPluginController {
     return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
   }
 
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
-   */
-  public function getSupportedTargetLanguages($source_language) {
-    $languages = $this->getSupportedLanguages();
-    unset($languages[$source_language]);
-    return $languages;
-  }
-
-  /**
-   * Returns array of service supported languages.
-   *
-   * @return array
-   */
-  public function getSupportedLanguages() {
-    // @todo - add specific myGengo implementation.
-
-    $languages = &drupal_static(__FUNCTION__);
-    if (!isset($languages)) {
-      $languages = array();
-      $res = drupal_http_request($this->translatorURL . '/GetLanguagesForTranslate' . '?appId=' . $this->getOption('bing_api_id'));
-      if ($res->code == 200) {
-        $dom = new DOMDocument;
-        $dom->loadXML($res->data);
-        $string_items = $dom->getElementsByTagName('string');
-        foreach($string_items as $item) {
-          $languages[$item->nodeValue] = $item->nodeValue;
-        }
-      }
+    /**
+     * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+     */
+    public function getSupportedTargetLanguages($source_language) {
+        return $this->requestFromGengo('translate/service/language_pairs', array(
+            'lc_src' => $source_language
+        ));
     }
-    return $languages;
-  }
+
+    /**
+     * Returns array of service supported languages.
+     *
+     * @return array
+     */
+    public function getSupportedLanguages() {
+        $languages = &drupal_static(__FUNCTION__);
+        if(!isset($languages)) {
+            $supported_languages = $this->requestFromGengo('translate/service/languages');
+            $languages = array();
+            
+            foreach($supported_languages as $language) {
+                array_push($languages, $language->lc);
+            }
+        }
+        return $languages;
+    }
 
 }

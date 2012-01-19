@@ -11,11 +11,18 @@
  * @ingroup forms
  */
 function tmgmt_mygengo_settings() {
-  $form['tmgmt_mygengo_api_key'] = array(
+  $form['tmgmt_mygengo_api_public_key'] = array(
     '#type' => 'textfield',
-    '#title' => t('myGengo API key'),
-    '#default_value' => variable_get('tmgmt_mygengo_api_key', ''),
-    '#description' => t('Please enter your myGengo API key.'),
+    '#title' => t('myGengo API Public key'),
+    '#default_value' => variable_get('tmgmt_mygengo_api_public_key', ''),
+    '#description' => t('Please enter yout myGengo API Public key.'),
+  );
+
+  $form['tmgmt_mygengo_api_private_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('myGengo API Private key'),
+    '#default_value' => variable_get('tmgmt_mygengo_api_private_key', ''),
+    '#description' => t('Please enter your myGengo API Private key.'),
   );
 
   return system_settings_form($form);
