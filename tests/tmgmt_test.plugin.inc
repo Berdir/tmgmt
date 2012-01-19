@@ -37,6 +37,13 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
         break;
     }
   }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   */
+  public function getSupportedTargetLanguages($source_language) {
+    return drupal_map_assoc(array('de', 'es', 'it', 'zh-zans'));
+  }
 }
 
 class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController {

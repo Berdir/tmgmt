@@ -62,7 +62,7 @@ class TMGMTTranslator extends Entity {
    * @return TMGMTTranslatorPluginControllerInterface
    */
   public function getTranslatorController() {
-    return tmgmt_translator_plugin_controller($this->plugin);
+    return tmgmt_translator_plugin_controller($this->translator_plugin);
   }
 
 }
@@ -143,7 +143,7 @@ class TMGMTJobItem extends Entity {
    * @return TMGMTSourcePluginControllerInterface
    */
   public function getSourceController() {
-    return tmgmt_source_plugin_controller($this->plugin);
+    return tmgmt_source_plugin_controller($this->source_plugin);
   }
 
   /**
@@ -395,11 +395,14 @@ class TMGMTJob extends Entity {
    *   TRUE if the state of the job entity has been updated, FALSE otherwise.
    */
   public function setStateFromResponse(TMGMTTranslatorResponseInterface $response) {
-    $this->addResponse($response);
+    $return = FALSE;
     if (($state = $response->toJobState()) !== NULL) {
-      return $this->setState($state);
+      $return = $this->setState($state);
     }
-    return FALSE;
+    if ((($message = $response->toString()) !== NULL)) {
+      $this->addMessage($response->toString());
+    }
+    return $return;
   }
 
   /**
@@ -464,6 +467,104 @@ class TMGMTJob extends Entity {
   }
 
   /**
+   * Add a log message for this job.
+   *
+   * @param $message
+   *   The message to store in the log. Keep $message translatable by not
+   *   concatenating dynamic values into it! Variables in the message should be
+   *   added by using placeholder strings alongside the variables argument to
+   *   declare the value of the placeholders. See t() for documentation on how
+   *   $message and $variables interact.
+   *
+   * @param $arguments
+   *   (Optional) Array of variables to replace in the message on display.
+   *
+   */
+  public function addMessage($message, $arguments = array()) {
+    $message = entity_create('tmgmt_job_message', array(
+      'tmjid' => $this->tjid,
+      'state_before' => isset($this->old_state) ? $this->old_state : $this->getState(),
+      'state_after' => $this->getState(),
+      'message' => $message,
+      'arguments' => $arguments,
+    ));
+    $message->save();
+  }
+
+  /**
+   * Set the state of the job to needs review.
+   *
+   * @see TMGMTJob::addLogMessage()
+   */
+  public function needsReview($message, $arguments = array()) {
+    $this->setState(TMGMTJob::STATE_REVIEW);
+    $this->addMessage($message);
+  }
+
+  /**
+   * Set the state of the job to prepared.
+   *
+   * @see TMGMTJob::addLogMessage()
+   */
+  public function prepared($message = NULL, $arguments = array()) {
+    $this->setState(TMGMTJob::STATE_PREPARED);
+    $this->addMessage($message);
+  }
+
+  /**
+   * Set the state of the job to submitted.
+   *
+   * @see TMGMTJob::addLogMessage()
+   */
+  public function submitted($message = NULL, $arguments = array()) {
+    $this->setState(TMGMTJob::STATE_SUBMITTED);
+    $this->addMessage($message);
+  }
+
+  /**
+   * Set the state of the job to accepted
+   *
+   * @see TMGMTJob::addLogMessage()
+   */
+  public function accepted($message = NULL, $arguments = array()) {
+    $this->setState(TMGMTJob::STATE_REVIEW);
+    $this->addMessage($message);
+    $this->propagateTranslatedData();
+  }
+
+  /**
+   * Set the state of the job to finished.
+   *
+   * @see TMGMTJob::addLogMessage()
+   */
+  public function finished($message = NULL, $arguments = array()) {
+    // @todo: To be defined.
+  }
+
+  /**
+   * Set the state of the job to rejected.
+   *
+   * @see TMGMTJob::addLogMessage()
+   */
+  public function rejected($message = NULL, $arguments = array()) {
+    $this->setState(TMGMTJob::STATE_REJECTED);
+    $this->addMessage($message);
+  }
+
+  /**
+   * Set the state of the job to cancelled.
+   *
+   * Note: Use TMGMTJob::cancelTranslation() to cancel a translation job if
+   * possible.
+   *
+   * @see TMGMTJob::addLogMessage()
+   */
+  protected function cancelled($message = NULL, $arguments = array()) {
+    $this->setState(TMGMTJob::STATE_CANCELLED);
+    $this->addMessage($message);
+  }
+
+  /**
    * Updates the state of the job.
    *
    * @param $state
@@ -480,6 +581,7 @@ class TMGMTJob extends Entity {
       case self::STATE_REVIEW:
       case self::STATE_SUBMITTED:
       case self::STATE_CANCELLED;
+        $this->old_state = $this->getState();
         $this->state = $state;
         return TRUE;
     }
@@ -533,7 +635,7 @@ class TMGMTJob extends Entity {
     // If the job is not currently pending by the translator (submitted), we can
     // cancel without any checks.
     if (!$this->isSubmitted()) {
-      $this->setState(TMGMTJob::STATE_CANCELLED);
+      $this->canceled('The translation job has been canceled.');
     }
     else {
       // Otherwise, ask the translator if this job can be cancelled.
@@ -579,7 +681,7 @@ class TMGMTJob extends Entity {
 }
 
 /**
- * Entity class for the tmgmt_message entity.
+ * Entity class for the tmgmt_job_message entity.
  *
  * @ingroup message
  */
@@ -638,7 +740,7 @@ class TMGMTJobMessage extends Entity {
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
-    parent::__construct($values, 'tmgmt_message');
+    parent::__construct($values, 'tmgmt_job_message');
     $this->created = REQUEST_TIME;
   }
 

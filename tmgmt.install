@@ -191,16 +191,12 @@ function tmgmt_schema() {
       'message' => array(
         'description' => 'The language into the data should be translated.',
         'type' => 'text',
-        'size' => 'long',
-        'default' => '',
-        'not null' => TRUE,
+        'size' => 'big',
       ),
       'variables' => array(
         'description' => 'The variables of the message as expected by t().',
         'type' => 'text',
-        'size' => 'long',
-        'default' => '',
-        'not null' => TRUE,
+        'size' => 'big',
       ),
       'state_before' => array(
         'description' => 'The state of the translation job before the event that supplied the message occurred.',
