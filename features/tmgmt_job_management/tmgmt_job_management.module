@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Translation Job Management feature.
+ */
+
+include_once('tmgmt_job_management.features.inc');

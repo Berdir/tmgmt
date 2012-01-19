@@ -57,7 +57,7 @@ class TMGMTJobMessageMetadataController extends EntityDefaultMetadataController 
     $properties['created']['type'] = 'date';
 
     // Add the options list for the defined state constants.
-    $properties['state_before']['options list'] = $properties['state_after']['options list'] = array('TMGMTJob', 'getStatesList');
+    $properties['state_before']['options list'] = $properties['state_after']['options list'] = 'tmgmt_job_states';
 
     return _tmgmt_override_property_description($info, $this->type);
   }

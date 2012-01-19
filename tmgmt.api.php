@@ -100,7 +100,9 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * $job->save();
  *
  * // Get the translator plugin and request a translation.
- * $job->requestTranslation();
+ * if ($job->isTranslatable()) {
+ *   $job->requestTranslation();
+ * }
  * @endcode
  *
  * The translation plugin will then request the text from the source plugin.
@@ -112,9 +114,7 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * // to save the translation.
  *
  * @code
- * $job->setState(TMGMTJob::STATE_ACCEPTED);
- * $job->save();
- * $job->propagateTranslatedData();
+ * $job->accepted('Optional message');
  * @endcode
  */
 
