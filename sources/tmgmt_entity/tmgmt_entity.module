@@ -35,7 +35,7 @@ function tmgmt_entity_update_entity_translation($entity, $entity_type, $translat
     foreach ($values as $key => $value) {
       $tdata = array();
       foreach ($value as $input_name => $input_value) {
-        $tdata[$input_name] = $input_value['#text'] . ' ' . $target_language;
+        $tdata[$input_name] = $input_value['#text'];
       }
       $entity->{$field_name}[$target_language][$index] = $tdata;
       $index++;

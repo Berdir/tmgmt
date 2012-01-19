@@ -38,35 +38,12 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
   }
   
   /**
-   * @todo: Implement this function.
+   * Overriden.
    */
   public function saveTranslation(TMGMTJobItem $job_item) {
     $entity = current(entity_load($job_item->item_type, array($job_item->item_id)));
     $job = tmgmt_job_load($job_item->tjid);
     tmgmt_entity_update_entity_translation($entity, $job_item->item_type, $job_item->translated_data, $job->target_language);
-    // @todo: refactor this.
-    /*if (module_exists('entity_translation')) {
-      db_delete('entity_translation')
-        ->condition('entity_type', $job_item->item_type)
-        ->condition('entity_id', $job_item->item_id)
-        ->condition('language', $job->target_language)
-        ->execute();
-
-      $columns = array('entity_type', 'entity_id', 'language', 'source', 'uid', 'status', 'translate', 'created', 'changed');
-      $query = db_insert('entity_translation')->fields($columns);
-      $values = array(
-        'entity_type' => $job_item->item_type,
-        'entity_id' => $job_item->item_id,
-        'language' => $job->target_language,
-        'source' => $job->source_language,
-        'uid' => 1,
-        'status' => 1,
-        'translate' => 0,
-        'created' => REQUEST_TIME,
-        'changed' => REQUEST_TIME,
-      );
-      $query->values($values)->execute();
-    }*/
   }
 
 }
