@@ -1,4 +1,4 @@
-name = UI
+name = Translation Management UI
 description = User interface.
 package = Translation Management
 core = 7.x

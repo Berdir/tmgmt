@@ -25,13 +25,13 @@ function tmgmt_ui_content() {
     'css' => array(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.my-tmgmt.css'),
   );
   $output['#theme'] = 'tmgmt_ui_element';
-  // This left column is given a width of 35% by workbench.myworkbench.css.
+  // This left column is given a width of 35% by tmgmt_ui.my-tmgmt.
   $output['tmgmt_ui_current_user'] = array(
     '#title' => t('My Profile'),
     '#attributes' => array('class' => array('left', 'clearfix')),
     '#theme' => 'tmgmt_ui_element',
   );
-  // This right column is given a width of 65% by workbench.myworkbench.css.
+  // This right column is given a width of 65% by tmgmt_ui.my-tmgmt.
   $output['tmgmt_ui_jobs_overview'] = array(
     '#view' => 'tmgmt_ui_jobs_overview',
     '#view_display' => 'block_1',

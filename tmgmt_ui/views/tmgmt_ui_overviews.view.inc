@@ -1,14 +1,9 @@
 <?php
-/**
- * @file
- * tmgmt_job_management.views_default.inc
- */
 
 /**
- * Implements hook_views_default_views().
+ * @file tmgmt_ui_overviews.view.inc
+ * Default view. Provides all tabs on the UI, "Jobs Overview" only - right now
  */
-function tmgmt_job_management_views_default_views() {
-  $export = array();
 
   $view = new view;
   $view->name = 'tmgmt_ui_jobs_overview';
@@ -386,7 +381,3 @@ function tmgmt_job_management_views_default_views() {
     t('Block'),
     t('Jobs Overview'),
   );
-  $export['translation_jobs'] = $view;
-
-  return $export;
-}
