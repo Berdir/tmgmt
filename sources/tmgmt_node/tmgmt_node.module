@@ -8,29 +8,54 @@
  * Implements hook_menu().
  */
 function tmgmt_node_menu() {
-  $items['node/%node/create-job'] = array(
+  $items['node/%node/tmgmt'] = array(
     'title' => t('Translation management'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_node_translator_settings_form', 1),
+    'page callback' => 'tmgmt_node_translation_overview',
+    'page arguments' => array(1),
     'access callback' => '_translation_tab_access',
     'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
     'weight' => 20
   );
+  $items['node/%node/tmgmt/create-job'] = array(
+    'title' => t('Create a Job'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tmgmt_node_translator_settings_form', 1),
+    'access callback' => '_translation_tab_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_ACTION,
+  );
   return $items;
+}
+
+function tmgmt_node_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'tmgmt_node') . '/includes/views',
+  );
+}
+
+/**
+ * job overview, which contains the selected item
+ */
+function tmgmt_node_translation_overview($node) {
+  $output = '';
+  // Check for pending jobs.
+  $jobs = tmgmt_job_load_multiple_by_source('node', 'node', $node->vid);
+  if (!empty($jobs)) {
+    $view = views_get_view('job_items_current_node');
+    $output .= views_embed_view('job_items_current_node', 'default', $node->vid);
+  }
+  else {
+    $output .= t('There are currently no jobs existing, related to this item.');
+  }
+  return $output;
 }
 
 /**
  * The Node translator settings form.
  */
 function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
-  // Check for pending jobs.
-  $jobs = tmgmt_job_load_multiple_by_source('node', 'node', $node->vid);
-  if (!empty($jobs)) {
-    foreach ($jobs as $job) {
-//      dsm($job);
-    }
-  }
 
   // Get all available languages from core translation module.
   $available_languages = entity_metadata_language_list();
@@ -198,21 +223,20 @@ function tmgmt_node_update_node_translation($node, $translated_data, $target_lan
  *
  * @todo: this hook should probably be placed elsewhere.
  */
-function text_tmgmt_source_translation_structure($field_name, $node, $field_info, $instance, $job) {
-  // @todo: there may be a problem if the user changes the order of the values
-  // in the case of a field with multiple values...
-  $field_lang = field_language('node', $node, $field_name);
+function text_tmgmt_source_translation_structure($field_name, $entity, $field_info, $field_instance, $job_item) {
+  $job = tmgmt_job_load($job_item->tjid);
+  $field_lang = field_language($job_item->item_type, $entity, $field_name);
   $structure = array();
-  if (!empty($node->{$field_name})) {
-    foreach ($node->{$field_name}[$field_lang] as $key => $value) {
+  if (!empty($entity->{$field_name})) {
+    foreach ($entity->{$field_name}[$field_lang] as $key => $value) {
       $structure[$key]['value'] = array(
-        '#label' => t('!field_name: Value nr. !count', array('!field_name' => $instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
+        '#label' => t('!field_name: Value nr. !count', array('!field_name' => $field_instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
         '#text' => $value['value'],
         '#translate' => TRUE,
       );
       if ($field_info['type'] == 'text_with_summary' && !empty($value['summary'])) {
         $structure[$key]['summary'] = array(
-          '#label' => t('!field_name: Summary nr. !count',array('!field_name' => $instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
+          '#label' => t('!field_name: Summary nr. !count', array('!field_name' => $field_instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
           '#text' => $value['summary'],
           '#translate' => TRUE
         );

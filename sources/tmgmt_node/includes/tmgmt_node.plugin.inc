@@ -26,7 +26,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     $structure = array();
     foreach (field_info_instances('node', $node->type) as $field_name => $field_instance) {
       $info = field_info_field($field_name);
-      $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info, $field_instance, $job);
+      $field_structure = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $node, $info, $field_instance, $job_item);
       if ($field_structure) {
         $structure[$field_name] = $field_structure;
       }
