@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Main module file for the translation management node source plugin user
@@ -33,7 +32,7 @@ function tmgmt_node_ui_menu() {
 /**
  * Implements hook_views_api().
  */
-function tmgmt_node_views_api() {
+function tmgmt_node_ui_views_api() {
   return array(
     'api' => 3,
     'path' => drupal_get_path('module', 'tmgmt_node_ui') . '/views',
