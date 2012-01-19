@@ -6,3 +6,4 @@ dependencies[] = tmgmt
 dependencies[] = node
 dependencies[] = tmgmt_field
 files[] = includes/tmgmt_entity.plugin.inc
+files[] = tmgmt_entity.test
