@@ -175,14 +175,14 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $de_job->requestTranslation();
 
     $de_job = tmgmt_job_load($de_job->tjid);
-    $this->assertEqual(TMGMTJob::STATE_SUBMITTED, $de_job->state);
+    $this->assertTrue($de_job->isSubmitted());
 
     // Trigger a translation job into spanish.
     $es_job = tmgmt_test_trigger_job('es');
     $es_job->requestTranslation();
 
     $es_job = tmgmt_job_load($es_job->tjid);
-    $this->assertEqual(TMGMTJob::STATE_REVIEW, $es_job->state);
+    $this->assertTrue($es_job->isNeedsReview());
 
     foreach ($es_job->getItems() as $item) {
       // Check the translated text. n has been replaced with ñ.
@@ -201,14 +201,14 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     // Trigger a translation job into italian.
     $it_job = tmgmt_test_trigger_job('it');
     $it_job->requestTranslation();
-    $this->assertEqual(TMGMTJob::STATE_REJECTED, $it_job->state);
+    $this->assertTrue($it_job->isRejected());
     $last_response = end($it_job->response);
     $this->assertEqual(t('Translation into italian not supported'), reset($last_response));
 
     // Trigger a translation job into chinese.
     $zh_job = tmgmt_test_trigger_job('zh-hans');
     $zh_job->requestTranslation();
-    // Still new.
-    $this->assertEqual(TMGMTJob::STATE_PREPARED, $zh_job->state);
+    // Still prepared.
+    $this->assertTrue($zh_job->isPrepared());
   }
 }
