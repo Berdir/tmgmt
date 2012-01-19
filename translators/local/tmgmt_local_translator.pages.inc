@@ -22,6 +22,7 @@ function tmgmt_local_translator_page_user_configure($user) {
  * Menu callback. Translate actual job.
  */
 function tmgmt_local_translator_page_job_translate(TMGMTJob $job) {
+    drupal_add_css(drupal_get_path('module', 'tmgmt_local_translator') . '/tmgmt_local_translator.css');
   // @TODO We will provide a form for each job item, arranged as vertical tabs.
   // For now this is just a collection of forms.
   $build = array();
@@ -38,8 +39,9 @@ function tmgmt_local_translator_job_item_form($form, &$form_state, $job, $item) 
   $form['job'] = array('#type' => 'value', '#value' => $job);
   $form['job_item'] = array('#type' => 'value', '#value' => $item);
   $data = $item->getSourceData();
-  dpm($data);
   $form['text'] = tmgmt_local_translator_job_item_subform($data);
+  $form['controls']['submit'] = array('#type' => 'submit', '#value' => t('Submit'));
+  $form['#attributes'] = array('class' => array('tmgmt-job-item'));
   return $form;
 }
 
@@ -48,20 +50,22 @@ function tmgmt_local_translator_job_item_form($form, &$form_state, $job, $item) 
  */
 function tmgmt_local_translator_job_item_subform($items) {
   $form = array();
-  $form['#type'] = 'fieldset';
   $form['#tree'] = TRUE;
   if (!empty($items['#label'])) {
     $form['#title'] = $items['#label'];
   }
   if (!empty($items['#text'])) {
+    $form['#type'] = 'fieldset';
     $form['source'] = array(
       '#type' => 'textarea',
-      '#disabled' => TRUE,
+      //'#disabled' => TRUE,
       '#default_value' => $items['#text'],
+      '#attributes' => array('class' => array('tmgmt-source')),
     );
     $form['translation'] = array(
       '#type' => 'textarea',
       '#default_value' => '',
+      '#attributes' => array('class' => array('tmgmt-translation')),
     );
   }
   if (!empty($items['#description'])) {
