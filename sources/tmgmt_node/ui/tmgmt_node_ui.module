@@ -64,7 +64,7 @@ function tmgmt_node_ui_translator_settings_form($form, &$form_state, $node) {
   // Get the translator plugin that is currently selected.
   $translator_plugins = tmgmt_translator_plugin_labels(TRUE);
   $translator_plugins_keyed = array_keys($translator_plugins);
-  $selected_translator_plugin = isset($form_state['values']['translation_service']) ? $form_state['values']['translation_service'] : reset($translator_plugins_keyed);
+  $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : reset($translator_plugins_keyed);
   // Load the plugin info for the selected translator plugin.
   $info = tmgmt_translator_plugin_info($selected_translator_plugin);
   $form['nid'] = array(
