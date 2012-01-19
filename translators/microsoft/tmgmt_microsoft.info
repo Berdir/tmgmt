@@ -3,4 +3,4 @@ description = A Microsoft Translator which use Microsoft Translator service.
 package = Translation Management
 core = 7.x
 dependencies[] = tmgmt
-files[] = tmgmt_microsoft_translator.plugin.inc
+files[] = tmgmt_microsoft.plugin.inc

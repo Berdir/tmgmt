@@ -3,6 +3,5 @@ description = Entity source plugin for the Translation Management system.
 package = Translation Management
 core = 7.x
 dependencies[] = tmgmt
-dependencies[] = node
 dependencies[] = tmgmt_field
 files[] = includes/tmgmt_entity.plugin.inc
