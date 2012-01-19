@@ -44,7 +44,10 @@ function tmgmt_node_views_api() {
  * Job overview, which contains the selected item
  */
 function tmgmt_node_ui_translation_overview($node) {
-  return views_embed_view('job_items_current_node', 'default', $node->tnid);
+  if (!$output = views_embed_view('job_items_current_node', 'default', $node->tnid)) {
+    $output = t('There are currently no job items attached to this node.');
+  }
+  return $output;
 }
 
 /**
@@ -83,7 +86,7 @@ function tmgmt_node_ui_translator_settings_form($form, &$form_state, $node) {
     '#description' => t('The target language'),
     '#options' => $available_languages,
   );
-  $form['translation_service'] = array(
+  $form['translator'] = array(
     '#type' => 'select',
     '#title' => t('Translation type'),
     '#options' => $translator_plugins,
