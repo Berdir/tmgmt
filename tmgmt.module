@@ -4,19 +4,6 @@
  * Implements hook_entity_info().
  */
 function tmgmt_entity_info() {
-  $info['tmgmt_job_item'] = array(
-    'label' => t('Translation Management Job Item'),
-    'module' => 'tmgmt',
-    'controller class' => 'TMGMTJobItemController',
-    'metadata controller class' => 'TMGMTJobItemMetadataController',
-    'entity class' => 'TMGMTJobItem',
-    'base table' => 'tmgmt_job_item',
-    'uri callback' => 'entity_class_uri',
-    'label callback' => 'entity_class_label',
-    'entity keys' => array(
-      'id' => 'tjiid',
-    ),
-  );
   $info['tmgmt_job'] = array(
     'label' => t('Translation Management Job'),
     'module' => 'tmgmt',
@@ -30,10 +17,36 @@ function tmgmt_entity_info() {
       'id' => 'tjid',
     ),
   );
+  $info['tmgmt_job_item'] = array(
+    'label' => t('Translation Management Job Item'),
+    'module' => 'tmgmt',
+    'controller class' => 'EntityAPIController',
+    'metadata controller class' => 'TMGMTJobItemMetadataController',
+    'entity class' => 'TMGMTJobItem',
+    'base table' => 'tmgmt_job_item',
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'tjiid',
+    ),
+  );
+  $info['tmgmt_job_message'] = array(
+    'label' => t('Translation Management Job Message'),
+    'module' => 'tmgmt',
+    'controller class' => 'EntityAPIController',
+    'metadata controller class' => 'TMGMTJobMessageMetadataController',
+    'entity class' => 'TMGMTJobMessage',
+    'base table' => 'tmgmt_job_message',
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'tjmid',
+    ),
+  );
   $info['tmgmt_translator'] = array(
     'label' => t('Translation Management Translator'),
     'module' => 'tmgmt',
-    'controller class' => 'TMGMTTranslatorController',
+    'controller class' => 'EntityAPIControllerExportable',
     'metadata controller class' => 'TMGMTTranslatorMetadataController',
     'entity class' => 'TMGMTTranslator',
     'base table' => 'tmgmt_translator',

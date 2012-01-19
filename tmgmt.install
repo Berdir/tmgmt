@@ -13,102 +13,95 @@ function tmgmt_schema() {
     'description' => 'A translation job represents a translation order that can be assigned to a translator.',
     'fields' => array(
       'tjid' => array(
-        'description' => 'The identifier of the translation job',
+        'description' => 'The identifier of the translation job.',
         'type' => 'serial',
         'not null' => TRUE,
       ),
       'source_language' => array(
-        'description' => 'The source language of the data',
+        'description' => 'The source language of the data.',
         'type' => 'varchar',
         'length' => 12,
         'not null' => TRUE,
       ),
       'target_language' => array(
-        'description' => 'The language into the data should be translated',
+        'description' => 'The language into the data should be translated.',
         'type' => 'varchar',
         'length' => 12,
         'not null' => TRUE,
       ),
       'state' => array(
-        'description' => 'The state of the translation job',
+        'description' => 'The state of the translation job.',
         'type' => 'int',
         'not null' => TRUE,
       ),
       'created' => array(
-        'description' => 'Created timestamp',
+        'description' => 'Created timestamp.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'changed' => array(
-        'description' => 'Changed timestamp',
+        'description' => 'Changed timestamp.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'translator' => array(
-        'description' => 'Machine name of the translator',
+        'description' => 'Machine name of the translator.',
         'type' => 'varchar',
         'length' => 128,
       ),
       'translator_context' => array(
-        'description' => 'Translator specific configuration and context for this job',
+        'description' => 'Translator specific configuration and context for this job.',
         'type' => 'text',
         'size' => 'big',
         'serialize' => TRUE,
       ),
       'translator_id' => array(
-        'description' => 'Remote identifier of this translation job',
+        'description' => 'Remote identifier of this translation job.',
         'type' => 'varchar',
         'length' => 256,
       ),
-      'response' => array(
-        'description' => 'Response Log from the translator',
-        'type' => 'text',
-        'not null' => TRUE,
-        'size' => 'big',
-        'serialize' => TRUE,
-      ),
     ),
     'primary key' => array('tjid'),
-    'keys' => array(
+    'indexes' => array(
       'state' => array('state'),
       'translator_id' => array('translator_id'),
     ),
   );
 
   $schema['tmgmt_job_item'] = array(
-    'description' => 'A job item connects a source to a translation job',
+    'description' => 'A job item connects a source to a translation job.',
     'fields' => array(
        'tjiid' => array(
-        'description' => 'The identifier of the translation job item',
+        'description' => 'The identifier of the translation job item.',
         'type' => 'serial',
         'not null' => TRUE,
       ),
        'tjid' => array(
-        'description' => 'The identifier of the translation job',
+        'description' => 'The identifier of the translation job.',
         'type' => 'int',
         'not null' => TRUE,
       ),
-      'plugin' => array(
-        'description' => 'Indicates the plugin which provides this item',
+      'source_plugin' => array(
+        'description' => 'Indicates the plugin which provides this item.',
         'type' => 'varchar',
         'length' => 128,
         'not null' => TRUE,
       ),
       'item_type' => array(
-        'description' => 'The type of the item, e.g. the entity type',
+        'description' => 'The type of the item, e.g. the entity type.',
         'type' => 'varchar',
         'length' => 128,
       ),
       'item_id' => array(
-        'description' => 'The unique id (within the given item type) of the item',
+        'description' => 'The unique id (within the given item type) of the item.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'translated_data' => array(
-        'description' => 'Structured translated data',
+        'description' => 'Structured translated data.',
         'type' => 'text',
         'not null' => TRUE,
         'size' => 'big',
@@ -117,51 +110,57 @@ function tmgmt_schema() {
     ),
     'primary key' => array('tjiid'),
     'unique keys' => array(
-      'source' => array('tjid', 'plugin', 'item_type', 'item_id'),
+      'source' => array('tjid', 'source_plugin', 'item_type', 'item_id'),
+    ),
+    'foreign keys' => array(
+      'job' => array(
+        'table' => 'tmgmt_job',
+        'columns' => array('tjid'),
+      ),
     ),
   );
 
   $schema['tmgmt_translator'] = array(
-    'description' => 'A translator is a combination of a translator type and type specific configuration',
+    'description' => 'A translator is a combination of a translator type and type specific configuration.',
     'fields' => array(
       'tid' => array(
-        'description' => 'The identifier of the translator',
+        'description' => 'The identifier of the translator.',
         'type' => 'serial',
         'not null' => TRUE,
       ),
       'name' => array(
-        'description' => 'Machine name identifier of the translator',
+        'description' => 'Machine name identifier of the translator.',
         'type' => 'varchar',
         'length' => 128,
         'not null' => TRUE,
       ),
       'label' => array(
-        'description' => 'Label of the translator',
+        'description' => 'Label of the translator.',
         'type' => 'varchar',
         'length' => 256,
         'not null' => TRUE,
       ),
-      'plugin' => array(
-        'description' => 'Name of the translator service plugin',
+      'translator_plugin' => array(
+        'description' => 'Name of the translator service plugin.',
         'type' => 'varchar',
         'length' => 128,
         'not null' => TRUE,
       ),
       'settings' => array(
-        'description' => 'Translator specific settings',
+        'description' => 'Translator specific settings.',
         'type' => 'text',
         'not null' => TRUE,
         'size' => 'big',
         'serialize' => TRUE,
       ),
       'status' => array(
+        'description' => 'The exportable status of the entity.',
         'type' => 'int',
         'not null' => TRUE,
         // Set the default to ENTITY_CUSTOM without using the constant as it is
         // not safe to use it at this point.
         'default' => 0x01,
         'size' => 'tiny',
-        'description' => 'The exportable status of the entity.',
       ),
       'module' => array(
         'description' => 'The name of the providing module if the entity has been defined in code.',
@@ -173,8 +172,61 @@ function tmgmt_schema() {
     'primary key' => array('tid'),
     'unique keys' => array(
       'name' => array('name'),
-    )
+    ),
   );
+
+  $schema['tmgmt_job_message'] = array(
+    'description' => 'A log message can be used to store events that affect a job.',
+    'fields' => array(
+      'tjmid' => array(
+        'description' => 'The identifier of the message.',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'tjid' => array(
+        'description' => 'The identifier of the translation job.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'message' => array(
+        'description' => 'The language into the data should be translated.',
+        'type' => 'text',
+        'size' => 'long',
+        'default' => '',
+        'not null' => TRUE,
+      ),
+      'variables' => array(
+        'description' => 'The variables of the message as expected by t().',
+        'type' => 'text',
+        'size' => 'long',
+        'default' => '',
+        'not null' => TRUE,
+      ),
+      'state_before' => array(
+        'description' => 'The state of the translation job before the event that supplied the message occurred.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'state_after' => array(
+        'description' => 'The state of the translation job after the event that supplied the message occurred.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'description' => 'Created timestamp.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('tjmid'),
+    'indexes' => array(
+      'job_id' => array('tjid'),
+      'state_before' => array('state_before'),
+      'state_after' => array('state_after'),
+    ),
+  );
+
   return $schema;
 }
 
