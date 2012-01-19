@@ -427,3 +427,63 @@ function _tmgmt_plugin_labels($type) {
   return $list;
 }
 
+/**
+ * Converts a nested data array into a flattened structure with a combined key.
+ *
+ * This function can be used by translators to help with the data conversion.
+ *
+ * Nested keys will be joined together using a colon, so for example
+ * $data['key1']['key2']['key3'] will be converted into
+ * $flattened_data['key1:key2:key3'].
+ *
+ * @param $data
+ *   The nested array structure that should be flattened.
+ * @param $prefix
+ *   Internal use only, indicates the current key prefix when recursing into
+ *   the data array.
+ *
+ * @return
+ *   The flattened data array.
+ *
+ * @see tmgmt_unflatten_data().
+ */
+function tmgmt_flatten_data($data, $prefix = NULL) {
+  $flattened_data = array();
+  // Each element is either a text (has #text property defined) or has children,
+  // not both.
+  if (!empty($data['#text'])) {
+    $flattened_data[$prefix] = $data;
+  }
+  else {
+    $prefix = !empty($prefix) ? $prefix . ':' : '';
+    foreach (element_children($data) as $key) {
+      $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key);
+    }
+  }
+  return $flattened_data;
+}
+
+/**
+ * Converts a flattened data structure into a nested array.
+ *
+ * This function can be used by translators to help with the data conversion.
+ *
+ * Nested keys will be created based on the colon, so for example
+ * $flattened_data['key1:key2:key3'] will be converted into
+ * $data['key1']['key2']['key3'].
+ *
+ * @param $data
+ *   The flattened data array.
+ *
+ * @return
+ *   The nested data array.
+ *
+ * @see tmgmt_flatten_data().
+ */
+function tmgmt_unflatten_data($flattened_data) {
+  $data = array();
+  foreach ($flattened_data as $key => $flattened_data_entry) {
+    drupal_array_set_nested_value($data, explode(':', $key), $flattened_data_entry);
+  }
+  return $data;
+}
