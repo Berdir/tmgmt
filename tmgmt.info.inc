@@ -34,9 +34,30 @@ class TMGMTJobItemMetadataController extends EntityDefaultMetadataController {
       'type' => 'tmgmt_job',
     ) + $properties['tjid'];
 
-
     // Add the options list for all available source plugins.
-    $properties['plugin']['options list'] = 'tmgmt_source_plugin_labels';
+    $properties['source_plugin']['options list'] = 'tmgmt_source_plugin_labels';
+
+    return _tmgmt_override_property_description($info, $this->type);
+  }
+
+}
+
+class TMGMTJobMessageMetadataController extends EntityDefaultMetadataController {
+
+  public function entityPropertyInfo() {
+    $info = parent::entityPropertyInfo();
+    $properties = &$info[$this->type]['properties'];
+
+    $properties['tjid'] = array(
+      'description' => t('Corresponding job entity.'),
+      'type' => 'tmgmt_job',
+    ) + $properties['tjid'];
+
+    // Make the created property appear as date.
+    $properties['created']['type'] = 'date';
+
+    // Add the options list for the defined state constants.
+    $properties['state_before']['options list'] = $properties['state_after']['options list'] = array('TMGMTJob', 'getStatesList');
 
     return _tmgmt_override_property_description($info, $this->type);
   }
