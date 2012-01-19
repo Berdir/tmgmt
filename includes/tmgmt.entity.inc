@@ -72,7 +72,7 @@ class TMGMTTranslator extends Entity {
  *
  * @ingroup job
  */
-class TMGMTJobItem extends Entity {
+class TMGMTJobItem extends Entity implements TMGMTDataProvider {
 
   /**
    * The source plugin that provides the item.
@@ -181,42 +181,7 @@ class TMGMTJobItem extends Entity {
  *
  * @ingroup job
  */
-class TMGMTJob extends Entity {
-
-  /**
-   * A new translation job, can not yet be submitted.
-   */
-  const STATE_NEW = 0;
-
-  /**
-   * A prepared translation job, not yet submitted to a translator.
-   */
-  const STATE_PREPARED = 1;
-
-  /**
-   * A translation job that has been submitted to the translator.
-   */
-  const STATE_SUBMITTED = 2;
-
-  /**
-   * A translation job that has been rejected by the translator.
-   */
-  const STATE_REJECTED = 3;
-
-  /**
-   * The translation job was translated and needs to be reviewed.
-   */
-  const STATE_REVIEW = 4;
-
-  /**
-   * The translation has been accepted and the job is finished.
-   */
-  const STATE_ACCEPTED = 5;
-
-  /**
-   * The translation job has been cancelled.
-   */
-  const STATE_CANCELLED = 6;
+class TMGMTJob extends Entity implements TMGMTDataProvider {
 
   /**
    * Translation job identifier.
@@ -276,31 +241,13 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Static method to retrieve a labeled list of all available states.
-   *
-   * @return array
-   *   A list of all available states.
-   */
-  static function getStatesList() {
-    return array(
-      self::STATE_NEW => t('New'),
-      self::STATE_PREPARED => t('Prepared'),
-      self::STATE_SUBMITTED => t('Submitted'),
-      self::STATE_REJECTED => t('Rejected'),
-      self::STATE_REVIEW => t('Needs review'),
-      self::STATE_ACCEPTED => t('Accepted'),
-      self::STATE_CANCELLED => t('Cancelled'),
-    );
-  }
-
-  /**
    * Returns if the state of this transaction is new.
    *
    * @return
    *   TRUE if the state is new, FALSE otherwise.
    */
   public function isNew() {
-    return $this->getState() == TMGMTJob::STATE_NEW;
+    return $this->isState(TMGMT_JOB_STATE_NEW);
   }
 
   /**
@@ -310,7 +257,7 @@ class TMGMTJob extends Entity {
    *   TRUE if the state is prepared, FALSE otherwise.
    */
   public function isPrepared() {
-    return $this->getState() == TMGMTJob::STATE_PREPARED;
+    return $this->isState(TMGMT_JOB_STATE_PREPARED);
   }
 
   /**
@@ -320,7 +267,7 @@ class TMGMTJob extends Entity {
    *   TRUE if the state is submitted, FALSE otherwise.
    */
   public function isSubmitted() {
-    return $this->getState() == TMGMTJob::STATE_SUBMITTED;
+    return $this->isState(TMGMT_JOB_STATE_SUBMITTED);
   }
 
   /**
@@ -330,7 +277,7 @@ class TMGMTJob extends Entity {
    *   TRUE if the state is rejected, FALSE otherwise.
    */
   public function isRejected() {
-    return $this->getState() == TMGMTJob::STATE_REJECTED;
+    return $this->isState(TMGMT_JOB_STATE_REJECTED);
   }
 
   /**
@@ -340,7 +287,7 @@ class TMGMTJob extends Entity {
    *   TRUE if the state is needs review, FALSE otherwise.
    */
   public function isNeedsReview() {
-    return $this->getState() == TMGMTJob::STATE_REVIEW;
+    return $this->isState(TMGMT_JOB_STATE_REVIEW);
   }
 
   /**
@@ -350,7 +297,7 @@ class TMGMTJob extends Entity {
    *   TRUE if the state is accepted, FALSE otherwise.
    */
   public function isAccepted() {
-    return $this->getState() == TMGMTJob::STATE_ACCEPTED;
+    return $this->isState(TMGMT_JOB_STATE_ACCEPTED);
   }
 
   /**
@@ -360,7 +307,7 @@ class TMGMTJob extends Entity {
    *   TRUE if the state is cancelled, FALSE otherwise.
    */
   public function isCancelled() {
-    return $this->getState() == TMGMTJob::STATE_CANCELLED;
+    return $this->isState(TMGMT_JOB_STATE_CANCELLED);
   }
 
   /**
@@ -456,6 +403,36 @@ class TMGMTJob extends Entity {
   }
 
   /**
+   * Updates the state of the job.
+   *
+   * @param $state
+   *   The new state of the job. Has to be one of the state constants defined
+   *   in the state
+   */
+  public function setState($state) {
+    // Return TRUE if the state could be set. Return FALSE otherwise.
+    if (array_key_exists($state, tmgmt_job_states())) {
+      $this->old_state = $this->getState();
+      $this->state = $state;
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Checks whether the passed value matches the current state.
+   *
+   * @param $state
+   *   The value to check the current state against.
+   *
+   * @return bool
+   *   TRUE if the passed state matches the current state, FALSE otherwise.
+   */
+  public function isState($state) {
+    return $this->getState() == $state;
+  }
+
+  /**
    * Add a log message for this job.
    *
    * @param $message
@@ -486,7 +463,7 @@ class TMGMTJob extends Entity {
    * @see TMGMTJob::addLogMessage()
    */
   public function needsReview($message, $arguments = array()) {
-    $this->setState(TMGMTJob::STATE_REVIEW);
+    $this->setState(TMGMT_JOB_STATE_REVIEW);
     $this->addMessage($message);
   }
 
@@ -496,7 +473,7 @@ class TMGMTJob extends Entity {
    * @see TMGMTJob::addLogMessage()
    */
   public function prepared($message = NULL, $arguments = array()) {
-    $this->setState(TMGMTJob::STATE_PREPARED);
+    $this->setState(TMGMT_JOB_STATE_PREPARED);
     $this->addMessage($message);
   }
 
@@ -506,7 +483,7 @@ class TMGMTJob extends Entity {
    * @see TMGMTJob::addLogMessage()
    */
   public function submitted($message = NULL, $arguments = array()) {
-    $this->setState(TMGMTJob::STATE_SUBMITTED);
+    $this->setState(TMGMT_JOB_STATE_SUBMITTED);
     $this->addMessage($message);
   }
 
@@ -536,7 +513,7 @@ class TMGMTJob extends Entity {
    * @see TMGMTJob::addLogMessage()
    */
   public function rejected($message = NULL, $arguments = array()) {
-    $this->setState(TMGMTJob::STATE_REJECTED);
+    $this->setState(TMGMT_JOB_STATE_REJECTED);
     $this->addMessage($message);
   }
 
@@ -550,30 +527,6 @@ class TMGMTJob extends Entity {
   public function cancelled($message = NULL, $arguments = array()) {
     $this->setState(TMGMTJob::STATE_CANCELLED);
     $this->addMessage($message);
-  }
-
-  /**
-   * Updates the state of the job.
-   *
-   * @param $state
-   *   The new state of the job. Has to be one of the state constants defined
-   *   in the state
-   */
-  public function setState($state) {
-    // Return TRUE if the state could be set. Return FALSE otherwise.
-    switch ($state) {
-      case self::STATE_ACCEPTED:
-      case self::STATE_NEW:
-      case self::STATE_PREPARED:
-      case self::STATE_REJECTED:
-      case self::STATE_REVIEW:
-      case self::STATE_SUBMITTED:
-      case self::STATE_CANCELLED;
-        $this->old_state = $this->getState();
-        $this->state = $state;
-        return TRUE;
-    }
-    return FALSE;
   }
 
   /**

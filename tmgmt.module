@@ -1,6 +1,43 @@
 <?php
 
 /**
+ * A new translation job, can not yet be submitted.
+ */
+define('TMGMT_JOB_STATE_NEW', 0);
+
+/**
+ * A prepared translation job, not yet submitted to a translator.
+ */
+define('TMGMT_JOB_STATE_PREPARED', 1);
+
+/**
+ * A translation job that has been submitted to the translator.
+ */
+define('TMGMT_JOB_STATE_SUBMITTED', 2);
+
+/**
+ * A translation job that has been rejected by the translator.
+ *
+ * The response contains information why the job was rejected.
+ */
+define('TMGMT_JOB_STATE_REJECTED', 3);
+
+/**
+ * The translation job was translated and needs to be reviewed.
+ */
+define('TMGMT_JOB_STATE_REVIEW', 4);
+
+/**
+ * The translation has been accepted and the job is finished.
+ */
+define('TMGMT_JOB_STATE_ACCEPTED', 5);
+
+/**
+ * The translation job has been cancelled.
+ */
+define('TMGMT_JOB_STATE_CANCELLED', 6);
+
+/**
  * Implements hook_entity_info().
  */
 function tmgmt_entity_info() {
@@ -201,6 +238,24 @@ function tmgmt_job_create($source_language, $target_language, array $values = ar
     'source_language' => $source_language,
     'target_language' => $target_language,
   )));
+}
+
+/**
+ * Static method to retrieve a labeled list of all available states.
+ *
+ * @return array
+ *   A list of all available states.
+ */
+function tmgmt_job_states() {
+  return array(
+    TMGMT_JOB_STATE_NEW => t('New'),
+    TMGMT_JOB_STATE_PREPARED => t('Prepared'),
+    TMGMT_JOB_STATE_SUBMITTED => t('Submitted'),
+    TMGMT_JOB_STATE_REJECTED => t('Rejected'),
+    TMGMT_JOB_STATE_REVIEW => t('Needs review'),
+    TMGMT_JOB_STATE_ACCEPTED => t('Accepted'),
+    TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
+  );
 }
 
 /**
@@ -447,4 +502,3 @@ function tmgmt_unflatten_data($flattened_data) {
   }
   return $data;
 }
-
