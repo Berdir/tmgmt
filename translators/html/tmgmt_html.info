@@ -1,0 +1,6 @@
+name = HTML Translator
+description = A HTML Translator which is able to export and import translations into html files
+package = Translation Management
+core = 7.x
+dependencies[] = tmgmt
+files[] = tmgmt_html.plugin.inc
