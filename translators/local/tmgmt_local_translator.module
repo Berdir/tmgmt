@@ -10,32 +10,32 @@
  * 
  * @TODO Review permissions, maybe create new ones
  */
-function tgmt_local_translator_menu() {
-  $items['translate'] => array(
+function tmgmt_local_translator_menu() {
+  $items['translate'] = array(
     'title' => 'Translate',
     'description' => 'View pending translations',
-    'page callback' => 'tgmt_local_translator_page_user_translate',
+    'page callback' => 'tmgmt_local_translator_page_user_translate',
     'page arguments' => array(1),
     'access arguments' => array('translate content'),
-    'file' => 'tgmt_local_translator.pages.inc',
+    'file' => 'tmgmt_local_translator.pages.inc',
   );
-  $items['translate/%tgmt_job'] => array(
+  $items['translate/%tmgmt_job'] = array(
     'title' => 'Translate job',
-    'page callback' => 'tgmt_local_translator_page_job_translate',
+    'page callback' => 'tmgmt_local_translator_page_job_translate',
     'page arguments' => array(1),
     'access arguments' => array('translate content'),
-    'file' => 'tgmt_local_translator.pages.inc',
+    'file' => 'tmgmt_local_translator.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['user/%user/translation'] => array(
+  $items['user/%user/translation'] = array(
     'title' => 'Translation',
     'description' => 'Configure which languages the user can translate',
-    'page callback' => 'tgmt_local_translator_page_user_configure',
+    'page callback' => 'tmgmt_local_translator_page_user_configure',
     'page arguments' => array(1),
     'access callback' => 'user_edit_access',
     'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'tgmt_local_translator.pages.inc',
+    'file' => 'tmgmt_local_translator.pages.inc',
   );
   return $items;
 }
