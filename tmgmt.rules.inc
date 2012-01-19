@@ -39,7 +39,7 @@ function tmgmt_rules_action_info() {
  * Rules callback to request a translation of a job.
  */
 function tmgmt_rules_job_request_translation(TMGMTJob $job) {
-  if ($job->getState() == TMGMTJob::STATE_PREPARED && !empty($job->translator)) {
+  if ($job->canTranslate()) {
     $job->requestTranslation();
   }
 }

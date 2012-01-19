@@ -316,6 +316,15 @@ class TMGMTJob extends Entity {
   }
 
   /**
+   * @param TMGMTTranslatorResponseInterface $response
+   */
+  public function addResponse(TMGMTTranslatorResponseInterface $response) {
+    if ((($message = $response->toString()) !== NULL)) {
+      $this->response[REQUEST_TIME][] = $response->toString();
+    }
+  }
+
+  /**
    * Updates the state of a job to the state supplied by the response object.
    *
    * @param TMGMTTranslatorResponseInterface $response
@@ -325,9 +334,7 @@ class TMGMTJob extends Entity {
    *   TRUE if the state of the job entity has been updated, FALSE otherwise.
    */
   public function setStateFromResponse(TMGMTTranslatorResponseInterface $response) {
-    if ((($message = $response->toString()) !== NULL)) {
-      $this->response[REQUEST_TIME][] = $response->toString();
-    }
+    $this->addResponse($response);
     if (($state = $response->toJobState()) !== NULL) {
       return $this->setState($state);
     }
@@ -419,6 +426,22 @@ class TMGMTJob extends Entity {
   }
 
   /**
+   * Checks whether a job is translatable by checking if it is prepared and
+   * the translator can handle it.
+   *
+   * @return bool
+   *   TRUE if the job is prepared and can be translated, FALSE otherwise.
+   */
+  public function isTranslatable() {
+    if ($this->isPrepared() && $plugin = $this->getTranslatorPlugin()) {
+      if ($plugin->canTranslate($this)) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * Request the translation of a job from the translator.
    *
    * @return
@@ -433,7 +456,7 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Request the translation of a job from the translator.
+   * Cancel the translation of a job from the translator.
    */
   public function cancelTranslation() {
     $translator = $this->getTranslatorPlugin();
@@ -464,4 +487,5 @@ class TMGMTJob extends Entity {
       }
     }
   }
+
 }

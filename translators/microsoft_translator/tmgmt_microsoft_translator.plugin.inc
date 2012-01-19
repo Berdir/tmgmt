@@ -60,7 +60,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       }
 
       $query_data = drupal_http_build_query(array(
-        'appId'       => variable_get(''),
+        'appId'       => $this->getOption('bing_api_id'),
         'from'        => $job->source_language,
         'to'          => $job->target_language,
         'contentType' => 'text/plain',

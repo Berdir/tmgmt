@@ -85,6 +85,14 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function canTranslate(TMGMTJob $job);
 
   /**
+   * @param $source_language
+   * @return mixed
+   */
+  public function getSupportedTargetLanguages($source_language) {
+    return
+  }
+
+  /**
    * Submit callback.
    *
    * @param $job TMGMTJob
@@ -145,7 +153,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Get setting for this Service
+   * Get settings for this Service
    */
   protected function getOption($name, $default = NULL) {
     return variable_get('tmgmt_' . $this->pluginType . '_' . $name, $default);
