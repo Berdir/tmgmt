@@ -1,0 +1,6 @@
+name = Nativy Translation
+description = Nativy translator plugin for Translation Management module
+package = Translation Management
+core = 7.x
+
+files[] = nativy.module
