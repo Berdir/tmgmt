@@ -1,0 +1,4 @@
+name = Translation Management Field
+description = Implements some hooks on behalf of the core Field modules that are required in the Translation Management module.
+package = Translation Management
+core = 7.x
