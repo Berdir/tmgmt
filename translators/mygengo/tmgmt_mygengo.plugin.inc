@@ -139,7 +139,10 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
      */
     public function getSupportedTargetLanguages($source_language) {
         return $this->requestFromGengo('translate/service/language_pairs', array(
-            'lc_src' => $source_language
+            'method' => 'GET',
+            'data' => array(
+                'lc_src' => $source_language
+            )
         ));
     }
 
@@ -151,7 +154,9 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     public function getSupportedLanguages() {
         $languages = &drupal_static(__FUNCTION__);
         if(!isset($languages)) {
-            $supported_languages = $this->requestFromGengo('translate/service/languages');
+            $supported_languages = $this->requestFromGengo('translate/service/languages', array(
+                'method' => 'GET'
+            ));
             $languages = array();
             
             foreach($supported_languages as $language) {
