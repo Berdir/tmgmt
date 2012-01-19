@@ -3,9 +3,9 @@
 /**
  * Implements hook_views_default_views().
  */
-function tmgmt_node_views_default_views() {
+function tmgmt_node_ui_views_default_views() {
   $views = array();
-  
+
   $view = new view;
   $view->name = 'job_items_current_node';
   $view->description = '';

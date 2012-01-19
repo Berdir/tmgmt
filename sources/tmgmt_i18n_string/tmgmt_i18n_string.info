@@ -4,5 +4,5 @@ package = Translation Management
 core = 7.x
 dependencies[] = tmgmt
 dependencies[] = i18n_string
-files[] = includes/tmgmt_i18n_string.plugin.inc
+files[] = tmgmt_i18n_string.plugin.inc
 files[] = tmgmt_i18n_string.test

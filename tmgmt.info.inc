@@ -13,7 +13,7 @@ class TMGMTJobMetadataController extends EntityDefaultMetadataController {
     $properties['target_language']['options list'] = $properties['source_language']['options list'] = 'entity_metadata_language_list';
 
     // Add the options list for the defined state constants.
-    $properties['state']['options list'] = array('TMGMTJob', 'getStatesList');
+    $properties['state']['options list'] = 'tmgmt_job_states';
 
     // Add the options list for all available translator plugins.
     $properties['translator']['options list'] = 'tmgmt_translator_plugin_labels';

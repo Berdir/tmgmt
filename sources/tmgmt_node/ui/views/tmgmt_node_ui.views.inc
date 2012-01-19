@@ -3,7 +3,7 @@
 /**
  * Implements hook_views_data().
  */
-function tmgmt_node_views_data() {
+function tmgmt_node_ui_views_data() {
   $data = array();
 
   $data['node']['table']['join']['node'] = array(
