@@ -87,7 +87,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
           $data[$key]['#text'] = $string_items->item(0)->nodeValue;
           break;
         case 400:
-          return new TMGMTTranslatorResponse(TMGMTJob::STATE_REJECTED, $result->data);
+          return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REJECTED, $result->data);
           break;
         default:
           // @todo - we need to think here more what to do if service is not
@@ -101,7 +101,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
     }
     // Save the translated data through the job.
     $job->addTranslatedData(tmgmt_unflatten_data($data));
-    return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Microsoft Translator translation completed.'));
+    return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
   }
 
   /**

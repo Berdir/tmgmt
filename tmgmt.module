@@ -1,6 +1,43 @@
 <?php
 
 /**
+ * A new translation job, can not yet be submitted.
+ */
+define('TMGMT_JOB_STATE_NEW', 0);
+
+/**
+ * A prepared translation job, not yet submitted to a translator.
+ */
+define('TMGMT_JOB_STATE_PREPARED', 1);
+
+/**
+ * A translation job that has been submitted to the translator.
+ */
+define('TMGMT_JOB_STATE_SUBMITTED', 2);
+
+/**
+ * A translation job that has been rejected by the translator.
+ *
+ * The response contains information why the job was rejected.
+ */
+define('TMGMT_JOB_STATE_REJECTED', 3);
+
+/**
+ * The translation job was translated and needs to be reviewed.
+ */
+define('TMGMT_JOB_STATE_REVIEW', 4);
+
+/**
+ * The translation has been accepted and the job is finished.
+ */
+define('TMGMT_JOB_STATE_ACCEPTED', 5);
+
+/**
+ * The translation job has been cancelled.
+ */
+define('TMGMT_JOB_STATE_CANCELLED', 6);
+
+/**
  * Implements hook_entity_info().
  */
 function tmgmt_entity_info() {
@@ -189,6 +226,24 @@ function tmgmt_job_create($source_language, $target_language, array $values = ar
 }
 
 /**
+ * Static method to retrieve a labeled list of all available states.
+ *
+ * @return array
+ *   A list of all available states.
+ */
+function tmgmt_job_states() {
+  return array(
+    TMGMT_JOB_STATE_NEW => t('New'),
+    TMGMT_JOB_STATE_PREPARED => t('Prepared'),
+    TMGMT_JOB_STATE_SUBMITTED => t('Submitted'),
+    TMGMT_JOB_STATE_REJECTED => t('Rejected'),
+    TMGMT_JOB_STATE_REVIEW => t('Needs review'),
+    TMGMT_JOB_STATE_ACCEPTED => t('Accepted'),
+    TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
+  );
+}
+
+/**
  * @} End of "addtogroup job".
  */
 
@@ -370,66 +425,5 @@ function _tmgmt_plugin_labels($type) {
     $list[$key] = $info['label'];
   }
   return $list;
-}
-
-/**
- * Converts a nested data array into a flattened structure with a combined key.
- *
- * This function can be used by translators to help with the data conversion.
- *
- * Nested keys will be joined together using a colon, so for example
- * $data['key1']['key2']['key3'] will be converted into
- * $flattened_data['key1:key2:key3'].
- *
- * @param $data
- *   The nested array structure that should be flattened.
- * @param $prefix
- *   Internal use only, indicates the current key prefix when recursing into
- *   the data array.
- *
- * @return
- *   The flattened data array.
- *
- * @see tmgmt_unflatten_data().
- */
-function tmgmt_flatten_data($data, $prefix = NULL) {
-  $flattened_data = array();
-  // Each element is either a text (has #text property defined) or has children,
-  // not both.
-  if (!empty($data['#text'])) {
-    $flattened_data[$prefix] = $data;
-  }
-  else {
-    $prefix = !empty($prefix) ? $prefix . ':' : '';
-    foreach (element_children($data) as $key) {
-      $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key);
-    }
-  }
-  return $flattened_data;
-}
-
-/**
- * Converts a flattened data structure into a nested array.
- *
- * This function can be used by translators to help with the data conversion.
- *
- * Nested keys will be created based on the colon, so for example
- * $flattened_data['key1:key2:key3'] will be converted into
- * $data['key1']['key2']['key3'].
- *
- * @param $data
- *   The flattened data array.
- *
- * @return
- *   The nested data array.
- *
- * @see tmgmt_flatten_data().
- */
-function tmgmt_unflatten_data($flattened_data) {
-  $data = array();
-  foreach ($flattened_data as $key => $flattened_data_entry) {
-    drupal_array_set_nested_value($data, explode(':', $key), $flattened_data_entry);
-  }
-  return $data;
 }
 

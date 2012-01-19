@@ -191,7 +191,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
       $this->assertEqual($expected_text, $item->translated_data['dummy']['deep_nesting']['#text']);
     }
 
-    $es_job->setStateFromResponse(new TMGMTTranslatorResponse(TMGMTJob::STATE_ACCEPTED, t('Job accepted')));
+    $es_job->setStateFromResponse(new TMGMTTranslatorResponse(TMGMT_JOB_STATE_ACCEPTED, t('Job accepted')));
     $es_job->propagateTranslatedData();
 
     // Check if the translations have been "saved".

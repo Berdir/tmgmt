@@ -14,7 +14,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     // Do something different based on the target language.
     switch ($job->target_language) {
       case 'de':
-        return new TMGMTTranslatorResponse(TMGMTJob::STATE_SUBMITTED, t('Test submit'));
+        return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_SUBMITTED, t('Test submit'));
         break;
 
       case 'es':
@@ -24,11 +24,11 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
           $data[$key]['#text'] = str_replace('n', 'ñ', $value['#text']);
         }
         $job->addTranslatedData(tmgmt_unflatten_data($data));
-        return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Test translation created'));
+        return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Test translation created'));
         break;
 
       case 'it':
-        return new TMGMTTranslatorResponse(TMGMTJob::STATE_REJECTED, t('Translation into italian not supported'));
+        return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REJECTED, t('Translation into italian not supported'));
         break;
 
       case 'zh-hans':
