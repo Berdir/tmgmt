@@ -6,29 +6,13 @@
  */
 
 /**
- * Implements hook_menu().
- */
-function tmgmt_microsoft_translator_menu() {
-  $items['admin/config/services/microsoft-translator'] = array(
-    'title' => 'Microsoft Translator',
-    'description' => 'Configure Microsoft Translator service.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_microsoft_translator_settings'),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'tmgmt_microsoft_translator.admin.inc',
-  );
-
-  return $items;
-}
-
-/**
  * Implements hook_tmgmt_translator_plugin_info().
  */
 function tmgmt_microsoft_translator_tmgmt_translator_plugin_info() {
   return array(
     'microsoft_translator' => array(
       'label' => t('Microsoft translator'),
-      'description' => t('Microsoft Translator which use Microsoft Translator service.'),
+      'description' => t('Microsoft Translator service.'),
       'controller class' => 'TMGMTMicrosoftTranslatorController',
     ),
   );

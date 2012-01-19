@@ -38,6 +38,32 @@ define('TMGMT_JOB_STATE_ACCEPTED', 5);
 define('TMGMT_JOB_STATE_CANCELLED', 6);
 
 /**
+ * Implements hook_menu(). 
+ */
+function tmgmt_menu() {
+  $items['admin/config/regional/tmgmt'] = array(
+    'title' => 'Translation Management',
+    'description' => 'Translation Management Suite.',
+    'access arguments' => array('administer site configuration'),
+  );
+  
+  // Add settings menu item for each plugin that is using settings form.
+  foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
+    $plugin_controller = tmgmt_translator_plugin_controller($plugin);
+    if (method_exists($plugin_controller, 'settingsForm')) {
+      $items['admin/config/regional/tmgmt/' . $plugin] = array(
+        'title' => $plugin_info['label'],
+        'description' => $plugin_info['description'],
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('tmgmt_' . $plugin . '_translator_settings_form', $plugin),
+        'access arguments' => array('administer site configuration'),
+      );
+    }
+  }
+  return $items;
+}
+
+/**
  * Implements hook_entity_info().
  */
 function tmgmt_entity_info() {
@@ -107,20 +133,46 @@ function tmgmt_entity_info() {
 function tmgmt_forms() {
   $info = array();
   // Give each translator settings form a unique form id.
-  foreach (tmgmt_translator_plugin_info() as $plugin => $info) {
+  foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
     $info['tmgmt_' . $plugin . '_translator_settings_form'] = array(
       'callback' => 'tmgmt_translator_settings_form',
       'wrapper_callback' => 'tmgmt_translator_settings_form_defaults',
     );
   }
-  foreach (tmgmt_source_plugin_info() as $plugin => $info) {
-    $info['tmgmt_' . $plugin . '_source_settings_form'] = array(
-      'callback' => 'tmgmt_source_settings_form',
-      // @todo Do we need a wrapper callback for source settings forms?
-      //'wrapper_callback' => '',
-    );
-  }
   return $info;
+}
+
+/**
+ * Populate translation plugin settings form with default values.
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @param string $plugin
+ *   Translation plugin name.
+ * @return array
+ *   Form.
+ */
+function tmgmt_translator_settings_form_defaults($form, &$form_state, $plugin) {
+  $form = system_settings_form($form, $form_state);
+  return $form;
+}
+
+/**
+ * Get plugin translation settings form.
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @param string $plugin 
+ *   Translation plugin name.
+ */
+function tmgmt_translator_settings_form($form, &$form_state, $plugin) {
+  $plugin_controller = tmgmt_translator_plugin_controller($plugin);
+  $form = $plugin_controller->settingsForm($form, $form_state);
+  foreach (element_children($form) as $key) {
+    $form['tmgmt_' . $plugin . '_' . $key] = $form[$key];
+    unset($form[$key]);
+  }
+  return $form;
 }
 
 /**
