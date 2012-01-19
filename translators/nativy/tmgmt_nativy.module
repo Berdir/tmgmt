@@ -16,7 +16,7 @@ function tmgmt_nativy_menu() {
   $items['soaptest'] = array(
     'title' => 'Testcallback',
     'type' => MENU_CALLBACK,
-    'page callback' => 'nativy_test_page',
+    'page callback' => 'tmgmt_nativy_test_page',
     'access arguments' => array('access content'),
   );
   
