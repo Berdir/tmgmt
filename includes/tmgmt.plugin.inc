@@ -96,7 +96,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * @param $job TMGMTJob
    *   The TMGMTJob that should be submitted.
    *
-   * @return TMGMTTranslatorResponseInterface
+   * @return
    *   TRUE if the job has been successfully submitted, FALSE otherwise.
    */
   public function requestTranslation(TMGMTJob $job);
@@ -147,7 +147,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::cancelTranslation().
    */
   public function cancelTranslation(TMGMTJob $job) {
-    return new TMGMTTranslatorResponse(TMGMTJob::STATE_CANCELLED, t('Canceled'));
+    $job->cancellled('Canceled');
   }
 
   /**
@@ -158,77 +158,3 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
 }
-
-/**
- * Interface for handling responses communication with translation providers.
- *
- * @ingroup translator
- */
-interface TMGMTTranslatorResponseInterface {
-
-  /**
-   * Translates the response of the translation provider into a message that
-   * can be displayed to the user.
-   *
-   * @return string
-   *   A message that describes the response from the translation provider.
-   */
-  function toString();
-
-  /**
-   * Returns a valid Translation Management job state depending on the response
-   * of the translator plugin. Has to be one of the defined state constants or
-   * NULL if the reponse of the provider could not be mapped to a valid job
-   * state.
-   *
-   * @return
-   *   A valid state for a TranslationManagementJob entity or NULL.
-   */
-  function toJobState();
-
-}
-
-/**
- * Interface for handling responses communication with translation providers.
- *
- * @ingroup translator
- */
-class TMGMTTranslatorResponse implements TMGMTTranslatorResponseInterface {
-
-  /**
-   * @var
-   */
-  protected $code;
-
-  /**
-   * @var
-   */
-  protected $string;
-
-  /**
-   * Constructor.
-   *
-   * @param $code
-   * @param $string
-   */
-  public function __construct($code, $string) {
-    $this->code = $code;
-    $this->string = $string;
-  }
-
-  /**
-   * Implements TMGMTTranslatorResponseInterface::toString(),
-   */
-  function toString() {
-    return $this->string;
-  }
-
-  /**
-   * Implements TMGMTTranslatorResponseInterface::toJobState(),
-   */
-  function toJobState() {
-    return $this->code;
-  }
-
-}
-

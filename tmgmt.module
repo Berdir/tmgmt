@@ -131,6 +131,21 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
 }
 
 /**
+ * Loads a translation job message.
+ */
+function tmgmt_job_message_load($tjmid, $reset = FALSE) {
+  $jobs = tmgmt_job_load_multiple(array($tjmid), array(), $reset);
+  return $jobs ? reset($jobs) : FALSE;
+}
+
+/**
+ * Loads translation job messages.
+ */
+function tmgmt_job_message_load_multiple(array $tjmids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('tmgmt_job_message', $tjmids, $conditions, $reset);
+}
+
+/**
  * Loads a translation job item.
  */
 function tmgmt_job_item_load($tjiid, $reset = FALSE) {
@@ -351,8 +366,6 @@ function _tmgmt_plugin_controller($type, $plugin) {
   if (!isset($cache[$type][$plugin])) {
     $info = _tmgmt_plugin_info($type, $plugin);
     $class = isset($info['controller class']) ? $info['controller class'] : 'TMGMTDefault' . ucfirst($type) . 'PluginController';
-    debug($info, $plugin);
-    debug($class);
     $cache[$type][$plugin] = new $class($plugin);
   }
   return $cache[$type][$plugin];

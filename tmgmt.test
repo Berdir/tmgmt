@@ -191,7 +191,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
       $this->assertEqual($expected_text, $item->translated_data['dummy']['deep_nesting']['#text']);
     }
 
-    $es_job->setStateFromResponse(new TMGMTTranslatorResponse(TMGMTJob::STATE_ACCEPTED, t('Job accepted')));
+    $es_job->accepted(t('Job accepted'));
     $es_job->propagateTranslatedData();
 
     // Check if the translations have been "saved".
@@ -203,8 +203,8 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $it_job = tmgmt_test_trigger_job('it');
     $it_job->requestTranslation();
     $this->assertTrue($it_job->isRejected());
-    //$last_response = end($it_job->response);
-    //$this->assertEqual(t('Translation into italian not supported'), reset($last_response));
+    $messages = $it_job->getMessages();
+    debug($messages);
 
     // Trigger a translation job into chinese.
     $zh_job = tmgmt_test_trigger_job('zh-hans');

@@ -87,21 +87,23 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
           $data[$key]['#text'] = $string_items->item(0)->nodeValue;
           break;
         case 400:
-          return new TMGMTTranslatorResponse(TMGMTJob::STATE_REJECTED, $result->data);
+          $job->rejected($result->data);
+          return;
           break;
         default:
           // @todo - we need to think here more what to do if service is not
           // responding for some items and is responding for some others.
           // Ideally we should save sources that we manage to translate and
           // not just return.
-          debug($result);
-          return new TMGMTTranslatorResponse(NULL, $result->data);
+          $job->addMessage($result->data);
+          return;
           break;
       }
     }
     // Save the translated data through the job.
     $job->addTranslatedData(tmgmt_unflatten_data($data));
-    return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Microsoft Translator translation completed.'));
+    // Mark this string as translatable.
+    $job->needsReview('Microsoft Translator translation completed.');
   }
 
   /**
