@@ -351,8 +351,6 @@ function _tmgmt_plugin_controller($type, $plugin) {
   if (!isset($cache[$type][$plugin])) {
     $info = _tmgmt_plugin_info($type, $plugin);
     $class = isset($info['controller class']) ? $info['controller class'] : 'TMGMTDefault' . ucfirst($type) . 'PluginController';
-    debug($info, $plugin);
-    debug($class);
     $cache[$type][$plugin] = new $class($plugin);
   }
   return $cache[$type][$plugin];
