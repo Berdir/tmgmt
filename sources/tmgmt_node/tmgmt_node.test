@@ -44,7 +44,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($node->body[LANGUAGE_NONE][0]['value'], $data['body'][0]['value']['#text'], t('Node body is extracted.'));
 
     $job->requestTranslation();
-    $job->setState(TMGMTJob::STATE_ACCEPTED);
+    $job->setState(TMGMT_JOB_STATE_ACCEPTED);
     $job->save();
 
     $job->propagateTranslatedData();

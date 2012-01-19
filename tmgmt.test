@@ -169,47 +169,66 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     parent::setUp(array('entity', 'tmgmt', 'tmgmt_test'));
   }
 
+  function createJob($action = 'translate') {
+    $job = tmgmt_job_create('en', 'de');
+
+    for ($i = 1; $i < 3; $i++) {
+      $item = tmgmt_job_item_create('test_source', 'test', $i);
+      $job->addItem($item);
+    }
+
+    // Manually specify the translator for now.
+    $job->translator = 'test_translator';
+    $job->translator_context = array('action' => $action);
+
+    $job->prepared();
+    $job->save();
+
+    return $job;
+  }
+
   function testBasicWorkflow() {
 
-    // Trigger a translation job into german.
-    $de_job = tmgmt_test_trigger_job('de');
-    $de_job->requestTranslation();
+    // Submit a translation job.
+    $submit_job = $this->createJob('submit');
+    $submit_job->requestTranslation();
 
-    $de_job = tmgmt_job_load($de_job->tjid);
-    $this->assertTrue($de_job->isSubmitted());
+    $submit_job = tmgmt_job_load($submit_job->tjid);
+    $this->assertTrue($submit_job->isSubmitted());
 
-    // Trigger a translation job into spanish.
-    $es_job = tmgmt_test_trigger_job('es');
-    $es_job->requestTranslation();
+    // Translate a job.
+    $translate_job = $this->createJob('translate');
+    $translate_job->requestTranslation();
 
-    $es_job = tmgmt_job_load($es_job->tjid);
-    $this->assertTrue($es_job->isNeedsReview());
+    $translate_job = tmgmt_job_load($translate_job->tjid);
+    $this->assertTrue($translate_job->isNeedsReview());
 
-    foreach ($es_job->getItems() as $item) {
-      // Check the translated text. n has been replaced with ñ.
-      $expected_text = 'Text for job item with type ' . $item->item_type . ' añd id ' . $item->item_id . '.';
+    foreach ($translate_job->getItems() as $item) {
+      // Check the translated text.
+      $expected_text = 'de_Text for job item with type ' . $item->item_type . ' and id ' . $item->item_id . '.';
       $this->assertEqual($expected_text, $item->translated_data['dummy']['deep_nesting']['#text']);
     }
 
-    $es_job->setStateFromResponse(new TMGMTTranslatorResponse(TMGMTJob::STATE_ACCEPTED, t('Job accepted')));
-    $es_job->propagateTranslatedData();
+    $translate_job->accepted(t('Job accepted'));
 
     // Check if the translations have been "saved".
-    foreach ($es_job->getItems() as $item) {
+    foreach ($translate_job->getItems() as $item) {
       $this->assertTrue(variable_get('tmgmt_test_saved_translation_' . $item->item_type . '_' . $item->item_id, FALSE));
     }
 
-    // Trigger a translation job into italian.
-    $it_job = tmgmt_test_trigger_job('it');
-    $it_job->requestTranslation();
-    $this->assertTrue($it_job->isRejected());
-    //$last_response = end($it_job->response);
-    //$this->assertEqual(t('Translation into italian not supported'), reset($last_response));
+    // A rejected job.
+    $reject_job = $this->createJob('reject');
+    $reject_job->requestTranslation();
+    $this->assertTrue($reject_job->isRejected());
+    $messages = $reject_job->getMessages();
+    debug($messages);
 
-    // Trigger a translation job into chinese.
-    $zh_job = tmgmt_test_trigger_job('zh-hans');
-    $zh_job->requestTranslation();
+    // A failing job.
+    $failing_job = $this->createJob('fail');
+    $failing_job->requestTranslation();
     // Still prepared.
-    $this->assertTrue($zh_job->isPrepared());
+    $this->assertTrue($failing_job->isPrepared());
+    $messages = $reject_job->getMessages();
+    debug($messages);
   }
 }
