@@ -11,11 +11,8 @@
 class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginController {
 
   public function getData(TMGMTJobItem $job_item) {
-    // TODO: find a way to get the default string.
-    $string = 'TODO';
-
     return array(
-      '#text' => $string,
+      '#text' => i18n_string_get_source($job_item->item_id),
     );
   }
 
