@@ -20,16 +20,30 @@ function tmgmt_node_menu() {
   return $items;
 }
 
+function tmgmt_node_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'tmgmt_node') . '/includes/views',
+  );
+}
+
 /**
  * The Node translator settings form.
  */
 function tmgmt_node_translator_settings_form($form, &$form_state, $node) {
   // Check for pending jobs.
   $jobs = tmgmt_job_load_multiple_by_source('node', 'node', $node->vid);
+  dsm($node);
   if (!empty($jobs)) {
-    foreach ($jobs as $job) {
-//      dsm($job);
-    }
+//    foreach ($jobs as $job) {
+    $view = views_get_view('job_items_current_node');
+    dsm(views_embed_view('job_items_current_node', 'default', $node->vid));
+    $form['joblist'] = array(
+      '#type' => 'item',
+      '#title' => t('Pending jobs'),
+      '#markup' => views_embed_view('job_items_current_node', 'default', $node->vid),
+    );
+//    }
   }
 
   // Get all available languages from core translation module.
@@ -212,7 +226,7 @@ function text_tmgmt_source_translation_structure($field_name, $node, $field_info
       );
       if ($field_info['type'] == 'text_with_summary' && !empty($value['summary'])) {
         $structure[$key]['summary'] = array(
-          '#label' => t('!field_name: Summary nr. !count',array('!field_name' => $instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
+          '#label' => t('!field_name: Summary nr. !count', array('!field_name' => $instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
           '#text' => $value['summary'],
           '#translate' => TRUE
         );
