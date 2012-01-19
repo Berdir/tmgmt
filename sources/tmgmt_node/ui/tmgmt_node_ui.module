@@ -41,7 +41,7 @@ function tmgmt_node_views_api() {
 }
 
 /**
- * Job overview, which contains the selected item
+ * Job overview, which contains the selected item.
  */
 function tmgmt_node_ui_translation_overview($node) {
   if (!$output = views_embed_view('job_items_current_node', 'default', $node->tnid)) {

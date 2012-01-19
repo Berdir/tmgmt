@@ -38,11 +38,11 @@ define('TMGMT_JOB_STATE_ACCEPTED', 5);
 define('TMGMT_JOB_STATE_CANCELLED', 6);
 
 /**
- * Implements hook_menu(). 
+ * Implements hook_menu().
  */
 function tmgmt_menu() {
   $items = array();
-  
+
   // Add settings menu item for each plugin that is using settings form.
   foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
     $plugin_controller = tmgmt_translator_plugin_controller($plugin);
@@ -144,39 +144,6 @@ function tmgmt_forms() {
     );
   }
   return $info;
-}
-
-/**
- * Populate translation plugin settings form with default values.
- * 
- * @param array $form
- * @param array $form_state
- * @param string $plugin
- *   Translation plugin name.
- * @return array
- *   Form.
- */
-function tmgmt_translator_settings_form_defaults($form, &$form_state, $plugin) {
-  $form = system_settings_form($form, $form_state);
-  return $form;
-}
-
-/**
- * Get plugin translation settings form.
- * 
- * @param array $form
- * @param array $form_state
- * @param string $plugin 
- *   Translation plugin name.
- */
-function tmgmt_translator_settings_form($form, &$form_state, $plugin) {
-  $plugin_controller = tmgmt_translator_plugin_controller($plugin);
-  $form = $plugin_controller->settingsForm($form, $form_state);
-  foreach (element_children($form) as $key) {
-    $form['tmgmt_' . $plugin . '_' . $key] = $form[$key];
-    unset($form[$key]);
-  }
-  return $form;
 }
 
 /**
@@ -387,6 +354,39 @@ function tmgmt_translator_plugin_labels($available_only = FALSE) {
     }
   }
   return $translators;
+}
+
+/**
+ * Populate translation plugin settings form with default values.
+ *
+ * @param array $form
+ * @param array $form_state
+ * @param string $plugin
+ *   Translation plugin name.
+ * @return array
+ *   Form.
+ */
+function tmgmt_translator_settings_form_defaults($form, &$form_state, $plugin) {
+  $form = system_settings_form($form, $form_state);
+  return $form;
+}
+
+/**
+ * Get plugin translation settings form.
+ *
+ * @param array $form
+ * @param array $form_state
+ * @param string $plugin
+ *   Translation plugin name.
+ */
+function tmgmt_translator_settings_form($form, &$form_state, $plugin) {
+  $plugin_controller = tmgmt_translator_plugin_controller($plugin);
+  $form = $plugin_controller->settingsForm($form, $form_state);
+  foreach (element_children($form) as $key) {
+    $form['tmgmt_' . $plugin . '_' . $key] = $form[$key];
+    unset($form[$key]);
+  }
+  return $form;
 }
 
 /**
