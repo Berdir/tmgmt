@@ -32,6 +32,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
     $job = $this->createJob();
     $job->translator = 'test_translator';
     $job->translator_context = array();
+    $job->save();
 
     $item1 = tmgmt_job_item_create('node', 'entity', $node->vid);
     $job->addItem($item1);
@@ -39,12 +40,17 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
     // Check the structure of the imported data.
     $this->assertEqual($item1->item_id, $node->vid, t('Node identifier is correctly saved'));
     $data = $item1->getSourceData();
-    debug($data);
-    //$this->assertEqual($first, $second)
+    $this->assertEqual($node->title, $data['node_title'][0]['value']['#text'], t('Node title is extracted.'));
+    $this->assertEqual($node->body[LANGUAGE_NONE][0]['value'], $data['body'][0]['value']['#text'], t('Node body is extracted.'));
 
     $job->requestTranslation();
+    $job->setState(TMGMTJob::STATE_ACCEPTED);
+    $job->save();
 
-    debug($item->translated_data);
-    $this->assertTrue(strpos($item->translated_data, $node->title) !== FALSE, t('Node title is correctly translated.'));
+    $job->saveTranslations();
+
+    foreach ($job->getItems() as $item) {
+      $this->assertTrue(strpos($item->translated_data, $node->title) !== FALSE, t('Node title is correctly translated.'));
+    }
   }
 }
