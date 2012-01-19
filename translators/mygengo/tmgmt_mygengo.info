@@ -1,0 +1,6 @@
+name = myGengo Translator
+description = A myGengo translator service.
+package = Translation Management
+core = 7.x
+dependencies[] = tmgmt
+files[] = tmgmt_mygengo.plugin.inc
