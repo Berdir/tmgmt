@@ -31,7 +31,7 @@ class TMGMTMyGengnoController extends TMGMTDefaultTranslatorPluginController {
    */
   public function canTranslate(TMGMTJob $job) {
     // @todo - add specific myGengo implementation.
-    
+
     $languages = $this->getSupportedLanguages();
     if ($this->isAvailable() && isset($languages[$job->source_language]) && isset($languages[$job->target_language])) {
       // The job is only translatable if the translator is available too.
@@ -49,7 +49,7 @@ class TMGMTMyGengnoController extends TMGMTDefaultTranslatorPluginController {
    */
   public function requestTranslation(TMGMTJob $job) {
     // @todo - add specific myGengo implementation.
-    
+
     // @todo - who is handling cron / batch here, we or some other controler?
     $translate_url = $this->translatorURL . '/Translate';
 
@@ -95,7 +95,6 @@ class TMGMTMyGengnoController extends TMGMTDefaultTranslatorPluginController {
           // responding for some items and is responding for some others.
           // Ideally we should save sources that we manage to translate and
           // not just return.
-          debug($result);
           return new TMGMTTranslatorResponse(NULL, $result->data);
           break;
       }
@@ -121,7 +120,7 @@ class TMGMTMyGengnoController extends TMGMTDefaultTranslatorPluginController {
    */
   public function getSupportedLanguages() {
     // @todo - add specific myGengo implementation.
-    
+
     $languages = &drupal_static(__FUNCTION__);
     if (!isset($languages)) {
       $languages = array();

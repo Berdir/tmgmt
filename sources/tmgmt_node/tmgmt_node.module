@@ -218,30 +218,3 @@ function tmgmt_node_update_node_translation($node, $translated_data, $target_lan
   node_save($node);
 }
 
-/**
- * Implements hook_tmgmt_source_translation_structure() for the text module.
- *
- * @todo: this hook should probably be placed elsewhere.
- */
-function text_tmgmt_source_translation_structure($field_name, $entity, $field_info, $field_instance, $job_item) {
-  $job = tmgmt_job_load($job_item->tjid);
-  $field_lang = field_language($job_item->item_type, $entity, $field_name);
-  $structure = array();
-  if (!empty($entity->{$field_name})) {
-    foreach ($entity->{$field_name}[$field_lang] as $key => $value) {
-      $structure[$key]['value'] = array(
-        '#label' => t('!field_name: Value nr. !count', array('!field_name' => $field_instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
-        '#text' => $value['value'],
-        '#translate' => TRUE,
-      );
-      if ($field_info['type'] == 'text_with_summary' && !empty($value['summary'])) {
-        $structure[$key]['summary'] = array(
-          '#label' => t('!field_name: Summary nr. !count', array('!field_name' => $field_instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
-          '#text' => $value['summary'],
-          '#translate' => TRUE
-        );
-      }
-    }
-  }
-  return $structure;
-}
