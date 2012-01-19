@@ -4,5 +4,6 @@ package = Translation Management
 core = 7.x
 dependencies[] = tmgmt
 dependencies[] = node
+dependencies[] = tmgmt_field
 files[] = includes/tmgmt_node.plugin.inc
 files[] = tmgmt_node.test
