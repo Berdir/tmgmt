@@ -62,7 +62,7 @@ class TMGMTTranslator extends Entity {
    * @return TMGMTTranslatorPluginControllerInterface
    */
   public function getTranslatorController() {
-    return tmgmt_translator_plugin_controller($this->plugin);
+    return tmgmt_translator_plugin_controller($this->translator_plugin);
   }
 
 }
@@ -143,7 +143,7 @@ class TMGMTJobItem extends Entity {
    * @return TMGMTSourcePluginControllerInterface
    */
   public function getSourceController() {
-    return tmgmt_source_plugin_controller($this->plugin);
+    return tmgmt_source_plugin_controller($this->source_plugin);
   }
 
   /**
@@ -481,10 +481,10 @@ class TMGMTJob extends Entity {
    *
    */
   public function addMessage($message, $arguments = array()) {
-    $message = entity_create('tmgmt_message', array(
+    $message = entity_create('tmgmt_job_message', array(
       'tmjid' => $this->tjid,
-      'old_state' => isset($this->old_state) ? $this->old_state : $this->getState(),
-      'new_state' => $this->getState(),
+      'state_before' => isset($this->old_state) ? $this->old_state : $this->getState(),
+      'state_after' => $this->getState(),
       'message' => $message,
       'arguments' => $arguments,
     ));
@@ -681,7 +681,7 @@ class TMGMTJob extends Entity {
 }
 
 /**
- * Entity class for the tmgmt_message entity.
+ * Entity class for the tmgmt_job_message entity.
  *
  * @ingroup message
  */
@@ -740,7 +740,7 @@ class TMGMTJobMessage extends Entity {
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
-    parent::__construct($values, 'tmgmt_message');
+    parent::__construct($values, 'tmgmt_job_message');
     $this->created = REQUEST_TIME;
   }
 

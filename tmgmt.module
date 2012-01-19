@@ -148,7 +148,7 @@ function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = arr
 /**
  * Creates a translation job item.
  *
- * @param $plugin
+ * @param $source_plugin
  *   The plugin name.
  * @param $item_type
  *   The source item type.
@@ -160,9 +160,9 @@ function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = arr
  * @return TMGMTJobItem
  *   The created, not yet saved, job item entity.
  */
-function tmgmt_job_item_create($plugin, $item_type, $item_id, array $values = array()) {
+function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $values = array()) {
   return entity_create('tmgmt_job_item', array_merge($values, array(
-    'plugin' => $plugin,
+    'source_plugin' => $source_plugin,
     'item_type' => $item_type,
     'item_id' => $item_id,
   )));
@@ -351,6 +351,8 @@ function _tmgmt_plugin_controller($type, $plugin) {
   if (!isset($cache[$type][$plugin])) {
     $info = _tmgmt_plugin_info($type, $plugin);
     $class = isset($info['controller class']) ? $info['controller class'] : 'TMGMTDefault' . ucfirst($type) . 'PluginController';
+    debug($info, $plugin);
+    debug($class);
     $cache[$type][$plugin] = new $class($plugin);
   }
   return $cache[$type][$plugin];
