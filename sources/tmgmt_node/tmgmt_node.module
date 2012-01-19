@@ -28,25 +28,17 @@ function tmgmt_node_menu() {
   return $items;
 }
 
-function tmgmt_node_views_api() {
-  return array(
-    'api' => 3,
-    'path' => drupal_get_path('module', 'tmgmt_node') . '/includes/views',
-  );
-}
-
 /**
  * job overview, which contains the selected item
  */
 function tmgmt_node_translation_overview($node) {
   $output = '';
-  // Check for pending jobs.
-  $jobs = tmgmt_job_load_multiple_by_source('node', 'node', $node->vid);
+  // Check for pending jobs
+  $jobs = tmgmt_job_load_multiple_by_source('node', 'node', $node->tnid);
   if (!empty($jobs)) {
     $view = views_get_view('job_items_current_node');
-    $output .= views_embed_view('job_items_current_node', 'default', $node->vid);
-  }
-  else {
+    $output .= views_embed_view('job_items_current_node', 'default', $node->tnid);
+  } else {
     $output .= t('There are currently no jobs existing, related to this item.');
   }
   return $output;
@@ -166,6 +158,8 @@ function tmgmt_node_translator_settings_form_submit($form, &$form_state) {
   // Mark the job as prepared.
   $job->prepared();
   $job->save();
+
+  $form_state['redirect'] = 'node/' . $values['nid'] . '/tmgmt';
 }
 
 /**
@@ -218,3 +212,12 @@ function tmgmt_node_update_node_translation($node, $translated_data, $target_lan
   node_save($node);
 }
 
+/**
+ * implementing hook_views_api.
+ */
+function tmgmt_node_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'tmgmt_node') . '/includes/views',
+  );
+}
