@@ -248,15 +248,6 @@ class TMGMTJob extends Entity {
   public $target_language;
 
   /**
-   * Response log from the translator.
-   *
-   * An array of response messages keyed by the time of the occurence.
-   *
-   * @var array
-   */
-  public $response;
-
-  /**
    * Reference to the used translator of this job.
    *
    * @see TMGMTJob::getTranslator().
@@ -583,6 +574,72 @@ class TMGMTJob extends Entity {
         $items[$key]->addTranslatedData($value);
       }
     }
+  }
+
+}
+
+/**
+ * Entity class for the tmgmt_message entity.
+ *
+ * @ingroup message
+ */
+class TMGMTJobMessage extends Entity {
+
+  /**
+   * The ID of the message..
+   *
+   * @var integer
+   */
+  public $tjmid;
+
+  /**
+   * The ID of the job.
+   *
+   * @var integer
+   */
+  public $tjid;
+
+  /**
+   * The message text.
+   *
+   * @var string
+   */
+  public $message;
+
+  /**
+   * An array of string replacement arguments as used by t().
+   *
+   * @var array
+   */
+  public $variables;
+
+  /**
+   * The status before the event occurred.
+   *
+   * @var int
+   */
+  public $status_before;
+
+  /**
+   * The status after the event occurred.
+   *
+   * @var int
+   */
+  public $status_after;
+
+  /**
+   * The time when the message object was created as a timestamp.
+   *
+   * @var int
+   */
+  public $created;
+
+  /**
+   * Overrides Entity::__construct().
+   */
+  public function __construct(array $values = array()) {
+    parent::__construct($values, 'tmgmt_message');
+    $this->created = REQUEST_TIME;
   }
 
 }
