@@ -15,7 +15,7 @@ function tmgmt_mygengo_settings() {
     '#type' => 'textfield',
     '#title' => t('myGengo API key'),
     '#default_value' => variable_get('tmgmt_mygengo_api_key', ''),
-    '#description' => t('Please enter yout myGengo API key.'),
+    '#description' => t('Please enter your myGengo API key.'),
   );
 
   return system_settings_form($form);
