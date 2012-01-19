@@ -11,8 +11,9 @@
 class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginController {
 
   public function getData(TMGMTJobItem $job_item) {
+    $i18nstring = i18n_string_get_source($job_item->item_id);
     return array(
-      '#text' => i18n_string_get_source($job_item->item_id),
+      '#text' => $i18nstring->source,
     );
   }
 
