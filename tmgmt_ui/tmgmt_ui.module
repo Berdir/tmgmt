@@ -1,0 +1,58 @@
+<?php
+/**
+ * @file
+ * UI.
+ */
+
+/**
+ * Implements hook_permission().
+ */
+function tmgmt_ui_permission() {
+  return array(
+    'administer tmgmt' => array(
+      'title' => t('administer Translation Management UI'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function tmgmt_ui_menu() {
+    $items = array();
+
+    $items['admin/tmgmt'] = array(
+        'title' => 'Translation Management',
+        'description' => 'Use the Translation Management',
+        'page callback' => 'tmgmt_ui_content',
+        'access arguments' => array('administer tmgmt'),
+        'weight' => -20,
+        'file' => 'tmgmt_ui.pages.inc',
+    );
+    $items['admin/tmgmt/my-translation-management'] = array(
+        'title' => 'Overview',
+        'page callback' => 'tmgmt_ui_content',
+        'access arguments' => array('administer tmgmt'),
+        'weight' => -20,
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+        'file' => 'tmgmt_ui.pages.inc',
+    );
+    $items['admin/tmgmt/jobs'] = array(
+        'title' => 'Jobs Overview',
+        'page callback' => 'tmgmt_ui_jobs',
+        'access arguments' => array('administer tmgmt'),
+        'weight' => -19,
+        'type' => MENU_LOCAL_TASK,
+        'file' => 'tmgmt_ui.pages.inc',
+    );
+    $items['admin/tmgmt/nodes'] = array(
+        'title' => 'Nodes Overview',
+        'page callback' => 'tmgmt_ui_nodes',
+        'access arguments' => array('administer tmgmt'),
+        'weight' => -18,
+        'type' => MENU_LOCAL_TASK,
+        'file' => 'tmgmt_ui.pages.inc',
+    );
+
+    return $items;
+}

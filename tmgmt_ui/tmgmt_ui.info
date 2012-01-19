@@ -1,0 +1,7 @@
+name = UI
+description = User interface.
+package = Translation Management
+core = 7.x
+configure = admin/config/tmgmt_ui
+dependencies[] = tmgmt
+#dependencies[] = views
