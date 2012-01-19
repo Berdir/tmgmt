@@ -47,7 +47,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
     $job->setState(TMGMTJob::STATE_ACCEPTED);
     $job->save();
 
-    $job->saveTranslations();
+    $job->propagateTranslatedData();
 
     foreach ($job->getItems() as $item) {
       $this->assertTrue(strpos($item->translated_data, $node->title) !== FALSE, t('Node title is correctly translated.'));
