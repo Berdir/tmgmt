@@ -41,16 +41,20 @@ define('TMGMT_JOB_STATE_CANCELLED', 6);
  * Implements hook_menu(). 
  */
 function tmgmt_menu() {
-  $items['admin/config/regional/tmgmt'] = array(
-    'title' => 'Translation Management',
-    'description' => 'Translation Management Suite.',
-    'access arguments' => array('administer site configuration'),
-  );
+  $items = array();
   
   // Add settings menu item for each plugin that is using settings form.
   foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
     $plugin_controller = tmgmt_translator_plugin_controller($plugin);
     if (method_exists($plugin_controller, 'settingsForm')) {
+      if (empty($items)) {
+        // If we have any menu item then lets add root item also.
+        $items['admin/config/regional/tmgmt'] = array(
+          'title' => 'Translation Management',
+          'description' => 'Translation Management Suite.',
+          'access arguments' => array('administer site configuration'),
+        );
+      }
       $items['admin/config/regional/tmgmt/' . $plugin] = array(
         'title' => $plugin_info['label'],
         'description' => $plugin_info['description'],
