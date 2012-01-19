@@ -105,13 +105,21 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   */
+  public function getSupportedTargetLanguages($source_language) {
+    $languages = $this->getSupportedLanguages();
+    unset($languages[$source_language]);
+    return $languages;
+  }
+
+  /**
    * Returns array of service supported languages.
    *
    * @return array
    */
   public function getSupportedLanguages() {
     $languages = &drupal_static(__FUNCTION__);
-
     if (!isset($languages)) {
       $languages = array();
       $res = drupal_http_request($this->translatorURL . '/GetLanguagesForTranslate' . '?appId=' . $this->getOption('bing_api_id'));
@@ -124,7 +132,6 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
         }
       }
     }
-
     return $languages;
   }
 

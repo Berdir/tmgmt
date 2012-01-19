@@ -88,9 +88,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * @param $source_language
    * @return mixed
    */
-  public function getSupportedTargetLanguages($source_language) {
-    return
-  }
+  public function getSupportedTargetLanguages($source_language);
 
   /**
    * Submit callback.

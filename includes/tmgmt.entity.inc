@@ -545,7 +545,7 @@ class TMGMTJob extends Entity {
       $this->setState(TMGMTJob::STATE_CANCELLED);
     }
     else {
-      // Otherwis, ask the translator if this job can be cancelled.
+      // Otherwise, ask the translator if this job can be cancelled.
       $translator = $this->getTranslatorPlugin();
       $response = $translator->cancelTranslation($this);
       $this->setStateFromResponse($response);
