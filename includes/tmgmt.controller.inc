@@ -21,7 +21,7 @@ class TMGMTJobController extends EntityAPIController {
     $entity->changed = REQUEST_TIME;
 
     if (!isset($entity->state)) {
-      $entity->state = TMGMTJob::STATE_NEW;
+      $entity->state = TMGMT_JOB_STATE_NEW;
     }
 
     return parent::save($entity, $transaction);

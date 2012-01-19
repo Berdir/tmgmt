@@ -99,32 +99,40 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
                 continue;
             }
 
-            switch ($result->code) {
-                case 200:
-                    // Lets leave DOMDocument for now because this service enable us
-                    // to send array of translation sources, and we will probably use
-                    // this soon.
-                    $dom = new DOMDocument;
-                    $dom->loadXML($result->data);
-                    $string_items = $dom->getElementsByTagName('string');
-                    $data[$key]['#text'] = $string_items->item(0)->nodeValue;
-                    break;
-                case 400:
-                    return new TMGMTTranslatorResponse(TMGMTJob::STATE_REJECTED, $result->data);
-                    break;
-                default:
-                    // @todo - we need to think here more what to do if service is not
-                    // responding for some items and is responding for some others.
-                    // Ideally we should save sources that we manage to translate and
-                    // not just return.
-                    return new TMGMTTranslatorResponse(NULL, $result->data);
-                    break;
-            }
-        }
-        // Save the translated data through the job.
-        $job->addTranslatedData(tmgmt_unflatten_data($data));
-        return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('myGengo translation sent.'));
+      $options = array(
+        // @todo - for some reason post is returning 202 status and service
+        // is not translating things, maybe check this later.
+        //'method' => 'POST',
+        //'data' => $query_data,
+        'headers' => array('Content-Type' => 'text/plain')
+      );
+      $result = drupal_http_request($translate_url. '?' . $query_data, $options);
+      switch ($result->code) {
+        case 200:
+          // Lets leave DOMDocument for now because this service enable us
+          // to send array of translation sources, and we will probably use
+          // this soon.
+          $dom = new DOMDocument;
+          $dom->loadXML($result->data);
+          $string_items = $dom->getElementsByTagName('string');
+          $data[$key]['#text'] = $string_items->item(0)->nodeValue;
+          break;
+        case 400:
+          return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REJECTED, $result->data);
+          break;
+        default:
+          // @todo - we need to think here more what to do if service is not
+          // responding for some items and is responding for some others.
+          // Ideally we should save sources that we manage to translate and
+          // not just return.
+          return new TMGMTTranslatorResponse(NULL, $result->data);
+          break;
+      }
     }
+    // Save the translated data through the job.
+    $job->addTranslatedData(tmgmt_unflatten_data($data));
+    return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
+  }
 
     /**
      * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
