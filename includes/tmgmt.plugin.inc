@@ -27,7 +27,8 @@ interface TMGMTSourcePluginControllerInterface {
   /**
    * Saves a translation.
    *
-   * @todo: Handle failures.
+   * @return bool
+   *   TRUE if the translation was saved successfully, FALSE otherwise.
    */
   public function saveTranslation(TMGMTJobItem $job_item);
 
@@ -99,7 +100,7 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function isAvailable();
 
   /**
-   * Check whether this service can handle this translation job.
+   * Check whether this service can handle a particular translation job.
    *
    * @param TMGMTJob $job
    *   The TMGMTJob entity that should be submitted.
@@ -110,8 +111,13 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function canTranslate(TMGMTJob $job);
 
   /**
+   * Returns all available target languages that are supported by this service
+   * when given a source language.
+   *
    * @param $source_language
-   * @return mixed
+   *   The source language.
+   * @return array
+   *   An array of languages in ISO format.
    */
   public function getSupportedTargetLanguages($source_language);
 
@@ -120,8 +126,6 @@ interface TMGMTTranslatorPluginControllerInterface {
    *
    * @param TMGMTJob $job
    *   The job that should be submitted.
-   *
-   * @param TMGMTJob $job
    */
   public function requestTranslation(TMGMTJob $job);
 
@@ -130,33 +134,28 @@ interface TMGMTTranslatorPluginControllerInterface {
    *
    * @param TMGMTJob $job
    *   The job that should have its translation cancelled.
+   *
+   * @return bool
+   *   TRUE if the job could be cancelled, FALSE otherwise.
    */
   public function cancelTranslation(TMGMTJob $job);
-  
+
   /**
-   * Plugin can define this method if it need settings form. 
-   * 
+   * A plugin can implement this method if it needs a settings form.
+   *
    * This is not actually an interface method and that is why it is commented,
-   * but we leave it here for api documentation.
-   * 
-   * @param $form array
-   * @param $form_state array
+   * but we leave it here for API documentation.
    */
   //public function settingsForm($form, &$form_state);
 
   /**
-   * Plugin can define this method if it need job settings form.
-   * 
+   * A plugin can implement this method if it needs a job settings form.
+   *
    * This is not actually an interface method and that is why it is commented,
-   * but we leave it here for api documentation.
-   * 
-   * @param $form array
-   * @param $form_state array
-   * @return array
-   *   Settings form.
+   * but we leave it here for API documentation.
    */
   //public function jobSettingsForm($form, &$form_state);
-  
+
 }
 
 /**
@@ -184,6 +183,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
   public function isAvailable() {
+    // Assume that the translation service is always available.
     return TRUE;
   }
 
@@ -191,14 +191,21 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
    */
   public function canTranslate(TMGMTJob $job) {
-    return $this->isAvailable();
+    // The job is only translatable if the translator is available too.
+    if ($this->isAvailable() && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($job->source_language))) {
+      // We can only translate this job if the target language of the job is in
+      // one of the supported languages.
+      return TRUE;
+    }
+    return FALSE;
   }
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::cancelTranslation().
    */
   public function cancelTranslation(TMGMTJob $job) {
-    $job->cancelled('Canceled');
+    // Assume that we can cancel a translation job at any time.
+    return TRUE;
   }
 
   /**

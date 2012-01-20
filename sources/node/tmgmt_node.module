@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Source plugin for the Translation Management system that handles nodes.
@@ -22,7 +23,6 @@ function tmgmt_node_tmgmt_source_plugin_info() {
  *
  * @param object $node
  *   The translated node object (the target).
- *
  * @param array $translated_data
  *   An array with the structured translated data.
  *

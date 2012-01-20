@@ -9,10 +9,10 @@
  */
 function tmgmt_ui_permission() {
   return array(
-    'administer tmgmt_ui' => array(
+    'administer tmgmt ui' => array(
       'title' => t('Administer Translation Management UI'),
     ),
-    'access tmgmt_ui' => array(
+    'access tmgmt ui' => array(
       'title' => t('Access Translation Management UI'),
     ),
   );
@@ -22,29 +22,26 @@ function tmgmt_ui_permission() {
  * Implements hook_menu().
  */
 function tmgmt_ui_menu() {
-  $items = array();
-
   $items['admin/config/regional/tmgmt/tmgmt_ui'] = array(
     'title' => 'UI',
     'description' => 'Administer Translation Management UI',
     'page callback' => 'tmgmt_ui_fake_admin',
-    'access arguments' => array('administer tmgmt_ui'),
+    'access arguments' => array('administer tmgmt ui'),
     'weight' => -1,
     'file' => 'tmgmt_ui.pages.inc',
   );
-
   $items['admin/tmgmt'] = array(
     'title' => 'Translation Management',
     'description' => 'Use the Translation Management',
     'page callback' => 'tmgmt_ui_content',
-    'access arguments' => array('access tmgmt_ui'),
+    'access arguments' => array('access tmgmt ui'),
     'weight' => -20,
     'file' => 'tmgmt_ui.pages.inc',
   );
   $items['admin/tmgmt/my-translation-management'] = array(
     'title' => 'Overview',
     'page callback' => 'tmgmt_ui_content',
-    'access arguments' => array('access tmgmt_ui'),
+    'access arguments' => array('access tmgmt ui'),
     'weight' => -20,
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
@@ -52,12 +49,11 @@ function tmgmt_ui_menu() {
   $items['admin/tmgmt/jobs'] = array(
     'title' => 'Jobs Overview',
     'page callback' => 'tmgmt_ui_jobs',
-    'access arguments' => array('access tmgmt_ui'),
+    'access arguments' => array('access tmgmt ui'),
     'weight' => -19,
     'type' => MENU_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
   );
-
   $items['admin/tmgmt/jobs/%tmgmt_job'] = array(
     'title' => 'Job',
     'page callback' => 'tmgmt_job_view',
@@ -67,26 +63,10 @@ function tmgmt_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
   );
-
-
-  // Add settings menu item for each plugin that is using settings form.
-  /* foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
-    $plugin_controller = tmgmt_translator_plugin_controller($plugin);
-    if (method_exists($plugin_controller, 'settingsForm')) {
-    $items['admin/tmgmt/' . $plugin] = array(
-    'title' => $plugin_info['label'],
-    'description' => $plugin_info['description'],
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_' . $plugin . '_translator_settings_form', $plugin),
-    'access arguments' => array('administer site configuration'),
-    );
-    } */
-
-
   $items['admin/tmgmt/untranslated'] = array(
     'title' => 'All untranslated elements',
     'page callback' => 'tmgmt_ui_untranslated',
-    'access arguments' => array('access tmgmt_ui'),
+    'access arguments' => array('access tmgmt ui'),
     'weight' => -2,
     'type' => MENU_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
@@ -94,12 +74,11 @@ function tmgmt_ui_menu() {
   $items['admin/tmgmt/pending'] = array(
     'title' => 'All pending elements',
     'page callback' => 'tmgmt_ui_pending',
-    'access arguments' => array('access tmgmt_ui'),
+    'access arguments' => array('access tmgmt ui'),
     'weight' => -1,
     'type' => MENU_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
   );
-
   return $items;
 }
 
@@ -130,23 +109,22 @@ function tmgmt_ui_views_default_views() {
  *   The name of the variable found in each file. Defaults to the same as
  *   $extension.
  *
- * @return
+ * @return array
  *   Array of $name objects.
  */
 function _tmgmt_ui_load_all_exports($module, $directory, $extension, $name = NULL) {
   if (!$name) {
     $name = $extension;
   }
-
   $return = array();
   // Find all the files in the directory with the correct extension.
   $files = file_scan_directory(drupal_get_path('module', $module) . "/$directory", "/\.{$extension}$/");
   foreach ($files as $path => $file) {
     require $path;
-    if (isset($$name)) {
-      $return[$$name->name] = $$name;
+    if (isset($name)) {
+      dpm($name);
+      $return[$name->name] = $name;
     }
   }
-
   return $return;
 }

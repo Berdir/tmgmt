@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Main module file for the translation management node source plugin user
@@ -32,11 +33,8 @@ function tmgmt_node_ui_views_api() {
 }
 
 /**
- * Job overview, which contains the selected item.
+ * Page callback for the overview, which contains the selected item.
  */
 function tmgmt_node_ui_translation_overview($node) {
-  if (!$output = views_embed_view('job_items_current_node', 'default', $node->tnid)) {
-    return '';
-  }
-  return $output;
+  return views_embed_view('job_items_current_node', 'default', $node->tnid);
 }

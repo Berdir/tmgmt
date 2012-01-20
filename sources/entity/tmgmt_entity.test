@@ -123,7 +123,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     $job->requestTranslation();
     $job->accepted();
     foreach ($job->getItems() as $job_item) {
-      $entity = entity_load_single($job_item->item_type, array($job_item->item_id));
+      $entity = entity_load_single($job_item->item_type, $job_item->item_id);
       $this->checkTranslatedData($entity, $job_item->translated_data, $langcode);
       $this->checkUntranslatedData($entity, $this->field_names['node'][$bundle], $job_item->translated_data, $langcode);
     }
@@ -172,7 +172,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     $job->accepted();
     // Check if the fields were translated.
     foreach ($job->getItems() as $job_item) {
-      $entity = current(entity_load($job_item->item_type, array($job_item->item_id)));
+      $entity = entity_load_single($job_item->item_type, $job_item->item_id);
       $this->checkTranslatedData($entity, $job_item->translated_data, $langcode);
       $this->checkUntranslatedData($entity, $this->field_names['taxonomy_term'][$bundle], $job_item->translated_data, $langcode);
     }

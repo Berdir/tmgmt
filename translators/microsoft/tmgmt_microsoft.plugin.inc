@@ -31,8 +31,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
    */
   public function canTranslate(TMGMTJob $job) {
-    $languages = $this->getSupportedLanguages();
-    if ($this->isAvailable() && isset($languages[$job->source_language]) && isset($languages[$job->target_language])) {
+    if ($this->isAvailable() && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($job->source_language))) {
       // The job is only translatable if the translator is available too.
       return TRUE;
     }

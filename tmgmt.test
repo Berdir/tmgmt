@@ -171,26 +171,24 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $job = tmgmt_job_create('en', 'de');
 
     for ($i = 1; $i < 3; $i++) {
-      $item = $job->addItem('test_source', 'test', $i);
-      // Explicitly define the data for the third item.
       if ($i == 3) {
-        $item->data = array(
+        // Explicitly define the data for the third item.
+        $data['data'] = array(
           'dummy' => array(
             'deep_nesting' => array(
               '#text' => 'Stored data',
             ),
           ),
         );
-        $item->save();
+        $job->addItem('test_source', 'test', $i, array($data));
       }
+      $job->addItem('test_source', 'test', $i);
     }
 
     // Manually specify the translator for now.
     $job->translator = 'test_translator';
     $job->translator_context = array('action' => $action);
-
     $job->prepared();
-    $job->save();
 
     return $job;
   }
@@ -200,14 +198,12 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     // Submit a translation job.
     $submit_job = $this->createJob('submit');
     $submit_job->requestTranslation();
-
     $submit_job = tmgmt_job_load($submit_job->tjid);
     $this->assertTrue($submit_job->isSubmitted());
 
     // Translate a job.
     $translate_job = $this->createJob('translate');
     $translate_job->requestTranslation();
-
     $translate_job = tmgmt_job_load($translate_job->tjid);
     $this->assertTrue($translate_job->isNeedsReview());
 
@@ -225,7 +221,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
       $i++;
     }
 
-    $translate_job->accepted(t('Job accepted'));
+    $translate_job->accepted('Job accepted');
 
     // Check if the translations have been "saved".
     foreach ($translate_job->getItems() as $item) {
@@ -235,16 +231,13 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     // A rejected job.
     $reject_job = $this->createJob('reject');
     $reject_job->requestTranslation();
+    // Still rejected.
     $this->assertTrue($reject_job->isRejected());
-    $messages = $reject_job->getMessages();
-    debug($messages);
 
     // A failing job.
     $failing_job = $this->createJob('fail');
     $failing_job->requestTranslation();
     // Still prepared.
     $this->assertTrue($failing_job->isPrepared());
-    $messages = $reject_job->getMessages();
-    debug($messages);
   }
 }

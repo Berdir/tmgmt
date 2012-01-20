@@ -5,23 +5,15 @@
  * Provides the Entity source controller.
  */
 
-/**
- * @ingroup source
- */
 class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginController {
 
-  public function __construct($plugin) {
-    parent::__construct($plugin);
-  }
   /**
    * Returns the data from the fields as a structure that can be processed by
    * the Translation Management system.
-   * 
    */
   public function getData(TMGMTJobItem $job_item) {
-    $entity = current(entity_load($job_item->item_type, array($job_item->item_id)));
+    $entity = entity_load_single($job_item->item_type, $job_item->item_id);
     list(, , $bundle) = entity_extract_ids($job_item->item_type, $entity);
-    $job = tmgmt_job_load($job_item->tjid);
     // Get all the fields that can be translated and arrange their values into
     // a specific structure.
     $structure = array();
@@ -36,12 +28,12 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
     }
     return $structure;
   }
-  
+
   /**
    * Overriden.
    */
   public function saveTranslation(TMGMTJobItem $job_item) {
-    $entity = current(entity_load($job_item->item_type, array($job_item->item_id)));
+    $entity = entity_load_single($job_item->item_type, $job_item->item_id);
     $job = tmgmt_job_load($job_item->tjid);
     tmgmt_entity_update_entity_translation($entity, $job_item->item_type, $job_item->translated_data, $job->target_language);
   }

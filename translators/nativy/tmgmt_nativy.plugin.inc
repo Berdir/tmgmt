@@ -94,7 +94,6 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
           // responding for some items and is responding for some others.
           // Ideally we should save sources that we manage to translate and
           // not just return.
-          debug($result);
           return new TMGMTTranslatorResponse(NULL, $result->data);
           break;
       }
@@ -134,7 +133,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     }
     return $languages;
   }
-  
+
   public function getXMLTemplate($request_type, $params = array()) {
     switch($request_type) {
       case 'Authentication':

@@ -75,8 +75,7 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       // Create the job object.
       $job = tmgmt_job_create($values['source_language'], $langcode, array('translator' => $values['translator']));
       // Create a job item and add it to the job.
-      $job_item = tmgmt_job_item_create($values['source_plugin'], $values['item_type'], $values['item_id']);
-      $job->addItem($job_item);
+      $job->addItem($values['source_plugin'], $values['item_type'], $values['item_id']);
       $job->save();
       // Print a message to the screen and redirect the user.
     }
