@@ -69,4 +69,14 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
       tmgmt_node_update_node_translation($tnode, $job_item->translated_data, $job->target_language);
     }
   }
+
+  public function getTitle(TMGMTJobItem $job_item) {
+    $node = node_load($job_item->item_id);
+    return entity_label('node', $node);
+  }
+
+  public function getUri(TMGMTJobItem $job_item) {
+    $node = node_load($job_item->item_id);
+    return entity_uri('node', $node);
+  }
 }
