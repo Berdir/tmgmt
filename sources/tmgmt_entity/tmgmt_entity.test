@@ -63,7 +63,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
 
     // Check that the body field is now translatable.
     $field_info = field_info_field('body');
-    $this->assertEqual($field_info['translatable'], 1, t('The Body field is not translatable'));
+    $this->assertEqual($field_info['translatable'], 1, t('The Body field is translatable.'));
 
     // Add a non-translatable field.
     $field_name = drupal_strtolower($this->randomName() . '_field_name');
@@ -76,11 +76,10 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       'bundle' => 'article',
       'label' => $this->randomName() . '_label',
       'description' => $this->randomName() . '_description',
-      'weight' => mt_rand(0, 127),
       'widget' => array(
         'type' => 'text_textfield',
         'label' => 'Test Field',
-      )
+      ),
     );
     field_create_instance($instance);
 
@@ -119,7 +118,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     $job->save();
     $job->propagateTranslatedData();
     foreach ($job->getItems() as $job_item) {
-      $entity = current(entity_load($job_item->item_type, array($job_item->item_id)));
+      $entity = entity_load_single($job_item->item_type, array($job_item->item_id));
       $this->assertEqual($entity->body[$langcode][0]['value'], $job_item->translated_data['body'][0]['value']['#text'], t('Translated data does not match with the value from the entity.'));
       // Check that the non-translatable field was not translated.
       // Avoid some PHP warnings.

@@ -154,6 +154,7 @@ function tmgmt_forms() {
   }
   return $info;
 }
+
 /**
  * @addtogroup tmgmt_job
  * @{
@@ -350,9 +351,11 @@ function tmgmt_job_message_create($status_before, $status_after, $message = '', 
     'arguments' => $arguments,
   )));
 }
+
 /**
  * @} End of "addtogroup tmgmt_job_message".
  */
+
 /**
  * @addtogroup tmgmt_translator
  * @{
@@ -456,9 +459,11 @@ function tmgmt_translator_settings_form($form, &$form_state, $plugin) {
   }
   return $form;
 }
+
 /**
  * @} End of "addtogroup tmgmt_translator".
  */
+
 /**
  * @addtogroup tmgmt_source
  * @{
@@ -497,6 +502,7 @@ function tmgmt_source_plugin_controller($plugin) {
 function tmgmt_source_plugin_labels() {
   return _tmgmt_plugin_labels('source');
 }
+
 /**
  * @} End of "addtogroup tmgmt_source".
  */
