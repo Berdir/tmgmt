@@ -201,7 +201,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       $field_info = field_info_field($field_name);
       foreach ($values as $delta => $value) {
         foreach ($value as $input_name => $input_value) {
-          $this->assertEqual($tentity->{$field_name}[$langcode][$index][$input_name], $input_value['#text'], t('The !input_name !index of the !field field in the translated node does not match with the translated data', array('!field' => $field_name, '!input_name' => $input_name, '!index' => $index)));
+          $this->assertEqual($tentity->{$field_name}[$langcode][$index][$input_name], $input_value['#text'], t('The !input_name !index of the !field field in the translated node does match with the translated data', array('!field' => $field_name, '!input_name' => $input_name, '!index' => $index)));
         }
         $index++;
       }

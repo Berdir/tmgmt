@@ -150,7 +150,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
     foreach ($translated_data as $field_name => $values) {
       // Special case for the node  title.
       if ($field_name == 'node_title') {
-        $this->assertEqual($tnode->title, $values[0]['value']['#text'], t('The title of the translated node does not match with the translated data.'));
+        $this->assertEqual($tnode->title, $values[0]['value']['#text'], t('The title of the translated node does match with the translated data.'));
         continue;
       }
       if (!is_array($values)) {
@@ -161,7 +161,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
       foreach ($values as $delta => $value) {
         $field_lang = $field_info['translatable'] ? $langcode : LANGUAGE_NONE;
         foreach ($value as $input_name => $input_value) {
-          $this->assertEqual($tnode->{$field_name}[$field_lang][$index][$input_name], $input_value['#text'], t('The !input_name !index of the !field field in the translated node does not match with the translated data', array('!field' => $field_name, '!input_name' => $input_name, '!index' => $index)));
+          $this->assertEqual($tnode->{$field_name}[$field_lang][$index][$input_name], $input_value['#text'], t('The !input_name !index of the !field field in the translated node does match with the translated data.', array('!field' => $field_name, '!input_name' => $input_name, '!index' => $index)));
         }
         $index++;
       }
