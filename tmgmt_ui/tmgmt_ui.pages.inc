@@ -35,7 +35,7 @@ function tmgmt_ui_content() {
   );
   
   // This right column is given a width of 65% by tmgmt_ui.my-tmgmt.css
-  $output['tmgmt_ui_jobs_by_state_1'] = array(
+  $output['tmgmt_ui_overview_top_left'] = array(
     '#title' => t('to be submitted'),
     '#view' => 'tmgmt_ui_jobs_by_state',
     '#view_display' => 'block_1',
