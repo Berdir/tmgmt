@@ -40,7 +40,7 @@ class TMGMTTranslator extends Entity {
    *
    * @type string
    */
-  public $plugin;
+  public $translator_plugin;
 
   /**
    * Translator type specific settings.
@@ -105,13 +105,27 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public $item_id;
 
   /**
+   * Can be used by the source plugin to store the data instead of creating it
+   * on demand.
+   *
+   * If additional information is added in the UI, like adding comments, it will
+   * also be saved here.
+   *
+   * Always use TMGMTJobItem::getSourceData() to load the data, which will use
+   * this property if present and otherwise get it from the source.
+   *
+   * @var array
+   */
+  public $data = array();
+
+  /**
    * The translated data in the same structure.
    *
    * Only the parts that actually are translated are present in this array.
    *
    * @var array
    */
-  public $translated_data;
+  public $translated_data = array();
 
   /**
    * Overrides Entity::label()
@@ -150,6 +164,10 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * @see TMGMTJobItem::getFlattenedData()
    */
   public function getSourceData() {
+    // If something is stored in data, return it immediately.
+    if (!empty($this->data)) {
+      return $this->data;
+    }
     return $this->getSourceController()->getData($this);
   }
 
@@ -172,7 +190,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *   Nested array of translated data. Can either be a single text entry, the
    *   whole data structure or parts of it.
    * @param $key
-   *   (Optional) Either a flattened key (a 'key1:key2:key3' string) or a nested
+   *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a nested
    *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
    *   means that it will replace the whole translated data array.
    */
@@ -181,7 +199,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
       $key = array();
     }
     if (!is_array($key)) {
-      $key = explode(':', $key);
+      $key = explode(TMGMT_ARRAY_DELIMITER, $key);
     }
     if (!is_array($this->translated_data)) {
       $this->translated_data = array();
@@ -248,6 +266,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @var integer
    */
   public $translator_id;
+
+  /**
+   *
+   * @var type
+   */
+  public $uid = 0;
+
+  public $label;
 
   /**
    * Overrides Entity::__construct().
@@ -637,12 +663,36 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @param $data
    *   Partially or complete translated data, the most upper key needs to be
    *   the translation job item id.
+   * @param $key
+   *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a nested
+   *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
+   *   means that it will replace the whole translated data array. The most
+   *   upper key entry needs to be the job id (tjiid).
    */
-  public function addTranslatedData($data) {
+  public function addTranslatedData($data, $key = NULL) {
+
+    if (empty($key)) {
+      $key = array();
+    }
+    if (!is_array($key)) {
+      $key = explode(TMGMT_ARRAY_DELIMITER, $key);
+    }
+
     $items = $this->getItems();
-    foreach ($data as $key => $value) {
-      if (isset($items[$key])) {
-        $items[$key]->addTranslatedData($value);
+
+    // If there is a key, get the specific item and forward the call.
+    if (!empty($key)) {
+      $item_id = array_shift($key);
+      if (!isset($items[$item_id])) {
+        throw new Exception(t('Item id @id does not exist', array('@id' => $item_id)));
+      }
+      $items[$item_id]->addTranslatedData($data, $key);
+    }
+    else {
+      foreach ($data as $key => $value) {
+        if (isset($items[$key])) {
+          $items[$key]->addTranslatedData($value);
+        }
       }
     }
   }

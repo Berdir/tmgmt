@@ -32,29 +32,26 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $vocabulary = entity_create('taxonomy_vocabulary', $config);
     taxonomy_vocabulary_save($vocabulary);
 
+    $string_object_name = "taxonomy_vocabulary:" . $vocabulary->vid;
     $source_text = $vocabulary->name;
-    $string_name = 'taxonomy:vocabulary:' . $vocabulary->vid . ':name';
-
-    $string = i18n_string($string_name, $source_text);
 
     // Create the new job and job item.
     $job = $this->createJob();
     $job->translator = 'test_translator';
     $job->translator_context = array();
+    $job->save();
 
-    $item1 = tmgmt_job_item_create('i18n_string', 'i18n_string', $string_name);
+    $item1 = tmgmt_job_item_create('i18n_string', 'i18n_string', $string_object_name);
+
     $job->addItem($item1);
-
-    $data = $item1->getSourceData();
-    $this->assertEqual($source_text, $data['#text']);
+    $job->requestTranslation();
+    $job->accepted();
 
     // Check the structure of the imported data.
-    $this->assertEqual($item1->item_id, $string_name, t('String is correctly saved'));
+    $this->assertEqual($item1->item_id, $string_object_name, t('i18n Strings object correctly saved'));
 
-    //$job->requestTranslation();
-
-    $desired_translation = 'de_' . $source_text;
-    $this->assertEqual(i18n_string_translate($string_name, $source_text, array('langcode' => 'de')), $desired_translation);
+    // Check string translation.
+    $this->assertEqual(i18n_string_translate('taxonomy:vocabulary:' . $vocabulary->vid . ':name', $source_text, array('langcode' => $job->target_language)), $job->target_language . '_' . $source_text);
   }
 
   function testI18nStringSourceMenu() {
@@ -69,9 +66,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $menu = menu_load($config['menu_name']);
 
     $source_text = $menu['title'];
-    $string_name = 'menu:menu:' . $menu['menu_name'] . ':title';
-
-    $string = i18n_string($string_name, $source_text);
+    $string_name = 'menu:' . $menu['menu_name'];
 
     // Create the new job and job item.
     $job = $this->createJob();
@@ -79,17 +74,19 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $job->translator_context = array();
 
     $item1 = tmgmt_job_item_create('i18n_string', 'i18n_string', $string_name);
+
     $job->addItem($item1);
+    $job->requestTranslation();
+    $job->accepted();
 
     $data = $item1->getSourceData();
-    $this->assertEqual($source_text, $data['#text']);
+    $this->assertEqual($data['menu:menu:' . $menu['menu_name'] . ':title']['#text'], $config['title']);
+    $this->assertEqual($data['menu:menu:' . $menu['menu_name'] . ':description']['#text'], $config['description']);
 
     // Check the structure of the imported data.
     $this->assertEqual($item1->item_id, $string_name, t('String is correctly saved'));
 
-    //$job->requestTranslation();
-
-    $desired_translation = 'de_' . $source_text;
-    $this->assertEqual(i18n_string_translate($string_name, $source_text, array('langcode' => 'de')), $desired_translation);
+    // Check string translation.
+    $this->assertEqual(i18n_string_translate('menu:menu:' . $menu['menu_name'] . ':title', $source_text, array('langcode' => $job->target_language)), $job->target_language . '_' . $source_text);
   }
 }

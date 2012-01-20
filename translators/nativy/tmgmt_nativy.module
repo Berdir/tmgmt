@@ -13,6 +13,7 @@
  */
 function tmgmt_nativy_menu() {
 
+  /* Remove this path after finishing development! */
   $items['soaptest'] = array(
     'title' => 'Testcallback',
     'type' => MENU_CALLBACK,
@@ -27,6 +28,9 @@ function tmgmt_nativy_menu() {
     'page arguments' => array('tmgmt_nativy_settings'),
     'access arguments' => array('administer site configuration'),
   );
+  
+  // @todo menu callback for order complete callback
+  //$items['nativy/notification'] = array();
 
   return $items;
 }
@@ -73,55 +77,18 @@ function tmgmt_nativy_settings() {
  */
 function tmgmt_nativy_test_page() {
 
-  $client = new SoapClient("http://test.nativy.com/nis/nis.asmx?WSDL", array('soap_version' => SOAP_1_2, 'trace' => 1));
-
-  /*//$client->AuthenticateUser(AuthenticateUser $parameters)
-  //$client->SecuredWebServiceHeader = array('Username' => 'demonis@nativy.com', 'Password' => 'A9!x57M');
-  $client->SecuredWebServiceHeader->Username = 'demonis@nativy.com';
-  $client->SecuredWebServiceHeader->Password = 'A9!x57M';
-
-  $auth = new AuthenticateUser();
-  $header = new SoapHeader('http://www.nativy.com/nis', 'SecuredWebServiceHeader', $auth); //array('Username' => 'demonis@nativy.com', 'Password' => 'A9!x57M'));
-  //$headers[] = new SoapHeader('http://www.nativy.com/nis', 'SecuredWebServiceHeader.Username', 'demonis@nativy.com');
-  //$headers[] = new SoapHeader('http://www.nativy.com/nis', 'SecuredWebServiceHeader.Password', 'A9!x57M');
-  $client->__setSoapHeaders(array($header));
-  */
-
-  $auth->Username = 'demonis@nativy.com';
-  $auth->Password = 'A9!x57M';
-  $authvalues = new SoapVar($auth, SOAP_ENC_OBJECT);
-  $header =  new SoapHeader('http://www.nativy.com/nis', "SecuredWebServiceHeader", $authvalues, false);
-  $client->__setSoapHeaders(array($header));
-  $response = $client->AuthenticateUser();
-  /*
-  $doc = new DOMDocument();
-  $path = drupal_get_path('module', 'nativy');
-  $doc->load($path . '/Auth.xml');
-  $request = $doc->saveXML();
-  dsm($request, 'ba');
-  $response = $client->__doRequest($request, "http://test.nativy.com", "https://www.nativy.com/nis/AuthenticateUser", 2);
-  //
-  */
-
-  dpm($client->__getLastRequestHeaders(), 'timeeeeeeeeeee');
-
-  dpm($client, 'client');
-  dpm($response, 'response');
-  dpm($client->__getFunctions(), 'functions');
-  dpm($client->__getTypes(), 'types');
-
   $xml = '<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Header>
-    <SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">
-      <Username>demonis@nativy.com</Username>
-      <Password>A9!x57M</Password>
-    </SecuredWebServiceHeader>
-  </soap:Header>
-  <soap:Body>
-    <AuthenticateUser xmlns="https://www.nativy.com/nis" />
-  </soap:Body>
-</soap:Envelope>';
+  <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Header>
+      <SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">
+        <Username>demonis@nativy.com</Username>
+        <Password>A9!x57M</Password>
+      </SecuredWebServiceHeader>
+    </soap:Header>
+    <soap:Body>
+      <AuthenticateUser xmlns="https://www.nativy.com/nis" />
+    </soap:Body>
+  </soap:Envelope>';
 
   $options = array(
     'method' => 'POST',
@@ -133,20 +100,81 @@ function tmgmt_nativy_test_page() {
     ),
   );
 
-  dpm(drupal_http_request('http://www.nativy.com/nis/nis.asmx', $options));
+  dpm(drupal_http_request('http://test.nativy.com/nis/nis.asmx', $options), 'auth');
+  
+  $response = drupal_http_request('http://test.nativy.com/nis/nis.asmx', $options);
+  $doc = simplexml_load_string($response->data);
+  $soap = $doc->children('http://schemas.xmlsoap.org/soap/envelope/');
+  $nis = $soap->Body[0]->children("https://www.nativy.com/nis");
+  $token = (string) $nis->AuthenticateUserResponse[0]->AuthenticateUserResult;
+  
+  // @todo: Ask Anton how to trigger the non iframe service variant
+  
+  $xml = '<?xml version="1.0" encoding="utf-8"?>
+          <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+            <soap:Header>
+              <SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">
+                <Username>demonis@nativy.com</Username>
+                <Password>A9!x57M</Password>
+                <AuthenticatedToken>' . $token . '</AuthenticatedToken>
+              </SecuredWebServiceHeader>
+            </soap:Header>
+            <soap:Body>
+              <CreateOffer xmlns="https://www.nativy.com/nis">
+                <requ>
+                	<offerrequest xmlns="http://www.nativy.com/nis">
+              				<settings>
+              					<emailCallbackLink>
+              						https://www.yourapplication.com/nisinterface/gettranslation
+              					</emailCallbackLink>
+              					<httpCallbackLink>
+												  https://www.yourapplication.com/nativy/notification
+  											</httpCallbackLink>
+              				</settings>
+                			<customer customerId="mailto:demo@nativy.com">
+                				<customerEmail>demo@nativy.com</customerEmail>
+                				<customerFirstName>Demofirstname</customerFirstName>
+                				<customerLastName>Demolastname</customerLastName>
+                			</customer>
+                			<languages primaryLangCode="de-DE">
+                				<language langCode="ms" />
+                				<language langCode="jv" />
+                				<language langCode="en" />
+                				<language langCode="es" />
+                			</languages>
+                			<textblocks>
+                				<textblock code="faq_question1" label="Wie funktioniert nativy?">
+                					<description langCode="de-DE">
+                						nativy hat ein System entwickelt, um den/die ideale ÜbersetzerIn für jeden
+                            Auftrag zu finden. KundInnen können dabei ihre individuellen Kriterien in der Suche
+                            nach dem/der idealen ÜbersetzerIn einbringen. nativy übernimmt in dem gesamten Prozess
+                            die wichtigsten administrativen Aufgaben, um seinen NutzerInnen das Leben etwas zu
+                            erleichtern und die Zusammenarbeit zu beschleunigen. nativy verrechnet seinen
+                            KundInnen das von dem/der ÜbersetzerIn festgelegte Honorar inklusive eines
+                            geringfügigen Vermittlungsaufschlags.
+                					</description>
+                					<category>
+                						Don\'t know what the heck this element is used for, and it\s not even mentioned in the documentation?!
+                					</category>
+                				</textblock>
+                		</textblocks>
+            			</offerrequest>
+          		  </requ>
+              </CreateOffer>
+            </soap:Body>
+          </soap:Envelope>';
+  
+  $options = array(
+    'method' => 'POST',
+    'data' => $xml,
+    'headers' => array(
+      'Content-Type' => 'text/xml; charset=utf-8',
+      'Content-Length' => strlen($xml),
+      'SoapAction' => 'https://www.nativy.com/nis/CreateOffer',
+    ),
+  );
+  
+  dpm(drupal_http_request('http://test.nativy.com/nis/nis.asmx', $options), 'createoffer');
 
   return 'TESTPAGE';
-}
-
-/*
- * Used for development purposes only!
- */
-class AuthenticateUser {
-  public $Username;
-  public $Password;
-
-  public function __construct() {
-    $this->Username = 'demonis@nativy.com';
-    $this->Password = 'A9!x57M';
-  }
 }
