@@ -42,24 +42,22 @@ function tmgmt_source_i18n_string_ui_form_i18n_string_translate_page_overview_fo
 function tmgmt_source_i18n_string_ui_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $object = $values['object'];
-  dpm($form_state['values']);
   if ($languages = array_filter($values['languages'])) {
     // Request a job for every selected language
-    $object_id = $object->get_type() . ':' . $object->get_key();
-    dpm("object id $object_id");
+    $object_key = $object->get_key();
+    $object_id = $object->get_type() . ':' . (is_array($object_key) ? implode(':', $object_key) : $object_key);
     $count = 0;
     foreach (array_keys($languages) as $langcode) {
       $count++;
       // Create the job object.
       $job = tmgmt_job_create($values['source_language'], $langcode, array('translator' => $values['translator']));
       // Create a job item and add it to the job.
-      $job->addItem(tmgmt_job_item_create('i18n_string', 'i18n_string', $object_id));
-      $job->prepared('Job has been prepared.');
+      $job_item = tmgmt_job_item_create('i18n_string', 'i18n_string', $object_id);
+      $job->addItem($job_item);
       $job->save();
       // Print a message to the screen and redirect the user.
       
     }
-    drupal_set_message(t('@count translation jobs have been created.', array('@count' => $count)));
-    
+    drupal_set_message(format_plural($count, 'A translation job has been created.', '@count translation jobs have been created.'));
   }
 }
