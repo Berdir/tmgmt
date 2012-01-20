@@ -35,7 +35,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
         break;
 
       case 'reject':
-        $job->rejected(t('This is not supported.'));
+        $job->rejected('This is not supported');
         return;
         break;
 

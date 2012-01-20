@@ -511,6 +511,10 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       'arguments' => $arguments,
     ));
     $message->save();
+
+    // Remove old state again so that future log messages will use the correct
+    // state.
+    unset($this->old_state);
   }
 
   /**

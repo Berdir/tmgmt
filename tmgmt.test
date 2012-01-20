@@ -207,6 +207,11 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     $submit_job = tmgmt_job_load($submit_job->tjid);
     $this->assertTrue($submit_job->isSubmitted());
+    $messages = $submit_job->getMessages();
+    $last_message = end($messages);
+    $this->assertEqual(TMGMT_JOB_STATE_PREPARED, $last_message->state_before);
+    $this->assertEqual(TMGMT_JOB_STATE_SUBMITTED, $last_message->state_after);
+    $this->assertEqual('Test submit', $last_message->message);
 
     // Translate a job.
     $translate_job = $this->createJob('translate');
@@ -214,6 +219,11 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     $translate_job = tmgmt_job_load($translate_job->tjid);
     $this->assertTrue($translate_job->isNeedsReview());
+    $messages = $translate_job->getMessages();
+    $last_message = end($messages);
+    $this->assertEqual(TMGMT_JOB_STATE_PREPARED, $last_message->state_before);
+    $this->assertEqual(TMGMT_JOB_STATE_REVIEW, $last_message->state_after);
+    $this->assertEqual('Test translation created', $last_message->message);
 
     $i = 1;
     foreach ($translate_job->getItems() as $item) {
@@ -229,7 +239,12 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
       $i++;
     }
 
-    $translate_job->accepted(t('Job accepted'));
+    $translate_job->accepted('Job accepted');
+    $messages = $translate_job->getMessages();
+    $last_message = end($messages);
+    $this->assertEqual(TMGMT_JOB_STATE_REVIEW, $last_message->state_before);
+    $this->assertEqual(TMGMT_JOB_STATE_ACCEPTED, $last_message->state_after);
+    $this->assertEqual('Job accepted', $last_message->message);
 
     // Check if the translations have been "saved".
     foreach ($translate_job->getItems() as $item) {
@@ -241,14 +256,20 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $reject_job->requestTranslation();
     $this->assertTrue($reject_job->isRejected());
     $messages = $reject_job->getMessages();
-    debug($messages);
+    $last_message = end($messages);
+    $this->assertEqual(TMGMT_JOB_STATE_PREPARED, $last_message->state_before);
+    $this->assertEqual(TMGMT_JOB_STATE_REJECTED, $last_message->state_after);
+    $this->assertEqual('This is not supported', $last_message->message);
 
     // A failing job.
     $failing_job = $this->createJob('fail');
     $failing_job->requestTranslation();
     // Still prepared.
     $this->assertTrue($failing_job->isPrepared());
-    $messages = $reject_job->getMessages();
-    debug($messages);
+    $messages = $failing_job->getMessages();
+    $last_message = end($messages);
+    $this->assertEqual(TMGMT_JOB_STATE_PREPARED, $last_message->state_before);
+    $this->assertEqual(TMGMT_JOB_STATE_PREPARED, $last_message->state_after);
+    $this->assertEqual('Service not reachable', $last_message->message);
   }
 }
