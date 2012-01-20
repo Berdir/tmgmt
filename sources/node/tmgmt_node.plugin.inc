@@ -72,4 +72,18 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     $node = node_load($job_item->item_id);
     return entity_uri('node', $node);
   }
+
+  public function hook_menu() {
+    $items = parent::hook_menu();
+    $items[TMGMT_SOURCE_OVERVIEW_TAB_PATH . '/node'] = array(
+      'title' => 'Content',
+      'access arguments' => array('access tmgmt_ui'),
+      'page callback' => 'tmgmt_node_ui_source_overview',
+      'type' => MENU_LOCAL_TASK,
+    );
+
+    return $items;
+  }
+
+
 }

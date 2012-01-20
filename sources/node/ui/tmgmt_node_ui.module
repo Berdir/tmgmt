@@ -48,3 +48,11 @@ function tmgmt_node_ui_views_api() {
 function tmgmt_node_ui_translation_overview($node) {
   return views_embed_view('job_items_current_node', 'default', $node->tnid);
 }
+
+/**
+ * Source overview callback which shows the status of all node translations.
+ */
+function tmgmt_node_ui_source_overview() {
+  $content = views_embed_view('tmgmt_node_ui_source_overview');
+  return $content;
+}
