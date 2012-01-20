@@ -31,9 +31,15 @@ function tmgmt_mygengo_callback() {
 }
 
 function tmgmt_mygengo_access_check() { 
-    watchdog('mygengo', print_r($_POST));
-
-  return TRUE;
+  try {
+    $job = json_decode($_POST['job']);
+    return TRUE;
+  } catch(Exception $e) {
+    
+    // Debug it for now, why not...
+    watchdog('mygengo', print_r($_REQUEST));
+    return FALSE;
+  }
 }
 
 /**
