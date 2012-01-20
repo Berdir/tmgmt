@@ -6,6 +6,37 @@
  */
 
 /**
+ * Implements hook_menu()
+ */
+function tmgmt_ui_simple_menu() {
+  $items['translate/multiple/node'] = array(
+    'page callback' => 'tmgmt_ui_simple_page_translate_node_multiple',
+    'access arguments' => array('translate content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Translate multiple items
+ */
+function tmgmt_ui_simple_page_translate_node_multiple($ids) {
+  $item_ids = explode('+', $ids);
+  $params = array(
+    'source_plugin' => 'node',
+    'item_type' => 'node',
+    'source_language' => $GLOBALS['language']->language,
+  );
+  $items = array();
+  foreach ($item_ids as $id) {
+    if ($node = node_load($id)) {
+      $items[$node->nid] = l($node->title, 'node/' . $node->nid);
+    }
+  }
+  return drupal_get_form('tmgmt_ui_simple_translate_list_form', $params, $items);
+}
+
+/**
  * Implements hook_form_FORMID_alter
  * Add submission capabilities to string forms.
  */
@@ -74,9 +105,12 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       $count++;
       // Create the job object.
       $job = tmgmt_job_create($values['source_language'], $langcode, array('translator' => $values['translator']));
-      // Create a job item and add it to the job.
-      $job_item = tmgmt_job_item_create($values['source_plugin'], $values['item_type'], $values['item_id']);
-      $job->addItem($job_item);
+      // Create job items and add them to the job. This may take a single value or an array of item_id's.
+      $items = is_array($values['item_id']) ? $values['item_id'] : array($values['item_id']);
+      foreach ($items as $item_id) {
+        $job_item = tmgmt_job_item_create($values['source_plugin'], $values['item_type'], $item_id);
+        $job->addItem($job_item);
+      }
       $job->save();
       // Print a message to the screen and redirect the user.
     }
@@ -103,4 +137,61 @@ function tmgmt_ui_simple_controls_element($form, &$form_state) {
   );
   $element['request'] = array('#type' => 'submit', '#value' => t('Request translation'));
   return $element;
+}
+
+/**
+ * Form for requesting translation for multiple items of the same type.
+ * 
+ * @param $params
+ *   Values to add to the form Plugin, Item type, etc
+ * @param $items
+ *   Array of item names indexed by item_id. Titles must be sanitized
+ */
+function tmgmt_ui_simple_translate_list_form($form, &$form_state, $params, $items) {
+  // Store parameters and item ids
+  $params['item_id'] = array_keys($items);
+  foreach ($params as $name => $value) {
+    $form[$name] = array('#type' => 'value', '#value' => $value);
+  }
+  // Display items
+  $form['items'] = array(
+    '#title' => t('Translate items'),
+    '#type' => 'item',
+    '#markup' => theme('item_list', array('items' => $items)),
+  );
+  // Select languages.
+  foreach (locale_language_list() as $langcode => $name) {
+    if ($langcode != $params['source_language']) {
+      $rows[$langcode] = array(check_plain($name));
+    }
+  }
+  $form['languages'] = array(
+    '#type' => 'tableselect',
+    '#header' => array(t('Select languages')),
+    '#options' => $rows,
+  );
+  $form['controls'] = tmgmt_ui_simple_controls_element($form, $form_state);
+  $form['#submit'][] = 'tmgmt_ui_simple_translate_form_submit';
+  return $form;
+}
+
+/**
+ * Implements hook_node_operations().
+ */
+function tmgmt_ui_simple_node_operations() {
+  $operations = array(
+    'translate_simple' => array(
+      'label' => t('Translate selected content'),
+      'callback' => 'tmgmt_ui_simple_translate_node_multiple',
+    ),
+  );
+  return $operations;
+}
+
+/**
+ * Node operations callback
+ */
+function tmgmt_ui_simple_translate_node_multiple($nodes) {
+  $path = 'translate/multiple/node/' . implode('+', $nodes);
+  drupal_goto($path);
 }
