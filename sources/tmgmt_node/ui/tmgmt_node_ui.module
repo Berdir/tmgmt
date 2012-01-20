@@ -36,7 +36,7 @@ function tmgmt_node_ui_views_api() {
  */
 function tmgmt_node_ui_translation_overview($node) {
   if (!$output = views_embed_view('job_items_current_node', 'default', $node->tnid)) {
-    $output = t('There are currently no job items attached to this node.');
+    return '';
   }
   return $output;
 }

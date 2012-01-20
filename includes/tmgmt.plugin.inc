@@ -8,7 +8,7 @@
 /**
  * Interface for source plugin controllers.
  *
- * @ingroup source
+ * @ingroup tmgmt_source
  */
 interface TMGMTSourcePluginControllerInterface {
 
@@ -48,7 +48,7 @@ interface TMGMTSourcePluginControllerInterface {
 /**
  * Default controller class for source plugins.
  *
- * @ingroup source
+ * @ingroup tmgmt_source
  */
 abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginControllerInterface {
 
@@ -81,7 +81,7 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
 /**
  * Interface for service plugin controllers.
  *
- * @ingroup translator
+ * @ingroup tmgmt_translator
  */
 interface TMGMTTranslatorPluginControllerInterface {
 
@@ -116,13 +116,12 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function getSupportedTargetLanguages($source_language);
 
   /**
-   * Submit callback.
+   * @abstract
    *
-   * @param $job TMGMTJob
-   *   The TMGMTJob that should be submitted.
+   * @param TMGMTJob $job
+   *   The job that should be submitted.
    *
-   * @return
-   *   TRUE if the job has been successfully submitted, FALSE otherwise.
+   * @param TMGMTJob $job
    */
   public function requestTranslation(TMGMTJob $job);
 
@@ -130,7 +129,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * Cancels a translation job.
    *
    * @param TMGMTJob $job
-   *   The TMGMTJob entity that should have its translation cancelled.
+   *   The job that should have its translation cancelled.
    */
   public function cancelTranslation(TMGMTJob $job);
   
@@ -163,7 +162,7 @@ interface TMGMTTranslatorPluginControllerInterface {
 /**
  * Default controller class for service plugins.
  *
- * @ingroup translator
+ * @ingroup tmgmt_translator
  */
 abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginControllerInterface {
 
@@ -172,6 +171,9 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
 
   /**
    * Constructor.
+   *
+   * @param $plugin
+   *   The machine-readable name of the translator plugin.
    */
   public function __construct($plugin) {
     $this->pluginType = $plugin;
@@ -200,7 +202,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Get settings for this Service
+   * Get settings for this Service.
    */
   protected function getOption($name, $default = NULL) {
     return variable_get('tmgmt_' . $this->pluginType . '_' . $name, $default);

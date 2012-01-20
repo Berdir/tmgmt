@@ -7,8 +7,6 @@
 
 /**
  * Implements hook_tmgmt_source_plugin_info().
- *
- * @ingroup source
  */
 function tmgmt_i18n_string_tmgmt_source_plugin_info() {
   return array(
