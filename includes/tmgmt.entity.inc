@@ -40,7 +40,7 @@ class TMGMTTranslator extends Entity {
    *
    * @type string
    */
-  public $plugin;
+  public $translator_plugin;
 
   /**
    * Translator type specific settings.
@@ -105,13 +105,27 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public $item_id;
 
   /**
+   * Can be used by the source plugin to store the data instead of creating it
+   * on demand.
+   *
+   * If additional information is added in the UI, like adding comments, it will
+   * also be saved here.
+   *
+   * Always use TMGMTJobItem::getSourceData() to load the data, which will use
+   * this property if present and otherwise get it from the source.
+   *
+   * @var array
+   */
+  public $data = array();
+
+  /**
    * The translated data in the same structure.
    *
    * Only the parts that actually are translated are present in this array.
    *
    * @var array
    */
-  public $translated_data;
+  public $translated_data = array();
 
   /**
    * Overrides Entity::label()
@@ -150,6 +164,10 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * @see TMGMTJobItem::getFlattenedData()
    */
   public function getSourceData() {
+    // If something is stored in data, return it immediately.
+    if (!empty($this->data)) {
+      return $this->data;
+    }
     return $this->getSourceController()->getData($this);
   }
 
@@ -248,6 +266,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @var integer
    */
   public $translator_id;
+
+  /**
+   *
+   * @var type
+   */
+  public $uid = 0;
+
+  public $label;
 
   /**
    * Overrides Entity::__construct().
