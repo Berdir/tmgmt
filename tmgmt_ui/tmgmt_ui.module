@@ -22,85 +22,91 @@ function tmgmt_ui_permission() {
  * Implements hook_menu().
  */
 function tmgmt_ui_menu() {
-    $items = array();
+  $items = array();
 
-    $items['admin/config/regional/tmgmt/tmgmt_ui'] = array(
-        'title' => 'UI',
-        'description' => 'Administer Translation Management UI',
-        'page callback' => 'tmgmt_ui_fake_admin',
-        'access arguments' => array('administer tmgmt_ui'),
-        'weight' => -1,
-        'file' => 'tmgmt_ui.pages.inc',
-    );
+  $items['admin/config/regional/tmgmt/tmgmt_ui'] = array(
+    'title' => 'UI',
+    'description' => 'Administer Translation Management UI',
+    'page callback' => 'tmgmt_ui_fake_admin',
+    'access arguments' => array('administer tmgmt_ui'),
+    'weight' => -1,
+    'file' => 'tmgmt_ui.pages.inc',
+  );
 
-    $items['admin/tmgmt'] = array(
-        'title' => 'Translation Management',
-        'description' => 'Use the Translation Management',
-        'page callback' => 'tmgmt_ui_content',
-        'access arguments' => array('access tmgmt_ui'),
-        'weight' => -20,
-        'file' => 'tmgmt_ui.pages.inc',
-    );
-    $items['admin/tmgmt/my-translation-management'] = array(
-        'title' => 'Overview',
-        'page callback' => 'tmgmt_ui_content',
-        'access arguments' => array('access tmgmt_ui'),
-        'weight' => -20,
-        'type' => MENU_DEFAULT_LOCAL_TASK,
-        'file' => 'tmgmt_ui.pages.inc',
-    );
-    $items['admin/tmgmt/jobs'] = array(
-        'title' => 'Jobs Overview',
-        'page callback' => 'tmgmt_ui_jobs',
-        'access arguments' => array('access tmgmt_ui'),
-        'weight' => -19,
-        'type' => MENU_LOCAL_TASK,
-        'file' => 'tmgmt_ui.pages.inc',
-    );
-    
-    $items['admin/tmgmt/jobs/%tmgmt_job'] = array(
-      'title' => 'Job',
-      'page callback' => 'tmgmt_job_view',
-      'page arguments' => array(3),
-      'access arguments' => array('administer tmgmt'),
-      'weight' => 0,
-      'type' => MENU_DEFAULT_LOCAL_TASK,
-      'file' => 'tmgmt_ui.pages.inc',
-    );
+  $items['admin/tmgmt'] = array(
+    'title' => 'Translation Management',
+    'description' => 'Use the Translation Management',
+    'page callback' => 'tmgmt_ui_content',
+    'access arguments' => array('access tmgmt_ui'),
+    'weight' => -20,
+    'file' => 'tmgmt_ui.pages.inc',
+  );
+  $items['admin/tmgmt/my-translation-management'] = array(
+    'title' => 'Overview',
+    'page callback' => 'tmgmt_ui_content',
+    'access arguments' => array('access tmgmt_ui'),
+    'weight' => -20,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'tmgmt_ui.pages.inc',
+  );
+  $items['admin/tmgmt/jobs'] = array(
+    'title' => 'Jobs Overview',
+    'page callback' => 'tmgmt_ui_jobs',
+    'access arguments' => array('access tmgmt_ui'),
+    'weight' => -19,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'tmgmt_ui.pages.inc',
+  );
+
+  $items['admin/tmgmt/jobs/%tmgmt_job'] = array(
+    'title' => 'Job',
+    'page callback' => 'tmgmt_job_view',
+    'page arguments' => array(3),
+    'access arguments' => array('administer tmgmt'),
+    'weight' => 0,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'tmgmt_ui.pages.inc',
+  );
+
+  $items['admin/tmgmt/jobs/add/%source_language'] = array(
+    'title' => t('Create a Job'),
+    'page callback' => 'tmgmt_job_create',
+    'page arguments' => array(4, ''),
+  );
 
 
   // Add settings menu item for each plugin that is using settings form.
-  /*foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
+  /* foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
     $plugin_controller = tmgmt_translator_plugin_controller($plugin);
     if (method_exists($plugin_controller, 'settingsForm')) {
-      $items['admin/tmgmt/' . $plugin] = array(
-        'title' => $plugin_info['label'],
-        'description' => $plugin_info['description'],
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('tmgmt_' . $plugin . '_translator_settings_form', $plugin),
-        'access arguments' => array('administer site configuration'),
-      );
-    }*/
-
-
-    $items['admin/tmgmt/untranslated'] = array(
-        'title' => 'All untranslated elements',
-        'page callback' => 'tmgmt_ui_untranslated',
-        'access arguments' => array('access tmgmt_ui'),
-        'weight' => -2,
-        'type' => MENU_LOCAL_TASK,
-        'file' => 'tmgmt_ui.pages.inc',
+    $items['admin/tmgmt/' . $plugin] = array(
+    'title' => $plugin_info['label'],
+    'description' => $plugin_info['description'],
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tmgmt_' . $plugin . '_translator_settings_form', $plugin),
+    'access arguments' => array('administer site configuration'),
     );
-    $items['admin/tmgmt/pending'] = array(
-        'title' => 'All pending elements',
-        'page callback' => 'tmgmt_ui_pending',
-        'access arguments' => array('access tmgmt_ui'),
-        'weight' => -1,
-        'type' => MENU_LOCAL_TASK,
-        'file' => 'tmgmt_ui.pages.inc',
-    );
+    } */
 
-    return $items;
+
+  $items['admin/tmgmt/untranslated'] = array(
+    'title' => 'All untranslated elements',
+    'page callback' => 'tmgmt_ui_untranslated',
+    'access arguments' => array('access tmgmt_ui'),
+    'weight' => -2,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'tmgmt_ui.pages.inc',
+  );
+  $items['admin/tmgmt/pending'] = array(
+    'title' => 'All pending elements',
+    'page callback' => 'tmgmt_ui_pending',
+    'access arguments' => array('access tmgmt_ui'),
+    'weight' => -1,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'tmgmt_ui.pages.inc',
+  );
+
+  return $items;
 }
 
 /**
@@ -116,41 +122,6 @@ function tmgmt_ui_theme($existing, $type, $theme, $path) {
       'file' => 'tmgmt_ui.theme.inc',
     ),
   );
-}
-
-/**
- * Implements hook_block_info().
- *
- * Adds the cart as block.
- */
-function tmgmt_block_info() {
-  $blocks = array();
-  $blocks['tmgmt_cart'] = array(
-    'info' => t('Translation cart'),
-  );
-
-  return $blocks;
-}
-
-/**
- * Implements hook_block_view().
- */
-function tmgmt_block_view($delta) {
-  switch ($delta) {
-    case 'tmgmt_cart':
-      return tmgmt_block_view_cart();
-      break;
-  }
-}
-
-/**
- * Displays the cart overview block.
- */
-function tmgmt_block_view_cart() {
-  $block = array();
-  $block['subject'] = t('Cart Overview');
-  $block['content'] = '';
-  return $block;
 }
 
 /**

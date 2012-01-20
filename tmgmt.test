@@ -37,7 +37,7 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
    * @return TMGMTJob
    */
   function createJob() {
-    $job = tmgmt_job_create('en', 'de');
+    $job = tmgmt_job_create('en', 'de', array('uid' => 1));
 
     $this->assertEqual(SAVED_NEW, $job->save());
 
