@@ -7,6 +7,20 @@
 
 class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
+  public function jobSettingsForm($form, &$form_state) {
+    $settings['action'] = array(
+      '#type' => 'select',
+      '#title' => t('Action'),
+      '#options' => array(
+        'translate' => t('Translate'),
+        'submit' => t('Submit'),
+        'reject' => t('Reject'),
+        'fail' => t('Fail'),
+      ),
+    );
+    return $settings;
+  }
+
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
@@ -21,7 +35,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
         break;
 
       case 'reject':
-        $job->rejected(t('Translation into italian not supported'));
+        $job->rejected(t('This is not supported.'));
         return;
         break;
 
