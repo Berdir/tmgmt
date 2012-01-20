@@ -126,8 +126,8 @@ function tmgmt_schema() {
       ),
     ),
     'primary key' => array('tjiid'),
-    'unique keys' => array(
-      'source' => array('tjid', 'source_plugin', 'item_type', 'item_id'),
+    'indexes' => array(
+      'job_id' => array('tjid'),
     ),
     'foreign keys' => array(
       'job' => array(
@@ -303,4 +303,13 @@ function tmgmt_update_7004() {
       'source' => array('tjid', 'source_plugin', 'item_type', 'item_id'),
     ),
   ));
+}
+
+/**
+ * Drop the job_item unique key and add the job index.
+ */
+function tmgmt_update_7005() {
+  db_drop_unique_key('tmgmt_job_item', 'source');
+  $job_index = array('tjid');
+  db_add_index('tmgmt_job_item', 'job_id', $job_index);
 }
