@@ -68,12 +68,6 @@ function tmgmt_ui_menu() {
     'file' => 'tmgmt_ui.pages.inc',
   );
 
-  $items['admin/tmgmt/jobs/add/%source_language'] = array(
-    'title' => t('Create a Job'),
-    'page callback' => 'tmgmt_job_create',
-    'page arguments' => array(4, ''),
-  );
-
 
   // Add settings menu item for each plugin that is using settings form.
   /* foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
@@ -107,21 +101,6 @@ function tmgmt_ui_menu() {
   );
 
   return $items;
-}
-
-/**
- * Implements hook_theme().
- *
- * Provides a theme function for use with the RenderAPI that uses the #title and
- * #attributes properties of a render array, if they're present.
- */
-function tmgmt_ui_theme($existing, $type, $theme, $path) {
-  return array(
-    'tmgmt_ui_element' => array(
-      'render element' => 'element',
-      'file' => 'tmgmt_ui.theme.inc',
-    ),
-  );
 }
 
 /**

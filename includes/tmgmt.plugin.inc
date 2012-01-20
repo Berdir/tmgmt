@@ -132,7 +132,31 @@ interface TMGMTTranslatorPluginControllerInterface {
    *   The job that should have its translation cancelled.
    */
   public function cancelTranslation(TMGMTJob $job);
+  
+  /**
+   * Plugin can define this method if it need settings form. 
+   * 
+   * This is not actually an interface method and that is why it is commented,
+   * but we leave it here for api documentation.
+   * 
+   * @param $form array
+   * @param $form_state array
+   */
+  //public function settingsForm($form, &$form_state);
 
+  /**
+   * Plugin can define this method if it need job settings form.
+   * 
+   * This is not actually an interface method and that is why it is commented,
+   * but we leave it here for api documentation.
+   * 
+   * @param $form array
+   * @param $form_state array
+   * @return array
+   *   Settings form.
+   */
+  //public function jobSettingsForm($form, &$form_state);
+  
 }
 
 /**

@@ -47,7 +47,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   public function requestTranslation(TMGMTJob $job) {
     // @todo Who is handling cron / batch here, we or some other controller?
     // @todo If length is more then 10000 chars we need to split the request.
-    // Pull the source data array from through the job and flatten it..
+    // Pull the source data array from through the job and flatten it.
     $data = tmgmt_flatten_data($job->getSourceData());
     foreach ($data as $key => $value) {
       if (isset($value['#translate']) && $value['#translate'] === FALSE) {
@@ -133,6 +133,23 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       '#description' => t('Please enter your Bing API ID, or follow this !link to generate one.', array('!link' => l('link', 'http://www.bing.com/developers/appids.aspx.'))),
     );
     return $form;
+  }
+
+  /**
+   * Defines plugin job settings form.
+   *
+   * @param $form array
+   * @param $form_state array
+   * @return array
+   *   Settings form.
+   */
+  public function jobSettingsForm($form, &$form_state) {
+    $settings['group_translations'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Group translation items (@TODO)'),
+      '#description' => t('If checked all text items in this translation job will be send to server in one request.')
+    );
+    return $settings;
   }
 
 }

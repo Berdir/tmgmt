@@ -68,6 +68,11 @@ function tmgmt_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'label' => array(
+        'description' => 'Optional user provided label of the job.',
+        'type' => 'varchar',
+        'length' => 256,
+      ),
     ),
     'primary key' => array('tjid'),
     'indexes' => array(
@@ -102,9 +107,16 @@ function tmgmt_schema() {
       ),
       'item_id' => array(
         'description' => 'The unique id (within the given item type) of the item.',
-        'type' => 'int',
-        'unsigned' => TRUE,
+        'type' => 'varchar',
+        'length' => 128,
         'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => 'Can be used by the source plugin to store the data if it can not be retrieved anymore later on.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'serialize' => TRUE,
       ),
       'translated_data' => array(
         'description' => 'Structured translated data.',
@@ -115,8 +127,8 @@ function tmgmt_schema() {
       ),
     ),
     'primary key' => array('tjiid'),
-    'unique keys' => array(
-      'source' => array('tjid', 'source_plugin', 'item_type', 'item_id'),
+    'indexes' => array(
+      'job_id' => array('tjid'),
     ),
     'foreign keys' => array(
       'job' => array(
@@ -239,7 +251,6 @@ function tmgmt_update_7000() {
   $new_field = array(
     'type' => 'int',
     'unsigned' => TRUE,
-    'not null' => TRUE,
   );
   db_add_field('tmgmt_job', 'uid', $new_field);
 }
@@ -255,4 +266,51 @@ function tmgmt_update_7001() {
     'not null' => FALSE,
   );
   db_change_field('tmgmt_job', 'uid', 'uid', $new_field);
+}
+
+/**
+ * Add the label field to {tmgmt_job}.
+ */
+function tmgmt_update_7003() {
+  $new_field = array(
+    'description' => 'Optional user provided label of the job.',
+    'type' => 'varchar',
+    'length' => 256,
+  );
+  db_add_field('tmgmt_job', 'label', $new_field);
+}
+
+/**
+ * Add the data field to {tmgmt_job_item} and change item_id to a varchar.
+ */
+function tmgmt_update_7004() {
+  $new_field = array(
+    'description' => 'Can be used by the source plugin to store the data.',
+    'type' => 'text',
+    'size' => 'big',
+    'serialize' => TRUE,
+  );
+  db_add_field('tmgmt_job_item', 'data', $new_field);
+
+  db_drop_unique_key('tmgmt_job_item', 'source');
+  $updated_item_id = array(
+    'description' => 'The unique id (within the given item type) of the item.',
+    'type' => 'varchar',
+    'length' => 128,
+    'not null' => TRUE,
+  );
+  db_change_field('tmgmt_job_item', 'item_id', 'item_id', $updated_item_id, array(
+    'unique keys' => array(
+      'source' => array('tjid', 'source_plugin', 'item_type', 'item_id'),
+    ),
+  ));
+}
+
+/**
+ * Drop the job_item unique key and add the job index.
+ */
+function tmgmt_update_7005() {
+  db_drop_unique_key('tmgmt_job_item', 'source');
+  $job_index = array('tjid');
+  db_add_index('tmgmt_job_item', 'job_id', $job_index);
 }
