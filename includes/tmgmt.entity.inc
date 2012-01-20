@@ -40,7 +40,7 @@ class TMGMTTranslator extends Entity {
    *
    * @type string
    */
-  public $plugin;
+  public $translator_plugin;
 
   /**
    * Translator type specific settings.
@@ -81,7 +81,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *
    * @var varchar
    */
-  public $plugin;
+  public $source_plugin;
 
   /**
    * The identifier of the translation job.
@@ -105,13 +105,43 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public $item_id;
 
   /**
+   * Can be used by the source plugin to store the data instead of creating it
+   * on demand.
+   *
+   * If additional information is added in the UI, like adding comments, it will
+   * also be saved here.
+   *
+   * Always use TMGMTJobItem::getSourceData() to load the data, which will use
+   * this property if present and otherwise get it from the source.
+   *
+   * @var array
+   */
+  public $data = array();
+
+  /**
    * The translated data in the same structure.
    *
    * Only the parts that actually are translated are present in this array.
    *
    * @var array
    */
-  public $translated_data;
+  public $translated_data = array();
+
+  /**
+   * Overrides Entity::label()
+   */
+  public function label() {
+    $controller = $this->getSourceController();
+    return $controller->getTitle($this);
+  }
+
+  /**
+   * Overrides Entity::uri()
+   */
+  public function uri() {
+    $controller = $this->getSourceController();
+    return $controller->getUri($this);
+  }
 
   /**
    * Array of the data to be translated.
@@ -134,6 +164,10 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * @see TMGMTJobItem::getFlattenedData()
    */
   public function getSourceData() {
+    // If something is stored in data, return it immediately.
+    if (!empty($this->data)) {
+      return $this->data;
+    }
     return $this->getSourceController()->getData($this);
   }
 
@@ -156,7 +190,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *   Nested array of translated data. Can either be a single text entry, the
    *   whole data structure or parts of it.
    * @param $key
-   *   (Optional) Either a flattened key (a 'key1:key2:key3' string) or a nested
+   *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a nested
    *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
    *   means that it will replace the whole translated data array.
    */
@@ -165,7 +199,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
       $key = array();
     }
     if (!is_array($key)) {
-      $key = explode(':', $key);
+      $key = explode(TMGMT_ARRAY_DELIMITER, $key);
     }
     if (!is_array($this->translated_data)) {
       $this->translated_data = array();
@@ -234,10 +268,33 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public $translator_id;
 
   /**
+   *
+   * @var type
+   */
+  public $uid = 0;
+
+  public $label;
+
+  /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_job');
+  }
+
+  /**
+   * Implements EntityAPIControllerInterface::label().
+   */
+  public function label() {
+    $wrapper = entity_metadata_wrapper($this->entityType, $this);
+    return t('@source into @target translation job', array('@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label()));
+  }
+
+  /**
+   * Implements EntityAPIControllerInterface::uri().
+   */
+  public function uri() {
+    return array('path' => 'admin/tmgmt/jobs/' . $this->tjid);
   }
 
   /**
@@ -369,7 +426,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     $query->entityCondition('entity_type', 'tmgmt_job_message');
     $query->propertyCondition('tjid', $this->tjid);
     $results = $query->execute();
-    debug($results);
     if (!empty($results['tmgmt_job_message'])) {
       return tmgmt_job_message_load_multiple(array_keys($results['tmgmt_job_message']));
     }
@@ -448,7 +504,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function addMessage($message, $arguments = array()) {
     $message = entity_create('tmgmt_job_message', array(
-      'tmjid' => $this->tjid,
+      'tjid' => $this->tjid,
       'state_before' => isset($this->old_state) ? $this->old_state : $this->getState(),
       'state_after' => $this->getState(),
       'message' => $message,
@@ -608,11 +664,28 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   Partially or complete translated data, the most upper key needs to be
    *   the translation job item id.
    */
-  public function addTranslatedData($data) {
+  public function addTranslatedData($data, $key = NULL) {
+
+    if (empty($key)) {
+      $key = array();
+    }
+    if (!is_array($key)) {
+      $key = explode(TMGMT_ARRAY_DELIMITER, $key);
+    }
+
+
     $items = $this->getItems();
-    foreach ($data as $key => $value) {
-      if (isset($items[$key])) {
-        $items[$key]->addTranslatedData($value);
+
+    // If there is a key, get the specific item and forward the call.
+    if (!empty($key)) {
+      $item_id = array_shift($key);
+      $items[$item_id]->addTranslatedData($data, $key);
+    }
+    else {
+      foreach ($data as $key => $value) {
+        if (isset($items[$key])) {
+          $items[$key]->addTranslatedData($value);
+        }
       }
     }
   }

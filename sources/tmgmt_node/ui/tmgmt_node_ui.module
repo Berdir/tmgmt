@@ -80,6 +80,7 @@ function tmgmt_node_ui_translator_settings_form($form, &$form_state, $node) {
     '#title' => t('Source language'),
     '#markup' => $node_language,
   );
+  // @todo: use checkboxes instead and create multiple jobs.
   $form['target_language'] = array(
     '#type' => 'select',
     '#title' => t('Target language'),

@@ -18,6 +18,16 @@ class TMGMTJobMetadataController extends EntityDefaultMetadataController {
     // Add the options list for all available translator plugins.
     $properties['translator']['options list'] = 'tmgmt_translator_plugin_labels';
 
+    $properties['author'] = array(
+      'label' => t("Author"),
+      'type' => 'user',
+      'description' => t("The author of the translation job."),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer nodes',
+      'required' => TRUE,
+      'schema field' => 'uid',
+    );
+
     return _tmgmt_override_property_description($info, $this->type);
   }
 

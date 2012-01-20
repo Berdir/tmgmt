@@ -16,15 +16,15 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
   protected $useSandbox = TRUE;
 
   /**
-   *  requestFromGengo($endpoint, $data = array())
+   *    requestFromGengo($endpoint, $data = array())
    *
-   *  Builds, signs and fires a request to myGengo's API. Will fire to a different url
-   *  if on the sandbox.
+   *    Builds, signs and fires a request to myGengo's API. Will fire to a different url
+   *    if on the sandbox.
    *
-   *  Authentication rituals are documented here: http://mygengo.com/api/developer-docs/authentication/
+   *    Authentication rituals are documented here: http://mygengo.com/api/developer-docs/authentication/
    *
-   *  It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
-   *  respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
+   *    It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
+   *    respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
    */
   public function requestFromGengo($endpoint, $method, $data = array()) {
     $options = array(
@@ -39,8 +39,8 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     $url = ($this->useSandbox ? $this->sandboxURL : $this->apiURL) . $endpoint;
 
     /**
-     *  If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
-     *  get a little more annoying...
+     *    If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
+     *    get a little more annoying...
      */
     if ($method == 'GET' || $method == 'DELETE') {
       $query_data = drupal_http_build_query(array_merge(array(
@@ -68,7 +68,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
       return $results->response;
     }
     else {
-      // @todo: Raise an actual error. >_>
+      // TODO: Raise an actual error. >_>
       return array();
     }
   }
@@ -106,14 +106,24 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
   public function requestTranslation(TMGMTJob $job) {
     // Pull the source data array from through the job and flatten it..
     $data = tmgmt_flatten_data($job->getSourceData());
-    $t = array();
+
+    $translations = array();
 
     foreach ($data as $key => $value) {
       if (isset($value['#translate']) && $value['#translate'] === FALSE) {
         continue;
       }
 
-      $t['job' . $job->tjid . $key] = array(
+      // NOTE: There's a not-so-fun-bug in the myGengo API that you'll encounter
+      // if you change how this key is set. If the key in this hash starts with
+      // numbers (especially a 0...), you will get an odd one-off response format
+      // that can't be parsed by default.
+      //
+            // This is being fixed in a future iteration of the API (v2). If you encounter
+      // weirdness with this issue, feel free to email us at api@mygengo.com. ;)
+      //
+            // - Ryan McGrath, who dislikes this error intensely
+      $translations['job' . $job->tjid . $key] = array(
         'type' => 'text',
         'slug' => $key,
         'body_src' => $value['#text'],
@@ -123,9 +133,8 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
       );
     }
 
-    // Stupid format at the moment, don't ask...
-    $x = $this->requestFromGengo('translate/jobs', 'POST', array(
-      'jobs' => $t
+    $response = $this->requestFromGengo('translate/jobs', 'POST', array(
+      'jobs' => $translations
       ));
 
     // Save the translated data through the job.
@@ -168,8 +177,8 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
   }
 
   /**
-   * Defines plugin settings form. 
-   * 
+   * Defines plugin settings form.
+   *
    * @param $form array
    * @param $form_state array
    */
@@ -188,10 +197,10 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     );
     return $form;
   }
-  
+
   /**
    * Defines plugin job settings form.
-   * 
+   *
    * @param $form array
    * @param $form_state array
    * @return array
@@ -208,5 +217,5 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     );
     return $settings;
   }
-  
+
 }

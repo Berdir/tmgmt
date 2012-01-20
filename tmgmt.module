@@ -1,5 +1,4 @@
 <?php
-
 /**
  * A new translation job, can not yet be submitted.
  */
@@ -38,6 +37,11 @@ define('TMGMT_JOB_STATE_ACCEPTED', 5);
 define('TMGMT_JOB_STATE_CANCELLED', 6);
 
 /**
+ * String used to delimit flattened array keys.
+ */
+define('TMGMT_ARRAY_DELIMITER', '][');
+
+/**
  * Implements hook_menu().
  */
 function tmgmt_menu() {
@@ -63,6 +67,12 @@ function tmgmt_menu() {
         'access arguments' => array('administer site configuration'),
       );
     }
+    $items['admin/tmgmt/add-item/%/%/%/%'] = array(
+      'title' => t('Create a Job'),
+      'page callback' => 'tmgmt_job_add_item',
+      'page arguments' => array(3, 4, 5, 6),
+      'access arguments' => array('administer site configuration'),
+    );
   }
   return $items;
 }
@@ -145,7 +155,6 @@ function tmgmt_forms() {
   }
   return $info;
 }
-
 /**
  * @addtogroup job
  * @{
@@ -237,10 +246,10 @@ function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = arr
  */
 function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $values = array()) {
   return entity_create('tmgmt_job_item', array_merge($values, array(
-    'source_plugin' => $source_plugin,
-    'item_type' => $item_type,
-    'item_id' => $item_id,
-  )));
+                    'source_plugin' => $source_plugin,
+                    'item_type' => $item_type,
+                    'item_id' => $item_id,
+                  )));
 }
 
 /**
@@ -258,9 +267,28 @@ function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $valu
  */
 function tmgmt_job_create($source_language, $target_language, array $values = array()) {
   return entity_create('tmgmt_job', array_merge($values, array(
-    'source_language' => $source_language,
-    'target_language' => $target_language,
-  )));
+                    'source_language' => $source_language,
+                    'target_language' => $target_language,
+                  )));
+}
+
+/**
+ * Creates and adds a jobitem to a certain job. If job is not defined, a new job
+ * will be created.
+ * Destinatoin will be needed to return to the submitters page.
+ */
+function tmgmt_job_add_item($source_language, $plugin, $type, $item_ids, $tjid = NULL) {
+  if (!$tjid) {
+    $job = tmgmt_job_create($source_language, '');
+  } else {
+    $job = tmgmt_job_load($tjid);
+  }
+  $item_ids = explode(',', $item_ids);
+  foreach ($item_ids as $item_id) {
+    $job->addItem(tmgmt_job_item_create($plugin, $type, $item_id));
+  }
+  $job->save();
+  drupal_goto();
 }
 
 /**
@@ -280,11 +308,9 @@ function tmgmt_job_states() {
     TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
   );
 }
-
 /**
  * @} End of "addtogroup job".
  */
-
 /**
  * @addtogroup translator
  * @{
@@ -388,11 +414,9 @@ function tmgmt_translator_settings_form($form, &$form_state, $plugin) {
   }
   return $form;
 }
-
 /**
  * @} End of "addtogroup translator".
  */
-
 /**
  * @addtogroup source
  * @{
@@ -431,7 +455,6 @@ function tmgmt_source_plugin_controller($plugin) {
 function tmgmt_source_plugin_labels() {
   return _tmgmt_plugin_labels('source');
 }
-
 /**
  * @} End of "addtogroup source".
  */
@@ -457,8 +480,7 @@ function _tmgmt_plugin_info($type, $plugin = NULL) {
   }
   if (isset($plugin) && isset($info[$type][$plugin])) {
     return $info[$type][$plugin];
-  }
-  else if (!isset($plugin)) {
+  } else if (!isset($plugin)) {
     return $info[$type];
   }
 }
@@ -505,7 +527,7 @@ function _tmgmt_plugin_labels($type) {
  *
  * Nested keys will be joined together using a colon, so for example
  * $data['key1']['key2']['key3'] will be converted into
- * $flattened_data['key1:key2:key3'].
+ * $flattened_data['key1][key2][key3'].
  *
  * @param $data
  *   The nested array structure that should be flattened.
@@ -526,7 +548,7 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
     $flattened_data[$prefix] = $data;
   }
   else {
-    $prefix = !empty($prefix) ? $prefix . ':' : '';
+    $prefix = !empty($prefix) ? $prefix . TMGMT_ARRAY_DELIMITER : '';
     foreach (element_children($data) as $key) {
       $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key);
     }
@@ -540,7 +562,7 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
  * This function can be used by translators to help with the data conversion.
  *
  * Nested keys will be created based on the colon, so for example
- * $flattened_data['key1:key2:key3'] will be converted into
+ * $flattened_data['key1][key2][key3'] will be converted into
  * $data['key1']['key2']['key3'].
  *
  * @param $data
@@ -554,7 +576,7 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
 function tmgmt_unflatten_data($flattened_data) {
   $data = array();
   foreach ($flattened_data as $key => $flattened_data_entry) {
-    drupal_array_set_nested_value($data, explode(':', $key), $flattened_data_entry);
+    drupal_array_set_nested_value($data, explode(TMGMT_ARRAY_DELIMITER, $key), $flattened_data_entry);
   }
   return $data;
 }
