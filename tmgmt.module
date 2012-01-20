@@ -64,32 +64,12 @@ function tmgmt_menu() {
     }
     $items['admin/tmgmt/add-item/%/%/%/%'] = array(
       'title' => t('Create a Job'),
-      'page callback' => 'tmgmt_add_job_item',
-      'page arguments' => array(4, 5, 6, 7),
+      'page callback' => 'tmgmt_job_add_item',
+      'page arguments' => array(3, 4, 5, 6),
       'access arguments' => array('administer site configuration'),
     );
   }
   return $items;
-}
-
-/**
- * Creates and adds a jobitem to a certain job. If job is not defined, a new job
- * will be created.
- * Destinatoin will be needed to return to the submitters page.
- */
-function tmgmt_add_job_item($source_language, $plugin, $type, $item_ids, $tjid = NULL) {
-  if (!$tjid) {
-    $job = tmgmt_job_create($source_language, '');
-  } else {
-    $job = tmgmt_job_load($tjid);
-  }
-  dsm($job);
-  $item_ids = implode($item_ids);
-  foreach ($item_ids as $item_id) {
-    $job->addItem(tmgmt_job_item_create($plugin, $type, $item_id));
-  }
-  $job->save();
-  drupal_goto();
 }
 
 /**
@@ -285,6 +265,25 @@ function tmgmt_job_create($source_language, $target_language, array $values = ar
                     'source_language' => $source_language,
                     'target_language' => $target_language,
                   )));
+}
+
+/**
+ * Creates and adds a jobitem to a certain job. If job is not defined, a new job
+ * will be created.
+ * Destinatoin will be needed to return to the submitters page.
+ */
+function tmgmt_job_add_item($source_language, $plugin, $type, $item_ids, $tjid = NULL) {
+  if (!$tjid) {
+    $job = tmgmt_job_create($source_language, '');
+  } else {
+    $job = tmgmt_job_load($tjid);
+  }
+  $item_ids = explode(',', $item_ids);
+  foreach ($item_ids as $item_id) {
+    $job->addItem(tmgmt_job_item_create($plugin, $type, $item_id));
+  }
+  $job->save();
+  drupal_goto();
 }
 
 /**
