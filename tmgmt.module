@@ -283,7 +283,7 @@ function tmgmt_job_create($source_language, $target_language, array $values = ar
  * will be created.
  * Destinatoin will be needed to return to the submitters page.
  */
-function tmgmt_job_add_item($source_language, $plugin, $type, $item_ids, $tjid = NULL) {
+function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_ids, $tjid = NULL) {
   if (!$tjid) {
     $job = tmgmt_job_create($source_language, '');
   } else {
@@ -291,8 +291,10 @@ function tmgmt_job_add_item($source_language, $plugin, $type, $item_ids, $tjid =
   }
   $item_ids = explode(',', $item_ids);
   foreach ($item_ids as $item_id) {
-    $job->addItem($plugin, $type, $item_id);
+//    $job->addItem($plugin, $type, $item_id);
+    $job->addItem(tmgmt_job_item_create($source_plugin, $item_type, $item_id));
   }
+  $job->submitted();
   $job->save();
   // @todo: in case of no destination, goto checkoutform
   drupal_goto();
