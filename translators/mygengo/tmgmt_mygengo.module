@@ -6,6 +6,33 @@
  */
 
 /**
+ *  Implements...
+ */
+function tmgmt_mygengo_menu() {
+      $items['mygengo_callback'] = array(
+        'type' => MENU_CALLBACK,
+        'title' => 'mygengo_callback',
+        'description' => '',
+        'page callback' => 'tmgmt_mygengo_callback',
+        'access callback' => 'tmgmt_mygengo_access_check'
+      );
+    return $items;
+}
+
+function tmgmt_mygengo_callback() {
+    $data = json_decode($_POST['job']);
+    $tjid = explode(':', $data->custom_data);
+
+    $job = tmgmt_job_load($tjid[0]);
+    $mygengo = tmgmt_translator_plugin_controller('mygengo');
+    $mygengo->receiveTranslation($job);
+}
+
+function tmgmt_mygengo_access_check() { 
+    
+}
+
+/**
  * Implements hook_tmgmt_translator_plugin_info().
  */
 function tmgmt_mygengo_tmgmt_translator_plugin_info() {

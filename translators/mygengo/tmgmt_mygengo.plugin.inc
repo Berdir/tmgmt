@@ -101,6 +101,9 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
      * Here we will acutally query source and get translations.
      */
     public function requestTranslation(TMGMTJob $job) {
+        global $base_url;
+        global $base_path;
+
         // Pull the source data array from through the job and flatten it..
         $data = tmgmt_flatten_data($job->getSourceData());
 
@@ -126,17 +129,25 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
                 'body_src' => $value['#text'],
                 'lc_src' => $job->source_language,
                 'lc_tgt' => $job->target_language,
-                'tier' => 'standard'
+                'tier' => 'standard',
+                'callback_url' => url('/mygengo_callback', array('absolute' => TRUE)),
+                'custom_data' => $key
             );
         }
         
         $response = $this->requestFromGengo('translate/jobs', 'POST', array(
-            'jobs' => $translations
+            'jobs' => $translations,
+            'process' => 1,
+            'as_group' => 1
         ));
 
         // Save the translated data through the job.
         $job->addTranslatedData(tmgmt_unflatten_data($data));
         //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
+    }
+
+    public function receiveTranslation(TMGMTJob $job) {
+        
     }
 
     /**
