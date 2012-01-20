@@ -134,5 +134,71 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     }
     return $languages;
   }
+  
+  public function getXMLTemplate($request_type, $params = array()) {
+    switch($request_type) {
+      case 'Authentication':
+        $xml = '<?xml version="1.0" encoding="utf-8"?>
+                <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+                  <soap:Header>
+                    <SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">
+                      <Username>' . $params['username'] . '</Username>
+                      <Password>' . $params['password'] . '</Password>
+                    </SecuredWebServiceHeader>
+                  </soap:Header>
+                  <soap:Body>
+                    <AuthenticateUser xmlns="https://www.nativy.com/nis" />
+                  </soap:Body>
+                </soap:Envelope>';
+        break;
+      case 'TranslationRequest':
+        $xml = '<?xml version="1.0"?>
+								<offerrequest xmlns="http://www.nativy.com/nis">
+									<settings>
+										<emailCallbackLink>
+											https://www.yourapplication.com/nisinterface/gettranslation
+										</emailCallbackLink>
+									</settings>
+								<customer customerId="mailto:demo@nativy.com">
+									<customerEmail>demo@nativy.com</customerEmail>
+									<customerFirstName>Demofirstname</customerFirstName>
+									<customerLastName>Demolastname</customerLastName>
+								</customer>
+								<languages primaryLangCode="de-DE">
+									<language langCode="ms" />
+									<language langCode="jv" />
+									<language langCode="en" />
+									<language langCode="es" />
+								</languages>
+								<textblocks>
+									<textblock code="faq_question1" label="Wie funktioniert nativy?">
+										<description langCode="de-DE">
+											nativy hat ein System entwickelt, um den/die ideale ÜbersetzerIn für jeden
+                      Auftrag zu finden. KundInnen können dabei ihre individuellen Kriterien in der Suche
+                      nach dem/der idealen ÜbersetzerIn einbringen. nativy übernimmt in dem gesamten Prozess
+                      die wichtigsten administrativen Aufgaben, um seinen NutzerInnen das Leben etwas zu
+                      erleichtern und die Zusammenarbeit zu beschleunigen. nativy verrechnet seinen
+                      KundInnen das von dem/der ÜbersetzerIn festgelegte Honorar inklusive eines
+                      geringfügigen Vermittlungsaufschlags.
+										</description>
+									</textblock>
+								<textblock code="faq_question2" label="Wer übersetzt bei nativy?">
+									<description langCode="de-DE">
+										Nur professionelle ÜbersetzerInnen werden bei nativy zugelassen. Übersetzungen
+										in die Muttersprache werden bevorzugt. Die Qualifikationen jedes/r ÜbersetzerIn werden
+										durch nativy geprüft.
+									</description>
+								</textblock>
+								<textblock code="faq_question3" label="Stehen AuftraggeberInnen und ÜbersetzerInnen in direktem Kontakt?">
+  								<description langCode="de-DE">
+  									Ja, auf der Webseite von nativy können Kurznachrichten zu den jeweiligen
+  									Aufträgen ausgetauscht werden.
+  								</description>
+								</textblock>
+							</textblocks>
+						</offerrequest>';
+        break;
+    }
+  }
 
 }
