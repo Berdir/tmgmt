@@ -194,6 +194,8 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    * 
    * @param $form array
    * @param $form_state array
+   * @return array
+   *   Settings form.
    */
   public function jobSettingsForm($form, &$form_state) {
     $settings['dummy_option'] = array(
