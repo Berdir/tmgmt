@@ -18,3 +18,33 @@ function tmgmt_entity_test_entity_info_alter(&$entity_info) {
     );
   }
 }
+
+/**
+ * Implements hook_entity_info().
+ */
+function tmgmt_entity_test_entity_info() {
+  $return = array(
+    'test_entity' => array(
+      'label' => t('Test entity'),
+      'controller class' => 'DrupalDefaultEntityController',
+      'base table' => 'test_entity',
+      'fieldable' => TRUE,
+      'entity keys' => array(
+        'id' => 'teid',
+        'bundle' => 'type',
+        'label' => 'title',
+      ),
+      'bundle keys' => array(
+        'bundle' => 'type',
+      ),
+      'bundles' => array(),
+      'view modes' => array(
+        'full' => array(
+          'label' => t('Full content'),
+          'custom settings' => FALSE,
+        ),
+      ),
+    ),
+  );
+  return $return;
+}
