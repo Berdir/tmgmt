@@ -94,7 +94,6 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
       if (in_array($job->target_language, $targets))
         return TRUE;
     }
-
     return FALSE;
   }
 
@@ -119,41 +118,49 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
       // numbers (especially a 0...), you will get an odd one-off response format
       // that can't be parsed by default.
       //
-            // This is being fixed in a future iteration of the API (v2). If you encounter
+      // This is being fixed in a future iteration of the API (v2). If you encounter
       // weirdness with this issue, feel free to email us at api@mygengo.com. ;)
       //
-            // - Ryan McGrath, who dislikes this error intensely
-      $translations['job' . $job->tjid . $key] = array(
-        'type' => 'text',
-        'slug' => $key,
-        'body_src' => $value['#text'],
-        'lc_src' => $job->source_language,
-        'lc_tgt' => $job->target_language,
-        'tier' => 'standard'
-      );
+      // - Ryan McGrath, who dislikes this error intensely
+            $translations['job' . $job->tjid . $key] = array(
+                'type' => 'text',
+                'slug' => $key,
+                'body_src' => $value['#text'],
+                'lc_src' => $job->source_language,
+                'lc_tgt' => $job->target_language,
+                'tier' => 'standard',
+                'callback_url' => url('mygengo_callback', array('absolute' => TRUE)),
+                'custom_data' => $key
+            );
+        }
+        
+        $response = $this->requestFromGengo('translate/jobs', 'POST', array(
+            'jobs' => $translations,
+            'process' => 1,
+            'as_group' => 1
+        ));
+
+        // Save the translated data through the job.
+        $job->addTranslatedData(tmgmt_unflatten_data($data));
+        //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
     }
 
-    $response = $this->requestFromGengo('translate/jobs', 'POST', array(
-      'jobs' => $translations
-      ));
-
-    // Save the translated data through the job.
-    $job->addTranslatedData(tmgmt_unflatten_data($data));
-    //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
-   */
-  public function getSupportedTargetLanguages($source_language) {
-    $results = array();
-    $targets = $this->requestFromGengo('translate/service/language_pairs', 'GET', array(
-      'lc_src' => $source_language
-      ));
-
-    foreach ($targets as $target) {
-      array_push($results, $target->lc_tgt);
+    public function receiveTranslation(TMGMTJob $job, $keys, $data) {
+        $job->addTranslatedData(array('#text' => $data->body_src), $keys);
     }
+
+    /**
+     * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+     */
+    public function getSupportedTargetLanguages($source_language) {
+        $results = array();
+        $targets = $this->requestFromGengo('translate/service/language_pairs', 'GET', array(
+            'lc_src' => $source_language
+        ));
+
+        foreach($targets as $target) {
+            array_push($results, $target->lc_tgt);
+        }
 
     return $results;
   }
