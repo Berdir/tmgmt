@@ -130,7 +130,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
                 'lc_src' => $job->source_language,
                 'lc_tgt' => $job->target_language,
                 'tier' => 'standard',
-                'callback_url' => url('/mygengo_callback', array('absolute' => TRUE)),
+                'callback_url' => url('mygengo_callback', array('absolute' => TRUE)),
                 'custom_data' => $key
             );
         }
@@ -146,8 +146,8 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
         //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
     }
 
-    public function receiveTranslation(TMGMTJob $job) {
-        
+    public function receiveTranslation(TMGMTJob $job, $keys, $data) {
+        $job->addTranslatedData(array('#text' => $data->body_src), $keys);
     }
 
     /**

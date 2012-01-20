@@ -9,27 +9,31 @@
  *  Implements...
  */
 function tmgmt_mygengo_menu() {
-      $items['mygengo_callback'] = array(
-        'type' => MENU_CALLBACK,
-        'title' => 'mygengo_callback',
-        'description' => '',
-        'page callback' => 'tmgmt_mygengo_callback',
-        'access callback' => 'tmgmt_mygengo_access_check'
-      );
-    return $items;
+    $items['mygengo_callback'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'mygengo_callback',
+    'description' => '',
+    'page callback' => 'tmgmt_mygengo_callback',
+    'access callback' => 'tmgmt_mygengo_access_check'
+    );
+  return $items;
 }
 
 function tmgmt_mygengo_callback() {
-    $data = json_decode($_POST['job']);
-    $tjid = explode(':', $data->custom_data);
+  $data = json_decode($_POST['job']);
+  $keys = explode('][', $data->custom_data);
+  $tjid = array_shift($keys);
 
-    $job = tmgmt_job_load($tjid[0]);
-    $mygengo = tmgmt_translator_plugin_controller('mygengo');
-    $mygengo->receiveTranslation($job);
+  $job = tmgmt_job_load($tjid);
+  $mygengo = tmgmt_translator_plugin_controller('mygengo');
+  $mygengo->receiveTranslation($job, $keys, $data);
+  echo '';
 }
 
 function tmgmt_mygengo_access_check() { 
-    
+    watchdog('mygengo', print_r($_POST));
+
+  return TRUE;
 }
 
 /**
@@ -37,11 +41,11 @@ function tmgmt_mygengo_access_check() {
  */
 function tmgmt_mygengo_tmgmt_translator_plugin_info() {
   return array(
-    'mygengo' => array(
-      'label' => t('myGengo translator'),
-      'description' => t('A myGengo translator service.'),
-      'controller class' => 'TMGMTMyGengoController',
-    ),
+  'mygengo' => array(
+    'label' => t('myGengo translator'),
+    'description' => t('A myGengo translator service.'),
+    'controller class' => 'TMGMTMyGengoController',
+  ),
   );
 }
 
