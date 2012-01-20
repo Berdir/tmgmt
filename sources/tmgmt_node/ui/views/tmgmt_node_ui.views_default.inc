@@ -188,7 +188,7 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['fields']['source_language']['table'] = 'tmgmt_job';
   $handler->display->display_options['fields']['source_language']['field'] = 'source_language';
   $handler->display->display_options['fields']['source_language']['relationship'] = 'tjid';
-  $handler->display->display_options['fields']['source_language']['label'] = 'Sourcelanguage';
+  $handler->display->display_options['fields']['source_language']['label'] = 'Source language';
   $handler->display->display_options['fields']['source_language']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['source_language']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['source_language']['alter']['absolute'] = 0;

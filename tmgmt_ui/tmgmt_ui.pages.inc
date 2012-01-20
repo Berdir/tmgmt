@@ -25,13 +25,15 @@ function tmgmt_ui_content() {
     'css' => array(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.my-tmgmt.css'),
   );
   $output['#theme'] = 'tmgmt_ui_element';
-  // This left column is given a width of 35% by tmgmt_ui.my-tmgmt.
+  // This left column is given a width of 35% by tmgmt_ui.my-tmgmt.css
   $output['tmgmt_ui_current_user'] = array(
     '#title' => t('My Profile'),
+    '#view' => 'tmgmt_ui_current_user',
+    '#view_display' => 'block_1',
     '#attributes' => array('class' => array('left', 'clearfix')),
     '#theme' => 'tmgmt_ui_element',
   );
-  // This right column is given a width of 65% by tmgmt_ui.my-tmgmt.
+  // This right column is given a width of 65% by tmgmt_ui.my-tmgmt.css
   $output['tmgmt_ui_jobs_overview'] = array(
     '#view' => 'tmgmt_ui_jobs_overview',
     '#view_display' => 'block_1',
@@ -64,8 +66,6 @@ function tmgmt_ui_content() {
 /**
  * Shows the job view.
  *
- * @see hook_tmgmt_ui_jobs_alter()
- *
  * @return
  *  A Render API array of content creation options.
  */
@@ -77,8 +77,41 @@ function tmgmt_ui_jobs() {
   $output['#title'] = $view->get_title();
   $output['#markup'] = $view->preview('block_1', array());
 
+  return $output;
+}
+
+/**
+ * Shows the untranslated elemets.
+ *
+ * @see hook_tmgmt_ui_untranslated_alter()
+ *
+ * @return
+ *  A Render API array of content creation options.
+ */
+function tmgmt_ui_untranslated() {
+  $output = array();
+  $output['#markup'] = '<h3>' . t('untranslated') . '</h3><p>all untranslated elements</p>';
+
   // Allow other modules to add content here.
-  drupal_alter('tmgmt_ui_jobs', $output);
+  drupal_alter('tmgmt_ui_untranslated', $output);
+
+  return $output;
+}
+
+/**
+ * Shows the pendning elements.
+ *
+ * @see hook_tmgmt_ui_pending_alter()
+ *
+ * @return
+ *  A Render API array of content creation options.
+ */
+function tmgmt_ui_pending() {
+  $output = array();
+  $output['#markup'] = '<h3>' . t('pending') . '</h3><p>all pending elements</p>';
+
+  // Allow other modules to add content here.
+  drupal_alter('tmgmt_ui_pending', $output);
 
   return $output;
 }
@@ -86,17 +119,14 @@ function tmgmt_ui_jobs() {
 /**
  * Shows the node view.
  *
- * @see hook_tmgmt_ui_nodes_alter()
+ * TOBE deleted or moved to admin.inc
  *
  * @return
  *  A Render API array of content creation options.
  */
-function tmgmt_ui_nodes() {
+function tmgmt_ui_fake_admin() {
   $output = array();
-  $output['#markup'] = '<h3>' . t('Hello World') . '</h3><p>nodes overview</p>';
-
-  // Allow other modules to add content here.
-  drupal_alter('tmgmt_ui_nodes', $output);
+  $output['#markup'] = '<h3>' . t('Administer UI') . '</h3><p>but not yet ..</p>';
 
   return $output;
 }
