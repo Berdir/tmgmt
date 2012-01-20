@@ -10,7 +10,7 @@
  *
  * Renders the #title and #attributes properties if they are present.
  */
-function theme_tmgmt_element($variables) {
+function theme_tmgmt_ui_element($variables) {
   $element = $variables['element'];
 
   // Use the #title attribute.

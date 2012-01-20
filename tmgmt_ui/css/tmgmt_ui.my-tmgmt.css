@@ -9,3 +9,7 @@ div.admin.my-tmgmt .left {
 div.admin.my-tmgmt .right {
   width: 65%;
 }
+
+div.admin.my-tmgmt .cleared {
+  clear: both;
+}
