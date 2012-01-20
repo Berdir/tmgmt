@@ -11,7 +11,7 @@
 function tmgmt_ui_simple_menu() {
   $items['admin/config/regional/tmgmt/simple'] = array(
     'title' => 'Simple UI',
-    'page callback' => 'system_settings_form',
+    'page callback' => 'drupal_get_form',
     'page arguments' => array('tmgmt_ui_simple_settings_form'),
     'access arguments' => array('administer site configuration'),
   );
@@ -29,11 +29,11 @@ function tmgmt_ui_simple_menu() {
 function tmgmt_ui_simple_settings_form($form, &$form_state) {
   $form['tmgmt_ui_simple_default_queue'] = array(
     '#title' => t('Queue jobs'),
-    '#type' => 'radio',
-    '#options' => array(t('No'), t('Yes')),
+    '#type' => 'radios',
+    '#options' => array(t('Disabled'), t('Enabled')),
     '#default_value' => variable_get('tmgmt_ui_simple_default_queue', 1),
   );
-  return $form;
+  return system_settings_form($form);
 }
 /**
  * Translate multiple items
