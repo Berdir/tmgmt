@@ -57,6 +57,16 @@ function tmgmt_ui_menu() {
         'type' => MENU_LOCAL_TASK,
         'file' => 'tmgmt_ui.pages.inc',
     );
+    
+    $items['admin/tmgmt/jobs/%tmgmt_job'] = array(
+      'title' => 'Job',
+      'page callback' => 'tmgmt_job_view',
+      'page arguments' => array(3),
+      'access arguments' => array('administer tmgmt'),
+      'weight' => 0,
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'file' => 'tmgmt_ui.pages.inc',
+    );
 
 
   // Add settings menu item for each plugin that is using settings form.
@@ -89,7 +99,7 @@ function tmgmt_ui_menu() {
         'type' => MENU_LOCAL_TASK,
         'file' => 'tmgmt_ui.pages.inc',
     );
-    
+
     return $items;
 }
 

@@ -81,7 +81,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *
    * @var varchar
    */
-  public $plugin;
+  public $source_plugin;
 
   /**
    * The identifier of the translation job.
@@ -112,6 +112,22 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * @var array
    */
   public $translated_data;
+
+  /**
+   * Overrides Entity::label()
+   */
+  public function label() {
+    $controller = $this->getSourceController();
+    return $controller->getTitle($this);
+  }
+
+  /**
+   * Overrides Entity::uri()
+   */
+  public function uri() {
+    $controller = $this->getSourceController();
+    return $controller->getUri($this);
+  }
 
   /**
    * Array of the data to be translated.
@@ -238,6 +254,21 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_job');
+  }
+
+  /**
+   * Implements EntityAPIControllerInterface::label().
+   */
+  public function label() {
+    $wrapper = entity_metadata_wrapper($this->entityType, $this);
+    return t('@source into @target translation job', array('@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label()));
+  }
+
+  /**
+   * Implements EntityAPIControllerInterface::uri().
+   */
+  public function uri() {
+    return array('path' => 'admin/tmgmt/jobs/' . $this->tjid);
   }
 
   /**
@@ -369,7 +400,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     $query->entityCondition('entity_type', 'tmgmt_job_message');
     $query->propertyCondition('tjid', $this->tjid);
     $results = $query->execute();
-    debug($results);
     if (!empty($results['tmgmt_job_message'])) {
       return tmgmt_job_message_load_multiple(array_keys($results['tmgmt_job_message']));
     }
@@ -448,7 +478,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function addMessage($message, $arguments = array()) {
     $message = entity_create('tmgmt_job_message', array(
-      'tmjid' => $this->tjid,
+      'tjid' => $this->tjid,
       'state_before' => isset($this->old_state) ? $this->old_state : $this->getState(),
       'state_after' => $this->getState(),
       'message' => $message,

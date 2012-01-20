@@ -71,9 +71,9 @@ function tmgmt_ui_content() {
  */
 function tmgmt_ui_jobs() {
   $output = array();
-  
+
   $view = views_get_view('tmgmt_ui_jobs_overview');
-  
+
   $output['#title'] = $view->get_title();
   $output['#markup'] = $view->preview('block_1', array());
 
@@ -129,4 +129,8 @@ function tmgmt_ui_fake_admin() {
   $output['#markup'] = '<h3>' . t('Administer UI') . '</h3><p>but not yet ..</p>';
 
   return $output;
+}
+
+function tmgmt_job_view(TMGMTJob $job) {
+  return entity_view('tmgmt_job', array($job->tjid => $job));
 }
