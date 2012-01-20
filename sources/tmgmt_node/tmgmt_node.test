@@ -34,8 +34,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
     $job->translator_context = array();
     $job->save();
 
-    $item1 = tmgmt_job_item_create('node', 'entity', $node->vid);
-    $job->addItem($item1);
+    $item1 = $job->addItem('node', 'entity', $node->vid);
 
     // Check the structure of the imported data.
     $this->assertEqual($item1->item_id, $node->vid, t('Node identifier is correctly saved'));

@@ -42,8 +42,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $job->translator = 'test_translator';
     $job->translator_context = array();
 
-    $item1 = tmgmt_job_item_create('i18n_string', 'i18n_string', $string_name);
-    $job->addItem($item1);
+    $item1 = $job->addItem('i18n_string', 'i18n_string', $string_name);
 
     $data = $item1->getSourceData();
     $this->assertEqual($source_text, $data['#text']);
@@ -78,8 +77,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $job->translator = 'test_translator';
     $job->translator_context = array();
 
-    $item1 = tmgmt_job_item_create('i18n_string', 'i18n_string', $string_name);
-    $job->addItem($item1);
+    $item1 = $job->addItem('i18n_string', 'i18n_string', $string_name);
 
     $data = $item1->getSourceData();
     $this->assertEqual($source_text, $data['#text']);

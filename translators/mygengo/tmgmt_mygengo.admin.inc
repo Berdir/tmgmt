@@ -7,8 +7,6 @@
 
 /**
  * Form builder; Configure Microsoft Translator service.
- *
- * @ingroup forms
  */
 function tmgmt_mygengo_settings() {
   $form['tmgmt_mygengo_api_public_key'] = array(

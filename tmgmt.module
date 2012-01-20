@@ -42,7 +42,6 @@ define('TMGMT_JOB_STATE_CANCELLED', 6);
  */
 function tmgmt_menu() {
   $items = array();
-
   // Add settings menu item for each plugin that is using settings form.
   foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
     $plugin_controller = tmgmt_translator_plugin_controller($plugin);
@@ -147,7 +146,7 @@ function tmgmt_forms() {
 }
 
 /**
- * @addtogroup job
+ * @addtogroup tmgmt_job
  * @{
  */
 
@@ -191,59 +190,6 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
 }
 
 /**
- * Loads a translation job message.
- */
-function tmgmt_job_message_load($tjmid, $reset = FALSE) {
-  $jobs = tmgmt_job_load_multiple(array($tjmid), array(), $reset);
-  return $jobs ? reset($jobs) : FALSE;
-}
-
-/**
- * Loads translation job messages.
- */
-function tmgmt_job_message_load_multiple(array $tjmids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('tmgmt_job_message', $tjmids, $conditions, $reset);
-}
-
-/**
- * Loads a translation job item.
- */
-function tmgmt_job_item_load($tjiid, $reset = FALSE) {
-  $jobs = tmgmt_job_load_multiple(array($tjid), array(), $reset);
-  return $jobs ? reset($jobs) : FALSE;
-}
-
-/**
- * Loads translation job items.
- */
-function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('tmgmt_job_item', $tjiids, $conditions, $reset);
-}
-
-/**
- * Creates a translation job item.
- *
- * @param $source_plugin
- *   The plugin name.
- * @param $item_type
- *   The source item type.
- * @param $item_id
- *   The source item id.
- * @param $values
- *   Array of additional entity values to be set.
- *
- * @return TMGMTJobItem
- *   The created, not yet saved, job item entity.
- */
-function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $values = array()) {
-  return entity_create('tmgmt_job_item', array_merge($values, array(
-    'source_plugin' => $source_plugin,
-    'item_type' => $item_type,
-    'item_id' => $item_id,
-  )));
-}
-
-/**
  * Creates a translation job.
  *
  * @param $source_language
@@ -282,11 +228,108 @@ function tmgmt_job_states() {
 }
 
 /**
- * @} End of "addtogroup job".
+ * @} End of "addtogroup tmgmt_job".
  */
 
 /**
- * @addtogroup translator
+ * @addtogroup tmgmt_job_item
+ * @{
+ */
+
+/**
+ * Loads a translation job item.
+ */
+function tmgmt_job_item_load($tjiid, $reset = FALSE) {
+  $jobs = tmgmt_job_load_multiple(array($tjid), array(), $reset);
+  return $jobs ? reset($jobs) : FALSE;
+}
+
+/**
+ * Loads translation job items.
+ */
+function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('tmgmt_job_item', $tjiids, $conditions, $reset);
+}
+
+/**
+ * Creates a translation job item.
+ *
+ * @param $source_plugin
+ *   The plugin name.
+ * @param $item_type
+ *   The source item type.
+ * @param $item_id
+ *   The source item id.
+ * @param $values
+ *   (Optional) An array of additional entity values to be set.
+ *
+ * @return TMGMTJobItem
+ *   The created, not yet saved, job item entity.
+ */
+function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $values = array()) {
+  return entity_create('tmgmt_job_item', array_merge($values, array(
+    'source_plugin' => $source_plugin,
+    'item_type' => $item_type,
+    'item_id' => $item_id,
+  )));
+}
+
+/**
+ * @} End of "addtogroup tmgmt_job".
+ */
+
+/**
+ * @addtogroup tmgmt_job_message
+ * @{
+ */
+
+/**
+ * Loads a translation job message.
+ */
+function tmgmt_job_message_load($tjmid, $reset = FALSE) {
+  $jobs = tmgmt_job_load_multiple(array($tjmid), array(), $reset);
+  return $jobs ? reset($jobs) : FALSE;
+}
+
+/**
+ * Loads translation job messages.
+ */
+function tmgmt_job_message_load_multiple(array $tjmids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('tmgmt_job_message', $tjmids, $conditions, $reset);
+}
+
+/**
+ * Creates a translation job message.
+ *
+ * @param $status_before
+ *   The status before the event occurred.
+ * @param $status_after
+ *   The status after the event occurred.
+ * @param $message
+ *   (Optional) The message to be saved.
+ * @param $arguments
+ *   (Optional) An array of variables to replace in the message on display.
+ * @param $values
+ *   (Optional) An array of additional entity values to be set.
+ *
+ * @return TMGMTJobItem
+ *   The created, not yet saved, job item entity.
+ */
+function tmgmt_job_message_create($status_before, $status_after, $message = '', $arguments = array(), $values = array()) {
+  return entity_create('tmgmt_job_message', array_merge($values, array(
+    'status_before' => $status_before,
+    'status_after' => $status_after,
+    'message' => $message,
+    'arguments' => $arguments,
+  )));
+}
+
+/**
+ * @} End of "addtogroup tmgmt_job_message".
+ */
+
+/**
+ * @addtogroup tmgmt_translator
  * @{
  */
 
@@ -390,11 +433,11 @@ function tmgmt_translator_settings_form($form, &$form_state, $plugin) {
 }
 
 /**
- * @} End of "addtogroup translator".
+ * @} End of "addtogroup tmgmt_translator".
  */
 
 /**
- * @addtogroup source
+ * @addtogroup tmgmt_source
  * @{
  */
 
@@ -433,7 +476,7 @@ function tmgmt_source_plugin_labels() {
 }
 
 /**
- * @} End of "addtogroup source".
+ * @} End of "addtogroup tmgmt_source".
  */
 
 /**

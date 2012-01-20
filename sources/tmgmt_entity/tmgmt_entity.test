@@ -23,7 +23,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     parent::setUp(array('tmgmt_entity', 'tmgmt_test', 'locale', 'tmgmt_dummy', 'tmgmt_entity_test'));
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
   }
-  
+
   function setEnvironment($langcode) {
     // Add the language.
     $edit = array(
@@ -43,7 +43,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     $this->drupalLogin($this->admin_user);
     $langcode = 'de';
     $this->setEnvironment($langcode);
-    
+
     // Nodes are also entities, so we can use them for testing.
     // Make the body field translatable.
     $field_info = field_info_field('body');
@@ -52,7 +52,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     // Check that the body field is translatable.
     $field_info = field_info_field('body');
     $this->assertEqual($field_info['translatable'], 1, t('The Body field is not translatable'));
-    
+
     // Add a non-translatable field.
     $field_name = drupal_strtolower($this->randomName() . '_field_name');
     $field = array('field_name' => $field_name, 'type' => 'text', 'cardinality' => 4);
@@ -71,7 +71,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       )
     );
     field_create_instance($instance);
-    
+
     // Set "Article" content type to use multilingual support.
     $this->drupalGet('admin/structure/types/manage/article');
     $this->assertText(t('Multilingual support'), t('Multilingual support fieldset present on content type configuration form.'));
@@ -95,8 +95,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
         'language' => 'en',
       );
       $node = $this->drupalCreateNode($edit);
-      $item = tmgmt_job_item_create('entity', 'node', $node->nid);
-      $job->addItem($item);
+      $job->addItem('entity', 'node', $node->nid);
     }
     $job->requestTranslation();
     $job->setState(TMGMT_JOB_STATE_ACCEPTED);
@@ -107,7 +106,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       $this->assertEqual($entity->body[$langcode][0]['value'], $job_item->translated_data['body'][0]['value']['#text'], t('Translated data does not match with the value from the entity.'));
     }
   }
-  
+
   /**
    * Tests taxonomy term translation.
    */
@@ -135,7 +134,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       )
     );
     field_create_instance($instance);
-    
+
     // 2. Non-translatable field.
     $field_name_2 = drupal_strtolower($this->randomName() . '_field_name');
     $field_2 = array('field_name' => $field_name_2, 'type' => 'text', 'cardinality' => 4);
@@ -154,7 +153,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       )
     );
     field_create_instance($instance);
-    
+
     // Check that we have the field assigned.
     $this->drupalGet('admin/structure/taxonomy/tags/fields');
     $this->assertResponse(200, t('The Manage fields page for the Tags vocabulary is not accessible.'));
@@ -183,8 +182,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       $this->assertEqual($term->{$field_name}['en'][0]['value'], $field_value, t('The translatable field value was not saved.'));
       $this->assertEqual($term->{$field_name_2}[LANGUAGE_NONE][0]['value'], $field_value_2, t('The non-translatable field value was not saved.'));
       // Create the item and assign it to the job.
-      $item = tmgmt_job_item_create('entity', 'taxonomy_term', $term->tid);
-      $job->addItem($item);
+      $job->addItem('entity', 'taxonomy_term', $term->tid);
       $job->save();
     }
     // Request the translation and accept it.

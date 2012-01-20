@@ -53,13 +53,13 @@ function tmgmt_source_i18n_string_ui_form_submit($form, &$form_state) {
       // Create the job object.
       $job = tmgmt_job_create($values['source_language'], $langcode, array('translator' => $values['translator']));
       // Create a job item and add it to the job.
-      $job->addItem(tmgmt_job_item_create('i18n_string', 'i18n_string', $object_id));
+      $job->addItem('i18n_string', 'i18n_string', $object_id);
       $job->prepared('Job has been prepared.');
       $job->save();
       // Print a message to the screen and redirect the user.
-      
+
     }
     drupal_set_message(t('@count translation jobs have been created.', array('@count' => $count)));
-    
+
   }
 }

@@ -46,8 +46,6 @@ function tmgmt_nativy_tmgmt_translator_plugin_info() {
 
 /**
  * Form callback used to configure nativy.com translation service.
- *
- * @ingroup forms
  */
 function tmgmt_nativy_settings() {
 
