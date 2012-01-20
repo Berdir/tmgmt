@@ -45,6 +45,10 @@ interface TMGMTSourcePluginControllerInterface {
 
   /**
    * Provide menu items which are used to display overview page etc.
+   *
+   * @todo
+   * Maybe it would make sense to provide a UI handler for source plugins
+   * but this is currently the easy to solve way.
    */
   public function hook_menu();
 }
