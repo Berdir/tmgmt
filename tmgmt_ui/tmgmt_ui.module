@@ -9,8 +9,11 @@
  */
 function tmgmt_ui_permission() {
   return array(
-    'administer tmgmt' => array(
-      'title' => t('administer Translation Management UI'),
+    'administer tmgmt_ui' => array(
+      'title' => t('Administer Translation Management UI'),
+    ),
+    'access tmgmt_ui' => array(
+      'title' => t('Access Translation Management UI'),
     ),
   );
 }
@@ -21,18 +24,27 @@ function tmgmt_ui_permission() {
 function tmgmt_ui_menu() {
     $items = array();
 
+    $items['admin/config/regional/tmgmt/tmgmt_ui'] = array(
+        'title' => 'UI',
+        'description' => 'Administer Translation Management UI',
+        'page callback' => 'tmgmt_ui_fake_admin',
+        'access arguments' => array('administer tmgmt_ui'),
+        'weight' => -1,
+        'file' => 'tmgmt_ui.pages.inc',
+    );
+
     $items['admin/tmgmt'] = array(
         'title' => 'Translation Management',
         'description' => 'Use the Translation Management',
         'page callback' => 'tmgmt_ui_content',
-        'access arguments' => array('administer tmgmt'),
+        'access arguments' => array('access tmgmt_ui'),
         'weight' => -20,
         'file' => 'tmgmt_ui.pages.inc',
     );
     $items['admin/tmgmt/my-translation-management'] = array(
         'title' => 'Overview',
         'page callback' => 'tmgmt_ui_content',
-        'access arguments' => array('administer tmgmt'),
+        'access arguments' => array('access tmgmt_ui'),
         'weight' => -20,
         'type' => MENU_DEFAULT_LOCAL_TASK,
         'file' => 'tmgmt_ui.pages.inc',
@@ -40,21 +52,60 @@ function tmgmt_ui_menu() {
     $items['admin/tmgmt/jobs'] = array(
         'title' => 'Jobs Overview',
         'page callback' => 'tmgmt_ui_jobs',
-        'access arguments' => array('administer tmgmt'),
+        'access arguments' => array('access tmgmt_ui'),
         'weight' => -19,
         'type' => MENU_LOCAL_TASK,
         'file' => 'tmgmt_ui.pages.inc',
     );
-    $items['admin/tmgmt/nodes'] = array(
-        'title' => 'Nodes Overview',
-        'page callback' => 'tmgmt_ui_nodes',
-        'access arguments' => array('administer tmgmt'),
-        'weight' => -18,
+
+
+  // Add settings menu item for each plugin that is using settings form.
+  /*foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
+    $plugin_controller = tmgmt_translator_plugin_controller($plugin);
+    if (method_exists($plugin_controller, 'settingsForm')) {
+      $items['admin/tmgmt/' . $plugin] = array(
+        'title' => $plugin_info['label'],
+        'description' => $plugin_info['description'],
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('tmgmt_' . $plugin . '_translator_settings_form', $plugin),
+        'access arguments' => array('administer site configuration'),
+      );
+    }*/
+
+
+    $items['admin/tmgmt/untranslated'] = array(
+        'title' => 'All untranslated elements',
+        'page callback' => 'tmgmt_ui_untranslated',
+        'access arguments' => array('access tmgmt_ui'),
+        'weight' => -2,
         'type' => MENU_LOCAL_TASK,
         'file' => 'tmgmt_ui.pages.inc',
     );
-
+    $items['admin/tmgmt/pending'] = array(
+        'title' => 'All pending elements',
+        'page callback' => 'tmgmt_ui_pending',
+        'access arguments' => array('access tmgmt_ui'),
+        'weight' => -1,
+        'type' => MENU_LOCAL_TASK,
+        'file' => 'tmgmt_ui.pages.inc',
+    );
+    
     return $items;
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * Provides a theme function for use with the RenderAPI that uses the #title and
+ * #attributes properties of a render array, if they're present.
+ */
+function tmgmt_ui_theme($existing, $type, $theme, $path) {
+  return array(
+    'tmgmt_ui_element' => array(
+      'render element' => 'element',
+      'file' => 'tmgmt_ui.theme.inc',
+    ),
+  );
 }
 
 /**
