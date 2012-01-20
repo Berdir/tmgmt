@@ -237,7 +237,7 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
   }
   $item_ids = explode(',', $item_ids);
   foreach ($item_ids as $item_id) {
-    $job->addItem($plugin, $type, $item_id);
+    $job->addItem($source_plugin, $item_type, $item_id);
   }
   $job->submitted();
   $job->save();
