@@ -37,6 +37,9 @@ function tmgmt_node_update_node_translation($node, $translated_data, $target_lan
       $node->title = $values[0]['value']['#text'];
       continue;
     }
+    if (!is_array($values)) {
+      continue;
+    }
     $index = 0;
     $field_info = field_info_field($field_name);
     foreach ($values as $delta => $value) {
@@ -45,6 +48,10 @@ function tmgmt_node_update_node_translation($node, $translated_data, $target_lan
         $tdata[$input_name] = $input_value['#text'];
       }
       $field_lang = $field_info['translatable'] ? $target_language : LANGUAGE_NONE;
+      // Make sure the array_merge() gets an array as a first parametere.
+      if (!isset($node->{$field_name}[$field_lang]) || !isset($node->{$field_name}[$field_lang][$index])) {
+        $node->{$field_name}[$field_lang][$index] = array();
+      }
       $node->{$field_name}[$field_lang][$index] = array_merge($node->{$field_name}[$field_lang][$index], $tdata);
       $index++;
     }
