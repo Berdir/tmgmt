@@ -38,6 +38,11 @@ define('TMGMT_JOB_STATE_ACCEPTED', 5);
 define('TMGMT_JOB_STATE_CANCELLED', 6);
 
 /**
+ * String used to delimit flattened array keys.
+ */
+define('TMGMT_ARRAY_DELIMITER', '][');
+
+/**
  * Implements hook_menu().
  */
 function tmgmt_menu() {
@@ -505,7 +510,7 @@ function _tmgmt_plugin_labels($type) {
  *
  * Nested keys will be joined together using a colon, so for example
  * $data['key1']['key2']['key3'] will be converted into
- * $flattened_data['key1:key2:key3'].
+ * $flattened_data['key1][key2][key3'].
  *
  * @param $data
  *   The nested array structure that should be flattened.
@@ -526,7 +531,7 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
     $flattened_data[$prefix] = $data;
   }
   else {
-    $prefix = !empty($prefix) ? $prefix . ':' : '';
+    $prefix = !empty($prefix) ? $prefix . TMGMT_ARRAY_DELIMITER : '';
     foreach (element_children($data) as $key) {
       $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key);
     }
@@ -540,7 +545,7 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
  * This function can be used by translators to help with the data conversion.
  *
  * Nested keys will be created based on the colon, so for example
- * $flattened_data['key1:key2:key3'] will be converted into
+ * $flattened_data['key1][key2][key3'] will be converted into
  * $data['key1']['key2']['key3'].
  *
  * @param $data
@@ -554,7 +559,7 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
 function tmgmt_unflatten_data($flattened_data) {
   $data = array();
   foreach ($flattened_data as $key => $flattened_data_entry) {
-    drupal_array_set_nested_value($data, explode(':', $key), $flattened_data_entry);
+    drupal_array_set_nested_value($data, explode(TMGMT_ARRAY_DELIMITER, $key), $flattened_data_entry);
   }
   return $data;
 }
