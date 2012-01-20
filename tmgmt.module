@@ -634,7 +634,7 @@ function tmgmt_source_plugin_info($plugin = NULL) {
 }
 
 /**
- * Determines the controller class for a given source plugin.
+ * Get the controller class for a given source plugin.
  *
  * @param $plugin
  *   The machine-readable name of a source plugin.
