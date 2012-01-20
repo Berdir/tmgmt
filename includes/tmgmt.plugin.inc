@@ -6,6 +6,15 @@
  */
 
 /**
+ * Prefix for source overview pages.
+ *
+ * @todo
+ * Maybe move into the ui.
+ *
+ */
+define('TMGMT_SOURCE_OVERVIEW_TAB_PATH', 'admin/tmgmt-overview');
+
+/**
  * Interface for source plugin controllers.
  *
  * @ingroup tmgmt_source
