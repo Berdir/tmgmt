@@ -72,6 +72,12 @@ function tmgmt_menu() {
       'page arguments' => array(3, 4, 5, 6),
       'access arguments' => array('administer site configuration'),
     );
+    $items['admin/tmgmt/checkout/%'] = array(
+      'title' => t('Checkout Job'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('tmgmt_checkout_form', 3),
+      'access arguments' => array('administer site configuration'),
+    );
   }
   return $items;
 }
@@ -223,7 +229,7 @@ function tmgmt_job_create($source_language, $target_language, array $values = ar
  * Creates and adds a jobitem to a certain job. If job is not defined, a new job
  * will be created. Destinatoin will be needed to return to the submitters page.
  */
-function tmgmt_job_add_item($source_language, $plugin, $type, $item_ids, $tjid = NULL) {
+function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_ids, $tjid = NULL) {
   if (!$tjid) {
     $job = tmgmt_job_create($source_language, '');
   } else {
@@ -233,7 +239,9 @@ function tmgmt_job_add_item($source_language, $plugin, $type, $item_ids, $tjid =
   foreach ($item_ids as $item_id) {
     $job->addItem($plugin, $type, $item_id);
   }
+  $job->submitted();
   $job->save();
+  // @todo: in case of no destination, goto checkoutform
   drupal_goto();
 }
 
@@ -324,6 +332,152 @@ function tmgmt_job_message_load($tjmid, $reset = FALSE) {
  */
 function tmgmt_job_message_load_multiple(array $tjmids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('tmgmt_job_message', $tjmids, $conditions, $reset);
+}
+
+/**
+ * The checkoutform.
+ */
+function tmgmt_checkout_form($form, &$form_state, $tjid) {
+  $job = tmgmt_job_load($tjid);
+  // Get all available languages from core translation module.
+  $available_languages = entity_metadata_language_list();
+  // Pull the label of the node language.
+  $node_language = $available_languages[$job->source_language];
+  // Remove LANGUAGE_NONE and the source language from the list of available
+  // languages.
+  unset($available_languages[LANGUAGE_NONE], $available_languages[$job->source_language]);
+  // Get the translator plugin that is currently selected.
+  $translator_plugins = tmgmt_translator_plugin_labels(TRUE);
+  $translator_plugins_keyed = array_keys($translator_plugins);
+  $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : reset($translator_plugins_keyed);
+  // Load the plugin info for the selected translator plugin.
+  $info = tmgmt_translator_plugin_info($selected_translator_plugin);
+  $form['items'] = array(
+    '#type' => 'item',
+    '#title' => t('Items'),
+    'links' => array(
+      '#theme' => 'links',
+    )
+  );
+  foreach ($job->getItems() as $item) {
+    $uri = $item->uri();
+    $form['items']['links']['#links'][$item->tjiid] = array(
+      'title' => $item->label(),
+      'href' => $uri['path'],
+    );
+  }
+
+  $form['#tree'] = TRUE;
+  $form['tjid'] = array(
+    '#type' => 'hidden',
+    '#value' => $tjid,
+  );
+  $form['source_language'] = array(
+    '#type' => 'hidden',
+    '#value' => $job->source_language,
+  );
+  $form['source_language_display'] = array(
+    '#type' => 'item',
+    '#title' => t('Source language'),
+    '#markup' => $node_language,
+  );
+  // @todo: use checkboxes instead and create multiple jobs.
+  $form['target_language'] = array(
+    '#type' => 'select',
+    '#title' => t('Target language'),
+    '#description' => t('The target language'),
+    '#options' => $available_languages,
+    '#ajax' => array(
+      'callback' => 'tmgmt_get_supported_translators',
+      'wrapper' => 'tmgmt-translator-wrapper',
+      'method' => 'replace',
+    ),
+  );
+  $form['translator_wrapper'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div id="tmgmt-translator-wrapper">',
+    '#suffix' => '</div>',
+  );
+  if (!empty($translator_plugins)) {
+    $form['translator_wrapper']['translator'] = array(
+      '#type' => 'select',
+      '#title' => t('Translation type'),
+      '#options' => $translator_plugins,
+      '#default_value' => $selected_translator_plugin,
+      '#ajax' => array(
+        'callback' => 'tmgmt_get_translator_options',
+        'wrapper' => 'tmgmt-translator-options',
+        'method' => 'replace',
+      ),
+    );
+    $form['translator_wrapper']['options'] = array(
+      '#type' => 'container',
+      '#prefix' => '<div id="tmgmt-translator-options">',
+      '#suffix' => '</div>',
+    );
+    $form['translator_wrapper']['options']['description'] = array(
+      '#type' => 'item',
+      '#title' => t('About this service'),
+      '#markup' => $info['description'],
+    );
+    // Load plugin controler and check is it defining job settings form.
+    // @todo need a function to get the provided languages.
+    $plugin_controller = tmgmt_translator_plugin_controller($selected_translator_plugin);
+//    $foo = $plugin_controller->getSupportedTargetLanguages($job->source_language);
+
+    if (method_exists($plugin_controller, 'jobSettingsForm')) {
+      $form['translator_wrapper']['options']['settings'] = $plugin_controller->jobSettingsForm($form, $form_state);
+    }
+
+    $form['translator_wrapper']['actions']['#type'] = 'actions';
+    $form['translator_wrapper']['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Submit'),
+      '#weight' => 50,
+    );
+  } else {
+    drupal_set_message(t('You have to install a translator plugin module'), 'warning');
+  }
+
+  return $form;
+}
+
+/**
+ * submit function, will create a job.
+ */
+function tmgmt_checkout_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  // Create the job object.
+//  $job_values = array('translator' => $values['translator'], 'uid' => $GLOBALS['user']->uid);
+//  if (isset($values['options']['settings'])) {
+//    $job_values['translator_context'] = $values['options']['settings'];
+//  }
+//  $job = tmgmt_job_create($values['source_language'], $values['target_language'], $job_values);
+//  // Create a job item and add it to the job.
+//  $job->addItem(tmgmt_job_item_create('node', 'node', $values['nid']));
+
+  $job = tmgmt_job_load($values['tjid']);
+  $job->target_language = $values['target_language'];
+  $job->translator = $values['translator_wrapper']['translator'];
+//  dsm($job);
+//  $job->prepared('Job has been prepared.');
+  $job->save();
+  // Print a message to the screen and redirect the user.
+  drupal_set_message(t('Translation job has been created.'));
+}
+
+/**
+ * Ajax callback to fetch the supported translator services.
+ */
+function tmgmt_get_supported_translators($form, &$form_state) {
+  return $form['translator_wrapper'];
+}
+
+/**
+ * Ajax callback to fetch the options provided by a translator.
+ */
+function tmgmt_get_translator_options($form, &$form_state) {
+  return $form['options'];
 }
 
 /**
@@ -594,8 +748,7 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
   // not both.
   if (!empty($data['#text'])) {
     $flattened_data[$prefix] = $data;
-  }
-  else {
+  } else {
     $prefix = !empty($prefix) ? $prefix . TMGMT_ARRAY_DELIMITER : '';
     foreach (element_children($data) as $key) {
       $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key);
