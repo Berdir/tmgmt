@@ -130,7 +130,7 @@ function tmgmt_node_ui_get_translator_options($form, &$form_state) {
 function tmgmt_node_ui_translator_settings_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   // Create the job object.
-  $job = tmgmt_job_create($values['source_language'], $values['target_language'], array('translator' => $values['translator']));
+  $job = tmgmt_job_create($values['source_language'], $values['target_language'], array('translator' => $values['translator'], 'uid' => $GLOBALS['user']->uid));
   // Create a job item and add it to the job.
   $job->addItem(tmgmt_job_item_create('node', 'node', $values['nid']));
   $job->prepared('Job has been prepared.');
