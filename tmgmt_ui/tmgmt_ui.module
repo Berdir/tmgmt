@@ -119,10 +119,45 @@ function tmgmt_ui_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Implements hook_block_info().
+ *
+ * Adds the cart as block.
+ */
+function tmgmt_block_info() {
+  $blocks = array();
+  $blocks['tmgmt_cart'] = array(
+    'info' => t('Translation cart'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function tmgmt_block_view($delta) {
+  switch ($delta) {
+    case 'tmgmt_cart':
+      return tmgmt_block_view_cart();
+      break;
+  }
+}
+
+/**
+ * Displays the cart overview block.
+ */
+function tmgmt_block_view_cart() {
+  $block = array();
+  $block['subject'] = t('Cart Overview');
+  $block['content'] = '';
+  return $block;
+}
+
+/**
  * Implements hook_views_api().
  */
 function tmgmt_ui_views_api() {
-  return array('api' => 2);
+  return array('api' => 3);
 }
 
 /**
