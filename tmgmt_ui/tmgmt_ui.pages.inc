@@ -33,11 +33,39 @@ function tmgmt_ui_content() {
     '#attributes' => array('class' => array('left', 'clearfix')),
     '#theme' => 'tmgmt_ui_element',
   );
+  
   // This right column is given a width of 65% by tmgmt_ui.my-tmgmt.css
-  $output['tmgmt_ui_jobs_overview'] = array(
-    '#view' => 'tmgmt_ui_jobs_overview',
+  $output['tmgmt_ui_jobs_by_state_1'] = array(
+    '#title' => t('to be submitted'),
+    '#view' => 'tmgmt_ui_jobs_by_state',
     '#view_display' => 'block_1',
+    '#view_arguments' => array(TMGMT_JOB_STATE_PREPARED),
     '#attributes' => array('class' => array('right', 'clearfix')),
+    '#theme' => 'tmgmt_ui_element',
+  );
+
+  $output['tmgmt_ui_jobs_by_state_4'] = array(
+    '#title' => t('Review Pending'),
+    '#view' => 'tmgmt_ui_jobs_by_state',
+    '#view_display' => 'block_1',
+    '#view_arguments' => array(TMGMT_JOB_STATE_REVIEW),
+    '#attributes' => array('class' => array('cleared')),
+    '#theme' => 'tmgmt_ui_element',
+  );
+  
+  $output['tmgmt_ui_jobs_by_state_2'] = array(
+    '#title' => t('Active Jobs'),
+    '#view' => 'tmgmt_ui_jobs_by_state',
+    '#view_display' => 'block_1',
+    '#view_arguments' => array(TMGMT_JOB_STATE_SUBMITTED),
+    '#theme' => 'tmgmt_ui_element',
+  );
+
+  $output['tmgmt_ui_jobs_by_state_5'] = array(
+    '#title' => t('Recently Published'),
+    '#view' => 'tmgmt_ui_jobs_by_state',
+    '#view_display' => 'block_1',
+    '#view_arguments' => array(TMGMT_JOB_STATE_ACCEPTED),
     '#theme' => 'tmgmt_ui_element',
   );
 
@@ -51,8 +79,12 @@ function tmgmt_ui_content() {
       $output[$key] += array('#markup' => '', '#view_display' => 'default');
       $display_id = $output[$key]['#view_display'];
       if ($view->access($display_id)) {
-        $output[$key]['#markup'] .= $view->preview($display_id, array());
-        if ($title = $view->get_title()) {
+        $arguments = array();
+        if (isset($output[$key]['#view_arguments'])) {
+          $arguments = $output[$key]['#view_arguments'];
+        }
+        $output[$key]['#markup'] .= $view->preview($display_id, $arguments);
+        if (!isset($output[$key]['#title']) && $title = $view->get_title()) {
           $output[$key]['#title'] = $title;
         }
       }
