@@ -2,6 +2,7 @@
 
 /**
  * Basic Node Source tests.
+ * 
  */
 class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
 
@@ -20,34 +21,150 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_node', 'tmgmt_test', 'translation'));
-
+    parent::setUp(array('tmgmt_node', 'tmgmt_test', 'translation', 'tmgmt_dummy'));
+    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
     variable_set('language_content_type_page', TRANSLATION_ENABLED);
+  }
+  
+  /**
+   * Sets the proper environment.
+   * 
+   * Currently just adds a new language.
+   * 
+   * @param string $langcode
+   *   The language code.
+   */
+  function setEnvironment($langcode) {
+    // Add the language.
+    $edit = array(
+      'langcode' => $langcode,
+    );
+    $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
+    $this->assertText($langcode, t('Language added successfully.'));
+    // This is needed to refresh the static cache of the language list.
+    $languages = &drupal_static('language_list');
+    $languages = NULL;
+  }
+  
+  /**
+   * Adds some fields to a node bundle.
+   * 
+   * @param string $bundle
+   *  The node bundle.
+   */
+  function addFields($bundle = 'article') {
+    $translatables = array(0, 1, 0, 0);
+    foreach ($translatables as $value) {
+      $field_type = rand(0, 1) ? 'text' : 'text_with_summary';
+      $field_name = drupal_strtolower($this->randomName() . '_field_name');
+      $field = array('field_name' => $field_name, 'type' => $field_type, 'cardinality' => 4, 'translatable' => $value);
+      $field = field_create_field($field);
+      $field_id = $field['id'];
+      $instance = array(
+        'field_name' => $field_name,
+        'entity_type' => 'node',
+        'bundle' => $bundle,
+        'label' => $this->randomName() . '_label',
+        'description' => $this->randomName() . '_description',
+        'weight' => mt_rand(0, 127),
+        'widget' => array(
+          'type' => $field_type == 'text' ? 'text_textfield' : 'text_textarea_with_summary',
+          'label' => 'Test Field',
+        )
+      );
+      field_create_instance($instance);
+      $this->field_names[$bundle][] = $field_name;
+    }
   }
 
   function testNodeSource() {
-    $node = $this->drupalCreateNode();
-
+    $this->drupalLogin($this->admin_user);
+    $langcode = 'de';
+    $bundle = 'article';
+    $this->setEnvironment($langcode);
+    $this->addFields($bundle);
+    // Create a node and translate it.
+    $edit = array(
+      'type' => $bundle,
+      'body' => array(LANGUAGE_NONE => array(array('value' => $this->randomString(32)))),
+    );
+    // Put some values in the new fields.
+    foreach ($this->field_names[$bundle] as $field_name) {
+      $field_info = field_info_field($field_name);
+      $field_lang = $field_info['translatable'] ? 'en' : LANGUAGE_NONE;
+      for ($index = 0; $index <= 2; $index++) {
+        $edit[$field_name][$field_lang][$index]['value'] = $this->randomString(20);
+        if ($field_info['type'] == 'text_with_summary') {
+          $edit[$field_name][$field_lang][$index]['summary'] = $this->randomString(10);
+        }
+      }
+    }
+    $node = $this->drupalCreateNode($edit);
+    $node->language = 'en';
+    node_save($node);
+    
     // Create the new job and job item.
     $job = $this->createJob();
-    $job->translator = 'test_translator';
+    $job->translator = 'dummy';
     $job->translator_context = array();
     $job->save();
 
-    $item1 = tmgmt_job_item_create('node', 'entity', $node->vid);
-    $job->addItem($item1);
-
-    // Check the structure of the imported data.
-    $this->assertEqual($item1->item_id, $node->vid, t('Node identifier is correctly saved'));
-    $data = $item1->getSourceData();
-    $this->assertEqual($node->title, $data['node_title'][0]['value']['#text'], t('Node title is extracted.'));
-    $this->assertEqual($node->body[LANGUAGE_NONE][0]['value'], $data['body'][0]['value']['#text'], t('Node body is extracted.'));
-
+    $item = tmgmt_job_item_create('node', 'node', $node->nid);
+    $job->addItem($item);
     $job->requestTranslation();
     $job->accepted();
 
     foreach ($job->getItems() as $item) {
-      $this->assertTrue(strpos($item->translated_data, $node->title) !== FALSE, t('Node title is correctly translated.'));
+      $node = node_load($item->item_id);
+      // Check if the tnid attribute is bigger than 0.
+      $this->assertTrue($node->tnid > 0, t('The source node is not part of a translation set.'));
+      // The translations may be statically cached, so make make sure
+      // to reset the cache before loading the node translations.
+      $cached_translations = &drupal_static('translation_node_get_translations', array());
+      $cached_translations[$node->tnid] = NULL;
+      // Load the translation set of the source node.
+      $translations = translation_node_get_translations($node->tnid);
+      if (!isset($translations[$langcode])) {
+        $this->assertNotNull($translations[$langcode], t('No translations found for the source node.'));
+      }
+      else {
+        $tnode = node_load($translations[$langcode]->nid, NULL, TRUE);
+        $this->checkTranslatedData($tnode, $item->translated_data, $langcode);
+      }
+    }
+  }
+  
+  /**
+   * Compares the data from a node with the translated data.
+   * 
+   * @param object $tnode
+   *  The translated node object.
+   * 
+   * @param array $translated_data
+   *  An array with the translated data.
+   * 
+   * @param string $langcode
+   *  The code of the target language.
+   */
+  function checkTranslatedData($tnode, $translated_data, $langcode) {
+    foreach ($translated_data as $field_name => $values) {
+      // Special case for the node  title.
+      if ($field_name == 'node_title') {
+        $this->assertEqual($tnode->title, $values[0]['value']['#text'], t('The title of the translated node does match with the translated data.'));
+        continue;
+      }
+      if (!is_array($values)) {
+        continue;
+      }
+      $index = 0;
+      $field_info = field_info_field($field_name);
+      foreach ($values as $delta => $value) {
+        $field_lang = $field_info['translatable'] ? $langcode : LANGUAGE_NONE;
+        foreach ($value as $input_name => $input_value) {
+          $this->assertEqual($tnode->{$field_name}[$field_lang][$index][$input_name], $input_value['#text'], t('The !input_name !index of the !field field in the translated node does match with the translated data.', array('!field' => $field_name, '!input_name' => $input_name, '!index' => $index)));
+        }
+        $index++;
+      }
     }
   }
 }
