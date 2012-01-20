@@ -8,7 +8,7 @@
 /**
  * Entity class for the tmgmt_translator entity.
  *
- * @ingroup translator
+ * @ingroup tmgmt_translator
  */
 class TMGMTTranslator extends Entity {
 
@@ -35,8 +35,6 @@ class TMGMTTranslator extends Entity {
 
   /**
    * Plugin name of the translator.
-   *
-   * @see TMGMTTranslator::getPluginController().
    *
    * @type string
    */
@@ -70,14 +68,12 @@ class TMGMTTranslator extends Entity {
 /**
  * Entity class for the tmgmt_job entity.
  *
- * @ingroup job
+ * @ingroup tmgmt_job_item
  */
 class TMGMTJobItem extends Entity implements TMGMTDataProvider {
 
   /**
    * The source plugin that provides the item.
-   *
-   * @see TMGMTMap::getPluginController().
    *
    * @var varchar
    */
@@ -86,7 +82,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   /**
    * The identifier of the translation job.
    *
-   * @var int
+   * @var integer
    */
   public $tjid;
 
@@ -131,16 +127,14 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * Overrides Entity::label()
    */
   public function label() {
-    $controller = $this->getSourceController();
-    return $controller->getTitle($this);
+    return $this->getSourceController()->getTitle($this);
   }
 
   /**
    * Overrides Entity::uri()
    */
   public function uri() {
-    $controller = $this->getSourceController();
-    return $controller->getUri($this);
+    return $this->getSourceController()->getUri($this);
   }
 
   /**
@@ -148,8 +142,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *
    * The structure is similar to the form API in the way that it is a possibly
    * nested array with the following properties whose presence indicate that the
-   * current element is a text that might need to be translated.
-   *
+   * current element is a text that might need to be translated.   *
    * - #text: The text to be translated.
    * - #label: The label that might be shown to the translator.
    * - #comment: (Optional) A comment with additional information.
@@ -158,7 +151,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *
    * The key can be an alphanumeric string.
    *
-   * @return
+   * @return array
    *   A data array structured in the
    *
    * @see TMGMTJobItem::getFlattenedData()
@@ -193,6 +186,9 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a nested
    *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
    *   means that it will replace the whole translated data array.
+   *
+   * @return bool
+   *   TRUE if the translated data could be added, FALSE otherwise.
    */
   public function addTranslatedData($translated_data, $key = array()) {
     if (empty($key)) {
@@ -205,7 +201,10 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
       $this->translated_data = array();
     }
     drupal_array_set_nested_value($this->translated_data, $key, $translated_data);
-    $this->save();
+    if ($this->save()) {
+      return TRUE;
+    }
+    return FALSE;
   }
 
 }
@@ -213,7 +212,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
 /**
  * Entity class for the tmgmt_job entity.
  *
- * @ingroup job
+ * @ingroup tmgmt_job
  */
 class TMGMTJob extends Entity implements TMGMTDataProvider {
 
@@ -247,7 +246,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Reference to the used translator of this job.
    *
-   * @see TMGMTJob::getTranslator().
+   * @see TMGMTJob::getTranslatorController().
    *
    * @var string
    */
@@ -280,6 +279,12 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_job');
+    if (empty($this->tjid)) {
+      $this->created = REQUEST_TIME;
+    }
+    if (!isset($this->state)) {
+      $this->state = TMGMT_JOB_STATE_NEW;
+    }
   }
 
   /**
@@ -287,7 +292,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function label() {
     $wrapper = entity_metadata_wrapper($this->entityType, $this);
-    return t('@source into @target translation job', array('@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label()));
+    return t('@source into @target translation job.', array('@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label()));
   }
 
   /**
@@ -298,9 +303,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns if the state of this transaction is new.
+   * Returns whether the state of this transaction is new.
    *
-   * @return
+   * @return bool
    *   TRUE if the state is new, FALSE otherwise.
    */
   public function isNew() {
@@ -308,9 +313,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns if the state of this transaction is prepared.
+   * Returns whether the state of this transaction is prepared.
    *
-   * @return
+   * @return bool
    *   TRUE if the state is prepared, FALSE otherwise.
    */
   public function isPrepared() {
@@ -318,9 +323,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns if the state of this transaction is submitted.
+   * Returns whether the state of this transaction is submitted.
    *
-   * @return
+   * @return bool
    *   TRUE if the state is submitted, FALSE otherwise.
    */
   public function isSubmitted() {
@@ -328,9 +333,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns if the state of this transaction is rejected.
+   * Returns whether the state of this transaction is rejected.
    *
-   * @return
+   * @return bool
    *   TRUE if the state is rejected, FALSE otherwise.
    */
   public function isRejected() {
@@ -338,9 +343,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns if the state of this transaction is needs review.
+   * Returns whether the state of this transaction needs to be reviewed.
    *
-   * @return
+   * @return bool
    *   TRUE if the state is needs review, FALSE otherwise.
    */
   public function isNeedsReview() {
@@ -348,9 +353,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns if the state of this transaction is accepted.
+   * Returns whether the state of this transaction is accepted.
    *
-   * @return
+   * @return bool
    *   TRUE if the state is accepted, FALSE otherwise.
    */
   public function isAccepted() {
@@ -358,9 +363,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns if the state of this transaction is cancelled.
+   * Returns whether the state of this transaction is cancelled.
    *
-   * @return
+   * @return bool
    *   TRUE if the state is cancelled, FALSE otherwise.
    */
   public function isCancelled() {
@@ -369,65 +374,82 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
 
   /**
    * Propagates the returned job item translations to the sources.
+   *
+   * @return bool
+   *   TRUE if we were able to propagate the translated data, FALSE otherwise.
    */
   public function propagateTranslatedData() {
     if ($this->isAccepted()) {
       foreach ($this->getItems() as $item) {
         $item->getSourceController()->saveTranslation($item);
       }
+      return TRUE;
     }
+    return FALSE;
   }
 
   /**
-   * Adds the item to the translation job.
+   * Adds an item to the translation job.
    *
-   * @param $item
-   *    The translation job item.
+   * @param $source_plugin
+   *   The plugin name.
+   * @param $item_type
+   *   The source item type.
+   * @param $item_id
+   *   The source item id.
    *
    * @return TMGMTJobItem
-   *   The updated item
+   *   The job item that was added to the job or NULL if it couldn't be saved.
    */
-  public function addItem(TMGMTJobItem $item) {
+  public function addItem($source_plugin, $item_type, $item_id) {
     // Save the job if it hasn't yet been saved.
-    if (empty($this->tjid)) {
-      $this->save();
+    if (empty($this->tjid) && !$this->save()) {
+      return;
     }
-    $item->tjid = $this->tjid;
-    $item->save();
+    $item = tmgmt_job_item_create($source_plugin, $item_type, $item_id, array(
+      'tjid' => $this->tjid,
+    ));
+    if ($item->save()) {
+      return $item;
+    }
   }
 
   /**
-   * Returns the job items.
+   * Returns all job items attached to this job.
    *
-   * @return
-   *   Array of translation job items.
+   * @return array
+   *   An array of translation job items.
    */
   public function getItems() {
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', 'tmgmt_job_item');
-    $query->propertyCondition('tjid', $this->tjid);
-    $results = $query->execute();
-    if (!empty($results['tmgmt_job_item'])) {
-      return tmgmt_job_item_load_multiple(array_keys($results['tmgmt_job_item']));
-    }
-    return array();
+    return $this->getAttachedEntities('tmgmt_job_item');
   }
 
-
-
   /**
-   * Returns the job items.
+   * Returns all job messages attached to this job.
    *
-   * @return
-   *   Array of translation job messages.
+   * @return array
+   *   An array of translation job messages.
    */
   public function getMessages() {
+    return $this->getAttachedEntities('tmgmt_job_message');
+  }
+
+  /**
+   * Returns all entities of a given entity type that are attached to this job.
+   *
+   * @param $entity_type
+   *   The attached entity type to look for.
+   *
+   * @return array
+   *   An array of entities that are attached to this job.
+   */
+  public function getAttachedEntities($entity_type) {
     $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', 'tmgmt_job_message');
+    $query->entityCondition('entity_type', $entity_type);
     $query->propertyCondition('tjid', $this->tjid);
     $results = $query->execute();
-    if (!empty($results['tmgmt_job_message'])) {
-      return tmgmt_job_message_load_multiple(array_keys($results['tmgmt_job_message']));
+    if (!empty($results[$entity_type])) {
+      return entity_load($entity_type, array_keys($results[$entity_type]));
     }
     return array();
   }
@@ -436,26 +458,24 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Returns the translator plugin for this job.
    *
    * @return TMGMTTranslatorPluginControllerInterface
-   *   The translator plugin controller or FALSE.
+   *   The translator plugin controller or NULL if it hasn't been defined yet.
    */
-  public function getTranslatorPlugin() {
+  public function getTranslatorController() {
     if ($this->translator) {
       return tmgmt_translator_plugin_controller($this->translator);
     }
-    return FALSE;
   }
 
   /**
    * Returns the state of the job. Can be one of the job state constants.
    *
-   * @return
-   *   The state of the job.
+   * @return integer
+   *   The state of the job or NULL if it hasn't been set yet.
    */
   public function getState() {
     if (isset($this->state)) {
       return $this->state;
     }
-    return NULL;
   }
 
   /**
@@ -464,6 +484,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @param $state
    *   The new state of the job. Has to be one of the state constants defined
    *   in the state
+   *
+   * @return bool
+   *   TRUE if the state could be set, FALSE otherwise.
    */
   public function setState($state) {
     // Return TRUE if the state could be set. Return FALSE otherwise.
@@ -485,7 +508,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   TRUE if the passed state matches the current state, FALSE otherwise.
    */
   public function isState($state) {
-    return $this->getState() == $state;
+    return $this->getState() === $state;
   }
 
   /**
@@ -496,31 +519,42 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   concatenating dynamic values into it! Variables in the message should be
    *   added by using placeholder strings alongside the variables argument to
    *   declare the value of the placeholders. See t() for documentation on how
-   *   $message and $variables interact.
-   *
+   *   $message and $variables interact.   *
    * @param $arguments
-   *   (Optional) Array of variables to replace in the message on display.
+   *   (Optional) An array of variables to replace in the message on display.
    *
+   * @return TMGMTJobMessage
+   *   The job message that was added to the job or NULL if it couldn't be
+   *   saved.
    */
   public function addMessage($message, $arguments = array()) {
-    $message = entity_create('tmgmt_job_message', array(
+    // Save the job if it hasn't yet been saved.
+    if (empty($this->tjid) && !$this->save()) {
+      return;
+    }
+    $state_before = isset($this->old_state) ? $this->old_state : $this->getState();
+    $state_after = $this->getState();
+    $message = tmgmt_job_message_create($state_before, $state_after, $message, $arguments, array(
       'tjid' => $this->tjid,
-      'state_before' => isset($this->old_state) ? $this->old_state : $this->getState(),
-      'state_after' => $this->getState(),
-      'message' => $message,
-      'arguments' => $arguments,
     ));
-    $message->save();
 
     // Remove old state again so that future log messages will use the correct
     // state.
     unset($this->old_state);
+    if ($message->save()) {
+      return $message;
+    }
   }
 
   /**
    * Set the state of the job to needs review.
    *
-   * @see TMGMTJob::addLogMessage()
+   * @param $message
+   *   The log message to be saved along with the state change.
+   * @param $arguments
+   *   (Optional) An array of variables to replace in the message on display.
+   *
+   * @see TMGMTJob::addMessage()
    */
   public function needsReview($message, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_REVIEW);
@@ -530,7 +564,12 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Set the state of the job to prepared.
    *
-   * @see TMGMTJob::addLogMessage()
+   * @param $message
+   *   The log message to be saved along with the state change.
+   * @param $arguments
+   *   (Optional) An array of variables to replace in the message on display.
+   *
+   * @see TMGMTJob::addMessage()
    */
   public function prepared($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_PREPARED);
@@ -540,7 +579,12 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Set the state of the job to submitted.
    *
-   * @see TMGMTJob::addLogMessage()
+   * @param $message
+   *   The log message to be saved along with the state change.
+   * @param $arguments
+   *   (Optional) An array of variables to replace in the message on display.
+   *
+   * @see TMGMTJob::addMessage()
    */
   public function submitted($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_SUBMITTED);
@@ -550,7 +594,12 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Set the state of the job to accepted
    *
-   * @see TMGMTJob::addLogMessage()
+   * @param $message
+   *   The log message to be saved along with the state change.
+   * @param $arguments
+   *   (Optional) An array of variables to replace in the message on display.
+   *
+   * @see TMGMTJob::addMessage()
    */
   public function accepted($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_ACCEPTED);
@@ -561,7 +610,12 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Set the state of the job to finished.
    *
-   * @see TMGMTJob::addLogMessage()
+   * @param $message
+   *   The log message to be saved along with the state change.
+   * @param $arguments
+   *   (Optional) An array of variables to replace in the message on display.
+   *
+   * @see TMGMTJob::addMessage()
    */
   public function finished($message = NULL, $arguments = array()) {
     // @todo: To be defined.
@@ -570,7 +624,12 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Set the state of the job to rejected.
    *
-   * @see TMGMTJob::addLogMessage()
+   * @param $message
+   *   The log message to be saved along with the state change.
+   * @param $arguments
+   *   (Optional) An array of variables to replace in the message on display.
+   *
+   * @see TMGMTJob::addMessage()
    */
   public function rejected($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_REJECTED);
@@ -580,9 +639,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Set the state of the job to cancelled.
    *
+   * @param $message
+   *   The log message to be saved along with the state change.
+   * @param $arguments
+   *   (Optional) An array of variables to replace in the message on display.
+   *
    * Use TMGMTJob::cancelTranslation() to cancel a translation.
    *
-   * @see TMGMTJob::addLogMessage()
+   * @see TMGMTJob::addMessage()
    */
   public function cancelled($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_CANCELLED);
@@ -597,7 +661,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   TRUE if the job is prepared and can be translated, FALSE otherwise.
    */
   public function isTranslatable() {
-    if ($this->isPrepared() && $plugin = $this->getTranslatorPlugin()) {
+    if ($this->isPrepared() && $plugin = $this->getTranslatorController()) {
       if ($plugin->canTranslate($this)) {
         return TRUE;
       }
@@ -608,23 +672,20 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Request the translation of a job from the translator.
    *
-   * @return
+   * @return integer
    *   The updated job status.
    */
   public function requestTranslation() {
-    $translator = $this->getTranslatorPlugin();
-    $translator->requestTranslation($this);
+    $this->getTranslatorController()->requestTranslation($this);
     $this->save();
     return $this->getState();
   }
 
   /**
-   * Attempts to cancel the translation job.
+   * Attempts to cancel the translation job. Already accepted jobs can not be
+   * cancelled, submitted jobs only if supported by the translator plugin.
    *
-   * Already accepted jobs can not be cancelled, submitted jobs only if
-   * supported by the translator plugin.
-   *
-   * @return
+   * @return bool
    *   TRUE if the translation job was cancelled, FALSE otherwise.
    */
   public function cancelTranslation() {
@@ -639,7 +700,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     }
     else {
       // Otherwise, ask the translator if this job can be cancelled.
-      $translator = $this->getTranslatorPlugin();
+      $translator = $this->getTranslatorController();
       $translator->cancelTranslation($this);
     }
     $this->save();
@@ -649,7 +710,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Returns the source data of all job items.
    *
-   * @return
+   * @return array
    *   A nested array with the source data where the most upper key is the job
    *   item id.
    */
@@ -706,7 +767,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
 /**
  * Entity class for the tmgmt_job_message entity.
  *
- * @ingroup message
+ * @ingroup tmgmt_job_message
  */
 class TMGMTJobMessage extends Entity {
 
@@ -741,21 +802,21 @@ class TMGMTJobMessage extends Entity {
   /**
    * The status before the event occurred.
    *
-   * @var int
+   * @var integer
    */
   public $status_before;
 
   /**
    * The status after the event occurred.
    *
-   * @var int
+   * @var integer
    */
   public $status_after;
 
   /**
    * The time when the message object was created as a timestamp.
    *
-   * @var int
+   * @var integer
    */
   public $created;
 

@@ -2,7 +2,7 @@
 
 /**
  * Basic Node Source tests.
- * 
+ *
  */
 class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
 
@@ -25,12 +25,12 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
     variable_set('language_content_type_page', TRANSLATION_ENABLED);
   }
-  
+
   /**
    * Sets the proper environment.
-   * 
+   *
    * Currently just adds a new language.
-   * 
+   *
    * @param string $langcode
    *   The language code.
    */
@@ -45,10 +45,10 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
     $languages = &drupal_static('language_list');
     $languages = NULL;
   }
-  
+
   /**
    * Adds some fields to a node bundle.
-   * 
+   *
    * @param string $bundle
    *  The node bundle.
    */
@@ -102,15 +102,12 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
     $node = $this->drupalCreateNode($edit);
     $node->language = 'en';
     node_save($node);
-    
+
     // Create the new job and job item.
     $job = $this->createJob();
     $job->translator = 'dummy';
     $job->translator_context = array();
-    $job->save();
-
-    $item = tmgmt_job_item_create('node', 'node', $node->nid);
-    $job->addItem($item);
+    $job->addItem('node', 'node', $node->nid);
     $job->requestTranslation();
     $job->accepted();
 
@@ -133,16 +130,16 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
       }
     }
   }
-  
+
   /**
    * Compares the data from a node with the translated data.
-   * 
+   *
    * @param object $tnode
    *  The translated node object.
-   * 
+   *
    * @param array $translated_data
    *  An array with the translated data.
-   * 
+   *
    * @param string $langcode
    *  The code of the target language.
    */

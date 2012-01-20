@@ -2,7 +2,7 @@
 
 /**
  * Basic Entity Source tests.
- * 
+ *
  * @todo: Write tests for these cases:
  *  - any generic entity (defined by the tmgmt_entity_test module).
  */
@@ -26,12 +26,12 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     parent::setUp(array('tmgmt_entity', 'tmgmt_test', 'locale', 'tmgmt_dummy', 'tmgmt_entity_test'));
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
   }
-  
+
   /**
    * Sets the proper environment.
-   * 
+   *
    * Currently just adds a new language.
-   * 
+   *
    * @param string $langcode
    *   The language code.
    */
@@ -46,13 +46,13 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     $languages = &drupal_static('language_list');
     $languages = NULL;
   }
-  
+
   /**
    * Adds some fields to an entity bundle
-   * 
+   *
    * @param string $entity_type
    *  The entity type.
-   * 
+   *
    * @param string $bundle
    *  The entity bundle.
    */
@@ -118,18 +118,17 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       $node = $this->drupalCreateNode($edit);
       $node->language = 'en';
       node_save($node);
-      $item = tmgmt_job_item_create('entity', 'node', $node->nid);
-      $job->addItem($item);
+      $job->addItem('entity', 'node', $node->nid);
     }
     $job->requestTranslation();
     $job->accepted();
     foreach ($job->getItems() as $job_item) {
-      $entity = current(entity_load($job_item->item_type, array($job_item->item_id)));
+      $entity = entity_load_single($job_item->item_type, array($job_item->item_id));
       $this->checkTranslatedData($entity, $job_item->translated_data, $langcode);
       $this->checkUntranslatedData($entity, $this->field_names['node'][$bundle], $job_item->translated_data, $langcode);
     }
   }
-  
+
   /**
    * Tests taxonomy terms field translation.
    */
@@ -166,8 +165,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       }
       taxonomy_term_save($term);
       // Create the item and assign it to the job.
-      $item = tmgmt_job_item_create('entity', 'taxonomy_term', $term->tid);
-      $job->addItem($item);
+      $job->addItem('entity', 'taxonomy_term', $term->tid);
     }
     // Request the translation and accept it.
     $job->requestTranslation();
@@ -179,16 +177,14 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       $this->checkUntranslatedData($entity, $this->field_names['taxonomy_term'][$bundle], $job_item->translated_data, $langcode);
     }
   }
-  
+
   /**
    * Compares the data from an entity with the translated data.
-   * 
+   *
    * @param object $tentity
    *  The translated entity object.
-   * 
    * @param array $translated_data
    *  An array with the translated data.
-   * 
    * @param string $langcode
    *  The code of the target language.
    */
@@ -198,7 +194,6 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
         continue;
       }
       $index = 0;
-      $field_info = field_info_field($field_name);
       foreach ($values as $delta => $value) {
         foreach ($value as $input_name => $input_value) {
           $this->assertEqual($tentity->{$field_name}[$langcode][$index][$input_name], $input_value['#text'], t('The !input_name !index of the !field field in the translated node does match with the translated data', array('!field' => $field_name, '!input_name' => $input_name, '!index' => $index)));
@@ -207,19 +202,16 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       }
     }
   }
-  
+
   /**
    * Checks the fields that should not be translated.
-   * 
+   *
    * @param object $tentity
    *  The translated entity object.
-   * 
    * @param array $fields
    *  An array with the field names to check.
-   * 
    * @param array $translated_data
    *  An array with the translated data.
-   * 
    * @param string $langcode
    *  The code of the target language.
    */
