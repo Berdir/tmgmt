@@ -663,6 +663,11 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @param $data
    *   Partially or complete translated data, the most upper key needs to be
    *   the translation job item id.
+   * @param $key
+   *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a nested
+   *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
+   *   means that it will replace the whole translated data array. The most
+   *   upper key entry needs to be the job id (tjiid).
    */
   public function addTranslatedData($data, $key = NULL) {
 
@@ -673,12 +678,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       $key = explode(TMGMT_ARRAY_DELIMITER, $key);
     }
 
-
     $items = $this->getItems();
 
     // If there is a key, get the specific item and forward the call.
     if (!empty($key)) {
       $item_id = array_shift($key);
+      if (!isset($items[$item_id])) {
+        throw new Exception(t('Item id @id does not exist', array('@id' => $item_id)));
+      }
       $items[$item_id]->addTranslatedData($data, $key);
     }
     else {

@@ -32,12 +32,15 @@ function tmgmt_entity_tmgmt_source_plugin_info() {
 function tmgmt_entity_update_entity_translation($entity, $entity_type, $translated_data, $target_language) {
   foreach ($translated_data as $field_name => $values) {
     $index = 0;
-    foreach ($values as $key => $value) {
+    foreach ($values as $delta => $value) {
       $tdata = array();
       foreach ($value as $input_name => $input_value) {
         $tdata[$input_name] = $input_value['#text'];
       }
-      $entity->{$field_name}[$target_language][$index] = $tdata;
+      if (!isset($entity->{$field_name}[$target_language]) || !isset($entity->{$field_name}[$target_language][$index])) {
+        $entity->{$field_name}[$target_language][$index] = array();
+      }
+      $entity->{$field_name}[$target_language][$index] = array_merge($entity->{$field_name}[$target_language][$index], $tdata);
       $index++;
     }
   }
