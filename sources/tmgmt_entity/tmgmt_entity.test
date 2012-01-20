@@ -1,7 +1,12 @@
 <?php
 
 /**
- * Basic Node Source tests.
+ * Basic Entity Source tests.
+ * 
+ * @todo: Write tests for these cases:
+ *  - any generic entity (defined by the tmgmt_entity_test module).
+ *  - fields with multiple values
+ *  - text_with_summary fields (simple and multiple).
  */
 class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
 
@@ -20,29 +25,69 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_entity', 'tmgmt_test'));
-    variable_set('language_content_type_article', 1);
+    parent::setUp(array('tmgmt_entity', 'tmgmt_test', 'locale', 'tmgmt_dummy', 'tmgmt_entity_test'));
+    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
   }
-
-  function testEntitySource() {
-    // Add a language.
-    $admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types'));
-    $this->drupalLogin($admin_user);
-
+  
+  /**
+   * Sets the proper environment.
+   * 
+   * Currently just adds a new language.
+   * 
+   * @param string $langcode
+   *   The language code.
+   */
+  function setEnvironment($langcode) {
+    // Add the language.
     $edit = array(
-      'langcode' => 'de',
+      'langcode' => $langcode,
     );
     $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
-    $this->assertText('de', t('Language added successfully.'));
-    $this->assertEqual($this->getUrl(), url('admin/config/regional/language', array('absolute' => TRUE)), t('Correct page redirection.'));
+    $this->assertText($langcode, t('Language added successfully.'));
+    // This is needed to refresh the static cache of the language list.
+    $languages = &drupal_static('language_list');
+    $languages = NULL;
+  }
+
+  /**
+   * Tests nodes field translation.
+   */
+  function testEntitySourceNode() {
+    $this->drupalLogin($this->admin_user);
+    $langcode = 'de';
+    $this->setEnvironment($langcode);
     
-    // Nodes are also entities, so we can use them for testing.
     // Make the body field translatable.
     $field_info = field_info_field('body');
     $field_info['translatable'] = 1;
     field_update_field($field_info);
+    
+    // Check that the body field is now translatable.
     $field_info = field_info_field('body');
     $this->assertEqual($field_info['translatable'], 1, t('The Body field is not translatable'));
+    
+    // Add a non-translatable field.
+    $field_name = drupal_strtolower($this->randomName() . '_field_name');
+    $field = array('field_name' => $field_name, 'type' => 'text', 'cardinality' => 4);
+    $field = field_create_field($field);
+    $field_id = $field['id'];
+    $instance = array(
+      'field_name' => $field_name,
+      'entity_type' => 'node',
+      'bundle' => 'article',
+      'label' => $this->randomName() . '_label',
+      'description' => $this->randomName() . '_description',
+      'weight' => mt_rand(0, 127),
+      'widget' => array(
+        'type' => 'text_textfield',
+        'label' => 'Test Field',
+      )
+    );
+    field_create_instance($instance);
+    
+    // Check that the field was added to the content type.
+    $this->drupalGet('admin/structure/types/manage/article/fields');
+    $this->assertText($field_name, t('The field was not added to the Article content type.'));
     
     // Set "Article" content type to use multilingual support.
     $this->drupalGet('admin/structure/types/manage/article');
@@ -51,40 +96,141 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       'language_content_type' => 1,
     );
     $this->drupalPost('admin/structure/types/manage/article', $edit, t('Save content type'));
-    
-    //$this->assertEqual(variable_get('language_content_type_article'), 1, t('The translation is not enabled for the article content type.'));
-    
-    $edit = array(
-      'type' => 'article',
-      'body' => array('en' => array(array('value' => $this->randomString(32)))),
-      'language' => 'en',
-    );
-    $node = $this->drupalCreateNode($edit);
-    
-    // Create a job to translate this node.
-    //debug($node);    
-    
+    // Check that the previous action succeeded.
+    $this->assertEqual(variable_get('language_content_type_article'), 1, t('The translation is not enabled for the article content type.'));
+
+    // Create a few nodes and translate them.
+    $amount = 3;
     $job = $this->createJob();
-    $job->translator = 'test_translator';
+    $job->translator = 'dummy';
     $job->translator_context = array();
     $job->save();
-    
-    $item = tmgmt_job_item_create('entity', 'node', $node->nid);
-    $job->addItem($item);
-    $job->save();
-    // Dummy translation, just put the source data.  
-    $item->addTranslatedData($item->getSourceData());
+    for ($index = 1; $index <= $amount; $index++) {
+      $edit = array(
+        'type' => 'article',
+        'body' => array('en' => array(array('value' => $this->randomString(32)))),
+        $field_name => array(LANGUAGE_NONE => array(array('value' => $this->randomString(32)))),
+        'language' => 'en',
+      );
+      $node = $this->drupalCreateNode($edit);
+      $item = tmgmt_job_item_create('entity', 'node', $node->nid);
+      $job->addItem($item);
+    }
+    $job->requestTranslation();
     $job->setState(TMGMT_JOB_STATE_ACCEPTED);
     $job->save();
-    // Does not work... the fields are not saved (altough, when manually tested it works...)
     $job->propagateTranslatedData();
-    // for debugging...
-    $result = db_select('field_data_body', 'f')
-        ->fields('f')
-        ->execute();
-    foreach ($result as $value) {
-      debug($value);
+    foreach ($job->getItems() as $job_item) {
+      $entity = current(entity_load($job_item->item_type, array($job_item->item_id)));
+      $this->assertEqual($entity->body[$langcode][0]['value'], $job_item->translated_data['body'][0]['value']['#text'], t('Translated data does not match with the value from the entity.'));
+      // Check that the non-translatable field was not translated.
+      // Avoid some PHP warnings.
+      if (isset($job_item->translated_data[$field_name])) {
+        $this->assertNull($job_item->translated_data[$field_name], t('The nontranslatable field value appears in the data translation structure.'));
+      }
+      if (isset($entity->{$field_name}[$langcode])) {
+        $this->assertNull($entity->{$field_name}[$langcode], t('The entity has translated data in fields that are not translatable.'));
+      }
     }
+  }
+  
+  /**
+   * Tests taxonomy terms field translation.
+   */
+  function testEntitySourceTerm() {
+    $this->drupalLogin($this->admin_user);
+    $langcode = 'de';
+    $this->setEnvironment($langcode);
+    // First, create 2 fields and assign them to the Tags vocabulary. One of
+    // them is translatable and the other not.
+    // 1. Translatable field.
+    $field_name = drupal_strtolower($this->randomName() . '_field_name');
+    $field = array('field_name' => $field_name, 'type' => 'text', 'cardinality' => 4, 'translatable' => 1);
+    $field = field_create_field($field);
+    $field_id = $field['id'];
+    $instance = array(
+      'field_name' => $field_name,
+      'entity_type' => 'taxonomy_term',
+      'bundle' => 'tags',
+      'label' => $this->randomName() . '_label',
+      'description' => $this->randomName() . '_description',
+      'weight' => mt_rand(0, 127),
+      'widget' => array(
+        'type' => 'text_textfield',
+        'label' => 'Test Field',
+      )
+    );
+    field_create_instance($instance);
+    
+    // 2. Non-translatable field.
+    $field_name_2 = drupal_strtolower($this->randomName() . '_field_name');
+    $field_2 = array('field_name' => $field_name_2, 'type' => 'text', 'cardinality' => 4);
+    $field_2 = field_create_field($field_2);
+    $field_id_2 = $field_2['id'];
+    $instance = array(
+      'field_name' => $field_name_2,
+      'entity_type' => 'taxonomy_term',
+      'bundle' => 'tags',
+      'label' => $this->randomName() . '_label',
+      'description' => $this->randomName() . '_description',
+      'weight' => mt_rand(0, 127),
+      'widget' => array(
+        'type' => 'text_textfield',
+        'label' => 'Test Field',
+      )
+    );
+    field_create_instance($instance);
+    
+    // Check that we have the fields assigned.
+    $this->drupalGet('admin/structure/taxonomy/tags/fields');
+    $this->assertResponse(200, t('The "Manage fields" page for the Tags vocabulary is not accessible.'));
+    $this->assertText($field_name, t('The translatable field was not assigned to the Tags vocabulary.'));
+    $this->assertText($field_name_2, t('The non-translatable field was not assigned to the Tags vocabulary.'));
+    
+    // Create some Tags term and translate them.
+    $amount = 3;
+    // Create the job.
+    $job = $this->createJob();
+    $job->translator = 'dummy';
+    $job->translator_context = array();
+    $job->save();
+    for ($index = 1; $index <= $amount; $index++) {
+      $term = new stdClass();
+      $term->name = $this->randomName();
+      $term->description = $this->randomName();
+      $term->vid = 1;
+      $field_value = $this->randomString(20);
+      $field_value_2 = $this->randomString(20);
+      $term->{$field_name}['en'][0]['value'] = $field_value;
+      $term->{$field_name_2}[LANGUAGE_NONE][0]['value'] = $field_value_2;
+      taxonomy_term_save($term);
 
+      // Check that the field values were correctly saved.
+      $term = taxonomy_term_load($term->tid);
+      $this->assertEqual($term->{$field_name}['en'][0]['value'], $field_value, t('The translatable field value was not saved.'));
+      $this->assertEqual($term->{$field_name_2}[LANGUAGE_NONE][0]['value'], $field_value_2, t('The non-translatable field value was not saved.'));
+      
+      // Create the item and assign it to the job.
+      $item = tmgmt_job_item_create('entity', 'taxonomy_term', $term->tid);
+      $job->addItem($item);
+      $job->save();
+    }
+    // Request the translation, accept and propagate it.
+    $job->requestTranslation();
+    $job->setState(TMGMT_JOB_STATE_ACCEPTED);
+    $job->save();
+    $job->propagateTranslatedData();
+    // Check if the fields were translated.
+    foreach ($job->getItems() as $job_item) {
+      $entity = current(entity_load($job_item->item_type, array($job_item->item_id)));
+      $this->assertEqual($entity->{$field_name}[$langcode][0]['value'], $job_item->translated_data[$field_name][0]['value']['#text'], t('Translated data does not match with the value from the entity.'));
+      // Avoid some PHP warnings.
+      if (isset($job_item->translated_data[$field_name_2])) {
+        $this->assertNull($job_item->translated_data[$field_name_2], t('The non-translatable field value appears in the data translation structure.'));
+      }
+      if (isset($entity->{$field_name_2}[$langcode])) {
+        $this->assertNull($entity->{$field_name_2}[$langcode], t('The entity has translated data in fields that are not translatable.'));
+      }
+    }
   }
 }

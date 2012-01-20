@@ -3,7 +3,7 @@
 
 /**
  * @file
- * 
+ *
  * Provides functions for translation provider nativy.com.
  */
 
@@ -12,14 +12,14 @@
  * Implements hook_menu().
  */
 function tmgmt_nativy_menu() {
-  
+
   $items['soaptest'] = array(
     'title' => 'Testcallback',
     'type' => MENU_CALLBACK,
     'page callback' => 'tmgmt_nativy_test_page',
     'access arguments' => array('access content'),
   );
-  
+
   $items['admin/config/services/nativy'] = array(
     'title' => 'Nativy Translator',
     'description' => 'Configure Nativy Translator service.',
@@ -27,7 +27,7 @@ function tmgmt_nativy_menu() {
     'page arguments' => array('tmgmt_nativy_settings'),
     'access arguments' => array('administer site configuration'),
   );
-  
+
   return $items;
 }
 
@@ -50,14 +50,14 @@ function tmgmt_nativy_tmgmt_translator_plugin_info() {
  * @ingroup forms
  */
 function tmgmt_nativy_settings() {
-  
+
   $form['tmgmt_nativy_username'] = array(
     '#type' => 'textfield',
     '#title' => t('Nativy.com username'),
     '#default_value' => variable_get('tmgmt_nativy_username'),
     '#description' => t('Please enter your username for your account on nativy.com.'),
   );
-  
+
   $form['tmgmt_nativy_password'] = array(
     '#type' => 'textfield',
     '#title' => t('Nativy.com password'),
@@ -74,12 +74,12 @@ function tmgmt_nativy_settings() {
 function tmgmt_nativy_test_page() {
 
   $client = new SoapClient("http://test.nativy.com/nis/nis.asmx?WSDL", array('soap_version' => SOAP_1_2, 'trace' => 1));
-  
+
   /*//$client->AuthenticateUser(AuthenticateUser $parameters)
   //$client->SecuredWebServiceHeader = array('Username' => 'demonis@nativy.com', 'Password' => 'A9!x57M');
   $client->SecuredWebServiceHeader->Username = 'demonis@nativy.com';
   $client->SecuredWebServiceHeader->Password = 'A9!x57M';
-  
+
   $auth = new AuthenticateUser();
   $header = new SoapHeader('http://www.nativy.com/nis', 'SecuredWebServiceHeader', $auth); //array('Username' => 'demonis@nativy.com', 'Password' => 'A9!x57M'));
   //$headers[] = new SoapHeader('http://www.nativy.com/nis', 'SecuredWebServiceHeader.Username', 'demonis@nativy.com');
@@ -91,7 +91,7 @@ function tmgmt_nativy_test_page() {
   $auth->Password = 'A9!x57M';
   $authvalues = new SoapVar($auth, SOAP_ENC_OBJECT);
   $header =  new SoapHeader('http://www.nativy.com/nis', "SecuredWebServiceHeader", $authvalues, false);
-  $client->__setSoapHeaders(array($header));                                        
+  $client->__setSoapHeaders(array($header));
   $response = $client->AuthenticateUser();
   /*
   $doc = new DOMDocument();
@@ -102,14 +102,39 @@ function tmgmt_nativy_test_page() {
   $response = $client->__doRequest($request, "http://test.nativy.com", "https://www.nativy.com/nis/AuthenticateUser", 2);
   //
   */
-  
+
   dpm($client->__getLastRequestHeaders(), 'timeeeeeeeeeee');
-  
+
   dpm($client, 'client');
   dpm($response, 'response');
   dpm($client->__getFunctions(), 'functions');
   dpm($client->__getTypes(), 'types');
-  
+
+  $xml = '<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Header>
+    <SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">
+      <Username>demonis@nativy.com</Username>
+      <Password>A9!x57M</Password>
+    </SecuredWebServiceHeader>
+  </soap:Header>
+  <soap:Body>
+    <AuthenticateUser xmlns="https://www.nativy.com/nis" />
+  </soap:Body>
+</soap:Envelope>';
+
+  $options = array(
+    'method' => 'POST',
+    'data' => $xml,
+    'headers' => array(
+      'Content-Type' => 'text/xml; charset=utf-8',
+      'Content-Length' => strlen($xml),
+      'SoapAction' => 'https://www.nativy.com/nis/AuthenticateUser',
+    ),
+  );
+
+  dpm(drupal_http_request('http://www.nativy.com/nis/nis.asmx', $options));
+
   return 'TESTPAGE';
 }
 
@@ -119,7 +144,7 @@ function tmgmt_nativy_test_page() {
 class AuthenticateUser {
   public $Username;
   public $Password;
-  
+
   public function __construct() {
     $this->Username = 'demonis@nativy.com';
     $this->Password = 'A9!x57M';
