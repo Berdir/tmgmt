@@ -18,14 +18,6 @@ function tmgmt_node_ui_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 20
   );
-  $items['node/%node/tmgmt/create-job'] = array(
-    'title' => t('Create a Job'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_node_ui_translator_settings_form', 1),
-    'access callback' => '_translation_tab_access',
-    'access arguments' => array(1),
-    'type' => MENU_LOCAL_ACTION,
-  );
   return $items;
 }
 
@@ -44,116 +36,7 @@ function tmgmt_node_ui_views_api() {
  */
 function tmgmt_node_ui_translation_overview($node) {
   if (!$output = views_embed_view('job_items_current_node', 'default', $node->tnid)) {
-    $output = t('There are currently no job items attached to this node.');
+    return '';
   }
   return $output;
-}
-
-/**
- * The Node translator settings form.
- */
-function tmgmt_node_ui_translator_settings_form($form, &$form_state, $node) {
-  // Get all available languages from core translation module.
-  $available_languages = entity_metadata_language_list();
-  // Pull the label of the node language.
-  $node_language = $available_languages[$node->language];
-  // Remove LANGUAGE_NONE and the source language from the list of available
-  // languages.
-  unset($available_languages[LANGUAGE_NONE], $available_languages[$node->language]);
-  // Get the translator plugin that is currently selected.
-  $translator_plugins = tmgmt_translator_plugin_labels(TRUE);
-  $translator_plugins_keyed = array_keys($translator_plugins);
-  $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : reset($translator_plugins_keyed);
-  // Load the plugin info for the selected translator plugin.
-  $info = tmgmt_translator_plugin_info($selected_translator_plugin);
-  $form['#tree'] = TRUE;
-  $form['nid'] = array(
-    '#type' => 'hidden',
-    '#value' => $node->nid,
-  );
-  $form['source_language'] = array(
-    '#type' => 'hidden',
-    '#value' => $node->language,
-  );
-  $form['source_language_display'] = array(
-    '#type' => 'item',
-    '#title' => t('Source language'),
-    '#markup' => $node_language,
-  );
-  // @todo: use checkboxes instead and create multiple jobs.
-  $form['target_language'] = array(
-    '#type' => 'select',
-    '#title' => t('Target language'),
-    '#description' => t('The target language'),
-    '#options' => $available_languages,
-  );
-
-  if (!empty($translator_plugins)) {
-    $form['translator'] = array(
-      '#type' => 'select',
-      '#title' => t('Translation type'),
-      '#options' => $translator_plugins,
-      '#default_value' => $selected_translator_plugin,
-      '#ajax' => array(
-        'callback' => 'tmgmt_node_ui_get_translator_options',
-        'wrapper' => 'tmgmt-translator-options',
-        'method' => 'replace',
-      ),
-    );
-    $form['options'] = array(
-      '#type' => 'container',
-      '#prefix' => '<div id="tmgmt-translator-options">',
-      '#suffix' => '</div>',
-    );
-    $form['options']['description'] = array(
-      '#type' => 'item',
-      '#title' => t('About this service'),
-      '#markup' => $info['description'],
-    );
-    // Load plugin controler and check is it defining job settings form.
-    $plugin_controller = tmgmt_translator_plugin_controller($selected_translator_plugin);
-    if (method_exists($plugin_controller, 'jobSettingsForm')) {
-      $form['options']['settings'] = $plugin_controller->jobSettingsForm($form, $form_state);
-    }
-
-    $form['actions']['#type'] = 'actions';
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Submit'),
-      '#weight' => 50,
-    );
-  }
-  else {
-    drupal_set_message(t('You have to install a translator plugin module'), 'warning');
-  }
-
-  return $form;
-}
-
-/**
- * Ajax callback to fetch the options provided by a translator.
- */
-function tmgmt_node_ui_get_translator_options($form, &$form_state) {
-  return $form['options'];
-}
-
-/**
- * node translator submit function.
- * will create a job with the node as item.
- */
-function tmgmt_node_ui_translator_settings_form_submit($form, &$form_state) {
-  $values = $form_state['values'];
-  // Create the job object.
-  $job_values = array('translator' => $values['translator'], 'uid' => $GLOBALS['user']->uid);
-  if (isset($values['options']['settings'])) {
-    $job_values['translator_context'] = $values['options']['settings'];
-  }
-  $job = tmgmt_job_create($values['source_language'], $values['target_language'], $job_values);
-  // Create a job item and add it to the job.
-  $job->addItem(tmgmt_job_item_create('node', 'node', $values['nid']));
-  $job->prepared('Job has been prepared.');
-  $job->save();
-  // Print a message to the screen and redirect the user.
-  drupal_set_message(t('Translation job has been created.'));
-  $form_state['redirect'] = 'node/' . $values['nid'] . '/tmgmt';
 }

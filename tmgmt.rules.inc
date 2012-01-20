@@ -9,19 +9,18 @@
  * Implements hook_rules_action_info().
  */
 function tmgmt_rules_action_info() {
-  return array(
-    'tmgmt_rules_job_request_translation' => array(
-      'label' => t('Request Job translation'),
-      'group' => t('Translation Management'),
-      'parameter' => array(
-        'job' => array(
-          'type' => 'tmgmt_job',
-          'label' => t('Translation Job'),
-          'description' => t('The translation job for which translations should be requested.'),
-        ),
+  $info['tmgmt_rules_job_request_translation'] = array(
+    'label' => t('Request Job translation'),
+    'group' => t('Translation Management'),
+    'parameter' => array(
+      'job' => array(
+        'type' => 'tmgmt_job',
+        'label' => t('Translation Job'),
+        'description' => t('The translation job for which translations should be requested.'),
       ),
     ),
-    'tmgmt_rules_job_accept_translation' => array(
+  );
+  $info['tmgmt_rules_job_accept_translation'] = array(
       'label' => t('Accept Job translation'),
       'group' => t('Translation Management'),
       'parameter' => array(
@@ -31,19 +30,19 @@ function tmgmt_rules_action_info() {
           'description' => t('The translation job for which translations should be accepted.'),
         ),
       ),
-    ),
-    'tmgmt_rules_job_cancel_translation' => array(
-      'label' => t('Cancel translation job'),
-      'group' => t('Translation Management'),
-      'parameter' => array(
-        'job' => array(
-          'type' => 'tmgmt_job',
-          'label' => t('Translation Job'),
-          'description' => t('The translation job that should be canceled.'),
-        ),
+    );
+  $info['tmgmt_rules_job_cancel_translation'] = array(
+    'label' => t('Cancel translation job'),
+    'group' => t('Translation Management'),
+    'parameter' => array(
+      'job' => array(
+        'type' => 'tmgmt_job',
+        'label' => t('Translation Job'),
+        'description' => t('The translation job that should be canceled.'),
       ),
     ),
   );
+  return $info;
 }
 
 /**

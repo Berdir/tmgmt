@@ -5,9 +5,6 @@
  * Provides the i18n string source controller.
  */
 
-/**
- * @ingroup source
- */
 class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginController {
 
   public function getData(TMGMTJobItem $job_item) {

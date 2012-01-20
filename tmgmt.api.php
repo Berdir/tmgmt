@@ -6,7 +6,7 @@
  */
 
 /**
- * @addtogroup source
+ * @addtogroup tmgmt_source
  * @{
  */
 
@@ -29,15 +29,15 @@ function hook_tmgmt_source_plugin_info() {
  * @param $info
  */
 function hook_tmgmt_source_plugin_info_alter(&$info) {
-
+  $info['test_source']['description'] = t('Updated description');
 }
 
 /**
- * @} End of "addtogroup translator".
+ * @} End of "addtogroup tmgmt_source".
  */
 
 /**
- * @addtogroup translator
+ * @addtogroup tmgmt_translator
  * @{
  */
 
@@ -58,24 +58,24 @@ function hook_tmgmt_translator_plugin_info() {
  * Alter information about translator plugins.
  */
 function hook_tmgmt_translator_plugin_info_alter(&$info) {
-
+  $info['test_source']['description'] = t('Updated description');
 }
 
 /**
- * @} End of "addtogroup translator".
+ * @} End of "addtogroup tmgmt_translator".
  */
 
 /**
- * @defgroup job Translation Jobs
+ * @defgroup tmgmt_job Translation Jobs
  *
  * A single task to translate something into a given language using a @link
  * translator translator @endlink.
  *
- * Attached to these jobs are job items, which specifiy which @link source
+ * Attached to these jobs are job items, which specify which @link source
  * sources @endlink are to be translated.
  *
  * To create a new translation job, first create a job and then assign items to
- * each. Each item needs to specificy the source plugin that should be used
+ * each. Each item needs to specify the source plugin that should be used
  * and the type and id, which the source plugin then uses to identify it later
  * on.
  *
@@ -83,8 +83,7 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * $job = tmgmt_job_create('en', $target_language);
  *
  * for ($i = 1; $i < 3; $i++) {
- *   $item = tmgmt_job_item_create('test_source', 'test', $i);
- *   $job->addItem($item);
+ *   $job->addItem('test_source', 'test', $i);
  * }
  * @endcode
  *
@@ -95,7 +94,7 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * $job->translator = 'test_translator';
  * // Translator specific settings.
  * $job->translator_context = array(
- *   'prioritoy' => 5,
+ *   'priority' => 5,
  * );
  * $job->save();
  *
@@ -119,12 +118,12 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  */
 
 /**
- * @defgroup translator Translators
+ * @defgroup tmgmt_translator Translators
  *
  * A translator plugin integrates a translation service.
  *
  * To define a translator, hook_tmgmt_translator_plugin_info() needs to be
- * implemented and a controller class (specificed in the info) created.
+ * implemented and a controller class (specified in the info) created.
  *
  * A translator plugin is then responsible for sending out a translation job and
  * storing the translated texts back into the job and marking it as needs review
@@ -134,7 +133,7 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  */
 
 /**
- * @defgroup source Translation source
+ * @defgroup tmgmt_source Translation source
  *
  * A source plugin represents translatable elements on a site.
  *
@@ -142,11 +141,11 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * on.
  *
  * To define a source, hook_tmgmt_source_plugin_info() needs to be implemented
- * and a controller class (specificed in the info) created.
+ * and a controller class (specified in the info) created.
  *
  * A source has three separate tasks.
  *
- * - Allows to reate a new @link job translation job @endlink and assign job
+ * - Allows to create a new @link job translation job @endlink and assign job
  *   items to itself.
  * - Extract the translatable text into a nested array when
  *   requested to do in their implementation of
