@@ -37,7 +37,7 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
    * @return TMGMTJob
    */
   function createJob() {
-    $job = tmgmt_job_create('en', 'de');
+    $job = tmgmt_job_create('en', 'de', array('uid' => 1));
 
     $this->assertEqual(SAVED_NEW, $job->save());
 
@@ -174,6 +174,18 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     for ($i = 1; $i < 3; $i++) {
       $item = tmgmt_job_item_create('test_source', 'test', $i);
+
+      // Explicitly define the data for the third item.
+      if ($i == 3) {
+        $item->data = array(
+          'dummy' => array(
+            'deep_nesting' => array(
+              '#text' => 'Stored data',
+            ),
+          ),
+        );
+      }
+
       $job->addItem($item);
     }
 
@@ -203,10 +215,18 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $translate_job = tmgmt_job_load($translate_job->tjid);
     $this->assertTrue($translate_job->isNeedsReview());
 
+    $i = 1;
     foreach ($translate_job->getItems() as $item) {
       // Check the translated text.
-      $expected_text = 'de_Text for job item with type ' . $item->item_type . ' and id ' . $item->item_id . '.';
+      if ($i != 3) {
+        $expected_text = 'de_Text for job item with type ' . $item->item_type . ' and id ' . $item->item_id . '.';
+      }
+      else {
+        // The third item has an explicitly stored data value.
+        $expected_text = 'de_Stored data';
+      }
       $this->assertEqual($expected_text, $item->translated_data['dummy']['deep_nesting']['#text']);
+      $i++;
     }
 
     $translate_job->accepted(t('Job accepted'));

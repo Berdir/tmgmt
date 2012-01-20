@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * @file
+ * UI plugin for the Translation Management system that handles i18n strings.
+ */
+
+/**
+ * Implements hook_form_FORMID_alter
+ * Add submission capabilities to string forms.
+ */
+function tmgmt_source_i18n_string_ui_form_i18n_string_translate_page_overview_form_alter(&$form, &$form_state) {
+  $form['languages'] = array(
+    '#options' => $form['languages']['#rows'],
+    '#header' => $form['languages']['#header'],
+    '#type' => 'tableselect',
+  );
+  $form['controls'] = array('#type' => 'fieldset');
+  $translator_plugins = tmgmt_translator_plugin_labels(TRUE);
+  $translator_plugins_keyed = array_keys($translator_plugins);
+  $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : reset($translator_plugins_keyed);
+  $form['controls']['translator'] = array(
+    '#type' => 'select',
+    '#title' => t('Translation type'),
+    '#options' => $translator_plugins,
+    '#default_value' => $selected_translator_plugin,
+  /*
+    '#ajax' => array(
+      'callback' => 'tmgmt_node_ui_get_translator_options',
+      'wrapper' => 'tmgmt-translator-options',
+      'method' => 'replace',
+    ),
+  */
+  );
+  $form['controls']['request'] = array('#type' => 'submit', '#value' => t('Request translation'));
+  $form['#submit'][] = 'tmgmt_source_i18n_string_ui_form_submit';
+}
+
+/**
+ * Form submission.
+ */
+function tmgmt_source_i18n_string_ui_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  $object = $values['object'];
+  if ($languages = array_filter($values['languages'])) {
+    // Request a job for every selected language
+    $object_key = $object->get_key();
+    $object_id = $object->get_type() . ':' . (is_array($object_key) ? implode(':', $object_key) : $object_key);
+    $count = 0;
+    foreach (array_keys($languages) as $langcode) {
+      $count++;
+      // Create the job object.
+      $job = tmgmt_job_create($values['source_language'], $langcode, array('translator' => $values['translator']));
+      // Create a job item and add it to the job.
+      $job_item = tmgmt_job_item_create('i18n_string', 'i18n_string', $object_id);
+      $job->addItem($job_item);
+      $job->save();
+      // Print a message to the screen and redirect the user.
+      
+    }
+    drupal_set_message(format_plural($count, 'A translation job has been created.', '@count translation jobs have been created.'));
+  }
+}
