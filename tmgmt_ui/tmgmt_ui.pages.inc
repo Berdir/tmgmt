@@ -25,8 +25,5 @@ function tmgmt_ui_content() {
     'css' => array(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.my-tmgmt.css'),
   );
 
-  
-  $output['']
-
   return $output;
 }
