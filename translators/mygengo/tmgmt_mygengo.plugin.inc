@@ -106,7 +106,6 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
   public function requestTranslation(TMGMTJob $job) {
     // Pull the source data array from through the job and flatten it..
     $data = tmgmt_flatten_data($job->getSourceData());
-
     $t = array();
 
     foreach ($data as $key => $value) {
@@ -181,7 +180,6 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
       '#default_value' => $this->getOption('api_public_key', ''),
       '#description' => t('Please enter yout myGengo API Public key.'),
     );
-
     $form['api_private_key'] = array(
       '#type' => 'textfield',
       '#title' => t('myGengo API Private key'),
@@ -190,9 +188,23 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     );
     return $form;
   }
-
+  
+  /**
+   * Defines plugin job settings form.
+   * 
+   * @param $form array
+   * @param $form_state array
+   */
   public function jobSettingsForm($form, &$form_state) {
-    // @todo...
+    $settings['dummy_option'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Just a dummy option for testing'),
+    );
+    $settings['dummy_text'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Just a dummy text for testing'),
+    );
+    return $settings;
   }
-
+  
 }
