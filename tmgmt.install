@@ -62,6 +62,12 @@ function tmgmt_schema() {
         'type' => 'varchar',
         'length' => 256,
       ),
+      'uid' => array(
+        'description' => 'uid of the job creator',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
     ),
     'primary key' => array('tjid'),
     'indexes' => array(
@@ -226,4 +232,14 @@ function tmgmt_schema() {
   return $schema;
 }
 
-
+/**
+ * Add the user id of a job creation.
+ */
+function tmgmt_update_7000() {
+  $new_field = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+  );
+  db_add_field('tmgmt_job', 'uid', $new_field);
+}
