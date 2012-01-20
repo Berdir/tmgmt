@@ -92,11 +92,12 @@ function tmgmt_local_translator_job_item_subform($items) {
   $form['#tree'] = TRUE;
   if (!empty($items['#label'])) {
     $form['#title'] = $items['#label'];
+    $form['#type'] = 'fieldset';
   }
   if (!empty($items['#text'])) {
     // Approximate the number of rows to use in the default textarea.
     $rows = min(ceil(str_word_count($items['#text']) / 12), 10);
-    $form['#type'] = 'fieldset';
+    
     $form['source'] = array(
       '#type' => 'textarea',
       '#disabled' => TRUE,

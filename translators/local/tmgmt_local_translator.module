@@ -56,7 +56,7 @@ function tmgmt_local_translator_tmgmt_translator_plugin_info() {
  * Implements hook_views_api().
  */
 function tmgmt_local_translator_views_api() {
-  return array('api' => 2.0);
+  return array('api' => 3);
 }
 
 /**
