@@ -9,6 +9,12 @@
  * Implements hook_menu()
  */
 function tmgmt_ui_simple_menu() {
+  $items['admin/config/regional/tmgmt/simple'] = array(
+    'title' => 'Simple UI',
+    'page callback' => 'system_settings_form',
+    'page arguments' => array('tmgmt_ui_simple_settings_form'),
+    'access arguments' => array('administer site configuration'),
+  );
   $items['translate/multiple/node'] = array(
     'page callback' => 'tmgmt_ui_simple_page_translate_node_multiple',
     'access arguments' => array('translate content'),
@@ -17,6 +23,18 @@ function tmgmt_ui_simple_menu() {
   return $items;
 }
 
+/**
+ * Basic settings
+ */
+function tmgmt_ui_simple_settings_form($form, &$form_state) {
+  $form['tmgmt_ui_simple_default_queue'] = array(
+    '#title' => t('Queue jobs'),
+    '#type' => 'radio',
+    '#options' => array(t('No'), t('Yes')),
+    '#default_value' => variable_get('tmgmt_ui_simple_default_queue', 1),
+  );
+  return $form;
+}
 /**
  * Translate multiple items
  */
@@ -41,6 +59,7 @@ function tmgmt_ui_simple_page_translate_node_multiple($ids) {
  * Add submission capabilities to string forms.
  */
 function tmgmt_ui_simple_form_i18n_string_translate_page_overview_form_alter(&$form, &$form_state) {
+  $object = $form['object']['#value'];
   $form['source_plugin'] = array('#type' => 'value', '#value' => 'i18n_string');
   $form['item_type'] = array('#type' => 'value', '#value' => 'i18n_string');
   $object_key = $object->get_key();
@@ -108,10 +127,12 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       // Create job items and add them to the job. This may take a single value or an array of item_id's.
       $items = is_array($values['item_id']) ? $values['item_id'] : array($values['item_id']);
       foreach ($items as $item_id) {
-        $job_item = tmgmt_job_item_create($values['source_plugin'], $values['item_type'], $item_id);
-        $job->addItem($job_item);
+        $job->addItem($values['source_plugin'], $values['item_type'], $item_id);
       }
       $job->save();
+      if (!variable_get('tmgmt_ui_simple_default_queue', 1)) {
+        $job->requestTranslation();
+      }
       // Print a message to the screen and redirect the user.
     }
     drupal_set_message(format_plural($count, 'A translation job has been created.', '@count translation jobs have been created.'));
