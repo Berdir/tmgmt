@@ -20,7 +20,7 @@ class TMGMTLocalTranslator extends TMGMTDefaultTranslatorPluginController {
    */
   function requestTranslation(TMGMTJob $job) {
     //$job->addTranslatedData($job->getSourceData());
-    return new TMGMTTranslatorResponse(TMGMTJob::STATE_ACCEPTED, t('Job queued for local translation.'));
+    $job->prepared('Job queued for local translation.');
   }
 
   /**
