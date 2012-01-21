@@ -30,6 +30,10 @@ function tmgmt_html_theme($existing, $type, $theme, $path) {
       'path'  => drupal_get_path('module', 'tmgmt_html') . '/templates',
       'template'  => 'html_template',
     ),
+    'xliff_template' => array(
+      'path'  => drupal_get_path('module', 'tmgmt_html') . '/templates',
+      'template'  => 'xliff_template',
+    ),
   );
 }
 
@@ -56,6 +60,16 @@ function tmgmt_html_import_form($form) {
     '#title' => t('HTML'),
     '#size' => 50,
     '#description' => t('A translated HTML File'),
+  );
+
+  $form['file_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('File type'),
+    '#options' => array(
+        'html' => t('HTML'),
+        'xliff' => t('XLIFF')),
+    '#default_value' => 'html',
+    '#description' => t('Please select the file type you want to import.'),
   );
 
   $form['import']['submit'] = array(

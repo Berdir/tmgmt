@@ -28,6 +28,13 @@ function tmgmt_supertext_menu(){
     'access callback' => TRUE,
     'weight' => -19,
   );
+  $items['supertext_callback'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'supertext callback',
+    'description' => '',
+    'page callback' => 'tmgmt_supertext_callback',
+    'access callback' => 'tmgmt_supertext_access_check'
+  );
   return $items;
 	
 }
@@ -145,3 +152,42 @@ function supertext_test(){
 	
 	return "hallo";
 }
+
+/**
+ * Process response from supertext.
+ */
+function tmgmt_supertext_callback() {
+  $data = json_decode($_POST['job']);
+  $keys = explode('][', $data->custom_data);
+  $tjid = array_shift($keys);
+
+  $job = tmgmt_job_load($tjid);
+  $supertext = tmgmt_translator_plugin_controller('supertext');
+  $supertext->receiveTranslation($job, $keys, $data);
+}
+
+/**
+ * tmgmt_supertext_callback access check.
+ */
+function tmgmt_supertext_access_check() {
+  try {
+    $job = json_decode($_POST['job']);
+    if (isset($job->ReferenceData)) {
+      // Check valid hash
+      $ref = explode(':', $job->ReferenceData);
+      if (count($ref)==2 && $ref[1] == tmgmt_supertext_hash($ref[0])) {
+        $job->TMGMT_id = $ref[0];
+        return TRUE;
+      }
+    }
+  } catch(Exception $e) {
+    // Debug it for now, why not...
+    watchdog('supertext', print_r($_REQUEST, TRUE));
+  }
+  return FALSE;
+}
+
+function tmgmt_supertext_hash($id) {
+  return md5(drupal_get_hash_salt() . $id);
+}
+
