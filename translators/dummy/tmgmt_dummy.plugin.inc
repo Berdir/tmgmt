@@ -53,5 +53,27 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
     return $form;
   }
 
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
+   */
+  function settingsForm($form, &$form_state) {
+    $form['sample_textfield'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Sample API key'),
+      '#default_value' => 'Your translation service sucks.',
+      '#description' => t('Please provide the API key.'),
+    );
+    $form['sample_checkboxes'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('These are just some sample checkboxes.'),
+      '#options' => array(
+        1 => t('Option one'),
+        2 => t('Option two'),
+        3 => t('Option three'),
+      ),
+    );
+    return $form;
+  }
+
 }
 
