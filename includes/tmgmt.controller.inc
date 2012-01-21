@@ -60,15 +60,17 @@ class TMGMTJobController extends EntityAPIController {
         'href' => $uri['path'],
       );
     }
-    // @todo: What do we want to do with this?
-    if (module_exists('views')) {
+
+    // @todo: Re-add a view for this.
+    /*if (module_exists('views')) {
       $view = views_get_view('translation_job_messages');
       $content['messages'] = array(
         '#type' => 'item',
         '#title' => $view->get_title(),
         '#markup' => $view->preview('block', array($entity->tjid)),
       );
-    }
+    }*/
+
     return $content;
   }
 }
