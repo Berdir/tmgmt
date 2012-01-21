@@ -549,7 +549,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function needsReview($message, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_REVIEW);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 
@@ -565,7 +565,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function prepared($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_PREPARED);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 
@@ -581,7 +581,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function submitted($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_SUBMITTED);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 
@@ -599,7 +599,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     $this->setState(TMGMT_JOB_STATE_ACCEPTED);
     // @todo Find a solution for what happens if the propagation of the translated data fails.
     if ($this->propagateTranslatedData()) {
-      $this->addMessage($message);
+      $this->addMessage($message, $arguments);
       $this->save();
     }
   }
@@ -617,7 +617,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public function finished($message = NULL, $arguments = array()) {
     // @todo Maybe we should clean up the job items here.
     $this->setState(TMGMT_JOB_STATE_ACCEPTED);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 
@@ -633,7 +633,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function rejected($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_REJECTED);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 
@@ -651,7 +651,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function cancelled($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_CANCELLED);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 
