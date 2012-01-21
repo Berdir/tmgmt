@@ -155,8 +155,13 @@ function tmgmt_schema() {
       'label' => array(
         'description' => 'Label of the translator.',
         'type' => 'varchar',
-        'length' => 256,
+        'length' => 255,
         'not null' => TRUE,
+      ),
+      'description' => array(
+        'description' => 'Description of the translator.',
+        'type' => 'text',
+        'size' => 'medium',
       ),
       'translator_plugin' => array(
         'description' => 'Name of the translator service plugin.',
@@ -167,7 +172,6 @@ function tmgmt_schema() {
       'settings' => array(
         'description' => 'Translator specific settings.',
         'type' => 'text',
-        'not null' => TRUE,
         'size' => 'big',
         'serialize' => TRUE,
       ),
@@ -275,7 +279,7 @@ function tmgmt_update_7003() {
   $new_field = array(
     'description' => 'Optional user provided label of the job.',
     'type' => 'varchar',
-    'length' => 256,
+    'length' => 255,
   );
   db_add_field('tmgmt_job', 'label', $new_field);
 }
