@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * tmgmt page callbacks.
@@ -97,17 +96,28 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     $form['translator_wrapper']['options'] = array(
       '#type' => 'fieldset',
       '#title' => t('Translator checkout settings'),
-      '#description' => t('The @translator translator does not provide any per job settings.', array('@translator' => $plugin_info['label'])),
       '#prefix' => '<div id="tmgmt-translator-options">',
       '#suffix' => '</div>',
     );
-    if (method_exists($plugin_controller, 'jobSettingsForm') && $settings = $plugin_controller->jobSettingsForm(array(), $form_state)) {
-      unset($form['translator_wrapper']['options']['#description']);
-      $form['translator_wrapper']['options']['settings'] = $settings;
-      $form['translator_wrapper']['options']['settings']['#tree'] = TRUE;
+    switch (tmgmt_translator_check($selected_translator_plugin, $job->source_language, $selected_target_language)) {
+      case TMTGT_TRANSLATOR_NOT_AVAILABLE:
+        $form['translator_wrapper']['options']['settings']['#markup'] = t('Translator is not available: @reason.', array('@reason' => $plugin_controller->getNotAvailableReason()));
+        break;
+      case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
+        $form['translator_wrapper']['options']['settings']['#markup'] = t('Test translator is not avalible for @language.', array('@language' => $available_languages[$selected_target_language]));
+        break;
+      default:
+        if (method_exists($plugin_controller, 'jobSettingsForm') && $settings = $plugin_controller->jobSettingsForm(array(), $form_state, $job)) {
+          unset($form['translator_wrapper']['options']['#description']);
+          $form['translator_wrapper']['options']['settings'] = $settings;
+          $form['translator_wrapper']['options']['settings']['#tree'] = TRUE;
+        }
+        else {
+
+      $form['translator_wrapper']['options']['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $plugin_info['label']));
+        }
     }
-  }
-  else {
+  } else {
     $form['translator_wrapper']['translator'] = array(
       '#markup' => t('None of the available translators supports the selected source and target language combination.'),
     );
@@ -135,7 +145,7 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
   //  // Create a job item and add it to the job.
   //  $job->addItem(tmgmt_job_item_create('node', 'node', $values['nid']));
 
-  $job = tmgmt_job_load($form_state['job']->tjid);
+  $job = $form_state['job'];
   $job->target_language = $values['target_language'];
   $job->translator = $values['translator'];
   $job->translator_context = $values['settings'];
@@ -144,6 +154,27 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
   //  $job->prepared('Job has been prepared.');
   // Print a message to the screen and redirect the user.
   drupal_set_message(t('Translation job has been created.'));
+}
+
+/**
+ *
+ * @param type $form
+ * @param type $form_state
+ * @return type
+ */
+function tmgmt_job_checkout_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  $job = $form_state['job'];
+  $plugin = tmgmt_translator_plugin_controller($values['translator']);
+  $available_languages = entity_metadata_language_list();
+  switch (tmgmt_translator_check($values['translator'], $job->source_language, $values['target_language'])) {
+    case TMTGT_TRANSLATOR_NOT_AVAILABLE:
+      form_set_error('translator', t('Translator is not available: @reason.', array('@reason' => $plugin->getNotAvailableReason())));
+      break;
+    case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
+      form_set_error('translator', t('Test translator is not avalible for @language.', array('@language' => $available_languages[$values['target_language']])));
+      break;
+  }
 }
 
 /**
@@ -159,7 +190,6 @@ function tmgmt_ajax_callback_get_supported_translators($form, &$form_state) {
 function tmgmt_ajax_callback_get_translator_options($form, &$form_state) {
   return $form['translator_wrapper']['options'];
 }
-
 
 /**
  * Page callback for the tmgmt content page.
@@ -248,11 +278,9 @@ function tmgmt_ui_checkout_wizard($jobs = array()) {
   // @todo: This doesn't include the file itself.
 //  $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt') .'/includes/tmgmt.ui.inc';
 //  ctools_include('tmgmt.ui', 'tmgmt');
-
   // @todo: Implement multiple cases via a wizard? See above.
   $job = reset($jobs);
   $output = drupal_get_form('tmgmt_job_checkout_form', $job);
 
   return $output;
 }
-
