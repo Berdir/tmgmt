@@ -14,7 +14,8 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
   }
   if ($source_language != $job->source_language) {
     drupal_set_message("The source language of your item doesn't match the source language of your job.", 'error');
-  } else {
+  }
+  else {
     $item_ids = explode(',', $item_ids);
     foreach ($item_ids as $item_id) {
       $job->addItem($source_plugin, $item_type, $item_id);
@@ -27,7 +28,7 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
  * The checkout form.
  */
 function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
-  if($job->isNew()) {
+  if ($job->isNew()) {
     $job->prepared();
   }
   if ($job->isRejected() || $job->isPrepared()) {
@@ -116,7 +117,8 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
             $form['translator_wrapper']['options']['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $plugin_info['label']));
           }
       }
-    } else {
+    }
+    else {
       $form['translator_wrapper']['translator'] = array(
         '#markup' => t('None of the available translators supports the selected source and target language combination.'),
       );
@@ -128,10 +130,12 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
       '#weight' => 50,
     );
     return $form;
-  } else {
+  }
+  else {
     if ($job->isNew()) {
       drupal_set_message(t('The job is not prepared for checkout yet.'), 'error');
-    } else {
+    }
+    else {
       drupal_set_message(t('The job has already been processed.'), 'error');
     }
   }
