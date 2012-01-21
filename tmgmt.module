@@ -147,8 +147,6 @@ function tmgmt_entity_info() {
     'exportable' => TRUE,
     // @todo: Fix entity api to check if the entitycache module is enabled.
     // 'entity cache' => TRUE,
-    'uri callback' => 'entity_class_uri',
-    'label callback' => 'entity_class_label',
     'access callback' => 'tmgmt_translator_access',
     'entity keys' => array(
       'id' => 'tid',

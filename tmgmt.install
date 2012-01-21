@@ -318,3 +318,15 @@ function tmgmt_update_7005() {
   $job_index = array('tjid');
   db_add_index('tmgmt_job_item', 'job_id', $job_index);
 }
+
+/**
+ * Add the translator description column.
+ */
+function tmgmt_update_7006() {
+  $new_field = array(
+    'description' => 'Description of the translator.',
+    'type' => 'text',
+    'size' => 'medium',
+  );
+  db_add_field('tmgmt_translator', 'description', $new_field);
+}
