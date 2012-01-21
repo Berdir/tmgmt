@@ -129,7 +129,7 @@ function tmgmt_local_translator_job_item_subform($items, $translation) {
     $form['#description'] = $items['#description'];
   }
   foreach (element_children($items) as $key) {
-    $form[$key] = tmgmt_local_translator_job_item_subform($items[$key], $translation[$key]);
+    $form[$key] = tmgmt_local_translator_job_item_subform($items[$key], isset($translation[$key]) ? $translation[$key] : array());
   }
   return $form;
 }
