@@ -91,6 +91,14 @@ function tmgmt_menu() {
       'page callback' => 'tmgmt_job_add_item',
       'page arguments' => array(3, 4, 5, 6),
       'access arguments' => array('use tmgmt'),
+      'file' => 'includes/tmgmt.ui.inc',
+    );
+    $items['admin/tmgmt/add-item/%/%/%/%/%tmgmt_job'] = array(
+      'title' => 'Add to existing Job',
+      'page callback' => 'tmgmt_job_add_item',
+      'page arguments' => array(3, 4, 5, 6, 7),
+      'access arguments' => array('use tmgmt'),
+      'file' => 'includes/tmgmt.ui.inc',
     );
     $items['admin/tmgmt/checkout/%tmgmt_job'] = array(
       'title' => 'Checkout Job',
@@ -244,26 +252,6 @@ function tmgmt_job_create($source_language, $target_language, array $values = ar
     'source_language' => $source_language,
     'target_language' => $target_language,
   )));
-}
-
-/**
- * Creates and adds a jobitem to a certain job. If job is not defined, a new job
- * will be created. Destinatoin will be needed to return to the submitters page.
- */
-function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_ids, $tjid = NULL) {
-  if (!$tjid) {
-    $job = tmgmt_job_create($source_language, '');
-  }
-  else {
-    $job = tmgmt_job_load($tjid);
-  }
-  $item_ids = explode(',', $item_ids);
-  foreach ($item_ids as $item_id) {
-    $job->addItem($source_plugin, $item_type, $item_id);
-  }
-  $job->submitted();
-  // @todo: in case of no destination, goto checkoutform
-  drupal_goto('admin/tmgmt/checkout/'.$tjid);
 }
 
 /**
