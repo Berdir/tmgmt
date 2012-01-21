@@ -13,8 +13,8 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
    */
   protected $apiURL = 'http://www.supertext.ch/api/v1/';
   // @TODO The second one is only for testing on local network.
-  //protected $sandboxURL = 'http://dev.supertext.ch/api/v1/';
-  protected $sandboxURL = 'http://172.21.21.66/supertext/api/v1/';
+  protected $sandboxURL = 'http://dev.supertext.ch/api/v1/';
+  //protected $sandboxURL = 'http://172.21.21.66/supertext/api/v1/';
   /**
    *    requestFromSupertext($endpoint, $data = array())
    *
