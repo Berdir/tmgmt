@@ -258,11 +258,6 @@ function tmgmt_job_states() {
  */
 
 /**
- * @addtogroup tmgmt_job_item
- * @{
- */
-
-/**
  * Loads a translation job item.
  */
 function tmgmt_job_item_load($tjiid, $reset = FALSE) {
@@ -299,9 +294,6 @@ function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $valu
     'item_id' => $item_id,
   )));
 }
-/**
- * @} End of "addtogroup tmgmt_job_item".
- */
 
 /**
  * @addtogroup tmgmt_job_message
