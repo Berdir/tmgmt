@@ -9,9 +9,6 @@
  */
 function tmgmt_ui_permission() {
   return array(
-    'administer tmgmt ui' => array(
-      'title' => t('Administer Translation Management UI'),
-    ),
     'access tmgmt ui' => array(
       'title' => t('Access Translation Management UI'),
     ),
