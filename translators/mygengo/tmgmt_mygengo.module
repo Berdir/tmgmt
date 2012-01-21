@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Module file of the translation management mygengo module.
@@ -13,7 +12,7 @@
  *  Implements hook_menu().
  */
 function tmgmt_mygengo_menu() {
-    $items['mygengo_callback'] = array(
+  $items['tmgmt_mygengo_callback'] = array(
     'type' => MENU_CALLBACK,
     'title' => 'mygengo_callback',
     'description' => '',
@@ -47,7 +46,7 @@ function tmgmt_mygengo_access_check() {
   } catch(Exception $e) {
     
     // Debug it for now, why not...
-    watchdog('mygengo', print_r($_REQUEST));
+    watchdog('mygengo', print_r($_REQUEST, TRUE));
     return FALSE;
   }
 }

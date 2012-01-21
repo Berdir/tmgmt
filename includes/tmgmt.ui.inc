@@ -1,9 +1,28 @@
 <?php
-
 /**
  * @file
  * Please supply a file description.
  */
+
+/**
+ * Creates and adds a jobitem to a certain job. If job is not defined, a new job
+ * will be created. Destinatoin will be needed to return to the submitters page.
+ */
+function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_ids, TMGMTJob $job = NULL) {
+  if (!$job) {
+    $job = tmgmt_job_create($source_language, '');
+  }
+  if ($source_language != $job->source_language) {
+    drupal_set_message("The source language of your item doesn't match the source language of your job.", 'error');
+  } else {
+    $item_ids = explode(',', $item_ids);
+    foreach ($item_ids as $item_id) {
+      $job->addItem($source_plugin, $item_type, $item_id);
+    }
+    $job->prepared();
+  }
+  drupal_goto('admin/tmgmt/checkout/' . $job->tjid);
+}
 
 /**
  * The checkout form.
@@ -93,6 +112,8 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
       '#value' => t('Submit'),
       '#weight' => 50,
     );
+  } else {
+    drupal_set_message(t('You have to install a translator plugin module'), 'warning');
   }
   return $form;
 }
@@ -100,7 +121,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
 /**
  * submit function, will create a job.
  */
-function tmgmt_checkout_form_submit($form, &$form_state) {
+function tmgmt_job_checkout_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   // Create the job object.
   //  $job_values = array('translator' => $values['translator'], 'uid' => $GLOBALS['user']->uid);
