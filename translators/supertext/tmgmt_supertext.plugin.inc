@@ -15,9 +15,9 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
     protected $sandboxURL = 'http://dev.supertext.ch/api/v1/';
 
     /**
-     *    requestFromGengo($endpoint, $data = array())
+     *    requestFromSupertext($endpoint, $data = array())
      *
-     *    Builds, signs and fires a request to myGengo's API. Will fire to a different url
+     *    Builds, signs and fires a request to mySupertext's API. Will fire to a different url
      *    if on the sandbox.
      *
      *    Authentication rituals are documented here: http://mygengo.com/api/developer-docs/authentication/
@@ -25,7 +25,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
      *    It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
      *    respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
      */
-    public function requestFromGengo($endpoint, $method, $data = array()) {
+    public function requestFromSupertext($endpoint, $method, $data = array()) {
         $options = array(
             'headers' => array(
                 'User-Agent' => 'Drupal Supertext Translation Interface v0.1',
@@ -98,7 +98,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
         $object = new stdClass();
         $object->AccountId = variable_get('tmgmt_supertext_api_account_id', '');
 	    $object->Password = variable_get('tmgmt_supertext_api_password', '');
-		$object->CallbackUrl = "asdf";
+		$object->CallbackUrl = url('tmgmt_supertext_callback', array('absolute' => TRUE));
 		$object->CommunicationLang = "en-US";
 		$object->ContentType = "text/plain";
 		$object->Currency = "chf";
@@ -106,11 +106,13 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
 		$object->DeliveryId = "1";
 		$object->SourceLang = $job->source_language;
 		$object->TargetLang = "en-US";
-		$object->ReferenceData = $job->tjid;
+		$object->ReferenceData = $job->tjid . ':' . tmgmt_supertext_hash($job->tjid);
 		$object->OrderTitle = $job->label;
 		$object->Groups = array();
 		
 	    $items = $job->getItems();
+            // @todo check to use $job->getSourceData();
+
 		foreach ($items as $tjiid => $item) {
 			$itemSourceData = $item->getSourceData();
 			$fields = tmgmt_flatten_data($itemSourceData);
@@ -165,7 +167,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
      */
     public function getSupportedTargetLanguages($source_language) {
         $results = array();
-        $targets = $this->requestFromGengo('translate/service/language_pairs', 'GET', array(
+        $targets = $this->requestFromSupertext('translate/service/language_pairs', 'GET', array(
             'lc_src' => $source_language
         ));
 
@@ -184,7 +186,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
     public function getSupportedLanguages() {
         $languages = &drupal_static(__FUNCTION__);
         if(!isset($languages)) {
-            $supported_languages = $this->requestFromGengo('translate/service/languages', 'GET');
+            $supported_languages = $this->requestFromSupertext('translate/service/languages', 'GET');
             $languages = array();
             
             foreach($supported_languages as $language) {
