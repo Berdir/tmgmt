@@ -5,7 +5,7 @@
  *
  * @ingroup views_filter_handlers
  */
-class tmgmt_node_ui_handler_filter_node_translatable_types extends views_handler_filter {
+class tmgmt_node_handler_filter_node_translatable_types extends views_handler_filter {
   function query() {
     $this->ensure_my_table();
 
