@@ -67,7 +67,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     if (isset($job->translator_context['action']) && $job->translator_context['action'] == 'not_translatable') {
       return FALSE;
     }
-    parent::canTranslate($job);
+    return parent::canTranslate($job);
   }
 
   /**
