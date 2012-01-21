@@ -32,7 +32,6 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt') . '/includes/tmgmt.ui.inc';
   // Add the job to the form state so we can use it in the submit handler.
   $form_state['job'] = $job;
-  $form_state['request_time'] = time();
   // Get all available languages from core translation module.
   $available_languages = entity_metadata_language_list();
   // Keep the label of the source language.
@@ -149,9 +148,9 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
   $job->requestTranslation();
 
   // Print a message to the screen and redirect the user.
-  $messages = $job->getMessagesSince($form_state['request_time']);
+  $messages = $job->getMessagesSince(REQUEST_TIME);
+  dpm($messages);
   foreach ($messages as $message) {
-
     $text = $message->message;
     if (is_array($message->variables)) {
       $text = t($message->message, $message->variables);
