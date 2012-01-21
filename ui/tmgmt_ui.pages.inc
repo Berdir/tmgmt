@@ -135,7 +135,7 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
   //  // Create a job item and add it to the job.
   //  $job->addItem(tmgmt_job_item_create('node', 'node', $values['nid']));
 
-  $job = tmgmt_job_load($values['tjid']);
+  $job = tmgmt_job_load($form_state['job']->tjid);
   $job->target_language = $values['target_language'];
   $job->translator = $values['translator_wrapper']['translator'];
   //  dsm($job);
