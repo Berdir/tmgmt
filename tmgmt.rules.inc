@@ -63,7 +63,6 @@ function tmgmt_rules_job_accept_translation(TMGMTJob $job) {
   }
 }
 
-
 /**
  * Rules callback to cancel a translation job.
  */

@@ -14,7 +14,8 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
   }
   if ($source_language != $job->source_language) {
     drupal_set_message("The source language of your item doesn't match the source language of your job.", 'error');
-  } else {
+  }
+  else {
     $item_ids = explode(',', $item_ids);
     foreach ($item_ids as $item_id) {
       $job->addItem($source_plugin, $item_type, $item_id);
@@ -27,14 +28,12 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
  * The checkout form.
  */
 function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
-  if($job->isNew()) {
+  // Add the job to the form state so we can use it in the submit handler.
+  $form_state['job'] = $job;
+  if ($job->isNew()) {
     $job->prepared();
   }
   if ($job->isRejected() || $job->isPrepared()) {
-    // The Form API needs to know that we are
-    $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt') . '/includes/tmgmt.ui.inc';
-    // Add the job to the form state so we can use it in the submit handler.
-    $form_state['job'] = $job;
     // Get all available languages from core translation module.
     $available_languages = entity_metadata_language_list();
     // Keep the label of the source language.
@@ -116,7 +115,8 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
             $form['translator_wrapper']['options']['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $plugin_info['label']));
           }
       }
-    } else {
+    }
+    else {
       $form['translator_wrapper']['translator'] = array(
         '#markup' => t('None of the available translators supports the selected source and target language combination.'),
       );
@@ -128,10 +128,12 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
       '#weight' => 50,
     );
     return $form;
-  } else {
+  }
+  else {
     if ($job->isNew()) {
       drupal_set_message(t('The job is not prepared for checkout yet.'), 'error');
-    } else {
+    }
+    else {
       drupal_set_message(t('The job has already been processed.'), 'error');
     }
   }
@@ -294,16 +296,16 @@ function tmgmt_ui_embed_view($view) {
  */
 function tmgmt_ui_checkout_wizard($jobs = array()) {
 
-//  ctools_include('wizard');
-//  $form_info = array(
-//    'id' => 'tmgmt_ui_checkout_wizard'
-//  );
-//  ctools_wizard_multistep_form($form_info, 'select', $form_state);
-//  return "hallo";
+  //  ctools_include('wizard');
+  //  $form_info = array(
+  //    'id' => 'tmgmt_ui_checkout_wizard'
+  //  );
+  //  ctools_wizard_multistep_form($form_info, 'select', $form_state);
+  //  return "hallo";
   $form_state = array();
   // @todo: This doesn't include the file itself.
-//  $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt') .'/includes/tmgmt.ui.inc';
-//  ctools_include('tmgmt.ui', 'tmgmt');
+  //  $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt') .'/includes/tmgmt.ui.inc';
+  //  ctools_include('tmgmt.ui', 'tmgmt');
   // @todo: Implement multiple cases via a wizard? See above.
   $job = reset($jobs);
   $output = drupal_get_form('tmgmt_job_checkout_form', $job);
