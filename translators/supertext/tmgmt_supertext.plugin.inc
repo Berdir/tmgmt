@@ -81,7 +81,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
+   * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
    *
    * We will check are source and target language supported.
    */
@@ -171,24 +171,6 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
     }
 
     return $results;
-  }
-
-  /**
-   * Returns array of service supported languages.
-   *
-   * @return array
-   */
-  public function getSupportedLanguages() {
-    $languages = &drupal_static(__FUNCTION__);
-    if(!isset($languages)) {
-      $supported_languages = $this->requestFromSupertext('translate/service/languages', 'GET');
-      $languages = array();
-
-      foreach($supported_languages as $language) {
-        array_push($languages, $language->lc);
-      }
-    }
-    return $languages;
   }
 
   /**
