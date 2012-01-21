@@ -286,14 +286,14 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  public function settingsForm() {
+  public function settingsForm($form, &$form_state) {
     return array();
   }
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::jobSettingsForm().
    */
-  public function jobSettingsForm() {
+  public function jobSettingsForm($form, &$form_state) {
     return array();
   }
 
