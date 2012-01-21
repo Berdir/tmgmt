@@ -145,7 +145,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
 
 
 /**
- * Basic CRUD tests.
+ * Tests interaction between core and the plugins.
  */
 class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
