@@ -27,10 +27,10 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
  * The checkout form.
  */
 function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
-  if(!$job->isPrepared()) {
+  if($job->isNew()) {
     $job->prepared();
   }
-  if ($job->isRejected()) {
+  if ($job->isRejected() || $job->isPrepared()) {
     // The Form API needs to know that we are
     $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt') . '/includes/tmgmt.ui.inc';
     // Add the job to the form state so we can use it in the submit handler.
