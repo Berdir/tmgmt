@@ -8,18 +8,19 @@
  * Creates and adds a jobitem to a certain job. If job is not defined, a new job
  * will be created. Destinatoin will be needed to return to the submitters page.
  */
-function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_ids, $tjid = NULL) {
-  if (!$tjid) {
+function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_ids, TMGMTJob $job = NULL) {
+  if (!$job) {
     $job = tmgmt_job_create($source_language, '');
+  }
+  if ($source_language != $job->source_language) {
+    drupal_set_message("The source language of your item doesn't match the source language of your job.", 'error');
   } else {
-    $job = tmgmt_job_load($tjid);
+    $item_ids = explode(',', $item_ids);
+    foreach ($item_ids as $item_id) {
+      $job->addItem($source_plugin, $item_type, $item_id);
+    }
+    $job->prepared();
   }
-  $item_ids = explode(',', $item_ids);
-  foreach ($item_ids as $item_id) {
-    $job->addItem($source_plugin, $item_type, $item_id);
-  }
-  $job->prepared();
-  // @todo: in case of no destination, goto checkoutform.
   drupal_goto('admin/tmgmt/checkout/' . $job->tjid);
 }
 
