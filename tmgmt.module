@@ -259,9 +259,12 @@ function tmgmt_job_states() {
 
 /**
  * Loads a translation job item.
+ *
+ * @return TMGMTJobItem
+ *   The loaded job item.
  */
 function tmgmt_job_item_load($tjiid, $reset = FALSE) {
-  $jobs = tmgmt_job_load_multiple(array($tjid), array(), $reset);
+  $jobs = tmgmt_job_item_load_multiple(array($tjiid), array(), $reset);
   return $jobs ? reset($jobs) : FALSE;
 }
 
