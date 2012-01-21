@@ -55,6 +55,13 @@ function tmgmt_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
   );
+  $items['tmgmt/checkout/%tmgmt_ui_job_multiple'] = array(
+    'title' => 'Job checkout form',
+    'page callback' => 'tmgmt_ui_checkout_wizard',
+    'page arguments' => array(2),
+    'access arguments' => array('access tmgmt ui'),
+    'file' => 'tmgmt_ui.pages.inc',
+  );
 
   // Add source overview pages.
   foreach (tmgmt_source_plugin_info() as $plugin_type => $info) {
@@ -62,6 +69,17 @@ function tmgmt_ui_menu() {
     $items = array_merge($items, $plugin->hook_menu());
   }
   return $items;
+}
+
+/**
+ * Load callback to load multiple jobs.
+ *
+ * @todo: This function can be easily tested.
+ */
+function tmgmt_ui_job_multiple_load($job_ids) {
+  $job_ids = explode(',', $job_ids);
+  $jobs = tmgmt_job_load_multiple($job_ids);
+  return $jobs;
 }
 
 /**
