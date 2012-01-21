@@ -36,7 +36,7 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
    *
    * @return TMGMTJob
    */
-  function createJob() {
+  function createJob()  {
     $job = tmgmt_job_create('en', 'de', array('uid' => 1));
     $this->assertEqual(SAVED_NEW, $job->save());
 
@@ -320,7 +320,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 }
 
 /**
- * Basic CRUD tests.
+ * Test the userinterface of tmgmt, for example the checkout form.
  */
 class TMGMTUITestCase extends TMGMTBaseTestCase {
 
@@ -494,4 +494,58 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->drupalGet('admin/tmgmt/add-item/en/test_source/test/5/' . ($tjid + 1));
     $this->assertResponse(404);
   }
+}
+
+/**
+ * Test the helper functions in tmgmt.module.
+ */
+class TMGMTHelperTestCase extends TMGMTBaseTestCase {
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => t('Helper functions Test case'),
+      'description' => t('Helper functions for other modules'),
+      'group' => t('Translation Management'),
+    );
+  }
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp() {
+    parent::setUp(array('entity', 'tmgmt'));
+  }
+
+  /**
+   * Tests tmgmt_job_match_item()
+   * @see tmgmt_job_match_item
+   */
+  function testTMGTJobMatchItem() {
+    locale_add_language('fr');
+    locale_add_language('es');
+
+    // Add a job from en to fr and en to sp.
+    $job_en_fr = $this->createJobEntity('en', 'fr');
+    $job_en_sp = $this->createJobEntity('en', 'es');
+
+    // Add a job which has existing source-target combinations.
+    $this->assertEqual($job_en_fr->tjid, tmgmt_job_match_item('en', 'fr')->tjid);
+    $this->assertEqual($job_en_sp->tjid, tmgmt_job_match_item('en', 'es')->tjid);
+
+    // Add a job which has no existing source-target combination.
+    $this->assertTrue(tmgmt_job_match_item('fr', 'es') !== FALSE);
+
+  }
+
+  function createJobEntity($source = 'en', $target = 'de', $uid = 1)  {
+    $job = tmgmt_job_create($source, $target, array('uid' => $uid));
+    $this->assertEqual(SAVED_NEW, $job->save());
+
+    // Assert that the translator was assigned a tid.
+    $this->assertTrue($job->tjid > 0);
+    return $job;
+  }
+
 }
