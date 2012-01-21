@@ -125,7 +125,7 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
     foreach (array_keys($languages) as $langcode) {
       $count++;
       // Create the job object.
-      $job = tmgmt_job_create($values['source_language'], $langcode, array('translator' => $values['translator']));
+      $job = tmgmt_job_create($values['source_language'], $langcode);
       // Create job items and add them to the job. This may take a single value or an array of item_id's.
       $items = is_array($values['item_id']) ? $values['item_id'] : array($values['item_id']);
       foreach ($items as $item_id) {

@@ -87,6 +87,13 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public $tjid;
 
   /**
+   * The identifier of the translation job item.
+   *
+   * @var integer
+   */
+  public $tjiid;
+
+  /**
    * Type of this item, used by the plugin to identify it.
    *
    * @var string

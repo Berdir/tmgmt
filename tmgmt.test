@@ -162,10 +162,39 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $job->delete();
     $this->assertFalse(tmgmt_job_load($job->tjid));
   }
+
+  /**
+   * Test crud operations of job items.
+   */
+  function testJobItems() {
+    $job = $this->createJob();
+
+    // Add some test items.
+    $item1 = $job->addItem('plugin', 'type', 5);
+    $item2 = $job->addItem('plugin', 'type', 4);
+
+    // Test single load callback.
+    $item = tmgmt_job_item_load($item1->tjiid);
+    $this->assertEqual($item1->source_plugin, $item->source_plugin);
+    $this->assertEqual($item1->item_type, $item->item_type);
+    $this->assertEqual($item1->item_id, $item->item_id);
+
+    // Test multiple load callback.
+    $items = tmgmt_job_item_load_multiple(array($item1->tjiid, $item2->tjiid));
+
+    $this->assertEqual(2, count($items));
+
+    $this->assertEqual($item1->source_plugin, $items[$item1->tjiid]->source_plugin);
+    $this->assertEqual($item1->item_type, $items[$item1->tjiid]->item_type);
+    $this->assertEqual($item1->item_id, $items[$item1->tjiid]->item_id);
+    $this->assertEqual($item2->source_plugin, $items[$item2->tjiid]->source_plugin);
+    $this->assertEqual($item2->item_type, $items[$item2->tjiid]->item_type);
+    $this->assertEqual($item2->item_id, $items[$item2->tjiid]->item_id);
+  }
 }
 
 /**
- * Basic CRUD tests.
+ * Tests interaction between core and the plugins.
  */
 class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
