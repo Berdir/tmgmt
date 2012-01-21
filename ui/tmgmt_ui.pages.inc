@@ -137,7 +137,9 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
 
   $job = tmgmt_job_load($form_state['job']->tjid);
   $job->target_language = $values['target_language'];
-  $job->translator = $values['translator_wrapper']['translator'];
+  $job->translator = $values['translator'];
+  $job->translator_context = $values['settings'];
+  $job->requestTranslation();
   //  dsm($job);
   //  $job->prepared('Job has been prepared.');
   // Print a message to the screen and redirect the user.
