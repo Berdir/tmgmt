@@ -19,6 +19,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
         'submit' => t('Submit'),
         'reject' => t('Reject'),
         'fail' => t('Fail'),
+        'not_translatable' => t('Not translatable'),
       ),
     );
     return $settings;
@@ -62,11 +63,18 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     return TRUE;
   }
 
+  function canTranslate(TMGMTJob $job) {
+    if (isset($job->translator_context['action']) && $job->translator_context['action'] == 'not_translatable') {
+      return FALSE;
+    }
+    parent::canTranslate($job);
+  }
+
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages($source_language) {
-    return drupal_map_assoc(array('de', 'es', 'it', 'zh-zans'));
+    return drupal_map_assoc(array('en', 'de', 'es', 'it', 'zh-zans'));
   }
 }
 
