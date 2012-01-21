@@ -118,7 +118,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
       $itemSourceData = $item->getSourceData();
       $fields = tmgmt_flatten_data($itemSourceData);
       $group = new stdClass();
-      $group->GroupID = $tjiid;
+      $group->GroupId = $tjiid;
       $group->Context = $itemSourceData['#label'];
       $group->Items = array();
       foreach ($fields as $fieldarray_id => $field_array) {
@@ -131,7 +131,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
       }
       $object->Groups[] = $group;
     }
-dpm($object, 'Request object');
+    //dpm($object, 'Request object');
     $options = array(
       'method' => 'POST',
       'data' => json_encode($object),
@@ -139,12 +139,11 @@ dpm($object, 'Request object');
     );
 
     $job->addMessage("Sending request to supertext");
-    dpm($options, 'Options');
     $response = drupal_http_request($this->sandboxURL.'/translation/order', $options);
-    dpm($response, 'Response');
+    //dpm($response, 'Response');
 
     if ($response->code == "200") {
-//      $job->submitted("Job sent to Supertext. Response: @response",array('@response'=>$repsonse->data));
+      $job->submitted("Job sent to Supertext. Response: !response",array('!response'=> $response->data));
       $responsedata = json_decode($response->data);
       // Save order id to the job
       $job->translator_id = $responsedata->Id;

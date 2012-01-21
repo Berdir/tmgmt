@@ -216,6 +216,14 @@ stdClass Object
     [WordCount] => 10
 )
 
+Then, how to convert a response to our format, example, not working, code:
+if (isset($response['Options'])) {
+        foreach $response['DeliveryOptions'] as $option_key => $option_item {
+          foreach $option_item['DeliveryOptions'] as $delivery_key => $delivery_item {
+            $options[$option_item->OrderTypeId . '-' . $delivery_item->DeliveryId] = $option_item->Name . ': ' . $delivery_item->DeliveryDate . ', Price' . $delivery_item->Price;
+          }
+        }
+      }
  */
 function tmgmt_supertext_callback() {
   $input = file_get_contents('php://input');
@@ -228,8 +236,19 @@ function tmgmt_supertext_callback() {
   $job = tmgmt_job_load($tjid);
   watchdog('supertext', 'JOB.  <br /><pre>!post</pre>', array('!post' => print_r($job, TRUE)));
   
-  $supertext = tmgmt_translator_plugin_controller('supertext');
-  $supertext->receiveTranslation($job, $keys, $data);
+  $translated_data = array();
+  foreach ($data->Groups as $object_id => $object) {
+    // Object <=> JobItem
+    foreach ($object->Items as $string_object) {
+      $translated_data[$object->GroupId][$string_object->Id] = array(
+        '#text' => $string_object->Content,
+      );
+    }
+  }
+  watchdog('supertext', 'TRANSLATED DATA.  <br /><pre>!post</pre>', array('!post' => print_r($translated_data, TRUE)));
+  
+  $job->addTranslatedData($translated_data);
+  $job->save();
 }
 
 /**
