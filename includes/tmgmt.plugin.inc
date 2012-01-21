@@ -126,6 +126,14 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function isAvailable();
 
   /**
+   * Return a reason why the translator is not available.
+   *
+   * Might be called when isAvailable() returns FALSE to get a reason that
+   * can be displayed to the user.
+   */
+  public function getNotAvailableReason();
+
+  /**
    * Check whether this service can handle a particular translation job.
    *
    * @param TMGMTJob $job
@@ -242,6 +250,13 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   public function cancelTranslation(TMGMTJob $job) {
     // Assume that we can cancel a translation job at any time.
     return TRUE;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getNotAvailableReason().
+   */
+  public function getNotAvailableReason() {
+    return t('@plugin needs to be configured before it can be used.', array('@plugin' => $this->pluginInfo['label']));
   }
 
   /**
