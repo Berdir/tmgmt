@@ -25,6 +25,9 @@ function tmgmt_ui_menu() {
   $items['admin/config/regional/tmgmt/tmgmt_ui'] = array(
     'title' => 'User interface configuration',
     'description' => 'Administer Translation Management UI',
+    'page callback' => 'tmgmt_ui_fake_admin',
+    'access arguments' => array('administer tmgmt ui'),
+    'file' => 'tmgmt_ui.pages.inc',
   );
   $items['admin/tmgmt'] = array(
     'title' => 'Translation Management',
