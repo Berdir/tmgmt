@@ -246,7 +246,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Reference to the used translator of this job.
    *
-   * @see TMGMTJob::getTranslatorController().
+   * @see TMGMTJob::getTranslatorController()
    *
    * @var string
    */

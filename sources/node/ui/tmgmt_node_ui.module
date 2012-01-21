@@ -11,7 +11,7 @@
  */
 function tmgmt_node_ui_menu() {
   $items['node/%node/tmgmt'] = array(
-    'title' => t('Translation management'),
+    'title' => 'Translation management',
     'page callback' => 'tmgmt_node_ui_translation_overview',
     'page arguments' => array(1),
     'access callback' => '_translation_tab_access',
