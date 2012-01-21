@@ -47,7 +47,7 @@ function tmgmt_mygengo_access_check() {
   } catch(Exception $e) {
     
     // Debug it for now, why not...
-    watchdog('mygengo', print_r($_REQUEST));
+    watchdog('mygengo', print_r($_REQUEST, TRUE));
     return FALSE;
   }
 }
