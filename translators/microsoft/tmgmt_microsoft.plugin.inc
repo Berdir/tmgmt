@@ -91,8 +91,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Implements
-   * TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages($source_language) {
     $languages = $this->getSupportedLanguages();
@@ -101,8 +100,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Implements
-   * TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
    */
   public function getSupportedLanguages() {
     $languages = &drupal_static(__FUNCTION__);
@@ -121,7 +119,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * The settings form.
+   * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
   public function settingsForm($form, &$form_state) {
     $form['bing_api_id'] = array(
@@ -135,12 +133,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Defines plugin job settings form.
-   *
-   * @param $form array
-   * @param $form_state array
-   * @return array
-   *   Settings form.
+   * Implements TMGMTTranslatorPluginControllerInterface::jobSettingsForm().
    */
   public function jobSettingsForm($form, &$form_state) {
     $settings['group_translations'] = array(

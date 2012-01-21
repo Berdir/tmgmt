@@ -11,7 +11,17 @@
  */
 function tmgmt_node_ui_menu() {
   $items['node/%node/tmgmt'] = array(
+    'title' => 'Translation management',
+    'page callback' => 'tmgmt_node_ui_translation_overview',
+    'page arguments' => array(1),
+    'access callback' => '_translation_tab_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 20
+  );
+  $items['node/%node/view/translate'] = array(
     'title' => t('Translation management'),
+
     'page callback' => 'tmgmt_node_ui_translation_overview',
     'page arguments' => array(1),
     'access callback' => '_translation_tab_access',
@@ -37,4 +47,12 @@ function tmgmt_node_ui_views_api() {
  */
 function tmgmt_node_ui_translation_overview($node) {
   return views_embed_view('job_items_current_node', 'default', $node->tnid);
+}
+
+/**
+ * Source overview callback which shows the status of all node translations.
+ */
+function tmgmt_node_ui_source_overview() {
+  $content = views_embed_view('tmgmt_node_ui_source_overview');
+  return $content;
 }
