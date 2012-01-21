@@ -92,11 +92,12 @@ function tmgmt_menu() {
       'page arguments' => array(3, 4, 5, 6),
       'access arguments' => array('use tmgmt'),
     );
-    $items['admin/tmgmt/checkout/%'] = array(
+    $items['admin/tmgmt/checkout/%tmgmt_job'] = array(
       'title' => 'Checkout Job',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('tmgmt_checkout_form', 3),
+      'page arguments' => array('tmgmt_job_checkout_form', 3),
       'access arguments' => array('use tmgmt'),
+      'file' => 'includes/tmgmt.ui.inc',
     );
   }
   return $items;
@@ -262,8 +263,7 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
   }
   $job->submitted();
   // @todo: in case of no destination, goto checkoutform
-  print_r($item_ids);
-  //drupal_goto();
+  drupal_goto('admin/tmgmt/checkout/'.$tjid);
 }
 
 /**
