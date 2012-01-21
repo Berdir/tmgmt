@@ -32,6 +32,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt') . '/includes/tmgmt.ui.inc';
   // Add the job to the form state so we can use it in the submit handler.
   $form_state['job'] = $job;
+  $form_state['request_time'] = time();
   // Get all available languages from core translation module.
   $available_languages = entity_metadata_language_list();
   // Keep the label of the source language.
@@ -147,10 +148,19 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
   $job = $form_state['job'];
   $job->requestTranslation();
 
+  // Print a message to the screen and redirect the user.
+  $messages = $job->getMessagesSince($form_state['request_time']);
+  foreach ($messages as $message) {
+
+    $text = $message->message;
+    if (is_array($message->variables)) {
+      $text = t($message->message, $message->variables);
+    }
+    drupal_set_message($text);
+  }
+
   //  dsm($job);
   //  $job->prepared('Job has been prepared.');
-  // Print a message to the screen and redirect the user.
-  drupal_set_message(t('Translation job has been created.'));
 }
 
 /**
@@ -169,7 +179,7 @@ function tmgmt_job_checkout_form_validate($form, &$form_state) {
       form_set_error('translator', t('Translator is not available: @reason.', array('@reason' => $plugin->getNotAvailableReason())));
       break;
     case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-      form_set_error('translator', t('Test translator is not avalable for @language.', array('@language' => $available_languages[$values['target_language']])));
+      form_set_error('translator', t('Test translator is not available for @language.', array('@language' => $available_languages[$values['target_language']])));
       break;
   }
   $job->target_language = $values['target_language'];
