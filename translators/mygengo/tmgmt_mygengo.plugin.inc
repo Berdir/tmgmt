@@ -16,15 +16,15 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
   protected $useSandbox = TRUE;
 
   /**
-   *    requestFromGengo($endpoint, $data = array())
+   *  requestFromGengo($endpoint, $data = array())
    *
-   *    Builds, signs and fires a request to myGengo's API. Will fire to a different url
-   *    if on the sandbox.
+   *  Builds, signs and fires a request to myGengo's API. Will fire to a different url
+   *  if on the sandbox.
    *
-   *    Authentication rituals are documented here: http://mygengo.com/api/developer-docs/authentication/
+   *  Authentication rituals are documented here: http://mygengo.com/api/developer-docs/authentication/
    *
-   *    It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
-   *    respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
+   *  It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
+   *  respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
    */
   public function requestFromGengo($endpoint, $method, $data = array()) {
     $options = array(
@@ -39,8 +39,8 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     $url = ($this->useSandbox ? $this->sandboxURL : $this->apiURL) . $endpoint;
 
     /**
-     *    If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
-     *    get a little more annoying...
+     *  If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
+     *  get a little more annoying...
      */
     if ($method == 'GET' || $method == 'DELETE') {
       $query_data = drupal_http_build_query(array_merge(array(
@@ -145,6 +145,9 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
   }
 
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::receiveTranslation().
+   */
   public function receiveTranslation(TMGMTJob $job, $keys, $data) {
     $job->addTranslatedData(array('#text' => $data->body_src), $keys);
   }
