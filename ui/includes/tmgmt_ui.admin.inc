@@ -5,6 +5,9 @@
  * Please supply a file description.
  */
 
+/**
+ * Entity API form for the translator entity.
+ */
 function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator, $op = 'edit') {
   $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt_ui') . '/includes/tmgmt_ui.admin.inc';
   // We don't want the terrible long title that Entity API generates for us.
@@ -16,7 +19,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     $translator->name = '';
   }
   $available_plugins = tmgmt_translator_plugin_labels();
-  if ($translator->is_new) {
+  if (!empty($translator->is_new)) {
     $selected_plugin = isset($form_state['values']['translator_plugin']) ? $form_state['values']['translator_plugin'] : key($available_plugins);
   }
   else {
@@ -83,9 +86,37 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
       $form['translator_plugin_settings_wrapper']['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $plugin_info['label']));
     }
   }
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['aubmit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
   return $form;
 }
 
+/**
+ * Ajax callback for loading the translator plugin settings form for the
+ * currently selected translator plugin.
+ */
 function tmgmt_ui_ajax_callback_translator_plugin_settings($form, &$form_state) {
   return $form['translator_plugin_settings_wrapper'];
+}
+
+/**
+ * Default submit handler for Homebox forms. Populates and stores the submitted
+ * values for the Homebox entity via entity_ui_form_submit_build_entity().
+ *
+ * @param $form
+ *   An associative array containing the structure of the form.
+ * @param $form_state
+ *   The standard associative array containing the current state of the form.
+ */
+function tmgmt_translator_form_submit($form, &$form_state) {
+  entity_ui_form_submit_build_entity($form, $form_state)->save();
+  // We might have changed the path, so rebuild the menu registry.
+  menu_rebuild();
+  if (isset($form_state['op']) && $form_state['op'] == 'add') {
+    $form_state['redirect'] = 'admin/tmgmt/translators/manage/' . $form_state['tmgmt_translator']->tid;
+  }
+  drupal_set_message(t('The configuration options have been saved.'));
 }
