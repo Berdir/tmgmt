@@ -12,8 +12,9 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
    * @var string
    */
   protected $apiURL = 'http://www.supertext.ch/api/v1/';
-  protected $sandboxURL = 'http://dev.supertext.ch/api/v1/';
-
+  // @TODO The second one is only for testing on local network.
+  //protected $sandboxURL = 'http://dev.supertext.ch/api/v1/';
+  protected $sandboxURL = 'http://172.21.21.66/supertext/api/v1/';
   /**
    *    requestFromSupertext($endpoint, $data = array())
    *
@@ -105,7 +106,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
     $object->OrderTypeId = "7";
     $object->DeliveryId = "1";
     $object->SourceLang = $job->source_language;
-    $object->TargetLang = "en-US";
+    $object->TargetLang = $job->target_language;
     $object->ReferenceData = $job->tjid . ':' . tmgmt_supertext_hash($job->tjid);
     $object->OrderTitle = $job->label;
     $object->Groups = array();
@@ -130,7 +131,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
       }
       $object->Groups[] = $group;
     }
-
+dpm($object, 'Request object');
     $options = array(
       'method' => 'POST',
       'data' => json_encode($object),
@@ -138,13 +139,15 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
     );
 
     $job->addMessage("Sending request to supertext");
-
+    dpm($options, 'Options');
     $response = drupal_http_request($this->sandboxURL.'/translation/order', $options);
-//    dpm($response);
+    dpm($response, 'Response');
 
     if ($response->code == "200") {
 //      $job->submitted("Job sent to Supertext. Response: @response",array('@response'=>$repsonse->data));
       $responsedata = json_decode($response->data);
+      // Save order id to the job
+      $job->translator_id = $responsedata->Id;
       drupal_set_message(t("Job successfully sent to Supertext. <br />OrderID: @orderid<br />Price: @price<br />Wordcount: @wordcount<br />Deadline: @deadline",array(
         '@orderid' => $responsedata->Id,
         '@price' => $responsedata->Price,
@@ -161,6 +164,8 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages($source_language) {
+    // @TODO Not real data, we are returning list of languages for now
+    /*
     $results = array();
     $targets = $this->requestFromSupertext('translate/service/language_pairs', 'GET', array(
       'lc_src' => $source_language
@@ -171,6 +176,9 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
     }
 
     return $results;
+    */
+    // Array like array('es' => TRUE, 'de' => TRUE); 
+    return array_flip(array_keys(language_list()));
   }
 
   /**

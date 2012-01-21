@@ -31,7 +31,7 @@ function tmgmt_supertext_menu(){
     'access callback' => TRUE,
     'weight' => -19,
   );
-  $items['supertext_callback'] = array(
+  $items['tmgmt_supertext_callback'] = array(
     'type' => MENU_CALLBACK,
     'title' => 'supertext callback',
     'description' => '',
@@ -158,13 +158,76 @@ function supertext_test(){
 
 /**
  * Process response from supertext.
+ * 
+ * The payload, once decoded, looks like this:
+ * 
+stdClass Object
+(
+    [AccountId] => 11798
+    [CallbackUrl] => 
+    [CommunicationLang] => 
+    [ContentType] => 
+    [Currency] => CHF
+    [Deadline] => 2012-01-23T13:52:12.0000000
+    [DeliveryId] => 1
+    [Groups] => Array
+        (
+            [0] => stdClass Object
+                (
+                    [Context] => 
+                    [GroupId] => 
+                    [Items] => Array
+                        (
+                            [0] => stdClass Object
+                                (
+                                    [Comment] => 
+                                    [Content] => Tags
+                                    [Context] => 
+                                    [Id] => taxonomy:vocabulary:1:name
+                                )
+
+                            [1] => stdClass Object
+                                (
+                                    [Comment] => 
+                                    [Content] => Use tags to group articles on similar topics into categories.
+                                    [Context] => 
+                                    [Id] => taxonomy:vocabulary:1:description
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [Id] => 14292
+    [OrderDate] => 2012-01-22T02:52:12.0000000
+    [OrderTitle] => 
+    [OrderType] => Adaption
+    [OrderTypeId] => 7
+    [Password] => 
+    [Price] => -1
+    [ReferenceData] => 51:6905f8ae8dd7c961e3dc00c639e9b6b5
+    [Referrer] => 
+    [Service] => Translation
+    [SourceLang] => en
+    [Status] => Eingegangen
+    [TargetLang] => pt-BR
+    [WordCount] => 10
+)
+
  */
 function tmgmt_supertext_callback() {
-  $data = json_decode($_POST['job']);
-  $keys = explode('][', $data->custom_data);
+  $input = file_get_contents('php://input');
+  $data = json_decode($input);
+  watchdog('supertext', 'DATA.  <br /><pre>!post</pre>', array('!post' => print_r($data, TRUE)));
+
+  $keys = explode(':', $data->ReferenceData);
   $tjid = array_shift($keys);
 
   $job = tmgmt_job_load($tjid);
+  watchdog('supertext', 'JOB.  <br /><pre>!post</pre>', array('!post' => print_r($job, TRUE)));
+  
   $supertext = tmgmt_translator_plugin_controller('supertext');
   $supertext->receiveTranslation($job, $keys, $data);
 }
@@ -173,8 +236,11 @@ function tmgmt_supertext_callback() {
  * tmgmt_supertext_callback access check.
  */
 function tmgmt_supertext_access_check() {
+  $input = file_get_contents('php://input');
+  //watchdog('supertext', 'INPUT.  <br /><pre>!post</pre>', array('!post' => print_r($input, TRUE)));  
   try {
-    $job = json_decode($_POST['job']);
+    $job = json_decode($input);
+    //watchdog('supertext', 'Job  <br /><pre>!post</pre>', array('!post' => print_r($job, TRUE)));
     if (isset($job->ReferenceData)) {
       // Check valid hash
       $ref = explode(':', $job->ReferenceData);
