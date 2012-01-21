@@ -44,10 +44,10 @@ function tmgmt_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
   );
-  $items['tmgmt/checkout/%tmgmt_ui_job_multiple'] = array(
+  $items['admin/tmgmt/checkout/%tmgmt_ui_job_multiple'] = array(
     'title' => 'Job checkout form',
     'page callback' => 'tmgmt_ui_checkout_wizard',
-    'page arguments' => array(2),
+    'page arguments' => array(3),
     'access arguments' => array('access tmgmt ui'),
     'file' => 'tmgmt_ui.pages.inc',
   );
