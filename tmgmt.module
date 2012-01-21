@@ -318,7 +318,7 @@ function tmgmt_job_message_create($status_before, $status_after, $message = '', 
  * Access callback for the translator entity.
  */
 function tmgmt_translator_access($op, $translator = NULL, $account = NULL) {
-  return TRUE;
+  return user_access('administer tmgmt', $account);
 }
 
 /**
