@@ -10,7 +10,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   /**
    * @todo
    */
-  public function jobSettingsForm($form, &$form_state) {
+  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     $settings['action'] = array(
       '#type' => 'select',
       '#title' => t('Action'),

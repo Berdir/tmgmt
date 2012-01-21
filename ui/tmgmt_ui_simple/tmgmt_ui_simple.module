@@ -35,6 +35,7 @@ function tmgmt_ui_simple_settings_form($form, &$form_state) {
   );
   return system_settings_form($form);
 }
+
 /**
  * Translate multiple items
  */
@@ -124,7 +125,7 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
     foreach (array_keys($languages) as $langcode) {
       $count++;
       // Create the job object.
-      $job = tmgmt_job_create($values['source_language'], $langcode, array('translator' => $values['translator']));
+      $job = tmgmt_job_create($values['source_language'], $langcode);
       // Create job items and add them to the job. This may take a single value or an array of item_id's.
       $items = is_array($values['item_id']) ? $values['item_id'] : array($values['item_id']);
       foreach ($items as $item_id) {
@@ -139,7 +140,7 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       // Print a message to the screen and redirect the user.
     }
     $form_state['redirect'] = array(
-      'tmgmt/checkout/' . implode(',', $tjids),
+      'admin/tmgmt/checkout/' . implode(',', $tjids),
       array(
         // @fixme: drupal_get_destination returns a string here so it's not usuable.
         'query' => array(
