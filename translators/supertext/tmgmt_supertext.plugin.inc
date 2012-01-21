@@ -81,7 +81,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
+   * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
    *
    * We will check are source and target language supported.
    */
@@ -157,64 +157,46 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
     }
   }
 
-    /**
-     * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
-     */
-    public function getSupportedTargetLanguages($source_language) {
-      $results = array();
-      $targets = $this->requestFromSupertext('translate/service/language_pairs', 'GET', array(
-        'lc_src' => $source_language
-      ));
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   */
+  public function getSupportedTargetLanguages($source_language) {
+    $results = array();
+    $targets = $this->requestFromSupertext('translate/service/language_pairs', 'GET', array(
+      'lc_src' => $source_language
+    ));
 
-      foreach($targets as $target) {
-        array_push($results, $target->lc_tgt);
-      }
-
-      return $results;
+    foreach($targets as $target) {
+      array_push($results, $target->lc_tgt);
     }
 
-    /**
-     * Returns array of service supported languages.
-     *
-     * @return array
-     */
-    public function getSupportedLanguages() {
-      $languages = &drupal_static(__FUNCTION__);
-      if(!isset($languages)) {
-        $supported_languages = $this->requestFromSupertext('translate/service/languages', 'GET');
-        $languages = array();
+    return $results;
+  }
 
-        foreach($supported_languages as $language) {
-          array_push($languages, $language->lc);
-        }
-      }
-      return $languages;
-    }
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
+   */
+  public function settingsForm($form, &$form_state) {
+  $form['api_account_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Supertext API Account Id'),
+    '#default_value' => $this->getOption('api_account_id', ''),
+    '#description' => t('Please enter yout supertext API Account Id.'),
+  );
 
-    /**
-     * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
-     */
-    public function settingsForm($form, &$form_state) {
-    $form['api_account_id'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Supertext API Account Id'),
-      '#default_value' => $this->getOption('api_account_id', ''),
-      '#description' => t('Please enter yout supertext API Account Id.'),
-    );
+  $form['api_password'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Supertext API password'),
+    '#default_value' => $this->getOption('api_password', ''),
+    '#description' => t('Please enter your Supertext API password.'),
+  );
 
-    $form['api_password'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Supertext API password'),
-      '#default_value' => $this->getOption('api_password', ''),
-      '#description' => t('Please enter your Supertext API password.'),
-    );
-
-    $form['use_sandbox'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use Sandbox'),
-      '#default_value' => $this->getOption('use_sandbox', TRUE),
-    );
-    return $form;
-    }
+  $form['use_sandbox'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use Sandbox'),
+    '#default_value' => $this->getOption('use_sandbox', TRUE),
+  );
+  return $form;
+  }
 
 }

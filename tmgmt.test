@@ -411,6 +411,9 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertTrue($job->isNeedsReview());
     $this->assertText(t('Test translation created'));
 
+    // Test redirection.
+    $this->assertText(t('Translation Management'));
+
     // Another job.
     $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
     preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
@@ -465,6 +468,9 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $job = tmgmt_job_load($tjid, FALSE);
     $this->assertTrue($job->isPrepared());
 
+    // Verify that we are still on the form.
+    $this->assertText(t('Checkout job'));
+
     // Another job.
     $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
     preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
@@ -476,7 +482,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     $edit = array(
       'target_language' => 'es',
-      'settings[action]' => 'no_translatable',
+      'settings[action]' => 'not_translatable',
     );
     $this->drupalPost(NULL, $edit, t('Order'));
     // @todo Update to correct failure message.

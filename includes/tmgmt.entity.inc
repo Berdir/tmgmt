@@ -510,7 +510,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     $messages = $this->getAttachedEntities('tmgmt_job_message');
     $new_messages = array();
     foreach ($messages as $message) {
-      if ($message->timestamp >= $time) {
+      if ($message->created >= $time) {
         $new_messages[] = $message;
       }
     }
@@ -911,7 +911,9 @@ class TMGMTJobMessage extends Entity {
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_job_message');
-    $this->created = REQUEST_TIME;
+    if (empty($this->created)) {
+      $this->created = REQUEST_TIME;
+    }
   }
 
 }
