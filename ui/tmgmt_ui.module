@@ -125,9 +125,9 @@ function _tmgmt_ui_load_all_exports($module, $directory, $extension, $name = NUL
   // Find all the files in the directory with the correct extension.
   $files = file_scan_directory(drupal_get_path('module', $module) . "/$directory", "/\.{$extension}$/");
   foreach ($files as $path => $file) {
-    require $path;
+    require DRUPAL_ROOT . '/' . $path;
     if (isset($name)) {
-      $return[$name->name] = $name;
+      $return[$$name->name] = $$name;
     }
   }
   return $return;

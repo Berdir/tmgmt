@@ -138,7 +138,15 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       }
       // Print a message to the screen and redirect the user.
     }
-    $form_state['redirect'] = 'tmgmt/checkout/' . implode(',', $tjids);
+    $form_state['redirect'] = array(
+      'tmgmt/checkout/' . implode(',', $tjids),
+      array(
+        // @fixme: drupal_get_destination returns a string here so it's not usuable.
+        'query' => array(
+          'destination' => $_GET['q'],
+        ),
+      ),
+    );
     drupal_set_message(format_plural($count, 'A translation job has been created. you will need to configure them now.', '@count translation jobs have been created.'));
   }
   else {

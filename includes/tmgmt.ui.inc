@@ -41,7 +41,10 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   // Get the translator plugin that is currently selected.
   $translator_plugins = tmgmt_translator_availability_filter(tmgmt_translator_plugin_labels());
   $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translator_plugins);
-  $available_languages = tmgmt_translator_languages_filter($selected_translator_plugin, $job->source_language, $available_languages);
+  $selected_target_language = isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available_languages);
+  $translators = tmgmt_translator_plugin_info();
+  $translator_plugins = tmgmt_translator_filtered_by_language($translators, $job->source_language, $selected_target_language);
+
   // Load plugin controller for the selected translator plugin..
   $plugin_controller = tmgmt_translator_plugin_controller($selected_translator_plugin);
   $form_implemented = method_exists($plugin_controller, 'jobSettingsForm');
@@ -70,7 +73,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     '#description' => t('The target language'),
     '#options' => $available_languages,
     '#ajax' => array(
-      'callback' => 'tmgmt_get_supported_translators',
+      'callback' => 'tmgmt_ajax_callback_get_supported_translators',
       'wrapper' => 'tmgmt-translator-wrapper',
       'method' => 'replace',
     ),
@@ -87,7 +90,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
       '#options' => $translator_plugins,
       '#default_value' => $selected_translator_plugin,
       '#ajax' => array(
-        'callback' => 'tmgmt_get_translator_options',
+        'callback' => 'tmgmt_ajax_callback_get_translator_options',
         'wrapper' => 'tmgmt-translator-options',
         'method' => 'replace',
       ),
@@ -105,6 +108,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
         '#hidden' => !$form_implemented,
       );
       $form['translator_wrapper']['options']['settings'] = $plugin_controller->jobSettingsForm($form, $form_state);
+      $form['translator_wrapper']['options']['settings']['#tree'] = TRUE;
     }
     $form['translator_wrapper']['actions']['#type'] = 'actions';
     $form['translator_wrapper']['actions']['submit'] = array(

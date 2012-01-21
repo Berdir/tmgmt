@@ -1,9 +1,9 @@
 <?php
-
 /**
  * @file
  * Provides myGengo translation plugin controller.
  */
+
 class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
 
   /**
@@ -16,15 +16,15 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
   protected $useSandbox = TRUE;
 
   /**
-   *    requestFromGengo($endpoint, $data = array())
+   *  requestFromGengo($endpoint, $data = array())
    *
-   *    Builds, signs and fires a request to myGengo's API. Will fire to a different url
-   *    if on the sandbox.
+   *  Builds, signs and fires a request to myGengo's API. Will fire to a different url
+   *  if on the sandbox.
    *
-   *    Authentication rituals are documented here: http://mygengo.com/api/developer-docs/authentication/
+   *  Authentication rituals are documented here: http://mygengo.com/api/developer-docs/authentication/
    *
-   *    It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
-   *    respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
+   *  It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
+   *  respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
    */
   public function requestFromGengo($endpoint, $method, $data = array()) {
     $options = array(
@@ -39,8 +39,8 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     $url = ($this->useSandbox ? $this->sandboxURL : $this->apiURL) . $endpoint;
 
     /**
-     *    If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
-     *    get a little more annoying...
+     *  If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
+     *  get a little more annoying...
      */
     if ($method == 'GET' || $method == 'DELETE') {
       $query_data = drupal_http_build_query(array_merge(array(
@@ -122,45 +122,48 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
       // weirdness with this issue, feel free to email us at api@mygengo.com. ;)
       //
       // - Ryan McGrath, who dislikes this error intensely
-            $translations['job' . $job->tjid . $key] = array(
-                'type' => 'text',
-                'slug' => $key,
-                'body_src' => $value['#text'],
-                'lc_src' => $job->source_language,
-                'lc_tgt' => $job->target_language,
-                'tier' => 'standard',
-                'callback_url' => url('tmgmt_mygengo_callback', array('absolute' => TRUE)),
-                'custom_data' => $job->tjid . '][' . $key
-            );
-        }
+      $translations['job' . $job->tjid . $key] = array(
+        'type' => 'text',
+        'slug' => $key,
+        'body_src' => $value['#text'],
+        'lc_src' => $job->source_language,
+        'lc_tgt' => $job->target_language,
+        'tier' => 'standard',
+        'callback_url' => url('tmgmt_mygengo_callback', array('absolute' => TRUE)),
+        'custom_data' => $job->tjid . '][' . $key
+      );
+    }
         
-        $response = $this->requestFromGengo('translate/jobs', 'POST', array(
-            'jobs' => $translations,
-            'process' => 1,
-            'as_group' => 1
-        ));
+    $response = $this->requestFromGengo('translate/jobs', 'POST', array(
+      'jobs' => $translations,
+      'process' => 1,
+      'as_group' => 1
+    ));
 
-        // Save the translated data through the job.
-        $job->addTranslatedData(tmgmt_unflatten_data($data));
-        //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
+    // Save the translated data through the job.
+    $job->addTranslatedData(tmgmt_unflatten_data($data));
+    //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::receiveTranslation().
+   */
+  public function receiveTranslation(TMGMTJob $job, $keys, $data) {
+    $job->addTranslatedData(array('#text' => $data->body_src), $keys);
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   */
+  public function getSupportedTargetLanguages($source_language) {
+    $results = array();
+    $targets = $this->requestFromGengo('translate/service/language_pairs', 'GET', array(
+      'lc_src' => $source_language
+    ));
+
+    foreach($targets as $target) {
+      array_push($results, $target->lc_tgt);
     }
-
-    public function receiveTranslation(TMGMTJob $job, $keys, $data) {
-        $job->addTranslatedData(array('#text' => $data->body_src), $keys);
-    }
-
-    /**
-     * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
-     */
-    public function getSupportedTargetLanguages($source_language) {
-        $results = array();
-        $targets = $this->requestFromGengo('translate/service/language_pairs', 'GET', array(
-            'lc_src' => $source_language
-        ));
-
-        foreach($targets as $target) {
-            array_push($results, $target->lc_tgt);
-        }
 
     return $results;
   }
