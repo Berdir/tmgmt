@@ -56,10 +56,10 @@ function tmgmt_local_translator_tmgmt_translator_plugin_info() {
  * Implements hook_user_load()
  */
 function tmgmt_local_translator_user_load($users) {
-  $result = db_query('SELECT * FROM {tmgmt_local_user} WHERE uid IN (:uids)', array(':uids' => array_keys($users)));
+  /*$result = db_query('SELECT * FROM {tmgmt_local_user} WHERE uid IN (:uids)', array(':uids' => array_keys($users)));
   foreach ($result as $record) {
     $users[$record->uid]->tmgmt_local_translator[$record->target_language][$record->source_language] = TRUE;
-  }
+  }*/
 }
 
 /**
