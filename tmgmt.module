@@ -85,6 +85,7 @@ function tmgmt_entity_info() {
     'base table' => 'tmgmt_job',
     'uri callback' => 'entity_class_uri',
     'label callback' => 'entity_class_label',
+    //'access callback' => 'tmgmt_translator_access',
     'entity keys' => array(
       'id' => 'tjid',
     ),

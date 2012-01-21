@@ -312,3 +312,11 @@ function tmgmt_ui_checkout_wizard($jobs = array()) {
 
   return $output;
 }
+
+/**
+ * Page callback to view a job.
+ */
+function tmgmt_job_view(TMGMTJob $job) {
+  drupal_set_title(entity_label('tmgmt_job', $job));
+  return entity_view('tmgmt_job', array($job));
+}

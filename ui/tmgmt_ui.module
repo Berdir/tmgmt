@@ -46,7 +46,7 @@ function tmgmt_ui_menu() {
     'page callback' => 'tmgmt_job_view',
     'page arguments' => array(3),
     'access arguments' => array('administer tmgmt'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'type' => MENU_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
   );
   $items['admin/tmgmt/checkout/%tmgmt_ui_job_multiple'] = array(

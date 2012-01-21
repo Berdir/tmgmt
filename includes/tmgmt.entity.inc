@@ -288,6 +288,11 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public $uid;
 
   /**
+   * A custom label for this job.
+   */
+  public $label;
+
+  /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
@@ -304,8 +309,17 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Overrides Entity::label().
    */
   public function label() {
+
+    if (!empty($this->label)) {
+      return $this->label;
+    }
+
     $wrapper = entity_metadata_wrapper($this->entityType, $this);
-    return t('@source into @target translation job.', array('@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label()));
+    $target = $wrapper->target_language->label();
+    if (empty($target)) {
+      $target = '?';
+    }
+    return t('Job @source to @target', array('@source' => $wrapper->source_language->label(), '@target' => $target));
   }
 
   /**
@@ -320,6 +334,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function buildContent($view_mode = 'full', $langcode = NULL) {
     $wrapper = entity_metadata_wrapper('tmgmt_job', $this);
+
     $content['created'] = array(
       '#type' => 'item',
       '#title' => t('Created'),
