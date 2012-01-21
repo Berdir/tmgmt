@@ -156,13 +156,32 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
 }
 
 /**
+ * Add to new card form submit.
+ *
+ * @see tmgmt_ui_simple_node_form
+ */
+function tmgmt_ui_simple_node_translate_add_to_cart($form, &$form_state) {
+  $node = $form_state['values']['object'];
+
+  $form['redirect'] = "node/$node->nid/translate";
+}
+
+/**
  * Subform for selecting translation method.
  */
 function tmgmt_ui_simple_controls_element($form, &$form_state) {
   $translator_plugins = tmgmt_translator_plugin_labels(TRUE);
   $translator_plugins_keyed = array_keys($translator_plugins);
   $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : reset($translator_plugins_keyed);
-  $element['request'] = array('#type' => 'submit', '#value' => t('Request translation'));
+  $element['request'] = array(
+    '#type' => 'submit',
+    '#value' => t('Request translation')
+  );
+  $element['cart'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add to cart'),
+    '#submit' => array('tmgmt_ui_simple_node_translate_add_to_cart'),
+  );
   return $element;
 }
 

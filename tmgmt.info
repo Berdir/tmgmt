@@ -5,8 +5,12 @@ core = 7.x
 dependencies[] = entity
 dependencies[] = translation
 files[] = includes/tmgmt.controller.inc
+files[] = includes/tmgmt.data.inc
 files[] = includes/tmgmt.entity.inc
 files[] = includes/tmgmt.plugin.inc
-files[] = includes/tmgmt.data.inc
+files[] = includes/tmgmt.views.inc
 files[] = includes/tmgmt.info.inc
 files[] = tmgmt.test
+
+; Views handlers
+files[] = views/tmgmt_handler_field_job_item_label.inc
