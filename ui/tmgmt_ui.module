@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * UI.
+ * Common Translation managment UI.
  */
 
 /**
@@ -46,14 +46,6 @@ function tmgmt_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
   );
-  $items['admin/tmgmt/jobs'] = array(
-    'title' => 'Jobs Overview',
-    'page callback' => 'tmgmt_ui_jobs',
-    'access arguments' => array('access tmgmt ui'),
-    'weight' => -19,
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'tmgmt_ui.pages.inc',
-  );
   $items['admin/tmgmt/jobs/%tmgmt_job'] = array(
     'title' => 'Job',
     'page callback' => 'tmgmt_job_view',
@@ -63,22 +55,7 @@ function tmgmt_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
   );
-  $items['admin/tmgmt/untranslated'] = array(
-    'title' => 'All untranslated elements',
-    'page callback' => 'tmgmt_ui_untranslated',
-    'access arguments' => array('access tmgmt ui'),
-    'weight' => -2,
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'tmgmt_ui.pages.inc',
-  );
-  $items['admin/tmgmt/pending'] = array(
-    'title' => 'All pending elements',
-    'page callback' => 'tmgmt_ui_pending',
-    'access arguments' => array('access tmgmt ui'),
-    'weight' => -1,
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'tmgmt_ui.pages.inc',
-  );
+
   // Add source overview pages.
   foreach (tmgmt_source_plugin_info() as $plugin_type => $info) {
     $plugin = tmgmt_source_plugin_controller($plugin_type);
@@ -127,7 +104,6 @@ function _tmgmt_ui_load_all_exports($module, $directory, $extension, $name = NUL
   foreach ($files as $path => $file) {
     require $path;
     if (isset($name)) {
-      dpm($name);
       $return[$name->name] = $name;
     }
   }
