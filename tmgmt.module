@@ -222,7 +222,7 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
  * @return TMGMTJob
  *   The job entity.
  */
-function tmgmt_job_create($source_language, $target_language, $uid, array $values = array()) {
+function tmgmt_job_create($source_language, $target_language, $uid = NULL, array $values = array()) {
   return entity_create('tmgmt_job', array_merge($values, array(
     'source_language' => $source_language,
     'target_language' => $target_language,

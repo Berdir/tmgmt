@@ -114,7 +114,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     ));
 
     // Save the translated data through the job.
-    $job->addTranslatedData(tmgmt_unflatten_data($data));
+    $job->addTranslatedData(tmgmt_unflatten_data($response));
     //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
   }
   
