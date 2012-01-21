@@ -198,7 +198,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * This is not actually an interface method and that is why it is commented,
    * but we leave it here for API documentation.
    */
-  //public function jobSettingsForm($form, &$form_state, TMGMTJob $job);
+  public function jobSettingsForm($form, &$form_state, TMGMTJob $job);
 
 }
 
@@ -281,6 +281,13 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
       );
     }
     return $items;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::jobSettingsForm().
+   */
+  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+    return array();
   }
 
 }
