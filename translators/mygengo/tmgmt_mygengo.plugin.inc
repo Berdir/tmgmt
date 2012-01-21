@@ -133,7 +133,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
         'custom_data' => $job->tjid . '][' . $key
       );
     }
-        
+
     $response = $this->requestFromGengo('translate/jobs', 'POST', array(
       'jobs' => $translations,
       'process' => 1,
@@ -216,7 +216,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    * @return array
    *   Settings form.
    */
-  public function jobSettingsForm($form, &$form_state) {
+  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     $settings['dummy_option'] = array(
       '#type' => 'checkbox',
       '#title' => t('Just a dummy option for testing'),

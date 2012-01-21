@@ -135,7 +135,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::jobSettingsForm().
    */
-  public function jobSettingsForm($form, &$form_state) {
+  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     $settings['group_translations'] = array(
       '#type' => 'checkbox',
       '#title' => t('Group translation items (@TODO)'),

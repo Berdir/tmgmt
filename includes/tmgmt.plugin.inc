@@ -198,7 +198,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * This is not actually an interface method and that is why it is commented,
    * but we leave it here for API documentation.
    */
-  //public function jobSettingsForm($form, &$form_state);
+  //public function jobSettingsForm($form, &$form_state, TMGMTJob $job);
 
 }
 
@@ -256,7 +256,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::getNotAvailableReason().
    */
   public function getNotAvailableReason() {
-    return t('@plugin needs to be configured before it can be used.', array('@plugin' => $this->pluginInfo['label']));
+    return t('@plugin needs to be configured before it can be used', array('@plugin' => $this->pluginInfo['label']));
   }
 
   /**

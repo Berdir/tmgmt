@@ -34,7 +34,7 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::jobSettingsForm().
    */
-  function jobSettingsForm($form, &$form_state) {
+  function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     $form['sample_checkboxes'] = array(
       '#type' => 'checkboxes',
       '#title' => t('These are just some sample checkboxes.'),

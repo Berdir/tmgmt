@@ -45,6 +45,27 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
     return $job;
   }
 
+
+  /**
+   * Sets the proper environment.
+   *
+   * Currently just adds a new language.
+   *
+   * @param string $langcode
+   *   The language code.
+   */
+  function setEnvironment($langcode) {
+    // Add the language.
+    $edit = array(
+      'langcode' => $langcode,
+    );
+    $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
+    $this->assertText($langcode, t('Language added successfully.'));
+    // This is needed to refresh the static cache of the language list.
+    $languages = &drupal_static('language_list');
+    $languages = NULL;
+  }
+
 }
 
 /**
@@ -172,7 +193,6 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
   }
 }
 
-
 /**
  * Tests interaction between core and the plugins.
  */
@@ -297,22 +317,155 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(TMGMT_JOB_STATE_PREPARED, $last_message->state_after);
     $this->assertEqual('Service not reachable', $last_message->message);
   }
+}
+
+/**
+ * Basic CRUD tests.
+ */
+class TMGMTUITestCase extends TMGMTBaseTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => t('UI tests'),
+      'description' => t('Verifies basic functionality of the user interface'),
+      'group' => t('Translation Management'),
+    );
+  }
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp() {
+    parent::setUp(array('ctools', 'entity', 'tmgmt', 'tmgmt_test', 'tmgmt_ui'));
+  }
 
   /**
    * Test the page callback to create a job cart and
    */
   function testCheckout() {
 
-    $user = $this->drupalCreateUser(array('administer tmgmt'));
+    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
+    $this->drupalLogin($this->admin_user);
+    $this->setEnvironment('de');
+    $this->setEnvironment('es');
+
+    $user = $this->drupalCreateUser(array('access tmgmt ui'));
     $this->drupalLogin($user);
 
     // Add a first item to the job. This will auto-create the job.
     $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
+    preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    $tjid = $matches[1];
 
-    // @todo Extract job id from path once the default redirect works.
-    $tjid = 1;
+    // Check checkout form.
+    $this->assertText('test_source: test :1');
 
     // Add two more job items.
     $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/2,3/' . $tjid);
+
+    // Check checkout form.
+    $this->assertText('test_source: test :1');
+    $this->assertText('test_source: test :2');
+    $this->assertText('test_source: test :3');
+
+    // Attempt to add item from a different source language.
+    $this->drupalGet('admin/tmgmt/add-item/en/test_source/test/4/' . $tjid);
+
+    // Check checkout form.
+    $this->assertText(t('Checkout job'));
+    $this->assertText("The source language of your item doesn't match the source language of your job.");
+    $this->assertText('test_source: test :1');
+    $this->assertText('test_source: test :2');
+    $this->assertText('test_source: test :3');
+    $this->assertText('German');
+    // Test translator is not available because the currently selected
+    // target language is not supported.
+    $this->assertText('Test translator (not available for this language)');
+
+    // @todo: Test ajax functionality.
+
+    // Attemt to translate into english.
+    $edit = array(
+      'target_language' => 'en',
+      'settings[action]' => 'translate',
+    );
+    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->assertText(t('@plugin is not available for @language', array('@plugin' => 'Test translator', '@langauge' => 'English')));
+
+    // Job still needs to be in state prepared.
+    $job = tmgmt_job_load($tjid, FALSE);
+    $this->assertTrue($job->isPrepared());
+
+    $edit = array(
+      'target_language' => 'es',
+      'settings[action]' => 'translate',
+    );
+    $this->drupalPost(NULL, $edit, t('Order'));
+
+    // Job needs to be in state review.
+    $job = tmgmt_job_load($tjid, TRUE);
+    $this->assertTrue($job->isNeedsReview());
+    $this->assertText(t('Test translation created'));
+
+    // Another job.
+    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
+    preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    $tjid = $matches[1];
+
+     // Check checkout form.
+    $this->assertText(t('Checkout job'));
+    $this->assertText('test_source: test :1');
+
+    $edit = array(
+      'target_language' => 'es',
+      'settings[action]' => 'submit',
+    );
+    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->assertText(t('Test submit'));
+    $job = tmgmt_job_load($tjid, FALSE);
+    $this->assertTrue($job->isSubmitted());
+
+    // Another job.
+    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
+    preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    $tjid = $matches[1];
+
+     // Check checkout form.
+    $this->assertText(t('Checkout job'));
+    $this->assertText('test_source: test :1');
+
+    $edit = array(
+      'target_language' => 'es',
+      'settings[action]' => 'reject',
+    );
+    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->assertText(t('This is not supported'));
+    $job = tmgmt_job_load($tjid, FALSE);
+    $this->assertTrue($job->isRejected());
+
+    // Another job.
+    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
+    preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    $tjid = $matches[1];
+
+     // Check checkout form.
+    $this->assertText(t('Checkout job'));
+    $this->assertText('test_source: test :1');
+
+    $edit = array(
+      'target_language' => 'es',
+      'settings[action]' => 'fail',
+    );
+    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->assertText(t('Service not reachable'));
+    $job = tmgmt_job_load($tjid, FALSE);
+    $this->assertTrue($job->isPrepared());
+
+    // Attempt to add items to a non-existing job.
+    $this->drupalGet('admin/tmgmt/add-item/en/test_source/test/5/' . ($tjid + 1));
+    $this->assertResponse(404);
   }
 }
