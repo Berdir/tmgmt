@@ -11,19 +11,20 @@ function tmgmt_job_management_views_default_views() {
   $export = array();
 
   $view = new view;
-  $view->name = 'translation_jobs';
+  $view->name = 'tmgmt_job_management_job_overview';
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'tmgmt_job';
-  $view->human_name = 'Translation Jobs';
+  $view->human_name = 'Translation job managment job overview';
   $view->core = 7;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
-  $handler->display->display_options['title'] = 'Translation Jobs';
-  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['title'] = 'Job overview';
+  $handler->display->display_options['access']['type'] = 'perm';
+  $handler->display->display_options['access']['perm'] = 'access tmgmt ui';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['query']['options']['query_comment'] = FALSE;
@@ -116,42 +117,42 @@ function tmgmt_job_management_views_default_views() {
   $handler->display->display_options['fields']['views_bulk_operations']['hide_alter_empty'] = 1;
   $handler->display->display_options['fields']['views_bulk_operations']['vbo']['entity_load_capacity'] = '10';
   $handler->display->display_options['fields']['views_bulk_operations']['vbo']['operations'] = array(
-    'rules_tmgmt_job_accept_translation' => array(
+    'rules_component::rules_tmgmt_job_accept_translation' => array(
       'selected' => 1,
       'use_queue' => 0,
       'skip_confirmation' => 1,
       'override_label' => 0,
       'label' => '',
     ),
-    'rules_tmgmt_job_cancel_translation' => array(
+    'rules_component::rules_tmgmt_job_cancel_translation' => array(
       'selected' => 1,
       'use_queue' => 0,
       'skip_confirmation' => 1,
       'override_label' => 0,
       'label' => '',
     ),
-    'views_bulk_operations_delete_item' => array(
+    'action::views_bulk_operations_delete_item' => array(
       'selected' => 0,
       'use_queue' => 0,
       'skip_confirmation' => 0,
       'override_label' => 0,
       'label' => '',
     ),
-    'system_message_action' => array(
+    'action::system_message_action' => array(
       'selected' => 0,
       'use_queue' => 0,
       'skip_confirmation' => 0,
       'override_label' => 0,
       'label' => '',
     ),
-    'views_bulk_operations_script_action' => array(
+    'action::views_bulk_operations_script_action' => array(
       'selected' => 0,
       'use_queue' => 0,
       'skip_confirmation' => 0,
       'override_label' => 0,
       'label' => '',
     ),
-    'views_bulk_operations_argument_selector_action' => array(
+    'action::views_bulk_operations_argument_selector_action' => array(
       'selected' => 0,
       'skip_confirmation' => 0,
       'override_label' => 0,
@@ -160,21 +161,21 @@ function tmgmt_job_management_views_default_views() {
         'url' => '',
       ),
     ),
-    'system_goto_action' => array(
+    'action::system_goto_action' => array(
       'selected' => 0,
       'use_queue' => 0,
       'skip_confirmation' => 0,
       'override_label' => 0,
       'label' => '',
     ),
-    'rules_tmgmt_job_request_translation' => array(
+    'rules_component::rules_tmgmt_job_request_translation' => array(
       'selected' => 1,
       'use_queue' => 0,
       'skip_confirmation' => 1,
       'override_label' => 0,
       'label' => '',
     ),
-    'system_send_email_action' => array(
+    'action::system_send_email_action' => array(
       'selected' => 0,
       'use_queue' => 0,
       'skip_confirmation' => 0,
@@ -273,7 +274,6 @@ function tmgmt_job_management_views_default_views() {
   $handler->display->display_options['fields']['state']['hide_empty'] = 0;
   $handler->display->display_options['fields']['state']['empty_zero'] = 0;
   $handler->display->display_options['fields']['state']['hide_alter_empty'] = 1;
-  $handler->display->display_options['fields']['state']['format_plural'] = 0;
   /* Field: Translation Management Job: Target_language */
   $handler->display->display_options['fields']['target_language']['id'] = 'target_language';
   $handler->display->display_options['fields']['target_language']['table'] = 'tmgmt_job';
@@ -359,10 +359,14 @@ function tmgmt_job_management_views_default_views() {
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
-  $handler->display->display_options['path'] = 'translation-jobs';
-  $translatables['translation_jobs'] = array(
+  $handler->display->display_options['path'] = 'admin/tmgmt/jobs';
+  $handler->display->display_options['menu']['type'] = 'tab';
+  $handler->display->display_options['menu']['title'] = 'Job overview';
+  $handler->display->display_options['menu']['weight'] = '-1';
+  $handler->display->display_options['menu']['context'] = 0;
+  $translatables['tmgmt_job_management_job_overview'] = array(
     t('Master'),
-    t('Translation Jobs'),
+    t('Job overview'),
     t('more'),
     t('Apply'),
     t('Reset'),
@@ -377,15 +381,15 @@ function tmgmt_job_management_views_default_views() {
     t('Created'),
     t('Source_language'),
     t('State'),
-    t('.'),
-    t(','),
     t('Target_language'),
     t('Translator'),
     t('Source language'),
     t('Target language'),
     t('Page'),
   );
-  $export['translation_jobs'] = $view;
+
+
+  $export['tmgmt_job_management_job_overview'] = $view;
 
   return $export;
 }

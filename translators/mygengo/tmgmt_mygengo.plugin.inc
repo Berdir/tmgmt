@@ -129,7 +129,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
                 'lc_src' => $job->source_language,
                 'lc_tgt' => $job->target_language,
                 'tier' => 'standard',
-                'callback_url' => url('mygengo_callback', array('absolute' => TRUE)),
+                'callback_url' => url('tmgmt_mygengo_callback', array('absolute' => TRUE)),
                 'custom_data' => $job->tjid . '][' . $key
             );
         }
