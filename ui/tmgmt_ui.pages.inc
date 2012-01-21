@@ -165,6 +165,7 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
 
   //  dsm($job);
   //  $job->prepared('Job has been prepared.');
+  drupal_goto('admin/tmgmt');
 }
 
 /**
