@@ -28,7 +28,7 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
  * The checkout form.
  */
 function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
-  if ($job->isPrepared()) {
+  if ($job->isPrepared() || $job->isRejected()) {
     // The Form API needs to know that we are
     $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt') . '/includes/tmgmt.ui.inc';
     // Add the job to the form state so we can use it in the submit handler.
@@ -130,7 +130,11 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     );
     return $form;
   } else {
-    drupal_set_message(t('Invalid job id'), 'error');
+    if ($job->isNew()) {
+      drupal_set_message(t('The job is not prepared for checkout yet.'), 'error');
+    } else {
+      drupal_set_message(t('The job has already been processed.'), 'error');
+    }
   }
 }
 
