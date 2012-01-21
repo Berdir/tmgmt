@@ -27,7 +27,7 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
  * The checkout form.
  */
 function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
-  if(!$job->isNew()) {
+  if($job->isNew()) {
     $job->prepared();
   }
   if ($job->isRejected() || $job->isPrepared()) {
