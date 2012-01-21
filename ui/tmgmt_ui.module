@@ -75,6 +75,11 @@ function tmgmt_ui_menu() {
  * Load callback to load multiple jobs.
  *
  * @todo: This function can be easily tested.
+ *
+ * @param string $job_ids
+ *   A string which has a comma-separeted list of job ids.
+ *
+ * @return array
  */
 function tmgmt_ui_job_multiple_load($job_ids) {
   $job_ids = explode(',', $job_ids);
