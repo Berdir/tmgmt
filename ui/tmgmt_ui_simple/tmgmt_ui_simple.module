@@ -79,7 +79,7 @@ function tmgmt_ui_simple_form_i18n_string_translate_page_overview_form_alter(&$f
  */
 function tmgmt_ui_simple_page_alter(&$page) {
   // Translation tabs for nodes.
-  if (isset($page['content']['system_main']['translation_node_overview']) && ($node = menu_get_object())) {
+  if (module_exists('tmgmt_node') && isset($page['content']['system_main']['translation_node_overview']) && ($node = menu_get_object())) {
     $page['content']['system_main']['translation_node_overview'] = drupal_get_form('tmgmt_ui_simple_node_form', $node, $page['content']['system_main']['translation_node_overview']);
   }
 }
@@ -200,13 +200,15 @@ function tmgmt_ui_simple_translate_list_form($form, &$form_state, $params, $item
  * Implements hook_node_operations().
  */
 function tmgmt_ui_simple_node_operations() {
-  $operations = array(
-    'translate_simple' => array(
-      'label' => t('Translate selected content'),
-      'callback' => 'tmgmt_ui_simple_translate_node_multiple',
-    ),
-  );
-  return $operations;
+  if (module_exists('tgmt_node')) {
+    $operations = array(
+      'translate_simple' => array(
+        'label' => t('Translate selected content'),
+        'callback' => 'tmgmt_ui_simple_translate_node_multiple',
+      ),
+    );
+    return $operations;
+  }
 }
 
 /**
