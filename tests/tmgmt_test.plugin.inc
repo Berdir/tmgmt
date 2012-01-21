@@ -7,6 +7,9 @@
 
 class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
+  /**
+   * @todo
+   */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     $settings['action'] = array(
       '#type' => 'select',
@@ -16,6 +19,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
         'submit' => t('Submit'),
         'reject' => t('Reject'),
         'fail' => t('Fail'),
+        'not_translatable' => t('Not translatable'),
       ),
     );
     return $settings;
@@ -59,16 +63,26 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     return TRUE;
   }
 
+  function canTranslate(TMGMTJob $job) {
+    if (isset($job->translator_context['action']) && $job->translator_context['action'] == 'not_translatable') {
+      return FALSE;
+    }
+    parent::canTranslate($job);
+  }
+
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages($source_language) {
-    return drupal_map_assoc(array('de', 'es', 'it', 'zh-zans'));
+    return drupal_map_assoc(array('en', 'de', 'es', 'it', 'zh-zans'));
   }
 }
 
 class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController {
 
+  /**
+   * @todo
+   */
   public function getData(TMGMTJobItem $job_item) {
     return array(
       'dummy' => array(
@@ -79,6 +93,9 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
     );
   }
 
+  /**
+   * @todo
+   */
   public function saveTranslation(TMGMTJobItem $job_item) {
     // Set a variable that can be checked later for a given job item.
     variable_set('tmgmt_test_saved_translation_' . $job_item->item_type . '_' . $job_item->item_id, TRUE);

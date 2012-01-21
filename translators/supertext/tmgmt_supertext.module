@@ -19,6 +19,9 @@ function tmgmt_supertext_tmgmt_translator_plugin_info() {
 }
 
 
+/**
+ * Implements hook_menu().
+ */
 function tmgmt_supertext_menu(){
   $items = array();
 
@@ -36,11 +39,11 @@ function tmgmt_supertext_menu(){
     'access callback' => 'tmgmt_supertext_access_check'
   );
   return $items;
-	
+
 }
 
 function supertext_test(){
-	dpm(json_decode('{
+  dpm(json_decode('{
     "AccountId": 3,
     "CallbackUrl": null,
     "CommunicationLang": null,
@@ -100,57 +103,57 @@ function supertext_test(){
     "TargetLang": "en-US",
     "WordCount": 0
 }'));
-	
-	$object = new stdClass();
-	$object->AccountId = variable_get('tmgmt_supertext_api_account_id', '');
-	$object->Password = variable_get('tmgmt_supertext_api_password', '');
-	$object->CallbackUrl = "asdf";
-	$object->CommunicationLang = "null";
-	$object->ContentType = "text/plain";
-	$object->Currency = "chf";
-	$object->OrderDate = "/Date(1326976828283+0100)/";
-	$object->OrderTypeId = "7";
-	$object->DeliveryId = "1";
-	$object->SourceLang = "de-CH";
-	$object->TargetLang = "en-US";
-	$object->ReferenceData = "myorderID";
-	$object->OrderTitle = "My Title";
-	$object->Items = array();
-	
 
-	
-	
+  $object = new stdClass();
+  $object->AccountId = variable_get('tmgmt_supertext_api_account_id', '');
+  $object->Password = variable_get('tmgmt_supertext_api_password', '');
+  $object->CallbackUrl = "asdf";
+  $object->CommunicationLang = "null";
+  $object->ContentType = "text/plain";
+  $object->Currency = "chf";
+  $object->OrderDate = "/Date(1326976828283+0100)/";
+  $object->OrderTypeId = "7";
+  $object->DeliveryId = "1";
+  $object->SourceLang = "de-CH";
+  $object->TargetLang = "en-US";
+  $object->ReferenceData = "myorderID";
+  $object->OrderTitle = "My Title";
+  $object->Items = array();
 
-//	$encoded = json_encode($object);
-//	dpm($encoded);
-	
-	$job = tmgmt_job_load('4');
-	dpm($job);
-	dpm($job->getSourceData());
-	$items = $job->getItems();
-	foreach ($items as $tjiid => $item) {
-		dpm($item->getSourceData());
-		$fields = tmgmt_flatten_data($item->getSourceData());
-		dpm($fields);
-		foreach ($fields as $fieldid => $field) {
-			
-			$newfield = new stdClass();
-			$newfield->Content = $field['#text'];
-			$newfield->Context = $field['#label'];
-			$newfield->GroupId = $tjiid;
-			$newfield->Id = $fieldid;
-			
-			$object->Items[] = $newfield;			
-		}
 
-	}
-		dpm($object);
-		$encoding = json_encode($object);
-	dpm($encoding);
-	
-	
-	
-	return "hallo";
+
+
+
+//  $encoded = json_encode($object);
+//  dpm($encoded);
+
+  $job = tmgmt_job_load('4');
+  dpm($job);
+  dpm($job->getSourceData());
+  $items = $job->getItems();
+  foreach ($items as $tjiid => $item) {
+    dpm($item->getSourceData());
+    $fields = tmgmt_flatten_data($item->getSourceData());
+    dpm($fields);
+    foreach ($fields as $fieldid => $field) {
+
+      $newfield = new stdClass();
+      $newfield->Content = $field['#text'];
+      $newfield->Context = $field['#label'];
+      $newfield->GroupId = $tjiid;
+      $newfield->Id = $fieldid;
+
+      $object->Items[] = $newfield;
+    }
+
+  }
+    dpm($object);
+    $encoding = json_encode($object);
+  dpm($encoding);
+
+
+
+  return "hallo";
 }
 
 /**
@@ -187,6 +190,9 @@ function tmgmt_supertext_access_check() {
   return FALSE;
 }
 
+/**
+ * Create secret hash for supertext reference.
+ */
 function tmgmt_supertext_hash($id) {
   return md5(drupal_get_hash_salt() . $id);
 }

@@ -86,7 +86,8 @@ function tmgmt_local_translator_job_item_form($form, &$form_state, $job, $item) 
   $form['job'] = array('#type' => 'value', '#value' => $job);
   $form['job_item'] = array('#type' => 'value', '#value' => $item);
   $data = $item->getSourceData();
-  $form['text'] = tmgmt_local_translator_job_item_subform($data);
+  $translation = $item->translated_data;
+  $form['text'] = tmgmt_local_translator_job_item_subform($data, $translation);
   $form['text']['#type'] = 'fieldset';
   $form['text']['#collapsible'] = TRUE;
   $form['text']['#collapsed'] = TRUE;
@@ -99,7 +100,7 @@ function tmgmt_local_translator_job_item_form($form, &$form_state, $job, $item) 
 /**
  * Build subform for translating single text
  */
-function tmgmt_local_translator_job_item_subform($items) {
+function tmgmt_local_translator_job_item_subform($items, $translation) {
   $form = array();
   $form['#tree'] = TRUE;
   if (!empty($items['#label'])) {
@@ -119,7 +120,7 @@ function tmgmt_local_translator_job_item_subform($items) {
     );
     $form['translation'] = array(
       '#type' => 'textarea',
-      '#default_value' => '',
+      '#default_value' => isset($translation['#text']) ? $translation['#text'] : '',
       '#attributes' => array('class' => array('tmgmt-translation')),
       '#rows' => $rows,
     );
@@ -128,7 +129,7 @@ function tmgmt_local_translator_job_item_subform($items) {
     $form['#description'] = $items['#description'];
   }
   foreach (element_children($items) as $key) {
-    $form[$key] = tmgmt_local_translator_job_item_subform($items[$key]);
+    $form[$key] = tmgmt_local_translator_job_item_subform($items[$key], $translation[$key]);
   }
   return $form;
 }

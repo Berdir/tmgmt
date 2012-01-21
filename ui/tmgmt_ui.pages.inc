@@ -111,10 +111,9 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
           unset($form['translator_wrapper']['options']['#description']);
           $form['translator_wrapper']['options']['settings'] = $settings;
           $form['translator_wrapper']['options']['settings']['#tree'] = TRUE;
-        }
-        else {
+        } else {
 
-      $form['translator_wrapper']['options']['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $plugin_info['label']));
+          $form['translator_wrapper']['options']['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $plugin_info['label']));
         }
     }
   } else {
@@ -146,10 +145,8 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
   //  $job->addItem(tmgmt_job_item_create('node', 'node', $values['nid']));
 
   $job = $form_state['job'];
-  $job->target_language = $values['target_language'];
-  $job->translator = $values['translator'];
-  $job->translator_context = $values['settings'];
   $job->requestTranslation();
+
   //  dsm($job);
   //  $job->prepared('Job has been prepared.');
   // Print a message to the screen and redirect the user.
@@ -172,8 +169,14 @@ function tmgmt_job_checkout_form_validate($form, &$form_state) {
       form_set_error('translator', t('Translator is not available: @reason.', array('@reason' => $plugin->getNotAvailableReason())));
       break;
     case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-      form_set_error('translator', t('Test translator is not avalible for @language.', array('@language' => $available_languages[$values['target_language']])));
+      form_set_error('translator', t('Test translator is not avalable for @language.', array('@language' => $available_languages[$values['target_language']])));
       break;
+  }
+  $job->target_language = $values['target_language'];
+  $job->translator = $values['translator'];
+  $job->translator_context = $values['settings'];
+  if (!$job->isTranslatable()) {
+    form_set_error('translator', t('Fail: todo add generic message'));
   }
 }
 
