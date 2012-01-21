@@ -79,6 +79,11 @@ function tmgmt_ui_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
   );
+  // Add source overview pages.
+  foreach (tmgmt_source_plugin_info() as $plugin_type => $info) {
+    $plugin = tmgmt_source_plugin_controller($plugin_type);
+    $items = array_merge($items, $plugin->hook_menu());
+  }
   return $items;
 }
 

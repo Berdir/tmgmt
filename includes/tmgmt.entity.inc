@@ -521,11 +521,19 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function addMessage($message, $arguments = array()) {
     // Save the job if it hasn't yet been saved.
-    if (!empty($this->tjid) || $this->save()) {
-      $state_before = isset($this->old_state) ? $this->old_state : $this->getState();
-      $state_after = $this->getState();
-      // We don't need to return the saved job message.
-      tmgmt_job_message_create($state_before, $state_after, $message, $arguments, array('tjid' => $this->tjid))->save();
+    if (empty($this->tjid) && !$this->save()) {
+      return;
+    }
+    $state_before = isset($this->old_state) ? $this->old_state : $this->getState();
+    $state_after = $this->getState();
+    $message = tmgmt_job_message_create($state_before, $state_after, $message, $arguments, array(
+      'tjid' => $this->tjid,
+    ));
+    // Remove old state again so that future log messages will use the correct
+    // state.
+    unset($this->old_state);
+    if ($message->save()) {
+      return $message;
     }
   }
 

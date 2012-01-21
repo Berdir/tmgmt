@@ -6,6 +6,15 @@
  */
 
 /**
+ * Prefix for source overview pages.
+ *
+ * @todo
+ * Maybe move into the ui.
+ *
+ */
+define('TMGMT_SOURCE_OVERVIEW_TAB_PATH', 'admin/tmgmt-overview');
+
+/**
  * Interface for source plugin controllers.
  *
  * @ingroup tmgmt_source
@@ -44,6 +53,14 @@ interface TMGMTSourcePluginControllerInterface {
    */
   public function getUri(TMGMTJobItem $job_item);
 
+  /**
+   * Provide menu items which are used to display overview page etc.
+   *
+   * @todo
+   * Maybe it would make sense to provide a UI handler for source plugins
+   * but this is currently the easy to solve way.
+   */
+  public function hook_menu();
 }
 
 /**
@@ -76,6 +93,15 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
    */
   public function getUri(TMGMTJobItem $job_item) {
     return array('path' => 'default/' . $job_item->item_id);
+  }
+
+  /**
+   * Provide menu items which are used to display overview page etc.
+   */
+  public function hook_menu() {
+    $items = array();
+
+    return $items;
   }
 }
 
@@ -214,5 +240,4 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   protected function getOption($name, $default = NULL) {
     return variable_get('tmgmt_' . $this->pluginType . '_' . $name, $default);
   }
-
 }

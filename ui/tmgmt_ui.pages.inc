@@ -24,7 +24,7 @@ function tmgmt_ui_content() {
   $output['#attached'] = array(
     // @fixme: I know it's evil and ugly but it works.
     // Embedding views admin css file for 6 lines of css.
-    'css' => array(drupal_get_path('module', 'views') . '/css/views-admin.css'),
+    'css' => array(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css'),
   );
 
   $view_output = tmgmt_ui_embed_view('tmgmt_ui_reviews_pending');
@@ -43,7 +43,7 @@ function tmgmt_ui_content() {
       '#title' => t('New jobs'),
       '#markup' => $view_output,
       '#theme_wrappers' => array('form_element', 'container'),
-      '#attributes' => array('class' => array('views-left-50')),
+      '#attributes' => array('class' => array('tmgmt_ui_left_48')),
     );
   }
 
@@ -54,7 +54,7 @@ function tmgmt_ui_content() {
       '#title' => t('Recently published'),
       '#markup' => $view_output,
       '#theme_wrappers' => array('form_element', 'container'),
-      '#attributes' => array('class' => array('views-right-50')),
+      '#attributes' => array('class' => array('tmgmt_ui_right_48')),
     );
   }
 

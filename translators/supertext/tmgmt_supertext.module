@@ -1,0 +1,147 @@
+<?php
+
+/**
+ * @file
+ * Module file of the translation management test module.
+ */
+
+/**
+ * Implements hook_tmgmt_translator_plugin_info().
+ */
+function tmgmt_supertext_tmgmt_translator_plugin_info() {
+  return array(
+    'supertext' => array(
+      'label' => t('Supertext translator'),
+      'description' => t('A Supertext translator service.'),
+      'controller class' => 'TMGMTSupertextController',
+    ),
+  );
+}
+
+
+function tmgmt_supertext_menu(){
+  $items = array();
+
+  $items['supertest'] = array(
+    'title' => 'UI',
+    'page callback' => 'supertext_test',
+    'access callback' => TRUE,
+    'weight' => -19,
+  );
+  return $items;
+	
+}
+
+function supertext_test(){
+	dpm(json_decode('{
+    "AccountId": 3,
+    "CallbackUrl": null,
+    "CommunicationLang": null,
+    "ContentType": "text/html",
+    "Currency": "chf",
+    "Deadline": "/Date(1327080948472+0100)/",
+    "DeliveryId": 1,
+    "Groups": [
+        {
+            "Context": "Some Node",
+            "GroupId": "Group1",
+            "Items": [
+                {
+                    "Comment": null,
+                    "Content": "<div> This is the content of group 1</div>",
+                    "Context": null,
+                    "Id": "1"
+                },
+                {
+                    "Comment": null,
+                    "Content": "This is <i> new </i> contentof group 1",
+                    "Context": null,
+                    "Id": "2"
+                }
+            ]
+        },
+        {
+            "Context": "Some other Node",
+            "GroupId": "Group2",
+            "Items": [
+                {
+                    "Comment": null,
+                    "Content": "<div> This is the contentof group 2 </div>",
+                    "Context": null,
+                    "Id": "1"
+                },
+                {
+                    "Comment": null,
+                    "Content": "This is <i> new </i> contentof group 2",
+                    "Context": null,
+                    "Id": "2"
+                }
+            ]
+        }
+    ],
+    "Id": 0,
+    "OrderDate": "/Date(1327080948472+0100)/",
+    "OrderTitle": null,
+    "OrderType": null,
+    "OrderTypeId": 6,
+    "Password": "mojito",
+    "Price": 0,
+    "ReferenceData": null,
+    "Service": "translation",
+    "SourceLang": "de-CH",
+    "Status": null,
+    "TargetLang": "en-US",
+    "WordCount": 0
+}'));
+	
+	$object = new stdClass();
+	$object->AccountId = variable_get('tmgmt_supertext_api_account_id', '');
+	$object->Password = variable_get('tmgmt_supertext_api_password', '');
+	$object->CallbackUrl = "asdf";
+	$object->CommunicationLang = "null";
+	$object->ContentType = "text/plain";
+	$object->Currency = "chf";
+	$object->OrderDate = "/Date(1326976828283+0100)/";
+	$object->OrderTypeId = "7";
+	$object->DeliveryId = "1";
+	$object->SourceLang = "de-CH";
+	$object->TargetLang = "en-US";
+	$object->ReferenceData = "myorderID";
+	$object->OrderTitle = "My Title";
+	$object->Items = array();
+	
+
+	
+	
+
+//	$encoded = json_encode($object);
+//	dpm($encoded);
+	
+	$job = tmgmt_job_load('4');
+	dpm($job);
+	dpm($job->getSourceData());
+	$items = $job->getItems();
+	foreach ($items as $tjiid => $item) {
+		dpm($item->getSourceData());
+		$fields = tmgmt_flatten_data($item->getSourceData());
+		dpm($fields);
+		foreach ($fields as $fieldid => $field) {
+			
+			$newfield = new stdClass();
+			$newfield->Content = $field['#text'];
+			$newfield->Context = $field['#label'];
+			$newfield->GroupId = $tjiid;
+			$newfield->Id = $fieldid;
+			
+			$object->Items[] = $newfield;			
+		}
+
+	}
+		dpm($object);
+		$encoding = json_encode($object);
+	dpm($encoding);
+	
+	
+	
+	return "hallo";
+}
