@@ -3,28 +3,12 @@
  * CSS for the tmgmt admin pages.
  */
 
-.tmgmt_ui_left_48 {
+.tmgmt-ui-left-48 {
   float: left;
   width: 48%;
 }
 
-.tmgmt_ui_right_48 {
+.tmgmt-ui-right-48 {
   float: right;
   width: 48%;
-}
-
-/**
- * CSS for the my-tmgmt page.
- */
-
-div.admin.my-tmgmt .left {
-  width: 35%;
-}
-
-div.admin.my-tmgmt .right {
-  width: 65%;
-}
-
-div.admin.my-tmgmt .cleared {
-  clear: both;
 }
