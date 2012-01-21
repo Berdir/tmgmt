@@ -87,22 +87,6 @@ function tmgmt_menu() {
     'description' => 'Configuration options for the available source and translator plugins.',
     'access arguments' => array('administer tmgmt'),
   );
-  $items['admin/tmgmt/add-item/%/%/%/%'] = array(
-    'title' => 'Create a Job',
-    'page callback' => 'tmgmt_job_add_item',
-    'page arguments' => array(3, 4, 5, 6),
-    'access arguments' => array('access tmgmt ui'),
-    'file' => 'includes/tmgmt.ui.inc',
-    'type' => MENU_CALLBACK,
-  );
-  $items['admin/tmgmt/add-item/%/%/%/%/%tmgmt_job'] = array(
-    'title' => 'Add to existing Job',
-    'page callback' => 'tmgmt_job_add_item',
-    'page arguments' => array(3, 4, 5, 6, 7),
-    'access arguments' => array('access tmgmt ui'),
-    'file' => 'includes/tmgmt.ui.inc',
-    'type' => MENU_CALLBACK,
-  );
   // Add settings menu item for each plugin that is using settings form.
   foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
     $items += tmgmt_translator_plugin_controller($plugin)->hook_menu();

@@ -42,11 +42,27 @@ function tmgmt_ui_menu() {
     'file' => 'tmgmt_ui.pages.inc',
   );
   $items['admin/tmgmt/checkout/%tmgmt_ui_job_multiple'] = array(
-    'title' => 'Job checkout form',
+    'title' => 'Checkout job',
     'page callback' => 'tmgmt_ui_checkout_wizard',
     'page arguments' => array(3),
     'access arguments' => array('access tmgmt ui'),
     'file' => 'tmgmt_ui.pages.inc',
+  );
+  $items['admin/tmgmt/add-item/%/%/%/%'] = array(
+    'title' => 'Create a Job',
+    'page callback' => 'tmgmt_job_add_item',
+    'page arguments' => array(3, 4, 5, 6),
+    'access arguments' => array('access tmgmt ui'),
+    'file' => 'tmgmt_ui.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/tmgmt/add-item/%/%/%/%/%tmgmt_job'] = array(
+    'title' => 'Add to existing Job',
+    'page callback' => 'tmgmt_job_add_item',
+    'page arguments' => array(3, 4, 5, 6, 7),
+    'access arguments' => array('access tmgmt ui'),
+    'file' => 'tmgmt_ui.pages.inc',
+    'type' => MENU_CALLBACK,
   );
   // Add source overview pages.
   foreach (tmgmt_source_plugin_info() as $plugin_type => $info) {
