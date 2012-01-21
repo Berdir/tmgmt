@@ -4,15 +4,15 @@
  * Common Translation managment UI.
  */
 
-/**
- * Implements hook_permission().
- */
-function tmgmt_ui_permission() {
-  return array(
-    'access tmgmt ui' => array(
-      'title' => t('Access Translation Management UI'),
+function tmgmt_ui_entity_info() {
+  $info['tmgmt_translator'] = array(
+    'admin ui' => array(
+      'controller class' => 'TMGMTTranslatorUIController',
+      'path' => 'admin/tmgmt/translators',
+      'file' => 'includes/tmgmt_ui.admin.inc',
     ),
   );
+  return $info;
 }
 
 /**
@@ -70,6 +70,32 @@ function tmgmt_ui_menu() {
     $items = array_merge($items, $plugin->hook_menu());
   }
   return $items;
+}
+
+/**
+ * Implements hook_forms().
+ */
+function tmgmt_ui_forms() {
+  $info = array();
+  // Give each translator settings form a unique form id.
+  foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
+    $info['tmgmt_' . $plugin . '_translator_settings_form'] = array(
+      'callback' => 'tmgmt_translator_settings_form',
+      'wrapper_callback' => 'tmgmt_translator_settings_form_defaults',
+    );
+  }
+  return $info;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function tmgmt_ui_permission() {
+  return array(
+    'access tmgmt ui' => array(
+      'title' => t('Access Translation Management UI'),
+    ),
+  );
 }
 
 /**
