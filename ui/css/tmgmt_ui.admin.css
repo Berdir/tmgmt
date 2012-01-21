@@ -12,3 +12,19 @@
   float: right;
   width: 48%;
 }
+
+/**
+ * CSS for the my-tmgmt page.
+ */
+
+div.admin.my-tmgmt .left {
+  width: 35%;
+}
+
+div.admin.my-tmgmt .right {
+  width: 65%;
+}
+
+div.admin.my-tmgmt .cleared {
+  clear: both;
+}
