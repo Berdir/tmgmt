@@ -4,7 +4,6 @@
  * @file
  * Provides the node source controller.
  */
-
 class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController {
 
   /**
@@ -64,13 +63,17 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
   }
 
   public function getTitle(TMGMTJobItem $job_item) {
-    $node = node_load($job_item->item_id);
-    return entity_label('node', $node);
+    if ($node = node_load($job_item->item_id)) {
+      return entity_label('node', $node);
+    }
+    return parent::getTitle($job_item);
   }
 
   public function getUri(TMGMTJobItem $job_item) {
-    $node = node_load($job_item->item_id);
-    return entity_uri('node', $node);
+    if ($node = node_load($job_item->item_id)) {
+      return entity_uri('node', $node);
+    }
+    return parent::getTitle($job_item);
   }
 
   public function hook_menu() {
