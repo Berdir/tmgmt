@@ -23,26 +23,20 @@ function tmgmt_ui_permission() {
  */
 function tmgmt_ui_menu() {
   $items['admin/config/regional/tmgmt/tmgmt_ui'] = array(
-    'title' => 'UI',
+    'title' => 'User interface configuration',
     'description' => 'Administer Translation Management UI',
-    'page callback' => 'tmgmt_ui_fake_admin',
-    'access arguments' => array('administer tmgmt ui'),
-    'weight' => -1,
-    'file' => 'tmgmt_ui.pages.inc',
   );
   $items['admin/tmgmt'] = array(
     'title' => 'Translation Management',
     'description' => 'Use the Translation Management',
     'page callback' => 'tmgmt_ui_content',
     'access arguments' => array('access tmgmt ui'),
-    'weight' => -20,
     'file' => 'tmgmt_ui.pages.inc',
   );
   $items['admin/tmgmt/my-translation-management'] = array(
     'title' => 'Overview',
     'page callback' => 'tmgmt_ui_content',
     'access arguments' => array('access tmgmt ui'),
-    'weight' => -20,
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
   );
@@ -51,7 +45,6 @@ function tmgmt_ui_menu() {
     'page callback' => 'tmgmt_job_view',
     'page arguments' => array(3),
     'access arguments' => array('administer tmgmt'),
-    'weight' => 0,
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'tmgmt_ui.pages.inc',
   );
@@ -62,7 +55,6 @@ function tmgmt_ui_menu() {
     'access arguments' => array('access tmgmt ui'),
     'file' => 'tmgmt_ui.pages.inc',
   );
-
   // Add source overview pages.
   foreach (tmgmt_source_plugin_info() as $plugin_type => $info) {
     $plugin = tmgmt_source_plugin_controller($plugin_type);

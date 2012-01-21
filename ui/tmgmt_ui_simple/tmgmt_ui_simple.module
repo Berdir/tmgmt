@@ -35,6 +35,7 @@ function tmgmt_ui_simple_settings_form($form, &$form_state) {
   );
   return system_settings_form($form);
 }
+
 /**
  * Translate multiple items
  */

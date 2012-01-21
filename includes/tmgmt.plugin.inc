@@ -256,13 +256,12 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   public function hook_menu() {
     $items = array();
     if (method_exists($this, 'settingsForm')) {
-      $items['admin/config/regional/tmgmt/' . $this->pluginType] = array(
+      $items['admin/config/regional/tmgmt/plugins/' . $this->pluginType] = array(
         'title' => $this->pluginInfo['label'],
         'description' => $this->pluginInfo['description'],
         'page callback' => 'drupal_get_form',
         'page arguments' => array('tmgmt_' . $this->pluginType . '_translator_settings_form', $this->pluginType),
         'access arguments' => array('administer tmgmt'),
-        'type' => MENU_LOCAL_TASK,
       );
     }
     return $items;

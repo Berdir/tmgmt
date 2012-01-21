@@ -28,6 +28,8 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
  * The checkout form.
  */
 function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
+  // The Form API needs to know that we are
+  $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt') . '/includes/tmgmt.ui.inc';
   // Add the job to the form state so we can use it in the submit handler.
   $form_state['job'] = $job;
   // Get all available languages from core translation module.
@@ -42,11 +44,9 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   $translator_plugins = tmgmt_translator_availability_filter(tmgmt_translator_plugin_labels());
   $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translator_plugins);
   $available_languages = tmgmt_translator_languages_filter($selected_translator_plugin, $job->source_language, $available_languages);
-  // Load plugin controller for the selected translator plugin..
-  $plugin_controller = tmgmt_translator_plugin_controller($selected_translator_plugin);
-  $form_implemented = method_exists($plugin_controller, 'jobSettingsForm');
-  // Load the plugin info for the selected translator plugin.
+  // Load plugin controller and info for the selected translator plugin.
   $plugin_info = tmgmt_translator_plugin_info($selected_translator_plugin);
+  $plugin_controller = tmgmt_translator_plugin_controller($selected_translator_plugin);
   // Add a link for each item in this job.
   $form['links'] = array(
     '#theme' => 'links',
@@ -70,9 +70,8 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     '#description' => t('The target language'),
     '#options' => $available_languages,
     '#ajax' => array(
-      'callback' => 'tmgmt_get_supported_translators',
+      'callback' => 'tmgmt_ajax_callback_get_supported_translators',
       'wrapper' => 'tmgmt-translator-wrapper',
-      'method' => 'replace',
     ),
   );
   $form['translator_wrapper'] = array(
@@ -87,34 +86,33 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
       '#options' => $translator_plugins,
       '#default_value' => $selected_translator_plugin,
       '#ajax' => array(
-        'callback' => 'tmgmt_get_translator_options',
+        'callback' => 'tmgmt_ajax_callback_get_translator_options',
         'wrapper' => 'tmgmt-translator-options',
-        'method' => 'replace',
       ),
     );
     $form['translator_wrapper']['options'] = array(
       '#type' => 'fieldset',
+      '#title' => t('Translator checkout settings'),
+      '#description' => t('The @translator translator does not provide any per job settings.', array('@translator' => $plugin_info['label'])),
       '#prefix' => '<div id="tmgmt-translator-options">',
       '#suffix' => '</div>',
     );
-    if ($form_implemented) {
-      $form['translator_wrapper']['options']['description'] = array(
-        '#type' => 'item',
-        '#title' => t('About this service'),
-        '#markup' => $plugin_info['description'],
-        '#hidden' => !$form_implemented,
-      );
-      $form['translator_wrapper']['options']['settings'] = $plugin_controller->jobSettingsForm($form, $form_state);
+    if (method_exists($plugin_controller, 'jobSettingsForm') && $settings = $plugin_controller->jobSettingsForm(array(), $form_state)) {
+      unset($form['translator_wrapper']['options']['#description']);
+      $form['translator_wrapper']['options']['settings'] = $settings;
     }
-    $form['translator_wrapper']['actions']['#type'] = 'actions';
-    $form['translator_wrapper']['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Submit'),
-      '#weight' => 50,
-    );
-  } else {
-    drupal_set_message(t('You have to install a translator plugin module'), 'warning');
   }
+  else {
+    $form['translator_wrapper']['translator'] = array(
+      '#markup' => t('None of the available translators supports the selected source and target language combination.'),
+    );
+  }
+  $form['translator_wrapper']['actions']['#type'] = 'actions';
+  $form['translator_wrapper']['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+    '#weight' => 50,
+  );
   return $form;
 }
 
@@ -145,6 +143,7 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
  * Ajax callback to fetch the supported translator services.
  */
 function tmgmt_ajax_callback_get_supported_translators($form, &$form_state) {
+  watchdog('ggggg', 'asd');
   return $form['translator_wrapper'];
 }
 

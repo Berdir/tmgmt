@@ -71,12 +71,18 @@ function tmgmt_menu() {
     'description' => 'Translation Management Suite.',
     'access arguments' => array('administer tmgmt'),
   );
+  $items['admin/config/regional/tmgmt/plugins'] = array(
+    'title' => 'Plugin settings',
+    'description' => 'Configuration options for the available source and translator plugins.',
+    'access arguments' => array('administer tmgmt'),
+  );
   $items['admin/tmgmt/add-item/%/%/%/%'] = array(
     'title' => 'Create a Job',
     'page callback' => 'tmgmt_job_add_item',
     'page arguments' => array(3, 4, 5, 6),
     'access arguments' => array('use tmgmt'),
     'file' => 'includes/tmgmt.ui.inc',
+    'type' => MENU_CALLBACK,
   );
   $items['admin/tmgmt/add-item/%/%/%/%/%tmgmt_job'] = array(
     'title' => 'Add to existing Job',
@@ -84,13 +90,7 @@ function tmgmt_menu() {
     'page arguments' => array(3, 4, 5, 6, 7),
     'access arguments' => array('use tmgmt'),
     'file' => 'includes/tmgmt.ui.inc',
-  );
-  $items['admin/tmgmt/checkout/%tmgmt_job'] = array(
-    'title' => 'Checkout Job',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_job_checkout_form', 3),
-    'access arguments' => array('use tmgmt'),
-    'file' => 'includes/tmgmt.ui.inc',
+    'type' => MENU_CALLBACK,
   );
   // Add settings menu item for each plugin that is using settings form.
   foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
@@ -173,10 +173,6 @@ function tmgmt_forms() {
     $info['tmgmt_' . $plugin . '_translator_settings_form'] = array(
       'callback' => 'tmgmt_translator_settings_form',
       'wrapper_callback' => 'tmgmt_translator_settings_form_defaults',
-    );
-    $info['tmgmt_' . $plugin . '_translator_job_settings_form'] = array(
-      'callback' => 'tmgmt_translator_job_settings_form',
-      'wrapper_callback' => 'tmgmt_translator_job_settings_form_defaults',
     );
   }
   return $info;
