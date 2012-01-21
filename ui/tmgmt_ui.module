@@ -16,7 +16,6 @@ function tmgmt_ui_entity_info() {
       'file path' => drupal_get_path('module', 'tmgmt_ui'),
     ),
   );
-  dpm('test');
   return $info;
 }
 
