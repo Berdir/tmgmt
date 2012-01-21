@@ -1,5 +1,4 @@
 <?php
-
 /**
  * A new translation job, can not yet be submitted.
  */
@@ -47,6 +46,21 @@ define('TMGMT_JOB_STATE_FINISHED', 7);
  * String used to delimit flattened array keys.
  */
 define('TMGMT_ARRAY_DELIMITER', '][');
+
+/**
+ * The selected translator is available for the target language.
+ */
+define('TMGMT_TRANSLATOR_AVAILABLE', 0);
+
+/**
+ * The selected translator is not available yet.
+ */
+define('TMTGT_TRANSLATOR_NOT_AVAILABLE', 1);
+
+/**
+ * The selected translator is not available for the sleected language.
+ */
+define('TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE', 2);
 
 /**
  * Implements hook_permission().
@@ -189,7 +203,6 @@ function tmgmt_forms() {
   }
   return $info;
 }
-
 /**
  * @addtogroup tmgmt_job
  * @{
@@ -249,9 +262,9 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
  */
 function tmgmt_job_create($source_language, $target_language, array $values = array()) {
   return entity_create('tmgmt_job', array_merge($values, array(
-    'source_language' => $source_language,
-    'target_language' => $target_language,
-  )));
+                    'source_language' => $source_language,
+                    'target_language' => $target_language,
+                  )));
 }
 
 /**
@@ -271,7 +284,6 @@ function tmgmt_job_states() {
     TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
   );
 }
-
 /**
  * @} End of "addtogroup tmgmt_job".
  */
@@ -312,12 +324,11 @@ function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = arr
  */
 function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $values = array()) {
   return entity_create('tmgmt_job_item', array_merge($values, array(
-    'source_plugin' => $source_plugin,
-    'item_type' => $item_type,
-    'item_id' => $item_id,
-  )));
+                    'source_plugin' => $source_plugin,
+                    'item_type' => $item_type,
+                    'item_id' => $item_id,
+                  )));
 }
-
 /**
  * @} End of "addtogroup tmgmt_job_item".
  */
@@ -360,13 +371,12 @@ function tmgmt_job_message_load_multiple(array $tjmids = array(), $conditions = 
  */
 function tmgmt_job_message_create($status_before, $status_after, $message = '', $arguments = array(), $values = array()) {
   return entity_create('tmgmt_job_message', array_merge($values, array(
-        'state_before' => $status_before,
-        'state_after' => $status_after,
-        'message' => $message,
-        'arguments' => $arguments,
-      )));
+                    'state_before' => $status_before,
+                    'state_after' => $status_after,
+                    'message' => $message,
+                    'arguments' => $arguments,
+                  )));
 }
-
 /**
  * @} End of "addtogroup tmgmt_job_message".
  */
@@ -454,12 +464,31 @@ function tmgmt_translator_availability_filter($plugins) {
  *   (Optional)
  * @return array
  */
-function tmgmt_translator_languages_filter($plugin, $source_language, $languages = array()) {
-  $supported_languages = tmgmt_translator_plugin_controller($plugin)->getSupportedTargetLanguages($source_language);
-  if (isset($languages)) {
-    $supported_languages = array_intersect_key($languages, $supported_languages);
+function tmgmt_translator_filtered_by_language($plugins, $source_language, $selected_target_language) {
+  foreach ($plugins as $plugin => $label) {
+    switch (tmgmt_translator_check($plugin, $source_language, $selected_target_language)) {
+      case TMTGT_TRANSLATOR_NOT_AVAILABLE:
+        $transator_plugins[$plugin] = t('@label (not available)', array('@label' => $label['label']));
+        break;
+      case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
+        $transator_plugins[$plugin] = t('@label (not available for this language)', array('@label' => $label['label']));
+        break;
+      default:
+        $transator_plugins[$plugin] = $label['label'];
+    }
   }
-  return $supported_languages;
+  return $transator_plugins;
+}
+
+function tmgmt_translator_check($plugin, $source_language, $selected_target_language) {
+  $supported_languages[$plugin] = tmgmt_translator_plugin_controller($plugin)->getSupportedTargetLanguages($source_language);
+  if (!tmgmt_translator_plugin_controller($plugin)->isAvailable()) {
+    return TMTGT_TRANSLATOR_NOT_AVAILABLE;
+  } elseif (isset($supported_languages[$plugin][$selected_target_language])) {
+    return TMGMT_TRANSLATOR_AVAILABLE;
+  } else {
+    return TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE;
+  }
 }
 
 /**
@@ -474,7 +503,6 @@ function tmgmt_translator_languages_filter($plugin, $source_language, $languages
  */
 function tmgmt_translator_settings_form_defaults($form, &$form_state, $plugin) {
   return system_settings_form($form, $form_state);
-  ;
 }
 
 /**
@@ -494,7 +522,6 @@ function tmgmt_translator_settings_form($form, &$form_state, $plugin) {
   }
   return $form;
 }
-
 /**
  * @} End of "addtogroup tmgmt_translator".
  */
@@ -536,7 +563,6 @@ function tmgmt_source_plugin_controller($plugin) {
 function tmgmt_source_plugin_labels() {
   return _tmgmt_plugin_labels('source');
 }
-
 /**
  * @} End of "addtogroup tmgmt_source".
  */
@@ -562,8 +588,7 @@ function _tmgmt_plugin_info($type, $plugin = NULL) {
   }
   if (isset($plugin) && isset($info[$type][$plugin])) {
     return $info[$type][$plugin];
-  }
-  elseif (!isset($plugin)) {
+  } elseif (!isset($plugin)) {
     return $info[$type];
   }
 }
@@ -629,8 +654,7 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
   // not both.
   if (!empty($data['#text'])) {
     $flattened_data[$prefix] = $data;
-  }
-  else {
+  } else {
     $prefix = !empty($prefix) ? $prefix . TMGMT_ARRAY_DELIMITER : '';
     foreach (element_children($data) as $key) {
       $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key);
