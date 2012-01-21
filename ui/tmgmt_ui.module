@@ -54,7 +54,7 @@ function tmgmt_ui_menu() {
     'page callback' => 'tmgmt_ui_checkout_wizard',
     'page arguments' => array(3),
     'access arguments' => array('access tmgmt ui'),
-    'file' => 'tmgmt_ui.pages.inc',
+    'file' => 'includes/tmgmt_ui.pages.inc',
   );
   $items['admin/tmgmt/add-item/%/%/%/%'] = array(
     'title' => 'Create a Job',
