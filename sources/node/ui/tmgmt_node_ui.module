@@ -19,6 +19,16 @@ function tmgmt_node_ui_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 20
   );
+  $items['node/%node/view/translate'] = array(
+    'title' => t('Translation management'),
+
+    'page callback' => 'tmgmt_node_ui_translation_overview',
+    'page arguments' => array(1),
+    'access callback' => '_translation_tab_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 20
+  );
   return $items;
 }
 

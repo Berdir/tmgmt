@@ -52,19 +52,16 @@ define('TMGMT_ARRAY_DELIMITER', '][');
  * Implements hook_menu().
  */
 function tmgmt_menu() {
-  $items = array();
   // Add settings menu item for each plugin that is using settings form.
   foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
     $plugin_controller = tmgmt_translator_plugin_controller($plugin);
     if (method_exists($plugin_controller, 'settingsForm')) {
-      if (empty($items)) {
-        // If we have any menu item then lets add root item also.
-        $items['admin/config/regional/tmgmt'] = array(
-          'title' => 'Translation Management',
-          'description' => 'Translation Management Suite.',
-          'access arguments' => array('administer site configuration'),
-        );
-      }
+      // If we have a menu item then lets add the root item also.
+      $items['admin/config/regional/tmgmt'] = array(
+        'title' => 'Translation Management',
+        'description' => 'Translation Management Suite.',
+        'access arguments' => array('administer site configuration'),
+      );
       $items['admin/config/regional/tmgmt/' . $plugin] = array(
         'title' => $plugin_info['label'],
         'description' => $plugin_info['description'],
