@@ -22,7 +22,7 @@ function tmgmt_job_management_views_default_views() {
 
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
-  $handler->display->display_options['title'] = 'Translation Jobs';
+  $handler->display->display_options['title'] = 'Job overview';
   $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['access']['perm'] = 'access tmgmt ui';
   $handler->display->display_options['cache']['type'] = 'none';
@@ -361,12 +361,12 @@ function tmgmt_job_management_views_default_views() {
   $handler = $view->new_display('page', 'Page', 'page');
   $handler->display->display_options['path'] = 'admin/tmgmt/jobs';
   $handler->display->display_options['menu']['type'] = 'tab';
-  $handler->display->display_options['menu']['title'] = 'job overview';
+  $handler->display->display_options['menu']['title'] = 'Job overview';
   $handler->display->display_options['menu']['weight'] = '-1';
   $handler->display->display_options['menu']['context'] = 0;
   $translatables['tmgmt_job_management_job_overview'] = array(
     t('Master'),
-    t('Translation Jobs'),
+    t('Job overview'),
     t('more'),
     t('Apply'),
     t('Reset'),
@@ -387,6 +387,7 @@ function tmgmt_job_management_views_default_views() {
     t('Target language'),
     t('Page'),
   );
+
 
   $export['tmgmt_job_management_job_overview'] = $view;
 
