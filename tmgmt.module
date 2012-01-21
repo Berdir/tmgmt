@@ -57,7 +57,7 @@ define('TMGMT_TRANSLATOR_AVAILABLE', 0);
 define('TMTGT_TRANSLATOR_NOT_AVAILABLE', 1);
 
 /**
- * The selected translator is not available for the sleected language.
+ * The selected translator is not available for the selected language.
  */
 define('TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE', 2);
 
@@ -146,7 +146,7 @@ function tmgmt_entity_info() {
     'base table' => 'tmgmt_translator',
     'exportable' => TRUE,
     // @todo: Fix entity api to check if the entitycache module is enabled.
-    //'entity cache' => TRUE,
+    // 'entity cache' => TRUE,
     'uri callback' => 'entity_class_uri',
     'label callback' => 'entity_class_label',
     'entity keys' => array(
@@ -158,20 +158,6 @@ function tmgmt_entity_info() {
   return $info;
 }
 
-/**
- * Implements hook_forms().
- */
-function tmgmt_forms() {
-  $info = array();
-  // Give each translator settings form a unique form id.
-  foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
-    $info['tmgmt_' . $plugin . '_translator_settings_form'] = array(
-      'callback' => 'tmgmt_translator_settings_form',
-      'wrapper_callback' => 'tmgmt_translator_settings_form_defaults',
-    );
-  }
-  return $info;
-}
 /**
  * @addtogroup tmgmt_job
  * @{
