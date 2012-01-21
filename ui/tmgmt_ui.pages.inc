@@ -19,7 +19,6 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
     foreach ($item_ids as $item_id) {
       $job->addItem($source_plugin, $item_type, $item_id);
     }
-    $job->prepared();
   }
   drupal_goto('admin/tmgmt/checkout/' . $job->tjid);
 }
@@ -28,7 +27,10 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
  * The checkout form.
  */
 function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
-  if ($job->isPrepared() || $job->isRejected()) {
+  if(!$job->isPrepared()) {
+    $job->prepared();
+  }
+  if ($job->isRejected()) {
     // The Form API needs to know that we are
     $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt') . '/includes/tmgmt.ui.inc';
     // Add the job to the form state so we can use it in the submit handler.
@@ -105,7 +107,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
           $form['translator_wrapper']['options']['settings']['#markup'] = t('Translator is not available: @reason.', array('@reason' => $plugin_controller->getNotAvailableReason()));
           break;
         case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-          $form['translator_wrapper']['options']['settings']['#markup'] = t('Test translator is not avalible for @language.', array('@language' => $available_languages[$selected_target_language]));
+          $form['translator_wrapper']['options']['settings']['#markup'] = t('Test translator is not available for @language.', array('@language' => $available_languages[$selected_target_language]));
           break;
         default:
           $form['translator_wrapper']['options']['settings'] = $plugin_controller->jobSettingsForm(array(), $form_state, $job);
