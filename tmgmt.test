@@ -535,7 +535,7 @@ class TMGMTHelperTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($job_en_sp->tjid, tmgmt_job_match_item('en', 'es')->tjid);
 
     // Add a job which has no existing source-target combination.
-    $this->assertTrue(tmgmt_job_match_item('fr', 'es') !== FALSE);
+    $this->assertTrue(tmgmt_job_match_item('fr', 'es'));
 
   }
 

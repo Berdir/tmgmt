@@ -205,7 +205,7 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
     return tmgmt_job_load(reset($result['tmgmt_job'])->tjid);
   }
   else {
-    return tmgmt_job_create($source_language, $target_language, $uid);
+    return tmgmt_job_create($source_language, $target_language, $account->uid);
   }
 }
 
