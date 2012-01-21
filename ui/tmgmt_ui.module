@@ -152,6 +152,15 @@ function tmgmt_ui_views_default_views() {
 }
 
 /**
+ * Add a class class to the cart view.
+ */
+function tmgmt_ui_views_pre_render($view) {
+  if ($view->name == 'tmgmt_ui_cart_overview' && $view->current_display == 'block_1') {
+    drupal_add_css(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.cart.css');
+  }
+}
+
+/**
  * Fetches an array of exportables from files.
  *
  * @param $module
