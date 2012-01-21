@@ -256,7 +256,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::getNotAvailableReason().
    */
   public function getNotAvailableReason() {
-    return t('@plugin needs to be configured before it can be used.', array('@plugin' => $this->pluginInfo['label']));
+    return t('@plugin needs to be configured before it can be used', array('@plugin' => $this->pluginInfo['label']));
   }
 
   /**
