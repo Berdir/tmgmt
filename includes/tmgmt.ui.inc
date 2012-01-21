@@ -46,7 +46,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   $form['source_language_display'] = array(
     '#type' => 'item',
     '#title' => t('Source language'),
-    '#markup' => $node_language,
+    '#markup' => $source_language,
   );
   $form['target_language'] = array(
     '#type' => 'select',
