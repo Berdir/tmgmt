@@ -149,6 +149,7 @@ function tmgmt_entity_info() {
     // 'entity cache' => TRUE,
     'uri callback' => 'entity_class_uri',
     'label callback' => 'entity_class_label',
+    'access callback' => 'tmgmt_translator_access',
     'entity keys' => array(
       'id' => 'tid',
       'name' => 'name',
@@ -336,6 +337,13 @@ function tmgmt_job_message_create($status_before, $status_after, $message = '', 
  * @addtogroup tmgmt_translator
  * @{
  */
+
+/**
+ * Access callback for the translator entity.
+ */
+function tmgmt_translator_access($op, $translator = NULL, $account = NULL) {
+  return TRUE;
+}
 
 /**
  * Loads a translator.
