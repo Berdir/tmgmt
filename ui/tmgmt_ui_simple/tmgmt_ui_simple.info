@@ -3,5 +3,3 @@ description = Simple translation UI for multiple sources integrating with existi
 package = Translation Management
 core = 7.x
 dependencies[] = tmgmt
-dependencies[] = tmgmt_i18n_string
-dependencies[] = tmgmt_node

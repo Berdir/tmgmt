@@ -49,6 +49,20 @@ define('TMGMT_JOB_STATE_FINISHED', 7);
 define('TMGMT_ARRAY_DELIMITER', '][');
 
 /**
+ * Implements hook_permission().
+ */
+function tmgmt_permission() {
+  return array(
+    'administer tmgmt' => array(
+      'title' => t('Administer Translation Management'),
+    ),
+    'use tmgmt' => array(
+      'title' => t('Use Translation Management'),
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function tmgmt_menu() {
@@ -56,31 +70,33 @@ function tmgmt_menu() {
   foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
     $plugin_controller = tmgmt_translator_plugin_controller($plugin);
     if (method_exists($plugin_controller, 'settingsForm')) {
-      // If we have a menu item then lets add the root item also.
-      $items['admin/config/regional/tmgmt'] = array(
-        'title' => 'Translation Management',
-        'description' => 'Translation Management Suite.',
-        'access arguments' => array('administer site configuration'),
-      );
+      if (empty($items)) {
+        // If we have any menu item then lets add root item also.
+        $items['admin/config/regional/tmgmt'] = array(
+          'title' => 'Translation Management',
+          'description' => 'Translation Management Suite.',
+          'access arguments' => array('tmgmt'),
+        );
+      }
       $items['admin/config/regional/tmgmt/' . $plugin] = array(
         'title' => $plugin_info['label'],
         'description' => $plugin_info['description'],
         'page callback' => 'drupal_get_form',
         'page arguments' => array('tmgmt_' . $plugin . '_translator_settings_form', $plugin),
-        'access arguments' => array('administer site configuration'),
+        'access arguments' => array('administer tmgmt'),
       );
     }
     $items['admin/tmgmt/add-item/%/%/%/%'] = array(
-      'title' => t('Create a Job'),
+      'title' => 'Create a Job',
       'page callback' => 'tmgmt_job_add_item',
       'page arguments' => array(3, 4, 5, 6),
-      'access arguments' => array('administer site configuration'),
+      'access arguments' => array('use tmgmt'),
     );
     $items['admin/tmgmt/checkout/%'] = array(
-      'title' => t('Checkout Job'),
+      'title' => 'Checkout Job',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('tmgmt_checkout_form', 3),
-      'access arguments' => array('administer site configuration'),
+      'access arguments' => array('use tmgmt'),
     );
   }
   return $items;
@@ -236,7 +252,8 @@ function tmgmt_job_create($source_language, $target_language, array $values = ar
 function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_ids, $tjid = NULL) {
   if (!$tjid) {
     $job = tmgmt_job_create($source_language, '');
-  } else {
+  }
+  else {
     $job = tmgmt_job_load($tjid);
   }
   $item_ids = explode(',', $item_ids);
@@ -270,7 +287,6 @@ function tmgmt_job_states() {
 /**
  * @} End of "addtogroup tmgmt_job".
  */
-
 /**
  * @addtogroup tmgmt_job_item
  * @{
@@ -317,7 +333,6 @@ function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $valu
 /**
  * @} End of "addtogroup tmgmt_job_item".
  */
-
 /**
  * @addtogroup tmgmt_job_message
  * @{
@@ -357,17 +372,16 @@ function tmgmt_job_message_load_multiple(array $tjmids = array(), $conditions = 
  */
 function tmgmt_job_message_create($status_before, $status_after, $message = '', $arguments = array(), $values = array()) {
   return entity_create('tmgmt_job_message', array_merge($values, array(
-    'state_before' => $status_before,
-    'state_after' => $status_after,
-    'message' => $message,
-    'arguments' => $arguments,
-  )));
+        'state_before' => $status_before,
+        'state_after' => $status_after,
+        'message' => $message,
+        'arguments' => $arguments,
+      )));
 }
 
 /**
  * @} End of "addtogroup tmgmt_job_message".
  */
-
 /**
  * @addtogroup tmgmt_translator
  * @{
@@ -471,7 +485,8 @@ function tmgmt_translator_languages_filter($plugin, $source_language, $languages
  *   Form.
  */
 function tmgmt_translator_settings_form_defaults($form, &$form_state, $plugin) {
-  return system_settings_form($form, $form_state);;
+  return system_settings_form($form, $form_state);
+  ;
 }
 
 /**
@@ -495,7 +510,6 @@ function tmgmt_translator_settings_form($form, &$form_state, $plugin) {
 /**
  * @} End of "addtogroup tmgmt_translator".
  */
-
 /**
  * @addtogroup tmgmt_source
  * @{
@@ -560,7 +574,8 @@ function _tmgmt_plugin_info($type, $plugin = NULL) {
   }
   if (isset($plugin) && isset($info[$type][$plugin])) {
     return $info[$type][$plugin];
-  } else if (!isset($plugin)) {
+  }
+  elseif (!isset($plugin)) {
     return $info[$type];
   }
 }
@@ -618,7 +633,7 @@ function _tmgmt_plugin_labels($type) {
  * @return
  *   The flattened data array.
  *
- * @see tmgmt_unflatten_data().
+ * @see tmgmt_unflatten_data()
  */
 function tmgmt_flatten_data($data, $prefix = NULL) {
   $flattened_data = array();
@@ -626,7 +641,8 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
   // not both.
   if (!empty($data['#text'])) {
     $flattened_data[$prefix] = $data;
-  } else {
+  }
+  else {
     $prefix = !empty($prefix) ? $prefix . TMGMT_ARRAY_DELIMITER : '';
     foreach (element_children($data) as $key) {
       $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key);
@@ -650,7 +666,7 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
  * @return
  *   The nested data array.
  *
- * @see tmgmt_flatten_data().
+ * @see tmgmt_flatten_data()
  */
 function tmgmt_unflatten_data($flattened_data) {
   $data = array();

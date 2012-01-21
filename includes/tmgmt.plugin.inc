@@ -49,7 +49,7 @@ interface TMGMTSourcePluginControllerInterface {
   /**
    * Returns the URi for this job item.
    *
-   * @see entity_uri().
+   * @see entity_uri()
    */
   public function getUri(TMGMTJobItem $job_item);
 

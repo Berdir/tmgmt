@@ -268,4 +268,22 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(TMGMT_JOB_STATE_PREPARED, $last_message->state_after);
     $this->assertEqual('Service not reachable', $last_message->message);
   }
+
+  /**
+   * Test the page callback to create a job cart and
+   */
+  function testCheckout() {
+
+    $user = $this->drupalCreateUser(array('administer tmgmt'));
+    $this->drupalLogin($user);
+
+    // Add a first item to the job. This will auto-create the job.
+    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
+
+    // @todo Extract job id from path once the default redirect works.
+    $tjid = 1;
+
+    // Add two more job items.
+    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/2,3/' . $tjid);
+  }
 }
