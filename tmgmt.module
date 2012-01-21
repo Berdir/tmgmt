@@ -41,7 +41,6 @@ define('TMGMT_JOB_STATE_CANCELLED', 6);
  */
 define('TMGMT_JOB_STATE_FINISHED', 7);
 
-
 /**
  * String used to delimit flattened array keys.
  */
@@ -80,47 +79,36 @@ function tmgmt_permission() {
  * Implements hook_menu().
  */
 function tmgmt_menu() {
+  // If we have any menu item then lets add root item also.
+  $items['admin/config/regional/tmgmt'] = array(
+    'title' => 'Translation Management',
+    'description' => 'Translation Management Suite.',
+    'access arguments' => array('administer tmgmt'),
+  );
+  $items['admin/config/regional/tmgmt/plugins'] = array(
+    'title' => 'Plugin settings',
+    'description' => 'Configuration options for the available source and translator plugins.',
+    'access arguments' => array('administer tmgmt'),
+  );
+  $items['admin/tmgmt/add-item/%/%/%/%'] = array(
+    'title' => 'Create a Job',
+    'page callback' => 'tmgmt_job_add_item',
+    'page arguments' => array(3, 4, 5, 6),
+    'access arguments' => array('use tmgmt'),
+    'file' => 'includes/tmgmt.ui.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/tmgmt/add-item/%/%/%/%/%tmgmt_job'] = array(
+    'title' => 'Add to existing Job',
+    'page callback' => 'tmgmt_job_add_item',
+    'page arguments' => array(3, 4, 5, 6, 7),
+    'access arguments' => array('use tmgmt'),
+    'file' => 'includes/tmgmt.ui.inc',
+    'type' => MENU_CALLBACK,
+  );
   // Add settings menu item for each plugin that is using settings form.
   foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
-    $plugin_controller = tmgmt_translator_plugin_controller($plugin);
-    if (method_exists($plugin_controller, 'settingsForm')) {
-      if (empty($items)) {
-        // If we have any menu item then lets add root item also.
-        $items['admin/config/regional/tmgmt'] = array(
-          'title' => 'Translation Management',
-          'description' => 'Translation Management Suite.',
-          'access arguments' => array('tmgmt'),
-        );
-      }
-      $items['admin/config/regional/tmgmt/' . $plugin] = array(
-        'title' => $plugin_info['label'],
-        'description' => $plugin_info['description'],
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('tmgmt_' . $plugin . '_translator_settings_form', $plugin),
-        'access arguments' => array('administer tmgmt'),
-      );
-    }
-    $items['admin/tmgmt/add-item/%/%/%/%'] = array(
-      'title' => 'Create a Job',
-      'page callback' => 'tmgmt_job_add_item',
-      'page arguments' => array(3, 4, 5, 6),
-      'access arguments' => array('use tmgmt'),
-      'file' => 'includes/tmgmt.ui.inc',
-    );
-    $items['admin/tmgmt/add-item/%/%/%/%/%tmgmt_job'] = array(
-      'title' => 'Add to existing Job',
-      'page callback' => 'tmgmt_job_add_item',
-      'page arguments' => array(3, 4, 5, 6, 7),
-      'access arguments' => array('use tmgmt'),
-      'file' => 'includes/tmgmt.ui.inc',
-    );
-    $items['admin/tmgmt/checkout/%tmgmt_job'] = array(
-      'title' => 'Checkout Job',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('tmgmt_job_checkout_form', 3),
-      'access arguments' => array('use tmgmt'),
-      'file' => 'includes/tmgmt.ui.inc',
-    );
+    $items += tmgmt_translator_plugin_controller($plugin)->hook_menu();
   }
   return $items;
 }
@@ -262,9 +250,9 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
  */
 function tmgmt_job_create($source_language, $target_language, array $values = array()) {
   return entity_create('tmgmt_job', array_merge($values, array(
-                    'source_language' => $source_language,
-                    'target_language' => $target_language,
-                  )));
+    'source_language' => $source_language,
+    'target_language' => $target_language,
+  )));
 }
 
 /**
@@ -287,6 +275,7 @@ function tmgmt_job_states() {
 /**
  * @} End of "addtogroup tmgmt_job".
  */
+
 /**
  * @addtogroup tmgmt_job_item
  * @{
@@ -324,14 +313,15 @@ function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = arr
  */
 function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $values = array()) {
   return entity_create('tmgmt_job_item', array_merge($values, array(
-                    'source_plugin' => $source_plugin,
-                    'item_type' => $item_type,
-                    'item_id' => $item_id,
-                  )));
+    'source_plugin' => $source_plugin,
+    'item_type' => $item_type,
+    'item_id' => $item_id,
+  )));
 }
 /**
  * @} End of "addtogroup tmgmt_job_item".
  */
+
 /**
  * @addtogroup tmgmt_job_message
  * @{
@@ -371,11 +361,11 @@ function tmgmt_job_message_load_multiple(array $tjmids = array(), $conditions = 
  */
 function tmgmt_job_message_create($status_before, $status_after, $message = '', $arguments = array(), $values = array()) {
   return entity_create('tmgmt_job_message', array_merge($values, array(
-                    'state_before' => $status_before,
-                    'state_after' => $status_after,
-                    'message' => $message,
-                    'arguments' => $arguments,
-                  )));
+    'state_before' => $status_before,
+    'state_after' => $status_after,
+    'message' => $message,
+    'arguments' => $arguments,
+  )));
 }
 /**
  * @} End of "addtogroup tmgmt_job_message".
@@ -570,10 +560,12 @@ function tmgmt_source_plugin_labels() {
 /**
  * Discovers all available source object plugins.
  *
+ * @param $type
+ *   The type of the plugin. Can be 'translator' or 'source'.
  * @param $plugin
  *   The machine-readable name of a source plugin.
  */
-function _tmgmt_plugin_info($type, $plugin = NULL) {
+function _tmgmt_plugin_info($type, $plugin) {
   $info = &drupal_static(__FUNCTION__);
   if (!isset($info[$type])) {
     $info[$type] = array();
@@ -596,10 +588,12 @@ function _tmgmt_plugin_info($type, $plugin = NULL) {
 /**
  * Determines the controller class for a given plugin type.
  *
+ * @param $type
+ *   The type of the plugin. Can be 'translator' or 'source'.
  * @param $plugin
  *   The machine-readable name of a source plugin.
  *
- * @return TMGMTSourcePluginControllerInterface
+ * @return
  *   The controller object for the given source plugin.
  */
 function _tmgmt_plugin_controller($type, $plugin) {

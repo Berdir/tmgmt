@@ -100,7 +100,6 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
    */
   public function hook_menu() {
     $items = array();
-
     return $items;
   }
 }
@@ -158,6 +157,8 @@ interface TMGMTTranslatorPluginControllerInterface {
   /**
    * @abstract
    *
+   * Submits the translation request and sends it to the translation provider.
+   *
    * @param TMGMTJob $job
    *   The job that should be submitted.
    */
@@ -173,6 +174,14 @@ interface TMGMTTranslatorPluginControllerInterface {
    *   TRUE if the job could be cancelled, FALSE otherwise.
    */
   public function cancelTranslation(TMGMTJob $job);
+
+  /**
+   * Implements hook_menu().
+   *
+   * @return array
+   *   An array of menu items that this translator plugin provides.
+   */
+  public function hook_menu();
 
   /**
    * A plugin can implement this method if it needs a settings form.
@@ -255,4 +264,22 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   protected function getOption($name, $default = NULL) {
     return variable_get('tmgmt_' . $this->pluginType . '_' . $name, $default);
   }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::hook_menu().
+   */
+  public function hook_menu() {
+    $items = array();
+    if (method_exists($this, 'settingsForm')) {
+      $items['admin/config/regional/tmgmt/plugins/' . $this->pluginType] = array(
+        'title' => $this->pluginInfo['label'],
+        'description' => $this->pluginInfo['description'],
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('tmgmt_' . $this->pluginType . '_translator_settings_form', $this->pluginType),
+        'access arguments' => array('administer tmgmt'),
+      );
+    }
+    return $items;
+  }
+
 }
