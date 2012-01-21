@@ -6,3 +6,4 @@ configure = admin/config/regional/tmgmt/tmgmt_ui
 dependencies[] = tmgmt
 dependencies[] = views
 dependencies[] = views_bulk_operations
+files[] = includes/tmgmt_ui.controller.inc

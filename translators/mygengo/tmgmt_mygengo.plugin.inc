@@ -164,7 +164,8 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     foreach($targets as $target) {
       array_push($results, $target->lc_tgt);
     }
-
+    // Resulting array must have language codes as keys
+    $results = array_flip(array_unique($results));
     return $results;
   }
 

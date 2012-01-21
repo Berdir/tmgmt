@@ -8,8 +8,12 @@ function tmgmt_ui_entity_info() {
   $info['tmgmt_translator'] = array(
     'admin ui' => array(
       'controller class' => 'TMGMTTranslatorUIController',
-      'path' => 'admin/tmgmt/translators',
+      'path' => 'admin/structure/translators',
       'file' => 'includes/tmgmt_ui.admin.inc',
+      // Entity API defaults to the path that implements the entity type, but
+      // since this happens in the TMGMT core module, we need to manually
+      // define the path here.
+      'file path' => drupal_get_path('module', 'tmgmt_ui'),
     ),
   );
   return $info;
