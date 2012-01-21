@@ -54,11 +54,10 @@ interface TMGMTSourcePluginControllerInterface {
   public function getUri(TMGMTJobItem $job_item);
 
   /**
-   * Provide menu items which are used to display overview page etc.
+   * Implements hook_menu().
    *
-   * @todo
-   * Maybe it would make sense to provide a UI handler for source plugins
-   * but this is currently the easy to solve way.
+   * @return array
+   *   An array of menu items that this translator plugin provides.
    */
   public function hook_menu();
 }
@@ -96,11 +95,13 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
   }
 
   /**
-   * Provide menu items which are used to display overview page etc.
+   * Implements hook_menu().
+   *
+   * @return array
+   *   An array of menu items that this translator plugin provides.
    */
   public function hook_menu() {
-    $items = array();
-    return $items;
+    return array();
   }
 }
 
