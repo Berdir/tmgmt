@@ -114,7 +114,5 @@ function tmgmt_ui_ajax_callback_translator_plugin_settings($form, &$form_state) 
  */
 function tmgmt_translator_form_submit($form, &$form_state) {
   entity_ui_form_submit_build_entity($form, $form_state)->save();
-  // We might have changed the path, so rebuild the menu registry.
-  menu_rebuild();
   drupal_set_message(t('The configuration options have been saved.'));
 }
