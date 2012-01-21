@@ -73,28 +73,6 @@ function tmgmt_permission() {
 }
 
 /**
- * Implements hook_menu().
- */
-function tmgmt_menu() {
-  // If we have any menu item then lets add root item also.
-  $items['admin/config/regional/tmgmt'] = array(
-    'title' => 'Translation Management',
-    'description' => 'Translation Management Suite.',
-    'access arguments' => array('administer tmgmt'),
-  );
-  $items['admin/config/regional/tmgmt/plugins'] = array(
-    'title' => 'Plugin settings',
-    'description' => 'Configuration options for the available source and translator plugins.',
-    'access arguments' => array('administer tmgmt'),
-  );
-  // Add settings menu item for each plugin that is using settings form.
-  foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
-    $items += tmgmt_translator_plugin_controller($plugin)->hook_menu();
-  }
-  return $items;
-}
-
-/**
  * Implements hook_entity_info().
  */
 function tmgmt_entity_info() {

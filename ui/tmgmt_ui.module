@@ -1,9 +1,13 @@
 <?php
+
 /**
  * @file
  * Common Translation managment UI.
  */
 
+/**
+ * Implements hook_menu().
+ */
 function tmgmt_ui_entity_info() {
   $info['tmgmt_translator'] = array(
     'admin ui' => array(
@@ -72,6 +76,21 @@ function tmgmt_ui_menu() {
   foreach (tmgmt_source_plugin_info() as $plugin_type => $info) {
     $plugin = tmgmt_source_plugin_controller($plugin_type);
     $items = array_merge($items, $plugin->hook_menu());
+  }
+  // If we have any menu item then lets add root item also.
+  $items['admin/config/regional/tmgmt'] = array(
+    'title' => 'Translation Management',
+    'description' => 'Translation Management Suite.',
+    'access arguments' => array('administer tmgmt'),
+  );
+  $items['admin/config/regional/tmgmt/plugins'] = array(
+    'title' => 'Plugin settings',
+    'description' => 'Configuration options for the available source and translator plugins.',
+    'access arguments' => array('administer tmgmt'),
+  );
+  // Add settings menu item for each plugin that is using settings form.
+  foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
+    $items += tmgmt_translator_plugin_controller($plugin)->hook_menu();
   }
   return $items;
 }

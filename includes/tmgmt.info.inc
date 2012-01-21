@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Contains
+ */
+
+/**
+ * Metadata controller for the job entity.
+ */
 class TMGMTJobMetadataController extends EntityDefaultMetadataController {
 
   public function entityPropertyInfo() {
@@ -33,6 +41,9 @@ class TMGMTJobMetadataController extends EntityDefaultMetadataController {
 
 }
 
+/**
+ * Metadata controller for the job item entity.
+ */
 class TMGMTJobItemMetadataController extends EntityDefaultMetadataController {
 
   public function entityPropertyInfo() {
@@ -52,6 +63,9 @@ class TMGMTJobItemMetadataController extends EntityDefaultMetadataController {
 
 }
 
+/**
+ * Metadata controller for the job message entity.
+ */
 class TMGMTJobMessageMetadataController extends EntityDefaultMetadataController {
 
   public function entityPropertyInfo() {
@@ -74,6 +88,9 @@ class TMGMTJobMessageMetadataController extends EntityDefaultMetadataController 
 
 }
 
+/**
+ * Metadata controller for the translator entity.
+ */
 class TMGMTTranslatorMetadataController extends EntityDefaultMetadataController {
 
   public function entityPropertyInfo() {
