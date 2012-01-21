@@ -351,6 +351,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->drupalLogin($this->admin_user);
     $this->setEnvironment('de');
     $this->setEnvironment('es');
+    $this->setEnvironment('el');
 
     $user = $this->drupalCreateUser(array('access tmgmt ui'));
     $this->drupalLogin($user);
@@ -383,17 +384,17 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText('German');
     // Test translator is not available because the currently selected
     // target language is not supported.
-    $this->assertText('Test translator (not available for this language)');
+    $this->assertText('Test translator');
 
     // @todo: Test ajax functionality.
 
     // Attemt to translate into english.
     $edit = array(
-      'target_language' => 'en',
+      'target_language' => 'el',
       'settings[action]' => 'translate',
     );
     $this->drupalPost(NULL, $edit, t('Order'));
-    $this->assertText(t('@plugin is not available for @language', array('@plugin' => 'Test translator', '@langauge' => 'English')));
+    $this->assertText(t('@plugin is not available for @language.', array('@plugin' => 'Test translator', '@language' => 'Greek')));
 
     // Job still needs to be in state prepared.
     $job = tmgmt_job_load($tjid, FALSE);
@@ -461,6 +462,25 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     );
     $this->drupalPost(NULL, $edit, t('Order'));
     $this->assertText(t('Service not reachable'));
+    $job = tmgmt_job_load($tjid, FALSE);
+    $this->assertTrue($job->isPrepared());
+
+    // Another job.
+    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
+    preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    $tjid = $matches[1];
+
+     // Check checkout form.
+    $this->assertText(t('Checkout job'));
+    $this->assertText('test_source: test :1');
+
+    $edit = array(
+      'target_language' => 'es',
+      'settings[action]' => 'no_translatable',
+    );
+    $this->drupalPost(NULL, $edit, t('Order'));
+    // @todo Update to correct failure message.
+    $this->assertText(t('Fail'));
     $job = tmgmt_job_load($tjid, FALSE);
     $this->assertTrue($job->isPrepared());
 
