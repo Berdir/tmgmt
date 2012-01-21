@@ -154,15 +154,17 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
 
   // Print a message to the screen and redirect the user.
   $messages = $job->getMessagesSince(REQUEST_TIME);
-  dpm($messages);
   foreach ($messages as $message) {
     $text = $message->message;
     if (is_array($message->variables)) {
       $text = t($message->message, $message->variables);
     }
-    drupal_set_message($text);
+    $type = 'status';
+    if($job->isPrepared() || $job->isRejected()) {
+      $type = 'error';
+    }
+    drupal_set_message($text, $type);
   }
-
   //  dsm($job);
   //  $job->prepared('Job has been prepared.');
   drupal_goto('admin/tmgmt');
