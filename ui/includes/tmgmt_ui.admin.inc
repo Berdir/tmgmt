@@ -88,9 +88,14 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     }
   }
   $form['actions']['#type'] = 'actions';
-  $form['actions']['aubmit'] = array(
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'admin/tmgmt/translators',
   );
   return $form;
 }

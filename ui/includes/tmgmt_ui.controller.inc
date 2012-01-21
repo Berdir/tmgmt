@@ -7,6 +7,9 @@
 
 class TMGMTTranslatorUIController extends EntityDefaultUIController {
 
+  /**
+   * Implements
+   */
   public function hook_menu() {
     $items = parent::hook_menu();
     // We don't need the entire entity label here.
