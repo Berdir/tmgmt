@@ -8,3 +8,6 @@ dependencies[] = tmgmt_field
 dependencies[] = views
 files[] = tmgmt_node.plugin.inc
 files[] = tmgmt_node.test
+
+; Views handlers
+files[] = views/tmgmt_node_handler_filter_node_translatable_types.inc
