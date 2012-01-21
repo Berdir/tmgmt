@@ -904,7 +904,9 @@ class TMGMTJobMessage extends Entity {
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_job_message');
-    $this->created = REQUEST_TIME;
+    if (empty($this->created)) {
+      $this->created = REQUEST_TIME;
+    }
   }
 
 }
