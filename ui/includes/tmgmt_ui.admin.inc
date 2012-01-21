@@ -71,16 +71,17 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   $form['translator_plugin_settings_wrapper'] = array(
     '#type' => 'fieldset',
     '#title' => t('Translator plugin settings'),
-    '#tree' => TRUE,
     '#prefix' => '<div id="tmgmt-translator-plugin-settings-wrapper">',
     '#suffix' => '</div>',
   );
   if ($selected_plugin) {
     $plugin_controller = tmgmt_translator_plugin_controller($selected_plugin);
     $plugin_info = tmgmt_translator_plugin_info($selected_plugin);
-    if (method_exists($plugin_controller, 'settingsForm') && $settings = $plugin_controller->settingsForm(array(), $form_state)) {
+    if ($settings = $plugin_controller->settingsForm(array(), $form_state)) {
       $form['translator_plugin_settings_wrapper']['#description'] = t('These settings apply to the @plugin plugin in this configuration set.', array('@plugin' => $plugin_info['label']));
-      $form['translator_plugin_settings_wrapper']['translator_plugin_settings'] = $settings;
+      $form['translator_plugin_settings_wrapper']['settings'] = array(
+        '#tree' => TRUE,
+      ) + $settings;
     }
     else {
       $form['translator_plugin_settings_wrapper']['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $plugin_info['label']));
@@ -115,8 +116,5 @@ function tmgmt_translator_form_submit($form, &$form_state) {
   entity_ui_form_submit_build_entity($form, $form_state)->save();
   // We might have changed the path, so rebuild the menu registry.
   menu_rebuild();
-  if (isset($form_state['op']) && $form_state['op'] == 'add') {
-    $form_state['redirect'] = 'admin/tmgmt/translators/manage/' . $form_state['tmgmt_translator']->tid;
-  }
   drupal_set_message(t('The configuration options have been saved.'));
 }
