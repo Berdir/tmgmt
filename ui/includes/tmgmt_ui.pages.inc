@@ -140,19 +140,11 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
 }
 
 /**
- * submit function, will create a job.
+ * Submit function, will set a job to request translation status.
  */
 function tmgmt_job_checkout_form_submit($form, &$form_state) {
   $values = $form_state['values'];
-  // Create the job object.
-  //  $job_values = array('translator' => $values['translator'], 'uid' => $GLOBALS['user']->uid);
-  //  if (isset($values['options']['settings'])) {
-  //    $job_values['translator_context'] = $values['options']['settings'];
-  //  }
-  //  $job = tmgmt_job_create($values['source_language'], $values['target_language'], $job_values);
-  //  // Create a job item and add it to the job.
-  //  $job->addItem(tmgmt_job_item_create('node', 'node', $values['nid']));
-
+  // Get job from form_state
   $job = $form_state['job'];
   $job->requestTranslation();
 
@@ -171,18 +163,15 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
     }
     drupal_set_message($text, $type);
   }
-  //  dsm($job);
-  //  $job->prepared('Job has been prepared.');
+
+  // redirect to job overview page, if no error happened.
   if (!$had_error) {
     drupal_goto('admin/tmgmt');
   }
 }
 
 /**
- *
- * @param type $form
- * @param type $form_state
- * @return type
+ * Validates the checkout form.
  */
 function tmgmt_job_checkout_form_validate($form, &$form_state) {
   $values = $form_state['values'];
