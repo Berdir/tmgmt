@@ -1,29 +1,9 @@
 <?php
 
 /**
- * Implements hook_views_data().
+ * Implements hook_views_data_alter().
  */
-function tmgmt_node_ui_views_data() {
-  $data = array();
-
-  $data['node']['table']['join']['node'] = array(
-    'left_field' => 'tnid',
-    'field' => 'tnid',
-    'extra fields' => array(
-    )
-  );
-
-  $data['tmgmt_job_item']['table']['join'] = array(
-    'node' => array(
-      'field' => 'item_id',
-      'left_field' => 'vid',
-      'extra' => array(
-        'field' => 'item_type',
-        'value' => 'node'
-      )
-    ),
-  );
-
+function tmgmt_node_ui_views_data_alter(&$data) {
   // Relationships between subscriptions and nodes.
   $data['tmgmt_job_item']['job_item_to_node'] = array(
     'title' => t('Content'),
@@ -52,5 +32,13 @@ function tmgmt_node_ui_views_data() {
     ),
   );
 
+  $data['node']['tmgmt_translatable_types'] = array(
+    'title' => t('Translatable types'),
+    'help' => t('Display only nodes from node types which are translatable'),
+    'filter' => array(
+      'handler' => 'tmgmt_node_ui_handler_filter_node_translatable_types',
+      'real field' => 'type',
+    ),
+  );
   return $data;
 }

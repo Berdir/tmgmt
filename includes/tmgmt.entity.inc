@@ -246,7 +246,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Reference to the used translator of this job.
    *
-   * @see TMGMTJob::getTranslatorController().
+   * @see TMGMTJob::getTranslatorController()
    *
    * @var string
    */
@@ -287,7 +287,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Implements EntityAPIControllerInterface::label().
+   * Overrides Entity::label().
    */
   public function label() {
     $wrapper = entity_metadata_wrapper($this->entityType, $this);
@@ -295,10 +295,61 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Implements EntityAPIControllerInterface::uri().
+   * Overrides Entity::uri().
    */
   public function uri() {
     return array('path' => 'admin/tmgmt/jobs/' . $this->tjid);
+  }
+
+  /**
+   * Overrides Entity::buildContent().
+   */
+  public function buildContent($view_mode = 'full', $langcode = NULL) {
+    $wrapper = entity_metadata_wrapper('tmgmt_job', $this);
+    $content['created'] = array(
+      '#type' => 'item',
+      '#title' => t('Created'),
+      '#markup' => format_date($wrapper->created->value()),
+    );
+    $content['changed'] = array(
+      '#type' => 'item',
+      '#title' => t('Last changed'),
+      '#markup' => format_date($wrapper->changed->value()),
+    );
+    $content['state'] = array(
+      '#type' => 'item',
+      '#title' => t('State'),
+      '#markup' => $wrapper->state->label(),
+    );
+    $content['created'] = array(
+      '#type' => 'item',
+      '#title' => t('Created'),
+      '#markup' => format_date($wrapper->created->value()),
+    );
+    $content['items'] = array(
+      '#type' => 'item',
+      '#title' => t('Items'),
+      'links' => array(
+        '#theme' => 'links',
+      ),
+    );
+    foreach ($this->getItems() as $item) {
+      $uri = $item->uri();
+      $content['items']['links']['#links'][$item->tjiid] = array(
+        'title' => $item->label(),
+        'href' => $uri['path'],
+      );
+    }
+    // @todo: Re-add a view for this.
+    /*if (module_exists('views')) {
+      $view = views_get_view('translation_job_messages');
+      $content['messages'] = array(
+        '#type' => 'item',
+        '#title' => $view->get_title(),
+        '#markup' => $view->preview('block', array($this->tjid)),
+      );
+    }*/
+    return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
   }
 
   /**
@@ -549,7 +600,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function needsReview($message, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_REVIEW);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 
@@ -565,7 +616,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function prepared($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_PREPARED);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 
@@ -581,7 +632,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function submitted($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_SUBMITTED);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 
@@ -599,7 +650,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     $this->setState(TMGMT_JOB_STATE_ACCEPTED);
     // @todo Find a solution for what happens if the propagation of the translated data fails.
     if ($this->propagateTranslatedData()) {
-      $this->addMessage($message);
+      $this->addMessage($message, $arguments);
       $this->save();
     }
   }
@@ -617,7 +668,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public function finished($message = NULL, $arguments = array()) {
     // @todo Maybe we should clean up the job items here.
     $this->setState(TMGMT_JOB_STATE_ACCEPTED);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 
@@ -633,7 +684,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function rejected($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_REJECTED);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 
@@ -651,7 +702,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function cancelled($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_CANCELLED);
-    $this->addMessage($message);
+    $this->addMessage($message, $arguments);
     $this->save();
   }
 

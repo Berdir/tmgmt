@@ -120,6 +120,7 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
   if ($languages = array_filter($values['languages'])) {
     // Request a job for every selected language
     $count = 0;
+    $tjids = array();
     foreach (array_keys($languages) as $langcode) {
       $count++;
       // Create the job object.
@@ -129,13 +130,16 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       foreach ($items as $item_id) {
         $job->addItem($values['source_plugin'], $values['item_type'], $item_id);
       }
+      $job->setState(TMGMT_JOB_STATE_NEW);
+      $tjids[] = $job->identifier();
       $job->save();
       if (!variable_get('tmgmt_ui_simple_default_queue', 1)) {
         $job->requestTranslation();
       }
       // Print a message to the screen and redirect the user.
     }
-    drupal_set_message(format_plural($count, 'A translation job has been created.', '@count translation jobs have been created.'));
+    $form_state['redirect'] = 'tmgmt/checkout/' . implode(',', $tjids);
+    drupal_set_message(format_plural($count, 'A translation job has been created. you will need to configure them now.', '@count translation jobs have been created.'));
   }
   else {
     drupal_set_message(t('You need to select one or more languages for requesting a translation.'), 'warning');
@@ -146,16 +150,9 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
  * Subform for selecting translation method.
  */
 function tmgmt_ui_simple_controls_element($form, &$form_state) {
-  $element = array('#type' => 'fieldset');
   $translator_plugins = tmgmt_translator_plugin_labels(TRUE);
   $translator_plugins_keyed = array_keys($translator_plugins);
   $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : reset($translator_plugins_keyed);
-  $element['translator'] = array(
-    '#type' => 'select',
-    '#title' => t('Translation type'),
-    '#options' => $translator_plugins,
-    '#default_value' => $selected_translator_plugin,
-  );
   $element['request'] = array('#type' => 'submit', '#value' => t('Request translation'));
   return $element;
 }
