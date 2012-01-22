@@ -154,16 +154,19 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
   $messages = $job->getMessagesSince(REQUEST_TIME);
   $had_error = FALSE;
   foreach ($messages as $message) {
+    // Ignore debug messages.
+    if ($message->type == 'debug') {
+      continue;
+    }
+
     $text = $message->message;
     if (is_array($message->variables)) {
       $text = t($message->message, $message->variables);
     }
-    $type = 'status';
-    if ($job->isPrepared() || $job->isRejected()) {
-      $type = 'error';
+    if ($message->type == 'error') {
       $had_error = TRUE;
     }
-    drupal_set_message($text, $type);
+    drupal_set_message($text, $message->type);
   }
 
   // redirect to job overview page, if no error happened.

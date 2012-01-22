@@ -236,6 +236,11 @@ function tmgmt_schema() {
         'unsigned' => TRUE,
         'not null' => FALSE,
       ),
+      'type' => array(
+        'description' => 'Type of the message (debug, notice, warning or error)',
+        'type' => 'varchar',
+        'length' => 128,
+      ),
     ),
     'primary key' => array('tjmid'),
     'indexes' => array(
@@ -329,4 +334,15 @@ function tmgmt_update_7006() {
     'size' => 'medium',
   );
   db_add_field('tmgmt_translator', 'description', $new_field);
+}
+
+/**
+ * Add the type column to {tmgmt_job_message}.
+ */
+function tmgmt_update_7007() {
+  db_add_field('tmgmt_job_message', 'type', array(
+    'description' => 'Type of the message (debug, notice, warning or error)',
+    'type' => 'varchar',
+    'length' => 128,
+  ));
 }
