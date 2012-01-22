@@ -8,9 +8,15 @@
  * Creates and adds a jobitem to a certain job. If job is not defined, a new job
  * will be created. Destinatoin will be needed to return to the submitters page.
  */
-function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_ids, TMGMTJob $job = NULL) {
-  if (!$job) {
+function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_ids, $tjid = NULL) {
+  if (!$tjid) {
     $job = tmgmt_job_create($source_language, '');
+  }
+  else {
+    $job = tmgmt_job_load($tjid);
+    if (!$job) {
+      return MENU_NOT_FOUND;
+    }
   }
   if ($source_language != $job->source_language) {
     drupal_set_message("The source language of your item doesn't match the source language of your job.", 'error');
@@ -36,7 +42,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     if (isset($form_state['values']['target_language'])) {
       $selected_target_language = $form_state['values']['target_language'];
     }
-    else if (isset($job->target_language)) {
+    else if (!empty($job->target_language)) {
       $selected_target_language = $job->target_language;
     }
     else {
@@ -121,7 +127,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     $form['translator_wrapper']['actions']['#type'] = 'actions';
     $form['translator_wrapper']['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Submit'),
+      '#value' => t('Order'),
       '#weight' => 50,
     );
     return $form;

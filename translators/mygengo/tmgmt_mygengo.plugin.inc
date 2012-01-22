@@ -76,7 +76,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
-  public function isAvailable() {
+  public function isAvailable(TMGMTTranslator $translator) {
     if ($this->getOption('api_public_key') && $this->getOption('api_private_key')) {
       return TRUE;
     }
@@ -90,7 +90,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    */
   public function canTranslate(TMGMTJob $job) {
     if ($this->isAvailable()) {
-      $targets = $this->getSupportedTargetLanguages($job->source_language);
+      $targets = $this->getSupportedTargetLanguages($job->getTranslator(), $job->source_language);
       if (in_array($job->target_language, $targets))
         return TRUE;
     }
@@ -105,7 +105,6 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
   public function requestTranslation(TMGMTJob $job) {
     // Pull the source data array from through the job and generate the MyGengo Translation Job
 	$translations = $this->generateMyGengoTranslationJobArray($job);
-
 
     $response = $this->requestFromGengo('translate/jobs', 'POST', array(
       'jobs' => $translations,
@@ -156,23 +155,28 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    * Implements TMGMTTranslatorPluginControllerInterface::receiveTranslation().
    */
   public function receiveTranslation(TMGMTJob $job, $keys, $data) {
+    if ($this->useSandbox) {
+      $translation = $data->body_src;
+    }
+    else {
+      $translation = $data->body_tgt;
+    }
+
     $job->addTranslatedData(array('#text' => $data->body_src), $keys);
   }
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
-  public function getSupportedTargetLanguages($source_language) {
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $results = array();
     $targets = $this->requestFromGengo('translate/service/language_pairs', 'GET', array(
       'lc_src' => $source_language
     ));
 
     foreach($targets as $target) {
-      array_push($results, $target->lc_tgt);
+      $results[$target->lc_tgt] = 1;
     }
-    // Resulting array must have language codes as keys
-    $results = array_flip(array_unique($results));
     return $results;
   }
 
@@ -181,7 +185,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    *
    * @return array
    */
-  public function getSupportedLanguages() {
+  public function getSupportedLanguages(TMGMTTranslator $translator) {
     $languages = &drupal_static(__FUNCTION__);
     if (!isset($languages)) {
       $supported_languages = $this->requestFromGengo('translate/service/languages', 'GET');
@@ -240,7 +244,6 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     	$sum_credits = $sum_credits + $mygengo_job->credits;
     	$highest_eta = ($mygengo_job->eta > $highest_eta) ? $mygengo_job->eta : $highest_eta;
     }
-
 
 
     $settings['word_count'] = array(

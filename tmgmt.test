@@ -214,6 +214,8 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
    */
   function setUp() {
     parent::setUp(array('entity', 'tmgmt', 'tmgmt_test'));
+
+    $this->translator = $this->createTranslator();
   }
 
   function createJob($action = 'translate') {
@@ -235,7 +237,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     }
 
     // Manually specify the translator for now.
-    $job->translator = 'test_translator';
+    $job->translator = $this->translator->name;
     $job->translator_context = array('action' => $action);
     $job->prepared();
 
@@ -340,6 +342,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
    */
   function setUp() {
     parent::setUp(array('ctools', 'entity', 'tmgmt', 'tmgmt_test', 'tmgmt_ui'));
+    $this->translator = $this->createTranslator();
   }
 
   /**
@@ -382,9 +385,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText('test_source: test :2');
     $this->assertText('test_source: test :3');
     $this->assertText('German');
-    // Test translator is not available because the currently selected
-    // target language is not supported.
-    $this->assertText('Test translator');
+    $this->assertText($this->translator->label);
 
     // @todo: Test ajax functionality.
 
@@ -398,7 +399,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Job still needs to be in state prepared.
     $job = tmgmt_job_load($tjid, FALSE);
-    $this->assertTrue($job->isPrepared());
+    $this->assertTrue($job->isNew());
 
     $edit = array(
       'target_language' => 'es',
@@ -407,7 +408,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->drupalPost(NULL, $edit, t('Order'));
 
     // Job needs to be in state review.
-    $job = tmgmt_job_load($tjid, TRUE);
+    entity_get_controller('tmgmt_job')->resetCache(array($tjid));
+    $job = tmgmt_job_load($tjid);
     $this->assertTrue($job->isNeedsReview());
     $this->assertText(t('Test translation created'));
 
@@ -465,7 +467,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     );
     $this->drupalPost(NULL, $edit, t('Order'));
     $this->assertText(t('Service not reachable'));
-    $job = tmgmt_job_load($tjid, FALSE);
+    entity_get_controller('tmgmt_job')->resetCache(array($tjid));
+    $job = tmgmt_job_load($tjid);
     $this->assertTrue($job->isPrepared());
 
     // Verify that we are still on the form.
@@ -487,8 +490,9 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->drupalPost(NULL, $edit, t('Order'));
     // @todo Update to correct failure message.
     $this->assertText(t('Fail'));
-    $job = tmgmt_job_load($tjid, FALSE);
-    $this->assertTrue($job->isPrepared());
+    entity_get_controller('tmgmt_job')->resetCache(array($tjid));
+    $job = tmgmt_job_load($tjid);
+    $this->assertTrue($job->isNew());
 
     // Attempt to add items to a non-existing job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/en/test_source/test/5/' . ($tjid + 1));

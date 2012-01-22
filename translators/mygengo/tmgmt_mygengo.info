@@ -1,5 +1,5 @@
 name = myGengo Translator
-description = A myGengo translator service.
+description = Crowd-sourced translation service. Sign up at http://mygengo.com/!
 package = Translation Management
 core = 7.x
 dependencies[] = tmgmt

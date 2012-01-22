@@ -10,17 +10,13 @@
  * Implements hook_menu().
  */
 function tmgmt_node_ui_menu() {
-  $items['node/%node/tmgmt'] = array(
+  $items['node/%node/translate/overview'] = array(
     'title' => 'Translation jobs',
-    'page callback' => 'tmgmt_node_ui_translation_overview',
-    'page arguments' => array(1),
-    'access callback' => '_translation_tab_access',
-    'access arguments' => array(1),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 20
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 10
   );
-  $items['node/%node/view/translate'] = array(
-    'title' => 'Translation management',
+  $items['node/%node/translate/view'] = array(
+    'title' => 'Job History',
     'page callback' => 'tmgmt_node_ui_translation_overview',
     'page arguments' => array(1),
     'access callback' => '_translation_tab_access',
@@ -29,6 +25,13 @@ function tmgmt_node_ui_menu() {
     'weight' => 20
   );
   return $items;
+}
+
+/*
+ * Ebeds the view.
+ */
+function tmgmt_node_ui_translation_overview() {
+  return views_embed_view('job_items_current_node');
 }
 
 /**
@@ -40,4 +43,3 @@ function tmgmt_node_ui_views_api() {
     'path' => drupal_get_path('module', 'tmgmt_node_ui') . '/views',
   );
 }
-
