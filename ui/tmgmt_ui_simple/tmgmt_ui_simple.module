@@ -6,38 +6,6 @@
  */
 
 /**
- * Implements hook_menu()
- */
-function tmgmt_ui_simple_menu() {
-  $items['admin/config/regional/tmgmt/simple'] = array(
-    'title' => 'Simple UI',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_ui_simple_settings_form'),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_TASK,
-  );
-  $items['translate/multiple/node'] = array(
-    'page callback' => 'tmgmt_ui_simple_page_translate_node_multiple',
-    'access arguments' => array('translate content'),
-    'type' => MENU_CALLBACK,
-  );
-  return $items;
-}
-
-/**
- * Basic settings
- */
-function tmgmt_ui_simple_settings_form($form, &$form_state) {
-  $form['tmgmt_ui_simple_default_queue'] = array(
-    '#title' => t('Queue jobs'),
-    '#type' => 'radios',
-    '#options' => array(t('Disabled'), t('Enabled')),
-    '#default_value' => variable_get('tmgmt_ui_simple_default_queue', 1),
-  );
-  return system_settings_form($form);
-}
-
-/**
  * Translate multiple items
  */
 function tmgmt_ui_simple_page_translate_node_multiple($ids) {
@@ -158,9 +126,6 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       $job->setState(TMGMT_JOB_STATE_NEW);
       $tjids[] = $job->identifier();
       $job->save();
-      if (!variable_get('tmgmt_ui_simple_default_queue', 1)) {
-        $job->requestTranslation();
-      }
       // Print a message to the screen and redirect the user.
     }
     $form_state['redirect'] = array(

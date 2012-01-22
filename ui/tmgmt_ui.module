@@ -40,6 +40,7 @@ function tmgmt_ui_menu() {
     'access arguments' => array('access tmgmt ui'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
+    'weight' => -10,
   );
   $items['admin/config/regional/tmgmt/jobs/%tmgmt_job'] = array(
     'title' => 'Job',

@@ -149,6 +149,27 @@ $handler->display->display_options['fields']['created']['hide_empty'] = 0;
 $handler->display->display_options['fields']['created']['empty_zero'] = 0;
 $handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
 $handler->display->display_options['fields']['created']['date_format'] = 'short';
+/* Field: Translation Management Job: Actions */
+$handler->display->display_options['fields']['actions']['id'] = 'actions';
+$handler->display->display_options['fields']['actions']['table'] = 'tmgmt_job';
+$handler->display->display_options['fields']['actions']['field'] = 'actions';
+$handler->display->display_options['fields']['actions']['alter']['alter_text'] = 0;
+$handler->display->display_options['fields']['actions']['alter']['make_link'] = 0;
+$handler->display->display_options['fields']['actions']['alter']['absolute'] = 0;
+$handler->display->display_options['fields']['actions']['alter']['external'] = 0;
+$handler->display->display_options['fields']['actions']['alter']['replace_spaces'] = 0;
+$handler->display->display_options['fields']['actions']['alter']['trim_whitespace'] = 0;
+$handler->display->display_options['fields']['actions']['alter']['nl2br'] = 0;
+$handler->display->display_options['fields']['actions']['alter']['word_boundary'] = 1;
+$handler->display->display_options['fields']['actions']['alter']['ellipsis'] = 1;
+$handler->display->display_options['fields']['actions']['alter']['strip_tags'] = 0;
+$handler->display->display_options['fields']['actions']['alter']['trim'] = 0;
+$handler->display->display_options['fields']['actions']['alter']['html'] = 0;
+$handler->display->display_options['fields']['actions']['element_label_colon'] = 1;
+$handler->display->display_options['fields']['actions']['element_default_classes'] = 1;
+$handler->display->display_options['fields']['actions']['hide_empty'] = 0;
+$handler->display->display_options['fields']['actions']['empty_zero'] = 0;
+$handler->display->display_options['fields']['actions']['hide_alter_empty'] = 1;
 /* Filter criterion: Translation Management Job: State */
 $handler->display->display_options['filters']['state']['id'] = 'state';
 $handler->display->display_options['filters']['state']['table'] = 'tmgmt_job';
@@ -174,4 +195,5 @@ $translatables['tmgmt_ui_reviews_pending'] = array(
   t('from'),
   t('to'),
   t('created'),
+  t('Actions'),
 );
