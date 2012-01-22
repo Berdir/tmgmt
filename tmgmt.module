@@ -340,14 +340,14 @@ function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id, $so
     $target_languages = array_keys($available_languages);
   }
   foreach ($target_languages as $target_language) {
-    $query = db_select('tmgmt_job_item', 'item');
-    $query->condition('source_plugin', $source_plugin, '=');
-    $query->condition('item_type', $item_type, '=');
-    $query->condition('item_id', $item_id, '=');
-    $query->join('tmgmt_job', 'job', 'job.tjid = item.tjid AND job.target_language = :target_language', array(':target_language' => $target_language));
-    $query->fields('job', array('tjid'));
-    $query->orderBy('changed', 'DESC');
-    $query->range(0, 1);
+    $query = db_select('tmgmt_job_item', 'item')
+      ->condition('source_plugin', $source_plugin, '=')
+      ->condition('item_type', $item_type, '=')
+      ->condition('item_id', $item_id, '=')
+      ->join('tmgmt_job', 'job', 'job.tjid = item.tjid AND job.target_language = :target_language', array(':target_language' => $target_language))
+      ->fields('job', array('tjid'))
+      ->orderBy('changed', 'DESC')
+      ->range(0, 1);
     $result = $query->execute();
     if ($tjid = $result->fetchfield()) {
       $jobs[$target_language] = tmgmt_job_load($tjid);

@@ -39,7 +39,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
       'exists' => 'tmgmt_translator_load',
       'source' => array('label'),
     ),
-    '#disabled' => !empty($translator->is_new) && $op != 'clone',
+    '#disabled' => empty($translator->is_new) && $op != 'clone',
     '#size' => 32,
     '#maxlength' => 64,
   );
