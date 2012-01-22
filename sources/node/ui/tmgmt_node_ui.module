@@ -45,5 +45,6 @@ function tmgmt_node_ui_views_api() {
  * Page callback for the overview, which contains the selected item.
  */
 function tmgmt_node_ui_translation_overview($node) {
-  return views_embed_view('job_items_current_node', 'default', $node->tnid);
+  $node = tmgmt_node_get_source_node($node);
+  return views_embed_view('job_items_current_node', 'default', $node->nid);
 }

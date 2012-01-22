@@ -163,14 +163,8 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
 function tmgmt_ui_simple_node_translate_add_to_cart($form, &$form_state) {
   $node = $form_state['values']['object'];
 
-  $source_language = '';
-  if ($node->tnid == 0 || $node->tnid == $node->nid) {
-    $source_language = $node->language;
-  }
-  else {
-    $node = node_load($node->tnid);
-    $source_language = $node->language;
-  }
+  $node = tmgmt_node_get_source_node($node);
+  $source_language = $node->language;
 
   if ($languages = array_filter($form_state['values']['languages'])) {
     foreach ($languages as $langcode) {

@@ -66,3 +66,16 @@ function tmgmt_node_views_api() {
     'path' => drupal_get_path('module', 'tmgmt_node') . '/views',
 );
 }
+
+/**
+ * Get the translation source node of a node.
+ *
+ * @param $node
+ */
+function tmgmt_node_get_source_node($node) {
+  if ($node->tnid != 0 && $node->tnid != $node->nid) {
+    $node = node_load($node->tnid);
+  }
+  return $node;
+}
+
