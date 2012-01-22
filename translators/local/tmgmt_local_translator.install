@@ -17,24 +17,23 @@ function tmgmt_local_translator_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'source_language' => array(
-        'description' => 'The source language of the data.',
+      'type' => array(
+        'description' => "Whether this is a source or a target language ('source', 'target').",
         'type' => 'varchar',
         'length' => 12,
         'not null' => TRUE,
       ),
-      'target_language' => array(
-        'description' => 'The language into the data should be translated.',
+      'language' => array(
+        'description' => 'The language code for languages the user knows.',
         'type' => 'varchar',
         'length' => 12,
         'not null' => TRUE,
       ),
     ),
-    'primary key' => array('uid', 'source_language', 'target_language'),
+    'primary key' => array('uid', 'type', 'language'),
     'indexes' => array(
       'uid' => array('uid'),
-      'source_language' => array('source_language'),
-      'target_language' => array('target_language'),
+      'type_language' => array('type', 'language'),
     ),
   );
   return $schema;

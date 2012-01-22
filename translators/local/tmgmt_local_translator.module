@@ -56,10 +56,10 @@ function tmgmt_local_translator_tmgmt_translator_plugin_info() {
  * Implements hook_user_load()
  */
 function tmgmt_local_translator_user_load($users) {
-  /*$result = db_query('SELECT * FROM {tmgmt_local_user} WHERE uid IN (:uids)', array(':uids' => array_keys($users)));
+  $result = db_query('SELECT * FROM {tmgmt_local_user} WHERE uid IN (:uids)', array(':uids' => array_keys($users)));
   foreach ($result as $record) {
-    $users[$record->uid]->tmgmt_local_translator[$record->target_language][$record->source_language] = TRUE;
-  }*/
+    $users[$record->uid]->tmgmt_local_translator[$record->type][$record->language] = TRUE;
+  }
 }
 
 /**
@@ -71,13 +71,13 @@ function tmgmt_local_translator_user_update(&$edit, $account, $category) {
       ->condition('uid', $account->uid)
       ->execute();
     if (!empty($account->tmgmt_local_translator)) {
-      foreach ($account->tmgmt_local_translator as $target => $source_list) {
-        foreach ($source_list as $source) {
+      foreach ($account->tmgmt_local_translator as $type => $list) {
+        foreach (array_keys($list) as $langcode) {
           db_insert('tmgmt_local_user')
             ->fields(array(
               'uid' => $account->uid,
-              'source_language' => $source,
-              'target_language' => $target,
+              'type' => $type,
+              'language' => $langcode,
             ))
             ->execute();
         }
