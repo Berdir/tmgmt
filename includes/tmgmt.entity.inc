@@ -66,7 +66,8 @@ class TMGMTTranslator extends Entity {
    *
    * @return TMGMTTranslatorPluginControllerInterface
    */
-  public function getTranslatorController() {
+  public function getPluginController() {
+    watchdog($this->translator_plugin, 'asd');
     return tmgmt_translator_plugin_controller($this->translator_plugin);
   }
 
@@ -77,7 +78,51 @@ class TMGMTTranslator extends Entity {
    *  An array of supported target languages in ISO format.
    */
   public function getSupportedTargetLanguages($source_language) {
-    return $this->getTranslatorController()->getSupportedTargetLanguages($this, $source_language);
+    return $this->getPluginController()->getSupportedTargetLanguages($this, $source_language);
+  }
+
+  /**
+   * Check whether this translator can handle a particular translation job.
+   *
+   * @param TMGMTJob $job
+   *   The TMGMTJob entity that should be translated.
+   *
+   * @return boolean
+   *   TRUE if the job can be processed and translated, FALSE otherwise.
+   */
+  public function canTranslate(TMGMTJob $job) {
+    return $this->getPluginController()->canTranslate($job);
+  }
+
+  /**
+   * Checks whether a translator is available.
+   *
+   * @return bool
+   *   TRUE if the translator plugin is available, FALSE otherwise.
+   */
+  public function isAvailable() {
+    return $this->getPluginController()->isAvailable($this);
+  }
+
+  /**
+   * @todo
+   */
+  public function jobSettingsForm($form, $form_state, $job) {
+    return $this->getPluginController()->jobSettingsForm($form, $form_state, $job);
+  }
+
+  /**
+   * @todo
+   */
+  public function settingsForm($form, $form_state) {
+    return $this->getPluginController()->settingsForm($form, $form_state, $this);
+  }
+
+  /**
+   * @todo
+   */
+  public function getNotAvailableReason() {
+    return $this->getPluginController()->getNotAvailableReason($this);
   }
 
   /**
@@ -581,7 +626,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function getTranslator() {
     if (isset($this->translator)) {
-      return tmgmt_translator_load_by_name($this->translator);
+      return tmgmt_translator_load($this->translator);
     }
   }
 
@@ -786,8 +831,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   TRUE if the job is prepared and can be translated, FALSE otherwise.
    */
   public function isTranslatable() {
-    if ($this->isPrepared() && $plugin = $this->getTranslatorController()) {
-      if ($plugin->canTranslate($this)) {
+    if ($this->isPrepared() && $translator = $this->getTranslator()) {
+      if ($translator->canTranslate($this)) {
         return TRUE;
       }
     }
@@ -830,6 +875,17 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       return TRUE;
     }
     return FALSE;
+  }
+
+  /**
+   * Returns the translator plugin controller of the translator of this job.
+   *
+   * @return TMGMTTranslatorPluginControllerInterface
+   */
+  public function getTranslatorController() {
+    if ($translator = $this->getTranslator($this)) {
+      return $translator->getPluginController();
+    }
   }
 
   /**

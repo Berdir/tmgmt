@@ -9,7 +9,6 @@
  * Entity API form for the translator entity.
  */
 function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator, $op = 'edit') {
-  $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt_ui') . '/includes/tmgmt_ui.admin.inc';
   // We don't want the terrible long title that Entity API generates for us.
   if (in_array($op, array('import', 'add'))) {
     drupal_set_title($op == 'import' ? t('Add Translator') : t('Import Translator'), PASS_THROUGH);
@@ -75,15 +74,14 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#suffix' => '</div>',
   );
   if ($selected_plugin) {
-    $plugin_controller = tmgmt_translator_plugin_controller($selected_plugin);
-    $plugin_info = tmgmt_translator_plugin_info($selected_plugin);
-    if ($settings = $plugin_controller->settingsForm(array(), $form_state, $translator)) {
-      $form['translator_plugin_settings_wrapper']['#description'] = t('These settings apply to the @plugin plugin in this configuration set.', array('@plugin' => $plugin_info['label']));
+    $controller = $selected_plugin->getPluginController();
+    if ($settings = $controller->settingsForm(array(), $form_state, $translator)) {
+      $form['translator_plugin_settings_wrapper']['#description'] = t('These settings apply to the @plugin plugin in this configuration set.', array('@plugin' => $controller['label']));
       $form['translator_plugin_settings_wrapper']['settings'] = $settings;
       $form['translator_plugin_settings_wrapper']['settings']['#tree'] = TRUE;
     }
     else {
-      $form['translator_plugin_settings_wrapper']['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $plugin_info['label']));
+      $form['translator_plugin_settings_wrapper']['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $controller['label']));
     }
   }
   $form['actions']['#type'] = 'actions';
@@ -119,4 +117,5 @@ function tmgmt_ui_ajax_callback_translator_plugin_settings($form, &$form_state) 
 function tmgmt_translator_form_submit($form, &$form_state) {
   entity_ui_form_submit_build_entity($form, $form_state)->save();
   drupal_set_message(t('The configuration options have been saved.'));
+  $form_state['redirect'] = 'admin/config/regional/tmgmt/translators';
 }

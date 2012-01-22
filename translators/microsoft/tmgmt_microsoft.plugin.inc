@@ -20,8 +20,8 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
-  public function isAvailable() {
-    if ($this->getOption('bing_api_id')) {
+  public function isAvailable(TMGMTTranslator $translator) {
+    if ($translator->getSetting('bing_api_id')) {
       return TRUE;
     }
     return FALSE;
@@ -31,7 +31,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
    */
   public function canTranslate(TMGMTJob $job) {
-    if ($this->isAvailable() && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($job->source_language))) {
+    if ($this->isAvailable($job->getTranslator()) && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($job->source_language))) {
       // The job is only translatable if the translator is available too.
       return TRUE;
     }
@@ -93,8 +93,8 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
-  public function getSupportedTargetLanguages($source_language) {
-    $languages = $this->getSupportedLanguages();
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
+    $languages = $this->getSupportedLanguages($translator);
     unset($languages[$source_language]);
     return $languages;
   }
@@ -102,7 +102,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
    */
-  public function getSupportedLanguages() {
+  public function getSupportedLanguages(TMGMTTranslator $translator) {
     $languages = &drupal_static(__FUNCTION__);
     if (!isset($languages)) {
       $languages = array();

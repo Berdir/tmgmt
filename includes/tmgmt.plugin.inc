@@ -95,24 +95,30 @@ interface TMGMTTranslatorPluginControllerInterface {
   /**
    * Checks whether a translator is available.
    *
+   * @param TMGMTTranslator $translator
+   *   The translator entity.
+   *
    * @return bool
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
-  public function isAvailable();
+  public function isAvailable(TMGMTTranslator $translator);
 
   /**
    * Return a reason why the translator is not available.
    *
+   * @param TMGMTTranslator $translator
+   *   The translator entity.
+   *
    * Might be called when isAvailable() returns FALSE to get a reason that
    * can be displayed to the user.
    */
-  public function getNotAvailableReason();
+  public function getNotAvailableReason(TMGMTTranslator $translator);
 
   /**
    * Check whether this service can handle a particular translation job.
    *
    * @param TMGMTJob $job
-   *   The TMGMTJob entity that should be submitted.
+   *   The TMGMTJob entity that should be translated.
    *
    * @return boolean
    *   TRUE if the job can be processed and translated, FALSE otherwise.
@@ -127,6 +133,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    *   The translator entity.
    * @param $source_language
    *   The source language.
+   *
    * @return array
    *   An array of languages in ISO format.
    */
@@ -135,10 +142,13 @@ interface TMGMTTranslatorPluginControllerInterface {
   /**
    * Returns all languages that are supported by this service.
    *
+   * @param TMGMTTranslator $translator
+   *   The translator entity.
+   *
    * @return array
    *   An array of languages in ISO format.
    */
-  public function getSupportedLanguages();
+  public function getSupportedLanguages(TMGMTTranslator $translator);
 
   /**
    * @abstract
@@ -203,7 +213,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
-  public function isAvailable() {
+  public function isAvailable(TMGMTTranslator $translator) {
     // Assume that the translation service is always available.
     return TRUE;
   }
@@ -211,9 +221,9 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
    */
-  public function canTranslate(TMGMTTranslator $translator, TMGMTJob $job) {
+  public function canTranslate(TMGMTJob $job) {
     // The job is only translatable if the translator is available too.
-    if ($this->isAvailable() && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($translator, $job->source_language))) {
+    if ($this->isAvailable($job->getTranslator()) && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($job->getTranslator(), $job->source_language))) {
       // We can only translate this job if the target language of the job is in
       // one of the supported languages.
       return TRUE;
@@ -233,7 +243,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
-    $languages = $this->getSupportedLanguages();
+    $languages = $this->getSupportedLanguages($translator);
     unset($languages[$source_language]);
     return $languages;
   }
@@ -243,14 +253,13 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function getSupportedLanguages(TMGMTTranslator $translator) {
     $languages = entity_metadata_language_list();
-    unset($languages[LANGUAGE_NONE], $languages[$source_language]);
     return drupal_map_assoc(array_keys($languages));
   }
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getNotAvailableReason().
    */
-  public function getNotAvailableReason() {
+  public function getNotAvailableReason(TMGMTTranslator $translator) {
     return t('@plugin needs to be configured before it can be used', array('@plugin' => $this->pluginInfo['label']));
   }
 
