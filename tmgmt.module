@@ -450,7 +450,12 @@ function tmgmt_job_message_create($status_before, $status_after, $message = '', 
 /**
  * Access callback for the translator entity.
  */
-function tmgmt_translator_access($op, $translator = NULL, $account = NULL) {
+function tmgmt_translator_access($op, TMGMTTranslator $translator = NULL, $account = NULL) {
+  if (isset($translator)) {
+    if (!$translator->getPluginController()) {
+      return FALSE;
+    }
+  }
   return user_access('administer tmgmt', $account);
 }
 
@@ -659,8 +664,12 @@ function _tmgmt_plugin_controller($type, $plugin) {
   $cache = &drupal_static(__FUNCTION__);
   if (!isset($cache[$type][$plugin])) {
     $info = _tmgmt_plugin_info($type, $plugin);
-    $class = isset($info['controller class']) ? $info['controller class'] : 'TMGMTDefault' . ucfirst($type) . 'PluginController';
-    $cache[$type][$plugin] = new $class($plugin);
+    if ($info && !empty($info['controller class'])) {
+      $cache[$type][$plugin] = new $info['controller class']($plugin);
+    }
+    else {
+      $cache[$type][$plugin] = FALSE;
+    }
   }
   return $cache[$type][$plugin];
 }
