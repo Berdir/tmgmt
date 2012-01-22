@@ -27,38 +27,103 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
   }
 
   /**
-   * Overrides EntityDefaultUIController::overviewTable().
-   */
-  public function overviewTable($conditions = array()) {
-    $table = parent::overviewTable($conditions);
-    // Add the plugin column.
-    array_splice($table['#header'], 1, 0, array(t('Plugin')));
-    return $table;
-  }
-
-  /**
-   * Overrides EntityDefaultUIController::overviewTableRow().
-   */
-  public function overviewTableRow($conditions, $id, $entity, $additional_cols = array()) {
-    $wrapper = entity_metadata_wrapper('tmgmt_translator', $entity);
-    // Add a column to show the translator plugin via the metadata wrapper.
-    $additional_cols['plugin'] = $wrapper->translator_plugin->label();
-    $row = parent::overviewTableRow($conditions, $id, $entity, $additional_cols);
-    // Add the description to the standard entity ui overview item.
-    $row[0]['data']['#theme'] = 'tmgmt_ui_translator_overview_item';
-    $row[0]['data']['#description'] = $entity->description;
-    return $row;
-  }
-
-  /**
    * Overrides EntityDefaultUIController::overviewForm().
    */
   public function overviewForm($form, &$form_state) {
-    // Just show translator entities if the plugin is available.
-    $plugins = tmgmt_translator_plugin_info();
-    $conditions = array('translator_plugin' => array_keys($plugins));
-    $form['table'] = $this->overviewTable($conditions);
-    $form['pager'] = array('#theme' => 'pager');
+    $form['translators']['#tree'] = TRUE;
+    $form['translators']['#theme'] = 'tmgmt_ui_translator_overview_form';
+    $form['translators']['#entity_info'] = $this->entityInfo;
+    // Load all translator entities.
+    $translators = tmgmt_translator_load_multiple(FALSE);
+    foreach ($translators as $key => $translator) {
+      $form['translators'][$key] = $this->overviewFormRow(array(), $form_state, $translator, $key);
+      $form['translators'][$key]['#translator'] = $translator;
+    }
+    $form['actions']['#type'] = 'actions';
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save weights'),
+    );
+    return $form;
+  }
+
+  protected function overviewFormRow($form, &$form_state, TMGMTTranslator $entity, $id) {
+    $uri = entity_uri($this->entityType, $entity);
+    $form['#weight'] = isset($form_state['input']['translators']) ? $form_state['input']['translators'][$id]['weight'] : NULL;
+    $form['label'] = array(
+      '#theme' => 'tmgmt_ui_translator_overview_item',
+      '#attached' => array('css' => array(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css')),
+      '#label' => entity_label($this->entityType, $entity),
+      '#name' => !empty($this->entityInfo['exportable']) ? entity_id($this->entityType, $entity) : FALSE,
+      '#url' => $uri ? $uri : FALSE,
+      '#description' => $entity->description,
+      '#entity_type' => $this->entityType,
+    );
+    // Add a row for the exportable status.
+    if (!empty($this->entityInfo['exportable'])) {
+      $form['status'] = array(
+        '#theme' => 'entity_status',
+        '#status' => $entity->{$this->statusKey},
+      );
+    }
+    $wrapper = entity_metadata_wrapper($this->entityType, $entity);
+    // Add a column to show the translator plugin via the metadata wrapper.
+    $form['plugin'] = array(
+      '#markup' => $wrapper->translator_plugin->label(),
+      '#status' => $entity->{$this->statusKey},
+    );
+    $form['weight'] = array(
+      '#type' => 'weight',
+      '#delta' => 30,
+    );
+    // Add operations depending on the status.
+    if (entity_has_status($this->entityType, $entity, ENTITY_FIXED)) {
+      $form['operations']['clone'] = array(
+        '#type' => 'link',
+        '#title' => t('clone'),
+        '#href' => $this->path . '/manage/' . $id . '/clone',
+      );
+    }
+    else {
+      $form['operations']['edit'] = array(
+        '#type' => 'link',
+        '#title' => t('edit'),
+        '#href' => $this->path . '/manage/' . $id,
+      );
+      if (!empty($this->entityInfo['exportable'])) {
+        $form['operations']['clone'] = array(
+          '#type' => 'link',
+          '#title' => t('clone'),
+          '#href' => $this->path . '/manage/' . $id . '/clone',
+        );
+      }
+      if (empty($this->entityInfo['exportable']) || !entity_has_status($this->entityType, $entity, ENTITY_IN_CODE)) {
+        $form['operations']['delete'] = array(
+          '#type' => 'link',
+          '#title' => t('delete'),
+          '#href' => $this->path . '/manage/' . $id . '/deleted',
+          '#options' => array('query' => drupal_get_destination()),
+        );
+      }
+      elseif (entity_has_status($this->entityType, $translator, ENTITY_OVERRIDDEN)) {
+        $form['operations']['revert'] = array(
+          '#type' => 'link',
+          '#title' => t('revert'),
+          '#href' => $this->path . '/manage/' . $id . '/revert',
+          '#options' => array('query' => drupal_get_destination()),
+        );
+      }
+      else {
+        $row[] = '';
+      }
+    }
+    if (!empty($this->entityInfo['exportable'])) {
+      $form['operations']['export'] = array(
+        '#type' => 'link',
+        '#title' => t('export'),
+        '#href' => $this->path . '/manage/' . $id . '/export',
+      );
+    }
     return $form;
   }
 
@@ -72,7 +137,39 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
 function theme_tmgmt_ui_translator_overview_item($variables) {
   $output = theme('entity_ui_overview_item', $variables);
   if (!empty($variables['description'])) {
-    $output .= '<div class="description">' . $variables['description'] . '</div>';
+    $output = '<div class="tmgmt-ui-translator-label-wrapper">' . $output . '<div class="description">' . $variables['description'] . '</div></div>';
   }
   return $output;
+}
+
+/**
+ * Theme callback for adding the tabledrag to the translator entity overview
+ * form.
+ */
+function theme_tmgmt_ui_translator_overview_form($variables) {
+  $form = $variables['form'];
+  $colspan = !empty($form['#entity_info']['exportable']) ? 4 : 3;
+  $rows = array();
+  $header = array(
+    t('Label'),
+    t('Plugin'),
+    t('Status'),
+    array('data' => t('Operations'), 'colspan' => $colspan),
+    t('Weight'),
+  );
+  foreach (element_children($form) as $key) {
+    $row = array();
+    $form[$key]['weight']['#attributes']['class'] = array('tmgmt-ui-translator-weight');
+    $row[] = drupal_render($form[$key]['label']);
+    $row[] = drupal_render($form[$key]['plugin']);
+    $row[] = drupal_render($form[$key]['status']);
+    $operations = element_children($form[$key]['operations']);
+    foreach ($operations as $op) {
+      $row[] = array('data' => $form[$key]['operations'][$op]);
+    }
+    $row[] = drupal_render($form[$key]['weight']);
+    $rows[] = array('data' => $row, 'class' => array('draggable'));
+  }
+  drupal_add_tabledrag('tmgmt-ui-translator-overview', 'order', 'sibling', 'tmgmt-ui-translator-weight');
+  return theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'tmgmt-ui-translator-overview')));
 }

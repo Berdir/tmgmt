@@ -12,3 +12,7 @@
   float: right;
   width: 48%;
 }
+
+.tmgmt-ui-translator-label-wrapper {
+  float: left;
+}

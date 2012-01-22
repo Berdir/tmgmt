@@ -79,6 +79,10 @@ function tmgmt_ui_theme() {
       'variables' => array('label' => NULL, 'entity_type' => NULL, 'url' => FALSE, 'name' => FALSE, 'description' => FALSE),
       'file' => 'includes/tmgmt_ui.controller.inc',
     ),
+    'tmgmt_ui_translator_overview_form' => array(
+      'render element' => 'form',
+      'file' => 'includes/tmgmt_ui.controller.inc',
+    ),
   );
 }
 
