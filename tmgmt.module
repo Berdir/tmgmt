@@ -1,4 +1,15 @@
 <?php
+
+/*
+ * @file
+ * The module file for the Translation Management module.
+ */
+
+/**
+ * @addtogroup tmgmt_job
+ * @{
+ */
+
 /**
  * A new translation job.
  *
@@ -88,6 +99,10 @@ define('TMTGT_TRANSLATOR_NOT_AVAILABLE', 1);
 define('TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE', 2);
 
 /**
+ * @} End of "addtogroup tmgmt_job".
+ */
+
+/**
  * Implements hook_permission().
  */
 function tmgmt_permission() {
@@ -163,6 +178,7 @@ function tmgmt_entity_info() {
   );
   return $info;
 }
+
 /**
  * @addtogroup tmgmt_job
  * @{
@@ -274,9 +290,6 @@ function tmgmt_job_states() {
     TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
   );
 }
-/**
- * @} End of "addtogroup tmgmt_job".
- */
 
 /**
  * Loads a translation job item.
@@ -328,11 +341,6 @@ function tmgmt_job_item_remove($tjiid) {
 }
 
 /**
- * @addtogroup tmgmt_job_message
- * @{
- */
-
-/**
  * Loads a translation job message.
  */
 function tmgmt_job_message_load($tjmid, $reset = FALSE) {
@@ -372,9 +380,11 @@ function tmgmt_job_message_create($status_before, $status_after, $message = '', 
                     'arguments' => $arguments,
                   )));
 }
+
 /**
- * @} End of "addtogroup tmgmt_job_message".
+ * @} End of "addtogroup tmgmt_job".
  */
+
 /**
  * @addtogroup tmgmt_translator
  * @{
