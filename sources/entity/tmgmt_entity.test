@@ -23,7 +23,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_entity', 'tmgmt_test', 'locale', 'tmgmt_dummy', 'tmgmt_entity_test'));
+    parent::setUp(array('tmgmt_entity', 'tmgmt_entity_test'));
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
   }
 
@@ -96,7 +96,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     // Create a few nodes and translate them.
     $amount = 1;
     $job = $this->createJob();
-    $job->translator = 'dummy';
+    $job->translator = $this->default_translator->name;
     $job->translator_context = array();
     $job->save();
     for ($i = 1; $i <= $amount; $i++) {
@@ -144,7 +144,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     $amount = 1;
     // Create the job.
     $job = $this->createJob();
-    $job->translator = 'dummy';
+    $job->translator = $this->default_translator->name;
     $job->translator_context = array();
     $job->save();
     for ($i = 1; $i <= $amount; $i++) {
