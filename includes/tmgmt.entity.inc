@@ -382,11 +382,17 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     }
 
     $wrapper = entity_metadata_wrapper($this->entityType, $this);
+
+    $source = $wrapper->source_language->label();
+    if (empty($source)) {
+      $source = '?';
+    }
+
     $target = $wrapper->target_language->label();
     if (empty($target)) {
       $target = '?';
     }
-    return t('Job @source to @target', array('@source' => $wrapper->source_language->label(), '@target' => $target));
+    return t('From @source to @target', array('@source' => $source, '@target' => $target));
   }
 
   /**
@@ -437,14 +443,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       );
     }
     // @todo: Re-add a view for this.
-    /*if (module_exists('views')) {
+    if (module_exists('views')) {
       $view = views_get_view('translation_job_messages');
       $content['messages'] = array(
         '#type' => 'item',
         '#title' => $view->get_title(),
         '#markup' => $view->preview('block', array($this->tjid)),
       );
-    }*/
+    }
     return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
   }
 
