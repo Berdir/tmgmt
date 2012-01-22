@@ -142,7 +142,6 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
  * Submit function, will set a job to request translation status.
  */
 function tmgmt_job_checkout_form_submit($form, &$form_state) {
-  $values = $form_state['values'];
   // Get job from form_state
   $job = $form_state['job'];
   if ($job->isNew()) {
