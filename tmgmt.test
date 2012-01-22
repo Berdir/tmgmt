@@ -11,6 +11,24 @@
 class TMGMTBaseTestCase extends DrupalWebTestCase {
 
   /**
+   * A default translator using the test translator.
+   *
+   * @var TMGMTTranslator
+   */
+  protected $default_translator;
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp(array $modules = array()) {
+    $modules = array_merge(array('entity', 'tmgmt', 'tmgmt_test'), $modules);
+    parent::setUp($modules);
+
+
+    $this->default_translator = $this->createTranslator();
+  }
+
+  /**
    * Creates, saves and returns a translator.
    *
    * @return TMGMTTranslator
@@ -36,8 +54,8 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
    *
    * @return TMGMTJob
    */
-  function createJob()  {
-    $job = tmgmt_job_create('en', 'de', array('uid' => 1));
+  function createJob($source = 'en', $target = 'de', $uid = 1)  {
+    $job = tmgmt_job_create($source, $target, $uid);
     $this->assertEqual(SAVED_NEW, $job->save());
 
     // Assert that the translator was assigned a tid.
@@ -82,13 +100,6 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
       'description' => t('Basic crud operations for jobs and translators'),
       'group' => t('Translation Management'),
     );
-  }
-
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
-  function setUp() {
-    parent::setUp(array('entity', 'tmgmt'));
   }
 
   /**
@@ -209,17 +220,8 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
-  function setUp() {
-    parent::setUp(array('entity', 'tmgmt', 'tmgmt_test'));
-
-    $this->translator = $this->createTranslator();
-  }
-
   function createJob($action = 'translate') {
-    $job = tmgmt_job_create('en', 'de');
+    $job = parent::createJob();
 
     for ($i = 1; $i < 3; $i++) {
       if ($i == 3) {
@@ -237,7 +239,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     }
 
     // Manually specify the translator for now.
-    $job->translator = $this->translator->name;
+    $job->translator = $this->default_translator->name;
     $job->translator_context = array('action' => $action);
     $job->prepared();
 
@@ -344,8 +346,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('ctools', 'entity', 'tmgmt', 'tmgmt_test', 'tmgmt_ui'));
-    $this->translator = $this->createTranslator();
+    parent::setUp(array('tmgmt_ui'));
   }
 
   /**
@@ -388,7 +389,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText('test_source: test :2');
     $this->assertText('test_source: test :3');
     $this->assertText('German');
-    $this->assertText($this->translator->label);
+    $this->assertText($this->default_translator->label);
 
     // @todo: Test ajax functionality.
 
@@ -520,23 +521,17 @@ class TMGMTHelperTestCase extends TMGMTBaseTestCase {
   }
 
   /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
-  function setUp() {
-    parent::setUp(array('entity', 'tmgmt'));
-  }
-
-  /**
    * Tests tmgmt_job_match_item()
+   *
    * @see tmgmt_job_match_item
    */
   function testTMGTJobMatchItem() {
-    locale_add_language('fr');
-    locale_add_language('es');
+    $this->setEnvironment('fr');
+    $this->setEnvironment('es');
 
     // Add a job from en to fr and en to sp.
-    $job_en_fr = $this->createJobEntity('en', 'fr');
-    $job_en_sp = $this->createJobEntity('en', 'es');
+    $job_en_fr = $this->createJob('en', 'fr');
+    $job_en_sp = $this->createJob('en', 'es');
 
     // Add a job which has existing source-target combinations.
     $this->assertEqual($job_en_fr->tjid, tmgmt_job_match_item('en', 'fr')->tjid);
@@ -544,16 +539,6 @@ class TMGMTHelperTestCase extends TMGMTBaseTestCase {
 
     // Add a job which has no existing source-target combination.
     $this->assertTrue(tmgmt_job_match_item('fr', 'es'));
-
-  }
-
-  function createJobEntity($source = 'en', $target = 'de', $uid = 1)  {
-    $job = tmgmt_job_create($source, $target, array('uid' => $uid));
-    $this->assertEqual(SAVED_NEW, $job->save());
-
-    // Assert that the translator was assigned a tid.
-    $this->assertTrue($job->tjid > 0);
-    return $job;
   }
 
 }
