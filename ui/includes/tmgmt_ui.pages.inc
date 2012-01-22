@@ -30,10 +30,7 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
 function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   // Add the job to the form state so we can use it in the submit handler.
   $form_state['job'] = $job;
-  if ($job->isNew()) {
-    $job->prepared();
-  }
-  if ($job->isRejected() || $job->isPrepared()) {
+  if ($job->isRejected() || $job->isPrepared() || $job->isNew()) {
     // Get all available languages from core translation module.
     $available_languages = entity_metadata_language_list();
     // Keep the label of the source language.
@@ -47,6 +44,9 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translator_plugins);
     // Load plugin controller and info for the selected translator plugin.
     $selected_target_language = isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available_languages);
+    if (isset($job->target_language)) {
+      $selected_target_language = $job->target_language;
+    }
     $translators = tmgmt_translator_plugin_info();
     $translator_plugins = tmgmt_translator_filtered_by_language($translators, $job->source_language, $selected_target_language);
     // Load the plugin info for the selected translator plugin.
@@ -74,6 +74,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
       '#title' => t('Target language'),
       '#description' => t('The target language'),
       '#options' => $available_languages,
+      '#default_value' => $selected_target_language,
       '#ajax' => array(
         'callback' => 'tmgmt_ajax_callback_get_supported_translators',
         'wrapper' => 'tmgmt-translator-wrapper',
@@ -130,12 +131,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     return $form;
   }
   else {
-    if ($job->isNew()) {
-      drupal_set_message(t('The job is not prepared for checkout yet.'), 'error');
-    }
-    else {
-      drupal_set_message(t('The job has already been processed.'), 'error');
-    }
+    drupal_set_message(t('The job has already been processed.'), 'error');
   }
 }
 
@@ -146,6 +142,9 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   // Get job from form_state
   $job = $form_state['job'];
+  if ($job->isNew()) {
+    $job->prepared();
+  }
   $job->requestTranslation();
 
   // Print a message to the screen and redirect the user.

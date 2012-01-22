@@ -1,5 +1,5 @@
-name = Node Source
-description = Node source plugin for the Translation Management system.
+name = Content Translation Source
+description = Content Translation source plugin for the Translation Management system.
 package = Translation Management
 core = 7.x
 dependencies[] = node
@@ -11,3 +11,4 @@ files[] = tmgmt_node.test
 
 ; Views handlers
 files[] = views/tmgmt_node_handler_filter_node_translatable_types.inc
+files[] = views/tmgmt_node_handler_field_translation_language_status.inc
