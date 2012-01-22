@@ -7,7 +7,7 @@
 
 /**
  * Implements hook_menu()
- * 
+ *
  * @TODO Review permissions, maybe create new ones
  */
 function tmgmt_local_translator_menu() {
@@ -36,10 +36,10 @@ function tmgmt_local_translator_menu() {
  */
 function tmgmt_local_translator_tmgmt_translator_plugin_info() {
   return array(
-    'local_translator' => array(
+    'local' => array(
       'label' => t('Local translator'),
       'description' => t('Local translation team.'),
-      'controller class' => 'TMGMTLocalTranslator',
+      'controller class' => 'TMGMTLocalTranslatorPluginController',
     ),
   );
 }
@@ -82,7 +82,7 @@ function tmgmt_local_translator_user_update(&$edit, $account, $category) {
  * Implements hook_user_update() {
  */
 function tmgmt_local_translator_user_insert(&$edit, $account, $category) {
-  
+
 }
 
 /**

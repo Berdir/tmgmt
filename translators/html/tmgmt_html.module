@@ -10,10 +10,10 @@
  */
 function tmgmt_html_tmgmt_translator_plugin_info() {
   return array(
-    'html_translator' => array(
+    'html' => array(
       'label' => t('HTML translator'),
       'description' => t('HTML translator that exports to HTML.'),
-      'controller class' => 'TMGMTHTMLTranslator',
+      'controller class' => 'TMGMTHTMLTranslatorPluginController',
     ),
   );
 }

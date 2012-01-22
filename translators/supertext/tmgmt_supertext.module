@@ -13,7 +13,7 @@ function tmgmt_supertext_tmgmt_translator_plugin_info() {
     'supertext' => array(
       'label' => t('Supertext translator'),
       'description' => t('A Supertext translator service.'),
-      'controller class' => 'TMGMTSupertextController',
+      'controller class' => 'TMGMTSupertextPluginController',
     ),
   );
 }
@@ -158,15 +158,15 @@ function supertext_test(){
 
 /**
  * Process response from supertext.
- * 
+ *
  * The payload, once decoded, looks like this:
- * 
+ *
 stdClass Object
 (
     [AccountId] => 11798
-    [CallbackUrl] => 
-    [CommunicationLang] => 
-    [ContentType] => 
+    [CallbackUrl] =>
+    [CommunicationLang] =>
+    [ContentType] =>
     [Currency] => CHF
     [Deadline] => 2012-01-23T13:52:12.0000000
     [DeliveryId] => 1
@@ -174,23 +174,23 @@ stdClass Object
         (
             [0] => stdClass Object
                 (
-                    [Context] => 
-                    [GroupId] => 
+                    [Context] =>
+                    [GroupId] =>
                     [Items] => Array
                         (
                             [0] => stdClass Object
                                 (
-                                    [Comment] => 
+                                    [Comment] =>
                                     [Content] => Tags
-                                    [Context] => 
+                                    [Context] =>
                                     [Id] => taxonomy:vocabulary:1:name
                                 )
 
                             [1] => stdClass Object
                                 (
-                                    [Comment] => 
+                                    [Comment] =>
                                     [Content] => Use tags to group articles on similar topics into categories.
-                                    [Context] => 
+                                    [Context] =>
                                     [Id] => taxonomy:vocabulary:1:description
                                 )
 
@@ -202,13 +202,13 @@ stdClass Object
 
     [Id] => 14292
     [OrderDate] => 2012-01-22T02:52:12.0000000
-    [OrderTitle] => 
+    [OrderTitle] =>
     [OrderType] => Adaption
     [OrderTypeId] => 7
-    [Password] => 
+    [Password] =>
     [Price] => -1
     [ReferenceData] => 51:6905f8ae8dd7c961e3dc00c639e9b6b5
-    [Referrer] => 
+    [Referrer] =>
     [Service] => Translation
     [SourceLang] => en
     [Status] => Eingegangen
@@ -235,7 +235,7 @@ function tmgmt_supertext_callback() {
 
   $job = tmgmt_job_load($tjid);
   watchdog('supertext', 'JOB.  <br /><pre>!post</pre>', array('!post' => print_r($job, TRUE)));
-  
+
   $translated_data = array();
   foreach ($data->Groups as $object_id => $object) {
     // Object <=> JobItem
@@ -246,7 +246,7 @@ function tmgmt_supertext_callback() {
     }
   }
   watchdog('supertext', 'TRANSLATED DATA.  <br /><pre>!post</pre>', array('!post' => print_r($translated_data, TRUE)));
-  
+
   $job->addTranslatedData($translated_data);
   $job->save();
   $job->needsReview('Supertext sent us their translation');
@@ -257,7 +257,7 @@ function tmgmt_supertext_callback() {
  */
 function tmgmt_supertext_access_check() {
   $input = file_get_contents('php://input');
-  //watchdog('supertext', 'INPUT.  <br /><pre>!post</pre>', array('!post' => print_r($input, TRUE)));  
+  //watchdog('supertext', 'INPUT.  <br /><pre>!post</pre>', array('!post' => print_r($input, TRUE)));
   try {
     $job = json_decode($input);
     //watchdog('supertext', 'Job  <br /><pre>!post</pre>', array('!post' => print_r($job, TRUE)));

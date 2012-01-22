@@ -5,7 +5,7 @@
  * Provides the user translator plugin controller.
  */
 
-class TMGMTLocalTranslator extends TMGMTDefaultTranslatorPluginController {
+class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * It can 'translate' any job

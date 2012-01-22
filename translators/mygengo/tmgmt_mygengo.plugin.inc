@@ -4,7 +4,7 @@
  * Provides myGengo translation plugin controller.
  */
 
-class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
+class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * Translation service URL.
@@ -113,7 +113,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
       'process' => 1,
       'as_group' => 1
     ));
-    
+
     // Save the translated data through the job.
     $job->addTranslatedData(tmgmt_unflatten_data($response));
     //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));

@@ -39,12 +39,12 @@ function tmgmt_mygengo_callback() {
 /**
  * tmgmt_mygengo_callback access check.
  */
-function tmgmt_mygengo_access_check() { 
+function tmgmt_mygengo_access_check() {
   try {
     $job = json_decode($_POST['job']);
     return TRUE;
   } catch(Exception $e) {
-    
+
     // Debug it for now, why not...
     watchdog('mygengo', print_r($_REQUEST, TRUE));
     return FALSE;
@@ -59,7 +59,7 @@ function tmgmt_mygengo_tmgmt_translator_plugin_info() {
   'mygengo' => array(
     'label' => t('myGengo translator'),
     'description' => t('A myGengo translator service.'),
-    'controller class' => 'TMGMTMyGengoController',
+    'controller class' => 'TMGMTMyGengoPluginController',
   ),
   );
 }

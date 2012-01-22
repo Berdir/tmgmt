@@ -4,7 +4,7 @@
  * @file
  * Provides a Supertext translation plugin controller.
  */
-class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
+class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * Translation service URL.
@@ -15,7 +15,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
   // @TODO The second one is only for testing on local network.
   protected $sandboxURL = 'http://dev.supertext.ch/api/v1/';
   //protected $sandboxURL = 'http://172.21.21.66/supertext/api/v1/';
- 
+
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
@@ -35,7 +35,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
   public function canTranslate(TMGMTJob $job) {
     return TRUE;
   }
-  
+
   public function generateSupertextOrderObject(TMGMTJob $job){
   $object = new stdClass();
     $object->AccountId = variable_get('tmgmt_supertext_api_account_id', '');
@@ -86,7 +86,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
     $object->DeliveryId = $order_settings[1];
     $job->label = $job->translator_context['job-label'];
 	$object->OrderTitle = $job->translator_context['job-label'];
-    
+
     $options = array(
       'method' => 'POST',
       'data' => json_encode($object),
@@ -151,7 +151,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
     return $form;
   }
 
-   
+
  /**
    * Defines plugin job settings form.
    *
@@ -162,59 +162,59 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     $object = $this->generateSupertextOrderObject($job);
-    $object->TargetLang = 'de-CH'; 
+    $object->TargetLang = 'de-CH';
     $options = array(
       'method' => 'POST',
       'data' => json_encode($object),
       'headers' => array('Content-Type' => 'application/json'),
     );
-               
+
     $response = drupal_http_request($this->sandboxURL.'/translation/quote', $options);
 
     if ($response->code == "200") {
       $responsedata = json_decode($response->data);
       $joboptions = array();
 	  $settings['supertext-job'] = array(
-	  	'#type' => 'value', 
+	  	'#type' => 'value',
 	  );
 	  $settings['job-label'] = array(
 	  	'#type' => 'textfield',
-	  '#title' => t('Job Title'), 
- 	 '#default_value' => $job->label, 
-	  '#size' => 60, 
-  		'#maxlength' => 128, 
-	  );	  
+	  '#title' => t('Job Title'),
+ 	 '#default_value' => $job->label,
+	  '#size' => 60,
+  		'#maxlength' => 128,
+	  );
       if (isset($responsedata->Options)) {
        foreach ($responsedata->Options as $option_item) {
             $settings[$option_item->OrderTypeId . "_markup"] = array(
             	'#type' => 'item',
 		        '#title' => $option_item->Name,
                 '#markup' => $option_item->Description,
-		      );       	
+		      );
           foreach ($option_item->DeliveryOptions as $delivery_key => $delivery_item) {
             $name = format_date(strtotime($delivery_item->DeliveryDate)) . ', Price ' . $delivery_item->Price . " ". $responsedata->Currency;
             $settings[$option_item->OrderTypeId .":" .$delivery_item->DeliveryId] = array(
 		        '#type' => 'radio',
 		        '#title' => $name,
                 '#return_value' => $option_item->OrderTypeId .":" .$delivery_item->DeliveryId,
-                '#default_value' => NULL, 
+                '#default_value' => NULL,
                 '#attributes' => array('name' => array('settings[supertext-job]')),
-		      ); 
+		      );
           }
-         
+
         }
       }
-            
+
       return $settings;
 
     } else {
       $job->addMessage("Could not get quote from Supertext. Response: @response",array('@response'=>$response->data));
       drupal_set_message(t("Could not get quote from Supertext. Error: @error",array('@error' => $response->error)),'error');
-      
+
       return;
     }
 
 
   }
-  
+
 }
