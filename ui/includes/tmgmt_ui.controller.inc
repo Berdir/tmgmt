@@ -67,14 +67,13 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
    * Helper method for building a row in the overview form.
    */
   protected function overviewFormRow($form, &$form_state, TMGMTTranslator $entity, $id) {
-    $uri = entity_uri($this->entityType, $entity);
     $form['#weight'] = isset($form_state['input']['translators']) ? $form_state['input']['translators'][$id]['weight'] : NULL;
     $form['label'] = array(
       '#theme' => 'tmgmt_ui_translator_overview_item',
       '#attached' => array('css' => array(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css')),
       '#label' => entity_label($this->entityType, $entity),
       '#name' => !empty($this->entityInfo['exportable']) ? entity_id($this->entityType, $entity) : FALSE,
-      '#url' => $uri ? $uri : FALSE,
+      '#url' => FALSE,
       '#description' => $entity->description,
       '#entity_type' => $this->entityType,
     );
