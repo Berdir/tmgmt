@@ -303,6 +303,16 @@ function tmgmt_job_item_load($tjiid, $reset = FALSE) {
 }
 
 /**
+ * Loads a translation job item per item_id.
+ *
+ * @return TMGMTJobItem
+ *   The loaded job item.
+ */
+function tmgmt_job_item_load_by_item_id($item_id) {
+  return entity_load('tmgmt_job_item', FALSE, array('item_id' => $item_id), FALSE);
+}
+
+/**
  * Loads translation job items.
  */
 function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = array(), $reset = FALSE) {
