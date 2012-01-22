@@ -89,10 +89,12 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    * We will check are source and target language supported.
    */
   public function canTranslate(TMGMTJob $job) {
-    if ($this->isAvailable()) {
-      $targets = $this->getSupportedTargetLanguages($job->getTranslator(), $job->source_language);
-      if (in_array($job->target_language, $targets))
+    $translator = $job->getTranslator();
+    if ($this->isAvailable($translator)) {
+      $targets = $this->getSupportedTargetLanguages($translator, $job->source_language);
+      if (isset($targets[$job->target_language])) {
         return TRUE;
+      }
     }
     return FALSE;
   }
@@ -104,21 +106,20 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    */
   public function requestTranslation(TMGMTJob $job) {
     // Pull the source data array from through the job and generate the MyGengo Translation Job
-	$translations = $this->generateMyGengoTranslationJobArray($job);
+	$translations = $this->generateMyGengoTranslationJobArray($job, $job->translator_context['quality']);
 
     $response = $this->requestFromGengo('translate/jobs', 'POST', array(
       'jobs' => $translations,
       'process' => 1,
       'as_group' => 1
     ));
-
+    
     // Save the translated data through the job.
     $job->addTranslatedData(tmgmt_unflatten_data($response));
     //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
   }
 
   public function generateMyGengoTranslationJobArray(TMGMTJob $job, $tier = "machine"){
-
   	$data = tmgmt_flatten_data($job->getSourceData());
 
   	$translations = array();
