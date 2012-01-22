@@ -13,7 +13,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   if (in_array($op, array('import', 'add'))) {
     drupal_set_title($op == 'import' ? t('Add Translator') : t('Import Translator'), PASS_THROUGH);
   }
-  $available_plugins = array();//tmgmt_translator_plugin_labels();
+  $available_plugins = tmgmt_translator_plugin_labels();
   // Initialize some of the default values.
   foreach (array('description', 'label', 'name', 'translator_plugin') as $key) {
     $translator->{$key} = isset($form_state['values'][$key]) ? $form_state['values'][$key] : $translator->{$key};
