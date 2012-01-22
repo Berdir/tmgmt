@@ -21,16 +21,16 @@ function tmgmt_rules_action_info() {
     ),
   );
   $info['tmgmt_rules_job_accept_translation'] = array(
-      'label' => t('Accept Job translation'),
-      'group' => t('Translation Management'),
-      'parameter' => array(
-        'job' => array(
-          'type' => 'tmgmt_job',
-          'label' => t('Translation Job'),
-          'description' => t('The translation job for which translations should be accepted.'),
-        ),
+    'label' => t('Accept Job translation'),
+    'group' => t('Translation Management'),
+    'parameter' => array(
+      'job' => array(
+        'type' => 'tmgmt_job',
+        'label' => t('Translation Job'),
+        'description' => t('The translation job for which translations should be accepted.'),
       ),
-    );
+    ),
+  );
   $info['tmgmt_rules_job_cancel_translation'] = array(
     'label' => t('Cancel translation job'),
     'group' => t('Translation Management'),

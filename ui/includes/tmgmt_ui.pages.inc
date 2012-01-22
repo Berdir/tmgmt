@@ -109,9 +109,11 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
           $form['translator_wrapper']['options']['settings']['#markup'] = t('Test translator is not available for @language.', array('@language' => $available_languages[$selected_target_language]));
           break;
         default:
-          $form['translator_wrapper']['options']['settings'] = $plugin_controller->jobSettingsForm(array(), $form_state, $job);
-          $form['translator_wrapper']['options']['settings']['#tree'] = TRUE;
-          if (empty($form['translator_wrapper']['options']['settings'])) {
+          if ($settings = $plugin_controller->jobSettingsForm(array(), $form_state, $job)) {
+            $form['translator_wrapper']['options']['settings'] = $settings;
+            $form['translator_wrapper']['options']['settings']['#tree'] = TRUE;
+          }
+          else {
             $form['translator_wrapper']['options']['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $plugin_info['label']));
           }
       }
