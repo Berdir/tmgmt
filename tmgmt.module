@@ -504,6 +504,17 @@ function tmgmt_translator_plugin_labels() {
 }
 
 /**
+ * Returns a list of translator labels.
+ */
+function tmgmt_translator_labels() {
+  $labels = array();
+  foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
+    $labels[$translator->identifier()] = $translator->label();
+  }
+  return $labels;
+}
+
+/**
  * @param $plugin
  * @param $source_language
  * @param array $languages
