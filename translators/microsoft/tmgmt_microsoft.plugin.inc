@@ -40,11 +40,11 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
         continue;
       }
       $query = drupal_http_build_query(array(
-        'appId'       => $this->getOption('bing_api_id'),
-        'from'        => $job->source_language,
-        'to'          => $job->target_language,
+        'appId' => $job->getTranslator()->getSetting('api'),
+        'from' => $job->source_language,
+        'to' => $job->target_language,
         'contentType' => 'text/plain',
-        'text'        => $value['#text'],
+        'text' => $value['#text'],
       ));
       $options = array(
         // @todo For some reason post is returning 202 status and service is not translating things, maybe check this later.
@@ -93,7 +93,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
     $languages = &drupal_static(__FUNCTION__);
     if (!isset($languages)) {
       $languages = array();
-      $request = drupal_http_request($this->translatorUrl . '/GetLanguagesForTranslate' . '?appId=' . $this->getOption('bing_api_id'));
+      $request = drupal_http_request($this->translatorUrl . '/GetLanguagesForTranslate' . '?appId=' . $translator->getSetting('api'));
       if ($request->code == 200) {
         $dom = new DOMDocument;
         $dom->loadXML($request->data);
@@ -109,11 +109,11 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
   public function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
-    $form['bing_api_id'] = array(
+    $form['api'] = array(
       '#type' => 'textfield',
-      '#title' => t('Bing API ID'),
-      // @todo - remove default test bing id before production release.
-      '#default_value' => $translator->getSetting('bing_api_id', 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369'),
+      '#title' => t('Microsoft API Key'),
+      // @todo Remove default API Key once development is finished.
+      '#default_value' => $translator->getSetting('api', 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369'),
       '#description' => t('Please enter your Bing API ID, or follow this !link to generate one.', array('!link' => l('link', 'http://www.bing.com/developers/appids.aspx.'))),
     );
     return $form;
