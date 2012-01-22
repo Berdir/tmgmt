@@ -13,5 +13,6 @@ files[] = includes/tmgmt.info.inc
 files[] = tmgmt.test
 
 ; Views handlers
-files[] = views/tmgmt_handler_field_job_item_label.inc
+files[] = views/tmgmt_handler_field_tmgmt_job_item_label.inc
 files[] = views/tmgmt_handler_field_tmgmt_job_actions.inc
+files[] = views/tmgmt_handler_field_tmgmt_job_label.inc
