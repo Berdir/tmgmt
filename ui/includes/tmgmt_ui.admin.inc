@@ -13,7 +13,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   if (in_array($op, array('import', 'add'))) {
     drupal_set_title($op == 'import' ? t('Add Translator') : t('Import Translator'), PASS_THROUGH);
   }
-  $available_plugins = tmgmt_translator_plugin_labels();
+  $available_plugins = array();//tmgmt_translator_plugin_labels();
   // Initialize some of the default values.
   foreach (array('description', 'label', 'name', 'translator_plugin') as $key) {
     $translator->{$key} = isset($form_state['values'][$key]) ? $form_state['values'][$key] : $translator->{$key};
@@ -51,41 +51,53 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#size' => 32,
     '#maxlength' => 64,
   );
-  $form['translator_plugin'] = array(
-    '#type' => 'select',
-    '#title' => t('Plugin'),
-    '#description' => t('The translator plugin that will be used.'),
-    '#options' => $available_plugins,
-    '#default_value' => $translator->translator_plugin,
-    '#required' => TRUE,
-    '#access' => !empty($translator->is_new),
-    '#ajax' => array(
-      'callback' => 'tmgmt_ui_ajax_callback_translator_plugin_settings',
-      'wrapper' => 'tmgmt-translator-plugin-settings-wrapper',
-    ),
-  );
-  $form['translator_plugin_settings_wrapper'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Translator plugin settings'),
-    '#prefix' => '<div id="tmgmt-translator-plugin-settings-wrapper">',
-    '#suffix' => '</div>',
-  );
-  if ($translator->translator_plugin) {
-    $controller = tmgmt_translator_plugin_controller($translator->translator_plugin);
-    $info = $controller->pluginInfo();
-    if ($settings = $controller->settingsForm(array(), $form_state, $translator)) {
-      $form['translator_plugin_settings_wrapper']['#description'] = t('These settings apply to the @plugin plugin in this configuration set.', array('@plugin' => $info['label']));
-      $form['translator_plugin_settings_wrapper']['settings'] = $settings;
-      $form['translator_plugin_settings_wrapper']['settings']['#tree'] = TRUE;
+  if (!empty($available_plugins)) {
+    $form['translator_plugin'] = array(
+      '#type' => 'select',
+      '#title' => t('Plugin'),
+      '#description' => t('The translator plugin that will be used.'),
+      '#options' => $available_plugins,
+      '#default_value' => $translator->translator_plugin,
+      '#required' => TRUE,
+      '#access' => !empty($translator->is_new),
+      '#ajax' => array(
+        'callback' => 'tmgmt_ui_ajax_callback_translator_plugin_settings',
+        'wrapper' => 'tmgmt-translator-plugin-settings-wrapper',
+      ),
+    );
+    $form['translator_plugin_settings_wrapper'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Translator plugin settings'),
+      '#prefix' => '<div id="tmgmt-translator-plugin-settings-wrapper">',
+      '#suffix' => '</div>',
+    );
+    if ($translator->translator_plugin) {
+      $controller = tmgmt_translator_plugin_controller($translator->translator_plugin);
+      $info = $controller->pluginInfo();
+      if ($settings = $controller->settingsForm(array(), $form_state, $translator)) {
+        $form['translator_plugin_settings_wrapper']['#description'] = t('These settings apply to the @plugin plugin in this configuration set.', array('@plugin' => $info['label']));
+        $form['translator_plugin_settings_wrapper']['settings'] = $settings;
+        $form['translator_plugin_settings_wrapper']['settings']['#tree'] = TRUE;
+      }
+      else {
+        $form['translator_plugin_settings_wrapper']['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $info['label']));
+      }
     }
-    else {
-      $form['translator_plugin_settings_wrapper']['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $info['label']));
-    }
+  }
+  else {
+    // Fallback for when no translator plugins are available.
+    $form['translator_plugin'] = array(
+      '#type' => 'item',
+      '#title' => t('Plugin'),
+      '#description' => t('There are no available translator plugins.'),
+      '#required' => TRUE,
+    );
   }
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
+    '#disabled' => empty($available_plugins),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'link',
