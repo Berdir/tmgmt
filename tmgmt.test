@@ -526,6 +526,8 @@ class TMGMTHelperTestCase extends TMGMTBaseTestCase {
    * @see tmgmt_job_match_item
    */
   function testTMGTJobMatchItem() {
+    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
+    $this->drupalLogin($this->admin_user);
     $this->setEnvironment('fr');
     $this->setEnvironment('es');
 
