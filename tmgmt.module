@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Main module file for the Translation Management module.
+ */
+
 /**
  * A new translation job, can not yet be submitted.
  */
