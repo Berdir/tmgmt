@@ -175,6 +175,12 @@ function tmgmt_schema() {
         'size' => 'big',
         'serialize' => TRUE,
       ),
+      'weight' => array(
+        'description' => 'The weight of the translator.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
       'status' => array(
         'description' => 'The exportable status of the entity.',
         'type' => 'int',
@@ -329,4 +335,17 @@ function tmgmt_update_7006() {
     'size' => 'medium',
   );
   db_add_field('tmgmt_translator', 'description', $new_field);
+}
+
+/**
+ * Add the translator description column.
+ */
+function tmgmt_update_7007() {
+  $new_field = array(
+    'description' => 'The weight of the translator.',
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+  );
+  db_add_field('tmgmt_translator', 'weight', $new_field);
 }

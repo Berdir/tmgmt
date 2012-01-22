@@ -377,17 +377,15 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Overrides Entity::label().
    */
   public function label() {
+    // In some cases we might have a user-defined label.
     if (!empty($this->label)) {
       return $this->label;
     }
-
     $wrapper = entity_metadata_wrapper($this->entityType, $this);
-
     $source = $wrapper->source_language->label();
     if (empty($source)) {
       $source = '?';
     }
-
     $target = $wrapper->target_language->label();
     if (empty($target)) {
       $target = '?';
@@ -407,7 +405,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function buildContent($view_mode = 'full', $langcode = NULL) {
     $wrapper = entity_metadata_wrapper('tmgmt_job', $this);
-
     $content['created'] = array(
       '#type' => 'item',
       '#title' => t('Created'),
@@ -442,7 +439,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
         'href' => $uri['path'],
       );
     }
-    // @todo: Re-add a view for this.
     if (module_exists('views')) {
       $view = views_get_view('translation_job_messages');
       $content['messages'] = array(

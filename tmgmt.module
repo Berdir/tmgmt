@@ -148,7 +148,7 @@ function tmgmt_entity_info() {
   $info['tmgmt_translator'] = array(
     'label' => t('Translation Management Translator'),
     'module' => 'tmgmt',
-    'controller class' => 'EntityAPIControllerExportable',
+    'controller class' => 'TMGMTTranslatorController',
     'metadata controller class' => 'TMGMTTranslatorMetadataController',
     'entity class' => 'TMGMTTranslator',
     'base table' => 'tmgmt_translator',
@@ -389,14 +389,6 @@ function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $valu
     'item_type' => $item_type,
     'item_id' => $item_id,
   )));
-}
-
-/**
- * This functin will remove a singel item from a job.
- * @param type $tjiid
- */
-function tmgmt_job_item_remove($tjiid) {
-  return entity_delete('tmgmt_job_item', $tjiid);
 }
 
 /**
