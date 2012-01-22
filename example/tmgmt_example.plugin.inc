@@ -5,7 +5,7 @@
  * Provides the user translator plugin controller.
  */
 
-class TMGMTExampleTranslatorPlugin extends TMGMTDefaultTranslatorPluginController {
+class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * It can 'translate' any job
@@ -75,3 +75,14 @@ class TMGMTExampleTranslatorPlugin extends TMGMTDefaultTranslatorPluginControlle
 
 }
 
+class TMGMTExampleSourcePluginController extends TMGMTDefaultSourcePluginController {
+
+  public function getData(TMGMTJobItem $job_item) {
+
+  }
+
+  public function saveTranslation(TMGMTJobItem $job_item) {
+
+  }
+
+}

@@ -95,6 +95,10 @@ class TMGMTTranslatorMetadataController extends EntityDefaultMetadataController 
 
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
+    $properties = &$info[$this->type]['properties'];
+
+    $properties['translator_plugin']['options list'] = 'tmgmt_translator_plugin_labels';
+
     return _tmgmt_override_property_description($info, $this->type);
   }
 

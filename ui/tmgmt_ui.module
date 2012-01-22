@@ -82,18 +82,17 @@ function tmgmt_ui_menu() {
 }
 
 /**
- * Implements hook_forms().
+ * Implements hook_theme().
  */
-function tmgmt_ui_forms() {
-  $info = array();
-  // Give each translator settings form a unique form id.
-  foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
-    $info['tmgmt_' . $plugin . '_translator_settings_form'] = array(
-      'callback' => 'tmgmt_translator_settings_form',
-      'wrapper_callback' => 'tmgmt_translator_settings_form_defaults',
-    );
-  }
-  return $info;
+function tmgmt_ui_theme() {
+  return array(
+    'tmgmt_ui_translator_overview_item' => array(
+      // We also have the entity_type here because we are still populating the
+      // defaults via the entity api so we just need to add the description.
+      'variables' => array('label' => NULL, 'entity_type' => NULL, 'url' => FALSE, 'name' => FALSE, 'description' => FALSE),
+      'file' => 'includes/tmgmt_ui.controller.inc',
+    ),
+  );
 }
 
 /**
