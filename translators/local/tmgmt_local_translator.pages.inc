@@ -4,12 +4,6 @@
  * Pages for local translation.
  */
 
-/**
- * Menu callback. Overview of pending jobs to translate.
- */
-function tmgmt_local_translator_page_user_translate() {
-  return 'NOT IMPLEMENTED';
-}
 
 /**
  * Menu callback. Configure which languages a user can handle.

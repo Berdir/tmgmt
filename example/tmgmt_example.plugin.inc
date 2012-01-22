@@ -5,7 +5,7 @@
  * Provides the user translator plugin controller.
  */
 
-class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
+class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * It can 'translate' any job
@@ -18,8 +18,14 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   public function requestTranslation(TMGMTJob $job) {
-    $job->addTranslatedData($job->getSourceData());
-    $job->needsReview('Dummy translation completed.');
+    $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
+    // The example translation prefixes strings with the target language.
+    $data = tmgmt_flatten_data($job->getSourceData());
+    foreach ($data as $key => $value) {
+      $data[$key]['#text'] = $wrapper->target_language->label() . ': ' . $value['#text'];
+    }
+    $job->addTranslatedData(tmgmt_unflatten_data($data));
+    $job->needsReview('Example translation from @source_language to @target_language completed.', array('@source_language' => $wrapper->source_language->label(), '@target_language' => $wrapper->target_language->label()));
   }
 
   /**
@@ -69,3 +75,14 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
 
 }
 
+class TMGMTExampleSourcePluginController extends TMGMTDefaultSourcePluginController {
+
+  public function getData(TMGMTJobItem $job_item) {
+
+  }
+
+  public function saveTranslation(TMGMTJobItem $job_item) {
+
+  }
+
+}

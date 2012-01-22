@@ -30,6 +30,9 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
    */
   function requestTranslation(TMGMTJob $job) {
 
+    // Add a debug message.
+    $job->addMessage('Test translator called', array(), 'debug');
+
     // Do something different based on the action, if defined.
     $action = isset($job->translator_context['action']) ? $job->translator_context['action'] : '';
     switch ($action) {
@@ -45,7 +48,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
 
       case 'fail':
         // Target not reachable.
-        $job->addMessage('Service not reachable');
+        $job->addMessage('Service not reachable', array(), 'error');
         return;
         break;
 

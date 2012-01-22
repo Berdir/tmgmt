@@ -38,11 +38,23 @@ interface TMGMTSourcePluginControllerInterface {
   public function getTitle(TMGMTJobItem $job_item);
 
   /**
-   * Returns the URi for this job item.
+   * Returns the Uri for this job item.
    *
    * @see entity_uri()
    */
   public function getUri(TMGMTJobItem $job_item);
+
+  /**
+   * Returns the info of the type of the plugin.
+   *
+   * @see tmgmt_source_plugin_info()
+   */
+  public function pluginInfo();
+
+  /**
+   * Returns the type of the plugin.
+   */
+  public function pluginType();
 
 }
 
@@ -72,10 +84,24 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getUridir().
+   * Implements TMGMTSourcePluginControllerInterface::getUri().
    */
   public function getUri(TMGMTJobItem $job_item) {
     return array('path' => 'default/' . $job_item->item_id);
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::pluginInfo().
+   */
+  public function pluginInfo() {
+    return $this->pluginInfo;
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::pluginType().
+   */
+  public function pluginType() {
+    return $this->pluginType;
   }
 
 }
@@ -187,6 +213,18 @@ interface TMGMTTranslatorPluginControllerInterface {
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job);
 
+  /**
+   * Returns the info of the type of the plugin.
+   *
+   * @see tmgmt_translator_plugin_info()
+   */
+  public function pluginInfo();
+
+  /**
+   * Returns the type of the plugin.
+   */
+  public function pluginType();
+
 }
 
 /**
@@ -282,6 +320,20 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     return array();
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::pluginInfo().
+   */
+  public function pluginInfo() {
+    return $this->pluginInfo;
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::pluginType().
+   */
+  public function pluginType() {
+    return $this->pluginType;
   }
 
 }

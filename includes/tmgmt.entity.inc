@@ -692,7 +692,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @param $arguments
    *   (Optional) An array of variables to replace in the message on display.
    */
-  public function addMessage($message, $arguments = array()) {
+  public function addMessage($message, $arguments = array(), $type = 'status') {
     // Save the job if it hasn't yet been saved.
     if (empty($this->tjid) && !$this->save()) {
       return;
@@ -701,6 +701,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     $state_after = $this->getState();
     $message = tmgmt_job_message_create($state_before, $state_after, $message, $arguments, array(
       'tjid' => $this->tjid,
+      'type' => $type,
     ));
     // Remove old state again so that future log messages will use the correct
     // state.
@@ -806,7 +807,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function rejected($message = NULL, $arguments = array()) {
     $this->setState(TMGMT_JOB_STATE_REJECTED);
-    $this->addMessage($message, $arguments);
+    $this->addMessage($message, $arguments, 'error');
     $this->save();
   }
 
@@ -1004,12 +1005,22 @@ class TMGMTJobMessage extends Entity {
   public $created;
 
   /**
+   * Type of the message (debug, status, warning or error).
+   *
+   * @var string
+   */
+  public $type;
+
+  /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_job_message');
     if (empty($this->created)) {
       $this->created = REQUEST_TIME;
+    }
+    if (empty($this->type)) {
+      $this->type = 'status';
     }
   }
 
