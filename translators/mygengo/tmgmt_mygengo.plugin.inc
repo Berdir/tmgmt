@@ -205,7 +205,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    * @param $form array
    * @param $form_state array
    */
-  public function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
 
     $form['api_public_key'] = array(
       '#type' => 'textfield',

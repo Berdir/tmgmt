@@ -198,12 +198,28 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function cancelTranslation(TMGMTJob $job);
 
   /**
+   * Defines default settings for a translator plugin.
+   *
+   * @return array
+   *   An array of default settings.
+   */
+  public function defaultTranslatorSettings();
+
+  /**
+   * Defines default settings for a job.
+   *
+   * @return array
+   *   An array of default settings.
+   */
+  public function defaultJobSettings();
+
+  /**
    * A plugin can implement this method if it needs a settings form.
    *
    * This is not actually an interface method and that is why it is commented,
    * but we leave it here for API documentation.
    */
-  public function settingsForm($form, &$form_state, TMGMTTranslator $translator);
+  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator);
 
   /**
    * A plugin can implement this method if it needs a job settings form.
@@ -302,9 +318,23 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultTranslatorSettings().
+   */
+  public function defaultTranslatorSettings() {
+    return array();
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultJobSettings().
+   */
+  public function defaultJobSettings() {
+    return array();
+  }
+
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  public function settingsForm($form, &$form_state, TMGMTTRanslator $translator) {
+  public function translatorSettingsForm($form, &$form_state, TMGMTTRanslator $translator) {
     return array();
   }
 

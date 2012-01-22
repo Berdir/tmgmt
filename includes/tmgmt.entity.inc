@@ -124,8 +124,8 @@ class TMGMTTranslator extends Entity {
   /**
    * Get the settings form from the respective translator plugin.
    */
-  public function settingsForm($form, $form_state) {
-    return $this->getPluginController()->settingsForm($form, $form_state, $this);
+  public function translatorSettingsForm($form, $form_state) {
+    return $this->getPluginController()->translatorSettingsForm($form, $form_state, $this);
   }
 
   /**
@@ -136,19 +136,47 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
-   * Retrieves a setting
+   * Retrieves a setting value from the translator settings. Pulls the default
+   * values (if defined) from the plugin controller.
+   *
    * @param $name
    *   The name of the setting.
-   * @param $default
-   *   (Optional) The default value to return in case the setting value is not
-   *   set. Defaults to NULL.
+   *
+   * @return
+   *   The setting value or $default if the setting value is not set. Returns
+   *   NULL if the setting does not exist at all.
+   */
+  public function getSetting($name) {
+    if (isset($this->settings[$name])) {
+      return $this->settings[$name];
+    }
+    else if ($defaults = $this->getPluginController()->defaultTranslatorSettings()) {
+      if (isset($defaults[$name])) {
+        return $defaults[$name];
+      }
+    }
+  }
+
+  /**
+   * Retrieves a setting value from the translator settings. Pulls the default
+   * values (if defined) from the plugin controller.
+   *
+   * @param $name
+   *   The name of the setting.
+   *
    * @return
    *   The setting value or $default if the setting value is not set.
    */
-  public function getSetting($name, $default = NULL) {
-    return isset($this->settings[$name]) ? $this->settings[$name] : $default;
+  public function getJobSetting($name) {
+    if (isset($this->settings[$name])) {
+      return $this->settings[$name];
+    }
+    else if ($defaults = $this->getPluginController()->defaultTranslatorSettings()) {
+      if (isset($defaults[$name])) {
+        return $defaults[$name];
+      }
+    }
   }
-
 }
 
 /**
@@ -949,6 +977,28 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
         if (isset($items[$key])) {
           $items[$key]->addTranslatedData($value);
         }
+      }
+    }
+  }
+
+  /**
+   * Retrieves a setting value from the job settings. Pulls the default values
+   * (if defined) from the plugin controller.
+   *
+   * @param $name
+   *   The name of the setting.
+   *
+   * @return
+   *   The setting value or a default value if the setting is not set. Returns
+   *   NULL if the setting does not exist at all.
+   */
+  public function getSetting($name) {
+    if (isset($this->settings[$name])) {
+      return $this->settings[$name];
+    }
+    else if ($defaults = $this->getPluginController()->defaultJobSettings()) {
+      if (isset($defaults[$name])) {
+        return $defaults[$name];
       }
     }
   }

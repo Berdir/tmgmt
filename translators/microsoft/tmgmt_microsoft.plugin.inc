@@ -104,14 +104,23 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultTranslatorSettings().
+   */
+  public function defaultTranslatorSettings() {
+    return array(
+      // @todo Remove default API Key once development is finished.
+      'api' => 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369',
+    );
+  }
+
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  public function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['api'] = array(
       '#type' => 'textfield',
       '#title' => t('Microsoft API Key'),
-      // @todo Remove default API Key once development is finished.
-      '#default_value' => $translator->getSetting('api', 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369'),
+      '#default_value' => $translator->getSetting('api'),
       '#description' => t('Please enter your Microsoft API ID, or follow this !link to generate one.', array('!link' => l('link', 'http://www.bing.com/developers/appids.aspx.'))),
     );
     return $form;
@@ -138,9 +147,9 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    *   The path that should be appended to the base uri, e.g. Translate or
    *   GetLanguagesForTranslate.
    * @param $query
-   *   Array of GET query arguments.
+   *   (Optional) Array of GET query arguments.
    * @param $options
-   *   Array of additional options passed to drupal_http_request().
+   *   (Optional) Array of additional options passed to drupal_http_request().
    *
    * @return
    *   The response object returned by drupal_http_request().
@@ -148,11 +157,9 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   protected function doRequest(TMGMTTranslator $translator, $path, array $query = array(), array $options = array()) {
     // Allow to override the url, e.g. for the tests.
     $url = $translator->getSetting('url', $this->translatorUrl) . '/' . $path;
-
     // Add the appId to the query arguments and build the query string.
     $query['appId'] = $translator->getSetting('api');
     $query_string = drupal_http_build_query($query);
-
     return drupal_http_request($url . '?' . $query_string, $options);
   }
 

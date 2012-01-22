@@ -83,7 +83,7 @@ class TMGMTHTMLTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   /**
    * The settings form.
    */
-  public function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['export_format'] = array(
       '#type' => 'radios',
       '#title' => t('Export to'),

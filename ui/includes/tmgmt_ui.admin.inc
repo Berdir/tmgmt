@@ -88,7 +88,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
       '#title' => t('@plugin plugin settings', array('@plugin' => $info['label'])),
       '#collapsible' => TRUE,
     );
-    if ($settings = $controller->settingsForm(array(), $form_state, $translator)) {
+    if ($settings = $controller->translatorSettingsForm(array(), $form_state, $translator)) {
       $element['#description'] = t('These settings apply to the @plugin plugin when this translator is used.', array('@plugin' => $info['label']));
       $element['settings'] = $settings;
       $element['settings']['#tree'] = TRUE;
