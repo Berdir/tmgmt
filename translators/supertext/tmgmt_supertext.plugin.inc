@@ -20,8 +20,8 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
-  public function isAvailable() {
-    if($this->getOption('api_account_id') && $this->getOption('api_password')) {
+  public function isAvailable(TMGMTTranslator $translator) {
+    if($translator->getSetting('api_account_id') && $translator->getSetting('api_password')) {
       return TRUE;
     }
     return FALSE;
@@ -93,7 +93,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
       'headers' => array('Content-Type' => 'application/json'),
     );
 
-    $job->addMessage("Sending request to supertext");
+    $job->addMessage("Sending request to supertext",'debug');
     $response = drupal_http_request($this->sandboxURL.'/translation/order', $options);
 
 
@@ -102,7 +102,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
       $responsedata = json_decode($response->data);
       // Save order id to the job
       $job->translator_id = $responsedata->Id;
-      drupal_set_message(t("Job successfully sent to Supertext. <br />Ordertitle: @ordertitle<br />OrderID: @orderid<br />Price: @price<br />Wordcount: @wordcount<br />Deadline: @deadline",array(
+      $job->addMessage(t("Job successfully sent to Supertext. <br />Ordertitle: @ordertitle<br />OrderID: @orderid<br />Price: @price<br />Wordcount: @wordcount<br />Deadline: @deadline",array(
         '@ordertitle' => $responsedata->OrderTitle,
         '@orderid' => $responsedata->Id,
         '@price' => $responsedata->Price,
@@ -110,15 +110,15 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
         '@deadline' => format_date(strtotime($responsedata->Deadline)),
       )));
     } else {
-      $job->addMessage("Could not send Job to Supertext. Response: @response",array('@response'=>$response->data));
-      drupal_set_message(t("Could not send Job to Supertext. Error: @error",array('@error' => $response->error)),'error');
+      $job->addMessage("Could not send Job to Supertext. Response: @response",array('@response'=>$response->data),'debug');
+      $job->addMessage(t("Could not send Job to Supertext. Error: @error",array('@error' => $response->error)),'error');
     }
   }
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
-  public function getSupportedTargetLanguages($source_language) {
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     // @TODO Not real data, we are returning list of languages for now
 
     // Array like array('es' => TRUE, 'de' => TRUE);
@@ -162,18 +162,16 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     $object = $this->generateSupertextOrderObject($job);
-        $object->TargetLang = 'de-CH';
-    dpm($object);
+    $object->TargetLang = 'de-CH'; 
     $options = array(
       'method' => 'POST',
       'data' => json_encode($object),
       'headers' => array('Content-Type' => 'application/json'),
     );
-                
+               
     $response = drupal_http_request($this->sandboxURL.'/translation/quote', $options);
 
     if ($response->code == "200") {
-      //$job->submitted("Job sent to Supertext. Response: @response",array('@response'=>$repsonse->data));
       $responsedata = json_decode($response->data);
       $joboptions = array();
 	  $settings['supertext-job'] = array(
@@ -182,9 +180,9 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
 	  $settings['job-label'] = array(
 	  	'#type' => 'textfield',
 	  '#title' => t('Job Title'), 
-  '#default_value' => $job->label, 
+ 	 '#default_value' => $job->label, 
 	  '#size' => 60, 
-  '#maxlength' => 128, 
+  		'#maxlength' => 128, 
 	  );	  
       if (isset($responsedata->Options)) {
        foreach ($responsedata->Options as $option_item) {
