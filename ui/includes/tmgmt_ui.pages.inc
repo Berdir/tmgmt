@@ -21,7 +21,7 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
       $job->addItem($source_plugin, $item_type, $item_id);
     }
   }
-  drupal_goto('admin/tmgmt/checkout/' . $job->tjid);
+  drupal_goto('admin/config/regional/tmgmt/checkout/' . $job->tjid);
 }
 
 /**
@@ -166,7 +166,7 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
 
   // redirect to job overview page, if no error happened.
   if (!$had_error) {
-    drupal_goto('admin/tmgmt');
+    drupal_goto('admin/config/regional/tmgmt');
   }
 }
 

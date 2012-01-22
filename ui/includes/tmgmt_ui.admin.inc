@@ -77,11 +77,10 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   if ($selected_plugin) {
     $plugin_controller = tmgmt_translator_plugin_controller($selected_plugin);
     $plugin_info = tmgmt_translator_plugin_info($selected_plugin);
-    if ($settings = $plugin_controller->settingsForm(array(), $form_state)) {
+    if ($settings = $plugin_controller->settingsForm(array(), $form_state, $translator)) {
       $form['translator_plugin_settings_wrapper']['#description'] = t('These settings apply to the @plugin plugin in this configuration set.', array('@plugin' => $plugin_info['label']));
-      $form['translator_plugin_settings_wrapper']['settings'] = array(
-        '#tree' => TRUE,
-      ) + $settings;
+      $form['translator_plugin_settings_wrapper']['settings'] = $settings;
+      $form['translator_plugin_settings_wrapper']['settings']['#tree'] = TRUE;
     }
     else {
       $form['translator_plugin_settings_wrapper']['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $plugin_info['label']));
@@ -95,7 +94,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#title' => t('Cancel'),
-    '#href' => 'admin/tmgmt/translators',
+    '#href' => 'admin/config/regional/tmgmt/translators',
   );
   return $form;
 }

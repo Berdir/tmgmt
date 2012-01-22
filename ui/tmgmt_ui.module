@@ -6,13 +6,13 @@
  */
 
 /**
- * Implements hook_menu().
+ * Implements hook_entity_info().
  */
 function tmgmt_ui_entity_info() {
   $info['tmgmt_translator'] = array(
     'admin ui' => array(
       'controller class' => 'TMGMTTranslatorUIController',
-      'path' => 'admin/tmgmt/translators',
+      'path' => 'admin/config/regional/tmgmt/translators',
       'file' => 'includes/tmgmt_ui.admin.inc',
       // Entity API defaults to the path that implements the entity type, but
       // since this happens in the TMGMT core module, we need to manually
@@ -27,36 +27,36 @@ function tmgmt_ui_entity_info() {
  * Implements hook_menu().
  */
 function tmgmt_ui_menu() {
-  $items['admin/tmgmt'] = array(
+  $items['admin/config/regional/tmgmt'] = array(
     'title' => 'Translation Management',
     'description' => 'Use the Translation Management',
     'page callback' => 'tmgmt_ui_content',
     'access arguments' => array('access tmgmt ui'),
     'file' => 'includes/tmgmt_ui.pages.inc',
   );
-  $items['admin/tmgmt/my-translation-management'] = array(
+  $items['admin/config/regional/tmgmt/my-translation-management'] = array(
     'title' => 'Overview',
     'page callback' => 'tmgmt_ui_content',
     'access arguments' => array('access tmgmt ui'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
   );
-  $items['admin/tmgmt/jobs/%tmgmt_job'] = array(
+  $items['admin/config/regional/tmgmt/jobs/%tmgmt_job'] = array(
     'title' => 'Job',
     'page callback' => 'tmgmt_job_view',
     'page arguments' => array(3),
-    'access arguments' => array('administer tmgmt'),
+    'access arguments' => array('access tmgmt tmgmt'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
   );
-  $items['admin/tmgmt/checkout/%tmgmt_ui_job_multiple'] = array(
+  $items['admin/config/regional/tmgmt/checkout/%tmgmt_ui_job_multiple'] = array(
     'title' => 'Checkout job',
     'page callback' => 'tmgmt_ui_checkout_wizard',
     'page arguments' => array(3),
     'access arguments' => array('access tmgmt ui'),
     'file' => 'includes/tmgmt_ui.pages.inc',
   );
-  $items['admin/tmgmt/add-item/%/%/%/%'] = array(
+  $items['admin/config/regional/tmgmt/add-item/%/%/%/%'] = array(
     'title' => 'Create a Job',
     'page callback' => 'tmgmt_job_add_item',
     'page arguments' => array(3, 4, 5, 6),
@@ -64,7 +64,7 @@ function tmgmt_ui_menu() {
     'file' => 'includes/tmgmt_ui.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['admin/tmgmt/add-item/%/%/%/%/%tmgmt_job'] = array(
+  $items['admin/config/regional/tmgmt/add-item/%/%/%/%/%tmgmt_job'] = array(
     'title' => 'Add to existing Job',
     'page callback' => 'tmgmt_job_add_item',
     'page arguments' => array(3, 4, 5, 6, 7),
@@ -72,42 +72,13 @@ function tmgmt_ui_menu() {
     'file' => 'includes/tmgmt_ui.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  // Add source overview pages.
-  foreach (tmgmt_source_plugin_info() as $plugin_type => $info) {
-    $plugin = tmgmt_source_plugin_controller($plugin_type);
-    $items = array_merge($items, $plugin->hook_menu());
-  }
   // If we have any menu item then lets add root item also.
   $items['admin/config/regional/tmgmt'] = array(
     'title' => 'Translation Management',
     'description' => 'Translation Management Suite.',
     'access arguments' => array('administer tmgmt'),
   );
-  $items['admin/config/regional/tmgmt/plugins'] = array(
-    'title' => 'Plugin settings',
-    'description' => 'Configuration options for the available source and translator plugins.',
-    'access arguments' => array('administer tmgmt'),
-  );
-  // Add settings menu item for each plugin that is using settings form.
-  foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
-    $items += tmgmt_translator_plugin_controller($plugin)->hook_menu();
-  }
   return $items;
-}
-
-/**
- * Implements hook_forms().
- */
-function tmgmt_ui_forms() {
-  $info = array();
-  // Give each translator settings form a unique form id.
-  foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
-    $info['tmgmt_' . $plugin . '_translator_settings_form'] = array(
-      'callback' => 'tmgmt_translator_settings_form',
-      'wrapper_callback' => 'tmgmt_translator_settings_form_defaults',
-    );
-  }
-  return $info;
 }
 
 /**

@@ -62,17 +62,6 @@ define('TMTGT_TRANSLATOR_NOT_AVAILABLE', 1);
 define('TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE', 2);
 
 /**
- * Implements hook_permission().
- */
-function tmgmt_permission() {
-  return array(
-    'administer tmgmt' => array(
-      'title' => t('Administer Translation Management'),
-    ),
-  );
-}
-
-/**
  * Implements hook_entity_info().
  */
 function tmgmt_entity_info() {
@@ -135,6 +124,17 @@ function tmgmt_entity_info() {
     ),
   );
   return $info;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function tmgmt_permission() {
+  return array(
+    'administer tmgmt' => array(
+      'title' => t('Administer Translation Management'),
+    ),
+  );
 }
 /**
  * @addtogroup tmgmt_job

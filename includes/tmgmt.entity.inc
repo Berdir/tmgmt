@@ -70,6 +70,20 @@ class TMGMTTranslator extends Entity {
     return tmgmt_translator_plugin_controller($this->translator_plugin);
   }
 
+  /**
+   * Retrieves a setting
+   * @param $name
+   *   The name of the setting.
+   * @param $default
+   *   (Optional) The default value to return in case the setting value is not
+   *   set. Defaults to NULL.
+   * @return
+   *   The setting value or $default if the setting value is not set.
+   */
+  public function getSetting($name, $default = NULL) {
+    return isset($this->settings[$name]) ? $this->settings[$name] : $default;
+  }
+
 }
 
 /**
@@ -326,7 +340,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Overrides Entity::uri().
    */
   public function uri() {
-    return array('path' => 'admin/tmgmt/jobs/' . $this->tjid);
+    return array('path' => 'admin/config/regional/tmgmt/jobs/' . $this->tjid);
   }
 
   /**

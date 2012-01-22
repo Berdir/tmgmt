@@ -56,7 +56,7 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  function settingsForm($form, &$form_state) {
+  function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['sample_textfield'] = array(
       '#type' => 'textfield',
       '#title' => t('Sample API key'),
@@ -66,6 +66,7 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
     $form['sample_checkboxes'] = array(
       '#type' => 'checkboxes',
       '#title' => t('These are just some sample checkboxes.'),
+      '#default_value' => isset($form_state['values']['settings']['sample_checkboxes']) ? $form_state['values']['settings']['sample_checkboxes'] : $translator->getSetting('sample_checkboxes'),
       '#options' => array(
         1 => t('Option one'),
         2 => t('Option two'),

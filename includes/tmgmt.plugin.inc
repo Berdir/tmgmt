@@ -6,15 +6,6 @@
  */
 
 /**
- * Prefix for source overview pages.
- *
- * @todo
- * Maybe move into the ui.
- *
- */
-define('TMGMT_SOURCE_OVERVIEW_TAB_PATH', 'admin/tmgmt-overview');
-
-/**
  * Interface for source plugin controllers.
  *
  * @ingroup tmgmt_source
@@ -53,13 +44,6 @@ interface TMGMTSourcePluginControllerInterface {
    */
   public function getUri(TMGMTJobItem $job_item);
 
-  /**
-   * Implements hook_menu().
-   *
-   * @return array
-   *   An array of menu items that this translator plugin provides.
-   */
-  public function hook_menu();
 }
 
 /**
@@ -94,15 +78,6 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
     return array('path' => 'default/' . $job_item->item_id);
   }
 
-  /**
-   * Implements hook_menu().
-   *
-   * @return array
-   *   An array of menu items that this translator plugin provides.
-   */
-  public function hook_menu() {
-    return array();
-  }
 }
 
 /**
@@ -177,20 +152,12 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function cancelTranslation(TMGMTJob $job);
 
   /**
-   * Implements hook_menu().
-   *
-   * @return array
-   *   An array of menu items that this translator plugin provides.
-   */
-  public function hook_menu();
-
-  /**
    * A plugin can implement this method if it needs a settings form.
    *
    * This is not actually an interface method and that is why it is commented,
    * but we leave it here for API documentation.
    */
-  public function settingsForm($form, &$form_state);
+  public function settingsForm($form, &$form_state, TMGMTTranslator $translator);
 
   /**
    * A plugin can implement this method if it needs a job settings form.
@@ -267,26 +234,9 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::hook_menu().
-   */
-  public function hook_menu() {
-    $items = array();
-    if (method_exists($this, 'settingsForm')) {
-      $items['admin/config/regional/tmgmt/plugins/' . $this->pluginType] = array(
-        'title' => $this->pluginInfo['label'],
-        'description' => $this->pluginInfo['description'],
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('tmgmt_' . $this->pluginType . '_translator_settings_form', $this->pluginType),
-        'access arguments' => array('administer tmgmt'),
-      );
-    }
-    return $items;
-  }
-
-  /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  public function settingsForm($form, &$form_state) {
+  public function settingsForm($form, &$form_state, TMGMTTRanslator $translator) {
     return array();
   }
 
