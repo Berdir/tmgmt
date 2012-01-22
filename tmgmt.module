@@ -164,6 +164,7 @@ function tmgmt_entity_info() {
   );
   return $info;
 }
+
 /**
  * Implements hook_permission().
  */
@@ -548,20 +549,6 @@ function tmgmt_translator_check(TMGMTTranslator $translator, $source_language, $
   else {
     return TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE;
   }
-}
-
-/**
- * Populate translation plugin settings form with default values.
- *
- * @param array $form
- * @param array $form_state
- * @param string $plugin
- *   Translation plugin name.
- * @return array
- *   Form.
- */
-function tmgmt_translator_settings_form_defaults($form, &$form_state, $plugin) {
-  return system_settings_form($form, $form_state);
 }
 
 /**
