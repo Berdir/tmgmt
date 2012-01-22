@@ -115,10 +115,16 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
       $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
       $job_uri = $job->uri();
       $form['languages']['#options'][$langcode][2] = t('Job state: !state', array('!state' => l($wrapper->state->label(), $job_uri['path'])));
-      $form['languages'][$langcode]['#disabled'] = true;
+      $form['languages'][$langcode] = array(
+      	'#disabled' => TRUE,
+        '#type' => 'checkbox',
+      );
     }
     elseif($langcode == $node->language) {
-      $form['languages'][$langcode]['#disabled'] = true;
+      $form['languages'][$langcode] = array(
+      	'#disabled' => TRUE,
+        '#type' => 'checkbox',
+      );
     }
   }
   $form['controls'] = tmgmt_ui_simple_controls_element($form, $form_state);
