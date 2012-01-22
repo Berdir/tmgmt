@@ -158,14 +158,11 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
       continue;
     }
 
-    $text = $message->message;
-    if (is_array($message->variables)) {
-      $text = t($message->message, $message->variables);
-    }
+    $text = $message->getMessage();
     if ($message->type == 'error') {
       $had_error = TRUE;
     }
-    drupal_set_message($text, $message->type);
+    drupal_set_message(filter_xss($text), $message->type);
   }
 
   // redirect to job overview page, if no error happened.
