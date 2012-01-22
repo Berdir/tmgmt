@@ -89,6 +89,7 @@ function tmgmt_entity_info() {
     'entity keys' => array(
       'id' => 'tjid',
     ),
+    'views controller class' => 'TMGMTJobViewsController',
   );
   $info['tmgmt_job_item'] = array(
     'label' => t('Translation Management Job Item'),

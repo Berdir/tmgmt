@@ -279,6 +279,28 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['fields']['nothing']['hide_empty'] = 0;
   $handler->display->display_options['fields']['nothing']['empty_zero'] = 0;
   $handler->display->display_options['fields']['nothing']['hide_alter_empty'] = 0;
+  /* Field: Translation Management Job: Actions */
+  $handler->display->display_options['fields']['actions']['id'] = 'actions';
+  $handler->display->display_options['fields']['actions']['table'] = 'tmgmt_job';
+  $handler->display->display_options['fields']['actions']['field'] = 'actions';
+  $handler->display->display_options['fields']['actions']['relationship'] = 'tjid';
+  $handler->display->display_options['fields']['actions']['alter']['alter_text'] = 0;
+  $handler->display->display_options['fields']['actions']['alter']['make_link'] = 0;
+  $handler->display->display_options['fields']['actions']['alter']['absolute'] = 0;
+  $handler->display->display_options['fields']['actions']['alter']['external'] = 0;
+  $handler->display->display_options['fields']['actions']['alter']['replace_spaces'] = 0;
+  $handler->display->display_options['fields']['actions']['alter']['trim_whitespace'] = 0;
+  $handler->display->display_options['fields']['actions']['alter']['nl2br'] = 0;
+  $handler->display->display_options['fields']['actions']['alter']['word_boundary'] = 1;
+  $handler->display->display_options['fields']['actions']['alter']['ellipsis'] = 1;
+  $handler->display->display_options['fields']['actions']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['actions']['alter']['trim'] = 0;
+  $handler->display->display_options['fields']['actions']['alter']['html'] = 0;
+  $handler->display->display_options['fields']['actions']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['actions']['element_default_classes'] = 1;
+  $handler->display->display_options['fields']['actions']['hide_empty'] = 0;
+  $handler->display->display_options['fields']['actions']['empty_zero'] = 0;
+  $handler->display->display_options['fields']['actions']['hide_alter_empty'] = 1;
   /* Contextual filter: Translation Management Job Item: Item_id */
   $handler->display->display_options['arguments']['item_id']['id'] = 'item_id';
   $handler->display->display_options['arguments']['item_id']['table'] = 'tmgmt_job_item';
@@ -327,6 +349,7 @@ function tmgmt_node_ui_views_default_views() {
     t('No actions avalible yet.'),
     t('All'),
   );
+
 
   $views[$view->name] = $view;
 

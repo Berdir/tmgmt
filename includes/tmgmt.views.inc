@@ -20,5 +20,23 @@ class TMGMTJobItemViewsController extends EntityDefaultViewsController {
     );
     return $data;
   }
+}
+
+/**
+ * Views controller class for the tmgmt_job entity.
+ */
+class TMGMTJobViewsController extends EntityDefaultViewsController {
+  public function views_data() {
+    $data = parent::views_data();
+    $data['tmgmt_job']['actions'] = array(
+      'title' => t('Actions'),
+      'help' => t('Displays a list of options which are available for a job.'),
+      'real field' => 'tjid',
+      'field' => array(
+        'handler' => 'tmgmt_handler_field_tmgmt_job_actions',
+      ),
+    );
+    return $data;
+  }
 
 }
