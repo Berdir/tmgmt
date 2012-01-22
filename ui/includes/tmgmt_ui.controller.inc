@@ -47,6 +47,25 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
     return $form;
   }
 
+  /**
+   * Overrides EntityDefaultUIController::overviewFormSubmit().
+   */
+  public function overviewFormSubmit($form, &$form_state) {
+    // Update image effect weights.
+    if (!empty($form_state['values']['translators'])) {
+      $translators = tmgmt_translator_load_multiple(array_keys($form_state['values']['translators']));
+      foreach ($form_state['values']['translators'] as $key => $item) {
+        if (isset($translators[$key])) {
+          $translators[$key]->weight = $item['weight'];
+          entity_save($this->entityType, $translators[$key]);
+        }
+      }
+    }
+  }
+
+  /**
+   * Helper method for building a row in the overview form.
+   */
   protected function overviewFormRow($form, &$form_state, TMGMTTranslator $entity, $id) {
     $uri = entity_uri($this->entityType, $entity);
     $form['#weight'] = isset($form_state['input']['translators']) ? $form_state['input']['translators'][$id]['weight'] : NULL;
@@ -75,6 +94,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
     $form['weight'] = array(
       '#type' => 'weight',
       '#delta' => 30,
+      '#default_value' => $entity->weight,
     );
     // Add operations depending on the status.
     if (entity_has_status($this->entityType, $entity, ENTITY_FIXED)) {
