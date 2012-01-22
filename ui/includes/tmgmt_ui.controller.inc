@@ -14,6 +14,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
     $items = parent::hook_menu();
     // We don't need the entire entity label here.
     $items[$this->path]['title'] = 'Translators';
+    $items[$this->path]['type'] = MENU_LOCAL_TASK;
     $items[$this->path . '/add']['title'] = 'Add Translator';
     unset($items[$this->path . '/add']['title callback']);
     unset($items[$this->path . '/add']['title arguments']);

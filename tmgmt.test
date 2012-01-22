@@ -357,15 +357,15 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->drupalLogin($user);
 
     // Add a first item to the job. This will auto-create the job.
-    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
+    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
     // Check checkout form.
     $this->assertText('test_source: test :1');
 
     // Add two more job items.
-    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/2,3/' . $tjid);
+    $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/2,3/' . $tjid);
 
     // Check checkout form.
     $this->assertText('test_source: test :1');
@@ -373,7 +373,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText('test_source: test :3');
 
     // Attempt to add item from a different source language.
-    $this->drupalGet('admin/tmgmt/add-item/en/test_source/test/4/' . $tjid);
+    $this->drupalGet('admin/config/regional/tmgmt/add-item/en/test_source/test/4/' . $tjid);
 
     // Check checkout form.
     $this->assertText(t('Checkout job'));
@@ -415,8 +415,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Translation Management'));
 
     // Another job.
-    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
+    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
@@ -433,8 +433,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertTrue($job->isSubmitted());
 
     // Another job.
-    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
+    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
@@ -451,8 +451,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertTrue($job->isRejected());
 
     // Another job.
-    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
+    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
@@ -472,8 +472,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Checkout job'));
 
     // Another job.
-    $this->drupalGet('admin/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
+    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
@@ -491,7 +491,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertTrue($job->isPrepared());
 
     // Attempt to add items to a non-existing job.
-    $this->drupalGet('admin/tmgmt/add-item/en/test_source/test/5/' . ($tjid + 1));
+    $this->drupalGet('admin/config/regional/tmgmt/add-item/en/test_source/test/5/' . ($tjid + 1));
     $this->assertResponse(404);
   }
 }
