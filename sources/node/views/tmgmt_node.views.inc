@@ -97,10 +97,20 @@ function tmgmt_node_views_data_alter(&$data) {
   $data['node']['translation_language_status'] = array(
     'title' => t('All translation languages'),
     'help' => t('Display all target lanuages.'),
+    'real field' => 'tnid',
     'field' => array(
       'handler' => 'tmgmt_node_handler_field_translation_language_status',
     ),
   );
+
+  $data['node']['translation_language_status_single'] = array(
+    'title' => t('All translation languages (single)'),
+    'help' => t('Don\' use this in the ui.'),
+    'field' => array(
+      'handler' => 'tmgmt_node_handler_field_translation_language_status_single',
+    ),
+  );
+
 
   $data['node']['tmgmt_translatable_types'] = array(
     'title' => t('Translatable types'),
