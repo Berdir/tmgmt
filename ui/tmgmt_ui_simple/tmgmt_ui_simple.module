@@ -170,7 +170,7 @@ function tmgmt_ui_simple_node_translate_add_to_cart($form, &$form_state) {
     foreach ($languages as $langcode) {
       $job = tmgmt_job_match_item($source_language, $langcode);
       $job->setState(TMGMT_JOB_STATE_NEW);
-      $job->addItem('node', 'node', $node->nid);
+      $job->addItem('node', 'node', $node->vid);
       $job->save();
     }
   }

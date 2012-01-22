@@ -159,7 +159,6 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['fields']['state']['hide_empty'] = 0;
   $handler->display->display_options['fields']['state']['empty_zero'] = 0;
   $handler->display->display_options['fields']['state']['hide_alter_empty'] = 1;
-  $handler->display->display_options['fields']['state']['format_plural'] = 0;
   /* Field: Translation Management Job: Translator */
   $handler->display->display_options['fields']['translator']['id'] = 'translator';
   $handler->display->display_options['fields']['translator']['table'] = 'tmgmt_job';
@@ -280,18 +279,31 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['fields']['nothing']['hide_empty'] = 0;
   $handler->display->display_options['fields']['nothing']['empty_zero'] = 0;
   $handler->display->display_options['fields']['nothing']['hide_alter_empty'] = 0;
-  /* Contextual filter: Content translation: Translation set node ID */
-  $handler->display->display_options['arguments']['tnid']['id'] = 'tnid';
-  $handler->display->display_options['arguments']['tnid']['table'] = 'node';
-  $handler->display->display_options['arguments']['tnid']['field'] = 'tnid';
-  $handler->display->display_options['arguments']['tnid']['relationship'] = 'job_item_to_node';
-  $handler->display->display_options['arguments']['tnid']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['tnid']['default_argument_skip_url'] = 0;
-  $handler->display->display_options['arguments']['tnid']['summary']['number_of_records'] = '0';
-  $handler->display->display_options['arguments']['tnid']['summary']['format'] = 'default_summary';
-  $handler->display->display_options['arguments']['tnid']['summary_options']['items_per_page'] = '25';
-  $handler->display->display_options['arguments']['tnid']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['tnid']['not'] = 0;
+  /* Contextual filter: Translation Management Job Item: Item_id */
+  $handler->display->display_options['arguments']['item_id']['id'] = 'item_id';
+  $handler->display->display_options['arguments']['item_id']['table'] = 'tmgmt_job_item';
+  $handler->display->display_options['arguments']['item_id']['field'] = 'item_id';
+  $handler->display->display_options['arguments']['item_id']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['item_id']['default_argument_skip_url'] = 0;
+  $handler->display->display_options['arguments']['item_id']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['item_id']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['item_id']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['item_id']['glossary'] = 0;
+  $handler->display->display_options['arguments']['item_id']['limit'] = '0';
+  $handler->display->display_options['arguments']['item_id']['transform_dash'] = 0;
+  $handler->display->display_options['arguments']['item_id']['break_phrase'] = 0;
+  /* Filter criterion: Translation Management Job Item: Item_type */
+  $handler->display->display_options['filters']['item_type']['id'] = 'item_type';
+  $handler->display->display_options['filters']['item_type']['table'] = 'tmgmt_job_item';
+  $handler->display->display_options['filters']['item_type']['field'] = 'item_type';
+  $handler->display->display_options['filters']['item_type']['value'] = 'node';
+  /* Filter criterion: Translation Management Job Item: Source_plugin */
+  $handler->display->display_options['filters']['source_plugin']['id'] = 'source_plugin';
+  $handler->display->display_options['filters']['source_plugin']['table'] = 'tmgmt_job_item';
+  $handler->display->display_options['filters']['source_plugin']['field'] = 'source_plugin';
+  $handler->display->display_options['filters']['source_plugin']['value'] = array(
+    'node' => 'node',
+  );
   $translatables['job_items_current_node'] = array(
     t('Master'),
     t('more'),
@@ -307,7 +319,7 @@ function tmgmt_node_ui_views_default_views() {
     t(','),
     t('Job state'),
     t('Translation service'),
-    t('Sourcelanguage'),
+    t('Source language'),
     t('Destination language'),
     t('Job created'),
     t('Changed'),
