@@ -121,11 +121,11 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
         $form['operations']['delete'] = array(
           '#type' => 'link',
           '#title' => t('delete'),
-          '#href' => $this->path . '/manage/' . $id . '/deleted',
+          '#href' => $this->path . '/manage/' . $id . '/delete',
           '#options' => array('query' => drupal_get_destination()),
         );
       }
-      elseif (entity_has_status($this->entityType, $translator, ENTITY_OVERRIDDEN)) {
+      elseif (entity_has_status($this->entityType, $entity, ENTITY_OVERRIDDEN)) {
         $form['operations']['revert'] = array(
           '#type' => 'link',
           '#title' => t('revert'),
