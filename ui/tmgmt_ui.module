@@ -45,7 +45,7 @@ function tmgmt_ui_menu() {
     'title' => 'Job',
     'page callback' => 'tmgmt_job_view',
     'page arguments' => array(3),
-    'access arguments' => array('access tmgmt tmgmt'),
+    'access arguments' => array('administer tmgmt'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
   );
@@ -78,7 +78,27 @@ function tmgmt_ui_menu() {
     'description' => 'Translation Management Suite.',
     'access arguments' => array('administer tmgmt'),
   );
+  $items['admin/config/regional/tmgmt/plugins'] = array(
+    'title' => 'Plugin settings',
+    'description' => 'Configuration options for the available source and translator plugins.',
+    'access arguments' => array('administer tmgmt'),
+  );
   return $items;
+}
+
+/**
+ * Implements hook_forms().
+ */
+function tmgmt_ui_forms() {
+  $info = array();
+  // Give each translator settings form a unique form id.
+  foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
+    $info['tmgmt_' . $plugin . '_translator_settings_form'] = array(
+      'callback' => 'tmgmt_translator_settings_form',
+      'wrapper_callback' => 'tmgmt_translator_settings_form_defaults',
+    );
+  }
+  return $info;
 }
 
 /**

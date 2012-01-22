@@ -123,12 +123,22 @@ interface TMGMTTranslatorPluginControllerInterface {
    * Returns all available target languages that are supported by this service
    * when given a source language.
    *
+   * @param TMGMTTranslator $translator
+   *   The translator entity.
    * @param $source_language
    *   The source language.
    * @return array
    *   An array of languages in ISO format.
    */
-  public function getSupportedTargetLanguages($source_language);
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language);
+
+  /**
+   * Returns all languages that are supported by this service.
+   *
+   * @return array
+   *   An array of languages in ISO format.
+   */
+  public function getSupportedLanguages();
 
   /**
    * @abstract
@@ -201,9 +211,9 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
    */
-  public function canTranslate(TMGMTJob $job) {
+  public function canTranslate(TMGMTTranslator $translator, TMGMTJob $job) {
     // The job is only translatable if the translator is available too.
-    if ($this->isAvailable() && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($job->source_language))) {
+    if ($this->isAvailable() && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($translator, $job->source_language))) {
       // We can only translate this job if the target language of the job is in
       // one of the supported languages.
       return TRUE;
@@ -217,6 +227,24 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   public function cancelTranslation(TMGMTJob $job) {
     // Assume that we can cancel a translation job at any time.
     return TRUE;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   */
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
+    $languages = $this->getSupportedLanguages();
+    unset($languages[$source_language]);
+    return $languages;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
+   */
+  public function getSupportedLanguages(TMGMTTranslator $translator) {
+    $languages = entity_metadata_language_list();
+    unset($languages[LANGUAGE_NONE], $languages[$source_language]);
+    return drupal_map_assoc(array_keys($languages));
   }
 
   /**

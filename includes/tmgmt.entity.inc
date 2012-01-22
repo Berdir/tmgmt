@@ -71,6 +71,16 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
+   * Returns the supported target languages for this translator.
+   *
+   * @return array
+   *  An array of supported target languages in ISO format.
+   */
+  public function getSupportedTargetLanguages($source_language) {
+    return $this->getTranslatorController()->getSupportedTargetLanguages($this, $source_language);
+  }
+
+  /**
    * Retrieves a setting
    * @param $name
    *   The name of the setting.
@@ -323,7 +333,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Overrides Entity::label().
    */
   public function label() {
-
     if (!empty($this->label)) {
       return $this->label;
     }
@@ -524,8 +533,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     return $this->getAttachedEntities('tmgmt_job_message');
   }
 
-
-
   /**
    * Returns all job messages attached to this job with timestamp newer than $time.
    *
@@ -567,14 +574,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns the translator plugin for this job.
+   * Returns the translator for this job.
    *
-   * @return TMGMTTranslatorPluginControllerInterface
-   *   The translator plugin controller or NULL if it hasn't been defined yet.
+   * @return TMGMTTranslator
+   *   The translator entity or NULL if it hasn't been defined yet.
    */
-  public function getTranslatorController() {
+  public function getTranslator() {
     if (isset($this->translator)) {
-      return tmgmt_translator_plugin_controller($this->translator);
+      return tmgmt_translator_load_by_name($this->translator);
     }
   }
 

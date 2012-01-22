@@ -10,31 +10,22 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
   /**
    * It can 'translate' any job
    */
-  function canTranslate(TMGMTJob $job) {
+  public function canTranslate(TMGMTJob $job) {
     return TRUE;
   }
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
-  function requestTranslation(TMGMTJob $job) {
+  public function requestTranslation(TMGMTJob $job) {
     $job->addTranslatedData($job->getSourceData());
     $job->needsReview('Dummy translation completed.');
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
-   */
-  function getSupportedTargetLanguages($source_language) {
-    $languages = entity_metadata_language_list();
-    unset($languages[LANGUAGE_NONE], $languages[$source_language]);
-    return drupal_map_assoc(array_keys($languages));
-  }
-
-  /**
    * Implements TMGMTTranslatorPluginControllerInterface::jobSettingsForm().
    */
-  function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     $form['sample_checkboxes'] = array(
       '#type' => 'checkboxes',
       '#title' => t('These are just some sample checkboxes.'),
@@ -56,7 +47,7 @@ class TMGMTDummyTranslator extends TMGMTDefaultTranslatorPluginController {
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['sample_textfield'] = array(
       '#type' => 'textfield',
       '#title' => t('Sample API key'),

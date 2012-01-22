@@ -191,7 +191,7 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
  * target language by user. If no job exists, a new job object will be created.
  *
  * @return TMGMTJob
- *  The job entity.
+ *   The job entity.
  */
 function tmgmt_job_match_item($source_language, $target_language, $account = NULL) {
   $account = isset($account) ? $account : $GLOBALS['user'];
@@ -456,12 +456,11 @@ function tmgmt_translator_filtered_by_language($plugins, $source_language, $sele
   return $transator_plugins;
 }
 
-function tmgmt_translator_check($plugin, $source_language, $selected_target_language) {
-  $supported_languages[$plugin] = tmgmt_translator_plugin_controller($plugin)->getSupportedTargetLanguages($source_language);
-  if (!tmgmt_translator_plugin_controller($plugin)->isAvailable()) {
+function tmgmt_translator_check(TMGMTTranslator $translator, $source_language, $selected_target_language) {
+  if (!$translator->isAvailable()) {
     return TMTGT_TRANSLATOR_NOT_AVAILABLE;
   }
-  elseif (isset($supported_languages[$plugin][$selected_target_language])) {
+  elseif (array_key_exists($selected_target_language, $translator->getSupportedTargetLanguages($source_language))) {
     return TMGMT_TRANSLATOR_AVAILABLE;
   }
   else {
@@ -483,23 +482,6 @@ function tmgmt_translator_settings_form_defaults($form, &$form_state, $plugin) {
   return system_settings_form($form, $form_state);
 }
 
-/**
- * Get plugin translation settings form.
- *
- * @param array $form
- * @param array $form_state
- * @param string $plugin
- *   Translation plugin name.
- */
-function tmgmt_translator_settings_form($form, &$form_state, $plugin) {
-  $plugin_controller = tmgmt_translator_plugin_controller($plugin);
-  $form = $plugin_controller->settingsForm($form, $form_state);
-  foreach (element_children($form) as $key) {
-    $form['tmgmt_' . $plugin . '_' . $key] = $form[$key];
-    unset($form[$key]);
-  }
-  return $form;
-}
 /**
  * @} End of "addtogroup tmgmt_translator".
  */

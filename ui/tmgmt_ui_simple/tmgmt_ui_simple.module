@@ -14,6 +14,7 @@ function tmgmt_ui_simple_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tmgmt_ui_simple_settings_form'),
     'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
   );
   $items['translate/multiple/node'] = array(
     'page callback' => 'tmgmt_ui_simple_page_translate_node_multiple',
