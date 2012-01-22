@@ -21,7 +21,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_node', 'tmgmt_test', 'translation', 'tmgmt_dummy'));
+    parent::setUp(array('tmgmt_node', 'translation'));
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
     variable_set('language_content_type_page', TRANSLATION_ENABLED);
   }
