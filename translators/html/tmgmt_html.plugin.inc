@@ -80,14 +80,14 @@ class TMGMTHTMLTranslator extends TMGMTDefaultTranslatorPluginController {
   /**
    * The settings form.
    */
-  public function settingsForm($form, &$form_state) {
+  public function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['export_format'] = array(
       '#type' => 'radios',
       '#title' => t('Export to'),
       '#options' => array(
           'html' => t('HTML'),
           'xliff' => t('XLIFF')),
-      '#default_value' => $this->getOption('export_format'),
+      '#default_value' => $translator->getSetting('export_format'),
       '#description' => t('Please select the format you want to export data.'),
     );
     return $form;

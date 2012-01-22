@@ -1,45 +1,85 @@
 <?php
+
 /**
- * A new translation job, can not yet be submitted.
+ * @file
+ * Main module file for the Translation Management module.
+ */
+/**
+ * @addtogroup tmgmt_job
+ * @{
+ */
+
+/**
+ * A new translation job.
+ *
+ * In the default user interface, jobs with this state are so called cart jobs.
+ * Each user gets his cart jobs listed in a block and can check them out.
  */
 define('TMGMT_JOB_STATE_NEW', 0);
 
 /**
  * A prepared translation job, not yet submitted to a translator.
+ *
+ * Before a job can be submitted, he needs to be marked as prepared. This is
+ * handled automatically be the default checkout form.
  */
 define('TMGMT_JOB_STATE_PREPARED', 1);
 
 /**
  * A translation job that has been submitted to the translator.
+ *
+ * Translator plugins are responsible for setting this state in their
+ * implementation of
+ * TMGMTTranslatorPluginControllerInterface::requestTranslation().
  */
 define('TMGMT_JOB_STATE_SUBMITTED', 2);
 
 /**
  * A translation job that has been rejected by the translator.
  *
- * The response contains information why the job was rejected.
+ * The translator plugin can use this state if the job has been actively
+ * rejected. However, this should be avoided by doing the necessary checks
+ * in the canTranslate() method and in the job configuration settings.
+ *
+ * A rejected job can be re-submitted.
  */
 define('TMGMT_JOB_STATE_REJECTED', 3);
 
 /**
  * The translation job was translated and needs to be reviewed.
+ *
+ * This state needs to be set by the translator plugin once the job has been
+ * completely translated.
  */
 define('TMGMT_JOB_STATE_REVIEW', 4);
 
 /**
  * The translation has been accepted and the job is finished.
+ *
+ * Once the job has been accepted, the source plugins are called to update their
+ * sources with the translated data.
  */
 define('TMGMT_JOB_STATE_ACCEPTED', 5);
 
 /**
  * The translation job has been cancelled.
+ *
+ * A job can be cancelled at any time. If he is currently in the submitted state
+ * the translator plugin is asked if this translation can be cancelled and needs
+ * to confirm it by returning TRUE in cancelTranslation().
  */
 define('TMGMT_JOB_STATE_CANCELLED', 6);
 
 /**
  * The translation job has been finished.
+ *
+ * Not yet used.
  */
 define('TMGMT_JOB_STATE_FINISHED', 7);
+
+/**
+ * @} End of "addtogroup tmgmt_job".
+ */
 
 /**
  * String used to delimit flattened array keys.
@@ -62,17 +102,6 @@ define('TMTGT_TRANSLATOR_NOT_AVAILABLE', 1);
 define('TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE', 2);
 
 /**
- * Implements hook_permission().
- */
-function tmgmt_permission() {
-  return array(
-    'administer tmgmt' => array(
-      'title' => t('Administer Translation Management'),
-    ),
-  );
-}
-
-/**
  * Implements hook_entity_info().
  */
 function tmgmt_entity_info() {
@@ -89,6 +118,7 @@ function tmgmt_entity_info() {
     'entity keys' => array(
       'id' => 'tjid',
     ),
+    'views controller class' => 'TMGMTJobViewsController',
   );
   $info['tmgmt_job_item'] = array(
     'label' => t('Translation Management Job Item'),
@@ -136,6 +166,51 @@ function tmgmt_entity_info() {
   );
   return $info;
 }
+
+/**
+ * Implements hook_permission().
+ */
+function tmgmt_permission() {
+  return array(
+    'administer tmgmt' => array(
+      'title' => t('Administer Translation Management'),
+    ),
+  );
+}
+
+/**
+ * Returns an array of languages that are available for translation.
+ *
+ * @return array
+ *   An array of languages in ISO format.
+ */
+function tmgmt_available_languages($exclude = array()) {
+  $languages = entity_metadata_language_list();
+  // Remove LANGUAGE_NONE and the language in $exclude from the list of
+  // available languages and then apply a filter that only leaves the supported
+  // target languages on the list.
+  unset($languages[LANGUAGE_NONE]);
+  foreach ($exclude as $item) {
+    unset($languages[$item]);
+  }
+  return $languages;
+}
+
+/**
+ * Returns the label of a language.
+ *
+ * @param $language
+ *   A language in ISO format.
+ * @return string
+ *   The label of the language.
+ */
+function tmgmt_language_label($language) {
+  $languages = entity_metadata_language_list();
+  if (isset($languages[$language])) {
+    return $languages[$language];
+  }
+}
+
 /**
  * @addtogroup tmgmt_job
  * @{
@@ -144,16 +219,16 @@ function tmgmt_entity_info() {
 /**
  * Loads a translation job.
  */
-function tmgmt_job_load($tjid, $reset = FALSE) {
-  $jobs = tmgmt_job_load_multiple(array($tjid), array(), $reset);
+function tmgmt_job_load($tjid) {
+  $jobs = tmgmt_job_load_multiple(array($tjid), array());
   return $jobs ? reset($jobs) : FALSE;
 }
 
 /**
  * Loads translation jobs.
  */
-function tmgmt_job_load_multiple(array $tjids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('tmgmt_job', $tjids, $conditions, $reset);
+function tmgmt_job_load_multiple(array $tjids = array(), $conditions = array()) {
+  return entity_load('tmgmt_job', $tjids, $conditions);
 }
 
 /**
@@ -181,26 +256,21 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
 }
 
 /**
- * This function will return a job wich matches the requested source- and target
- * language by user. If no job exists, a new job object will be created.
+ * This function will return a job which matches the requested source- and
+ * target language by user. If no job exists, a new job object will be created.
  *
  * @return TMGMTJob
- *  The job entity.
+ *   The job entity.
  */
 function tmgmt_job_match_item($source_language, $target_language, $account = NULL) {
-  if (!$account) {
-    global $user;
-    $account = $user;
-  }
-  $conditions = array('source_language' => $source_language, 'target_language' => $target_language, 'uid' => $account->uid, 'state' => 0);
-
+  $account = isset($account) ? $account : $GLOBALS['user'];
   $query = new EntityFieldQuery();
-  $query->entityCondition('entity_type', 'tmgmt_job');
-  $query->propertyCondition('source_language', $source_language);
-  $query->propertyCondition('target_language', $target_language);
-  $query->propertyCondition('uid', $account->uid);
-  $query->propertyCondition('state', 0);
-  $result = $query->execute();
+  $result = $query->entityCondition('entity_type', 'tmgmt_job')
+    ->propertyCondition('source_language', $source_language)
+    ->propertyCondition('target_language', $target_language)
+    ->propertyCondition('uid', $account->uid)
+    ->propertyCondition('state', TMGMT_JOB_STATE_NEW)
+    ->execute();
   if (!empty($result['tmgmt_job'])) {
     return tmgmt_job_load(reset($result['tmgmt_job'])->tjid);
   }
@@ -247,9 +317,6 @@ function tmgmt_job_states() {
     TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
   );
 }
-/**
- * @} End of "addtogroup tmgmt_job".
- */
 
 /**
  * Loads a translation job item.
@@ -257,16 +324,39 @@ function tmgmt_job_states() {
  * @return TMGMTJobItem
  *   The loaded job item.
  */
-function tmgmt_job_item_load($tjiid, $reset = FALSE) {
-  $jobs = tmgmt_job_item_load_multiple(array($tjiid), array(), $reset);
+function tmgmt_job_item_load($tjiid) {
+  $jobs = tmgmt_job_item_load_multiple(array($tjiid), array());
   return $jobs ? reset($jobs) : FALSE;
+}
+
+/**
+ * Loads a translation job item per source.
+ *
+ * @return TMGMTJobItem
+ *   The loaded job item.
+ */
+function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id) {
+  $query = db_select('tmgmt_job_item', 'item');
+  $query->condition('source_plugin', $source_plugin, '=');
+  $query->condition('item_type', $item_type, '=');
+  $query->condition('item_id', $item_id, '=');
+  $query->join('tmgmt_job', 'job', 'job.tjid = item.tjid');
+  $query->fields('job', array('tjid'));
+  $query->orderBy('changed', 'DESC');
+  $query->range(0, 1);
+  $result = $query->execute();
+  if ($tjid = $result->fetchfield()) {
+    $job = tmgmt_job_load($tjid);
+    return $job;
+  }
+  return FALSE;
 }
 
 /**
  * Loads translation job items.
  */
-function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('tmgmt_job_item', $tjiids, $conditions, $reset);
+function tmgmt_job_item_load_multiple($tjiids = array(), $conditions = array()) {
+  return entity_load('tmgmt_job_item', $tjiids, $conditions);
 }
 
 /**
@@ -286,10 +376,10 @@ function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = arr
  */
 function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $values = array()) {
   return entity_create('tmgmt_job_item', array_merge($values, array(
-                    'source_plugin' => $source_plugin,
-                    'item_type' => $item_type,
-                    'item_id' => $item_id,
-                  )));
+    'source_plugin' => $source_plugin,
+    'item_type' => $item_type,
+    'item_id' => $item_id,
+  )));
 }
 
 /**
@@ -299,25 +389,19 @@ function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $valu
 function tmgmt_job_item_remove($tjiid) {
   return entity_delete('tmgmt_job_item', $tjiid);
 }
-
-/**
- * @addtogroup tmgmt_job_message
- * @{
- */
-
 /**
  * Loads a translation job message.
  */
-function tmgmt_job_message_load($tjmid, $reset = FALSE) {
-  $jobs = tmgmt_job_load_multiple(array($tjmid), array(), $reset);
+function tmgmt_job_message_load($tjmid) {
+  $jobs = tmgmt_job_load_multiple(array($tjmid));
   return $jobs ? reset($jobs) : FALSE;
 }
 
 /**
  * Loads translation job messages.
  */
-function tmgmt_job_message_load_multiple(array $tjmids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('tmgmt_job_message', $tjmids, $conditions, $reset);
+function tmgmt_job_message_load_multiple($tjmids = array(), $conditions = array()) {
+  return entity_load('tmgmt_job_message', $tjmids, $conditions);
 }
 
 /**
@@ -339,15 +423,17 @@ function tmgmt_job_message_load_multiple(array $tjmids = array(), $conditions = 
  */
 function tmgmt_job_message_create($status_before, $status_after, $message = '', $arguments = array(), $values = array()) {
   return entity_create('tmgmt_job_message', array_merge($values, array(
-                    'state_before' => $status_before,
-                    'state_after' => $status_after,
-                    'message' => $message,
-                    'arguments' => $arguments,
-                  )));
+    'state_before' => $status_before,
+    'state_after' => $status_after,
+    'message' => $message,
+    'arguments' => $arguments,
+  )));
 }
+
 /**
- * @} End of "addtogroup tmgmt_job_message".
+ * @} End of "addtogroup tmgmt_job".
  */
+
 /**
  * @addtogroup tmgmt_translator
  * @{
@@ -361,26 +447,18 @@ function tmgmt_translator_access($op, $translator = NULL, $account = NULL) {
 }
 
 /**
- * Loads a translator.
- */
-function tmgmt_translator_load($tid, $reset = FALSE) {
-  $translators = tmgmt_translator_load_multiple(array($tid), array(), $reset);
-  return $translators ? reset($translators) : FALSE;
-}
-
-/**
  * Loads a translator based on the name.
  */
-function tmgmt_translator_load_by_name($name, $reset = FALSE) {
-  $translators = tmgmt_translator_load_multiple(array(), array('name' => $name), $reset);
+function tmgmt_translator_load($name) {
+  $translators = entity_load_multiple_by_name('tmgmt_translator', array($name));
   return $translators ? reset($translators) : FALSE;
 }
 
 /**
  * Loads translation maps.
  */
-function tmgmt_translator_load_multiple(array $tids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('tmgmt_translator', $tids, $conditions, $reset);
+function tmgmt_translator_load_multiple($names = array(), $conditions = array()) {
+  return entity_load_multiple_by_name('tmgmt_translator', $names, $conditions);
 }
 
 /**
@@ -413,23 +491,8 @@ function tmgmt_translator_plugin_controller($plugin) {
  * @return array
  *   An array of the labels of all available plugins.
  */
-function tmgmt_translator_plugin_labels($available_only = FALSE) {
+function tmgmt_translator_plugin_labels() {
   return _tmgmt_plugin_labels('translator');
-}
-
-/**
- * Filters an array of translators and removes those that are not available.
- *
- * @param $plugin array
- */
-function tmgmt_translator_availability_filter($plugins) {
-  foreach ($plugins as $name => $label) {
-    $controller = tmgmt_translator_plugin_controller($name);
-    if (!$controller->isAvailable()) {
-      unset($plugins[$name]);
-    }
-  }
-  return $plugins;
 }
 
 /**
@@ -439,28 +502,34 @@ function tmgmt_translator_availability_filter($plugins) {
  *   (Optional)
  * @return array
  */
-function tmgmt_translator_filtered_by_language($plugins, $source_language, $selected_target_language) {
-  foreach ($plugins as $plugin => $label) {
-    switch (tmgmt_translator_check($plugin, $source_language, $selected_target_language)) {
+function tmgmt_translator_filtered_by_language($source_language, $selected_target_language) {
+  $translators = array();
+  foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
+    switch (tmgmt_translator_check($translator, $source_language, $selected_target_language)) {
       case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-        $transator_plugins[$plugin] = t('@label (not available)', array('@label' => $label['label']));
+        $translators[$translator->identifier()] = t('@label (not available)', array('@label' => $translator->label()));
         break;
       case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-        $transator_plugins[$plugin] = t('@label (not available for this language)', array('@label' => $label['label']));
+        $translators[$translator->identifier()] = t('@label (not available for this language)', array('@label' => $translator->label()));
         break;
       default:
-        $transator_plugins[$plugin] = $label['label'];
+        $translators[$translator->identifier()] = $translator->label();
     }
   }
-  return $transator_plugins;
+  return $translators;
 }
 
-function tmgmt_translator_check($plugin, $source_language, $selected_target_language) {
-  $supported_languages[$plugin] = tmgmt_translator_plugin_controller($plugin)->getSupportedTargetLanguages($source_language);
-  if (!tmgmt_translator_plugin_controller($plugin)->isAvailable()) {
+/**
+ * @param TMGMTTranslator $translator
+ * @param $source_language
+ * @param $selected_target_language
+ * @return int
+ */
+function tmgmt_translator_check(TMGMTTranslator $translator, $source_language, $selected_target_language) {
+  if (!$translator->isAvailable()) {
     return TMTGT_TRANSLATOR_NOT_AVAILABLE;
   }
-  elseif (isset($supported_languages[$plugin][$selected_target_language])) {
+  elseif (array_key_exists($selected_target_language, $translator->getSupportedTargetLanguages($source_language))) {
     return TMGMT_TRANSLATOR_AVAILABLE;
   }
   else {
@@ -482,23 +551,6 @@ function tmgmt_translator_settings_form_defaults($form, &$form_state, $plugin) {
   return system_settings_form($form, $form_state);
 }
 
-/**
- * Get plugin translation settings form.
- *
- * @param array $form
- * @param array $form_state
- * @param string $plugin
- *   Translation plugin name.
- */
-function tmgmt_translator_settings_form($form, &$form_state, $plugin) {
-  $plugin_controller = tmgmt_translator_plugin_controller($plugin);
-  $form = $plugin_controller->settingsForm($form, $form_state);
-  foreach (element_children($form) as $key) {
-    $form['tmgmt_' . $plugin . '_' . $key] = $form[$key];
-    unset($form[$key]);
-  }
-  return $form;
-}
 /**
  * @} End of "addtogroup tmgmt_translator".
  */

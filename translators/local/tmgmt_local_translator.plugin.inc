@@ -11,8 +11,9 @@ class TMGMTLocalTranslator extends TMGMTDefaultTranslatorPluginController {
    * It can 'translate' any job
    */
   function canTranslate(TMGMTJob $job) {
-    // @TODO Check whether we actually have a user that can handle this translation.
-    return TRUE;
+    // @TODO Performance wise, we should go through tmgmt which could have it cached.
+    $supported = $this->getSupportedTargetLanguages($job->source_language);
+    return isset($supported[$job->target_language]);
   }
 
   /**
@@ -27,9 +28,13 @@ class TMGMTLocalTranslator extends TMGMTDefaultTranslatorPluginController {
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   function getSupportedTargetLanguages($source_language) {
-    $languages = entity_metadata_language_list();
-    unset($languages[LANGUAGE_NONE], $languages[$source_language]);
-    return drupal_map_assoc(array_keys($languages));
+    $query = db_select('tmgmt_local_user', 'target')
+      ->fields('target', array('language'))
+      ->distinct();
+    $query->join('tmgmt_local_user', 'source', 'target.uid = source.uid');
+    $query->condition('source.language', $source_language);
+    $list = $query->execute()->fetchCol();
+    return array_flip($list);
   }
 
 }

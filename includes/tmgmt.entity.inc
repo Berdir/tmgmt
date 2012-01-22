@@ -66,8 +66,77 @@ class TMGMTTranslator extends Entity {
    *
    * @return TMGMTTranslatorPluginControllerInterface
    */
-  public function getTranslatorController() {
+  public function getPluginController() {
+    watchdog($this->translator_plugin, 'asd');
     return tmgmt_translator_plugin_controller($this->translator_plugin);
+  }
+
+  /**
+   * Returns the supported target languages for this translator.
+   *
+   * @return array
+   *  An array of supported target languages in ISO format.
+   */
+  public function getSupportedTargetLanguages($source_language) {
+    return $this->getPluginController()->getSupportedTargetLanguages($this, $source_language);
+  }
+
+  /**
+   * Check whether this translator can handle a particular translation job.
+   *
+   * @param TMGMTJob $job
+   *   The TMGMTJob entity that should be translated.
+   *
+   * @return boolean
+   *   TRUE if the job can be processed and translated, FALSE otherwise.
+   */
+  public function canTranslate(TMGMTJob $job) {
+    return $this->getPluginController()->canTranslate($job);
+  }
+
+  /**
+   * Checks whether a translator is available.
+   *
+   * @return bool
+   *   TRUE if the translator plugin is available, FALSE otherwise.
+   */
+  public function isAvailable() {
+    return $this->getPluginController()->isAvailable($this);
+  }
+
+  /**
+   * Get the job settings form from the respective translator plugin.
+   */
+  public function jobSettingsForm($form, $form_state, $job) {
+    return $this->getPluginController()->jobSettingsForm($form, $form_state, $job);
+  }
+
+  /**
+   * Get the settings form from the respective translator plugin.
+   */
+  public function settingsForm($form, $form_state) {
+    return $this->getPluginController()->settingsForm($form, $form_state, $this);
+  }
+
+  /**
+   * @todo
+   */
+  public function getNotAvailableReason() {
+    return $this->getPluginController()->getNotAvailableReason($this);
+  }
+
+  /**
+   * Retrieves a setting
+   * @param $name
+   *   The name of the setting.
+   * @param $default
+   *   (Optional) The default value to return in case the setting value is not
+   *   set. Defaults to NULL.
+   * @return
+   *   The setting value or $default if the setting value is not set.
+   */
+  public function getSetting($name, $default = NULL) {
+    return isset($this->settings[$name]) ? $this->settings[$name] : $default;
   }
 
 }
@@ -75,7 +144,7 @@ class TMGMTTranslator extends Entity {
 /**
  * Entity class for the tmgmt_job entity.
  *
- * @ingroup tmgmt_job_item
+ * @ingroup tmgmt_job
  */
 class TMGMTJobItem extends Entity implements TMGMTDataProvider {
 
@@ -309,24 +378,29 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Overrides Entity::label().
    */
   public function label() {
-
     if (!empty($this->label)) {
       return $this->label;
     }
 
     $wrapper = entity_metadata_wrapper($this->entityType, $this);
+
+    $source = $wrapper->source_language->label();
+    if (empty($source)) {
+      $source = '?';
+    }
+
     $target = $wrapper->target_language->label();
     if (empty($target)) {
       $target = '?';
     }
-    return t('Job @source to @target', array('@source' => $wrapper->source_language->label(), '@target' => $target));
+    return t('From @source to @target', array('@source' => $source, '@target' => $target));
   }
 
   /**
    * Overrides Entity::uri().
    */
   public function uri() {
-    return array('path' => 'admin/tmgmt/jobs/' . $this->tjid);
+    return array('path' => 'admin/config/regional/tmgmt/jobs/' . $this->tjid);
   }
 
   /**
@@ -370,14 +444,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       );
     }
     // @todo: Re-add a view for this.
-    /*if (module_exists('views')) {
+    if (module_exists('views')) {
       $view = views_get_view('translation_job_messages');
       $content['messages'] = array(
         '#type' => 'item',
         '#title' => $view->get_title(),
         '#markup' => $view->preview('block', array($this->tjid)),
       );
-    }*/
+    }
     return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
   }
 
@@ -510,8 +584,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     return $this->getAttachedEntities('tmgmt_job_message');
   }
 
-
-
   /**
    * Returns all job messages attached to this job with timestamp newer than $time.
    *
@@ -553,14 +625,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns the translator plugin for this job.
+   * Returns the translator for this job.
    *
-   * @return TMGMTTranslatorPluginControllerInterface
-   *   The translator plugin controller or NULL if it hasn't been defined yet.
+   * @return TMGMTTranslator
+   *   The translator entity or NULL if it hasn't been defined yet.
    */
-  public function getTranslatorController() {
+  public function getTranslator() {
     if (isset($this->translator)) {
-      return tmgmt_translator_plugin_controller($this->translator);
+      return tmgmt_translator_load($this->translator);
     }
   }
 
@@ -765,8 +837,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   TRUE if the job is prepared and can be translated, FALSE otherwise.
    */
   public function isTranslatable() {
-    if ($this->isPrepared() && $plugin = $this->getTranslatorController()) {
-      if ($plugin->canTranslate($this)) {
+    if ($translator = $this->getTranslator()) {
+      if ($translator->canTranslate($this)) {
         return TRUE;
       }
     }
@@ -809,6 +881,17 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       return TRUE;
     }
     return FALSE;
+  }
+
+  /**
+   * Returns the translator plugin controller of the translator of this job.
+   *
+   * @return TMGMTTranslatorPluginControllerInterface
+   */
+  public function getTranslatorController() {
+    if ($translator = $this->getTranslator($this)) {
+      return $translator->getPluginController();
+    }
   }
 
   /**
@@ -868,7 +951,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
 /**
  * Entity class for the tmgmt_job_message entity.
  *
- * @ingroup tmgmt_job_message
+ * @ingroup tmgmt_job
  */
 class TMGMTJobMessage extends Entity {
 
