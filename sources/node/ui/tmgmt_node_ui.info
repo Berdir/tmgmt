@@ -1,5 +1,5 @@
-name = Node Source User Interface
-description = User Interface for the node source plugin.
+name = Content Translation Source User Interface
+description = User Interface for the content translation source plugin.
 package = Translation Management
 core = 7.x
 
@@ -9,4 +9,5 @@ dependencies[] = views
 dependencies[] = views_bulk_operations
 
 ; Views handlers
-files[] = views/handlers/tmgmt_node_ui_handler_filter_node_translatable_types.inc
+files[] = views/tmgmt_node_ui_handler_filter_node_translatable_types.inc
+files[] = views/tmgmt_node_ui_handler_field_jobs.inc
