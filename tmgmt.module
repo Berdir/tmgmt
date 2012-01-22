@@ -340,16 +340,15 @@ function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id, $so
     $target_languages = array_keys($available_languages);
   }
   foreach ($target_languages as $target_language) {
-    $query = db_select('tmgmt_job_item', 'ji')
-      ->condition('source_plugin', $source_plugin)
-      ->condition('item_type', $item_type)
-      ->condition('item_id', $item_id);
+    $query = db_select('tmgmt_job_item', 'ji');
     $query->join('tmgmt_job', 'j', 'j.tjid = ji.tjid AND j.target_language = :target_language', array(':target_language' => $target_language));
     $query = $query->fields('j', array('tjid'))
+      ->condition('source_plugin', $source_plugin)
+      ->condition('item_type', $item_type)
+      ->condition('item_id', $item_id)
       ->orderBy('changed', 'DESC')
       ->range(0, 1);
-    $result = $query->execute();
-    if ($tjid = $result->fetchfield()) {
+    if ($tjid = $query->execute()->fetchfield()) {
       $jobs[$target_language] = tmgmt_job_load($tjid);
     }
   }
@@ -443,10 +442,8 @@ function tmgmt_job_message_create($status_before, $status_after, $message = '', 
  * Access callback for the translator entity.
  */
 function tmgmt_translator_access($op, TMGMTTranslator $translator = NULL, $account = NULL) {
-  if (isset($translator)) {
-    if (!$translator->getPluginController()) {
-      return FALSE;
-    }
+  if (isset($translator) && !$translator->getPluginController()) {
+    return FALSE;
   }
   return user_access('administer tmgmt', $account);
 }

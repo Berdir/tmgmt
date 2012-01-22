@@ -302,13 +302,6 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Get settings for this Service.
-   */
-  protected function getOption($name, $default = NULL) {
-    return variable_get('tmgmt_' . $this->pluginType . '_' . $name, $default);
-  }
-
-  /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
   public function settingsForm($form, &$form_state, TMGMTTRanslator $translator) {
