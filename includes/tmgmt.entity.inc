@@ -41,6 +41,13 @@ class TMGMTTranslator extends Entity {
   public $description;
 
   /**
+   * Weight of the translator.
+   *
+   * @var int
+   */
+  public $weight;
+
+  /**
    * Plugin name of the translator.
    *
    * @type string
