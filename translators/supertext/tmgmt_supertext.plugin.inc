@@ -15,61 +15,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
   // @TODO The second one is only for testing on local network.
   protected $sandboxURL = 'http://dev.supertext.ch/api/v1/';
   //protected $sandboxURL = 'http://172.21.21.66/supertext/api/v1/';
-  /**
-   *    requestFromSupertext($endpoint, $data = array())
-   *
-   *    Builds, signs and fires a request to mySupertext's API. Will fire to a different url
-   *    if on the sandbox.
-   *
-   *    Authentication rituals are documented here: http://mygengo.com/api/developer-docs/authentication/
-   *
-   *    It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
-   *    respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
-   */
-  public function requestFromSupertext($endpoint, $method, $data = array()) {
-    $options = array(
-      'headers' => array(
-        'User-Agent' => 'Drupal Supertext Translation Interface v0.1',
-        'Accept' => 'application/json'
-      ),
-      'method' => $method
-    );
-
-    $timestamp = gmdate('U');
-    $url = (variable_get('tmgmt_supertext_sandbox', TRUE) ? $this->sandboxURL : $this->apiURL) . $endpoint;
-
-    /**
-     *    If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
-     *    get a little more annoying...
-     */
-    if($method == 'GET' || $method == 'DELETE') {
-      $query_data = drupal_http_build_query(array_merge(array(
-        'api_key' => $this->getOption('api_public_key'),
-        'api_sig' => hash_hmac('sha1', $timestamp, $this->getOption('api_private_key')),
-        'ts' => $timestamp
-      ), $data));
-
-      $response = drupal_http_request($url .'?'. $query_data, $options);
-    } else {
-      $options['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
-      $options['data'] = drupal_http_build_query(array(
-        'api_key' => $this->getOption('api_public_key'),
-        'api_sig' => hash_hmac('sha1', $timestamp, $this->getOption('api_private_key')),
-        'ts' => $timestamp,
-        'data' => json_encode($data)
-      ));
-
-      $response = drupal_http_request($url, $options);
-    }
-
-    $results = json_decode($response->data);
-    if($results->opstat == 'ok' && isset($results->response)) {
-      return $results->response;
-    } else {
-      // TODO: Raise an actual error. >_>
-      return array();
-    }
-  }
+ 
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
@@ -89,26 +35,19 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
   public function canTranslate(TMGMTJob $job) {
     return TRUE;
   }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
-   *
-   * Here we will acutally query source and get translations.
-   */
-  public function requestTranslation(TMGMTJob $job) {
-    $object = new stdClass();
+  
+  public function generateSupertextOrderObject(TMGMTJob $job){
+  $object = new stdClass();
     $object->AccountId = variable_get('tmgmt_supertext_api_account_id', '');
     $object->Password = variable_get('tmgmt_supertext_api_password', '');
     $object->CallbackUrl = url('tmgmt_supertext_callback', array('absolute' => TRUE));
     $object->CommunicationLang = "en-US";
     $object->ContentType = "text/plain";
     $object->Currency = "chf";
-    $object->OrderTypeId = "7";
-    $object->DeliveryId = "1";
+	$object->Service = "translation";
     $object->SourceLang = $job->source_language;
     $object->TargetLang = $job->target_language;
     $object->ReferenceData = $job->tjid . ':' . tmgmt_supertext_hash($job->tjid);
-    $object->OrderTitle = $job->label;
     $object->Groups = array();
 
     $items = $job->getItems();
@@ -131,7 +70,23 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
       }
       $object->Groups[] = $group;
     }
-    //dpm($object, 'Request object');
+    return $object;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
+   *
+   * Here we will acutally query source and get translations.
+   */
+  public function requestTranslation(TMGMTJob $job) {
+
+  	$object = $this->generateSupertextOrderObject($job);
+  	$order_settings = explode(":", $job->translator_context['supertext-job']);
+    $object->OrderTypeId = $order_settings[0];
+    $object->DeliveryId = $order_settings[1];
+    $job->label = $job->translator_context['job-label'];
+	$object->OrderTitle = $job->translator_context['job-label'];
+    
     $options = array(
       'method' => 'POST',
       'data' => json_encode($object),
@@ -140,14 +95,15 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
 
     $job->addMessage("Sending request to supertext");
     $response = drupal_http_request($this->sandboxURL.'/translation/order', $options);
-    //dpm($response, 'Response');
+
 
     if ($response->code == "200") {
       $job->submitted("Job sent to Supertext. Response: !response",array('!response'=> $response->data));
       $responsedata = json_decode($response->data);
       // Save order id to the job
       $job->translator_id = $responsedata->Id;
-      drupal_set_message(t("Job successfully sent to Supertext. <br />OrderID: @orderid<br />Price: @price<br />Wordcount: @wordcount<br />Deadline: @deadline",array(
+      drupal_set_message(t("Job successfully sent to Supertext. <br />Ordertitle: @ordertitle<br />OrderID: @orderid<br />Price: @price<br />Wordcount: @wordcount<br />Deadline: @deadline",array(
+        '@ordertitle' => $responsedata->OrderTitle,
         '@orderid' => $responsedata->Id,
         '@price' => $responsedata->Price,
         '@wordcount' => $responsedata->WordCount,
@@ -164,19 +120,7 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
    */
   public function getSupportedTargetLanguages($source_language) {
     // @TODO Not real data, we are returning list of languages for now
-    /*
-    $results = array();
-    $targets = $this->requestFromSupertext('translate/service/language_pairs', 'GET', array(
-      'lc_src' => $source_language
-    ));
 
-    foreach($targets as $target) {
-      array_push($results, $target->lc_tgt);
-    }
-
-    return $results;
-    */
-    // Array like array('es' => TRUE, 'de' => TRUE); 
     return array_flip(array_keys(language_list()));
   }
 
@@ -206,4 +150,72 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
   return $form;
   }
 
+   
+ /**
+   * Defines plugin job settings form.
+   *
+   * @param $form array
+   * @param $form_state array
+   * @return array
+   *   Settings form.
+   */
+  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+    $object = $this->generateSupertextOrderObject($job);
+        $object->TargetLang = 'de-CH';
+    dpm($object);
+    $options = array(
+      'method' => 'POST',
+      'data' => json_encode($object),
+      'headers' => array('Content-Type' => 'application/json'),
+    );
+                
+    $response = drupal_http_request($this->sandboxURL.'/translation/quote', $options);
+
+    if ($response->code == "200") {
+      //$job->submitted("Job sent to Supertext. Response: @response",array('@response'=>$repsonse->data));
+      $responsedata = json_decode($response->data);
+      $joboptions = array();
+	  $settings['supertext-job'] = array(
+	  	'#type' => 'value', 
+	  );
+	  $settings['job-label'] = array(
+	  	'#type' => 'textfield',
+	  '#title' => t('Job Title'), 
+  '#default_value' => $job->label, 
+	  '#size' => 60, 
+  '#maxlength' => 128, 
+	  );	  
+      if (isset($responsedata->Options)) {
+       foreach ($responsedata->Options as $option_item) {
+            $settings[$option_item->OrderTypeId . "_markup"] = array(
+            	'#type' => 'item',
+		        '#title' => $option_item->Name,
+                '#markup' => $option_item->Description,
+		      );       	
+          foreach ($option_item->DeliveryOptions as $delivery_key => $delivery_item) {
+            $name = format_date(strtotime($delivery_item->DeliveryDate)) . ', Price ' . $delivery_item->Price . " ". $responsedata->Currency;
+            $settings[$option_item->OrderTypeId .":" .$delivery_item->DeliveryId] = array(
+		        '#type' => 'radio',
+		        '#title' => $name,
+                '#return_value' => $option_item->OrderTypeId .":" .$delivery_item->DeliveryId,
+                '#default_value' => NULL, 
+                '#attributes' => array('name' => array('settings[supertext-job]')),
+		      ); 
+          }
+         
+        }
+      }
+            
+      return $settings;
+
+    } else {
+      $job->addMessage("Could not get quote from Supertext. Response: @response",array('@response'=>$response->data));
+      drupal_set_message(t("Could not get quote from Supertext. Error: @error",array('@error' => $response->error)),'error');
+      
+      return;
+    }
+
+
+  }
+  
 }
