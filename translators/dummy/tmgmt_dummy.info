@@ -1,6 +1,0 @@
-name = Dummy Translator
-description = A dummy translator that just returns the same source text as translation.
-package = Translation Management
-core = 7.x
-dependencies[] = tmgmt
-files[] = tmgmt_dummy.plugin.inc
