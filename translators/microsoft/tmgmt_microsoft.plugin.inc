@@ -21,7 +21,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
   public function isAvailable(TMGMTTranslator $translator) {
-    if ($translator->getSetting('bing_api_id')) {
+    if ($translator->getSetting('api')) {
       return TRUE;
     }
     return FALSE;

@@ -36,8 +36,6 @@ class TMGMTJobMetadataController extends EntityDefaultMetadataController {
       'required' => TRUE,
       'schema field' => 'uid',
     );
-
-    dpm($properties);
     return _tmgmt_override_property_description($info, $this->type);
   }
 

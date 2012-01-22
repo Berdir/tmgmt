@@ -42,7 +42,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
     $form['actions']['#type'] = 'actions';
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Save weights'),
+      '#value' => t('Save'),
     );
     return $form;
   }
@@ -191,5 +191,5 @@ function theme_tmgmt_ui_translator_overview_form($variables) {
     $rows[] = array('data' => $row, 'class' => array('draggable'));
   }
   drupal_add_tabledrag('tmgmt-ui-translator-overview', 'order', 'sibling', 'tmgmt-ui-translator-weight');
-  return theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'tmgmt-ui-translator-overview')));
+  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('None.'), 'attributes' => array('id' => 'tmgmt-ui-translator-overview')));
 }
