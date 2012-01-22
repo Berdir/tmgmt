@@ -59,7 +59,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
         'ts' => $timestamp,
         'data' => json_encode($data)
         ));
-				
+
       $response = drupal_http_request($url, $options);
     }
 
@@ -105,7 +105,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
   public function requestTranslation(TMGMTJob $job) {
     // Pull the source data array from through the job and generate the MyGengo Translation Job
 	$translations = $this->generateMyGengoTranslationJobArray($job);
-    
+
 
     $response = $this->requestFromGengo('translate/jobs', 'POST', array(
       'jobs' => $translations,
@@ -117,11 +117,11 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     $job->addTranslatedData(tmgmt_unflatten_data($response));
     //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
   }
-  
+
   public function generateMyGengoTranslationJobArray(TMGMTJob $job, $tier = "machine"){
-  	
+
   	$data = tmgmt_flatten_data($job->getSourceData());
-  	
+
   	$translations = array();
 
     foreach ($data as $key => $value) {
@@ -148,7 +148,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
         'callback_url' => url('tmgmt_mygengo_callback', array('absolute' => TRUE)),
         'custom_data' => $job->tjid . '][' . $key
       );
-    }  	
+    }
     return $translations;
   }
 
@@ -200,18 +200,18 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    * @param $form array
    * @param $form_state array
    */
-  public function settingsForm($form, &$form_state) {
+  public function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
 
     $form['api_public_key'] = array(
       '#type' => 'textfield',
       '#title' => t('myGengo API Public key'),
-      '#default_value' => $this->getOption('api_public_key', ''),
+      '#default_value' => $translator->getSetting('api_public_key', ''),
       '#description' => t('Please enter yout myGengo API Public key.'),
     );
     $form['api_private_key'] = array(
       '#type' => 'textfield',
       '#title' => t('myGengo API Private key'),
-      '#default_value' => $this->getOption('api_private_key', ''),
+      '#default_value' => $translator->getSetting('api_private_key', ''),
       '#description' => t('Please enter your myGengo API Private key.'),
     );
     return $form;
@@ -240,15 +240,15 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     	$sum_credits = $sum_credits + $mygengo_job->credits;
     	$highest_eta = ($mygengo_job->eta > $highest_eta) ? $mygengo_job->eta : $highest_eta;
     }
-    
+
 
 
     $settings['word_count'] = array(
       '#type' => 'item',
       '#title' => t('Word count'),
       '#markup' => $sum_unit_count,
-    );    
-    
+    );
+
         $settings['quality'] = array(
       '#type' => 'select',
       '#title' => t('Quality'),
@@ -258,7 +258,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     		'pro' => t('Pro'),
 	         'ultra' => t('Ultra'),
 	       ),
-	          '#description' => t('With which Quality you want to translate?'),    
+	          '#description' => t('With which Quality you want to translate?'),
 	       '#ajax' => array(
 
       'callback' => 'tmgmt_mygengo_quote',
@@ -266,27 +266,27 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
 
     ),
     );
-    
+
       $settings['quote'] = array(
         '#type' => 'fieldset',
         '#title' => t('Quote'),
         '#prefix' => '<div id="mygengo-quote">',
         '#suffix' => '</div>',
       );
-          
+
     $settings['quote']['needed_credits'] = array(
       '#type' => 'item',
       '#title' => t('Needed Credits'),
       '#markup' => $sum_credits,
-    );    
+    );
 
     $settings['quote']['eta'] = array(
       '#type' => 'item',
       '#title' => t('ETA'),
-      '#markup' => format_date(mktime() + $highest_eta, "long"),    
+      '#markup' => format_date(mktime() + $highest_eta, "long"),
     );
 
-   
+
     return $settings;
   }
 

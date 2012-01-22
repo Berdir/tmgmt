@@ -21,7 +21,7 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
       $job->addItem($source_plugin, $item_type, $item_id);
     }
   }
-  drupal_goto('admin/tmgmt/checkout/' . $job->tjid);
+  drupal_goto('admin/config/regional/tmgmt/checkout/' . $job->tjid);
 }
 
 /**
@@ -32,26 +32,20 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   $form_state['job'] = $job;
   if ($job->isRejected() || $job->isPrepared() || $job->isNew()) {
     // Get all available languages from core translation module.
-    $available_languages = entity_metadata_language_list();
-    // Keep the label of the source language.
-    $source_language = $available_languages[$job->source_language];
-    // Remove LANGUAGE_NONE and the source language from the list of available
-    // languages and then apply a filter that only leaves the supported target
-    // languages on the list.
-    unset($available_languages[LANGUAGE_NONE], $available_languages[$job->source_language]);
-    // Get the translator plugin that is currently selected.
-    $translator_plugins = tmgmt_translator_availability_filter(tmgmt_translator_plugin_labels());
-    $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translator_plugins);
-    // Load plugin controller and info for the selected translator plugin.
-    $selected_target_language = isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available_languages);
-    if (isset($job->target_language)) {
+    $available_languages = tmgmt_available_languages(array($job->source_language));
+    if (isset($form_state['values']['target_language'])) {
+      $selected_target_language = $form_state['values']['target_language'];
+    }
+    else if (isset($job->target_language)) {
       $selected_target_language = $job->target_language;
     }
-    $translators = tmgmt_translator_plugin_info();
-    $translator_plugins = tmgmt_translator_filtered_by_language($translators, $job->source_language, $selected_target_language);
-    // Load the plugin info for the selected translator plugin.
-    $plugin_info = tmgmt_translator_plugin_info($selected_translator_plugin);
-    $plugin_controller = tmgmt_translator_plugin_controller($selected_translator_plugin);
+    else {
+      $selected_target_language = key($available_languages);
+    }
+    // Get the translator plugin that is currently selected.
+    $translators = tmgmt_translator_filtered_by_language($job->source_language, $selected_target_language);
+    $selected_translator_name = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
+    $selected_translator = tmgmt_translator_load($selected_translator_name);
     // Add a link for each item in this job.
     $form['links'] = array(
       '#theme' => 'links',
@@ -67,7 +61,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     $form['source_language'] = array(
       '#type' => 'item',
       '#title' => t('Source language'),
-      '#markup' => $source_language,
+      '#markup' => tmgmt_language_label($job->source_language),
     );
     $form['target_language'] = array(
       '#type' => 'select',
@@ -85,12 +79,12 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
       '#prefix' => '<div id="tmgmt-translator-wrapper">',
       '#suffix' => '</div>',
     );
-    if (!empty($translator_plugins)) {
+    if (!empty($translators)) {
       $form['translator_wrapper']['translator'] = array(
         '#type' => 'select',
         '#title' => t('Translator'),
-        '#options' => $translator_plugins,
-        '#default_value' => $selected_translator_plugin,
+        '#options' => $translators,
+        '#default_value' => $selected_translator_name,
         '#ajax' => array(
           'callback' => 'tmgmt_ajax_callback_get_translator_options',
           'wrapper' => 'tmgmt-translator-options',
@@ -102,18 +96,20 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
         '#prefix' => '<div id="tmgmt-translator-options">',
         '#suffix' => '</div>',
       );
-      switch (tmgmt_translator_check($selected_translator_plugin, $job->source_language, $selected_target_language)) {
+      switch (tmgmt_translator_check($selected_translator, $job->source_language, $selected_target_language)) {
         case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-          $form['translator_wrapper']['options']['settings']['#markup'] = t('Translator is not available: @reason.', array('@reason' => $plugin_controller->getNotAvailableReason()));
+          $form['translator_wrapper']['options']['settings']['#markup'] = t('Translator is not available: @reason.', array('@reason' => $selected_translator->getNotAvailableReason()));
           break;
         case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-          $form['translator_wrapper']['options']['settings']['#markup'] = t('Test translator is not available for @language.', array('@language' => $available_languages[$selected_target_language]));
+          $form['translator_wrapper']['options']['settings']['#markup'] = t('Test translator is not available for @language.', array('@language' => tmgmt_language_label($selected_target_language)));
           break;
         default:
-          $form['translator_wrapper']['options']['settings'] = $plugin_controller->jobSettingsForm(array(), $form_state, $job);
-          $form['translator_wrapper']['options']['settings']['#tree'] = TRUE;
-          if (empty($form['translator_wrapper']['options']['settings'])) {
-            $form['translator_wrapper']['options']['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $plugin_info['label']));
+          if ($settings = $selected_translator->jobSettingsForm(array(), $form_state, $job)) {
+            $form['translator_wrapper']['options']['settings'] = $settings;
+            $form['translator_wrapper']['options']['settings']['#tree'] = TRUE;
+          }
+          else {
+            $form['translator_wrapper']['options']['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $selected_translator->identifier()));
           }
       }
     }
@@ -125,7 +121,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     $form['translator_wrapper']['actions']['#type'] = 'actions';
     $form['translator_wrapper']['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Order'),
+      '#value' => t('Submit'),
       '#weight' => 50,
     );
     return $form;
@@ -165,7 +161,7 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
 
   // redirect to job overview page, if no error happened.
   if (!$had_error) {
-    drupal_goto('admin/tmgmt');
+    drupal_goto('admin/config/regional/tmgmt');
   }
 }
 
@@ -175,11 +171,11 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
 function tmgmt_job_checkout_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   $job = $form_state['job'];
-  $plugin = tmgmt_translator_plugin_controller($values['translator']);
+  $translator = tmgmt_translator_load($values['translator']);
   $available_languages = entity_metadata_language_list();
-  switch (tmgmt_translator_check($values['translator'], $job->source_language, $values['target_language'])) {
+  switch (tmgmt_translator_check($translator, $job->source_language, $values['target_language'])) {
     case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-      form_set_error('translator', t('Translator is not available: @reason.', array('@reason' => $plugin->getNotAvailableReason())));
+      form_set_error('translator', t('Translator is not available: @reason.', array('@reason' => $translator->getNotAvailableReason())));
       break;
     case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
       form_set_error('translator', t('Test translator is not available for @language.', array('@language' => $available_languages[$values['target_language']])));

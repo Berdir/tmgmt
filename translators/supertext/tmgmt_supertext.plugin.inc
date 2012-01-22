@@ -176,34 +176,34 @@ class TMGMTSupertextController extends TMGMTDefaultTranslatorPluginController {
 
     return $results;
     */
-    // Array like array('es' => TRUE, 'de' => TRUE); 
+    // Array like array('es' => TRUE, 'de' => TRUE);
     return array_flip(array_keys(language_list()));
   }
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  public function settingsForm($form, &$form_state) {
-  $form['api_account_id'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Supertext API Account Id'),
-    '#default_value' => $this->getOption('api_account_id', ''),
-    '#description' => t('Please enter yout supertext API Account Id.'),
-  );
+  public function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
+    $form['api_account_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Supertext API Account Id'),
+      '#default_value' => $translator->getSetting('api_account_id', ''),
+      '#description' => t('Please enter yout supertext API Account Id.'),
+    );
 
-  $form['api_password'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Supertext API password'),
-    '#default_value' => $this->getOption('api_password', ''),
-    '#description' => t('Please enter your Supertext API password.'),
-  );
+    $form['api_password'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Supertext API password'),
+      '#default_value' => $translator->getSetting('api_password', ''),
+      '#description' => t('Please enter your Supertext API password.'),
+    );
 
-  $form['use_sandbox'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Use Sandbox'),
-    '#default_value' => $this->getOption('use_sandbox', TRUE),
-  );
-  return $form;
+    $form['use_sandbox'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use Sandbox'),
+      '#default_value' => $translator->getSetting('use_sandbox', TRUE),
+    );
+    return $form;
   }
 
 }

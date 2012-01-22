@@ -20,23 +20,10 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
-  public function isAvailable() {
-    if ($this->getOption('bing_api_id')) {
+  public function isAvailable(TMGMTTranslator $translator) {
+    if ($translator->getSetting('bing_api_id')) {
       return TRUE;
     }
-    return FALSE;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
-   */
-  public function canTranslate(TMGMTJob $job) {
-    if ($this->isAvailable() && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($job->source_language))) {
-      // The job is only translatable if the translator is available too.
-      return TRUE;
-    }
-    // What to return if we can not query service and can not get supported
-    // languages, for what ever reason? For now it is safer to return FALSE.
     return FALSE;
   }
 
@@ -93,8 +80,8 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
-  public function getSupportedTargetLanguages($source_language) {
-    $languages = $this->getSupportedLanguages();
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
+    $languages = $this->getSupportedLanguages($translator);
     unset($languages[$source_language]);
     return $languages;
   }
@@ -102,7 +89,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
    */
-  public function getSupportedLanguages() {
+  public function getSupportedLanguages(TMGMTTranslator $translator) {
     $languages = &drupal_static(__FUNCTION__);
     if (!isset($languages)) {
       $languages = array();
@@ -121,12 +108,12 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  public function settingsForm($form, &$form_state) {
+  public function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['bing_api_id'] = array(
       '#type' => 'textfield',
       '#title' => t('Bing API ID'),
       // @todo - remove default test bing id before production release.
-      '#default_value' => $this->getOption('bing_api_id', 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369'),
+      '#default_value' => $translator->getSetting('bing_api_id', 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369'),
       '#description' => t('Please enter your Bing API ID, or follow this !link to generate one.', array('!link' => l('link', 'http://www.bing.com/developers/appids.aspx.'))),
     );
     return $form;

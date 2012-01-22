@@ -6,15 +6,6 @@
  */
 
 /**
- * Prefix for source overview pages.
- *
- * @todo
- * Maybe move into the ui.
- *
- */
-define('TMGMT_SOURCE_OVERVIEW_TAB_PATH', 'admin/tmgmt-overview');
-
-/**
  * Interface for source plugin controllers.
  *
  * @ingroup tmgmt_source
@@ -53,13 +44,6 @@ interface TMGMTSourcePluginControllerInterface {
    */
   public function getUri(TMGMTJobItem $job_item);
 
-  /**
-   * Implements hook_menu().
-   *
-   * @return array
-   *   An array of menu items that this translator plugin provides.
-   */
-  public function hook_menu();
 }
 
 /**
@@ -94,15 +78,6 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
     return array('path' => 'default/' . $job_item->item_id);
   }
 
-  /**
-   * Implements hook_menu().
-   *
-   * @return array
-   *   An array of menu items that this translator plugin provides.
-   */
-  public function hook_menu() {
-    return array();
-  }
 }
 
 /**
@@ -120,24 +95,30 @@ interface TMGMTTranslatorPluginControllerInterface {
   /**
    * Checks whether a translator is available.
    *
+   * @param TMGMTTranslator $translator
+   *   The translator entity.
+   *
    * @return bool
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
-  public function isAvailable();
+  public function isAvailable(TMGMTTranslator $translator);
 
   /**
    * Return a reason why the translator is not available.
    *
+   * @param TMGMTTranslator $translator
+   *   The translator entity.
+   *
    * Might be called when isAvailable() returns FALSE to get a reason that
    * can be displayed to the user.
    */
-  public function getNotAvailableReason();
+  public function getNotAvailableReason(TMGMTTranslator $translator);
 
   /**
    * Check whether this service can handle a particular translation job.
    *
    * @param TMGMTJob $job
-   *   The TMGMTJob entity that should be submitted.
+   *   The TMGMTJob entity that should be translated.
    *
    * @return boolean
    *   TRUE if the job can be processed and translated, FALSE otherwise.
@@ -148,12 +129,26 @@ interface TMGMTTranslatorPluginControllerInterface {
    * Returns all available target languages that are supported by this service
    * when given a source language.
    *
+   * @param TMGMTTranslator $translator
+   *   The translator entity.
    * @param $source_language
    *   The source language.
+   *
    * @return array
    *   An array of languages in ISO format.
    */
-  public function getSupportedTargetLanguages($source_language);
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language);
+
+  /**
+   * Returns all languages that are supported by this service.
+   *
+   * @param TMGMTTranslator $translator
+   *   The translator entity.
+   *
+   * @return array
+   *   An array of languages in ISO format.
+   */
+  public function getSupportedLanguages(TMGMTTranslator $translator);
 
   /**
    * @abstract
@@ -177,20 +172,12 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function cancelTranslation(TMGMTJob $job);
 
   /**
-   * Implements hook_menu().
-   *
-   * @return array
-   *   An array of menu items that this translator plugin provides.
-   */
-  public function hook_menu();
-
-  /**
    * A plugin can implement this method if it needs a settings form.
    *
    * This is not actually an interface method and that is why it is commented,
    * but we leave it here for API documentation.
    */
-  public function settingsForm($form, &$form_state);
+  public function settingsForm($form, &$form_state, TMGMTTranslator $translator);
 
   /**
    * A plugin can implement this method if it needs a job settings form.
@@ -226,7 +213,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
-  public function isAvailable() {
+  public function isAvailable(TMGMTTranslator $translator) {
     // Assume that the translation service is always available.
     return TRUE;
   }
@@ -236,7 +223,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function canTranslate(TMGMTJob $job) {
     // The job is only translatable if the translator is available too.
-    if ($this->isAvailable() && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($job->source_language))) {
+    if ($this->isAvailable($job->getTranslator()) && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($job->getTranslator(), $job->source_language))) {
       // We can only translate this job if the target language of the job is in
       // one of the supported languages.
       return TRUE;
@@ -253,9 +240,26 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   */
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
+    $languages = $this->getSupportedLanguages($translator);
+    unset($languages[$source_language]);
+    return $languages;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
+   */
+  public function getSupportedLanguages(TMGMTTranslator $translator) {
+    $languages = entity_metadata_language_list();
+    return drupal_map_assoc(array_keys($languages));
+  }
+
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::getNotAvailableReason().
    */
-  public function getNotAvailableReason() {
+  public function getNotAvailableReason(TMGMTTranslator $translator) {
     return t('@plugin needs to be configured before it can be used', array('@plugin' => $this->pluginInfo['label']));
   }
 
@@ -267,26 +271,9 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::hook_menu().
-   */
-  public function hook_menu() {
-    $items = array();
-    if (method_exists($this, 'settingsForm')) {
-      $items['admin/config/regional/tmgmt/plugins/' . $this->pluginType] = array(
-        'title' => $this->pluginInfo['label'],
-        'description' => $this->pluginInfo['description'],
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('tmgmt_' . $this->pluginType . '_translator_settings_form', $this->pluginType),
-        'access arguments' => array('administer tmgmt'),
-      );
-    }
-    return $items;
-  }
-
-  /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  public function settingsForm($form, &$form_state) {
+  public function settingsForm($form, &$form_state, TMGMTTRanslator $translator) {
     return array();
   }
 
