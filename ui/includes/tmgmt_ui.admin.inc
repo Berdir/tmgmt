@@ -20,7 +20,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   }
   // If the translator plugin is not set, pick the first available plugin as the
   // default.
-  $translator->translator_plugin = $translator->translator_plugin ? key($available_plugins) : $translator->translator_plugin;
+  $translator->translator_plugin = empty($translator->translator_plugin) ? key($available_plugins) : $translator->translator_plugin;
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
