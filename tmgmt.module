@@ -415,7 +415,7 @@ function tmgmt_job_message_load_multiple($tjmids = array(), $conditions = array(
  *   The status after the event occurred.
  * @param $message
  *   (Optional) The message to be saved.
- * @param $arguments
+ * @param $variables
  *   (Optional) An array of variables to replace in the message on display.
  * @param $values
  *   (Optional) An array of additional entity values to be set.
@@ -423,12 +423,12 @@ function tmgmt_job_message_load_multiple($tjmids = array(), $conditions = array(
  * @return TMGMTJobItem
  *   The created, not yet saved, job item entity.
  */
-function tmgmt_job_message_create($status_before, $status_after, $message = '', $arguments = array(), $values = array()) {
+function tmgmt_job_message_create($status_before, $status_after, $message = '', $variables = array(), $values = array()) {
   return entity_create('tmgmt_job_message', array_merge($values, array(
     'state_before' => $status_before,
     'state_after' => $status_after,
     'message' => $message,
-    'arguments' => $arguments,
+    'variables' => $variables,
   )));
 }
 /**

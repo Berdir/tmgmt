@@ -225,6 +225,7 @@ function tmgmt_schema() {
         'description' => 'The variables of the message as expected by t().',
         'type' => 'text',
         'size' => 'big',
+        'serialize' => TRUE,
       ),
       'state_before' => array(
         'description' => 'The state of the translation job before the event that supplied the message occurred.',

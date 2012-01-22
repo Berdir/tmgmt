@@ -107,7 +107,11 @@ class TMGMTTranslator extends Entity {
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
   public function isAvailable() {
-    return $this->getPluginController()->isAvailable($this);
+    $plugin = $this->getPluginController();
+    if ($plugin) {
+      $plugin->isAvailable($this);
+    }
+    return FALSE;
   }
 
   /**
@@ -692,17 +696,17 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   added by using placeholder strings alongside the variables argument to
    *   declare the value of the placeholders. See t() for documentation on how
    *   $message and $variables interact.   *
-   * @param $arguments
+   * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
    */
-  public function addMessage($message, $arguments = array(), $type = 'status') {
+  public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job if it hasn't yet been saved.
     if (empty($this->tjid) && !$this->save()) {
       return;
     }
     $state_before = isset($this->old_state) ? $this->old_state : $this->getState();
     $state_after = $this->getState();
-    $message = tmgmt_job_message_create($state_before, $state_after, $message, $arguments, array(
+    $message = tmgmt_job_message_create($state_before, $state_after, $message, $variables, array(
       'tjid' => $this->tjid,
       'type' => $type,
     ));
@@ -719,14 +723,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @param $message
    *   The log message to be saved along with the state change.
-   * @param $arguments
+   * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
    *
    * @see TMGMTJob::addMessage()
    */
-  public function needsReview($message, $arguments = array()) {
+  public function needsReview($message, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_REVIEW);
-    $this->addMessage($message, $arguments);
+    $this->addMessage($message, $variables);
     $this->save();
   }
 
@@ -735,14 +739,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @param $message
    *   The log message to be saved along with the state change.
-   * @param $arguments
+   * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
    *
    * @see TMGMTJob::addMessage()
    */
-  public function prepared($message = NULL, $arguments = array()) {
+  public function prepared($message = NULL, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_PREPARED);
-    $this->addMessage($message, $arguments);
+    $this->addMessage($message, $variables);
     $this->save();
   }
 
@@ -751,14 +755,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @param $message
    *   The log message to be saved along with the state change.
-   * @param $arguments
+   * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
    *
    * @see TMGMTJob::addMessage()
    */
-  public function submitted($message = NULL, $arguments = array()) {
+  public function submitted($message = NULL, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_SUBMITTED);
-    $this->addMessage($message, $arguments);
+    $this->addMessage($message, $variables);
     $this->save();
   }
 
@@ -767,16 +771,16 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @param $message
    *   The log message to be saved along with the state change.
-   * @param $arguments
+   * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
    *
    * @see TMGMTJob::addMessage()
    */
-  public function accepted($message = NULL, $arguments = array()) {
+  public function accepted($message = NULL, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_ACCEPTED);
     // @todo Find a solution for what happens if the propagation of the translated data fails.
     if ($this->propagateTranslatedData()) {
-      $this->addMessage($message, $arguments);
+      $this->addMessage($message, $variables);
       $this->save();
     }
   }
@@ -786,15 +790,15 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @param $message
    *   The log message to be saved along with the state change.
-   * @param $arguments
+   * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
    *
    * @see TMGMTJob::addMessage()
    */
-  public function finished($message = NULL, $arguments = array()) {
+  public function finished($message = NULL, $variables = array()) {
     // @todo Maybe we should clean up the job items here.
     $this->setState(TMGMT_JOB_STATE_ACCEPTED);
-    $this->addMessage($message, $arguments);
+    $this->addMessage($message, $variables);
     $this->save();
   }
 
@@ -803,14 +807,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @param $message
    *   The log message to be saved along with the state change.
-   * @param $arguments
+   * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
    *
    * @see TMGMTJob::addMessage()
    */
-  public function rejected($message = NULL, $arguments = array()) {
+  public function rejected($message = NULL, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_REJECTED);
-    $this->addMessage($message, $arguments, 'error');
+    $this->addMessage($message, $variables, 'error');
     $this->save();
   }
 
@@ -819,16 +823,16 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @param $message
    *   The log message to be saved along with the state change.
-   * @param $arguments
+   * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
    *
    * Use TMGMTJob::cancelTranslation() to cancel a translation.
    *
    * @see TMGMTJob::addMessage()
    */
-  public function cancelled($message = NULL, $arguments = array()) {
+  public function cancelled($message = NULL, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_CANCELLED);
-    $this->addMessage($message, $arguments);
+    $this->addMessage($message, $variables);
     $this->save();
   }
 
@@ -1025,6 +1029,17 @@ class TMGMTJobMessage extends Entity {
     if (empty($this->type)) {
       $this->type = 'status';
     }
+  }
+
+  /**
+   * Returns the translated message.
+   */
+  public function getMessage() {
+    $text = $this->message;
+    if (is_array($this->variables)) {
+      $text = t($text, $this->variables);
+    }
+    return $text;
   }
 
 }
