@@ -615,7 +615,7 @@ function _tmgmt_plugin_info($type, $plugin) {
         $info[$type][$key]['plugin'] = $key;
       }
     }
-    drupal_alter('tmgmt_' . $type . '_plugin_info', $info);
+    drupal_alter('tmgmt_' . $type . '_plugin_info', $info[$type]);
   }
   if (isset($plugin) && isset($info[$type][$plugin])) {
     return $info[$type][$plugin];
