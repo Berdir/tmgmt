@@ -21,6 +21,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
    */
   function setUp() {
     parent::setUp(array('tmgmt_i18n_string', 'tmgmt_test', 'i18n_menu', 'i18n_taxonomy'));
+    $this->translator = $this->createTranslator();
   }
 
   function testI18nStringSourceTaxonomy() {
@@ -37,7 +38,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
 
     // Create the new job and job item.
     $job = $this->createJob();
-    $job->translator = 'test_translator';
+    $job->translator = $this->translator->name;
     $job->translator_context = array();
     $job->save();
 
@@ -69,7 +70,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
 
     // Create the new job and job item.
     $job = $this->createJob();
-    $job->translator = 'test_translator';
+    $job->translator = $this->translator->name;
     $job->translator_context = array();
 
     $item1 = $job->addItem('i18n_string', 'i18n_string', $string_name);
