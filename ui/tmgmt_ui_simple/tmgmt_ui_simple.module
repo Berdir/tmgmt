@@ -102,12 +102,20 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
   );
   // As keys are numeric, we assume languages are in the same order, need to rekey rows
   $language_list = module_exists('i18n_node') ? i18n_node_language_list($node) : locale_language_list();
+  $jobs = tmgmt_job_item_load_by_source($form['source_plugin']['#value'], $form['item_type']['#value'], $form['item_id']['#value'], $form['source_language']['#value'] , array_keys($language_list));
+
   foreach ($language_list as $langcode => $language_name) {
     if ($langcode == LANGUAGE_NONE) {
       // Never show language neutral on the overview.
       continue;
     }
     $form['languages']['#options'][$langcode] = array_shift($original['#rows']);
+    if(isset($jobs[$langcode])) {
+      $job = $jobs[$langcode];
+      $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
+      $job_uri = $job->uri();
+      $form['languages']['#options'][$langcode][2] = t('Job state: !state', array('!state' => l($wrapper->state->label(), $job_uri['path'])));
+    }
   }
   $form['controls'] = tmgmt_ui_simple_controls_element($form, $form_state);
   $form['#submit'][] = 'tmgmt_ui_simple_translate_form_submit';
