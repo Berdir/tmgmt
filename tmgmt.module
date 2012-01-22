@@ -1,43 +1,69 @@
 <?php
 /**
- * A new translation job, can not yet be submitted.
+ * A new translation job.
+ *
+ * In the default user interface, jobs with this state are so called cart jobs.
+ * Each user gets his cart jobs listed in a block and can check them out.
  */
 define('TMGMT_JOB_STATE_NEW', 0);
 
 /**
  * A prepared translation job, not yet submitted to a translator.
+ *
+ * Before a job can be submitted, he needs to be marked as prepared. This is
+ * handled automatically be the default checkout form.
  */
 define('TMGMT_JOB_STATE_PREPARED', 1);
 
 /**
  * A translation job that has been submitted to the translator.
+ *
+ * Translator plugins are responsible for setting this state in their
+ * implementation of
+ * TMGMTTranslatorPluginControllerInterface::requestTranslation().
  */
 define('TMGMT_JOB_STATE_SUBMITTED', 2);
 
 /**
  * A translation job that has been rejected by the translator.
  *
- * The response contains information why the job was rejected.
+ * The translator plugin can use this state if the job has been actively
+ * rejected. However, this should be avoided by doing the necessary checks
+ * in the canTranslate() method and in the job configuration settings.
+ *
+ * A rejected job can be re-submitted.
  */
 define('TMGMT_JOB_STATE_REJECTED', 3);
 
 /**
  * The translation job was translated and needs to be reviewed.
+ *
+ * This state needs to be set by the translator plugin once the job has been
+ * completely translated.
  */
 define('TMGMT_JOB_STATE_REVIEW', 4);
 
 /**
  * The translation has been accepted and the job is finished.
+ *
+ * Once the job has been accepted, the source plugins are called to update their
+ * sources with the translated data.
  */
 define('TMGMT_JOB_STATE_ACCEPTED', 5);
 
 /**
  * The translation job has been cancelled.
+ *
+ * A job can be cancelled at any time. If he is currently in the submitted state
+ * the translator plugin is asked if this translation can be cancelled and needs
+ * to confirm it by returning TRUE in cancelTranslation().
  */
 define('TMGMT_JOB_STATE_CANCELLED', 6);
 
 /**
  * The translation job has been finished.
+ *
+ * Not yet used.
  */
 define('TMGMT_JOB_STATE_FINISHED', 7);
 
