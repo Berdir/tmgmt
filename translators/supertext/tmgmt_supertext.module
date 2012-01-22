@@ -249,6 +249,7 @@ function tmgmt_supertext_callback() {
   
   $job->addTranslatedData($translated_data);
   $job->save();
+  $job->needsReview('Supertext sent us their translation');
 }
 
 /**

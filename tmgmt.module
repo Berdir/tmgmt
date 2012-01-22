@@ -8,7 +8,6 @@
  * @addtogroup tmgmt_job
  * @{
  */
-
 /**
  * A new translation job.
  *
@@ -80,7 +79,6 @@ define('TMGMT_JOB_STATE_FINISHED', 7);
 /**
  * @} End of "addtogroup tmgmt_job".
  */
-
 /**
  * String used to delimit flattened array keys.
  */
@@ -166,7 +164,6 @@ function tmgmt_entity_info() {
   );
   return $info;
 }
-
 /**
  * Implements hook_permission().
  */
@@ -330,26 +327,38 @@ function tmgmt_job_item_load($tjiid) {
 }
 
 /**
- * Loads a translation job item per source.
+ * Loads a translation job item per source. It will order the related jobs by
+ * the latest change.
  *
  * @return TMGMTJobItem
  *   The loaded job item.
  */
-function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id) {
-  $query = db_select('tmgmt_job_item', 'item');
-  $query->condition('source_plugin', $source_plugin, '=');
-  $query->condition('item_type', $item_type, '=');
-  $query->condition('item_id', $item_id, '=');
-  $query->join('tmgmt_job', 'job', 'job.tjid = item.tjid');
-  $query->fields('job', array('tjid'));
-  $query->orderBy('changed', 'DESC');
-  $query->range(0, 1);
-  $result = $query->execute();
-  if ($tjid = $result->fetchfield()) {
-    $job = tmgmt_job_load($tjid);
-    return $job;
+function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id, $source_language, $target_languages = array()) {
+  if (empty($target_languages)) {
+    $available_languages = entity_metadata_language_list();
+    unset($available_languages[LANGUAGE_NONE], $available_languages[$source_language]);
+    $target_languages = array_keys($available_languages);
   }
-  return FALSE;
+  foreach ($target_languages as $target_language) {
+    $query = db_select('tmgmt_job_item', 'item');
+    $query->condition('source_plugin', $source_plugin, '=');
+    $query->condition('item_type', $item_type, '=');
+    $query->condition('item_id', $item_id, '=');
+    $query->join('tmgmt_job', 'job', 'job.tjid = item.tjid AND job.target_language = :target_language', array(':target_language' => $target_language));
+    $query->fields('job', array('tjid'));
+    $query->orderBy('changed', 'DESC');
+    $query->range(0, 1);
+    $result = $query->execute();
+    if ($tjid = $result->fetchfield()) {
+      $jobs[$target_language] = tmgmt_job_load($tjid);
+    }
+  }
+  if(isset($jobs)) {
+    return $jobs;
+  }
+  else {
+    return FALSE;
+  }
 }
 
 /**
@@ -389,6 +398,7 @@ function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $valu
 function tmgmt_job_item_remove($tjiid) {
   return entity_delete('tmgmt_job_item', $tjiid);
 }
+
 /**
  * Loads a translation job message.
  */
@@ -429,11 +439,9 @@ function tmgmt_job_message_create($status_before, $status_after, $message = '', 
     'arguments' => $arguments,
   )));
 }
-
 /**
  * @} End of "addtogroup tmgmt_job".
  */
-
 /**
  * @addtogroup tmgmt_translator
  * @{
