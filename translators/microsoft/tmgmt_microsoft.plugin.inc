@@ -28,19 +28,6 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
-   */
-  public function canTranslate(TMGMTJob $job) {
-    if ($this->isAvailable($job->getTranslator()) && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($job->source_language))) {
-      // The job is only translatable if the translator is available too.
-      return TRUE;
-    }
-    // What to return if we can not query service and can not get supported
-    // languages, for what ever reason? For now it is safer to return FALSE.
-    return FALSE;
-  }
-
-  /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   public function requestTranslation(TMGMTJob $job) {

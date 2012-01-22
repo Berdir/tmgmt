@@ -640,7 +640,6 @@ function _tmgmt_plugin_controller($type, $plugin) {
   $cache = &drupal_static(__FUNCTION__);
   if (!isset($cache[$type][$plugin])) {
     $info = _tmgmt_plugin_info($type, $plugin);
-    watchdog($type, $plugin);
     $class = isset($info['controller class']) ? $info['controller class'] : 'TMGMTDefault' . ucfirst($type) . 'PluginController';
     $cache[$type][$plugin] = new $class($plugin);
   }

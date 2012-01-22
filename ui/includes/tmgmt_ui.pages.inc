@@ -171,11 +171,11 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
 function tmgmt_job_checkout_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   $job = $form_state['job'];
-  $plugin = tmgmt_translator_plugin_controller($values['translator']);
+  $translator = tmgmt_translator_load($values['translator']);
   $available_languages = entity_metadata_language_list();
-  switch (tmgmt_translator_check($values['translator'], $job->source_language, $values['target_language'])) {
+  switch (tmgmt_translator_check($translator, $job->source_language, $values['target_language'])) {
     case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-      form_set_error('translator', t('Translator is not available: @reason.', array('@reason' => $plugin->getNotAvailableReason())));
+      form_set_error('translator', t('Translator is not available: @reason.', array('@reason' => $translator->getNotAvailableReason())));
       break;
     case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
       form_set_error('translator', t('Test translator is not available for @language.', array('@language' => $available_languages[$values['target_language']])));

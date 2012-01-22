@@ -105,14 +105,14 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
-   * @todo
+   * Get the job settings form from the respective translator plugin.
    */
   public function jobSettingsForm($form, $form_state, $job) {
     return $this->getPluginController()->jobSettingsForm($form, $form_state, $job);
   }
 
   /**
-   * @todo
+   * Get the settings form from the respective translator plugin.
    */
   public function settingsForm($form, $form_state) {
     return $this->getPluginController()->settingsForm($form, $form_state, $this);
@@ -831,7 +831,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   TRUE if the job is prepared and can be translated, FALSE otherwise.
    */
   public function isTranslatable() {
-    if ($this->isPrepared() && $translator = $this->getTranslator()) {
+    if ($translator = $this->getTranslator()) {
       if ($translator->canTranslate($this)) {
         return TRUE;
       }
