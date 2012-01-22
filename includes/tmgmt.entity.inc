@@ -109,7 +109,7 @@ class TMGMTTranslator extends Entity {
   public function isAvailable() {
     $plugin = $this->getPluginController();
     if ($plugin) {
-      $plugin->isAvailable($this);
+      return $plugin->isAvailable($this);
     }
     return FALSE;
   }
