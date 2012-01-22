@@ -67,7 +67,6 @@ class TMGMTTranslator extends Entity {
    * @return TMGMTTranslatorPluginControllerInterface
    */
   public function getPluginController() {
-    watchdog($this->translator_plugin, 'asd');
     return tmgmt_translator_plugin_controller($this->translator_plugin);
   }
 

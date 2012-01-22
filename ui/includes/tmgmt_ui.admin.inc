@@ -74,14 +74,15 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#suffix' => '</div>',
   );
   if ($selected_plugin) {
-    $controller = $selected_plugin->getPluginController();
+    $controller = tmgmt_translator_plugin_controller($selected_plugin);
+    $info = tmgmt_translator_plugin_info($selected_plugin);
     if ($settings = $controller->settingsForm(array(), $form_state, $translator)) {
-      $form['translator_plugin_settings_wrapper']['#description'] = t('These settings apply to the @plugin plugin in this configuration set.', array('@plugin' => $controller['label']));
+      $form['translator_plugin_settings_wrapper']['#description'] = t('These settings apply to the @plugin plugin in this configuration set.', array('@plugin' => $info['label']));
       $form['translator_plugin_settings_wrapper']['settings'] = $settings;
       $form['translator_plugin_settings_wrapper']['settings']['#tree'] = TRUE;
     }
     else {
-      $form['translator_plugin_settings_wrapper']['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $controller['label']));
+      $form['translator_plugin_settings_wrapper']['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $info['label']));
     }
   }
   $form['actions']['#type'] = 'actions';

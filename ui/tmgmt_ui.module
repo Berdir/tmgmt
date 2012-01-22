@@ -78,11 +78,6 @@ function tmgmt_ui_menu() {
     'description' => 'Translation Management Suite.',
     'access arguments' => array('administer tmgmt'),
   );
-  $items['admin/config/regional/tmgmt/plugins'] = array(
-    'title' => 'Plugin settings',
-    'description' => 'Configuration options for the available source and translator plugins.',
-    'access arguments' => array('administer tmgmt'),
-  );
   return $items;
 }
 
