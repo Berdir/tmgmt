@@ -79,6 +79,10 @@ define('TMGMT_JOB_STATE_CANCELLED', 6);
 define('TMGMT_JOB_STATE_FINISHED', 7);
 
 /**
+ * @} End of "addtogroup tmgmt_job".
+ */
+
+/**
  * String used to delimit flattened array keys.
  */
 define('TMGMT_ARRAY_DELIMITER', '][');
@@ -97,10 +101,6 @@ define('TMTGT_TRANSLATOR_NOT_AVAILABLE', 1);
  * The selected translator is not available for the selected language.
  */
 define('TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE', 2);
-
-/**
- * @} End of "addtogroup tmgmt_job".
- */
 
 /**
  * Implements hook_permission().
