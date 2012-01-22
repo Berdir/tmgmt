@@ -235,14 +235,12 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
     global $user;
     $account = $user;
   }
-  $conditions = array('source_language' => $source_language, 'target_language' => $target_language, 'uid' => $account->uid, 'state' => 0);
-
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'tmgmt_job');
   $query->propertyCondition('source_language', $source_language);
   $query->propertyCondition('target_language', $target_language);
   $query->propertyCondition('uid', $account->uid);
-  $query->propertyCondition('state', 0);
+  $query->propertyCondition('state', TMGMT_JOB_STATE_NEW);
   $result = $query->execute();
   if (!empty($result['tmgmt_job'])) {
     return tmgmt_job_load(reset($result['tmgmt_job'])->tjid);
@@ -303,13 +301,26 @@ function tmgmt_job_item_load($tjiid, $reset = FALSE) {
 }
 
 /**
- * Loads a translation job item per item_id.
+ * Loads a translation job item per source.
  *
  * @return TMGMTJobItem
  *   The loaded job item.
  */
-function tmgmt_job_item_load_by_item_id($item_id) {
-  return entity_load('tmgmt_job_item', FALSE, array('item_id' => $item_id), FALSE);
+function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id) {
+  $query = db_select('tmgmt_job_item', 'item');
+  $query->condition('source_plugin', $source_plugin, '=');
+  $query->condition('item_type', $item_type, '=');
+  $query->condition('item_id', $item_id, '=');
+  $query->join('tmgmt_job', 'job', 'job.tjid = item.tjid');
+  $query->fields('job', array('tjid'));
+  $query->orderBy('changed', 'DESC');
+  $query->range(0, 1);
+  $result = $query->execute();
+  if ($tjid = $result->fetchfield()) {
+    $job = tmgmt_job_load($tjid);
+    return $job;
+  }
+  return FALSE;
 }
 
 /**
@@ -336,10 +347,10 @@ function tmgmt_job_item_load_multiple(array $tjiids = array(), $conditions = arr
  */
 function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $values = array()) {
   return entity_create('tmgmt_job_item', array_merge($values, array(
-                    'source_plugin' => $source_plugin,
-                    'item_type' => $item_type,
-                    'item_id' => $item_id,
-                  )));
+    'source_plugin' => $source_plugin,
+    'item_type' => $item_type,
+    'item_id' => $item_id,
+  )));
 }
 
 /**
@@ -349,7 +360,6 @@ function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $valu
 function tmgmt_job_item_remove($tjiid) {
   return entity_delete('tmgmt_job_item', $tjiid);
 }
-
 /**
  * Loads a translation job message.
  */
@@ -384,11 +394,11 @@ function tmgmt_job_message_load_multiple(array $tjmids = array(), $conditions = 
  */
 function tmgmt_job_message_create($status_before, $status_after, $message = '', $arguments = array(), $values = array()) {
   return entity_create('tmgmt_job_message', array_merge($values, array(
-                    'state_before' => $status_before,
-                    'state_after' => $status_after,
-                    'message' => $message,
-                    'arguments' => $arguments,
-                  )));
+    'state_before' => $status_before,
+    'state_after' => $status_after,
+    'message' => $message,
+    'arguments' => $arguments,
+  )));
 }
 
 /**
