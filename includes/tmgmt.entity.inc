@@ -144,7 +144,7 @@ class TMGMTTranslator extends Entity {
 /**
  * Entity class for the tmgmt_job entity.
  *
- * @ingroup tmgmt_job_item
+ * @ingroup tmgmt_job
  */
 class TMGMTJobItem extends Entity implements TMGMTDataProvider {
 
@@ -945,7 +945,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
 /**
  * Entity class for the tmgmt_job_message entity.
  *
- * @ingroup tmgmt_job_message
+ * @ingroup tmgmt_job
  */
 class TMGMTJobMessage extends Entity {
 

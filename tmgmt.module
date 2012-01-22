@@ -4,48 +4,82 @@
  * @file
  * Main module file for the Translation Management module.
  */
+/**
+ * @addtogroup tmgmt_job
+ * @{
+ */
 
 /**
- * A new translation job, can not yet be submitted.
+ * A new translation job.
+ *
+ * In the default user interface, jobs with this state are so called cart jobs.
+ * Each user gets his cart jobs listed in a block and can check them out.
  */
 define('TMGMT_JOB_STATE_NEW', 0);
 
 /**
  * A prepared translation job, not yet submitted to a translator.
+ *
+ * Before a job can be submitted, he needs to be marked as prepared. This is
+ * handled automatically be the default checkout form.
  */
 define('TMGMT_JOB_STATE_PREPARED', 1);
 
 /**
  * A translation job that has been submitted to the translator.
+ *
+ * Translator plugins are responsible for setting this state in their
+ * implementation of
+ * TMGMTTranslatorPluginControllerInterface::requestTranslation().
  */
 define('TMGMT_JOB_STATE_SUBMITTED', 2);
 
 /**
  * A translation job that has been rejected by the translator.
  *
- * The response contains information why the job was rejected.
+ * The translator plugin can use this state if the job has been actively
+ * rejected. However, this should be avoided by doing the necessary checks
+ * in the canTranslate() method and in the job configuration settings.
+ *
+ * A rejected job can be re-submitted.
  */
 define('TMGMT_JOB_STATE_REJECTED', 3);
 
 /**
  * The translation job was translated and needs to be reviewed.
+ *
+ * This state needs to be set by the translator plugin once the job has been
+ * completely translated.
  */
 define('TMGMT_JOB_STATE_REVIEW', 4);
 
 /**
  * The translation has been accepted and the job is finished.
+ *
+ * Once the job has been accepted, the source plugins are called to update their
+ * sources with the translated data.
  */
 define('TMGMT_JOB_STATE_ACCEPTED', 5);
 
 /**
  * The translation job has been cancelled.
+ *
+ * A job can be cancelled at any time. If he is currently in the submitted state
+ * the translator plugin is asked if this translation can be cancelled and needs
+ * to confirm it by returning TRUE in cancelTranslation().
  */
 define('TMGMT_JOB_STATE_CANCELLED', 6);
 
 /**
  * The translation job has been finished.
+ *
+ * Not yet used.
  */
 define('TMGMT_JOB_STATE_FINISHED', 7);
+
+/**
+ * @} End of "addtogroup tmgmt_job".
+ */
 
 /**
  * String used to delimit flattened array keys.
@@ -84,6 +118,7 @@ function tmgmt_entity_info() {
     'entity keys' => array(
       'id' => 'tjid',
     ),
+    'views controller class' => 'TMGMTJobViewsController',
   );
   $info['tmgmt_job_item'] = array(
     'label' => t('Translation Management Job Item'),
@@ -230,12 +265,12 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
 function tmgmt_job_match_item($source_language, $target_language, $account = NULL) {
   $account = isset($account) ? $account : $GLOBALS['user'];
   $query = new EntityFieldQuery();
-  $query->entityCondition('entity_type', 'tmgmt_job');
-  $query->propertyCondition('source_language', $source_language);
-  $query->propertyCondition('target_language', $target_language);
-  $query->propertyCondition('uid', $account->uid);
-  $query->propertyCondition('state', 0);
-  $result = $query->execute();
+  $result = $query->entityCondition('entity_type', 'tmgmt_job')
+    ->propertyCondition('source_language', $source_language)
+    ->propertyCondition('target_language', $target_language)
+    ->propertyCondition('uid', $account->uid)
+    ->propertyCondition('state', TMGMT_JOB_STATE_NEW)
+    ->execute();
   if (!empty($result['tmgmt_job'])) {
     return tmgmt_job_load(reset($result['tmgmt_job'])->tjid);
   }
@@ -282,9 +317,6 @@ function tmgmt_job_states() {
     TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
   );
 }
-/**
- * @} End of "addtogroup tmgmt_job".
- */
 
 /**
  * Loads a translation job item.
@@ -295,6 +327,29 @@ function tmgmt_job_states() {
 function tmgmt_job_item_load($tjiid) {
   $jobs = tmgmt_job_item_load_multiple(array($tjiid), array());
   return $jobs ? reset($jobs) : FALSE;
+}
+
+/**
+ * Loads a translation job item per source.
+ *
+ * @return TMGMTJobItem
+ *   The loaded job item.
+ */
+function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id) {
+  $query = db_select('tmgmt_job_item', 'item');
+  $query->condition('source_plugin', $source_plugin, '=');
+  $query->condition('item_type', $item_type, '=');
+  $query->condition('item_id', $item_id, '=');
+  $query->join('tmgmt_job', 'job', 'job.tjid = item.tjid');
+  $query->fields('job', array('tjid'));
+  $query->orderBy('changed', 'DESC');
+  $query->range(0, 1);
+  $result = $query->execute();
+  if ($tjid = $result->fetchfield()) {
+    $job = tmgmt_job_load($tjid);
+    return $job;
+  }
+  return FALSE;
 }
 
 /**
@@ -334,12 +389,6 @@ function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $valu
 function tmgmt_job_item_remove($tjiid) {
   return entity_delete('tmgmt_job_item', $tjiid);
 }
-
-/**
- * @addtogroup tmgmt_job_message
- * @{
- */
-
 /**
  * Loads a translation job message.
  */
@@ -380,9 +429,11 @@ function tmgmt_job_message_create($status_before, $status_after, $message = '', 
     'arguments' => $arguments,
   )));
 }
+
 /**
- * @} End of "addtogroup tmgmt_job_message".
+ * @} End of "addtogroup tmgmt_job".
  */
+
 /**
  * @addtogroup tmgmt_translator
  * @{
