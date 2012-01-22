@@ -47,6 +47,9 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translator_plugins);
     // Load plugin controller and info for the selected translator plugin.
     $selected_target_language = isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available_languages);
+    if(isset($job->target_language)) {
+      $selected_target_language = $job->target_language;
+    }
     $translators = tmgmt_translator_plugin_info();
     $translator_plugins = tmgmt_translator_filtered_by_language($translators, $job->source_language, $selected_target_language);
     // Load the plugin info for the selected translator plugin.
@@ -74,6 +77,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
       '#title' => t('Target language'),
       '#description' => t('The target language'),
       '#options' => $available_languages,
+      '#default_value' => $selected_target_language,
       '#ajax' => array(
         'callback' => 'tmgmt_ajax_callback_get_supported_translators',
         'wrapper' => 'tmgmt-translator-wrapper',
