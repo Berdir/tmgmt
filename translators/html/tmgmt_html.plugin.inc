@@ -71,7 +71,7 @@ class TMGMTHTMLTranslator extends TMGMTDefaultTranslatorPluginController {
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
-  public function getSupportedTargetLanguages($source_language) {
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $languages = entity_metadata_language_list();
     unset($languages[LANGUAGE_NONE], $languages[$source_language]);
     return drupal_map_assoc(array_keys($languages));
