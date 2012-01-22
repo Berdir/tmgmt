@@ -27,7 +27,7 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
       $job->addItem($source_plugin, $item_type, $item_id);
     }
   }
-  drupal_goto('admin/config/regional/tmgmt/checkout/' . $job->tjid);
+  drupal_goto('admin/config/regional/tmgmt/jobs/' . $job->tjid . '/checkout');
 }
 
 /**
@@ -280,28 +280,6 @@ function tmgmt_ui_embed_view($view) {
     }
   }
   return '';
-}
-
-/**
- * Builds up a list of checkout forms.
- */
-function tmgmt_ui_checkout_wizard($jobs = array()) {
-
-  //  ctools_include('wizard');
-  //  $form_info = array(
-  //    'id' => 'tmgmt_ui_checkout_wizard'
-  //  );
-  //  ctools_wizard_multistep_form($form_info, 'select', $form_state);
-  //  return "hallo";
-  $form_state = array();
-  // @todo: This doesn't include the file itself.
-  //  $form_state['build_info']['files'][] = drupal_get_path('module', 'tmgmt') .'/includes/tmgmt.ui.inc';
-  //  ctools_include('tmgmt.ui', 'tmgmt');
-  // @todo: Implement multiple cases via a wizard? See above.
-  $job = reset($jobs);
-  $output = drupal_get_form('tmgmt_job_checkout_form', $job);
-
-  return $output;
 }
 
 /**

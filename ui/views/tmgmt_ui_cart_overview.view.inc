@@ -158,7 +158,7 @@ $handler->display->display_options['fields']['tjid_1']['exclude'] = TRUE;
 $handler->display->display_options['fields']['tjid_1']['alter']['alter_text'] = 1;
 $handler->display->display_options['fields']['tjid_1']['alter']['text'] = 'checkout';
 $handler->display->display_options['fields']['tjid_1']['alter']['make_link'] = 1;
-$handler->display->display_options['fields']['tjid_1']['alter']['path'] = 'admin/config/regional/tmgmt/checkout/[tjid_1]';
+$handler->display->display_options['fields']['tjid_1']['alter']['path'] = 'admin/config/regional/tmgmt/jobs/[tjid_1]/checkout';
 $handler->display->display_options['fields']['tjid_1']['alter']['absolute'] = 0;
 $handler->display->display_options['fields']['tjid_1']['alter']['external'] = 0;
 $handler->display->display_options['fields']['tjid_1']['alter']['replace_spaces'] = 0;
@@ -260,7 +260,7 @@ $translatables['tmgmt_ui_cart_overview'] = array(
   t('User'),
   t('Source_language'),
   t('checkout'),
-  t('admin/config/regional/tmgmt/checkout/[tjid_1]'),
+  t('admin/config/regional/tmgmt/jobs/[tjid_1]/checkout'),
   t('.'),
   t(','),
   t('Cart: [tjid] [tjid_1] <br> source: [source_language] target: [target_language] '),

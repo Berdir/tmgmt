@@ -21,25 +21,25 @@ class tmgmt_handler_field_tmgmt_job_actions extends views_handler_field_entity {
 
     if ($job->isNew() || $job->isPrepared() | $job->isRejected()) {
       $element['#links']['checkout'] = array(
-        'href' => "admin/tmgmt/checkout/$job->tjid",
+        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/checkout",
         'title' => t('checkout'),
       );
     }
 
     if ($job->isNeedsReview()) {
       $element['#links']['review'] = array(
-        'href' => "admin/tmgmt/review/$job->tjid",
+        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/review",
         'title' => t('review'),
       );
       $element['#links']['accept'] = array(
-        'href' => "admin/tmgmt/accept/$job->tjid",
+        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/accept",
         'title' => t('accept'),
       );
     }
 
     if (!$job->isAccepted() && !$job->isCancelled()) {
       $element['#links']['cancel'] = array(
-        'href' => "admin/tmgmt/cancel/$job->tjid",
+        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/cancel",
         'title' => t('cancel'),
       );
     }

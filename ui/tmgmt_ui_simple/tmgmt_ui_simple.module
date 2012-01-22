@@ -129,7 +129,7 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       // Print a message to the screen and redirect the user.
     }
     $form_state['redirect'] = array(
-      'admin/config/regional/tmgmt/checkout/' . implode(',', $tjids),
+      'admin/config/regional/tmgmt/jobs/' . implode(',', $tjids) . '/checkout',
       array(
         // @fixme: drupal_get_destination returns a string here so it's not usuable.
         'query' => array(

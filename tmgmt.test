@@ -18,7 +18,7 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
   function createTranslator() {
     $translator = new TMGMTTranslator();
     $translator->name = $this->randomName();
-    $translator->label = $this->randomString();
+    $translator->label = $this->randomName();
     $translator->translator_plugin = 'test_translator';
     $translator->settings = array(
       'key' => $this->randomName(),
@@ -361,7 +361,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Add a first item to the job. This will auto-create the job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/checkout|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
     // Check checkout form.
@@ -418,7 +418,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Another job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/checkout|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
@@ -436,7 +436,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Another job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/checkout|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
@@ -454,7 +454,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Another job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/checkout|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
@@ -476,7 +476,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Another job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/checkout|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
