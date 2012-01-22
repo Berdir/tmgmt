@@ -40,12 +40,13 @@ function tmgmt_ui_menu() {
     'access arguments' => array('access tmgmt ui'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
+    'weight' => -10,
   );
   $items['admin/config/regional/tmgmt/jobs/%tmgmt_job'] = array(
     'title' => 'Job',
     'page callback' => 'tmgmt_job_view',
     'page arguments' => array(5),
-    'access arguments' => array('administer tmgmt'),
+    'access arguments' => array('access tmgmt ui'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
   );
@@ -63,20 +64,6 @@ function tmgmt_ui_menu() {
     'access arguments' => array('access tmgmt ui'),
     'file' => 'includes/tmgmt_ui.pages.inc',
     'type' => MENU_CALLBACK,
-  );
-  $items['admin/config/regional/tmgmt/add-item/%/%/%/%/%tmgmt_job'] = array(
-    'title' => 'Add to existing Job',
-    'page callback' => 'tmgmt_job_add_item',
-    'page arguments' => array(5, 6, 7, 8, 9),
-    'access arguments' => array('access tmgmt ui'),
-    'file' => 'includes/tmgmt_ui.pages.inc',
-    'type' => MENU_CALLBACK,
-  );
-  // If we have any menu item then lets add root item also.
-  $items['admin/config/regional/tmgmt'] = array(
-    'title' => 'Translation Management',
-    'description' => 'Translation Management Suite.',
-    'access arguments' => array('administer tmgmt'),
   );
   return $items;
 }

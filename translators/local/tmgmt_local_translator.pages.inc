@@ -219,15 +219,12 @@ function tmgmt_local_translator_user_languages_form_submit($form, &$form_state) 
   $account = $form_state['values']['user'];
   if (isset($form_state['values']['translate'])) {
     $user_list  = array_map('array_filter', $form_state['values']['translate']);
+    $user_list = array_map('array_unique', $user_list);
+    $user_list = array_map('array_flip', $user_list);
   }
   else {
     $user_list = array();
   }
-
-  foreach ($user_list as $type => $type_list) {
-    $user_list[$type] = array_flip(array_unique($type_list));
-  }
-  dpm($user_list);
   // Save account
   $account->tmgmt_local_translator = $user_list;
   user_save($account);
