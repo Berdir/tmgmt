@@ -36,4 +36,34 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
     }
     return TRUE;
   }
+
+  public function hook_menu() {
+    $items = parent::hook_menu();
+
+    $items['admin/tmgmt/source/i18n-string'] = array(
+      'title' => 'i18n String Source',
+      'page callback' => 'tmgmt_i18n_string_source_tab_page_default',
+      'access arguments' => array('access tmgmt_ui'),
+      'file' => 'tmgmt_i18n_string.admin.inc',
+      'file path' => drupal_get_path('module', 'tmgmt_i18n_string'),
+      'type' => MENU_LOCAL_TASK,
+    );
+
+    $i18n_object_info = i18n_object_info();
+    foreach($i18n_object_info as $object_type => $definition) {
+      if (isset($definition['string translation']['textgroup']) && isset($definition['string translation']['type'])) {
+        $items['admin/tmgmt/source/i18n-string/' . $object_type] = array(
+          'title' => $definition['title'],
+          'access arguments' => array('access tmgmt_ui'),
+          'page callback' => 'tmgmt_i18n_string_source_tab_page',
+          'page arguments' => array($object_type),
+          'file' => 'tmgmt_i18n_string.admin.inc',
+          'file path' => drupal_get_path('module', 'tmgmt_i18n_string'),
+          'type' => MENU_LOCAL_TASK,
+        );
+      }
+    }
+
+    return $items;
+  }
 }
