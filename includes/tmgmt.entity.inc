@@ -267,8 +267,8 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *   a problem.
    */
   public function getJob() {
-    if (!empty($this->tjid) && $job = tmgmt_job_load($this->tjid)) {
-      return $job;
+    if (!empty($this->tjid)) {
+      return tmgmt_job_load($this->tjid);
     }
     return FALSE;
   }
@@ -1094,6 +1094,20 @@ class TMGMTJobMessage extends Entity {
       $text = t($text, $this->variables);
     }
     return $text;
+  }
+
+  /**
+   * Loads the job entity that this job message is attached to.
+   *
+   * @return TMGMTJob
+   *   The job entity that this job message is attached to or FALSE if there was
+   *   a problem.
+   */
+  public function getJob() {
+    if (!empty($this->tjid)) {
+      return tmgmt_job_load($this->tjid);
+    }
+    return FALSE;
   }
 
 }
