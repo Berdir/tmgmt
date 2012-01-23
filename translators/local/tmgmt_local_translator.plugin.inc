@@ -11,9 +11,7 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
    * It can 'translate' any job
    */
   function canTranslate(TMGMTJob $job) {
-    // @TODO Performance wise, we should go through tmgmt which could have it cached.
-    $supported = $this->getSupportedTargetLanguages(NULL, $job->source_language);
-    return isset($supported[$job->target_language]);
+    return TRUE;
   }
 
   /**
