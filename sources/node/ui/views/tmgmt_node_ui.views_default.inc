@@ -8,7 +8,7 @@ function tmgmt_node_ui_views_default_views() {
 
   $view = new view;
   $view->name = 'job_items_current_node';
-  $view->description = '';
+  $view->description = 'Lists the job items that are related to the current node.';
   $view->tag = 'default';
   $view->base_table = 'tmgmt_job_item';
   $view->human_name = 'Job items current node';
@@ -358,7 +358,7 @@ function tmgmt_node_ui_views_default_views() {
   $view->description = '';
   $view->tag = 'default';
   $view->base_table = 'node';
-  $view->human_name = 'tmgmt_node_ui_source_overview';
+  $view->human_name = 'Translation Management Node Source Overview';
   $view->core = 7;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
