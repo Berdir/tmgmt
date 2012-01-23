@@ -302,14 +302,14 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
     '#type' => 'submit',
     '#value' => t('Submit to translator'),
   );
-  if (!$job->isSubmitted()) {
-    $form['actions']['delete'] = array(
-      '#type' => 'link',
-      '#title' => t('Delete'),
-      '#href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/delete',
-    );
-  }
-  else {
+  $form['actions']['delete'] = array(
+    '#type' => 'link',
+    '#title' => t('Delete'),
+    '#href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/delete',
+  );
+  // Only show the 'Cancel' button if the job has been submitted to the
+  // translator.
+  if ($job->isSubmitted()) {
     $form['actions']['cancel'] = array(
       '#type' => 'link',
       '#title' => t('Cancel'),

@@ -6,7 +6,7 @@
  */
 
 /**
- * Views controller class for the tmgmt_job_item entity.
+ * Views controller class for the job item entity.
  */
 class TMGMTJobItemViewsController extends EntityDefaultViewsController {
   public function views_data() {
@@ -23,7 +23,7 @@ class TMGMTJobItemViewsController extends EntityDefaultViewsController {
 }
 
 /**
- * Views controller class for the tmgmt_job entity.
+ * Views controller class for the job entity.
  */
 class TMGMTJobViewsController extends EntityDefaultViewsController {
   public function views_data() {
@@ -37,6 +37,16 @@ class TMGMTJobViewsController extends EntityDefaultViewsController {
       ),
     );
     $data['tmgmt_job']['label']['field']['handler'] = 'tmgmt_handler_field_tmgmt_job_label';
+    return $data;
+  }
+}
+/**
+ * Views controller class for the tmgmt job message entity.
+ */
+class TMGMTJobMessageViewsController extends EntityDefaultViewsController {
+  public function views_data() {
+    $data = parent::views_data();
+    $data['tmgmt_job_message']['message']['field']['handler'] = 'views_handler_field_xss';
     return $data;
   }
 }

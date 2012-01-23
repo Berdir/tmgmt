@@ -108,6 +108,7 @@ function tmgmt_entity_info() {
     'module' => 'tmgmt',
     'controller class' => 'TMGMTJobController',
     'metadata controller class' => 'TMGMTJobMetadataController',
+    'views controller class' => 'TMGMTJobViewsController',
     'entity class' => 'TMGMTJob',
     'base table' => 'tmgmt_job',
     'uri callback' => 'entity_class_uri',
@@ -116,13 +117,13 @@ function tmgmt_entity_info() {
     'entity keys' => array(
       'id' => 'tjid',
     ),
-    'views controller class' => 'TMGMTJobViewsController',
   );
   $info['tmgmt_job_item'] = array(
     'label' => t('Translation Management Job Item'),
     'module' => 'tmgmt',
     'controller class' => 'EntityAPIController',
     'metadata controller class' => 'TMGMTJobItemMetadataController',
+    'views controller class' => 'TMGMTJobItemViewsController',
     'entity class' => 'TMGMTJobItem',
     'base table' => 'tmgmt_job_item',
     'uri callback' => 'entity_class_uri',
@@ -131,13 +132,13 @@ function tmgmt_entity_info() {
     'entity keys' => array(
       'id' => 'tjiid',
     ),
-    'views controller class' => 'TMGMTJobItemViewsController',
   );
   $info['tmgmt_job_message'] = array(
     'label' => t('Translation Management Job Message'),
     'module' => 'tmgmt',
     'controller class' => 'EntityAPIController',
     'metadata controller class' => 'TMGMTJobMessageMetadataController',
+    'views controller class' => 'TMGMTJobMessageViewsController',
     'entity class' => 'TMGMTJobMessage',
     'base table' => 'tmgmt_job_message',
     'uri callback' => 'entity_class_uri',
