@@ -35,8 +35,13 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
  * The checkout form.
  */
 function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
-  // Add the job to the form state so we can use it in the submit handler.
+  // Add the job to the form state so we can use it in the submit handlers.
   $form_state['job'] = $job;
+  // Look up the items on the job.
+  $job_items = $job->getItems();
+  $job_items_count = count($job_items);
+  // Add a nice title that describes the form.
+  drupal_set_title(format_plural($job_items_count, 'Translation job checkout for @count translatable item', 'Translation job checkout for @count translatable items'));
   // Get all available languages from core translation module.
   $available_languages = tmgmt_available_languages(array($job->source_language));
   if (isset($form_state['values']['target_language'])) {
@@ -48,39 +53,56 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   else {
     $selected_target_language = key($available_languages);
   }
-
   // Get the translator plugin that is currently selected.
   $translators = tmgmt_translator_filtered_by_language($job->source_language, $selected_target_language);
   $selected_translator_name = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
   $selected_translator = tmgmt_translator_load($selected_translator_name);
-  // Add a link for each item in this job.
-  $form['links'] = array(
-    '#theme' => 'links',
-    '#title' => t('Items in this job.'),
-  );
-  foreach ($job->getItems() as $item) {
-    $uri = $item->uri();
-    $form['links']['#links'][$item->tjiid] = array(
-      'title' => $item->label(),
-      'href' => $uri['path'],
+  // Show the items that are attached to this job if there are not more than 20.
+  if ($job_items_count <= 20) {
+    $form['job_items'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Attached source objects'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
     );
+    $form['job_items']['links']['#theme'] = 'links';
+    foreach ($job->getItems() as $job_item) {
+      $uri = $job_item->uri();
+      $form['job_items']['links']['#links'][$job_item->tjiid] = array(
+        'title' => $job_item->label(),
+        'href' => $uri['path'],
+      );
+    }
   }
-  $form['source_language'] = array(
-    '#type' => 'item',
-    '#title' => t('Source language'),
-    '#markup' => tmgmt_language_label($job->source_language),
+  // Show the source and target language in a fieldset.
+  $form['languages'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Source and target language'),
   );
-  $form['target_language'] = array(
-    '#type' => 'select',
-    '#title' => t('Target language'),
-    '#description' => t('The target language'),
-    '#options' => $available_languages,
-    '#default_value' => $selected_target_language,
-    '#ajax' => array(
-      'callback' => 'tmgmt_ajax_callback_get_supported_translators',
-      'wrapper' => 'tmgmt-translator-wrapper',
-    ),
-  );
+  foreach (array('source', 'target') as $item) {
+    $key = $item . '_language';
+    $label = t(ucfirst($item) . ' language');
+    if (!empty($job->{$key})) {
+      $form['languages'][$key] = array(
+        '#type' => 'item',
+        '#title' => $label,
+        '#markup' => tmgmt_language_label($job->{$key}),
+        '#required' => TRUE,
+      );
+    }
+    else {
+      $form['languages'][$key] = array(
+        '#type' => 'select',
+        '#title' => $label,
+        '#options' => $available_languages,
+        '#required' => TRUE,
+        '#ajax' => array(
+          'callback' => 'tmgmt_ajax_callback_get_supported_translators',
+          'wrapper' => 'tmgmt-translator-wrapper',
+        ),
+      );
+    }
+  }
   $form['translator_wrapper'] = array(
     '#type' => 'container',
     '#prefix' => '<div id="tmgmt-translator-wrapper">',
@@ -92,6 +114,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
       '#title' => t('Translator'),
       '#options' => $translators,
       '#default_value' => $selected_translator_name,
+      '#required' => TRUE,
       '#ajax' => array(
         'callback' => 'tmgmt_ajax_callback_get_translator_options',
         'wrapper' => 'tmgmt-translator-options',
@@ -128,7 +151,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   $form['translator_wrapper']['actions']['#type'] = 'actions';
   $form['translator_wrapper']['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Order'),
+    '#value' => t('Checkout order'),
     '#weight' => 50,
   );
   return $form;

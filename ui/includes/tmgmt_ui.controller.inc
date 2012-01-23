@@ -148,6 +148,17 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
 
 }
 
+class TMGMTJobUIController extends EntityDefaultUIController {
+
+  /**
+   * Implements hook_menu();
+   */
+  public function hook_menu() {
+
+  }
+
+}
+
 /**
  * Adds a description to the translator entity on the entity overview form.
  *

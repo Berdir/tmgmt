@@ -13,13 +13,21 @@ function tmgmt_ui_entity_info() {
     'admin ui' => array(
       'controller class' => 'TMGMTTranslatorUIController',
       'path' => 'admin/config/regional/tmgmt/translators',
-      'file' => 'includes/tmgmt_ui.admin.inc',
-      // Entity API defaults to the path that implements the entity type, but
-      // since this happens in the TMGMT core module, we need to manually
-      // define the path here.
-      'file path' => drupal_get_path('module', 'tmgmt_ui'),
     ),
   );
+  $info['tmgmt_job'] = array(
+    'admin ui' => array(
+      'controller class' => 'TMGMTJobUIController',
+      'path' => 'admin/config/regional/tmgmt/jobs',
+    ),
+  );
+  foreach ($info as &$item) {
+    // Entity API defaults to the path that implements the entity type, but
+    // since this happens in the TMGMT core module, we need to manually
+    // define the path here.
+    $item['file path'] = drupal_get_path('module', 'tmgmt_ui');
+    $item['file'] = 'includes/tmgmt_ui.admin.inc';
+  }
   return $info;
 }
 
