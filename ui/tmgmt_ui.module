@@ -110,17 +110,6 @@ function tmgmt_ui_theme() {
 }
 
 /**
- * Implements hook_permission().
- */
-function tmgmt_ui_permission() {
-  return array(
-    'access tmgmt ui' => array(
-      'title' => t('Access Translation Management UI'),
-    ),
-  );
-}
-
-/**
  * Implements hook_views_api().
  */
 function tmgmt_ui_views_api() {
