@@ -179,7 +179,6 @@ function tmgmt_permission() {
   $perms['access tmgmt ui'] = array(
     'title' => t('Access Translation Management UI'),
   );
-  }
   return $perms;
 }
 
