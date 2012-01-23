@@ -12,7 +12,7 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
    */
   function canTranslate(TMGMTJob $job) {
     // @TODO Performance wise, we should go through tmgmt which could have it cached.
-    $supported = $this->getSupportedTargetLanguages($job->source_language);
+    $supported = $this->getSupportedTargetLanguages(NULL, $job->source_language);
     return isset($supported[$job->target_language]);
   }
 
@@ -25,9 +25,26 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
   }
 
   /**
+   * Returns all languages that are supported by this service.
+   *
+   * @param TMGMTTranslator $translator
+   *   The translator entity.
+   *
+   * @return array
+   *   An array of languages in ISO format.
+   */
+  public function getSupportedLanguages(TMGMTTranslator $translator) {
+    $query = db_select('tmgmt_local_user', 't')
+      ->fields('t', array('language'))
+      ->condition('t.type', 'source')
+      ->distinct();
+    $list = $query->execute()->fetchCol();
+    return array_flip($list);    
+  }
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
-  function getSupportedTargetLanguages($source_language) {
+  function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $query = db_select('tmgmt_local_user', 'target')
       ->fields('target', array('language'))
       ->distinct();
