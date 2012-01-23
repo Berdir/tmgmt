@@ -38,8 +38,8 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
 
   public function generateSupertextOrderObject(TMGMTJob $job){
   $object = new stdClass();
-    $object->AccountId = variable_get('tmgmt_supertext_api_account_id', '');
-    $object->Password = variable_get('tmgmt_supertext_api_password', '');
+    $object->AccountId = $job->getTranslator()->getSetting('api_account_id');
+    $object->Password = $job->getTranslator()->getSetting('api_password');
     $object->CallbackUrl = url('tmgmt_supertext_callback', array('absolute' => TRUE));
     $object->CommunicationLang = "en-US";
     $object->ContentType = "text/plain";
