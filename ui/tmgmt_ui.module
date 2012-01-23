@@ -133,3 +133,81 @@ function _tmgmt_ui_load_all_exports($module, $directory, $extension, $name = NUL
   }
   return $return;
 }
+
+function tmgmt_ui_job_checkout(array $jobs) {
+  $redirects = array();
+
+  foreach ($jobs as $job) {
+    /* @var $job TMGMTJob */
+
+    // @todo: Dummy code. Update once the entity UI controller is in.
+    if (!user_access('checkout tmgmt job')) {
+      // User does not have permissions to actually check out. Just mark them as
+      // prepared and be done with it.
+      $job->prepared('Job %label prepared for checkout.', array('%label' => $job->label()));
+      continue;
+    }
+
+    if (tmgmt_ui_job_needs_checkout_form($job)) {
+      $redirects[] = $job->uri() . '/checkout';
+    }
+    else {
+      // No manual checkout required. Request translations now.
+      tmgmt_ui_job_request_translation($job);
+    }
+  }
+
+  // Allow other modules to jump in and act.
+  drupal_alter('tmgmt_ui_job_checkout', $redirects, $jobs);
+
+
+  return $redirects;
+}
+
+/**
+ *
+ * @param TMGMTJob $job
+ */
+function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
+  // If the job has no target language set, checkout is mandatory.
+  if (empty($job->target_language)) {
+    return TRUE;
+  }
+
+  // If there is more than a single translator available, checkout is mandatory.
+  // @todo: This doesn't actually work yet because that function just alters
+  // the labels.
+  $translators = tmgmt_translator_filtered_by_language($job->source_language, $job->target_language);
+  if (count($translators) > 1) {
+    return TRUE;
+  }
+
+  // If that translator has settings, the checkout is mandatory.
+  // @todo: Maybe introduce a hasJobSettings($job) method for translators?
+  $settings = reset($translators)->getJobSettingsForm(array(), array(), $job);
+  if (!empty($settings)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+function tmgmt_ui_job_request_translation(TMGMTJob $job) {
+  $job->requestTranslation();
+
+  // Print a message to the screen and redirect the user.
+  $messages = $job->getMessagesSince(REQUEST_TIME);
+  $had_error = FALSE;
+  foreach ($messages as $message) {
+    // Ignore debug messages.
+    if ($message->type == 'debug') {
+      continue;
+    }
+
+    $text = $message->getMessage();
+    if ($message->type == 'error') {
+      $had_error = TRUE;
+    }
+    drupal_set_message(filter_xss($text), $message->type);
+  }
+  return $had_error;
+}
