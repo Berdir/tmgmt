@@ -46,28 +46,27 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   $preselected = array();
   // @todo Make sure that our ajax callback also replaces the opposite language
   // options list so we never have the same source and target language.
-  foreach (array('source' => 'target', 'target' => 'source') as $item => $opposite) {
-    $key = $item . '_language';
-    $preselected[$item] = !empty($job->{$key}) ? $job->{$key} : NULL;
+  foreach (array('source_language', 'target_language', 'translator') as $item) {
+    $preselected[$item] = !empty($job->{$item}) ? $job->{$item} : NULL;
     // Actually select an element.
-    $selected[$item] = $preselected[$item] ? $preselected[$item] : (isset($form_state['values'][$key]) ? $form_state['values'][$key] : key($available));
+    $selected[$item] = $preselected[$item] ? $preselected[$item] : (isset($form_state['values'][$item]) ? $form_state['values'][$item] : key($available));
   }
   // Show a list of translators tagged by availability for the selected source
   // and target language combination
-  $translators = tmgmt_translator_filtered_by_language($selected['source'], $selected['target']);
+  $translators = tmgmt_translator_filtered_by_language($selected['source_language'], $selected['target_language']);
   $selected['translator'] = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
   // Show the items that are attached to this job if there are not more than 20.
   if (count($items) <= 20) {
-    $form['job_items'] = array(
+    $form['items'] = array(
       '#type' => 'fieldset',
       '#title' => t('Attached source objects'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    $form['job_items']['links']['#theme'] = 'links';
+    $form['items']['links']['#theme'] = 'links';
     foreach ($job->getItems() as $job_item) {
       $uri = $job_item->uri();
-      $form['job_items']['links']['#links'][$job_item->tjiid] = array(
+      $form['items']['links']['#links'][$job_item->tjiid] = array(
         'title' => $job_item->label(),
         'href' => $uri['path'],
       );
@@ -80,23 +79,21 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   );
   // Make the source and target language flexible by showing either a select
   // dropdown or the plain string (if preselected).
-  foreach (array('source', 'target') as $item) {
-    $key = $item . '_language';
-    $form['languages'][$key] = array(
-      '#title' => t(ucfirst($item) . ' language'),
+  foreach (array('source_language', 'target_language') as $item) {
+    $form['languages'][$item] = array(
+      '#title' => $item == 'source_language' ? t('Source language') : t('Target language'),
       '#required' => TRUE,
-      '#prefix' => '<div class="tmgmt-ui-' . $item . '-language">',
+      '#prefix' => '<div class="tmgmt-ui-' . ($item == 'source_language' ? 'source' : 'target') . '-language">',
       '#suffix' => '</div>',
     );
-    if (!empty($job->{$key})) {
-      $form['languages'][$key] += array(
+    if (!empty($job->{$item})) {
+      $form['languages'][$item] += array(
         '#type' => 'item',
-        '#title' => t(ucfirst($item) . ' language'),
-        '#markup' => tmgmt_language_label($job->{$key}),
+        '#markup' => tmgmt_language_label($job->{$item}),
       );
     }
     else {
-      $form['languages'][$key] += array(
+      $form['languages'][$item] += array(
         '#type' => 'select',
         '#options' => $available,
         '#default_value' => $selected[$item],
