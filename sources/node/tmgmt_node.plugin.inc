@@ -79,7 +79,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     if ($node = node_load($job_item->item_id)) {
       return entity_uri('node', $node);
     }
-    return parent::getTitle($job_item);
+    return parent::getUri($job_item);
   }
 
 }
