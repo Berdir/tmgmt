@@ -88,9 +88,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    */
   public function getSupportedLanguages(TMGMTTranslator $translator) {
     // @todo Maybe add database caching?
-    // @todo Is __FUNCTION__ really correct here? Shouldn't it be __CLASS__ and
-    // __METHOD__ ?
-    $languages = &drupal_static(__FUNCTION__);
+    $languages = &drupal_static(__CLASS__ . '::' . __METHOD__);
     if (!isset($languages)) {
       $languages = array();
       $request = $this->doRequest($translator, 'GetLanguagesForTranslate');
@@ -112,6 +110,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
     return array(
       // @todo Remove default API Key once development is finished.
       'api' => 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369',
+      'url' => $this->translatorUrl,
     );
   }
 
@@ -158,7 +157,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    */
   protected function doRequest(TMGMTTranslator $translator, $path, array $query = array(), array $options = array()) {
     // Allow to override the url, e.g. for the tests.
-    $url = $translator->getSetting('url', $this->translatorUrl) . '/' . $path;
+    $url = $translator->getSetting('url') . '/' . $path;
 
     // Add the appId to the query arguments and build the query string.
     $query = array('appId' => $translator->getSetting('api')) + $query;

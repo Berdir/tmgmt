@@ -26,7 +26,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    *  It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
    *  respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
    */
-  public function requestFromGengo($endpoint, $method, $data = array()) {
+  public function requestFromGengo(TMGMTTranslator $translator, $endpoint, $method, $data = array()) {
     $options = array(
       'headers' => array(
         'User-Agent' => 'Drupal myGengo Translation Interface v0.1',
@@ -44,8 +44,8 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
      */
     if ($method == 'GET' || $method == 'DELETE') {
       $query_data = drupal_http_build_query(array_merge(array(
-          'api_key' => $this->getOption('api_public_key'),
-          'api_sig' => hash_hmac('sha1', $timestamp, $this->getOption('api_private_key')),
+          'api_key' => $translator->getSEtting('api_public_key'),
+          'api_sig' => hash_hmac('sha1', $timestamp, $translator->getSetting('api_private_key')),
           'ts' => $timestamp
           ), $data));
 
@@ -54,8 +54,8 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
     else {
       $options['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
       $options['data'] = drupal_http_build_query(array(
-        'api_key' => $this->getOption('api_public_key'),
-        'api_sig' => hash_hmac('sha1', $timestamp, $this->getOption('api_private_key')),
+        'api_key' => $translator->getSetting(),
+        'api_sig' => hash_hmac('sha1', $timestamp, $translator->getSetting('api_private_key')),
         'ts' => $timestamp,
         'data' => json_encode($data)
         ));
@@ -77,7 +77,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
   public function isAvailable(TMGMTTranslator $translator) {
-    if ($this->getOption('api_public_key') && $this->getOption('api_private_key')) {
+    if ($translator->getSetting('api_public_key') && $translator->getSetting('api_private_key')) {
       return TRUE;
     }
     return FALSE;
@@ -108,7 +108,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
     // Pull the source data array from through the job and generate the MyGengo Translation Job
     $translations = $this->generateMyGengoTranslationJobArray($job, $job->settings['quality']);
 
-    $response = $this->requestFromGengo('translate/jobs', 'POST', array(
+    $response = $this->requestFromGengo($job->getTranslator(), 'translate/jobs', 'POST', array(
       'jobs' => $translations,
       'process' => 1,
       'as_group' => 1
@@ -171,7 +171,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $results = array();
-    $targets = $this->requestFromGengo('translate/service/language_pairs', 'GET', array(
+    $targets = $this->requestFromGengo($translator, 'translate/service/language_pairs', 'GET', array(
       'lc_src' => $source_language
       ));
 
@@ -189,7 +189,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
   public function getSupportedLanguages(TMGMTTranslator $translator) {
     $languages = &drupal_static(__FUNCTION__);
     if (!isset($languages)) {
-      $supported_languages = $this->requestFromGengo('translate/service/languages', 'GET');
+      $supported_languages = $this->requestFromGengo($translator, 'translate/service/languages', 'GET');
       $languages = array();
 
       foreach ($supported_languages as $language) {
@@ -233,7 +233,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     $quality = !empty($form_state['values']['settings']['quality']) ? $form_state['values']['settings']['quality'] : 'machine';
     $translation_array = $this->generateMyGengoTranslationJobArray($job, $quality);
-    $response = $this->requestFromGengo('/translate/service/quote', 'POST', array(
+    $response = $this->requestFromGengo($job->getTranslator(), '/translate/service/quote', 'POST', array(
       'jobs' => $translation_array,
       'as_group' => 1
       ));
