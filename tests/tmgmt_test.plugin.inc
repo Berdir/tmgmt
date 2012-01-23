@@ -68,6 +68,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
 
   function canTranslate(TMGMTJob $job) {
     if (isset($job->settings['action']) && $job->settings['action'] == 'not_translatable') {
+      dpm('FALSE');
       return FALSE;
     }
     return parent::canTranslate($job);
