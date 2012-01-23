@@ -81,25 +81,27 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   );
   foreach (array('source', 'target') as $item) {
     $key = $item . '_language';
-    $label = t(ucfirst($item) . ' language');
     if (!empty($job->{$key})) {
       $form['languages'][$key] = array(
         '#type' => 'item',
-        '#title' => $label,
+        '#title' => t(ucfirst($item) . ' language'),
         '#markup' => tmgmt_language_label($job->{$key}),
         '#required' => TRUE,
+        '#prefix' => '<div class="tmgmt-ui-' . $item . '-language">',
+        '#suffix' => '</div>',
       );
     }
     else {
       $form['languages'][$key] = array(
         '#type' => 'select',
-        '#title' => $label,
+        '#title' => t(ucfirst($item) . ' language'),
         '#options' => $available_languages,
         '#required' => TRUE,
         '#ajax' => array(
           'callback' => 'tmgmt_ajax_callback_get_supported_translators',
           'wrapper' => 'tmgmt-translator-wrapper',
         ),
+        '#attributes' => array('class' => array('tmgmt-ui-' . $item . '-language')),
       );
     }
   }
@@ -154,6 +156,8 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     '#value' => t('Checkout order'),
     '#weight' => 50,
   );
+  // We need some CSS for showing the source and target language in one row.
+  $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
   return $form;
 }
 
