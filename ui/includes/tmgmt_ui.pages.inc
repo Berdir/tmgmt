@@ -108,7 +108,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
         $form['translator_wrapper']['options']['settings']['#markup'] = t('Translator is not available: @reason.', array('@reason' => $selected_translator->getNotAvailableReason()));
         break;
       case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-        $form['translator_wrapper']['options']['settings']['#markup'] = t('Test translator is not available for @language.', array('@language' => tmgmt_language_label($selected_target_language)));
+        $form['translator_wrapper']['options']['settings']['#markup'] = t('@plugin_label is not available for @language.', array('@language' => tmgmt_language_label($selected_target_language), '@plugin_label' => $selected_translator->label));
         break;
       default:
         if ($settings = $selected_translator->jobSettingsForm(array(), $form_state, $job)) {
