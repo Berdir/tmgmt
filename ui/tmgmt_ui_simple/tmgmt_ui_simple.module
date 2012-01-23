@@ -87,7 +87,7 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
       $job = $jobs[$langcode];
       $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
       $job_uri = $job->uri();
-      $form['languages']['#options'][$langcode][2] = t('Job state: !state', array('!state' => l($wrapper->state->label(), $job_uri['path'])));
+      $form['languages']['#options'][$langcode][2] = t('@state (Job state: !job_state)', array('@state' => $form['languages']['#options'][$langcode][2], '!job_state' => l($wrapper->state->label(), $job_uri['path'])));
       $form['languages'][$langcode] = array(
       	'#disabled' => TRUE,
         '#type' => 'checkbox',

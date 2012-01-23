@@ -24,13 +24,20 @@ function tmgmt_nativy_menu() {
   $items['admin/config/services/nativy'] = array(
     'title' => 'Nativy Translator',
     'description' => 'Configure Nativy Translator service.',
+    'type' => MENU_CALLBACK,
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tmgmt_nativy_settings'),
     'access arguments' => array('administer site configuration'),
   );
   
   // @todo menu callback for order complete callback
-  //$items['nativy/notification'] = array();
+  $items['nativy/notification'] = array(
+    'title' => 'Nativy Notification',
+    'description' => 'Callback for the completion notification of a translation job.',
+    'type' => MENU_CALLBACK,
+    'page callback' => 'tmgmt_nativy_process_translation_result',
+    // @todo add a tmgmt permission: 'access arguments' => array('administer site configuration'),
+  );
 
   return $items;
 }
