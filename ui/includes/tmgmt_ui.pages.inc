@@ -38,27 +38,26 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   // Add the job to the form state so we can use it in the submit handlers.
   $form_state['job'] = $job;
   // Look up the items on the job.
-  $job_items = $job->getItems();
-  $job_items_count = count($job_items);
+  $items = $job->getItems();
   // Add a nice title that describes the form.
-  drupal_set_title(format_plural($job_items_count, 'Translation job checkout for @count translatable item', 'Translation job checkout for @count translatable items'));
-  // Get all available languages from core translation module.
-  $available_languages = tmgmt_available_languages(array($job->source_language));
-  if (isset($form_state['values']['target_language'])) {
-    $selected_target_language = $form_state['values']['target_language'];
+  drupal_set_title(format_plural(count($items), 'Translation job checkout for @count translatable item', 'Translation job checkout for @count translatable items'));
+  // Find pre-selected values and get all available languages.
+  $available = tmgmt_available_languages();
+  $preselected = array();
+  // @todo Make sure that our ajax callback also replaces the opposite language
+  // options list so we never have the same source and target language.
+  foreach (array('source' => 'target', 'target' => 'source') as $item => $opposite) {
+    $key = $item . '_language';
+    $preselected[$item] = !empty($job->{$key}) ? $job->{$key} : NULL;
+    // Actually select an element.
+    $selected[$item] = $preselected[$item] ? $preselected[$item] : (isset($form_state['values'][$key]) ? $form_state['values'][$key] : key($available));
   }
-  elseif (!empty($job->target_language)) {
-    $selected_target_language = $job->target_language;
-  }
-  else {
-    $selected_target_language = key($available_languages);
-  }
-  // Get the translator plugin that is currently selected.
-  $translators = tmgmt_translator_filtered_by_language($job->source_language, $selected_target_language);
-  $selected_translator_name = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
-  $selected_translator = tmgmt_translator_load($selected_translator_name);
+  // Show a list of translators tagged by availability for the selected source
+  // and target language combination
+  $translators = tmgmt_translator_filtered_by_language($selected['source'], $selected['target']);
+  $selected['translator'] = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
   // Show the items that are attached to this job if there are not more than 20.
-  if ($job_items_count <= 20) {
+  if (count($items) <= 20) {
     $form['job_items'] = array(
       '#type' => 'fieldset',
       '#title' => t('Attached source objects'),
@@ -79,29 +78,32 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     '#type' => 'fieldset',
     '#title' => t('Source and target language'),
   );
+  // Make the source and target language flexible by showing either a select
+  // dropdown or the plain string (if preselected).
   foreach (array('source', 'target') as $item) {
     $key = $item . '_language';
+    $form['languages'][$key] = array(
+      '#title' => t(ucfirst($item) . ' language'),
+      '#required' => TRUE,
+      '#prefix' => '<div class="tmgmt-ui-' . $item . '-language">',
+      '#suffix' => '</div>',
+    );
     if (!empty($job->{$key})) {
-      $form['languages'][$key] = array(
+      $form['languages'][$key] += array(
         '#type' => 'item',
         '#title' => t(ucfirst($item) . ' language'),
         '#markup' => tmgmt_language_label($job->{$key}),
-        '#required' => TRUE,
-        '#prefix' => '<div class="tmgmt-ui-' . $item . '-language">',
-        '#suffix' => '</div>',
       );
     }
     else {
-      $form['languages'][$key] = array(
+      $form['languages'][$key] += array(
         '#type' => 'select',
-        '#title' => t(ucfirst($item) . ' language'),
-        '#options' => $available_languages,
-        '#required' => TRUE,
+        '#options' => $available,
+        '#default_value' => $selected[$item],
         '#ajax' => array(
           'callback' => 'tmgmt_ajax_callback_get_supported_translators',
           'wrapper' => 'tmgmt-translator-wrapper',
         ),
-        '#attributes' => array('class' => array('tmgmt-ui-' . $item . '-language')),
       );
     }
   }
@@ -115,7 +117,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
       '#type' => 'select',
       '#title' => t('Translator'),
       '#options' => $translators,
-      '#default_value' => $selected_translator_name,
+      '#default_value' => $selected['translator'],
       '#required' => TRUE,
       '#ajax' => array(
         'callback' => 'tmgmt_ajax_callback_get_translator_options',
@@ -128,22 +130,6 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
       '#prefix' => '<div id="tmgmt-translator-options">',
       '#suffix' => '</div>',
     );
-    switch (tmgmt_translator_check($selected_translator, $job->source_language, $selected_target_language)) {
-      case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-        $form['translator_wrapper']['options']['settings']['#markup'] = t('Translator is not available: @reason.', array('@reason' => $selected_translator->getNotAvailableReason()));
-        break;
-      case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-        $form['translator_wrapper']['options']['settings']['#markup'] = t('@plugin_label is not available for @language.', array('@language' => tmgmt_language_label($selected_target_language), '@plugin_label' => $selected_translator->label));
-        break;
-      default:
-        if ($settings = $selected_translator->jobSettingsForm(array(), $form_state, $job)) {
-          $form['translator_wrapper']['options']['settings'] = $settings;
-          $form['translator_wrapper']['options']['settings']['#tree'] = TRUE;
-        }
-        else {
-          $form['translator_wrapper']['options']['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $selected_translator->identifier()));
-        }
-    }
   }
   else {
     $form['translator_wrapper']['translator'] = array(
@@ -199,22 +185,31 @@ function tmgmt_job_checkout_form_submit($form, &$form_state) {
  */
 function tmgmt_job_checkout_form_validate($form, &$form_state) {
   $values = $form_state['values'];
-  $job = $form_state['job'];
+  // We need to clone this here so we don't change the job entity in the form
+  // state. Otherwise the form will break.
+  $job = clone $form_state['job'];
+  // Load the selected translator.
   $translator = tmgmt_translator_load($values['translator']);
-  $available_languages = entity_metadata_language_list();
-  switch (tmgmt_translator_check($translator, $job->source_language, $values['target_language'])) {
+  // Identify the selected source and target language.
+  $job->source_language = $values['source_language'] ? $values['source_language'] : $job->source_language;
+  $job->target_language = $values['target_language'] ? $values['target_language'] : $job->target_language;
+  // Load the metadata wrapper so we can display the selected language
+  $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
+  switch (tmgmt_translator_check($translator, $job->source_language, $job->target_language)) {
     case TMTGT_TRANSLATOR_NOT_AVAILABLE:
       form_set_error('translator', t('Translator is not available: @reason.', array('@reason' => $translator->getNotAvailableReason())));
       break;
     case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-      form_set_error('translator', t('Test translator is not available for @language.', array('@language' => $available_languages[$values['target_language']])));
+      form_set_error('translator', t('Test selected translator can not translate from @source to @language.', array('@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())));
       break;
   }
-  $job->target_language = $values['target_language'];
+  // Build up the rest of the fake (cloned) entity so we can check if the job
+  // is translateable.
   $job->translator = $values['translator'];
   $job->settings = $values['settings'];
   if (!$job->isTranslatable()) {
-    form_set_error('translator', t('Fail: todo add generic message'));
+    // @todo Add a generic error message.
+    form_set_error('translator', t('Something went wrong.'));
   }
 }
 
