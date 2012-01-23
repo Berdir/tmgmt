@@ -72,7 +72,7 @@ class TMGMTMicrosoftTestCase extends TMGMTBaseTestCase {
     $this->assertTrue($job->isNeedsReview());
     $items = $job->getItems();
     $item = end($items);
-    $this->assertEqual('de_Hello world', $item->translated_data['wrapper']['#text']);
+    $this->assertEqual('de_Hello world', $item->translation['wrapper']['#text']);
   }
 
 }

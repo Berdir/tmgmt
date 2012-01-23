@@ -51,13 +51,13 @@ function tmgmt_schema() {
         'type' => 'varchar',
         'length' => 128,
       ),
-      'translator_context' => array(
+      'settings' => array(
         'description' => 'Translator specific configuration and context for this job.',
         'type' => 'text',
         'size' => 'big',
         'serialize' => TRUE,
       ),
-      'translator_id' => array(
+      'reference' => array(
         'description' => 'Remote identifier of this translation job.',
         'type' => 'varchar',
         'length' => 256,
@@ -77,7 +77,7 @@ function tmgmt_schema() {
     'primary key' => array('tjid'),
     'indexes' => array(
       'state' => array('state'),
-      'translator_id' => array('translator_id'),
+      'reference' => array('reference'),
     ),
   );
 
@@ -118,7 +118,7 @@ function tmgmt_schema() {
         'size' => 'big',
         'serialize' => TRUE,
       ),
-      'translated_data' => array(
+      'translation' => array(
         'description' => 'Structured translated data.',
         'type' => 'text',
         'not null' => TRUE,

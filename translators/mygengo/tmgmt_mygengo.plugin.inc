@@ -106,7 +106,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    */
   public function requestTranslation(TMGMTJob $job) {
     // Pull the source data array from through the job and generate the MyGengo Translation Job
-	$translations = $this->generateMyGengoTranslationJobArray($job, $job->translator_context['quality']);
+	$translations = $this->generateMyGengoTranslationJobArray($job, $job->settings['quality']);
 
     $response = $this->requestFromGengo('translate/jobs', 'POST', array(
       'jobs' => $translations,

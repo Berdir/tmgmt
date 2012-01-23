@@ -23,13 +23,13 @@ function tmgmt_entity_tmgmt_source_plugin_info() {
  *
  * @param object $entity
  *   The translated entity object (the target). *
- * @param array $translated_data
+ * @param array $translation
  *   An array with the structured translated data.
  *
  * @see TMGMTEntitySourcePluginController::getData()
  */
-function tmgmt_entity_update_entity_translation($entity, $entity_type, $translated_data, $target_language) {
-  foreach ($translated_data as $field_name => $values) {
+function tmgmt_entity_update_entity_translation($entity, $entity_type, $translation, $target_language) {
+  foreach ($translation as $field_name => $values) {
     $index = 0;
     foreach ($values as $value) {
       $tdata = array();

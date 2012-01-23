@@ -242,7 +242,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *
    * @var array
    */
-  public $translated_data = array();
+  public $translation = array();
 
   /**
    * Overrides Entity::label()
@@ -300,7 +300,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * Note: This does not merge existing data which already exists below the
    * defined key and will replace it.
    *
-   * @param $translated_data
+   * @param $translation
    *   Nested array of translated data. Can either be a single text entry, the
    *   whole data structure or parts of it.
    * @param $key
@@ -311,17 +311,17 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * @return bool
    *   TRUE if the translated data could be added, FALSE otherwise.
    */
-  public function addTranslatedData($translated_data, $key = array()) {
+  public function addTranslatedData($translation, $key = array()) {
     if (empty($key)) {
       $key = array();
     }
     if (!is_array($key)) {
       $key = explode(TMGMT_ARRAY_DELIMITER, $key);
     }
-    if (!is_array($this->translated_data)) {
-      $this->translated_data = array();
+    if (!is_array($this->translation)) {
+      $this->translation = array();
     }
-    drupal_array_set_nested_value($this->translated_data, $key, $translated_data);
+    drupal_array_set_nested_value($this->translation, $key, $translation);
     if ($this->save()) {
       return TRUE;
     }
@@ -378,14 +378,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @var array
    */
-  public $translator_context;
+  public $settings;
 
   /**
    * Remote identification of this job.
    *
    * @var integer
    */
-  public $translator_id;
+  public $reference;
 
   /**
    * The user id of the creator of the job.

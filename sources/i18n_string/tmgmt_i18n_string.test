@@ -39,7 +39,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     // Create the new job and job item.
     $job = $this->createJob();
     $job->translator = $this->translator->name;
-    $job->translator_context = array();
+    $job->settings = array();
     $job->save();
 
     $item1 = $job->addItem('i18n_string', 'i18n_string', $string_object_name);
@@ -71,7 +71,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     // Create the new job and job item.
     $job = $this->createJob();
     $job->translator = $this->translator->name;
-    $job->translator_context = array();
+    $job->settings = array();
 
     $item1 = $job->addItem('i18n_string', 'i18n_string', $string_name);
     $job->prepared();

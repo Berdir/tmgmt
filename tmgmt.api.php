@@ -93,7 +93,7 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * @code
  * $job->translator = 'test_translator';
  * // Translator specific settings.
- * $job->translator_context = array(
+ * $job->settings = array(
  *   'priority' => 5,
  * );
  * $job->save();

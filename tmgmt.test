@@ -147,12 +147,12 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(0, $loaded_job->state);
 
     // Update the settings.
-    $job->translator_id = 7;
+    $job->reference = 7;
     $this->assertEqual(SAVED_UPDATED, $job->save());
 
     $loaded_job = tmgmt_job_load($job->tjid);
 
-    $this->assertEqual($job->translator_id, $loaded_job->translator_id);
+    $this->assertEqual($job->reference, $loaded_job->reference);
 
     // Test the job items.
     $item1 = $job->addItem('plugin', 'type', 5);
@@ -240,7 +240,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     // Manually specify the translator for now.
     $job->translator = $this->default_translator->name;
-    $job->translator_context = array('action' => $action);
+    $job->settings = array('action' => $action);
     $job->prepared();
 
     return $job;
@@ -280,7 +280,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
         // The third item has an explicitly stored data value.
         $expected_text = 'de_Stored data';
       }
-      $this->assertEqual($expected_text, $item->translated_data['dummy']['deep_nesting']['#text']);
+      $this->assertEqual($expected_text, $item->translation['dummy']['deep_nesting']['#text']);
       $i++;
     }
 

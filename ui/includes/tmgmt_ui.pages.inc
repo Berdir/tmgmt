@@ -189,7 +189,7 @@ function tmgmt_job_checkout_form_validate($form, &$form_state) {
   }
   $job->target_language = $values['target_language'];
   $job->translator = $values['translator'];
-  $job->translator_context = $values['settings'];
+  $job->settings = $values['settings'];
   if (!$job->isTranslatable()) {
     form_set_error('translator', t('Fail: todo add generic message'));
   }

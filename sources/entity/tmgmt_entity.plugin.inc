@@ -35,7 +35,7 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
   public function saveTranslation(TMGMTJobItem $job_item) {
     $entity = entity_load_single($job_item->item_type, $job_item->item_id);
     $job = tmgmt_job_load($job_item->tjid);
-    tmgmt_entity_update_entity_translation($entity, $job_item->item_type, $job_item->translated_data, $job->target_language);
+    tmgmt_entity_update_entity_translation($entity, $job_item->item_type, $job_item->translation, $job->target_language);
   }
 
 }

@@ -23,13 +23,13 @@ function tmgmt_node_tmgmt_source_plugin_info() {
  *
  * @param object $node
  *   The translated node object (the target).
- * @param array $translated_data
+ * @param array $translation
  *   An array with the structured translated data.
  *
  * @see TMGMTNodeSourcePluginController::getData()
  */
-function tmgmt_node_update_node_translation($node, $translated_data, $target_language) {
-  foreach ($translated_data as $field_name => $values) {
+function tmgmt_node_update_node_translation($node, $translation, $target_language) {
+  foreach ($translation as $field_name => $values) {
     // Special case for the node  title.
     if ($field_name == 'node_title') {
       $node->title = $values[0]['value']['#text'];

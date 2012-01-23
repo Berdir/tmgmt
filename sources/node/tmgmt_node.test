@@ -86,7 +86,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
     // Create the new job and job item.
     $job = $this->createJob();
     $job->translator = 'dummy';
-    $job->translator_context = array();
+    $job->settings = array();
     $job->addItem('node', 'node', $node->nid);
     $job->requestTranslation();
     $job->accepted();
@@ -106,7 +106,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
       }
       else {
         $tnode = node_load($translations[$langcode]->nid, NULL, TRUE);
-        $this->checkTranslatedData($tnode, $item->translated_data, $langcode);
+        $this->checkTranslatedData($tnode, $item->translation, $langcode);
       }
     }
   }
@@ -117,14 +117,14 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
    * @param object $tnode
    *  The translated node object.
    *
-   * @param array $translated_data
+   * @param array $translation
    *  An array with the translated data.
    *
    * @param string $langcode
    *  The code of the target language.
    */
-  function checkTranslatedData($tnode, $translated_data, $langcode) {
-    foreach ($translated_data as $field_name => $values) {
+  function checkTranslatedData($tnode, $translation, $langcode) {
+    foreach ($translation as $field_name => $values) {
       // Special case for the node  title.
       if ($field_name == 'node_title') {
         $this->assertEqual($tnode->title, $values[0]['value']['#text'], t('The title of the translated node does match with the translated data.'));

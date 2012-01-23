@@ -236,18 +236,18 @@ function tmgmt_supertext_callback() {
   $job = tmgmt_job_load($tjid);
   watchdog('supertext', 'JOB.  <br /><pre>!post</pre>', array('!post' => print_r($job, TRUE)));
 
-  $translated_data = array();
+  $translation = array();
   foreach ($data->Groups as $object_id => $object) {
     // Object <=> JobItem
     foreach ($object->Items as $string_object) {
-      $translated_data[$object->GroupId][$string_object->Id] = array(
+      $translation[$object->GroupId][$string_object->Id] = array(
         '#text' => $string_object->Content,
       );
     }
   }
-  watchdog('supertext', 'TRANSLATED DATA.  <br /><pre>!post</pre>', array('!post' => print_r($translated_data, TRUE)));
+  watchdog('supertext', 'TRANSLATED DATA.  <br /><pre>!post</pre>', array('!post' => print_r($translation, TRUE)));
 
-  $job->addTranslatedData($translated_data);
+  $job->addTranslatedData($translation);
   $job->save();
   $job->needsReview('Supertext sent us their translation');
 }

@@ -81,11 +81,11 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
   public function requestTranslation(TMGMTJob $job) {
 
   	$object = $this->generateSupertextOrderObject($job);
-  	$order_settings = explode(":", $job->translator_context['supertext-job']);
+  	$order_settings = explode(":", $job->settings['supertext-job']);
     $object->OrderTypeId = $order_settings[0];
     $object->DeliveryId = $order_settings[1];
-    $job->label = $job->translator_context['job-label'];
-	$object->OrderTitle = $job->translator_context['job-label'];
+    $job->label = $job->settings['job-label'];
+	$object->OrderTitle = $job->settings['job-label'];
 
     $options = array(
       'method' => 'POST',
@@ -101,7 +101,7 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
       $job->submitted("Job sent to Supertext. Response: !response",array('!response'=> $response->data));
       $responsedata = json_decode($response->data);
       // Save order id to the job
-      $job->translator_id = $responsedata->Id;
+      $job->reference = $responsedata->Id;
       $job->addMessage(t("Job successfully sent to Supertext. <br />Ordertitle: @ordertitle<br />OrderID: @orderid<br />Price: @price<br />Wordcount: @wordcount<br />Deadline: @deadline",array(
         '@ordertitle' => $responsedata->OrderTitle,
         '@orderid' => $responsedata->Id,
