@@ -254,8 +254,17 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
 }
 
 /**
- * This function will return a job which matches the requested source- and
- * target language by user. If no job exists, a new job object will be created.
+ * @todo Is this really a good function name?
+ *
+ * Returns a job which matches the requested source- and target language by
+ * user. If no job exists, a new job object will be created.
+ *
+ * @param $source_language
+ *   The source language from which should be translated.
+ * @param $target_language
+ *   The target language into which should be translated.
+ * @param $account
+ *   (Optional) A user object. Defaults to the currently logged in user.
  *
  * @return TMGMTJob
  *   The job entity.
@@ -319,6 +328,9 @@ function tmgmt_job_states() {
 /**
  * Loads a translation job item.
  *
+ * @param $tjiid
+ *   A job item id.
+ *
  * @return TMGMTJobItem
  *   The loaded job item.
  */
@@ -328,11 +340,24 @@ function tmgmt_job_item_load($tjiid) {
 }
 
 /**
+ * @todo Looks ineffective to me. Let's remove that loop.
+ *
  * Loads a translation job item per source. It will order the related jobs by
  * the latest change.
  *
+ * @param $source_type
+ *   The source type.
+ * @param $item_type
+ *   The source item type.
+ * @param $item_id
+ *   The source item id.
+ * @param $source_language
+ *   The source language.
+ * @param $target_languages
+ *   (Optional) An array of target language.
+ *
  * @return TMGMTJobItem
- *   The loaded job item.
+ *   The loaded job items.
  */
 function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id, $source_language, $target_languages = array()) {
   if (empty($target_languages)) {
@@ -340,6 +365,7 @@ function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id, $so
     unset($available_languages[LANGUAGE_NONE], $available_languages[$source_language]);
     $target_languages = array_keys($available_languages);
   }
+  // @todo Why are we looping here? Can't this be done with an IN statement?
   foreach ($target_languages as $target_language) {
     $query = db_select('tmgmt_job_item', 'ji');
     $query->join('tmgmt_job', 'j', 'j.tjid = ji.tjid AND j.target_language = :target_language', array(':target_language' => $target_language));
@@ -353,12 +379,7 @@ function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id, $so
       $jobs[$target_language] = tmgmt_job_load($tjid);
     }
   }
-  if(isset($jobs)) {
-    return $jobs;
-  }
-  else {
-    return FALSE;
-  }
+  return isset($jobs) ? $jobs : FALSE;
 }
 
 /**
@@ -393,6 +414,12 @@ function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $valu
 
 /**
  * Loads a translation job message.
+ *
+ * @param $tjmid
+ *   A job message id.
+ *
+ * @return TMGMTJobMessage
+ *   A job message entity or FALSE if the query didn't yield any results.
  */
 function tmgmt_job_message_load($tjmid) {
   $jobs = tmgmt_job_load_multiple(array($tjmid));
