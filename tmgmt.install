@@ -360,3 +360,35 @@ function tmgmt_update_7008() {
     'default' => 0,
   ));
 }
+
+/**
+ * Add the weight column to {tmgmt_translator}.
+ */
+function tmgmt_update_7009() {
+  // Rename 'translated_data' to 'translation'.
+  db_change_field('tmgmt_job_item', 'translated_data', 'translation', array(
+    'description' => 'Structured translated data.',
+    'type' => 'text',
+    'not null' => TRUE,
+    'size' => 'big',
+    'serialize' => TRUE,
+  ));
+  // Rename 'translator_data' to 'translation'.
+  db_change_field('tmgmt_job', 'translator_context', 'settings', array(
+    'description' => 'Translator specific settings.',
+    'type' => 'text',
+    'size' => 'big',
+    'serialize' => TRUE,
+  ));
+  // Rename 'translator_id' to 'reference'.
+  db_drop_index('tmgmt_job', 'translator_id');
+  db_change_field('tmgmt_job', 'translator_id', 'reference', array(
+    'description' => 'Remote identifier of this translation job.',
+    'type' => 'varchar',
+    'length' => 256,
+  ), array(
+    'indexes' => array(
+      'reference' => array('reference'),
+    ),
+  ));
+}
