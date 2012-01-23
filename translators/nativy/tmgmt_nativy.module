@@ -36,7 +36,7 @@ function tmgmt_nativy_menu() {
     'description' => 'Callback for the completion notification of a translation job.',
     'type' => MENU_CALLBACK,
     'page callback' => 'tmgmt_nativy_process_translation_result',
-    // @todo add tmgmt permission: 'access arguments' => array('administer site configuration'),
+    // @todo add a tmgmt permission: 'access arguments' => array('administer site configuration'),
   );
 
   return $items;
