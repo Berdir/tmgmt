@@ -153,7 +153,7 @@ function tmgmt_ui_ajax_callback_translator_plugin($form, &$form_state) {
  *   The machine-readable name of the translator entity that we are trying to
  *   save.
  *
- * @return bool
+ * @return boolean
  *   TRUE if a translator entity with the same machine-readable name already
  *   exists FALSE otherwise.
  */
@@ -163,5 +163,5 @@ function tmgmt_ui_translator_exists($name) {
     ->propertyCondition('name', $name)
     ->count()
     ->range(0, 1);
-  return (bool) $query->execute();
+  return (boolean) $query->execute();
 }

@@ -27,7 +27,7 @@ interface TMGMTSourcePluginControllerInterface {
   /**
    * Saves a translation.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the translation was saved successfully, FALSE otherwise.
    */
   public function saveTranslation(TMGMTJobItem $job_item);
@@ -123,7 +123,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * @param TMGMTTranslator $translator
    *   The translator entity.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
   public function isAvailable(TMGMTTranslator $translator);
@@ -191,7 +191,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * @param TMGMTJob $job
    *   The job that should have its translation cancelled.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the job could be cancelled, FALSE otherwise.
    */
   public function cancelTranslation(TMGMTJob $job);

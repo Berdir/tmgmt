@@ -103,7 +103,7 @@ class TMGMTTranslator extends Entity {
   /**
    * Checks whether a translator is available.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
   public function isAvailable() {
@@ -323,7 +323,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
    *   means that it will replace the whole translated data array.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the translated data could be added, FALSE otherwise.
    */
   public function addTranslatedData($translation, $key = array()) {
@@ -518,7 +518,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Returns whether the state of this transaction is new.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the state is new, FALSE otherwise.
    */
   public function isNew() {
@@ -528,7 +528,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Returns whether the state of this transaction is prepared.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the state is prepared, FALSE otherwise.
    */
   public function isPrepared() {
@@ -538,7 +538,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Returns whether the state of this transaction is submitted.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the state is submitted, FALSE otherwise.
    */
   public function isSubmitted() {
@@ -548,7 +548,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Returns whether the state of this transaction is rejected.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the state is rejected, FALSE otherwise.
    */
   public function isRejected() {
@@ -558,7 +558,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Returns whether the state of this transaction needs to be reviewed.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the state is needs review, FALSE otherwise.
    */
   public function isNeedsReview() {
@@ -568,7 +568,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Returns whether the state of this transaction is accepted.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the state is accepted, FALSE otherwise.
    */
   public function isAccepted() {
@@ -578,7 +578,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Returns whether the state of this transaction is cancelled.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the state is cancelled, FALSE otherwise.
    */
   public function isCancelled() {
@@ -588,7 +588,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Propagates the returned job item translations to the sources.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if we were able to propagate the translated data, FALSE otherwise.
    */
   public function propagateTranslatedData() {
@@ -715,7 +715,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   The new state of the job. Has to be one of the state constants defined
    *   in the state
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the state could be set, FALSE otherwise.
    */
   public function setState($state) {
@@ -734,7 +734,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @param $state
    *   The value to check the current state against.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the passed state matches the current state, FALSE otherwise.
    */
   public function isState($state) {
@@ -894,7 +894,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Checks whether a job is translatable by checking if it is prepared and
    * the translator can handle it.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the job is prepared and can be translated, FALSE otherwise.
    */
   public function isTranslatable() {
@@ -926,7 +926,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * cancelled, submitted jobs only if supported by the translator plugin.
    * Always use this method if you want to cancel a translation job.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the translation job was cancelled, FALSE otherwise.
    */
   public function cancelTranslation() {
