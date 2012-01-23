@@ -20,8 +20,7 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   function requestTranslation(TMGMTJob $job) {
-    //$job->addTranslatedData($job->getSourceData());
-    $job->prepared('Job queued for local translation.');
+    $job->submitted('Job queued for local translation.');
   }
 
   /**
@@ -39,10 +38,11 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
       ->condition('t.type', 'source')
       ->distinct();
     $list = $query->execute()->fetchCol();
-    return array_flip($list);    
+    return array_flip($list);
   }
+
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
   function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $query = db_select('tmgmt_local_user', 'target')
