@@ -82,7 +82,7 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
       continue;
     }
     $form['languages']['#options'][$langcode] = array_shift($original['#rows']);
-    if (isset($jobs[$langcode]) && ($jobs[$langcode]->changed >= $node->changed)) {
+    if (isset($jobs[$langcode]) && ($jobs[$langcode]->changed >= $node->changed) && $jobs[$langcode]->state != 5) {
       $job = $jobs[$langcode];
       $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
       $job_uri = $job->uri();
