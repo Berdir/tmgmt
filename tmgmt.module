@@ -112,7 +112,7 @@ function tmgmt_entity_info() {
     'base table' => 'tmgmt_job',
     'uri callback' => 'entity_class_uri',
     'label callback' => 'entity_class_label',
-    //'access callback' => 'tmgmt_translator_access',
+    'access callback' => 'tmgmt_job_access',
     'entity keys' => array(
       'id' => 'tjid',
     ),
@@ -127,6 +127,7 @@ function tmgmt_entity_info() {
     'base table' => 'tmgmt_job_item',
     'uri callback' => 'entity_class_uri',
     'label callback' => 'entity_class_label',
+    'access callback' => 'tmgmt_job_item_access',
     'entity keys' => array(
       'id' => 'tjiid',
     ),
@@ -308,6 +309,31 @@ function tmgmt_job_create($source_language, $target_language, $uid = NULL, array
 }
 
 /**
+ * Access callback for the job entity.
+ */
+function tmgmt_job_access($op, TMGMTJob $job = NULL, $account = NULL) {
+  switch ($op) {
+    case 'create':
+      return user_access('tmgmt create new jobs', $account);
+    case 'view':
+    case 'update':
+    case 'delete':
+      if (isset($job)) {
+        if ($job->isAuthor($account)) {
+          // Covers cases in which the user described by $account is the author.
+          return user_access('tmgmt ' . $op . ' own jobs', $account) || user_access('tmgmt ' . $op . ' all jobs', $account);
+        }
+        else {
+          // Covers all other cases.
+          return user_access('tmgmt ' . $op . ' all jobs', $account);
+        }
+      }
+    default:
+      return FALSE;
+  }
+}
+
+/**
  * Static method to retrieve a labeled list of all available states.
  *
  * @return array
@@ -410,6 +436,17 @@ function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $valu
     'item_type' => $item_type,
     'item_id' => $item_id,
   )));
+}
+
+/**
+ * Access callback for the job item entity.
+ */
+function tmgmt_job_item_access($op, TMGMTJobItem $job_item = NULL, $account = NULL) {
+  // We just forward the access request to the job entity.
+  if (isset($job_item) && $job = $job_item->getJob()) {
+    return entity_access($op, 'tmgmt_job', $job, $account);
+  }
+  return entity_access($op, 'tmgmt_job', NULL, $account);
 }
 
 /**

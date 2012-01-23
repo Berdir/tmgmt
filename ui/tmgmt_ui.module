@@ -62,8 +62,8 @@ function tmgmt_ui_menu() {
     'title' => 'Checkout job',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tmgmt_job_checkout_form', 5),
-    'access callback' => 'tmgmt_ui_checkout_access',
-    'access arguments' => array(5),
+    'access callback' => 'tmgmt_ui_job_access',
+    'access arguments' => array(5, 'checkout'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
   );

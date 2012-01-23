@@ -154,8 +154,8 @@ function tmgmt_ui_ajax_callback_translator_plugin($form, &$form_state) {
  *   save.
  *
  * @return bool
- *   TRUE if a translator entity with the same machine-readable already exists,
- *   FALSE otherwise.
+ *   TRUE if a translator entity with the same machine-readable name already
+ *   exists FALSE otherwise.
  */
 function tmgmt_ui_translator_exists($name) {
   $query = new EntityFieldQuery();

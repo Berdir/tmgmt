@@ -260,6 +260,20 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   }
 
   /**
+   * Loads the job entity that this job item is attached to.
+   *
+   * @return TMGMTJob
+   *   The job entity that this job item is attached to or FALSE if there was
+   *   a problem.
+   */
+  public function getJob() {
+    if (!empty($this->tjid) && $job = tmgmt_job_load($this->tjid)) {
+      return $job;
+    }
+    return FALSE;
+  }
+
+  /**
    * Array of the data to be translated.
    *
    * The structure is similar to the form API in the way that it is a possibly
@@ -488,6 +502,17 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       );
     }
     return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
+  }
+
+  /**
+   * Checks whether the user described by $account is the author of this job.
+   *
+   * @param $account
+   *   (Optional) A user object. Defaults to the currently logged in user.
+   */
+  public function isAuthor($account = NULL) {
+    $account = isset($account) ? $account : $GLOBALS['user'];
+    return $this->uid == $account->uid;
   }
 
   /**
