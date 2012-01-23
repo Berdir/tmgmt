@@ -617,7 +617,8 @@ function tmgmt_translator_create($plugin, $name, $label, $description = '', $set
 function tmgmt_translator_auto_create($plugin) {
   if ($info = tmgmt_translator_plugin_info($plugin)) {
     if (!tmgmt_translator_exists($plugin)) {
-      $translator = tmgmt_translator_create($plugin, $plugin, $info['label'], $info['description']);
+      $label = $plugin . ' (auto created)';
+      $translator = tmgmt_translator_create($plugin, $label, $info['label'], $info['description']);
       // Append some default settings from the translator plugin definition.
       $translator->settings = $translator->getPluginController()->defaultTranslatorSettings();
       $translator->save();
