@@ -171,11 +171,16 @@ function tmgmt_entity_info() {
  * Implements hook_permission().
  */
 function tmgmt_permission() {
-  return array(
-    'administer tmgmt' => array(
-      'title' => t('Administer Translation Management'),
-    ),
+  $perms = array();
+  $perms['administer tmgmt'] = array(
+    'title' => t('Administer Translation Management'),
   );
+  // @todo Remove this access check once entity access is finished.
+  $perms['access tmgmt ui'] = array(
+    'title' => t('Access Translation Management UI'),
+  );
+  }
+  return $perms;
 }
 
 /**
