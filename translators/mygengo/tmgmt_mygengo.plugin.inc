@@ -1,9 +1,9 @@
 <?php
+
 /**
  * @file
  * Provides myGengo translation plugin controller.
  */
-
 class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
@@ -106,23 +106,23 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    */
   public function requestTranslation(TMGMTJob $job) {
     // Pull the source data array from through the job and generate the MyGengo Translation Job
-	$translations = $this->generateMyGengoTranslationJobArray($job, $job->settings['quality']);
+    $translations = $this->generateMyGengoTranslationJobArray($job, $job->settings['quality']);
 
     $response = $this->requestFromGengo('translate/jobs', 'POST', array(
       'jobs' => $translations,
       'process' => 1,
       'as_group' => 1
-    ));
+      ));
 
     // Save the translated data through the job.
     $job->addTranslatedData(tmgmt_unflatten_data($response));
     //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
   }
 
-  public function generateMyGengoTranslationJobArray(TMGMTJob $job, $tier = "machine"){
-  	$data = tmgmt_flatten_data($job->getSourceData());
+  public function generateMyGengoTranslationJobArray(TMGMTJob $job, $tier = "machine") {
+    $data = tmgmt_flatten_data($job->getSourceData());
 
-  	$translations = array();
+    $translations = array();
 
     foreach ($data as $key => $value) {
       if (isset($value['#translate']) && $value['#translate'] === FALSE) {
@@ -173,9 +173,9 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
     $results = array();
     $targets = $this->requestFromGengo('translate/service/language_pairs', 'GET', array(
       'lc_src' => $source_language
-    ));
+      ));
 
-    foreach($targets as $target) {
+    foreach ($targets as $target) {
       $results[$target->lc_tgt] = 1;
     }
     return $results;
@@ -231,19 +231,19 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    *   Settings form.
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
-  	$quality = !empty($form_state['values']['settings']['quality']) ? $form_state['values']['settings']['quality'] : 'machine';
-  	$translation_array = $this->generateMyGengoTranslationJobArray($job, $quality);
-  	$response = $this->requestFromGengo('/translate/service/quote', 'POST', array(
+    $quality = !empty($form_state['values']['settings']['quality']) ? $form_state['values']['settings']['quality'] : 'machine';
+    $translation_array = $this->generateMyGengoTranslationJobArray($job, $quality);
+    $response = $this->requestFromGengo('/translate/service/quote', 'POST', array(
       'jobs' => $translation_array,
       'as_group' => 1
-    ));
+      ));
     $sum_credits = 0;
     $highest_eta = "";
     $sum_unit_count = 0;
     foreach ($response->jobs as $mygengo_job) {
-    	$sum_unit_count = $sum_unit_count + $mygengo_job->unit_count;
-    	$sum_credits = $sum_credits + $mygengo_job->credits;
-    	$highest_eta = ($mygengo_job->eta > $highest_eta) ? $mygengo_job->eta : $highest_eta;
+      $sum_unit_count = $sum_unit_count + $mygengo_job->unit_count;
+      $sum_credits = $sum_credits + $mygengo_job->credits;
+      $highest_eta = ($mygengo_job->eta > $highest_eta) ? $mygengo_job->eta : $highest_eta;
     }
 
 
@@ -253,30 +253,28 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
       '#markup' => $sum_unit_count,
     );
 
-        $settings['quality'] = array(
+    $settings['quality'] = array(
       '#type' => 'select',
       '#title' => t('Quality'),
-	  '#options' => array(
-	          'machine' => t('Machine'),
-	         'standard' => t('Standard'),
-    		'pro' => t('Pro'),
-	         'ultra' => t('Ultra'),
-	       ),
-	          '#description' => t('With which Quality you want to translate?'),
-	       '#ajax' => array(
-
-      'callback' => 'tmgmt_mygengo_quote',
-	       'wrapper' => 'mygengo-quote',
-
-    ),
+      '#options' => array(
+        'machine' => t('Machine'),
+        'standard' => t('Standard'),
+        'pro' => t('Pro'),
+        'ultra' => t('Ultra'),
+      ),
+      '#description' => t('With which Quality you want to translate?'),
+      '#ajax' => array(
+        'callback' => 'tmgmt_mygengo_quote',
+        'wrapper' => 'mygengo-quote',
+      ),
     );
 
-      $settings['quote'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Quote'),
-        '#prefix' => '<div id="mygengo-quote">',
-        '#suffix' => '</div>',
-      );
+    $settings['quote'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Quote'),
+      '#prefix' => '<div id="mygengo-quote">',
+      '#suffix' => '</div>',
+    );
 
     $settings['quote']['needed_credits'] = array(
       '#type' => 'item',

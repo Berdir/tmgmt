@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Module file of the translation management mygengo module.
@@ -18,7 +19,7 @@ function tmgmt_mygengo_menu() {
     'description' => '',
     'page callback' => 'tmgmt_mygengo_callback',
     'access callback' => 'tmgmt_mygengo_access_check'
-    );
+  );
   return $items;
 }
 
@@ -43,7 +44,7 @@ function tmgmt_mygengo_access_check() {
   try {
     $job = json_decode($_POST['job']);
     return TRUE;
-  } catch(Exception $e) {
+  } catch (Exception $e) {
 
     // Debug it for now, why not...
     watchdog('mygengo', print_r($_REQUEST, TRUE));
@@ -56,11 +57,11 @@ function tmgmt_mygengo_access_check() {
  */
 function tmgmt_mygengo_tmgmt_translator_plugin_info() {
   return array(
-  'mygengo' => array(
-    'label' => t('myGengo translator'),
-    'description' => t('A myGengo translator service.'),
-    'controller class' => 'TMGMTMyGengoPluginController',
-  ),
+    'mygengo' => array(
+      'label' => t('myGengo translator'),
+      'description' => t('A myGengo translator service.'),
+      'controller class' => 'TMGMTMyGengoPluginController',
+    ),
   );
 }
 
