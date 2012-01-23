@@ -926,10 +926,13 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * cancelled, submitted jobs only if supported by the translator plugin.
    * Always use this method if you want to cancel a translation job.
    *
+   * @param $account
+   *   (Optional) The user that cancelled the translation job.
+   *
    * @return boolean
    *   TRUE if the translation job was cancelled, FALSE otherwise.
    */
-  public function cancelTranslation() {
+  public function cancelTranslation($account = NULL) {
     // Already accepted translation jobs can't be cancelled.
     if (!$this->isAccepted()) {
       return FALSE;
@@ -938,7 +941,12 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     // cancel without any checks. Otherwise, ask the translator plugin if the
     // job can be cancelled.
     if (!$this->isSubmitted() || $this->getTranslatorController()->cancelTranslation($this)) {
-      $this->cancelled('The translation job has been canceled.');
+      if (isset($account)) {
+        $this->cancelled('The translation job has been canceled by !user.', array('!user' => theme('username', array('account' => $account))));
+      }
+      else {
+        $this->cancelled('The translation job has been canceled.');
+      }
       return TRUE;
     }
     return FALSE;

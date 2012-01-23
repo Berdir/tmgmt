@@ -13,19 +13,16 @@ class tmgmt_handler_field_tmgmt_job_actions extends views_handler_field_entity {
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('inline'));
     $uri = $job->uri();
-
     $element['#links']['view'] = array(
       'href' => $uri['path'],
       'title' => t('view'),
     );
-
     if ($job->isNew() || $job->isPrepared() | $job->isRejected()) {
       $element['#links']['checkout'] = array(
         'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/manage",
         'title' => t('checkout'),
       );
     }
-
     if ($job->isNeedsReview()) {
       $element['#links']['review'] = array(
         'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/review",
@@ -36,14 +33,18 @@ class tmgmt_handler_field_tmgmt_job_actions extends views_handler_field_entity {
         'title' => t('accept'),
       );
     }
-
-    if (!$job->isAccepted() && !$job->isCancelled()) {
+    if (!$job->isNew() && ) {
       $element['#links']['cancel'] = array(
         'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/cancel",
         'title' => t('cancel'),
       );
     }
-
+    if (!$job->isNew() && !$job->isCancelled()) {
+      $element['#links']['delete'] = array(
+        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/delete",
+        'title' => t('cancel'),
+      );
+    }
     return drupal_render($element);
   }
 

@@ -66,7 +66,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
   /**
    * Helper method for building a row in the overview form.
    */
-  protected function overviewFormRow($form, &$form_state, TMGMTTranslator $entity, $id) {
+  protected function overviewFormRow($form, &$form_state, $entity, $id) {
     $form['#weight'] = isset($form_state['input']['translators']) ? $form_state['input']['translators'][$id]['weight'] : NULL;
     $form['label'] = array(
       '#theme' => 'tmgmt_ui_translator_overview_item',
@@ -151,6 +151,8 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
 class TMGMTJobUIController extends EntityDefaultUIController {
 
   /**
+   * @todo Use real access callbacks.
+   *
    * Overrides EntityDefaultUIController::hook_menu().
    */
   public function hook_menu() {
@@ -172,8 +174,9 @@ class TMGMTJobUIController extends EntityDefaultUIController {
       'page callback' => 'drupal_get_form',
       'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
       'load arguments' => array($this->entityType),
-      'access callback' => 'tmgmt_job_operation_access',
-      'access arguments' => array($id_count + 1, $id_count),
+      'access callback' => 'entity_access',
+      'access arguments' => array('update', $this->entityType, $id_count),
+      'type' => MENU_CALLBACK,
     );
     return $items;
   }
@@ -185,10 +188,13 @@ class TMGMTJobUIController extends EntityDefaultUIController {
     $label = entity_label($this->entityType, $entity);
     switch ($op) {
       case 'cancel':
-        $confirm_question = t('Are you sure you want to cancel the %entity %label?', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+        $confirm_question = t('Are you sure you want to cancel the translation job %label?', array('%entity' => $this->entityInfo['label'], '%label' => $label));
         return confirm_form($form, $confirm_question, $this->path);
       case 'delete':
-        $confirm_question = t('Are you sure you want to delete the %entity %label?', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+        $confirm_question = t('Are you sure you want to delete the translation job %label?', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+        return confirm_form($form, $confirm_question, $this->path);
+      case 'accept':
+        $confirm_question = t('Are you sure you want to accept the translation job %label?', array('%entity' => $this->entityInfo['label'], '%label' => $label));
         return confirm_form($form, $confirm_question, $this->path);
     }
     drupal_not_found();
@@ -198,34 +204,23 @@ class TMGMTJobUIController extends EntityDefaultUIController {
   /**
    * Overrides EntityDefaultUIController::applyOperation().
    */
-  public function applyOperation($op, $entity) {
+  public function applyOperation($op, TMGMTJob $entity) {
     $label = entity_label($this->entityType, $entity);
+    $username = theme('username', array('account' => $GLOBALS['user']));
     switch ($op) {
       case 'cancel':
+        $entity->cancelTranslation();
         return t('Cancelled %entity %label to the defaults.', array('%entity' => $this->entityInfo['label'], '%label' => $label));
       case 'delete':
+        $entity->delete();
         return t('Deleted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+      case 'accept':
+        $entity->accepted(t('The translation has been accepted by !user.', array('!user' => $username)));
+        return t('Accepted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $label));
     }
     return FALSE;
   }
 
-}
-
-/**
- * Access callback for job operation pages.
- */
-function tmgmt_job_operation_access($op, TMGMTJob $job) {
-  switch ($op) {
-    case 'delete':
-      if (entity_access('delete', 'tmgmt_job', $op)) {
-        return !$job->isSubmitted();
-      }
-      break;
-    case 'cancel':
-      if (entity_access('update', 'tmgmgt_job', $op)) {
-        return $job->isSubmitted();
-      }
-  }
 }
 
 /**
