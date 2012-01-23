@@ -367,7 +367,6 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/manage|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
-    debug($this->getUrl());
     // Check checkout form.
     $this->assertText('test_source:test:1');
 
@@ -384,7 +383,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Check checkout form.
     $this->assertText("The source language of your item doesn't match the source language of your job.");
-    $this->assertText('Checkout job');
+    $this->assertText('You can provide a label for this job in order to identify it easily later on.');
     $this->assertText('test_source:test:1');
     $this->assertText('test_source:test:2');
     $this->assertText('test_source:test:3');
@@ -393,7 +392,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // @todo: Test ajax functionality.
 
-    // Attemt to translate into english.
+    // Attempt to translate into english.
     $edit = array(
       'target_language' => 'el',
       'settings[action]' => 'translate',
@@ -427,7 +426,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $tjid = $matches[1];
 
      // Check checkout form.
-    $this->assertText(t('Checkout job'));
+    $this->assertText('You can provide a label for this job in order to identify it easily later on.');
     $this->assertText('test_source:test:1');
 
     $edit = array(
@@ -445,7 +444,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $tjid = $matches[1];
 
      // Check checkout form.
-    $this->assertText(t('Checkout job'));
+    $this->assertText('You can provide a label for this job in order to identify it easily later on.');
     $this->assertText('test_source:test:1');
 
     $edit = array(
@@ -463,7 +462,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $tjid = $matches[1];
 
      // Check checkout form.
-    $this->assertText(t('Checkout job'));
+    $this->assertText('You can provide a label for this job in order to identify it easily later on.');
     $this->assertText('test_source:test:1');
 
     $edit = array(
@@ -477,7 +476,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertTrue($job->isPrepared());
 
     // Verify that we are still on the form.
-    $this->assertText(t('Checkout job'));
+    $this->assertText('You can provide a label for this job in order to identify it easily later on.');
 
     // Another job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
@@ -485,7 +484,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $tjid = $matches[1];
 
      // Check checkout form.
-    $this->assertText(t('Checkout job'));
+    $this->assertText('You can provide a label for this job in order to identify it easily later on.');
     $this->assertText('test_source:test:1');
 
     $edit = array(

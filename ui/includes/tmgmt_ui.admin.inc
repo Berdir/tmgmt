@@ -280,7 +280,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
           break;
         default:
           if ($settings = $translator->jobSettingsForm(array(), $form_state, $job)) {
-            $form['translator_wrapper']['settings']['settings'] = $settings;
+            $form['translator_wrapper']['settings'] = $settings;
           }
           else {
             $form['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $translator->identifier()));
