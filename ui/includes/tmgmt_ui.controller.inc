@@ -154,7 +154,7 @@ class TMGMTJobUIController extends EntityDefaultUIController {
    * Implements hook_menu();
    */
   public function hook_menu() {
-
+    return array();
   }
 
 }

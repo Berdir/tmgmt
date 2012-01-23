@@ -397,7 +397,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'el',
       'settings[action]' => 'translate',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
     $this->assertText(t('@plugin is not available for @language.', array('@plugin' => 'Test translator', '@language' => 'Greek')));
 
     // Job still needs to be in state prepared.
@@ -408,7 +408,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'es',
       'settings[action]' => 'translate',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
 
     // Job needs to be in state review.
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));
@@ -433,7 +433,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'es',
       'settings[action]' => 'submit',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
     $this->assertText(t('Test submit'));
     $job = tmgmt_job_load($tjid, FALSE);
     $this->assertTrue($job->isSubmitted());
@@ -451,7 +451,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'es',
       'settings[action]' => 'reject',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
     $this->assertText(t('This is not supported'));
     $job = tmgmt_job_load($tjid, FALSE);
     $this->assertTrue($job->isRejected());
@@ -469,7 +469,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'es',
       'settings[action]' => 'fail',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
     $this->assertText(t('Service not reachable'));
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));
     $job = tmgmt_job_load($tjid);
@@ -491,7 +491,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'es',
       'settings[action]' => 'not_translatable',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
     // @todo Update to correct failure message.
     $this->assertText(t('Fail'));
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));

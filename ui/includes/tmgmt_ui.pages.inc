@@ -153,7 +153,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
   $form['translator_wrapper']['actions']['#type'] = 'actions';
   $form['translator_wrapper']['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Checkout order'),
+    '#value' => t('Checkout'),
     '#weight' => 50,
   );
   // We need some CSS for showing the source and target language in one row.
