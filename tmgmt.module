@@ -330,6 +330,9 @@ function tmgmt_job_create($source_language, $target_language, $uid = NULL, array
  * Access callback for the job entity.
  */
 function tmgmt_job_access($op, TMGMTJob $job = NULL, $account = NULL) {
+  // Return TRUE in all cases for now :)
+  return TRUE;
+
   switch ($op) {
     case 'create':
       return user_access('tmgmt create new jobs', $account);
@@ -472,6 +475,8 @@ function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $valu
  *   job item or message is attached to, FALSE otherwise.
  */
 function tmgmt_job_attachment_access($op, $attachment = NULL, $account = NULL) {
+  // Return TRUE in all cases for now :)
+  return TRUE;
   // We just forward the access request to the job entity.
   if (isset($attachment) && $job = $attachment->getJob()) {
     return entity_access($op, 'tmgmt_job', $job, $account);

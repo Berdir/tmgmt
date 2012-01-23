@@ -359,7 +359,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->setEnvironment('es');
     $this->setEnvironment('el');
 
-    $user = $this->drupalCreateUser(array('access tmgmt ui'));
+    $user = $this->drupalCreateUser(array('access administration pages', 'access tmgmt ui'));
     $this->drupalLogin($user);
 
     // Add a first item to the job. This will auto-create the job.
@@ -367,26 +367,27 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/manage|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
+    debug($this->getUrl());
     // Check checkout form.
-    $this->assertText('test_source: test :1');
+    $this->assertText('test_source:test:1');
 
     // Add two more job items.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/2,3/' . $tjid);
 
     // Check checkout form.
-    $this->assertText('test_source: test :1');
-    $this->assertText('test_source: test :2');
-    $this->assertText('test_source: test :3');
+    $this->assertText('test_source:test:1');
+    $this->assertText('test_source:test:2');
+    $this->assertText('test_source:test:3');
 
     // Attempt to add item from a different source language.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/en/test_source/test/4/' . $tjid);
 
     // Check checkout form.
-    $this->assertText(t('Checkout job'));
     $this->assertText("The source language of your item doesn't match the source language of your job.");
-    $this->assertText('test_source: test :1');
-    $this->assertText('test_source: test :2');
-    $this->assertText('test_source: test :3');
+    $this->assertText('Checkout job');
+    $this->assertText('test_source:test:1');
+    $this->assertText('test_source:test:2');
+    $this->assertText('test_source:test:3');
     $this->assertText('German');
     $this->assertText($this->default_translator->label);
 
@@ -397,7 +398,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'el',
       'settings[action]' => 'translate',
     );
-    $this->drupalPost(NULL, $edit, t('Checkout'));
+    $this->drupalPost(NULL, $edit, t('Checkout job'));
     $this->assertText(t('@plugin is not available for @language.', array('@plugin' => 'Test translator', '@language' => 'Greek')));
 
     // Job still needs to be in state prepared.
@@ -408,7 +409,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'es',
       'settings[action]' => 'translate',
     );
-    $this->drupalPost(NULL, $edit, t('Checkout'));
+    $this->drupalPost(NULL, $edit, t('Checkout job'));
 
     // Job needs to be in state review.
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));
@@ -427,13 +428,13 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
      // Check checkout form.
     $this->assertText(t('Checkout job'));
-    $this->assertText('test_source: test :1');
+    $this->assertText('test_source:test:1');
 
     $edit = array(
       'target_language' => 'es',
       'settings[action]' => 'submit',
     );
-    $this->drupalPost(NULL, $edit, t('Checkout'));
+    $this->drupalPost(NULL, $edit, t('Checkout job'));
     $this->assertText(t('Test submit'));
     $job = tmgmt_job_load($tjid, FALSE);
     $this->assertTrue($job->isSubmitted());
@@ -445,13 +446,13 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
      // Check checkout form.
     $this->assertText(t('Checkout job'));
-    $this->assertText('test_source: test :1');
+    $this->assertText('test_source:test:1');
 
     $edit = array(
       'target_language' => 'es',
       'settings[action]' => 'reject',
     );
-    $this->drupalPost(NULL, $edit, t('Checkout'));
+    $this->drupalPost(NULL, $edit, t('Checkout job'));
     $this->assertText(t('This is not supported'));
     $job = tmgmt_job_load($tjid, FALSE);
     $this->assertTrue($job->isRejected());
@@ -463,13 +464,13 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
      // Check checkout form.
     $this->assertText(t('Checkout job'));
-    $this->assertText('test_source: test :1');
+    $this->assertText('test_source:test:1');
 
     $edit = array(
       'target_language' => 'es',
       'settings[action]' => 'fail',
     );
-    $this->drupalPost(NULL, $edit, t('Checkout'));
+    $this->drupalPost(NULL, $edit, t('Checkout job'));
     $this->assertText(t('Service not reachable'));
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));
     $job = tmgmt_job_load($tjid);
@@ -485,13 +486,13 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
      // Check checkout form.
     $this->assertText(t('Checkout job'));
-    $this->assertText('test_source: test :1');
+    $this->assertText('test_source:test:1');
 
     $edit = array(
       'target_language' => 'es',
       'settings[action]' => 'not_translatable',
     );
-    $this->drupalPost(NULL, $edit, t('Checkout'));
+    $this->drupalPost(NULL, $edit, t('Checkout job'));
     // @todo Update to correct failure message.
     $this->assertText(t('Fail'));
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));

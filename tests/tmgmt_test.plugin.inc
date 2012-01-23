@@ -8,7 +8,7 @@
 class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
-   * @todo
+   * Overrides TMGMTDefaultTranslatorPluginController::jobSettingsForm().
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     $settings['action'] = array(
@@ -26,7 +26,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
+   * Overrides TMGMTDefaultTranslatorPluginController::requestTranslation().
    */
   function requestTranslation(TMGMTJob $job) {
 
@@ -66,6 +66,9 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     return TRUE;
   }
 
+  /**
+   * Overrides TMGMTDefaultTranslatorPluginController::canTranslate().
+   */
   function canTranslate(TMGMTJob $job) {
     if (isset($job->settings['action']) && $job->settings['action'] == 'not_translatable') {
       return FALSE;
@@ -74,17 +77,25 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   * Overrides TMGMTDefaultTranslatorPluginController::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     return drupal_map_assoc(array('en', 'de', 'es', 'it', 'zh-zans'));
   }
+
 }
 
 class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController {
 
   /**
-   * @todo
+   * Overrides TMGMTDefaultSourcePluginController::getTitle().
+   */
+  public function getTitle(TMGMTJobItem $job_item) {
+    return $this->pluginType . ':' . $job_item->item_type . ':' . $job_item->item_id;
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::getData().
    */
   public function getData(TMGMTJobItem $job_item) {
     return array(
@@ -97,7 +108,7 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
   }
 
   /**
-   * @todo
+   * Implements TMGMTSourcePluginControllerInterface::saveTranslation().
    */
   public function saveTranslation(TMGMTJobItem $job_item) {
     // Set a variable that can be checked later for a given job item.
