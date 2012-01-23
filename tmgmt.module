@@ -172,13 +172,13 @@ function tmgmt_entity_info() {
  */
 function tmgmt_permission() {
   $perms = array();
-  if (module_exists('tmgmt_ui')) {
-    $perms['administer tmgmt'] = array(
-      'title' => t('Administer Translation Management'),
-    );
-    $perms['access tmgmt ui'] = array(
-      'title' => t('Access Translation Management UI'),
-    );
+  $perms['administer tmgmt'] = array(
+    'title' => t('Administer Translation Management'),
+  );
+  // @todo Remove this access check once entity access is finished.
+  $perms['access tmgmt ui'] = array(
+    'title' => t('Access Translation Management UI'),
+  );
   }
   return $perms;
 }
