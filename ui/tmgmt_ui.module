@@ -21,12 +21,12 @@ function tmgmt_ui_entity_info() {
       'path' => 'admin/config/regional/tmgmt/jobs',
     ),
   );
-  foreach ($info as &$item) {
+  foreach ($info as $key => $item) {
     // Entity API defaults to the path that implements the entity type, but
     // since this happens in the TMGMT core module, we need to manually
     // define the path here.
-    $item['file path'] = drupal_get_path('module', 'tmgmt_ui');
-    $item['file'] = 'includes/tmgmt_ui.admin.inc';
+    $info[$key]['admin ui']['file path'] = drupal_get_path('module', 'tmgmt_ui');
+    $info[$key]['admin ui']['file'] = 'includes/tmgmt_ui.admin.inc';
   }
   return $info;
 }
@@ -65,14 +65,6 @@ function tmgmt_ui_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
     'weight' => -10,
-  );
-  $items['admin/config/regional/tmgmt/jobs/%tmgmt_job/checkout'] = array(
-    'title' => 'Checkout job',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_job_checkout_form', 5),
-    'access arguments' => array('access tmgmt ui'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/tmgmt_ui.pages.inc',
   );
   $items['admin/config/regional/tmgmt/add-item/%/%/%/%'] = array(
     'title' => 'Create a Job',

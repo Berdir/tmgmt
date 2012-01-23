@@ -79,14 +79,14 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
    * Implements TMGMTSourcePluginControllerInterface::getTitle().
    */
   public function getTitle(TMGMTJobItem $job_item) {
-    return $job_item->source_plugin . ': ' . $job_item->item_type . ' :' . $job_item->item_id;
+    return t('unlabeled');
   }
 
   /**
    * Implements TMGMTSourcePluginControllerInterface::getUri().
    */
   public function getUri(TMGMTJobItem $job_item) {
-    return array('path' => 'default/' . $job_item->item_id);
+    return FALSE;
   }
 
   /**

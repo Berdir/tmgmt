@@ -8,7 +8,7 @@
 class TMGMTTranslatorUIController extends EntityDefaultUIController {
 
   /**
-   * Implements hook_menu();
+   * Overrides EntityDefaultUIController::hook_menu().
    */
   public function hook_menu() {
     $items = parent::hook_menu();
@@ -151,12 +151,81 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
 class TMGMTJobUIController extends EntityDefaultUIController {
 
   /**
-   * Implements hook_menu();
+   * Overrides EntityDefaultUIController::hook_menu().
    */
   public function hook_menu() {
-
+    $id_count = count(explode('/', $this->path));
+    $wildcard = isset($this->entityInfo['admin ui']['menu wildcard']) ? $this->entityInfo['admin ui']['menu wildcard'] : '%entity_object';
+    $items[$this->path . '/' . $wildcard . '/manage'] = array(
+      'title' => 'Edit',
+      'page callback' => 'entity_ui_get_form',
+      'page arguments' => array($this->entityType, $id_count),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'entity_access',
+      'access arguments' => array('update', $this->entityType, $id_count),
+      'type' => MENU_LOCAL_TASK,
+      'file' => $this->entityInfo['admin ui']['file'],
+      'file path' => $this->entityInfo['admin ui']['file path'],
+    );
+    // Menu item for operations like cancel.
+    $items[$this->path . '/' . $wildcard . '/%'] = array(
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'tmgmt_job_operation_access',
+      'access arguments' => array($id_count + 1, $id_count),
+    );
+    return $items;
   }
 
+  /**
+   * Overrides EntityDefaultUIController::operationForm().
+   */
+  public function operationForm($form, &$form_state, $entity, $op) {
+    $label = entity_label($this->entityType, $entity);
+    switch ($op) {
+      case 'cancel':
+        $confirm_question = t('Are you sure you want to cancel the %entity %label?', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+        return confirm_form($form, $confirm_question, $this->path);
+      case 'delete':
+        $confirm_question = t('Are you sure you want to delete the %entity %label?', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+        return confirm_form($form, $confirm_question, $this->path);
+    }
+    drupal_not_found();
+    exit;
+  }
+
+  /**
+   * Overrides EntityDefaultUIController::applyOperation().
+   */
+  public function applyOperation($op, $entity) {
+    $label = entity_label($this->entityType, $entity);
+    switch ($op) {
+      case 'cancel':
+        return t('Cancelled %entity %label to the defaults.', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+      case 'delete':
+        return t('Deleted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+    }
+    return FALSE;
+  }
+
+}
+
+/**
+ * Access callback for job operation pages.
+ */
+function tmgmt_job_operation_access($op, TMGMTJob $job) {
+  switch ($op) {
+    case 'delete':
+      if (entity_access('delete', 'tmgmt_job', $op)) {
+        return !$job->isSubmitted();
+      }
+      break;
+    case 'cancel':
+      if (entity_access('update', 'tmgmgt_job', $op)) {
+        return $job->isSubmitted();
+      }
+  }
 }
 
 /**

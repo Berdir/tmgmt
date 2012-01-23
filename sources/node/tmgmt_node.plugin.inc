@@ -62,6 +62,9 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     }
   }
 
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::getTitle().
+   */
   public function getTitle(TMGMTJobItem $job_item) {
     if ($node = node_load($job_item->item_id)) {
       return entity_label('node', $node);
@@ -69,6 +72,9 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     return parent::getTitle($job_item);
   }
 
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::getUri().
+   */
   public function getUri(TMGMTJobItem $job_item) {
     if ($node = node_load($job_item->item_id)) {
       return entity_uri('node', $node);

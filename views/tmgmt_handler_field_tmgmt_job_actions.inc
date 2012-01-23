@@ -21,7 +21,7 @@ class tmgmt_handler_field_tmgmt_job_actions extends views_handler_field_entity {
 
     if ($job->isNew() || $job->isPrepared() | $job->isRejected()) {
       $element['#links']['checkout'] = array(
-        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/checkout",
+        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/manage",
         'title' => t('checkout'),
       );
     }
