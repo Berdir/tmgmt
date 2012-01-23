@@ -18,6 +18,18 @@ interface TMGMTSourcePluginControllerInterface {
   public function __construct($plugin);
 
   /**
+   * Returns the info of the type of the plugin.
+   *
+   * @see tmgmt_source_plugin_info()
+   */
+  public function pluginInfo();
+
+  /**
+   * Returns the type of the plugin.
+   */
+  public function pluginType();
+
+  /**
    * Returns an array with the data structured for translation.
    *
    * @see TMGMTJobItem::getSourceData()
@@ -44,17 +56,6 @@ interface TMGMTSourcePluginControllerInterface {
    */
   public function getUri(TMGMTJobItem $job_item);
 
-  /**
-   * Returns the info of the type of the plugin.
-   *
-   * @see tmgmt_source_plugin_info()
-   */
-  public function pluginInfo();
-
-  /**
-   * Returns the type of the plugin.
-   */
-  public function pluginType();
 }
 
 /**
@@ -76,20 +77,6 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getTitle().
-   */
-  public function getTitle(TMGMTJobItem $job_item) {
-    return t('unlabeled');
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::getUri().
-   */
-  public function getUri(TMGMTJobItem $job_item) {
-    return FALSE;
-  }
-
-  /**
    * Implements TMGMTSourcePluginControllerInterface::pluginInfo().
    */
   public function pluginInfo() {
@@ -101,6 +88,20 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
    */
   public function pluginType() {
     return $this->pluginType;
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::getTitle().
+   */
+  public function getTitle(TMGMTJobItem $job_item) {
+    return t('@plugin item unavailable (@item)', array('@plugin' => $this->pluginInfo['label'], '@item' => $job_item->item_type . ':' . $job_item->item_id));
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::getUri().
+   */
+  public function getUri(TMGMTJobItem $job_item) {
+    return FALSE;
   }
 
 }
@@ -116,6 +117,18 @@ interface TMGMTTranslatorPluginControllerInterface {
    * Constructor.
    */
   public function __construct($plugin);
+
+  /**
+   * Returns the info of the type of the plugin.
+   *
+   * @see tmgmt_translator_plugin_info()
+   */
+  public function pluginInfo();
+
+  /**
+   * Returns the type of the plugin.
+   */
+  public function pluginType();
 
   /**
    * Checks whether a translator is available.
@@ -220,17 +233,6 @@ interface TMGMTTranslatorPluginControllerInterface {
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job);
 
-  /**
-   * Returns the info of the type of the plugin.
-   *
-   * @see tmgmt_translator_plugin_info()
-   */
-  public function pluginInfo();
-
-  /**
-   * Returns the type of the plugin.
-   */
-  public function pluginType();
 }
 
 /**
@@ -252,6 +254,20 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   public function __construct($plugin) {
     $this->pluginType = $plugin;
     $this->pluginInfo = tmgmt_translator_plugin_info($plugin);
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::pluginInfo().
+   */
+  public function pluginInfo() {
+    return $this->pluginInfo;
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::pluginType().
+   */
+  public function pluginType() {
+    return $this->pluginType;
   }
 
   /**
@@ -333,20 +349,6 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     return array();
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::pluginInfo().
-   */
-  public function pluginInfo() {
-    return $this->pluginInfo;
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::pluginType().
-   */
-  public function pluginType() {
-    return $this->pluginType;
   }
 
 }
