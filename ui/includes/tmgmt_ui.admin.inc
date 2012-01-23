@@ -298,10 +298,12 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
     '#type' => 'submit',
     '#value' => t('Save job'),
   );
-  $form['actions']['checkout'] = array(
-    '#type' => 'submit',
-    '#value' => t('Submit to translator'),
-  );
+  if (!$job->isSubmitted() && !$job->isAccepted() && !$job->isNeedsReview()) {
+    $form['actions']['checkout'] = array(
+      '#type' => 'submit',
+      '#value' => t('Submit to translator'),
+    );
+  }
   $form['actions']['delete'] = array(
     '#type' => 'link',
     '#title' => t('Delete'),
