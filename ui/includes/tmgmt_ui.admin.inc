@@ -327,6 +327,11 @@ function tmgmt_job_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/config/regional/tmgmt';
   // Build up the job from the submitted form values.
   $job = entity_ui_form_submit_build_entity($form, $form_state);
+  // Save here so we got the plain 'Submit' case covered. Also, if the
+  // translator fails it won't save on its own.
+  $job->save();
+  // Everything below this line is only invoked if the 'Checkout job' button
+  // was clicked.
   if ($form_state['triggering_element']['#value'] == t('Checkout job')) {
     // Request the job to be translated.
     $job->requestTranslation();
@@ -343,10 +348,6 @@ function tmgmt_job_form_submit($form, &$form_state) {
       }
       drupal_set_message(filter_xss($message->getMessage()), $message->type);
     }
-  }
-  else {
-    // The 'Submit' button was clicked, so we just save the job.
-    $job->save();
   }
 }
 

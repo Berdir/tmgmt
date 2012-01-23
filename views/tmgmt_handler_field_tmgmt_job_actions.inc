@@ -33,16 +33,16 @@ class tmgmt_handler_field_tmgmt_job_actions extends views_handler_field_entity {
         'title' => t('accept'),
       );
     }
-    if (!$job->isNew() && ) {
+    if ($job->isSubmitted()) {
       $element['#links']['cancel'] = array(
         'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/cancel",
         'title' => t('cancel'),
       );
     }
-    if (!$job->isNew() && !$job->isCancelled()) {
+    else {
       $element['#links']['delete'] = array(
         'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/delete",
-        'title' => t('cancel'),
+        'title' => t('delete'),
       );
     }
     return drupal_render($element);
