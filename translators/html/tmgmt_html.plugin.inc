@@ -39,7 +39,7 @@ class TMGMTHTMLTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
         'target_language' => $target_language,
         'items' => $items));
 
-    if ($this->getOption('export_format', 'html') == 'xliff') {
+    if ($job->getTranslator()->getSetting('export_format', 'html') == 'xliff') {
       $html = new DOMDocument();
       @$html->loadXML($html_template);
 
