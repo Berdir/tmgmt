@@ -4,7 +4,7 @@
  * @file
  * Provides myGengo translation plugin controller.
  */
-class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
+class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * Translation service URL.
@@ -16,15 +16,15 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
   protected $useSandbox = TRUE;
 
   /**
-   *    requestFromGengo($endpoint, $data = array())
+   *  requestFromGengo($endpoint, $data = array())
    *
-   *    Builds, signs and fires a request to myGengo's API. Will fire to a different url
-   *    if on the sandbox.
+   *  Builds, signs and fires a request to myGengo's API. Will fire to a different url
+   *  if on the sandbox.
    *
-   *    Authentication rituals are documented here: http://mygengo.com/api/developer-docs/authentication/
+   *  Authentication rituals are documented here: http://mygengo.com/api/developer-docs/authentication/
    *
-   *    It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
-   *    respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
+   *  It should be noted that the authentication ritual listed there is different from the one here (v1 vs v1.1,
+   *  respectively). v1.1 doesn't require signing on the entire data structure, just a timestamp and keys.
    */
   public function requestFromGengo($endpoint, $method, $data = array()) {
     $options = array(
@@ -39,8 +39,8 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
     $url = ($this->useSandbox ? $this->sandboxURL : $this->apiURL) . $endpoint;
 
     /**
-     *    If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
-     *    get a little more annoying...
+     *  If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
+     *  get a little more annoying...
      */
     if ($method == 'GET' || $method == 'DELETE') {
       $query_data = drupal_http_build_query(array_merge(array(
@@ -76,7 +76,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
-  public function isAvailable() {
+  public function isAvailable(TMGMTTranslator $translator) {
     if ($this->getOption('api_public_key') && $this->getOption('api_private_key')) {
       return TRUE;
     }
@@ -89,12 +89,13 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    * We will check are source and target language supported.
    */
   public function canTranslate(TMGMTJob $job) {
-    if ($this->isAvailable()) {
-      $targets = $this->getSupportedTargetLanguages($job->source_language);
-      if (in_array($job->target_language, $targets))
+    $translator = $job->getTranslator();
+    if ($this->isAvailable($translator)) {
+      $targets = $this->getSupportedTargetLanguages($translator, $job->source_language);
+      if (isset($targets[$job->target_language])) {
         return TRUE;
+      }
     }
-
     return FALSE;
   }
 
@@ -104,7 +105,21 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    * Here we will acutally query source and get translations.
    */
   public function requestTranslation(TMGMTJob $job) {
-    // Pull the source data array from through the job and flatten it..
+    // Pull the source data array from through the job and generate the MyGengo Translation Job
+    $translations = $this->generateMyGengoTranslationJobArray($job, $job->settings['quality']);
+
+    $response = $this->requestFromGengo('translate/jobs', 'POST', array(
+      'jobs' => $translations,
+      'process' => 1,
+      'as_group' => 1
+      ));
+
+    // Save the translated data through the job.
+    $job->addTranslatedData(tmgmt_unflatten_data($response));
+    //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
+  }
+
+  public function generateMyGengoTranslationJobArray(TMGMTJob $job, $tier = "machine") {
     $data = tmgmt_flatten_data($job->getSourceData());
 
     $translations = array();
@@ -119,42 +134,50 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
       // numbers (especially a 0...), you will get an odd one-off response format
       // that can't be parsed by default.
       //
-            // This is being fixed in a future iteration of the API (v2). If you encounter
+      // This is being fixed in a future iteration of the API (v2). If you encounter
       // weirdness with this issue, feel free to email us at api@mygengo.com. ;)
       //
-            // - Ryan McGrath, who dislikes this error intensely
+      // - Ryan McGrath, who dislikes this error intensely
       $translations['job' . $job->tjid . $key] = array(
         'type' => 'text',
         'slug' => $key,
         'body_src' => $value['#text'],
         'lc_src' => $job->source_language,
         'lc_tgt' => $job->target_language,
-        'tier' => 'standard'
+        'tier' => $tier,
+        'callback_url' => url('tmgmt_mygengo_callback', array('absolute' => TRUE)),
+        'custom_data' => $job->tjid . '][' . $key
       );
     }
+    return $translations;
+  }
 
-    $response = $this->requestFromGengo('translate/jobs', 'POST', array(
-      'jobs' => $translations
-      ));
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::receiveTranslation().
+   */
+  public function receiveTranslation(TMGMTJob $job, $keys, $data) {
+    if ($this->useSandbox) {
+      $translation = $data->body_src;
+    }
+    else {
+      $translation = $data->body_tgt;
+    }
 
-    // Save the translated data through the job.
-    $job->addTranslatedData(tmgmt_unflatten_data($data));
-    //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
+    $job->addTranslatedData(array('#text' => $data->body_src), $keys);
   }
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
-  public function getSupportedTargetLanguages($source_language) {
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $results = array();
     $targets = $this->requestFromGengo('translate/service/language_pairs', 'GET', array(
       'lc_src' => $source_language
       ));
 
     foreach ($targets as $target) {
-      array_push($results, $target->lc_tgt);
+      $results[$target->lc_tgt] = 1;
     }
-
     return $results;
   }
 
@@ -163,7 +186,7 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    *
    * @return array
    */
-  public function getSupportedLanguages() {
+  public function getSupportedLanguages(TMGMTTranslator $translator) {
     $languages = &drupal_static(__FUNCTION__);
     if (!isset($languages)) {
       $supported_languages = $this->requestFromGengo('translate/service/languages', 'GET');
@@ -182,17 +205,18 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    * @param $form array
    * @param $form_state array
    */
-  public function settingsForm($form, &$form_state) {
+  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+
     $form['api_public_key'] = array(
       '#type' => 'textfield',
       '#title' => t('myGengo API Public key'),
-      '#default_value' => $this->getOption('api_public_key', ''),
+      '#default_value' => $translator->getSetting('api_public_key', ''),
       '#description' => t('Please enter yout myGengo API Public key.'),
     );
     $form['api_private_key'] = array(
       '#type' => 'textfield',
       '#title' => t('myGengo API Private key'),
-      '#default_value' => $this->getOption('api_private_key', ''),
+      '#default_value' => $translator->getSetting('api_private_key', ''),
       '#description' => t('Please enter your myGengo API Private key.'),
     );
     return $form;
@@ -206,15 +230,65 @@ class TMGMTMyGengoController extends TMGMTDefaultTranslatorPluginController {
    * @return array
    *   Settings form.
    */
-  public function jobSettingsForm($form, &$form_state) {
-    $settings['dummy_option'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Just a dummy option for testing'),
+  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+    $quality = !empty($form_state['values']['settings']['quality']) ? $form_state['values']['settings']['quality'] : 'machine';
+    $translation_array = $this->generateMyGengoTranslationJobArray($job, $quality);
+    $response = $this->requestFromGengo('/translate/service/quote', 'POST', array(
+      'jobs' => $translation_array,
+      'as_group' => 1
+      ));
+    $sum_credits = 0;
+    $highest_eta = "";
+    $sum_unit_count = 0;
+    foreach ($response->jobs as $mygengo_job) {
+      $sum_unit_count = $sum_unit_count + $mygengo_job->unit_count;
+      $sum_credits = $sum_credits + $mygengo_job->credits;
+      $highest_eta = ($mygengo_job->eta > $highest_eta) ? $mygengo_job->eta : $highest_eta;
+    }
+
+
+    $settings['word_count'] = array(
+      '#type' => 'item',
+      '#title' => t('Word count'),
+      '#markup' => $sum_unit_count,
     );
-    $settings['dummy_text'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Just a dummy text for testing'),
+
+    $settings['quality'] = array(
+      '#type' => 'select',
+      '#title' => t('Quality'),
+      '#options' => array(
+        'machine' => t('Machine'),
+        'standard' => t('Standard'),
+        'pro' => t('Pro'),
+        'ultra' => t('Ultra'),
+      ),
+      '#description' => t('With which Quality you want to translate?'),
+      '#ajax' => array(
+        'callback' => 'tmgmt_mygengo_quote',
+        'wrapper' => 'mygengo-quote',
+      ),
     );
+
+    $settings['quote'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Quote'),
+      '#prefix' => '<div id="mygengo-quote">',
+      '#suffix' => '</div>',
+    );
+
+    $settings['quote']['needed_credits'] = array(
+      '#type' => 'item',
+      '#title' => t('Needed Credits'),
+      '#markup' => $sum_credits,
+    );
+
+    $settings['quote']['eta'] = array(
+      '#type' => 'item',
+      '#title' => t('ETA'),
+      '#markup' => format_date(mktime() + $highest_eta, "long"),
+    );
+
+
     return $settings;
   }
 

@@ -1,0 +1,7 @@
+<?php
+
+/**
+ * @file
+ * UI plugin for the Translation Management system that handles i18n strings.
+ */
+

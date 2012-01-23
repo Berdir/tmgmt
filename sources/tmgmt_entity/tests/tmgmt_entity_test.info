@@ -1,5 +1,0 @@
-name = "Entity Source plugin tests"
-description = "Support module for entity source testing."
-package = Testing
-core = 7.x
-hidden = TRUE

@@ -6,85 +6,39 @@
  */
 
 /**
- * Controller class for the tmgmt_job entity.
+ * Controller class for the job entity.
  *
- * @ingroup job
+ * @ingroup tmgmt_job
  */
 class TMGMTJobController extends EntityAPIController {
 
+  /**
+   * Overrides EntityAPIController::save().
+   */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
-
-    if (empty($entity->tjid)) {
-      $entity->created = REQUEST_TIME;
-    }
-
     $entity->changed = REQUEST_TIME;
-
-    if (!isset($entity->state)) {
-      $entity->state = TMGMT_JOB_STATE_NEW;
-    }
-
     return parent::save($entity, $transaction);
   }
 
+}
+
+/**
+ * Controller class for the job entity.
+ *
+ * @ingroup tmgmt_translator
+ */
+class TMGMTTranslatorController extends EntityAPIControllerExportable {
+
   /**
-   * Overrides EntityAPIController::buildContent().
+   * Overrides EntityAPIControllerExportable::buildQuery().
    */
-  public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $content = array()) {
-    $content = parent::buildContent($entity, $view_mode, $langcode, $content);
-
-    $wrapper = entity_metadata_wrapper('tmgmt_job', $entity);
-
-    $content['created'] = array(
-      '#type' => 'item',
-      '#title' => t('Created'),
-      '#markup' => format_date($wrapper->created->value()),
-    );
-
-    $content['changed'] = array(
-      '#type' => 'item',
-      '#title' => t('Last changed'),
-      '#markup' => format_date($wrapper->changed->value()),
-    );
-
-    $content['state'] = array(
-      '#type' => 'item',
-      '#title' => t('State'),
-      '#markup' => $wrapper->state->label(),
-    );
-
-    $content['created'] = array(
-      '#type' => 'item',
-      '#title' => t('Created'),
-      '#markup' => format_date($wrapper->created->value()),
-    );
-
-    $content['items'] = array(
-      '#type' => 'item',
-      '#title' => t('Items'),
-      'links' => array(
-        '#theme' => 'links',
-      )
-    );
-
-    foreach ($entity->getItems() as $item) {
-      $uri = $item->uri();
-      $content['items']['links']['#links'][$item->tjiid] = array(
-        'title' => $item->label(),
-        'href' => $uri['path'],
-      );
-    }
-
-    // @todo: What do we want to do with this?
-    if (module_exists('views')) {
-      $view = views_get_view('translation_job_messages');
-      $content['messages'] = array(
-        '#type' => 'item',
-        '#title' => $view->get_title(),
-        '#markup' => $view->preview('block', array($entity->tjid)),
-      );
-    }
-
-    return $content;
+  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
+    $query = parent::buildQuery($ids, $conditions, $revision_id);
+    // Filter by available translator plugins.
+    $plugins = tmgmt_translator_plugin_info();
+    $query->condition('translator_plugin', array_keys($plugins));
+    // Sort by the weight of the translator.
+    $query->orderBy('weight');
+    return $query;
   }
 }

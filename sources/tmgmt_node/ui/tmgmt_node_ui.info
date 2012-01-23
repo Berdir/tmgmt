@@ -1,7 +1,0 @@
-name = Node Source User Interface
-description = User Interface for the node source plugin.
-package = Translation Management
-core = 7.x
-dependencies[] = tmgmt_node
-dependencies[] = views
-dependencies[] = views_bulk_operations

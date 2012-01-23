@@ -8,12 +8,33 @@
 class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
+   * @todo
+   */
+  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+    $settings['action'] = array(
+      '#type' => 'select',
+      '#title' => t('Action'),
+      '#options' => array(
+        'translate' => t('Translate'),
+        'submit' => t('Submit'),
+        'reject' => t('Reject'),
+        'fail' => t('Fail'),
+        'not_translatable' => t('Not translatable'),
+      ),
+    );
+    return $settings;
+  }
+
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   function requestTranslation(TMGMTJob $job) {
 
+    // Add a debug message.
+    $job->addMessage('Test translator called', array(), 'debug');
+
     // Do something different based on the action, if defined.
-    $action = isset($job->translator_context['action']) ? $job->translator_context['action'] : '';
+    $action = isset($job->settings['action']) ? $job->settings['action'] : '';
     switch ($action) {
       case 'submit':
         $job->submitted('Test submit');
@@ -21,13 +42,13 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
         break;
 
       case 'reject':
-        $job->rejected(t('Translation into italian not supported'));
+        $job->rejected('This is not supported');
         return;
         break;
 
       case 'fail':
         // Target not reachable.
-        $job->addMessage('Service not reachable');
+        $job->addMessage('Service not reachable', array(), 'error');
         return;
         break;
 
@@ -45,16 +66,26 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     return TRUE;
   }
 
+  function canTranslate(TMGMTJob $job) {
+    if (isset($job->settings['action']) && $job->settings['action'] == 'not_translatable') {
+      return FALSE;
+    }
+    return parent::canTranslate($job);
+  }
+
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
-  public function getSupportedTargetLanguages($source_language) {
-    return drupal_map_assoc(array('de', 'es', 'it', 'zh-zans'));
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
+    return drupal_map_assoc(array('en', 'de', 'es', 'it', 'zh-zans'));
   }
 }
 
 class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController {
 
+  /**
+   * @todo
+   */
   public function getData(TMGMTJobItem $job_item) {
     return array(
       'dummy' => array(
@@ -65,6 +96,9 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
     );
   }
 
+  /**
+   * @todo
+   */
   public function saveTranslation(TMGMTJobItem $job_item) {
     // Set a variable that can be checked later for a given job item.
     variable_set('tmgmt_test_saved_translation_' . $job_item->item_type . '_' . $job_item->item_id, TRUE);

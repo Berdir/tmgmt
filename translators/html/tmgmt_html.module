@@ -10,18 +10,19 @@
  */
 function tmgmt_html_tmgmt_translator_plugin_info() {
   return array(
-    'html_translator' => array(
+    'html' => array(
       'label' => t('HTML translator'),
       'description' => t('HTML translator that exports to HTML.'),
-      'controller class' => 'TMGMTHTMLTranslator',
+      'controller class' => 'TMGMTHTMLTranslatorPluginController',
     ),
   );
 }
 
 /**
  * Implements hook_theme().
- * 
- * Creates template file for Campaign Statistics block. The template may also be moved under the current theme directory.
+ *
+ * Creates template file for Campaign Statistics block. The template may also
+ * be moved under the current theme directory.
  */
 function tmgmt_html_theme($existing, $type, $theme, $path) {
   return array(
@@ -46,12 +47,15 @@ function tmgmt_html_menu() {
   return $items;
 }
 
+/**
+ * Import form.
+ */
 function tmgmt_html_import_form($form) {
   $form['file'] = array(
-    '#type' => 'file', 
-    '#title' => t('HTML'), 
-    '#size' => 50, 
-    '#description' => t('A translated HTML File'),
+    '#type' => 'file',
+    '#title' => t('HTML or XLIFF'),
+    '#size' => 50,
+    '#description' => t('A translated HTML or XLIFF File'),
   );
 
   $form['import']['submit'] = array(
@@ -62,76 +66,102 @@ function tmgmt_html_import_form($form) {
   return $form;
 }
 
-
+/**
+ * Import form submit callback.
+ */
 function tmgmt_html_import_form_submit($form, &$form_state) {
   // Ensure we have the file uploaded
-  if ($file = file_save_upload('file', array('file_validate_extensions' => array('html')))) {
-	$html = file_get_contents($file->uri);
-	$html_obj = new simple_html_dom();
-	$html_obj->load($html);
-	$JobID = $html_obj->find('meta[name=JobID]',0)->content;
-	$source_language = $html_obj->find('meta[name=languageSource]',0)->content;
-	$target_language = $html_obj->find('meta[name=languageTarget]',0)->content;
-	if (empty($JobID) && !is_numeric($JobID)) {
-		drupal_set_message(t('No JobID found'),'error');
-		return;
-	}
-	if (empty($source_language)) {
-		drupal_set_message(t('No languageSource found'),'error');
-		return;		
-	}
-  	if (empty($target_language)) {
-		drupal_set_message(t('No languageTarget found'),'error');
-		return;		
-	}
-	
-	$job = tmgmt_job_load($JobID);
-	
+  if ($file = file_save_upload('file', array('file_validate_extensions' => array('html xlf')))) {
+    if ($file->filemime != 'text/html') {
+      $xliff = new DOMDocument;
+      $xliff->load($file->uri);
+
+      $xsl = new DOMDocument;
+      $xsl->load(drupal_get_path('module', 'tmgmt_html') . '/xsl/xliff2xml.xsl');
+
+      $proc = new XSLTProcessor();
+      $proc->ImportStyleSheet($xsl);
+
+      $xml = simplexml_import_dom($proc->transformToDoc($xliff));
+      if (!isset($xml)) {
+        drupal_set_message(t('Malformed XLIFF file.'));
+        return;
+      }
+
+      $job   = (array) $xml->head->meta[1];
+      $source_language = (array) $xml->head->meta[2];
+      $target_language = (array) $xml->head->meta[3];
+      $items = (array) $xml->body->div;
+
+      $html = theme("html_template", array(
+          'tjid' => $job['@attributes']['content'],
+          'source_language' => $source_language['@attributes']['content'],
+          'target_language' => $target_language['@attributes']['content'],
+          'items' => $items['div']));
+
+      // @todo RECKECK! $items array does not meet the expected structure.
+    }
+    else {
+      $html = file_get_contents($file->uri);
+    }
+
+    $html_obj = new simple_html_dom();
+    $html_obj->load($html);
+
+    $JobID = $html_obj->find('meta[name=JobID]',0)->content;
+    $source_language = $html_obj->find('meta[name=languageSource]',0)->content;
+    $target_language = $html_obj->find('meta[name=languageTarget]',0)->content;
+
+    if (empty($JobID) && !is_numeric($JobID)) {
+      drupal_set_message(t('No JobID found'),'error');
+      return;
+    }
+    if (empty($source_language)) {
+      drupal_set_message(t('No languageSource found'),'error');
+      return;
+    }
+    if (empty($target_language)) {
+      drupal_set_message(t('No languageTarget found'),'error');
+      return;
+    }
+
+    $job = tmgmt_job_load($JobID);
+
     if ($job->source_language != $source_language) {
-		drupal_set_message(t('Source language of file does not match source language of job'),'error');
-		return;		
-	}
-	
+      drupal_set_message(t('Source language of file does not match source language of job'),'error');
+      return;
+    }
+
     if ($job->target_language != $target_language) {
-		drupal_set_message(t('Target language of file does not match target language of job'),'error');
-		return;		
-	}
-	
-	$items = $job->getItems();
+      drupal_set_message(t('Target language of file does not match target language of job'),'error');
+      return;
+    }
 
-	
-  	foreach($html_obj->find('div.asset') as $asset) 
-	{
-		//assets are our jobitem ids
-		if (!isset($items[$asset->id])) {
-			drupal_set_message(t('Job item: @jobitem does not exist',array('@jobitem' => $asset->id)),'error');
-			continue;			
-		}
-		$item = $items[$asset->id];
-		unset($items[$asset->id]);
-		$SourceDataArray = tmgmt_flatten_data($item->getSourceData());
-	       foreach($asset->find('div.atom') as $atom) 
-	       {
-	       		//assets are our strings (eq fields in nodes)
-	       		if (!isset($SourceDataArray[$atom->id])) {
-					drupal_set_message(t('String item: @stringitem does not exist',array('@stringitem' => $atom->id)),'error');
-					continue;			
-				}	       		
-	       		$SourceDataArray[$atom->id]['#text'] = $atom->innertext;
-	       }
-	    $item->addTranslatedData(tmgmt_unflatten_data($SourceDataArray));
-	}
-	if (count($items) > 0) {
-		drupal_set_message(t('There where missing translations for these Job items: @jobitems',array('@jobitems' => implode(", ", array_keys($items)))),'error');
-	}
-	
-	drupal_set_message(t("Translation for Job: @jobid imported",array('@jobid' => $JobID)));
-	
-	$job->needsReview('Translation imported');
-    $job->save();
-	
-	
+    $items = $job->getItems();
+
+    foreach($html_obj->find('div.asset') as $asset) {
+      //assets are our jobitem ids
+      if (!isset($items[$asset->id])) {
+        drupal_set_message(t('Job item: @jobitem does not exist',array('@jobitem' => $asset->id)),'error');
+        continue;
+      }
+      $item = $items[$asset->id];
+      unset($items[$asset->id]);
+      $SourceDataArray = tmgmt_flatten_data($item->getSourceData());
+      foreach($asset->find('div.atom') as $atom) {
+        //assets are our strings (eq fields in nodes)
+        if (!isset($SourceDataArray[$atom->id])) {
+          drupal_set_message(t('String item: @stringitem does not exist',array('@stringitem' => $atom->id)),'error');
+          continue;
+        }
+        $SourceDataArray[$atom->id]['#text'] = $atom->innertext;
+      }
+      $item->addTranslatedData(tmgmt_unflatten_data($SourceDataArray));
+    }
+    if (!empty($items)) {
+      drupal_set_message(t('There where missing translations for these Job items: @jobitems',array('@jobitems' => implode(", ", array_keys($items)))),'error');
+    }
+    drupal_set_message(t("Translation for Job: @jobid imported",array('@jobid' => $JobID)));
+    $job->needsReview('Translation imported');
   }
-
-  return;
 }

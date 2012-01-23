@@ -1,0 +1,5 @@
+name = Simple Translation UI
+description = Simple translation UI for multiple sources integrating with existing tabs.
+package = Translation Management
+core = 7.x
+dependencies[] = tmgmt
