@@ -11,4 +11,6 @@ files[] = tmgmt_node.test
 
 ; Views handlers
 files[] = views/tmgmt_node_handler_filter_node_translatable_types.inc
+
 files[] = views/tmgmt_node_handler_field_translation_language_status.inc
+files[] = views/tmgmt_node_handler_field_translation_language_status_single.inc

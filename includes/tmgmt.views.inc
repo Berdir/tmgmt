@@ -39,5 +39,4 @@ class TMGMTJobViewsController extends EntityDefaultViewsController {
     $data['tmgmt_job']['label']['field']['handler'] = 'tmgmt_handler_field_tmgmt_job_label';
     return $data;
   }
-
 }

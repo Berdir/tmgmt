@@ -596,30 +596,54 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['fields']['type']['hide_alter_empty'] = 1;
   $handler->display->display_options['fields']['type']['link_to_node'] = 0;
   $handler->display->display_options['fields']['type']['machine_name'] = 0;
-  /* Field: Translation Management Job: Source_language */
-  $handler->display->display_options['fields']['source_language']['id'] = 'source_language';
-  $handler->display->display_options['fields']['source_language']['table'] = 'tmgmt_job';
-  $handler->display->display_options['fields']['source_language']['field'] = 'source_language';
-  $handler->display->display_options['fields']['source_language']['relationship'] = 'tjid';
-  $handler->display->display_options['fields']['source_language']['label'] = 'Source language';
-  $handler->display->display_options['fields']['source_language']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['source_language']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['source_language']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['source_language']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['source_language']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['source_language']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['source_language']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['source_language']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['source_language']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['source_language']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['source_language']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['source_language']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['source_language']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['source_language']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['source_language']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['source_language']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['source_language']['hide_alter_empty'] = 1;
-  $handler->display->display_options['fields']['source_language']['machine_name'] = 0;
+  /* Field: Content translation: Language */
+  $handler->display->display_options['fields']['language']['id'] = 'language';
+  $handler->display->display_options['fields']['language']['table'] = 'node';
+  $handler->display->display_options['fields']['language']['field'] = 'language';
+  $handler->display->display_options['fields']['language']['label'] = 'Source';
+  $handler->display->display_options['fields']['language']['alter']['alter_text'] = 0;
+  $handler->display->display_options['fields']['language']['alter']['make_link'] = 0;
+  $handler->display->display_options['fields']['language']['alter']['absolute'] = 0;
+  $handler->display->display_options['fields']['language']['alter']['external'] = 0;
+  $handler->display->display_options['fields']['language']['alter']['replace_spaces'] = 0;
+  $handler->display->display_options['fields']['language']['alter']['trim_whitespace'] = 0;
+  $handler->display->display_options['fields']['language']['alter']['nl2br'] = 0;
+  $handler->display->display_options['fields']['language']['alter']['word_boundary'] = 1;
+  $handler->display->display_options['fields']['language']['alter']['ellipsis'] = 1;
+  $handler->display->display_options['fields']['language']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['language']['alter']['trim'] = 0;
+  $handler->display->display_options['fields']['language']['alter']['html'] = 0;
+  $handler->display->display_options['fields']['language']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['language']['element_default_classes'] = 1;
+  $handler->display->display_options['fields']['language']['hide_empty'] = 0;
+  $handler->display->display_options['fields']['language']['empty_zero'] = 0;
+  $handler->display->display_options['fields']['language']['hide_alter_empty'] = 1;
+  $handler->display->display_options['fields']['language']['link_to_node'] = 0;
+  $handler->display->display_options['fields']['language']['native_language'] = 0;
+  /* Field: Content: All translation languages */
+  $handler->display->display_options['fields']['translation_language_status_1']['id'] = 'translation_language_status_1';
+  $handler->display->display_options['fields']['translation_language_status_1']['table'] = 'node';
+  $handler->display->display_options['fields']['translation_language_status_1']['field'] = 'translation_language_status';
+  $handler->display->display_options['fields']['translation_language_status_1']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['alter_text'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['make_link'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['absolute'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['external'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['replace_spaces'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['trim_whitespace'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['nl2br'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['word_boundary'] = 1;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['ellipsis'] = 1;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['trim'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['alter']['html'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['translation_language_status_1']['element_default_classes'] = 1;
+  $handler->display->display_options['fields']['translation_language_status_1']['hide_empty'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['empty_zero'] = 0;
+  $handler->display->display_options['fields']['translation_language_status_1']['hide_alter_empty'] = 1;
+  $handler->display->display_options['fields']['translation_language_status_1']['type'] = 'unicode-yes-no';
+  $handler->display->display_options['fields']['translation_language_status_1']['not'] = 0;
   /* Field: User: Name */
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'users';
@@ -710,19 +734,18 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['filters']['tmgmt_translatable_types_1']['table'] = 'node';
   $handler->display->display_options['filters']['tmgmt_translatable_types_1']['field'] = 'tmgmt_translatable_types';
   $handler->display->display_options['filters']['tmgmt_translatable_types_1']['group'] = 1;
-  /* Filter criterion: Translation Management Job: Source_language */
-  $handler->display->display_options['filters']['source_language']['id'] = 'source_language';
-  $handler->display->display_options['filters']['source_language']['table'] = 'tmgmt_job';
-  $handler->display->display_options['filters']['source_language']['field'] = 'source_language';
-  $handler->display->display_options['filters']['source_language']['relationship'] = 'tjid';
-  $handler->display->display_options['filters']['source_language']['group'] = 1;
-  $handler->display->display_options['filters']['source_language']['exposed'] = TRUE;
-  $handler->display->display_options['filters']['source_language']['expose']['operator_id'] = 'source_language_op';
-  $handler->display->display_options['filters']['source_language']['expose']['label'] = 'Source';
-  $handler->display->display_options['filters']['source_language']['expose']['operator'] = 'source_language_op';
-  $handler->display->display_options['filters']['source_language']['expose']['identifier'] = 'source_language';
-  $handler->display->display_options['filters']['source_language']['expose']['multiple'] = 1;
-  $handler->display->display_options['filters']['source_language']['expose']['reduce'] = 0;
+  /* Filter criterion: Content translation: Language */
+  $handler->display->display_options['filters']['language']['id'] = 'language';
+  $handler->display->display_options['filters']['language']['table'] = 'node';
+  $handler->display->display_options['filters']['language']['field'] = 'language';
+  $handler->display->display_options['filters']['language']['group'] = 1;
+  $handler->display->display_options['filters']['language']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['language']['expose']['operator_id'] = 'language_op';
+  $handler->display->display_options['filters']['language']['expose']['label'] = 'Source';
+  $handler->display->display_options['filters']['language']['expose']['operator'] = 'language_op';
+  $handler->display->display_options['filters']['language']['expose']['identifier'] = 'language';
+  $handler->display->display_options['filters']['language']['expose']['multiple'] = 1;
+  $handler->display->display_options['filters']['language']['expose']['reduce'] = 0;
   /* Filter criterion: Translation Management Job: Target_language */
   $handler->display->display_options['filters']['target_language']['id'] = 'target_language';
   $handler->display->display_options['filters']['target_language']['table'] = 'tmgmt_job';
@@ -753,10 +776,11 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['filters']['source_translation']['table'] = 'node';
   $handler->display->display_options['filters']['source_translation']['field'] = 'source_translation';
   $handler->display->display_options['filters']['source_translation']['operator'] = '1';
+  $handler->display->display_options['filters']['source_translation']['group'] = 1;
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page_1');
-  $handler->display->display_options['path'] = 'admin/config/regional/tmgmt/node';
+  $handler->display->display_options['path'] = 'admin/tmgmt/node';
   $handler->display->display_options['menu']['type'] = 'tab';
   $handler->display->display_options['menu']['title'] = 'Content overview';
   $handler->display->display_options['menu']['weight'] = '0';
@@ -779,12 +803,12 @@ function tmgmt_node_ui_views_default_views() {
     t('Bulk operations'),
     t('node title (in source language)'),
     t('type'),
-    t('Source language'),
+    t('Source'),
+    t('All translation languages'),
     t('Updated date'),
     t('Translation management job ID'),
     t('.'),
     t(','),
-    t('Source'),
     t('Target'),
     t('Type'),
     t('Page'),
