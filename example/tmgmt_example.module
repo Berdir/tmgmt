@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Module file of the translation management test module.
+ */
+
+/**
+ * Implements hook_tmgmt_translator_plugin_info().
+ */
+function tmgmt_example_tmgmt_translator_plugin_info() {
+  return array(
+    'example' => array(
+      'label' => t('Example translator'),
+      'description' => t('Example translator plugin.'),
+      'controller class' => 'TMGMTExampleTranslatorPluginController',
+      'auto create' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_tmgmt_source_plugin_info().
+ */
+function tmgmt_example_tmgmt_source_plugin_info() {
+  return array(
+    'example' => array(
+      'label' => t('Example source'),
+      'description' => t('Example source plugin.'),
+      'controller class' => 'TMGMTExampleSourcePluginController',
+    ),
+  );
+}

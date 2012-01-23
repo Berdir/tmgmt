@@ -24,7 +24,8 @@ class TMGMTJobMetadataController extends EntityDefaultMetadataController {
     $properties['state']['options list'] = 'tmgmt_job_states';
 
     // Add the options list for all available translator plugins.
-    $properties['translator']['options list'] = 'tmgmt_translator_plugin_labels';
+    $properties['translator']['type'] = 'tmgmt_translator';
+    $properties['translator']['options list'] = 'tmgmt_translator_labels';
 
     $properties['author'] = array(
       'label' => t("Author"),
@@ -35,7 +36,6 @@ class TMGMTJobMetadataController extends EntityDefaultMetadataController {
       'required' => TRUE,
       'schema field' => 'uid',
     );
-
     return _tmgmt_override_property_description($info, $this->type);
   }
 
@@ -95,6 +95,10 @@ class TMGMTTranslatorMetadataController extends EntityDefaultMetadataController 
 
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
+    $properties = &$info[$this->type]['properties'];
+
+    $properties['translator_plugin']['options list'] = 'tmgmt_translator_plugin_labels';
+
     return _tmgmt_override_property_description($info, $this->type);
   }
 

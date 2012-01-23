@@ -10,10 +10,10 @@
  */
 function tmgmt_html_tmgmt_translator_plugin_info() {
   return array(
-    'html_translator' => array(
+    'html' => array(
       'label' => t('HTML translator'),
       'description' => t('HTML translator that exports to HTML.'),
-      'controller class' => 'TMGMTHTMLTranslator',
+      'controller class' => 'TMGMTHTMLTranslatorPluginController',
     ),
   );
 }
@@ -29,10 +29,6 @@ function tmgmt_html_theme($existing, $type, $theme, $path) {
     'html_template' => array(
       'path'  => drupal_get_path('module', 'tmgmt_html') . '/templates',
       'template'  => 'html_template',
-    ),
-    'xliff_template' => array(
-      'path'  => drupal_get_path('module', 'tmgmt_html') . '/templates',
-      'template'  => 'xliff_template',
     ),
   );
 }
@@ -57,19 +53,9 @@ function tmgmt_html_menu() {
 function tmgmt_html_import_form($form) {
   $form['file'] = array(
     '#type' => 'file',
-    '#title' => t('HTML'),
+    '#title' => t('HTML or XLIFF'),
     '#size' => 50,
-    '#description' => t('A translated HTML File'),
-  );
-
-  $form['file_type'] = array(
-    '#type' => 'radios',
-    '#title' => t('File type'),
-    '#options' => array(
-        'html' => t('HTML'),
-        'xliff' => t('XLIFF')),
-    '#default_value' => 'html',
-    '#description' => t('Please select the file type you want to import.'),
+    '#description' => t('A translated HTML or XLIFF File'),
   );
 
   $form['import']['submit'] = array(
@@ -85,13 +71,47 @@ function tmgmt_html_import_form($form) {
  */
 function tmgmt_html_import_form_submit($form, &$form_state) {
   // Ensure we have the file uploaded
-  if ($file = file_save_upload('file', array('file_validate_extensions' => array('html')))) {
-    $html = file_get_contents($file->uri);
+  if ($file = file_save_upload('file', array('file_validate_extensions' => array('html xlf')))) {
+    if ($file->filemime != 'text/html') {
+      $xliff = new DOMDocument;
+      $xliff->load($file->uri);
+
+      $xsl = new DOMDocument;
+      $xsl->load(drupal_get_path('module', 'tmgmt_html') . '/xsl/xliff2xml.xsl');
+
+      $proc = new XSLTProcessor();
+      $proc->ImportStyleSheet($xsl);
+
+      $xml = simplexml_import_dom($proc->transformToDoc($xliff));
+      if (!isset($xml)) {
+        drupal_set_message(t('Malformed XLIFF file.'));
+        return;
+      }
+
+      $job   = (array) $xml->head->meta[1];
+      $source_language = (array) $xml->head->meta[2];
+      $target_language = (array) $xml->head->meta[3];
+      $items = (array) $xml->body->div;
+
+      $html = theme("html_template", array(
+          'tjid' => $job['@attributes']['content'],
+          'source_language' => $source_language['@attributes']['content'],
+          'target_language' => $target_language['@attributes']['content'],
+          'items' => $items['div']));
+
+      // @todo RECKECK! $items array does not meet the expected structure.
+    }
+    else {
+      $html = file_get_contents($file->uri);
+    }
+
     $html_obj = new simple_html_dom();
     $html_obj->load($html);
+
     $JobID = $html_obj->find('meta[name=JobID]',0)->content;
     $source_language = $html_obj->find('meta[name=languageSource]',0)->content;
     $target_language = $html_obj->find('meta[name=languageTarget]',0)->content;
+
     if (empty($JobID) && !is_numeric($JobID)) {
       drupal_set_message(t('No JobID found'),'error');
       return;

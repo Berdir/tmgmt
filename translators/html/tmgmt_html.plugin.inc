@@ -4,7 +4,7 @@
  * @file
  * Provides the user translator plugin controller.
  */
-class TMGMTHTMLTranslator extends TMGMTDefaultTranslatorPluginController {
+class TMGMTHTMLTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * It can 'translate' any job
@@ -32,38 +32,41 @@ class TMGMTHTMLTranslator extends TMGMTDefaultTranslatorPluginController {
     $source_language = $job->source_language;
     $target_language = $job->target_language;
 
-    switch ($this->getOption('export_format', 'html')) {
-      case 'xliff':
-        $name = "JobID" . $tjid . '.xml';
-        $file_content = theme("xliff_template", array(
-            'tjid' => $tjid,
-            'origin_file_name' => $name,
-            'source_language' => $source_language,
-            'target_language' => $target_language,
-            'items' => $items));
+    $name = "JobID" . $tjid;
+    $html_template = theme("html_template", array(
+        'tjid' => $tjid,
+        'source_language' => $source_language,
+        'target_language' => $target_language,
+        'items' => $items));
 
-        drupal_add_http_header('Content-Type', 'text/xml; name="' . $name . '"');
-        drupal_add_http_header('Content-Length', mb_strlen($file_content));
-        drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $name . '"');
-        drupal_add_http_header('Cache-Control', 'private');
-        break;
+    if ($job->getTranslator()->getSetting('export_format', 'html') == 'xliff') {
+      $html = new DOMDocument();
+      @$html->loadXML($html_template);
 
-      default:
-        $name = "JobID" . $tjid . '.html';
-        $file_content = theme("html_template", array(
-            'tjid' => $tjid,
-            'source_language' => $source_language,
-            'target_language' => $target_language,
-            'items' => $items));
+      $xsl = new DOMDocument;
+      $xsl->load(drupal_get_path('module', 'tmgmt_html') . '/xsl/xml2xliff.xsl');
 
-        drupal_add_http_header('Content-Type', 'text/html; name="' . $name . '"');
-        drupal_add_http_header('Content-Length', mb_strlen($file_content));
-        drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $name . '"');
-        drupal_add_http_header('Cache-Control', 'private');
-        break;
+      $proc = new XSLTProcessor();
+      $proc->ImportStyleSheet($xsl);
+
+      $file_content = $proc->transformToXML($html);
+
+      drupal_add_http_header('Content-Type', 'text/xml; name="' . $name . '.xlf"');
+      drupal_add_http_header('Content-Length', mb_strlen($file_content));
+      drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $name . '.xlf"');
+      drupal_add_http_header('Cache-Control', 'private');
+
+      print $file_content;
+    }
+    else {
+      drupal_add_http_header('Content-Type', 'text/html; name="' . $name . '.html"');
+      drupal_add_http_header('Content-Length', mb_strlen($html_template));
+      drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $name . '.html"');
+      drupal_add_http_header('Cache-Control', 'private');
+
+      print $html_template;
     }
 
-    print $file_content;
     $job->submitted('Translation exported');
     drupal_exit();
   }
@@ -71,7 +74,7 @@ class TMGMTHTMLTranslator extends TMGMTDefaultTranslatorPluginController {
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
-  public function getSupportedTargetLanguages($source_language) {
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $languages = entity_metadata_language_list();
     unset($languages[LANGUAGE_NONE], $languages[$source_language]);
     return drupal_map_assoc(array_keys($languages));
@@ -80,7 +83,7 @@ class TMGMTHTMLTranslator extends TMGMTDefaultTranslatorPluginController {
   /**
    * The settings form.
    */
-  public function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['export_format'] = array(
       '#type' => 'radios',
       '#title' => t('Export to'),

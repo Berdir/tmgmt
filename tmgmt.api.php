@@ -50,6 +50,9 @@ function hook_tmgmt_translator_plugin_info() {
       'label' => t('Test translator'),
       'description' => t('Simple translator for testing purposes.'),
       'controller class' => 'TMGMTTestTranslatorPluginController',
+      // Automatically create a translator instance with the same name and
+      // default settings.
+      'auto create' => TRUE,
     ),
   );
 }
@@ -93,7 +96,7 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * @code
  * $job->translator = 'test_translator';
  * // Translator specific settings.
- * $job->translator_context = array(
+ * $job->settings = array(
  *   'priority' => 5,
  * );
  * $job->save();

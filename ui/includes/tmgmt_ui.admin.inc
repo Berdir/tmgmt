@@ -13,22 +13,19 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   if (in_array($op, array('import', 'add'))) {
     drupal_set_title($op == 'import' ? t('Add Translator') : t('Import Translator'), PASS_THROUGH);
   }
-  if ($op == 'clone') {
-    $translator->label .= ' (cloned)';
-    $translator->name = '';
-  }
   $available_plugins = tmgmt_translator_plugin_labels();
-  if (!empty($translator->is_new)) {
-    $selected_plugin = isset($form_state['values']['translator_plugin']) ? $form_state['values']['translator_plugin'] : key($available_plugins);
+  // Initialize some of the default values.
+  foreach (array('description', 'label', 'name', 'translator_plugin') as $key) {
+    $translator->{$key} = isset($form_state['values'][$key]) ? $form_state['values'][$key] : $translator->{$key};
   }
-  else {
-    $selected_plugin = $translator->translator_plugin;
-  }
+  // If the translator plugin is not set, pick the first available plugin as the
+  // default.
+  $translator->translator_plugin = empty($translator->translator_plugin) ? key($available_plugins) : $translator->translator_plugin;
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
     '#description' => t('The label of the translator.'),
-    '#default_value' => isset($form_state['values']['label']) ? $form_state['values']['label'] : $translator->label,
+    '#default_value' => $translator->label,
     '#required' => TRUE,
     '#size' => 32,
     '#maxlength' => 64,
@@ -37,12 +34,12 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#type' => 'machine_name',
     '#title' => t('Machine name'),
     '#description' => t('The machine readable name of this translator. It must be unique, and it must contain only alphanumeric characters and underscores. Once created, you will not be able to change this value!'),
-    '#default_value' => isset($translator->name) ? $translator->name : '',
+    '#default_value' => $translator->name,
     '#machine_name' => array(
-      'exists' => 'tmgmt_translator_load',
+      'exists' => 'tmgmt_translator_exists',
       'source' => array('label'),
     ),
-    '#disabled' => isset($translator->name) && $op != 'clone',
+    '#disabled' => empty($translator->is_new) && $op != 'clone',
     '#size' => 32,
     '#maxlength' => 64,
   );
@@ -50,45 +47,70 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#type' => 'textarea',
     '#title' => t('Description'),
     '#description' => t('The description of the translator.'),
-    '#default_value' => isset($values['description']) ? $values['description'] : $translator->description,
+    '#default_value' => $translator->description,
     '#size' => 32,
     '#maxlength' => 64,
   );
-  $form['translator_plugin'] = array(
-    '#type' => 'select',
-    '#title' => t('Plugin'),
-    '#description' => t('The translator plugin that will be used.'),
-    '#options' => $available_plugins,
-    '#default_value' => $selected_plugin,
-    '#required' => TRUE,
-    '#access' => !isset($translator->translator_plugin),
-    '#ajax' => array(
-      'callback' => 'tmgmt_ui_ajax_callback_translator_plugin_settings',
-      'wrapper' => 'tmgmt-translator-plugin-settings-wrapper',
-    ),
-  );
-  $form['translator_plugin_settings_wrapper'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Translator plugin settings'),
-    '#prefix' => '<div id="tmgmt-translator-plugin-settings-wrapper">',
-    '#suffix' => '</div>',
-  );
-  if ($selected_plugin) {
-    $controller = tmgmt_translator_plugin_controller($selected_plugin);
-    $info = tmgmt_translator_plugin_info($selected_plugin);
-    if ($settings = $controller->settingsForm(array(), $form_state, $translator)) {
-      $form['translator_plugin_settings_wrapper']['#description'] = t('These settings apply to the @plugin plugin in this configuration set.', array('@plugin' => $info['label']));
-      $form['translator_plugin_settings_wrapper']['settings'] = $settings;
-      $form['translator_plugin_settings_wrapper']['settings']['#tree'] = TRUE;
+  if (!empty($available_plugins)) {
+    $controller = tmgmt_translator_plugin_controller($translator->translator_plugin);
+    $info = $controller->pluginInfo();
+    $element = &$form['translator_plugin_wrapper'];
+    $element = array(
+      '#type' => 'container',
+      '#prefix' => '<div id="tmgmt-translator-plugin-wrapper">',
+      '#suffix' => '</div>',
+    );
+    if (!empty($translator->is_new)) {
+      $element['translator_plugin'] = array(
+        '#type' => 'select',
+        '#title' => t('Translator plugin'),
+        '#description' => check_plain($info['description']),
+        '#options' => $available_plugins,
+        '#default_value' => $translator->translator_plugin,
+        '#required' => TRUE,
+        '#ajax' => array(
+          'callback' => 'tmgmt_ui_ajax_callback_translator_plugin',
+          'wrapper' => 'tmgmt-translator-plugin-wrapper',
+        ),
+      );
     }
     else {
-      $form['translator_plugin_settings_wrapper']['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $info['label']));
+      $element['translator_plugin'] = array(
+        '#type' => 'item',
+        '#title' => t('Translator plugin'),
+        '#description' => check_plain($info['label'] . ' - ' . $info['description']),
+        '#required' => TRUE,
+      );
     }
+    $element = &$element['translator_plugin_settings'];
+    $element = array(
+      '#type' => 'fieldset',
+      '#title' => t('@plugin plugin settings', array('@plugin' => $info['label'])),
+      '#collapsible' => TRUE,
+    );
+    if ($settings = $controller->translatorSettingsForm(array(), $form_state, $translator)) {
+      $element['#description'] = t('These settings apply to the @plugin plugin when this translator is used.', array('@plugin' => $info['label']));
+      $element['settings'] = $settings;
+      $element['settings']['#tree'] = TRUE;
+    }
+    else {
+      $element['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $info['label']));
+    }
+  }
+  else {
+    // Fallback for when no translator plugins are available.
+    $form['translator_plugin'] = array(
+      '#type' => 'item',
+      '#title' => t('Translator plugin'),
+      '#description' => t('There are no available translator plugins.'),
+      '#required' => TRUE,
+    );
   }
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Save translator'),
+    '#disabled' => empty($available_plugins),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'link',
@@ -99,24 +121,23 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
 }
 
 /**
- * Ajax callback for loading the translator plugin settings form for the
- * currently selected translator plugin.
- */
-function tmgmt_ui_ajax_callback_translator_plugin_settings($form, &$form_state) {
-  return $form['translator_plugin_settings_wrapper'];
-}
-
-/**
- * Default submit handler for Homebox forms. Populates and stores the submitted
- * values for the Homebox entity via entity_ui_form_submit_build_entity().
+ * Submit handler for the translator entity form.
  *
- * @param $form
- *   An associative array containing the structure of the form.
- * @param $form_state
- *   The standard associative array containing the current state of the form.
+ * Populates and stores the submitted values for the translator entity via
+ * entity_ui_form_submit_build_entity().
+ *
+ * @see entity_ui_form_submit_build_entity()
  */
 function tmgmt_translator_form_submit($form, &$form_state) {
   entity_ui_form_submit_build_entity($form, $form_state)->save();
   drupal_set_message(t('The configuration options have been saved.'));
   $form_state['redirect'] = 'admin/config/regional/tmgmt/translators';
+}
+
+/**
+ * Ajax callback for loading the translator plugin settings form for the
+ * currently selected translator plugin.
+ */
+function tmgmt_ui_ajax_callback_translator_plugin($form, &$form_state) {
+  return $form['translator_plugin_wrapper'];
 }

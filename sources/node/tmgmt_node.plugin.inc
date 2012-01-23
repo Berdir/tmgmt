@@ -58,7 +58,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
         $tnode->translation_source = $node;
       }
       // Time to put the translated data into the node.
-      tmgmt_node_update_node_translation($tnode, $job_item->translated_data, $job->target_language);
+      tmgmt_node_update_node_translation($tnode, $job_item->translation, $job->target_language);
     }
   }
 

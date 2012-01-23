@@ -27,7 +27,7 @@ interface TMGMTSourcePluginControllerInterface {
   /**
    * Saves a translation.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the translation was saved successfully, FALSE otherwise.
    */
   public function saveTranslation(TMGMTJobItem $job_item);
@@ -38,12 +38,23 @@ interface TMGMTSourcePluginControllerInterface {
   public function getTitle(TMGMTJobItem $job_item);
 
   /**
-   * Returns the URi for this job item.
+   * Returns the Uri for this job item.
    *
    * @see entity_uri()
    */
   public function getUri(TMGMTJobItem $job_item);
 
+  /**
+   * Returns the info of the type of the plugin.
+   *
+   * @see tmgmt_source_plugin_info()
+   */
+  public function pluginInfo();
+
+  /**
+   * Returns the type of the plugin.
+   */
+  public function pluginType();
 }
 
 /**
@@ -72,10 +83,24 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getUridir().
+   * Implements TMGMTSourcePluginControllerInterface::getUri().
    */
   public function getUri(TMGMTJobItem $job_item) {
     return array('path' => 'default/' . $job_item->item_id);
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::pluginInfo().
+   */
+  public function pluginInfo() {
+    return $this->pluginInfo;
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::pluginType().
+   */
+  public function pluginType() {
+    return $this->pluginType;
   }
 
 }
@@ -98,7 +123,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * @param TMGMTTranslator $translator
    *   The translator entity.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
   public function isAvailable(TMGMTTranslator $translator);
@@ -166,10 +191,18 @@ interface TMGMTTranslatorPluginControllerInterface {
    * @param TMGMTJob $job
    *   The job that should have its translation cancelled.
    *
-   * @return bool
+   * @return boolean
    *   TRUE if the job could be cancelled, FALSE otherwise.
    */
   public function cancelTranslation(TMGMTJob $job);
+
+  /**
+   * Defines default settings for a translator plugin.
+   *
+   * @return array
+   *   An array of default settings.
+   */
+  public function defaultTranslatorSettings();
 
   /**
    * A plugin can implement this method if it needs a settings form.
@@ -177,7 +210,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * This is not actually an interface method and that is why it is commented,
    * but we leave it here for API documentation.
    */
-  public function settingsForm($form, &$form_state, TMGMTTranslator $translator);
+  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator);
 
   /**
    * A plugin can implement this method if it needs a job settings form.
@@ -187,6 +220,17 @@ interface TMGMTTranslatorPluginControllerInterface {
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job);
 
+  /**
+   * Returns the info of the type of the plugin.
+   *
+   * @see tmgmt_translator_plugin_info()
+   */
+  public function pluginInfo();
+
+  /**
+   * Returns the type of the plugin.
+   */
+  public function pluginType();
 }
 
 /**
@@ -264,16 +308,23 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Get settings for this Service.
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultTranslatorSettings().
    */
-  protected function getOption($name, $default = NULL) {
-    return variable_get('tmgmt_' . $this->pluginType . '_' . $name, $default);
+  public function defaultTranslatorSettings() {
+    return array();
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultJobSettings().
+   */
+  public function defaultJobSettings() {
+    return array();
   }
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  public function settingsForm($form, &$form_state, TMGMTTRanslator $translator) {
+  public function translatorSettingsForm($form, &$form_state, TMGMTTRanslator $translator) {
     return array();
   }
 
@@ -282,6 +333,20 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
     return array();
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::pluginInfo().
+   */
+  public function pluginInfo() {
+    return $this->pluginInfo;
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::pluginType().
+   */
+  public function pluginType() {
+    return $this->pluginType;
   }
 
 }

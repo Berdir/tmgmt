@@ -4,12 +4,6 @@
  * Pages for local translation.
  */
 
-/**
- * Menu callback. Overview of pending jobs to translate.
- */
-function tmgmt_local_translator_page_user_translate() {
-  return 'NOT IMPLEMENTED';
-}
 
 /**
  * Menu callback. Configure which languages a user can handle.
@@ -37,7 +31,7 @@ function tmgmt_local_translator_page_job_translate(TMGMTJob $job) {
     $build['items'][$key] = drupal_get_form('tmgmt_local_translator_job_item_form', $job, $item);
     //$build['items'][$key]['#title'] = t('Item @key', array('@key' => $key));
   }
-  
+
   return $build;
 }
 
@@ -86,7 +80,7 @@ function tmgmt_local_translator_job_item_form($form, &$form_state, $job, $item) 
   $form['job'] = array('#type' => 'value', '#value' => $job);
   $form['job_item'] = array('#type' => 'value', '#value' => $item);
   $data = $item->getSourceData();
-  $translation = $item->translated_data;
+  $translation = $item->translation;
   $form['text'] = tmgmt_local_translator_job_item_subform($data, $translation);
   $form['text']['#type'] = 'fieldset';
   $form['text']['#collapsible'] = TRUE;
@@ -110,7 +104,7 @@ function tmgmt_local_translator_job_item_subform($items, $translation) {
   if (!empty($items['#text'])) {
     // Approximate the number of rows to use in the default textarea.
     $rows = min(ceil(str_word_count($items['#text']) / 12), 10);
-    
+
     $form['source'] = array(
       '#type' => 'textarea',
       '#disabled' => TRUE,

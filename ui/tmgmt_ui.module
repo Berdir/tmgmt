@@ -13,13 +13,21 @@ function tmgmt_ui_entity_info() {
     'admin ui' => array(
       'controller class' => 'TMGMTTranslatorUIController',
       'path' => 'admin/config/regional/tmgmt/translators',
-      'file' => 'includes/tmgmt_ui.admin.inc',
-      // Entity API defaults to the path that implements the entity type, but
-      // since this happens in the TMGMT core module, we need to manually
-      // define the path here.
-      'file path' => drupal_get_path('module', 'tmgmt_ui'),
     ),
   );
+  $info['tmgmt_job'] = array(
+    'admin ui' => array(
+      'controller class' => 'TMGMTJobUIController',
+      'path' => 'admin/config/regional/tmgmt/jobs',
+    ),
+  );
+  foreach ($info as &$item) {
+    // Entity API defaults to the path that implements the entity type, but
+    // since this happens in the TMGMT core module, we need to manually
+    // define the path here.
+    $item['file path'] = drupal_get_path('module', 'tmgmt_ui');
+    $item['file'] = 'includes/tmgmt_ui.admin.inc';
+  }
   return $info;
 }
 
@@ -40,20 +48,30 @@ function tmgmt_ui_menu() {
     'access arguments' => array('access tmgmt ui'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
+    'weight' => -10,
   );
   $items['admin/config/regional/tmgmt/jobs/%tmgmt_job'] = array(
     'title' => 'Job',
     'page callback' => 'tmgmt_job_view',
     'page arguments' => array(5),
     'access arguments' => array('access tmgmt ui'),
-    'type' => MENU_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
   );
-  $items['admin/config/regional/tmgmt/checkout/%tmgmt_ui_job_multiple'] = array(
-    'title' => 'Checkout job',
-    'page callback' => 'tmgmt_ui_checkout_wizard',
+  $items['admin/config/regional/tmgmt/jobs/%tmgmt_job/view'] = array(
+    'title' => 'view',
+    'page callback' => 'tmgmt_job_view',
     'page arguments' => array(5),
     'access arguments' => array('access tmgmt ui'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'includes/tmgmt_ui.pages.inc',
+    'weight' => -10,
+  );
+  $items['admin/config/regional/tmgmt/jobs/%tmgmt_job/checkout'] = array(
+    'title' => 'Checkout job',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tmgmt_job_checkout_form', 5),
+    'access arguments' => array('access tmgmt ui'),
+    'type' => MENU_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
   );
   $items['admin/config/regional/tmgmt/add-item/%/%/%/%'] = array(
@@ -68,45 +86,35 @@ function tmgmt_ui_menu() {
 }
 
 /**
- * Implements hook_forms().
+ * Access callback for the checkout local task.
+ *
+ * @param TMGMTJob $job
+ *
+ * @return
+ *   TRUE if the job can be checked out and the user has access to do this.
  */
-function tmgmt_ui_forms() {
-  $info = array();
-  // Give each translator settings form a unique form id.
-  foreach (tmgmt_translator_plugin_info() as $plugin => $plugin_info) {
-    $info['tmgmt_' . $plugin . '_translator_settings_form'] = array(
-      'callback' => 'tmgmt_translator_settings_form',
-      'wrapper_callback' => 'tmgmt_translator_settings_form_defaults',
-    );
+function tmgmt_ui_checkout_access(TMGMTJob $job) {
+  if ($job->isNew() || $job->isPrepared() || $job->isRejected()) {
+    return user_access('access tmgmt ui');
   }
-  return $info;
 }
 
 /**
- * Implements hook_permission().
+ * Implements hook_theme().
  */
-function tmgmt_ui_permission() {
+function tmgmt_ui_theme() {
   return array(
-    'access tmgmt ui' => array(
-      'title' => t('Access Translation Management UI'),
+    'tmgmt_ui_translator_overview_item' => array(
+      // We also have the entity_type here because we are still populating the
+      // defaults via the entity api so we just need to add the description.
+      'variables' => array('label' => NULL, 'entity_type' => NULL, 'url' => FALSE, 'name' => FALSE, 'description' => FALSE),
+      'file' => 'includes/tmgmt_ui.controller.inc',
+    ),
+    'tmgmt_ui_translator_overview_form' => array(
+      'render element' => 'form',
+      'file' => 'includes/tmgmt_ui.controller.inc',
     ),
   );
-}
-
-/**
- * Load callback to load multiple jobs.
- *
- * @todo: This function can be easily tested.
- *
- * @param string $job_ids
- *   A string which has a comma-separeted list of job ids.
- *
- * @return array
- */
-function tmgmt_ui_job_multiple_load($job_ids) {
-  $job_ids = explode(',', $job_ids);
-  $jobs = tmgmt_job_load_multiple($job_ids);
-  return $jobs;
 }
 
 /**

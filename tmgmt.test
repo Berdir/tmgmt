@@ -11,6 +11,23 @@
 class TMGMTBaseTestCase extends DrupalWebTestCase {
 
   /**
+   * A default translator using the test translator.
+   *
+   * @var TMGMTTranslator
+   */
+  protected $default_translator;
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp(array $modules = array()) {
+    $modules = array_merge(array('entity', 'tmgmt', 'tmgmt_test'), $modules);
+    parent::setUp($modules);
+
+    $this->default_translator = tmgmt_translator_load('test_translator');
+  }
+
+  /**
    * Creates, saves and returns a translator.
    *
    * @return TMGMTTranslator
@@ -18,7 +35,7 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
   function createTranslator() {
     $translator = new TMGMTTranslator();
     $translator->name = $this->randomName();
-    $translator->label = $this->randomString();
+    $translator->label = $this->randomName();
     $translator->translator_plugin = 'test_translator';
     $translator->settings = array(
       'key' => $this->randomName(),
@@ -36,8 +53,8 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
    *
    * @return TMGMTJob
    */
-  function createJob()  {
-    $job = tmgmt_job_create('en', 'de', array('uid' => 1));
+  function createJob($source = 'en', $target = 'de', $uid = 1)  {
+    $job = tmgmt_job_create($source, $target, $uid);
     $this->assertEqual(SAVED_NEW, $job->save());
 
     // Assert that the translator was assigned a tid.
@@ -85,13 +102,6 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
   }
 
   /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
-  function setUp() {
-    parent::setUp(array('entity', 'tmgmt'));
-  }
-
-  /**
    * Test crud operations of translators.
    */
   function testTranslators() {
@@ -136,12 +146,12 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(0, $loaded_job->state);
 
     // Update the settings.
-    $job->translator_id = 7;
+    $job->reference = 7;
     $this->assertEqual(SAVED_UPDATED, $job->save());
 
     $loaded_job = tmgmt_job_load($job->tjid);
 
-    $this->assertEqual($job->translator_id, $loaded_job->translator_id);
+    $this->assertEqual($job->reference, $loaded_job->reference);
 
     // Test the job items.
     $item1 = $job->addItem('plugin', 'type', 5);
@@ -209,17 +219,8 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
-  function setUp() {
-    parent::setUp(array('entity', 'tmgmt', 'tmgmt_test'));
-
-    $this->translator = $this->createTranslator();
-  }
-
   function createJob($action = 'translate') {
-    $job = tmgmt_job_create('en', 'de');
+    $job = parent::createJob();
 
     for ($i = 1; $i < 3; $i++) {
       if ($i == 3) {
@@ -237,8 +238,8 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     }
 
     // Manually specify the translator for now.
-    $job->translator = $this->translator->name;
-    $job->translator_context = array('action' => $action);
+    $job->translator = $this->default_translator->name;
+    $job->settings = array('action' => $action);
     $job->prepared();
 
     return $job;
@@ -278,7 +279,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
         // The third item has an explicitly stored data value.
         $expected_text = 'de_Stored data';
       }
-      $this->assertEqual($expected_text, $item->translated_data['dummy']['deep_nesting']['#text']);
+      $this->assertEqual($expected_text, $item->translation['dummy']['deep_nesting']['#text']);
       $i++;
     }
 
@@ -289,6 +290,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(TMGMT_JOB_STATE_REVIEW, $last_message->state_before);
     $this->assertEqual(TMGMT_JOB_STATE_ACCEPTED, $last_message->state_after);
     $this->assertEqual('Job accepted', $last_message->message);
+    $this->assertEqual('status', $last_message->type);
 
     // Check if the translations have been "saved".
     foreach ($translate_job->getItems() as $item) {
@@ -306,6 +308,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(TMGMT_JOB_STATE_PREPARED, $last_message->state_before);
     $this->assertEqual(TMGMT_JOB_STATE_REJECTED, $last_message->state_after);
     $this->assertEqual('This is not supported', $last_message->message);
+    $this->assertEqual('error', $last_message->type);
 
     // A failing job.
     $failing_job = $this->createJob('fail');
@@ -318,6 +321,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(TMGMT_JOB_STATE_PREPARED, $last_message->state_before);
     $this->assertEqual(TMGMT_JOB_STATE_PREPARED, $last_message->state_after);
     $this->assertEqual('Service not reachable', $last_message->message);
+    $this->assertEqual('error', $last_message->type);
   }
 }
 
@@ -341,8 +345,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('ctools', 'entity', 'tmgmt', 'tmgmt_test', 'tmgmt_ui'));
-    $this->translator = $this->createTranslator();
+    parent::setUp(array('tmgmt_ui'));
   }
 
   /**
@@ -361,7 +364,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Add a first item to the job. This will auto-create the job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/checkout|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
     // Check checkout form.
@@ -385,7 +388,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText('test_source: test :2');
     $this->assertText('test_source: test :3');
     $this->assertText('German');
-    $this->assertText($this->translator->label);
+    $this->assertText($this->default_translator->label);
 
     // @todo: Test ajax functionality.
 
@@ -394,7 +397,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'el',
       'settings[action]' => 'translate',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
     $this->assertText(t('@plugin is not available for @language.', array('@plugin' => 'Test translator', '@language' => 'Greek')));
 
     // Job still needs to be in state prepared.
@@ -405,20 +408,21 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'es',
       'settings[action]' => 'translate',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
 
     // Job needs to be in state review.
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));
     $job = tmgmt_job_load($tjid);
     $this->assertTrue($job->isNeedsReview());
     $this->assertText(t('Test translation created'));
+    $this->assertNoText(t('Test translator called'));
 
     // Test redirection.
     $this->assertText(t('Translation Management'));
 
     // Another job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/checkout|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
@@ -429,14 +433,14 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'es',
       'settings[action]' => 'submit',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
     $this->assertText(t('Test submit'));
     $job = tmgmt_job_load($tjid, FALSE);
     $this->assertTrue($job->isSubmitted());
 
     // Another job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/checkout|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
@@ -447,14 +451,14 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'es',
       'settings[action]' => 'reject',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
     $this->assertText(t('This is not supported'));
     $job = tmgmt_job_load($tjid, FALSE);
     $this->assertTrue($job->isRejected());
 
     // Another job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/checkout|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
@@ -465,7 +469,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'es',
       'settings[action]' => 'fail',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
     $this->assertText(t('Service not reachable'));
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));
     $job = tmgmt_job_load($tjid);
@@ -476,7 +480,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Another job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
-    preg_match('|admin/config/regional/tmgmt/checkout/([0-9]+)|', $this->getUrl(), $matches);
+    preg_match('|admin/config/regional/tmgmt/jobs/([0-9]+)/checkout|', $this->getUrl(), $matches);
     $tjid = $matches[1];
 
      // Check checkout form.
@@ -487,12 +491,12 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'target_language' => 'es',
       'settings[action]' => 'not_translatable',
     );
-    $this->drupalPost(NULL, $edit, t('Order'));
+    $this->drupalPost(NULL, $edit, t('Checkout'));
     // @todo Update to correct failure message.
     $this->assertText(t('Fail'));
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));
     $job = tmgmt_job_load($tjid);
-    $this->assertTrue($job->isPrepared());
+    $this->assertTrue($job->isNew());
 
     // Attempt to add items to a non-existing job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/en/test_source/test/5/' . ($tjid + 1));
@@ -516,23 +520,19 @@ class TMGMTHelperTestCase extends TMGMTBaseTestCase {
   }
 
   /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
-  function setUp() {
-    parent::setUp(array('entity', 'tmgmt'));
-  }
-
-  /**
    * Tests tmgmt_job_match_item()
+   *
    * @see tmgmt_job_match_item
    */
   function testTMGTJobMatchItem() {
-    locale_add_language('fr');
-    locale_add_language('es');
+    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
+    $this->drupalLogin($this->admin_user);
+    $this->setEnvironment('fr');
+    $this->setEnvironment('es');
 
     // Add a job from en to fr and en to sp.
-    $job_en_fr = $this->createJobEntity('en', 'fr');
-    $job_en_sp = $this->createJobEntity('en', 'es');
+    $job_en_fr = $this->createJob('en', 'fr');
+    $job_en_sp = $this->createJob('en', 'es');
 
     // Add a job which has existing source-target combinations.
     $this->assertEqual($job_en_fr->tjid, tmgmt_job_match_item('en', 'fr')->tjid);
@@ -540,16 +540,6 @@ class TMGMTHelperTestCase extends TMGMTBaseTestCase {
 
     // Add a job which has no existing source-target combination.
     $this->assertTrue(tmgmt_job_match_item('fr', 'es'));
-
-  }
-
-  function createJobEntity($source = 'en', $target = 'de', $uid = 1)  {
-    $job = tmgmt_job_create($source, $target, array('uid' => $uid));
-    $this->assertEqual(SAVED_NEW, $job->save());
-
-    // Assert that the translator was assigned a tid.
-    $this->assertTrue($job->tjid > 0);
-    return $job;
   }
 
 }

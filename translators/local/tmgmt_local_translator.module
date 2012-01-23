@@ -7,18 +7,10 @@
 
 /**
  * Implements hook_menu()
- * 
+ *
  * @TODO Review permissions, maybe create new ones
  */
 function tmgmt_local_translator_menu() {
-  $items['translate'] = array(
-    'title' => 'Translate',
-    'description' => 'View pending translations',
-    'page callback' => 'tmgmt_local_translator_page_user_translate',
-    'page arguments' => array(1),
-    'access arguments' => array('translate content'),
-    'file' => 'tmgmt_local_translator.pages.inc',
-  );
   $items['translate/%tmgmt_job'] = array(
     'title' => 'Translate job',
     'page callback' => 'tmgmt_local_translator_page_job_translate',
@@ -44,10 +36,10 @@ function tmgmt_local_translator_menu() {
  */
 function tmgmt_local_translator_tmgmt_translator_plugin_info() {
   return array(
-    'local_translator' => array(
+    'local' => array(
       'label' => t('Local translator'),
       'description' => t('Local translation team.'),
-      'controller class' => 'TMGMTLocalTranslator',
+      'controller class' => 'TMGMTLocalTranslatorPluginController',
     ),
   );
 }
@@ -90,14 +82,17 @@ function tmgmt_local_translator_user_update(&$edit, $account, $category) {
  * Implements hook_user_update() {
  */
 function tmgmt_local_translator_user_insert(&$edit, $account, $category) {
-  
+
 }
 
 /**
  * Implements hook_views_api().
  */
 function tmgmt_local_translator_views_api() {
-  return array('api' => 3);
+  return array(
+  	'api' => 3,
+    'path' => drupal_get_path('module', 'tmgmt_local_translator') . '/includes',
+  );
 }
 
 /**
@@ -121,4 +116,11 @@ function tmgmt_local_translator_views_default_views() {
   }
 
   return $return;
+}
+
+/**
+ * Implements hook_views_data_alter()
+ */
+function tmgmt_local_translator_views_data_alter($data) {
+  //dpm($data);
 }

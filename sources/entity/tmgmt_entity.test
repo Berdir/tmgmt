@@ -23,7 +23,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_entity', 'tmgmt_test', 'locale', 'tmgmt_dummy', 'tmgmt_entity_test'));
+    parent::setUp(array('tmgmt_entity', 'tmgmt_entity_test'));
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
   }
 
@@ -96,8 +96,8 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     // Create a few nodes and translate them.
     $amount = 1;
     $job = $this->createJob();
-    $job->translator = 'dummy';
-    $job->translator_context = array();
+    $job->translator = $this->default_translator->name;
+    $job->settings = array();
     $job->save();
     for ($i = 1; $i <= $amount; $i++) {
       $edit = array(
@@ -124,8 +124,8 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     $job->accepted();
     foreach ($job->getItems() as $job_item) {
       $entity = entity_load_single($job_item->item_type, $job_item->item_id);
-      $this->checkTranslatedData($entity, $job_item->translated_data, $langcode);
-      $this->checkUntranslatedData($entity, $this->field_names['node'][$bundle], $job_item->translated_data, $langcode);
+      $this->checkTranslatedData($entity, $job_item->translation, $langcode);
+      $this->checkUntranslatedData($entity, $this->field_names['node'][$bundle], $job_item->translation, $langcode);
     }
   }
 
@@ -144,8 +144,8 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     $amount = 1;
     // Create the job.
     $job = $this->createJob();
-    $job->translator = 'dummy';
-    $job->translator_context = array();
+    $job->translator = $this->default_translator->name;
+    $job->settings = array();
     $job->save();
     for ($i = 1; $i <= $amount; $i++) {
       $term = new stdClass();
@@ -173,8 +173,8 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     // Check if the fields were translated.
     foreach ($job->getItems() as $job_item) {
       $entity = entity_load_single($job_item->item_type, $job_item->item_id);
-      $this->checkTranslatedData($entity, $job_item->translated_data, $langcode);
-      $this->checkUntranslatedData($entity, $this->field_names['taxonomy_term'][$bundle], $job_item->translated_data, $langcode);
+      $this->checkTranslatedData($entity, $job_item->translation, $langcode);
+      $this->checkUntranslatedData($entity, $this->field_names['taxonomy_term'][$bundle], $job_item->translation, $langcode);
     }
   }
 
@@ -183,13 +183,13 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
    *
    * @param object $tentity
    *  The translated entity object.
-   * @param array $translated_data
+   * @param array $translation
    *  An array with the translated data.
    * @param string $langcode
    *  The code of the target language.
    */
-  function checkTranslatedData($tentity, $translated_data, $langcode) {
-    foreach ($translated_data as $field_name => $values) {
+  function checkTranslatedData($tentity, $translation, $langcode) {
+    foreach ($translation as $field_name => $values) {
       if (!is_array($values)) {
         continue;
       }
@@ -210,18 +210,18 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
    *  The translated entity object.
    * @param array $fields
    *  An array with the field names to check.
-   * @param array $translated_data
+   * @param array $translation
    *  An array with the translated data.
    * @param string $langcode
    *  The code of the target language.
    */
-  function checkUntranslatedData($tentity, $fields, $translated_data, $langcode) {
+  function checkUntranslatedData($tentity, $fields, $translation, $langcode) {
     foreach ($fields as $field_name) {
       $field_info = field_info_field($field_name);
       if (!$field_info['translatable']) {
         // Avoid some PHP warnings.
-        if (isset($translated_data[$field_name])) {
-          $this->assertNull($translated_data[$field_name], t('The not translatable field "!field" was not translated.', array('!field' => $field_name)));
+        if (isset($translation[$field_name])) {
+          $this->assertNull($translation[$field_name], t('The not translatable field "!field" was not translated.', array('!field' => $field_name)));
         }
         if (isset($tentity->{$field_name}[$langcode])) {
           $this->assertNull($tentity->{$field_name}[$langcode], t('The entity has translated data in fields that are not translatable: !field', array('!field' => $field_name)));

@@ -30,8 +30,11 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
    */
   function requestTranslation(TMGMTJob $job) {
 
+    // Add a debug message.
+    $job->addMessage('Test translator called', array(), 'debug');
+
     // Do something different based on the action, if defined.
-    $action = isset($job->translator_context['action']) ? $job->translator_context['action'] : '';
+    $action = isset($job->settings['action']) ? $job->settings['action'] : '';
     switch ($action) {
       case 'submit':
         $job->submitted('Test submit');
@@ -45,7 +48,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
 
       case 'fail':
         // Target not reachable.
-        $job->addMessage('Service not reachable');
+        $job->addMessage('Service not reachable', array(), 'error');
         return;
         break;
 
@@ -64,7 +67,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   }
 
   function canTranslate(TMGMTJob $job) {
-    if (isset($job->translator_context['action']) && $job->translator_context['action'] == 'not_translatable') {
+    if (isset($job->settings['action']) && $job->settings['action'] == 'not_translatable') {
       return FALSE;
     }
     return parent::canTranslate($job);

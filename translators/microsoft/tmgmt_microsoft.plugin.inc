@@ -7,7 +7,6 @@
  * Check @link http://msdn.microsoft.com/en-us/library/dd576287.aspx Microsoft
  * Translator @endlink. Note that we are using HTTP API.
  */
-
 class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginController {
 
   /**
@@ -21,7 +20,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
   public function isAvailable(TMGMTTranslator $translator) {
-    if ($translator->getSetting('bing_api_id')) {
+    if ($translator->getSetting('api')) {
       return TRUE;
     }
     return FALSE;
@@ -39,18 +38,18 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       if (isset($value['#translate']) && $value['#translate'] === FALSE) {
         continue;
       }
-      $query = drupal_http_build_query(array(
-        'appId'       => $this->getOption('bing_api_id'),
-        'from'        => $job->source_language,
-        'to'          => $job->target_language,
+      $query = array(
+        'from' => $job->source_language,
+        'to' => $job->target_language,
         'contentType' => 'text/plain',
-        'text'        => $value['#text'],
-      ));
-      $options = array(
-        // @todo For some reason post is returning 202 status and service is not translating things, maybe check this later.
-        'headers' => array('Content-Type' => 'text/plain')
+        'text' => $value['#text'],
       );
-      $result = drupal_http_request($this->translatorUrl . '/Translate?' . $query, $options);
+      $options = array(
+        // @todo For some reason post is returning 202 status and service is not
+        // translating things, maybe check this later.
+        'headers' => array('Content-Type' => 'text/plain'),
+      );
+      $result = $this->doRequest($job->getTranslator(), 'Translate', $query, $options);
       switch ($result->code) {
         case 200:
           // Lets use DOMDocument for now because this service enables us to
@@ -62,12 +61,10 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
           $data[$key]['#text'] = $items->item(0)->nodeValue;
           break;
         case 400:
-          // @todo Change error message.
-          $job->rejected($result->data);
+          $job->rejected('Rejected by Microsoft Translator: @error', array('@error' => $result->data));
           return;
         default:
-          // @todo Change error message.
-          $job->addMessage('Error from server: @error', array('@error' => $result->data));
+          $job->addMessage('Unknown error from Microsoft Translator: @error', array('@error' => $result->data), 'error');
           return;
       }
     }
@@ -90,14 +87,15 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
    */
   public function getSupportedLanguages(TMGMTTranslator $translator) {
-    $languages = &drupal_static(__FUNCTION__);
+    // @todo Maybe add database caching?
+    $languages = &drupal_static(__CLASS__ . '::' . __METHOD__);
     if (!isset($languages)) {
       $languages = array();
-      $request = drupal_http_request($this->translatorUrl . '/GetLanguagesForTranslate' . '?appId=' . $this->getOption('bing_api_id'));
+      $request = $this->doRequest($translator, 'GetLanguagesForTranslate');
       if ($request->code == 200) {
         $dom = new DOMDocument;
         $dom->loadXML($request->data);
-        foreach($dom->getElementsByTagName('string') as $item) {
+        foreach ($dom->getElementsByTagName('string') as $item) {
           $languages[$item->nodeValue] = $item->nodeValue;
         }
       }
@@ -106,15 +104,25 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultTranslatorSettings().
+   */
+  public function defaultTranslatorSettings() {
+    return array(
+      // @todo Remove default API Key once development is finished.
+      'api' => 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369',
+      'url' => $this->translatorUrl,
+    );
+  }
+
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  public function settingsForm($form, &$form_state, TMGMTTranslator $translator) {
-    $form['bing_api_id'] = array(
+  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+    $form['api'] = array(
       '#type' => 'textfield',
-      '#title' => t('Bing API ID'),
-      // @todo - remove default test bing id before production release.
-      '#default_value' => $translator->getSetting('bing_api_id', 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369'),
-      '#description' => t('Please enter your Bing API ID, or follow this !link to generate one.', array('!link' => l('link', 'http://www.bing.com/developers/appids.aspx.'))),
+      '#title' => t('Microsoft API Key'),
+      '#default_value' => $translator->getSetting('api'),
+      '#description' => t('Please enter your Microsoft API ID, or follow this <a hef="!link">link</a> to generate one.', array('!link' => 'http://www.bing.com/developers/appids.aspx.')),
     );
     return $form;
   }
@@ -129,6 +137,32 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       '#description' => t('If checked all text items in this translation job will be send to server in one request.')
     );
     return $settings;
+  }
+
+  /**
+   * Execute a request against the Microsoft API.
+   *
+   * @param TMGMTTranslator $translator
+   *   The translator entity to get the settings from.
+   * @param $path
+   *   The path that should be appended to the base uri, e.g. Translate or
+   *   GetLanguagesForTranslate.
+   * @param $query
+   *   (Optional) Array of GET query arguments.
+   * @param $options
+   *   (Optional) Array of additional options passed to drupal_http_request().
+   *
+   * @return
+   *   The response object returned by drupal_http_request().
+   */
+  protected function doRequest(TMGMTTranslator $translator, $path, array $query = array(), array $options = array()) {
+    // Allow to override the url, e.g. for the tests.
+    $url = $translator->getSetting('url') . '/' . $path;
+
+    // Add the appId to the query arguments and build the query string.
+    $query = array('appId' => $translator->getSetting('api')) + $query;
+    $url = url($url, array('query' => $query));
+    return drupal_http_request($url, $options);
   }
 
 }

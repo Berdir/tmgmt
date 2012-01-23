@@ -21,3 +21,24 @@ class TMGMTJobController extends EntityAPIController {
   }
 
 }
+
+/**
+ * Controller class for the job entity.
+ *
+ * @ingroup tmgmt_translator
+ */
+class TMGMTTranslatorController extends EntityAPIControllerExportable {
+
+  /**
+   * Overrides EntityAPIControllerExportable::buildQuery().
+   */
+  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
+    $query = parent::buildQuery($ids, $conditions, $revision_id);
+    // Filter by available translator plugins.
+    $plugins = tmgmt_translator_plugin_info();
+    $query->condition('translator_plugin', array_keys($plugins));
+    // Sort by the weight of the translator.
+    $query->orderBy('weight');
+    return $query;
+  }
+}
