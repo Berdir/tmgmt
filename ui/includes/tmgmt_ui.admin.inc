@@ -36,7 +36,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#description' => t('The machine readable name of this translator. It must be unique, and it must contain only alphanumeric characters and underscores. Once created, you will not be able to change this value!'),
     '#default_value' => $translator->name,
     '#machine_name' => array(
-      'exists' => 'tmgmt_ui_translator_exists',
+      'exists' => 'tmgmt_translator_exists',
       'source' => array('label'),
     ),
     '#disabled' => empty($translator->is_new) && $op != 'clone',
@@ -140,28 +140,4 @@ function tmgmt_translator_form_submit($form, &$form_state) {
  */
 function tmgmt_ui_ajax_callback_translator_plugin($form, &$form_state) {
   return $form['translator_plugin_wrapper'];
-}
-
-/**
- * Checks whether a translator entity with the supplied name already exists.
- *
- * We can't user entity_load or any of its wrapper functions for that as our
- * translator entity controller filters out broken translator entities (e.g. if
- * the translator plugin of the translator entity doesn't exist (anymore).
- *
- * @param $name
- *   The machine-readable name of the translator entity that we are trying to
- *   save.
- *
- * @return boolean
- *   TRUE if a translator entity with the same machine-readable name already
- *   exists FALSE otherwise.
- */
-function tmgmt_ui_translator_exists($name) {
-  $query = new EntityFieldQuery();
-  $query = $query->entityCondition('entity_type', 'tmgmt_translator')
-    ->propertyCondition('name', $name)
-    ->count()
-    ->range(0, 1);
-  return (boolean) $query->execute();
 }

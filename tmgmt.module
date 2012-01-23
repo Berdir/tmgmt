@@ -179,6 +179,19 @@ function tmgmt_permission() {
 }
 
 /**
+ * Implements hook_modules_installed().
+ */
+function tmgmt_modules_installed($modules) {
+  foreach (tmgmt_translator_plugin_info() as $key => $info) {
+    // Check if this translator plugin has been added by one of the recently
+    // installed modules.
+    if (!empty($info['auto create']) && in_array($info['module'], $modules)) {
+      tmgmt_translator_auto_create($key);
+    }
+  }
+}
+
+/**
  * Returns an array of languages that are available for translation.
  *
  * @return array
@@ -296,7 +309,7 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
  * @param $target_language
  *   The target language into which should be translated.
  * @param $values
- *   (Optional) Array of additional entity values.
+ *   (Optional) An array of additional entity values.
  *
  * @return TMGMTJob
  *   The job entity.
@@ -528,6 +541,30 @@ function tmgmt_translator_access($op, TMGMTTranslator $translator = NULL, $accou
 }
 
 /**
+ * Checks whether a translator entity with the supplied name already exists.
+ *
+ * We can't user entity_load or any of its wrapper functions for that as our
+ * translator entity controller filters out broken translator entities (e.g. if
+ * the translator plugin of the translator entity doesn't exist (anymore).
+ *
+ * @param $name
+ *   The machine-readable name of the translator entity that we are trying to
+ *   save.
+ *
+ * @return boolean
+ *   TRUE if a translator entity with the same machine-readable name already
+ *   exists FALSE otherwise.
+ */
+function tmgmt_translator_exists($name) {
+  $query = new EntityFieldQuery();
+  $query = $query->entityCondition('entity_type', 'tmgmt_translator')
+    ->propertyCondition('name', $name)
+    ->count()
+    ->range(0, 1);
+  return (boolean) $query->execute();
+}
+
+/**
  * Loads a translator based on the name.
  */
 function tmgmt_translator_load($name) {
@@ -540,6 +577,53 @@ function tmgmt_translator_load($name) {
  */
 function tmgmt_translator_load_multiple($names = array(), $conditions = array()) {
   return entity_load_multiple_by_name('tmgmt_translator', $names, $conditions);
+}
+
+/**
+ * Creates a translator.
+ *
+ * @param $plugin
+ *   The plugin of the translator.
+ * @param $name
+ *   The machine-readable name of the translator.
+ * @param $label
+ *   The label of the translator.
+ * @param $description
+ *   (Optional) The description of the translator. Defaults to an empty string.
+ * @param $settings
+ *   (Optional) An array of settings for the translator.
+ * @param $values
+ *   (Optional) Array of additional entity values.
+ *
+ * @return TMGMTTranslator
+ *   The created, not yet saved, translator entity.
+ */
+function tmgmt_translator_create($plugin, $name, $label, $description = '', $settings = array(), $values = array()) {
+  return entity_create('tmgmt_translator', array_merge($values, array(
+    'translator_plugin' => $plugin,
+    'name' => $name,
+    'label' => $label,
+    'description' => $description,
+    'settings' => $settings,
+  )));
+}
+
+/**
+ * Auto creates a translator from a translator plugin definition.
+ *
+ * @param $plugin
+ *   The machine-readable name of a translator plugin.
+ */
+function tmgmt_translator_auto_create($plugin) {
+  if ($info = tmgmt_translator_plugin_info($plugin)) {
+    if (!tmgmt_translator_exists($plugin)) {
+      $translator = tmgmt_translator_create($plugin, $plugin, $info['label'], $info['description']);
+      // Append some default settings from the translator plugin definition.
+      $translator->settings = $translator->getPluginController()->defaultTranslatorSettings();
+      $translator->save();
+    }
+  }
+  return FALSE;
 }
 
 /**
