@@ -9,7 +9,6 @@
  */
 
 class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginController {
-
   /**
    * Translation service URL.
    *
@@ -20,7 +19,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
-  public function isAvailable() {
+  public function isAvailable(TMGMTTranslator $translator) {
     if ($this->getOption('username') && $this->getOption('password')) {
       return TRUE;
     }
@@ -104,20 +103,43 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
   }
 
   /**
+   * Defines plugin settings form.
+   *
+   * @param $form array
+   * @param $form_state array
+   */
+  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+    $form['api_user_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('User name'),
+      '#default_value' => $translator->getSetting('api_user_name', ''),
+    );
+    $form['api_password'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Password'),
+      '#default_value' => $translator->getSetting('api_password', ''),
+    );
+    return $form;
+  }
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
-  public function getSupportedTargetLanguages($source_language) {
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $languages = $this->getSupportedLanguages();
     unset($languages[$source_language]);
     return $languages;
   }
 
   /**
-   * Returns array of service supported languages.
+   * Returns all languages that are supported by this service.
+   *
+   * @param TMGMTTranslator $translator
+   *   The translator entity.
    *
    * @return array
+   *   An array of languages in ISO format.
    */
-  public function getSupportedLanguages() {
+  public function getSupportedLanguages(TMGMTTranslator $translator) {
     $languages = &drupal_static(__FUNCTION__);
     if (!isset($languages)) {
       $languages = array();
@@ -134,6 +156,25 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     return $languages;
   }
 
+
+  /**
+   * Send request to nativy, get response
+   */
+  /*protected*/ function nativySoapRequest($method, $params = array()) {
+    $response = $this->nativySoapClient()->$method($params);
+    return $response;
+  }
+  /**
+   * Get SOAP client for Nativy service
+   */
+  /*protected*/ function nativySoapClient() {
+    static $client;
+    if (!isset($client)) {
+      $client = new SoapClient(drupal_get_path('module', 'tmgmt_nativy') . '/tmgmt_nativy_test.wsdl');
+    }
+    return $client;
+  }
+  
   public function getXMLTemplate($request_type, $params = array()) {
     switch($request_type) {
       case 'Authentication':
@@ -199,5 +240,4 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
         break;
     }
   }
-
 }
