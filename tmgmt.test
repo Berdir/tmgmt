@@ -24,8 +24,7 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
     $modules = array_merge(array('entity', 'tmgmt', 'tmgmt_test'), $modules);
     parent::setUp($modules);
 
-
-    $this->default_translator = $this->createTranslator();
+    $this->default_translator = tmgmt_translator_load('test_translator');
   }
 
   /**
