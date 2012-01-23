@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * tmgmt page callbacks.
@@ -19,7 +20,7 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
     }
   }
   if ($source_language != $job->source_language) {
-    drupal_set_message("The source language of your item doesn't match the source language of your job.", 'error');
+    drupal_set_message(t("The source language of your item doesn't match the source language of your job."), 'error');
   }
   else {
     $item_ids = explode(',', $item_ids);
@@ -42,7 +43,7 @@ function tmgmt_job_checkout_form($form, &$form_state, TMGMTJob $job) {
     if (isset($form_state['values']['target_language'])) {
       $selected_target_language = $form_state['values']['target_language'];
     }
-    else if (!empty($job->target_language)) {
+    elseif (!empty($job->target_language)) {
       $selected_target_language = $job->target_language;
     }
     else {

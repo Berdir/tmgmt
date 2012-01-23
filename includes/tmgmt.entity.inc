@@ -150,7 +150,7 @@ class TMGMTTranslator extends Entity {
     if (isset($this->settings[$name])) {
       return $this->settings[$name];
     }
-    else if ($defaults = $this->getPluginController()->defaultTranslatorSettings()) {
+    elseif ($defaults = $this->getPluginController()->defaultTranslatorSettings()) {
       if (isset($defaults[$name])) {
         return $defaults[$name];
       }
@@ -171,12 +171,13 @@ class TMGMTTranslator extends Entity {
     if (isset($this->settings[$name])) {
       return $this->settings[$name];
     }
-    else if ($defaults = $this->getPluginController()->defaultTranslatorSettings()) {
+    elseif ($defaults = $this->getPluginController()->defaultTranslatorSettings()) {
       if (isset($defaults[$name])) {
         return $defaults[$name];
       }
     }
   }
+
 }
 
 /**
@@ -737,7 +738,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     $message = tmgmt_job_message_create($state_before, $state_after, $message, $variables, array(
       'tjid' => $this->tjid,
       'type' => $type,
-    ));
+      ));
     // Remove old state again so that future log messages will use the correct
     // state.
     unset($this->old_state);

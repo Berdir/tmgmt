@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Test cases for the microsoft translator module.
+ */
+
+/**
  * Basic tests for the microsoft translator.
  */
 class TMGMTMicrosoftTestCase extends TMGMTBaseTestCase {

@@ -7,7 +7,6 @@
  * Check @link http://msdn.microsoft.com/en-us/library/dd576287.aspx Microsoft
  * Translator @endlink. Note that we are using HTTP API.
  */
-
 class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginController {
 
   /**
@@ -40,10 +39,10 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
         continue;
       }
       $query = array(
-        'from'        => $job->source_language,
-        'to'          => $job->target_language,
+        'from' => $job->source_language,
+        'to' => $job->target_language,
         'contentType' => 'text/plain',
-        'text'        => $value['#text'],
+        'text' => $value['#text'],
       );
       $options = array(
         // @todo For some reason post is returning 202 status and service is not
@@ -98,7 +97,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       if ($request->code == 200) {
         $dom = new DOMDocument;
         $dom->loadXML($request->data);
-        foreach($dom->getElementsByTagName('string') as $item) {
+        foreach ($dom->getElementsByTagName('string') as $item) {
           $languages[$item->nodeValue] = $item->nodeValue;
         }
       }
@@ -124,7 +123,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       '#type' => 'textfield',
       '#title' => t('Microsoft API Key'),
       '#default_value' => $translator->getSetting('api'),
-      '#description' => t('Please enter your Microsoft API ID, or follow this !link to generate one.', array('!link' => l('link', 'http://www.bing.com/developers/appids.aspx.'))),
+      '#description' => t('Please enter your Microsoft API ID, or follow this <a hef="!link">link</a> to generate one.', array('!link' => 'http://www.bing.com/developers/appids.aspx.')),
     );
     return $form;
   }

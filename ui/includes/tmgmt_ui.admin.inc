@@ -64,7 +64,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
       $element['translator_plugin'] = array(
         '#type' => 'select',
         '#title' => t('Translator plugin'),
-        '#description' => $info['description'],
+        '#description' => check_plain($info['description']),
         '#options' => $available_plugins,
         '#default_value' => $translator->translator_plugin,
         '#required' => TRUE,
@@ -78,7 +78,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
       $element['translator_plugin'] = array(
         '#type' => 'item',
         '#title' => t('Translator plugin'),
-        '#description' => $info['label'] . ' - ' . $info['description'],
+        '#description' => check_plain($info['label'] . ' - ' . $info['description']),
         '#required' => TRUE,
       );
     }
@@ -109,7 +109,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Save translator'),
     '#disabled' => empty($available_plugins),
   );
   $form['actions']['cancel'] = array(
@@ -121,11 +121,12 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
 }
 
 /**
- * Submit handler for the translator entity form. Populates and stores the
- * submitted values for the translator entity via
+ * Submit handler for the translator entity form.
+ *
+ * Populates and stores the submitted values for the translator entity via
  * entity_ui_form_submit_build_entity().
  *
- * @see entity_ui_form_submit_build_entity().
+ * @see entity_ui_form_submit_build_entity()
  */
 function tmgmt_translator_form_submit($form, &$form_state) {
   entity_ui_form_submit_build_entity($form, $form_state)->save();

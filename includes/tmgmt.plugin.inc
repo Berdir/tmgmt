@@ -55,7 +55,6 @@ interface TMGMTSourcePluginControllerInterface {
    * Returns the type of the plugin.
    */
   public function pluginType();
-
 }
 
 /**
@@ -232,7 +231,6 @@ interface TMGMTTranslatorPluginControllerInterface {
    * Returns the type of the plugin.
    */
   public function pluginType();
-
 }
 
 /**
