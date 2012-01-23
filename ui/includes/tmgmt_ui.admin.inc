@@ -155,7 +155,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
   // Look up the items on the job.
   $items = $job->getItems();
   // Add a nice title that describes the form.
-  drupal_set_title(format_plural(count($items), 'Translation job including @count translatable item', 'Translation job including @count translatable items'));
+  drupal_set_title(format_plural(count($items), 'Translation job with @count attached item', 'Translation job with @count attached items'));
   // Find pre-selected values and get all available languages.
   // @todo Make sure that our ajax callback also replaces the opposite language
   // options list so we never have the same source and target language.
@@ -180,7 +180,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
   if (count($items) <= 20) {
     $form['items'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Attached source objects'),
+      '#title' => t('Attached items'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
@@ -224,7 +224,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
     );
   }
   $form['languages']['target_language'] = array(
-    '#title' => t('Source language'),
+    '#title' => t('Target language'),
     '#required' => TRUE,
     '#prefix' => '<div class="tmgmt-ui-source-language">',
     '#suffix' => '</div>',
@@ -293,24 +293,24 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
       '#markup' => t('None of the available translators supports the selected source and target language combination.'),
     );
   }
-  $form['translator_wrapper']['actions']['#type'] = 'actions';
-  $form['translator_wrapper']['actions']['submit'] = array(
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Save job'),
   );
-  $form['translator_wrapper']['actions']['checkout'] = array(
+  $form['actions']['checkout'] = array(
     '#type' => 'submit',
-    '#value' => t('Checkout job'),
+    '#value' => t('Submit to translator'),
   );
   if (!$job->isSubmitted()) {
-    $form['translator_wrapper']['actions']['delete'] = array(
+    $form['actions']['delete'] = array(
       '#type' => 'link',
       '#title' => t('Delete'),
       '#href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/delete',
     );
   }
   else {
-    $form['translator_wrapper']['actions']['cancel'] = array(
+    $form['actions']['cancel'] = array(
       '#type' => 'link',
       '#title' => t('Cancel'),
       '#href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/cancel',
@@ -332,9 +332,9 @@ function tmgmt_job_form_submit($form, &$form_state) {
   // Save here so we got the plain 'Submit' case covered. Also, if the
   // translator fails it won't save on its own.
   $job->save();
-  // Everything below this line is only invoked if the 'Checkout job' button
+  // Everything below this line is only invoked if the 'Submit to translator' button
   // was clicked.
-  if ($form_state['triggering_element']['#value'] == t('Checkout job')) {
+  if ($form_state['triggering_element']['#value'] == t('Submit to translator')) {
     // Request the job to be translated.
     $job->requestTranslation();
     // Print all messages to the screen and redirect the user.
