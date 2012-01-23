@@ -52,8 +52,7 @@ function tmgmt_ui_simple_page_alter(&$page) {
   if (module_exists('tmgmt_node') && ($node = menu_get_object())) {
     if (isset($page['content']['system_main']['translation_node_overview'])) {
       $page['content']['system_main']['translation_node_overview'] = drupal_get_form('tmgmt_ui_simple_node_form', $node, $page['content']['system_main']['translation_node_overview']);
-    }
-    elseif (isset($page['content']['system_main']['entity_translation_overview'])) {
+    } elseif (isset($page['content']['system_main']['entity_translation_overview'])) {
       $page['content']['system_main']['entity_translation_overview'] = drupal_get_form('tmgmt_ui_simple_node_form', $node, $page['content']['system_main']['entity_translation_overview']);
     }
   }
@@ -75,30 +74,38 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
   );
   // As keys are numeric, we assume languages are in the same order, need to rekey rows
   $language_list = module_exists('i18n_node') ? i18n_node_language_list($node) : locale_language_list();
-  $jobs = tmgmt_job_item_load_by_source($form['source_plugin']['#value'], $form['item_type']['#value'], $form['item_id']['#value'], $form['source_language']['#value'] , array_keys($language_list));
-
+  $jobs = tmgmt_job_item_load_by_source($form['source_plugin']['#value'], $form['item_type']['#value'], $form['item_id']['#value'], $form['source_language']['#value'], array_keys($language_list));
+  $running_jobs = array();
   foreach ($language_list as $langcode => $language_name) {
     if ($langcode == LANGUAGE_NONE) {
       // Never show language neutral on the overview.
       continue;
     }
     $form['languages']['#options'][$langcode] = array_shift($original['#rows']);
-    if(isset($jobs[$langcode])) {
+    if (isset($jobs[$langcode]) && ($jobs[$langcode]->changed >= $node->changed)) {
       $job = $jobs[$langcode];
       $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
       $job_uri = $job->uri();
       $form['languages']['#options'][$langcode][2] = t('@state (Job state: !job_state)', array('@state' => $form['languages']['#options'][$langcode][2], '!job_state' => l($wrapper->state->label(), $job_uri['path'])));
       $form['languages'][$langcode] = array(
-      	'#disabled' => TRUE,
+        '#disabled' => TRUE,
         '#type' => 'checkbox',
       );
-    }
-    elseif($langcode == $node->language) {
+    } elseif (isset($jobs[$langcode])) {
+      $running_jobs[] = $langcode;
+    } elseif ($langcode == $node->language) {
       $form['languages'][$langcode] = array(
-      	'#disabled' => TRUE,
+        '#disabled' => TRUE,
         '#type' => 'checkbox',
       );
     }
+  }
+  $existing_job_languages = '';
+  foreach ($running_jobs as $job_language) {
+    $existing_job_languages .= $language_list[$job_language] . ', ';
+  }
+  if (!empty($running_jobs)) {
+    drupal_set_message('There are currently existing jobs for: ' . substr($existing_job_languages, 0, -2) . '. They are possibaly outdated.', 'warning');
   }
   $form['controls'] = tmgmt_ui_simple_controls_element($form, $form_state);
   $form['#submit'][] = 'tmgmt_ui_simple_translate_form_submit';
@@ -138,8 +145,7 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       ),
     );
     drupal_set_message(format_plural($count, 'A translation job has been created. you will need to configure them now.', '@count translation jobs have been created.'));
-  }
-  else {
+  } else {
     drupal_set_message(t('You need to select one or more languages for requesting a translation.'), 'warning');
   }
 }
