@@ -157,9 +157,12 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    *   The response object returned by drupal_http_request().
    */
   protected function doRequest(TMGMTTranslator $translator, $path, array $query = array(), array $options = array()) {
+    // Allow to override the url, e.g. for the tests.
+    $url = $translator->getSetting('url', $this->translatorUrl) . '/' . $path;
+
     // Add the appId to the query arguments and build the query string.
     $query = array('appId' => $translator->getSetting('api')) + $query;
-    $url = url($this->translatorUrl . '/' . $path, array('query' => $query));
+    $url = url($url, array('query' => $query));
     return drupal_http_request($url, $options);
   }
 
