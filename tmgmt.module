@@ -542,6 +542,7 @@ function tmgmt_translator_access($op, TMGMTTranslator $translator = NULL, $accou
   if (isset($translator) && !$translator->getPluginController()) {
     return FALSE;
   }
+  // Only administrators are allowed to manage translator entities.
   return user_access('administer tmgmt', $account);
 }
 
@@ -678,6 +679,8 @@ function tmgmt_translator_labels() {
 }
 
 /**
+ * @todo Lets see if we can make this work in a better way.
+ *
  * @param $plugin
  * @param $source_language
  * @param array $languages
@@ -702,6 +705,8 @@ function tmgmt_translator_filtered_by_language($source_language, $selected_targe
 }
 
 /**
+ * @todo Lets see if we can make this work in a better way.
+ *
  * @param TMGMTTranslator $translator
  * @param $source_language
  * @param $selected_target_language
@@ -718,7 +723,6 @@ function tmgmt_translator_check(TMGMTTranslator $translator, $source_language, $
     return TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE;
   }
 }
-
 /**
  * @} End of "addtogroup tmgmt_translator".
  */
