@@ -169,11 +169,13 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
   $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
   $job->target_language = $preselected['target_language'] ? $preselected['target_language'] : (isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available));
   $job->source_language = $preselected['source_language'] ? $preselected['source_language'] : (isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : key($available));
+  $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
   // Show the items that are attached to this job if there are not more than 20.
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
     '#description' => t('You can provide a label for this job in order to identify it easily later on.'),
+    '#default_value' => $job->label,
   );
   if (count($items) <= 20) {
     $form['items'] = array(
