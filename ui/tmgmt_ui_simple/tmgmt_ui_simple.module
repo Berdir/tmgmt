@@ -92,7 +92,11 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
         '#type' => 'checkbox',
       );
     } elseif (isset($jobs[$langcode])) {
-      $running_jobs[] = $langcode;
+      $job_uri = $jobs[$langcode]->uri();
+      $running_jobs[] = array(
+        'language' => $langcode,
+        'path' => $job_uri['path'],
+      );
     } elseif ($langcode == $node->language) {
       $form['languages'][$langcode] = array(
         '#disabled' => TRUE,
@@ -102,10 +106,10 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
   }
   $existing_job_languages = '';
   foreach ($running_jobs as $job_language) {
-    $existing_job_languages .= $language_list[$job_language] . ', ';
+    $existing_job_languages .= l($language_list[$job_language['language']], $job_language['path']) . ', ';
   }
   if (!empty($running_jobs)) {
-    drupal_set_message('There are currently existing jobs for: ' . substr($existing_job_languages, 0, -2) . '. They are possibaly outdated.', 'warning');
+    drupal_set_message('There are currently existing jobs for: ' . substr($existing_job_languages, 0, -2) . '. They are potentially outdated.', 'warning');
   }
   $form['controls'] = tmgmt_ui_simple_controls_element($form, $form_state);
   $form['#submit'][] = 'tmgmt_ui_simple_translate_form_submit';
