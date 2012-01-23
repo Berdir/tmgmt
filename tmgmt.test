@@ -398,7 +398,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       'settings[action]' => 'translate',
     );
     $this->drupalPost(NULL, $edit, t('Checkout job'));
-    $this->assertText(t('@plugin is not available for @language.', array('@plugin' => 'Test translator', '@language' => 'Greek')));
+    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Test translator (auto created)', '@source' => 'German', '@target' => 'Greek')));
 
     // Job still needs to be in state prepared.
     $job = tmgmt_job_load($tjid, FALSE);
@@ -473,7 +473,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Service not reachable'));
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));
     $job = tmgmt_job_load($tjid);
-    $this->assertTrue($job->isPrepared());
+    $this->assertTrue($job->isNew());
 
     // Verify that we are still on the form.
     $this->assertText('You can provide a label for this job in order to identify it easily later on.');

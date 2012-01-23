@@ -276,11 +276,11 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
           $form['translator_wrapper']['settings']['#markup'] = t('The selected translator is not available: @reason.', array('@reason' => $translator->getNotAvailableReason()));
           break;
         case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-          $form['translator_wrapper']['settings']['#markup'] = t('The selected translator is not available for translations from @source.', array('@source' => tmgmt_language_label($job->target_language)));
+          $form['translator_wrapper']['settings']['#markup'] = t('The selected translator is not available for translations from @source to @target.', array('@source' => tmgmt_language_label($job->source_language), '@target' => tmgmt_language_label($job->target_language)));
           break;
         default:
           if ($settings = $translator->jobSettingsForm(array(), $form_state, $job)) {
-            $form['translator_wrapper']['settings'] = $settings;
+            $form['translator_wrapper']['settings'] += $settings;
           }
           else {
             $form['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $translator->identifier()));
@@ -369,10 +369,10 @@ function tmgmt_job_form_validate($form, &$form_state) {
   // @todo Also make this a little bit nicer... The constants look wonky.
   switch (tmgmt_translator_check($translator, $job->source_language, $job->target_language)) {
     case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-      form_set_error('translator', t('Translator is not available: @reason.', array('@reason' => $translator->getNotAvailableReason())));
+      form_set_error('translator', t('@translator is not available: @reason.', array('@translator' => $translator->label(), '@reason' => $translator->getNotAvailableReason())));
       break;
     case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-      form_set_error('translator', t('Test selected translator can not translate from @source to @language.', array('@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())));
+      form_set_error('translator', t('@translator can not translate from @source to @target.', array('@translator' => $translator->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())));
       break;
   }
   if (!$job->isTranslatable()) {
