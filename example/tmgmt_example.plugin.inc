@@ -69,7 +69,6 @@ class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPlugi
       '#title' => t('Sample comment'),
       '#default_value' => 'Your translation service sucks.',
       '#description' => t("Please don't yell at us when sending us a comment."),
-      '#default_value' => isset($form_state['values']['settings']['sample_checkboxes']) ? $form_state['values']['settings']['sample_checkboxes'] : $job->getSetting('sample_checkboxes'),
     );
     return $form;
   }

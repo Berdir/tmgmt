@@ -88,6 +88,9 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
    */
   public function getSupportedLanguages(TMGMTTranslator $translator) {
+    // @todo Maybe add database caching?
+    // @todo Is __FUNCTION__ really correct here? Shouldn't it be __CLASS__ and
+    // __METHOD__ ?
     $languages = &drupal_static(__FUNCTION__);
     if (!isset($languages)) {
       $languages = array();
@@ -155,12 +158,10 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    *   The response object returned by drupal_http_request().
    */
   protected function doRequest(TMGMTTranslator $translator, $path, array $query = array(), array $options = array()) {
-    // Allow to override the url, e.g. for the tests.
-    $url = $translator->getSetting('url', $this->translatorUrl) . '/' . $path;
     // Add the appId to the query arguments and build the query string.
-    $query['appId'] = $translator->getSetting('api');
-    $query_string = drupal_http_build_query($query);
-    return drupal_http_request($url . '?' . $query_string, $options);
+    $query = array('appId' => $translator->getSetting('api')) + $query;
+    $url = url($this->translatorUrl . '/' . $path, array('query' => $query));
+    return drupal_http_request($url, $options);
   }
 
 }

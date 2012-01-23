@@ -206,14 +206,6 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function defaultTranslatorSettings();
 
   /**
-   * Defines default settings for a job.
-   *
-   * @return array
-   *   An array of default settings.
-   */
-  public function defaultJobSettings();
-
-  /**
    * A plugin can implement this method if it needs a settings form.
    *
    * This is not actually an interface method and that is why it is commented,

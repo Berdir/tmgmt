@@ -981,28 +981,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     }
   }
 
-  /**
-   * Retrieves a setting value from the job settings. Pulls the default values
-   * (if defined) from the plugin controller.
-   *
-   * @param $name
-   *   The name of the setting.
-   *
-   * @return
-   *   The setting value or a default value if the setting is not set. Returns
-   *   NULL if the setting does not exist at all.
-   */
-  public function getSetting($name) {
-    if (isset($this->settings[$name])) {
-      return $this->settings[$name];
-    }
-    else if ($defaults = $this->getPluginController()->defaultJobSettings()) {
-      if (isset($defaults[$name])) {
-        return $defaults[$name];
-      }
-    }
-  }
-
 }
 
 /**
