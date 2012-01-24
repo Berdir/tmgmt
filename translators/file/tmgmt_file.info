@@ -3,4 +3,4 @@ description = A HTML Translator which is able to export and import translations 
 package = Translation Management
 core = 7.x
 dependencies[] = tmgmt
-files[] = tmgmt_html.plugin.inc
+files[] = tmgmt_file.plugin.inc

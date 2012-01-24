@@ -33,18 +33,18 @@ class TMGMTHTMLTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     $target_language = $job->target_language;
 
     $name = "JobID" . $tjid;
-    $html_template = theme("html_template", array(
+    $file_template = theme("file_template", array(
         'tjid' => $tjid,
         'source_language' => $source_language,
         'target_language' => $target_language,
         'items' => $items));
 
-    if ($job->getTranslator()->getSetting('export_format', 'html') == 'xliff') {
+    if ($job->getTranslator()->getSetting('export_format') == 'xliff') {
       $html = new DOMDocument();
-      @$html->loadXML($html_template);
+      @$html->loadXML($file_template);
 
       $xsl = new DOMDocument;
-      $xsl->load(drupal_get_path('module', 'tmgmt_html') . '/xsl/xml2xliff.xsl');
+      $xsl->load(drupal_get_path('module', 'tmgmt_file') . '/xsl/xml2xliff.xsl');
 
       $proc = new XSLTProcessor();
       $proc->ImportStyleSheet($xsl);
@@ -60,11 +60,11 @@ class TMGMTHTMLTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     }
     else {
       drupal_add_http_header('Content-Type', 'text/html; name="' . $name . '.html"');
-      drupal_add_http_header('Content-Length', mb_strlen($html_template));
+      drupal_add_http_header('Content-Length', mb_strlen($file_template));
       drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $name . '.html"');
       drupal_add_http_header('Cache-Control', 'private');
 
-      print $html_template;
+      print $file_template;
     }
 
     $job->submitted('Translation exported');
@@ -88,8 +88,9 @@ class TMGMTHTMLTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
       '#type' => 'radios',
       '#title' => t('Export to'),
       '#options' => array(
-          'html' => t('HTML'),
-          'xliff' => t('XLIFF')),
+        'html' => t('HTML'),
+        'xliff' => t('XLIFF'),
+      ),
       '#default_value' => $translator->getSetting('export_format'),
       '#description' => t('Please select the format you want to export data.'),
     );
