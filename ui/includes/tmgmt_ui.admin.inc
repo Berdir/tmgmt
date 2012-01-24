@@ -162,8 +162,6 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $old = empty($job->is_new) && $op != 'clone';
   // Look up the items on the job.
   $items = $job->getItems();
-  // Add a nice title that describes the form.
-  drupal_set_title(format_plural(count($items), 'Translation job with @count attached item', 'Translation job with @count attached items'));
   // Find pre-selected values and get all available languages.
   // @todo Make sure that our ajax callback also replaces the opposite language
   // options list so we never have the same source and target language.
@@ -198,7 +196,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   // Add a list of job items.
   $form['items'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Attached items'),
+    '#title' => format_plural(count($items), '@count attached item', '@count attached items'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
