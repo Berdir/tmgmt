@@ -20,11 +20,14 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   if (in_array($op, array('import', 'add'))) {
     drupal_set_title($op == 'import' ? t('Add Translator') : t('Import Translator'), PASS_THROUGH);
   }
+  // Check if the translator is currently in use.
+  if ($busy = empty($translator->is_new) && $op != 'clone' ? tmgmt_translator_busy($translator->name) : FALSE) {
+    drupal_set_message(t("This translator is currently in use and therefore can't be modified or deleted."), 'warning');
+  }
   $available = tmgmt_translator_plugin_labels();
   // If the translator plugin is not set, pick the first available plugin as the
   // default.
   $translator->translator_plugin = empty($translator->translator_plugin) ? key($available) : $translator->translator_plugin;
-  $busy = empty($translator->is_new) ? tmgmt_translator_busy($translator->name) : FALSE;
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),

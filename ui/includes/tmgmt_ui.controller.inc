@@ -146,6 +146,17 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
     return $form;
   }
 
+  /**
+   * Overrides EntityDefaultUIController::applyOperation().
+   */
+  public function applyOperation($op, $entity) {
+    if ($op == 'delete' && tmgmt_translator_busy($entity->name)) {
+      drupal_set_message(t("The translator %translator could not be deleted because it is currently being used by at least one active translation job.", array('%translator' => $entity->label())));
+      return FALSE;
+    }
+    return parent::applyOperation($op, $entity);
+  }
+
 }
 
 class TMGMTJobUIController extends EntityDefaultUIController {
@@ -204,7 +215,7 @@ class TMGMTJobUIController extends EntityDefaultUIController {
   /**
    * Overrides EntityDefaultUIController::applyOperation().
    */
-  public function applyOperation($op, TMGMTJob $entity) {
+  public function applyOperation($op, $entity) {
     $label = entity_label($this->entityType, $entity);
     switch ($op) {
       case 'cancel':

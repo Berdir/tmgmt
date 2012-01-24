@@ -606,7 +606,7 @@ function tmgmt_translator_busy($translator) {
   return (boolean) $query->entityCondition('entity_type', 'tmgmt_job')
     // @todo is TMGMT_JOB_STATE_SUBMITTED really the only state in which we
     // don't want our translator to be modified or deleted?
-    ->propertyCondition('state', TMGMT_JOB_STATE_SUBMITTED, '!=')
+    ->propertyCondition('state', TMGMT_JOB_STATE_ACCEPTED, '!=')
     ->range(0, 1)
     ->count()
     ->execute();
