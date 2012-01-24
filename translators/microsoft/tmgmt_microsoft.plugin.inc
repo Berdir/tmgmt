@@ -104,9 +104,9 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::defaultTranslatorSettings().
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultPluginSettings().
    */
-  public function defaultTranslatorSettings() {
+  public function defaultPluginSettings() {
     return array(
       // @todo Remove default API Key once development is finished.
       'api' => 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369',
@@ -115,22 +115,22 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
+   * Implements TMGMTTranslatorPluginControllerInterface::pluginSettingsForm().
    */
-  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['api'] = array(
       '#type' => 'textfield',
       '#title' => t('Microsoft API Key'),
       '#default_value' => $translator->getSetting('api'),
       '#description' => t('Please enter your Microsoft API ID, or follow this <a hef="!link">link</a> to generate one.', array('!link' => 'http://www.bing.com/developers/appids.aspx.')),
     );
-    return parent::translatorSettingsForm($form, $form_state, $translator);
+    return parent::pluginSettingsForm($form, $form_state, $translator);
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::jobSettingsForm().
+   * Implements TMGMTTranslatorPluginControllerInterface::checkoutSettingsForm().
    */
-  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     $settings['group_translations'] = array(
       '#type' => 'checkbox',
       '#title' => t('Group translation items (@TODO)'),

@@ -8,34 +8,10 @@
 class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
-   * It can 'translate' any job
+   * Overrides
    */
   public function canTranslate(TMGMTJob $job) {
     return TRUE;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::defaultJobSettings().
-   */
-  public function defaultJobSettings() {
-    return array(
-      // The 'First option' is the default.
-      'sample_radios' => 1,
-      // Default string for the textfield.
-      'sample_textfield' => t('This is a example default string.'),
-    );
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::defaultTranslatorSettings().
-   */
-  public function defaultTranslatorSettings() {
-    return array(
-      // 'Option one' and 'Option three' are checked by default.
-      'sample_checkboxes' => array(1, 3),
-      // Default string for the textfield.
-      'sample_textfield' => t('This is a example default string.'),
-    );
   }
 
   /**
@@ -53,9 +29,9 @@ class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPlugi
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::jobSettingsForm().
+   * Overrides TMGMTDefaultTranslatorPluginController::checkoutSettingsForm().
    */
-  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     $form['sample_radios'] = array(
       '#type' => 'radios',
       '#title' => t('These are just some sample radios.'),
@@ -74,9 +50,9 @@ class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPlugi
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
+   * Overrides TMGMTDefaultTranslatorPluginController::pluginSettingsForm().
    */
-  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['sample_textfield'] = array(
       '#type' => 'textfield',
       '#title' => t('Sample API key'),
@@ -93,19 +69,7 @@ class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPlugi
         3 => t('Option three'),
       ),
     );
-    return parent::translatorSettingsForm($form, $form_state, $translator);
-  }
-
-}
-
-class TMGMTExampleSourcePluginController extends TMGMTDefaultSourcePluginController {
-
-  public function getData(TMGMTJobItem $job_item) {
-
-  }
-
-  public function saveTranslation(TMGMTJobItem $job_item) {
-
+    return parent::pluginSettingsForm($form, $form_state, $translator);
   }
 
 }

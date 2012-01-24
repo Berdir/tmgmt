@@ -8,9 +8,9 @@
 class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::jobSettingsForm().
+   * Overrides TMGMTDefaultTranslatorPluginController::checkoutSettingsForm().
    */
-  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     $settings['action'] = array(
       '#type' => 'select',
       '#title' => t('Action'),

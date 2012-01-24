@@ -14,6 +14,9 @@ interface TMGMTSourcePluginControllerInterface {
 
   /**
    * Constructor.
+   *
+   * @param $plugin
+   *   The machine-readable name of the translator plugin.
    */
   public function __construct($plugin);
 
@@ -69,7 +72,7 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
   protected $pluginInfo;
 
   /**
-   * Constructor.
+   * Implements TMGMTSourcePluginControllerInterface::__construct().
    */
   public function __construct($plugin) {
     $this->pluginType = $plugin;
@@ -115,6 +118,9 @@ interface TMGMTTranslatorPluginControllerInterface {
 
   /**
    * Constructor.
+   *
+   * @param $plugin
+   *   The machine-readable name of the translator plugin.
    */
   public function __construct($plugin);
 
@@ -210,20 +216,12 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function cancelTranslation(TMGMTJob $job);
 
   /**
-   * Defines default settings for a translator plugin.
+   * Defines default settings.
    *
    * @return array
    *   An array of default settings.
    */
-  public function defaultTranslatorSettings();
-
-  /**
-   * Defines default job settings for a translator plugin.
-   *
-   * @return array
-   *   An array of default settings.
-   */
-  public function defaultJobSettings();
+  public function defaultPluginSettings();
 
   /**
    * Retrieves information about a translation job.
@@ -231,7 +229,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * @param TMGMTJob $job
    *   The translation job.
    */
-  public function getJobInfo(TMGMTJob $job);
+  public function checkoutInfo(TMGMTJob $job);
 
   /**
    * A plugin can implement this method if it needs a settings form.
@@ -239,7 +237,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * This is not actually an interface method and that is why it is commented,
    * but we leave it here for API documentation.
    */
-  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator);
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator);
 
   /**
    * A plugin can implement this method if it needs a job settings form.
@@ -247,7 +245,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * This is not actually an interface method and that is why it is commented,
    * but we leave it here for API documentation.
    */
-  public function jobSettingsForm($form, &$form_state, TMGMTJob $job);
+  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job);
 
 }
 
@@ -262,10 +260,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   protected $pluginInfo;
 
   /**
-   * Constructor.
-   *
-   * @param $plugin
-   *   The machine-readable name of the translator plugin.
+   * Impelements TMGMTTranslatorPluginController::__construct().
    */
   public function __construct($plugin) {
     $this->pluginType = $plugin;
@@ -273,14 +268,14 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::pluginInfo().
+   * Implements TMGMTTranslatorPluginControllerInterface::pluginInfo().
    */
   public function pluginInfo() {
     return $this->pluginInfo;
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::pluginType().
+   * Implements TMGMTTranslatorPluginControllerInterface::pluginType().
    */
   public function pluginType() {
     return $this->pluginType;
@@ -340,33 +335,31 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::defaultTranslatorSettings().
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultCheckoutSettings().
    */
-  public function defaultTranslatorSettings() {
+  public function defaultCheckoutSettings() {
+    // Check if any default settings are defined in the plugin info.
+    if (isset($this->pluginInfo['default plugin settings'])) {
+      return $this->pluginInfo['default plugin settings'];
+    }
     return array();
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::defaultJobSettings().
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultPluginSettings().
    */
-  public function defaultJobSettings() {
+  public function defaultPluginSettings() {
+    // Check if any default settings are defined in the plugin info.
+    if (isset($this->pluginInfo['default plugin settings'])) {
+      return $this->pluginInfo['default plugin settings'];
+    }
     return array();
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getJobInfo().
+   * Implements TMGMTTranslatorPluginControllerInterface::pluginSettingsForm().
    */
-  public function getJobInfo(TMGMTJob $job) {
-    $label = $job->getTranslator()->label();
-    $form['#title'] = t('@translator translation job information', array('@translator' => $label));
-    $form['#description'] = t('There is no relevant information to be displayed.');
-    return $form;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
-   */
-  public function translatorSettingsForm($form, &$form_state, TMGMTTRanslator $translator) {
+  public function pluginForm($form, &$form_state, TMGMTTRanslator $translator) {
     $form['#title'] = t('@plugin plugin settings', array('@plugin' => $this->pluginInfo['label']));
     if (empty($form)) {
       $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginInfo['label']));
@@ -378,14 +371,23 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::jobSettingsForm().
+   * Implements TMGMTTranslatorPluginControllerInterface::checkoutSettingsForm().
    */
-  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
-    $label = $job->getTranslator()->label();
-    $form['#title'] = t('@translator checkout settings', array('@translator' => $label));
+  public function checkoutForm($form, &$form_state, TMGMTJob $job, TMGMTTranslator $translator) {
+    $form['#title'] = t('@translator checkout settings', array('@translator' => $translator->label()));
     if (empty($form)) {
-      $form['#description'] = t("@translator doesn't provide any checkout settings.", array('@translator' => $label));
+      $form['#description'] = t("@translator doesn't provide any checkout settings.", array('@translator' => $translator->label()));
     }
+    return $form;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
+   */
+  public function checkoutInfo(TMGMTJob $job) {
+    $label = $job->getTranslator()->label();
+    $form['#title'] = t('@translator translation job information', array('@translator' => $label));
+    $form['#description'] = t('There is no relevant information to be displayed.');
     return $form;
   }
 

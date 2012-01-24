@@ -102,7 +102,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    * @param $form array
    * @param $form_state array
    */
-  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['api_user_name'] = array(
       '#type' => 'textfield',
       '#title' => t('User name'),
@@ -113,9 +113,9 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
       '#title' => t('Password'),
       '#default_value' => $translator->getSetting('api_password', ''),
     );
-    return parent::translatorSettingsForm($form, $form_state, $translator);
+    return parent::pluginSettingsForm($form, $form_state, $translator);
   }
-  
+
   /**
    * Returns all languages that are supported by this service.
    *
@@ -142,7 +142,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     }
     return $languages;
   }
-  
+
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
@@ -160,7 +160,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    * @return array
    *   Settings form.
    */
-  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     $settings['quote'] = array(
       '#type' => 'fieldset',
       '#title' => t('Quote'),
@@ -179,7 +179,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     //$template = '<requ>' . $template . '</requ>';
     //dpm($template);
     $soapvar = new SoapVar($template, XSD_ANYXML);
-      
+
     $response = $client->xmlRequest('CreateOffer', $template);
     if ($response) {
       $iframe_url = $response->CreateOfferResult;
@@ -194,7 +194,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    * Build offer xml
    */
   protected function nativyBuildOffer($job) {
-    
+
   }
   /**
    * Send request to nativy, get response
@@ -234,7 +234,7 @@ class TMGMTNativySoapClient extends SoapClient {
    */
   public function xmlRequest($method, $xmldata) {
     $soapvar = new SoapVar($xmldata, XSD_ANYXML);
-      
+
     $response = FALSE;
     try {
       $response = $this->$method($soapvar);
@@ -256,7 +256,7 @@ class TMGMTNativySoapClient extends SoapClient {
      $token = $response->AuthenticateUserResult;
      $this->setAuthHeader(array('AuthenticatedToken' => $token));
      return TRUE;
-   } 
+   }
    /**
     * Set authentication header.
     */
@@ -268,11 +268,11 @@ class TMGMTNativySoapClient extends SoapClient {
      $rawheader .= '</SecuredWebServiceHeader>';
      $soapvar = new SoapVar($rawheader, XSD_ANYXML);
      $headers['SecuredWebServiceHeader'] = new SoapHeader(
-     		'http://www.nativy.com/nis', 
+     		'http://www.nativy.com/nis',
         'SecuredWebServiceHeader',
         $soapvar
      );
-     $this->__setSoapHeaders(NULL); 
+     $this->__setSoapHeaders(NULL);
      $this->__setSoapHeaders($headers);
    }
 

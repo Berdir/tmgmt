@@ -128,7 +128,7 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['api_account_id'] = array(
       '#type' => 'textfield',
       '#title' => t('Supertext API Account Id'),
@@ -148,7 +148,7 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
       '#title' => t('Use Sandbox'),
       '#default_value' => $translator->getSetting('use_sandbox', TRUE),
     );
-    return parent::translatorSettingsForm($form, $form_state, $translator);
+    return parent::pluginSettingsForm($form, $form_state, $translator);
   }
 
 
@@ -160,7 +160,7 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
    * @return array
    *   Settings form.
    */
-  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     $object = $this->generateSupertextOrderObject($job);
     $object->TargetLang = 'de-CH';
     $options = array(

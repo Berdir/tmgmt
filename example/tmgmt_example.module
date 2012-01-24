@@ -18,16 +18,3 @@ function tmgmt_example_tmgmt_translator_plugin_info() {
     ),
   );
 }
-
-/**
- * Implements hook_tmgmt_source_plugin_info().
- */
-function tmgmt_example_tmgmt_source_plugin_info() {
-  return array(
-    'example' => array(
-      'label' => t('Example source'),
-      'description' => t('Example source plugin.'),
-      'controller class' => 'TMGMTExampleSourcePluginController',
-    ),
-  );
-}
