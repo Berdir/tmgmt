@@ -7,6 +7,9 @@
 
 /**
  * Entity API form for the translator entity.
+ *
+ * @todo Make the translator field and settings #disabled if there are
+ * translation jobs in the database that use the translator.
  */
 function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator, $op = 'edit') {
   // We don't want the terrible long title that Entity API generates for us.
@@ -181,6 +184,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
     '#description' => t('You can provide a label for this job in order to identify it easily later on.'),
     '#default_value' => $job->label,
   );
+  // Show the current state of the job.
   $form['state'] = array(
     '#type' => 'item',
     '#title' => t('Current status'),
