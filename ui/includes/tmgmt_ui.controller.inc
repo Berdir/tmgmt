@@ -190,6 +190,7 @@ class TMGMTJobUIController extends EntityDefaultUIController {
       'load arguments' => array($this->entityType),
       'access callback' => 'tmgmt_job_access',
       'access arguments' => array('review', $id_count),
+      'type' => MENU_LOCAL_TASK,
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],
     );
