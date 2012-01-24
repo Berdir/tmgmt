@@ -170,7 +170,7 @@ class TMGMTJobUIController extends EntityDefaultUIController {
     $id_count = count(explode('/', $this->path));
     $wildcard = isset($this->entityInfo['admin ui']['menu wildcard']) ? $this->entityInfo['admin ui']['menu wildcard'] : '%entity_object';
     $items[$this->path . '/' . $wildcard . '/manage'] = array(
-      'title' => 'Edit',
+      'title' => 'Manage',
       'page callback' => 'entity_ui_get_form',
       'page arguments' => array($this->entityType, $id_count),
       'load arguments' => array($this->entityType),

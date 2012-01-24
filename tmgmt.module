@@ -333,7 +333,6 @@ function tmgmt_job_create($source_language, $target_language, $uid = NULL, array
 function tmgmt_job_access($op, TMGMTJob $job = NULL, $account = NULL) {
   // Return TRUE in all cases for now :)
   return TRUE;
-
   switch ($op) {
     case 'create':
       return user_access('tmgmt create new jobs', $account);
