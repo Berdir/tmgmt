@@ -15,6 +15,14 @@ function tmgmt_example_tmgmt_translator_plugin_info() {
       'description' => t('Example translator plugin.'),
       'controller class' => 'TMGMTExampleTranslatorPluginController',
       'auto create' => TRUE,
+      'default plugin settings' => array(
+        'sample_checkboxes' => array(1),
+        'sample_textfield' => t('Example default text.'),
+      ),
+      'default checkout settings' => array(
+        'sample_radios' => array(1, 2),
+        'sample_textfield' => t('Example default text.'),
+      ),
     ),
   );
 }

@@ -339,8 +339,8 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function defaultCheckoutSettings() {
     // Check if any default settings are defined in the plugin info.
-    if (isset($this->pluginInfo['default plugin settings'])) {
-      return $this->pluginInfo['default plugin settings'];
+    if (isset($this->pluginInfo['default checkout settings'])) {
+      return $this->pluginInfo['default checkout settings'];
     }
     return array();
   }
