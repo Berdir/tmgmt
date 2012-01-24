@@ -87,6 +87,7 @@ function tmgmt_nativy_test_page($jobid) {
   $controller = $translator->getPluginController();
   $form = $form_state = array();
   $job->translator = $translator_name; 
-  $controller->jobSettingsForm($form, $form_state, $job);
+  $form = $controller->jobSettingsForm($form, $form_state, $job);
+  return $form;
   return "TESTPAGE Job Id = $jobid";
 }
