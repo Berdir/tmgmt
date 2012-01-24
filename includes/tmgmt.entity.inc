@@ -134,6 +134,16 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
+   * Get information about a job from the respective translator plugin.
+   */
+  public function getJobInfo(TMGMTJob $job) {
+    if ($controller = $this->getPluginController()) {
+      return $controller->getJobInfo($job);
+    }
+    return FALSE;
+  }
+
+  /**
    * @todo
    */
   public function getNotAvailableReason() {
@@ -152,27 +162,6 @@ class TMGMTTranslator extends Entity {
    *   NULL if the setting does not exist at all.
    */
   public function getSetting($name) {
-    if (isset($this->settings[$name])) {
-      return $this->settings[$name];
-    }
-    elseif ($defaults = $this->getPluginController()->defaultTranslatorSettings()) {
-      if (isset($defaults[$name])) {
-        return $defaults[$name];
-      }
-    }
-  }
-
-  /**
-   * Retrieves a setting value from the translator settings. Pulls the default
-   * values (if defined) from the plugin controller.
-   *
-   * @param $name
-   *   The name of the setting.
-   *
-   * @return
-   *   The setting value or $default if the setting value is not set.
-   */
-  public function getJobSetting($name) {
     if (isset($this->settings[$name])) {
       return $this->settings[$name];
     }
@@ -669,6 +658,43 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       }
     }
     return $new_messages;
+  }
+
+  /**
+   * Retrieves information about this job from the translator plugin.
+   *
+   * @return array
+   *   A renderable array with job information or FALSE if no information is
+   *   available.
+   */
+  public function getInfo() {
+    if ($translator = $this->getTranslator()) {
+      return $translator->getJobInfo($this);
+    }
+    return FALSE;
+  }
+
+  /**
+   * Retrieves a setting value from the job settings. Pulls the default values
+   * (if defined) from the plugin controller.
+   *
+   * @param $name
+   *   The name of the setting.
+   *
+   * @return
+   *   The setting value or $default if the setting value is not set. Returns
+   *   NULL if the setting does not exist at all.
+   */
+  public function getSetting($name) {
+    if (isset($this->settings[$name])) {
+      return $this->settings[$name];
+    }
+    else if ($controller = $this->getTranslatorController()) {
+      $defaults = $controller->defaultJobSettings();
+      if (isset($defaults[$name])) {
+        return $defaults[$name];
+      }
+    }
   }
 
   /**

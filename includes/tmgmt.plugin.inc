@@ -218,6 +218,22 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function defaultTranslatorSettings();
 
   /**
+   * Defines default job settings for a translator plugin.
+   *
+   * @return array
+   *   An array of default settings.
+   */
+  public function defaultJobSettings();
+
+  /**
+   * Retrieves information about a translation job.
+   *
+   * @param TMGMTJob $job
+   *   The translation job.
+   */
+  public function getJobInfo(TMGMTJob $job);
+
+  /**
    * A plugin can implement this method if it needs a settings form.
    *
    * This is not actually an interface method and that is why it is commented,
@@ -338,6 +354,16 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getJobInfo().
+   */
+  public function getJobInfo(TMGMTJob $job) {
+    $label = $job->getTranslator()->label();
+    $form['#title'] = t('@translator translation job information', array('@translator' => $label));
+    $form['#description'] = t('There is no relevant information to be displayed.');
+    return $form;
+  }
+
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
   public function translatorSettingsForm($form, &$form_state, TMGMTTRanslator $translator) {
@@ -355,7 +381,12 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::jobSettingsForm().
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
-    return array();
+    $label = $job->getTranslator()->label();
+    $form['#title'] = t('@translator checkout settings', array('@translator' => $label));
+    if (empty($form)) {
+      $form['#description'] = t("@translator doesn't provide any checkout settings.", array('@translator' => $label));
+    }
+    return $form;
   }
 
 }

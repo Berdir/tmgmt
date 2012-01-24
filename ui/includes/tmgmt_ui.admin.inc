@@ -255,15 +255,23 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
       'wrapper' => 'tmgmt-translator-settings',
     ),
   );
-  $form['translator_wrapper']['settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Translator checkout settings'),
-    '#prefix' => '<div id="tmgmt-translator-settings">',
-    '#suffix' => '</div>',
-    '#tree' => TRUE,
-  );
-  // Add the job settings form.
-  $form['translator_wrapper']['settings'] += tmgmt_ui_job_settings_form(array(), $form_state, $job);
+  if (!$job->isSubmitted() && !$job->isAccepted() && !$job->isNeedsReview()) {
+    $form['translator_wrapper']['settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Translator checkout settings'),
+      '#prefix' => '<div id="tmgmt-translator-settings">',
+      '#suffix' => '</div>',
+      '#tree' => TRUE,
+    );
+    // Add the job settings form.
+    $form['translator_wrapper']['settings'] += tmgmt_ui_job_settings_form(array(), $form_state, $job);
+  }
+  if ($info = $job->getInfo()) {
+    $form['translator_wrapper']['info'] = $info + array(
+      '#type' => 'fieldset',
+      '#title' => t('Information about this translation job'),
+    );
+  }
   // Add the buttons and action links.
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
