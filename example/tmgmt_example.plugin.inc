@@ -49,7 +49,7 @@ class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPlugi
       $data[$key]['#text'] = $wrapper->target_language->label() . ': ' . $value['#text'];
     }
     $job->addTranslatedData(tmgmt_unflatten_data($data));
-    $job->needsReview('Example translation from @source_language to @target_language completed.', array('@source_language' => $wrapper->source_language->label(), '@target_language' => $wrapper->target_language->label()));
+    $job->needsReview('Example translation from @source to @target completed.', array('@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label()));
   }
 
   /**

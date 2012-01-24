@@ -161,14 +161,39 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
 
 class TMGMTJobUIController extends EntityDefaultUIController {
 
-  /**
-   * @todo Use real access callbacks.
-   *
+  /*
    * Overrides EntityDefaultUIController::hook_menu().
    */
   public function hook_menu() {
     $id_count = count(explode('/', $this->path));
     $wildcard = isset($this->entityInfo['admin ui']['menu wildcard']) ? $this->entityInfo['admin ui']['menu wildcard'] : '%entity_object';
+    $items[$this->path . '/' . $wildcard] = array(
+      'title' => 'Job',
+      'page callback' => 'tmgmt_ui_job_view',
+      'page arguments' => array($id_count),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'tmgmt_job_access',
+      'access arguments' => array('view', $id_count),
+      'file' => $this->entityInfo['admin ui']['file'],
+      'file path' => $this->entityInfo['admin ui']['file path'],
+    );
+    $items[$this->path . '/' . $wildcard . '/view'] = array(
+      'title' => 'View',
+      'load arguments' => array($this->entityType),
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+    );
+    $items[$this->path . '/' . $wildcard . '/review'] = array(
+      'title' => 'Review',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('tmgmt_ui_job_review_form', $id_count),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'tmgmt_job_access',
+      'access arguments' => array('review', $id_count),
+      'type' => MENU_LOCAL_TASK,
+      'file' => $this->entityInfo['admin ui']['file'],
+      'file path' => $this->entityInfo['admin ui']['file path'],
+    );
     $items[$this->path . '/' . $wildcard . '/manage'] = array(
       'title' => 'Manage',
       'page callback' => 'entity_ui_get_form',

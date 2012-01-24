@@ -6,6 +6,26 @@
  */
 
 /**
+ * Simple page callback for viewing a job.
+ *
+ * @param TMGMTJob $job
+ *   The viewed job.
+ *
+ * @return array
+ *   A renderable array.
+ */
+function tmgmt_ui_job_view(TMGMTJob $job) {
+  return entity_view($job->entityType(), array($job), 'full', NULL, TRUE);
+}
+
+/**
+ * Review form for translation jobs.
+ */
+function tmgmt_ui_job_review_form($form, &$form_state, TMGMTJob $job) {
+  return $form;
+}
+
+/**
  * Entity API form for the translator entity.
  *
  * @todo Make the translator field and settings #disabled if there are

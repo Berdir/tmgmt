@@ -102,11 +102,3 @@ function tmgmt_ui_embed_view($view) {
   }
   return '';
 }
-
-/**
- * Page callback to view a job.
- */
-function tmgmt_job_view(TMGMTJob $job) {
-  drupal_set_title($job->label());
-  return entity_view('tmgmt_job', array($job));
-}
