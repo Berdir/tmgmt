@@ -4,7 +4,7 @@
  * @file
  * Provides the user translator plugin controller.
  */
-class TMGMTHTMLTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
+class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * It can 'translate' any job

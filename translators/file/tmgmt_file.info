@@ -1,5 +1,5 @@
-name = HTML Translator
-description = A HTML Translator which is able to export and import translations into html files
+name = Export / Import File
+description = A translator which allows you to export source data into a file and import the translated in return.
 package = Translation Management
 core = 7.x
 dependencies[] = tmgmt

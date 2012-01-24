@@ -11,9 +11,9 @@
 function tmgmt_file_tmgmt_translator_plugin_info() {
   return array(
     'html' => array(
-      'label' => t('HTML translator'),
-      'description' => t('HTML translator that exports to HTML.'),
-      'controller class' => 'TMGMTHTMLTranslatorPluginController',
+      'label' => t('File translator'),
+      'description' => t('File translator that exports and imports files.'),
+      'controller class' => 'TMGMTFileTranslatorPluginController',
     ),
   );
 }
