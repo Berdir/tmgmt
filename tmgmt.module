@@ -330,7 +330,7 @@ function tmgmt_job_create($source_language, $target_language, $uid = NULL, array
 /**
  * Access callback for the job entity.
  */
-function tmgmt_job_access($op, TMGMTJob $job = NULL, $account = NULL) {
+function tmgmt_job_access($op, $job = NULL, $account = NULL) {
   if (isset($job)) {
     if ($op == 'review') {
       // Simple check for wether the job needs a review for now.

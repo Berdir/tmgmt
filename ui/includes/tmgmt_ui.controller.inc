@@ -183,14 +183,13 @@ class TMGMTJobUIController extends EntityDefaultUIController {
       'type' => MENU_DEFAULT_LOCAL_TASK,
       'weight' => -10,
     );
-    $items[$this->path . '/' . $wildcard . '/review'] = array(
+    $items[$this->path . '/' . $wildcard] = array(
       'title' => 'Review',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('tmgmt_ui_job_review_form', $id_count),
       'load arguments' => array($this->entityType),
       'access callback' => 'tmgmt_job_access',
       'access arguments' => array('review', $id_count),
-      'type' => MENU_LOCAL_TASK,
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],
     );
@@ -208,7 +207,7 @@ class TMGMTJobUIController extends EntityDefaultUIController {
     // Menu item for operations like cancel.
     $items[$this->path . '/' . $wildcard . '/%'] = array(
       'page callback' => 'drupal_get_form',
-      'page arguments' => array($this->entityType . '_operation_form', $id_count, $id_count + 1),
+      'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
       'load arguments' => array($this->entityType),
       'access callback' => 'tmgmt_job_access',
       'access arguments' => array('update', $this->entityType, $id_count),
