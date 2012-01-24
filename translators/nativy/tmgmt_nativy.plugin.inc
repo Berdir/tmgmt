@@ -170,7 +170,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     $translator = $job->getTranslator();
     $client = $this->nativySoapClient();
     // First try authentication and if successful, go for the offer.
-    $this->nativyAuthenticate(
+    $client->authenticate(
       $translator->getSetting('api_user_name'),
       $translator->getSetting('api_password')
     );
@@ -247,35 +247,33 @@ SoapFault: Bad Request in /var/workspace/drupal7/sites/all/modules/translation_m
     }
     return $client;
   }
-  /**
-   * Perform authentication
-   *
-   * Enter description here ...
-   */
-   function nativyAuthenticate($user, $pass) {
-     $client = $this->nativySoapClient();
-     $client->setAuthHeader(array(
-       'Username' => $user,
-       'Password' => $pass,
-     ));
-     $response = $client->AuthenticateUser();
-     //dpm($response, $response->AuthenticateUserResult);
-     //dpm($client->__getLastRequest());
-     //dpm($client->__getLastRequestHeaders()); 
-     // Got token that should be valid for 20 mins.
-     $token = $response->AuthenticateUserResult;
-     $client->setAuthHeader(array('AuthenticatedToken' => $token));
-     //dpm($response);
-     //dpm($client->__getLastRequest());
-     //dpm($client->__getLastRequestHeaders()); 
-      
-   }
+
  }
 
 /**
  * Nativy SOAP client
  */
 class TMGMTNativySoapClient extends SoapClient {
+   /**
+    * Authenticate to the service
+    */
+   public function authenticate($user, $pass) {
+     $this->setAuthHeader(array(
+       'Username' => $user,
+       'Password' => $pass,
+     ));
+     $response = $this->AuthenticateUser();
+     //dpm($response, $response->AuthenticateUserResult);
+     //dpm($client->__getLastRequest());
+     //dpm($client->__getLastRequestHeaders()); 
+     // Got token that should be valid for 20 mins.
+     $token = $response->AuthenticateUserResult;
+     $this->setAuthHeader(array('AuthenticatedToken' => $token));
+     //dpm($response);
+     //dpm($client->__getLastRequest());
+     //dpm($client->__getLastRequestHeaders()); 
+     return TRUE;
+   } 
    /**
     * Set authentication header.
     */
