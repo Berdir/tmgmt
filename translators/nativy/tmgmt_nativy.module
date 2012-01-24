@@ -55,9 +55,9 @@ function tmgmt_nativy_process_callback() {
   if (isset($_REQUEST['orderid'])) {
     $orderid = $_REQUEST['orderid'];
     $items[] = t('Your order id is @orderid', array('@orderid' => $orderid));
-    if ($jobs = tmgmt_job_load_multiple(array(), array('reference' => $orderid))) {
+    // @todo tmgmt_job_load_multiple() doesn't seem to work for this.
+    if ($jobs = entity_load('tmgmt_job', FALSE, array('reference' => $orderid))) {
       $job = reset($jobs);
-      dpm($job);
       $controller = $job->getTranslatorController();
       if (!is_a($controller, 'TMGMTNativyTranslatorController')) {
         $items[] = t('The job was not assigned to Nativy.');

@@ -50,6 +50,22 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    * Retrieve job when ready (we got an email with a link?)
    */
   public function retrieveTranslation(TMGMTJob $job) {
+    if ($document = $this->nativyRetrieveTranslation($job)) {
+      $translation = array();
+      foreach ($document->offerrequest->textblocks as $textblock) {
+        $block = $textblock->textblock;
+        $code = (string)$block['code'];
+        $label = (string)$block['label'];
+        $text = (string)$block->description;
+        $translation[$code] = array(
+          '#text' => $text,
+          '#label' => $label,
+        );
+      }
+      $job->addTranslatedData(tmgmt_unflatten_data($translation));
+      $job->needsReview('Got translation from Nativy');     
+      return TRUE;
+    }
     // @todo Implement retrieve translation
     return FALSE;
   }
@@ -118,44 +134,22 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    *   Settings form.
    */
   public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
-    $translator = $job->getTranslator();
-    $client = $this->nativySoapClient();
-    // First try authentication and if successful, go for the offer.
-    $authenticated = $client->authenticate($translator->getSetting('api_user_name'), $translator->getSetting('api_password'));
-    if ($authenticated) {
+    if ($iframe_url = $this->nativyCreateOffer($job)) {
+      // This should look like http://test.nativy.com/client/createorder.aspx?token=a19fd9f9-4bdc-4396-aebf-277fafd9c42a&amp;orderid=f1446707-ae2f-499e-a08e-47131533a88d
+      $parts = explode('orderid=', $iframe_url);
+      if (count($parts) == 2 && ($orderid = $parts[1])) {
       $settings['help']['#markup'] =
-    		'<p>' . t('You need to complete your order through Nativy pages below') . '</p>';
-      // Build offer parameters for straight text replacement
-      // Customer data
-      $data['!customerEmail'] = variable_get('site_mail', ini_get('sendmail_from'));
-      $data['!customerFirstName'] = 'Drupal';
-      $data['!customerLastName'] = 'Translator';
-      // Languages
-      $data['!primaryLangCode']= $job->source_language; //"de-DE";
-      $data['!langCode'] = $job->target_language; //"en";
-      // Add text
-      $data['!textblocks'] = $this->nativyBuildText($job);
-      $data['!emailCallbackLink'] = url('nativy/callback', array('absolute' => TRUE));
-      //$template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest_sample_good.xml');
-      $template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest.xml');
-      $template = strtr($template, $data);    
-      $response = $client->xmlRequest('CreateOffer', $template);
-      if ($response) {
-        // This should look like http://test.nativy.com/client/createorder.aspx?token=a19fd9f9-4bdc-4396-aebf-277fafd9c42a&amp;orderid=f1446707-ae2f-499e-a08e-47131533a88d
-        $iframe_url = $response->CreateOfferResult;
-        $parts = explode('orderid=', $iframe_url);
-        if (count($parts) == 2 && ($orderid = $parts[1])) {
-          $settings['orderid'] = array('#type' => 'value', '#value' => $orderid);
-          // If we complete the order we should be at http://test.nativy.com/client/nisfinish.aspx
-          // @TODO The idea is we add a hidden variable and check whether we've reached that page
-          $settings['nativyurl'] = array('#type' => 'hidden', '#value' => $iframe_url);
-          $settings['iframe']['#markup'] = "<iframe width=\"800\" height=\"600\" src=\"$iframe_url\"></iframe>";
-          return $settings;
-        }
-      }     
+    		'<p>' . t('You need to complete your order through Nativy pages below and then click on <em>Submit to translator</em>.') . '</p>';
+        
+        $settings['orderid'] = array('#type' => 'value', '#value' => $orderid);
+        // If we complete the order we should be at http://test.nativy.com/client/nisfinish.aspx
+        // @TODO The idea is we add a hidden variable and check whether we've reached that page
+        $settings['nativyurl'] = array('#type' => 'hidden', '#value' => $iframe_url);
+        $settings['iframe']['#markup'] = "<iframe width=\"800\" height=\"600\" src=\"$iframe_url\"></iframe>";
+        return $settings;
+      }
     }
     // Something went wrong, just print message and get out.
-    $client->printDebug();
     $settings['error']['#markup'] =
         '<p>' . t('Cannot authenticate to Nativy server. Pleaser review your user name and password.') .'</p>';
     return $settings;
@@ -185,11 +179,69 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     }
     return $output;
   }
-  /**
-   * Build offer xml
+    /**
+   * Create offer and return iframe URL
    */
-  protected function nativyBuildOffer($job) {
-    
+  protected function nativyRetrieveTranslation($job) {
+    $orderid = $job->reference;
+    $translator = $job->getTranslator();
+    $client = $this->nativySoapClient();
+    // First try authentication and if successful, go for the offer.
+    $authenticated = $client->authenticate($translator->getSetting('api_user_name'), $translator->getSetting('api_password'));
+    if ($authenticated) {
+      try {
+        $response = $client->GetOffer(array('OrderId' => $orderid));
+        $prefix = '<?xml version="1.0" standalone="yes"?>';
+        $content = $response->GetOfferResult->any;
+        // Since response is not valid XML we take out the nonsense par of it (schema)
+        // Note it has nothing to do with the documented theoretical response.
+        $content = array_pop(explode('</xs:schema>', $content));
+        $document = new SimpleXMLElement($content);
+        return $document;
+      }
+      catch (Exception $e) {
+        dpm($e, 'Exception');
+      }
+    }
+    //$content = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_getoffer_response.xml');
+    // $document = new SimpleXMLElement($content);
+    // Something went wrong, just print message and get out.
+    $client->printDebug();
+    return FALSE; 
+  }
+  /**
+   * Create offer and return iframe URL
+   */
+  protected function nativyCreateOffer($job) {
+    $translator = $job->getTranslator();
+    $client = $this->nativySoapClient();
+    // First try authentication and if successful, go for the offer.
+    $authenticated = $client->authenticate($translator->getSetting('api_user_name'), $translator->getSetting('api_password'));
+    if ($authenticated) {
+      // Build offer parameters for straight text replacement
+      // Customer data
+      $data['!customerEmail'] = variable_get('site_mail', ini_get('sendmail_from'));
+      $data['!customerFirstName'] = 'Drupal';
+      $data['!customerLastName'] = 'Translator';
+      // Languages
+      $data['!primaryLangCode']= $job->source_language; //"de-DE";
+      $data['!langCode'] = $job->target_language; //"en";
+      // Add text
+      $data['!textblocks'] = $this->nativyBuildText($job);
+      $data['!emailCallbackLink'] = url('nativy/callback', array('absolute' => TRUE));
+      //$template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest_sample_good.xml');
+      $template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest.xml');
+      $template = strtr($template, $data);    
+      $response = $client->xmlRequest('CreateOffer', $template);
+      if ($response) {
+        // This should look like http://test.nativy.com/client/createorder.aspx?token=a19fd9f9-4bdc-4396-aebf-277fafd9c42a&amp;orderid=f1446707-ae2f-499e-a08e-47131533a88d
+        $iframe_url = $response->CreateOfferResult;
+        return $iframe_url;
+      }
+    }
+    // Something went wrong, just print message and get out.
+    $client->printDebug();
+    return FALSE;      
   }
   /**
    * Send request to nativy, get response
