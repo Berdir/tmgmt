@@ -107,6 +107,6 @@ function tmgmt_ui_embed_view($view) {
  * Page callback to view a job.
  */
 function tmgmt_job_view(TMGMTJob $job) {
-  drupal_set_title(entity_label('tmgmt_job', $job));
+  drupal_set_title($job->label());
   return entity_view('tmgmt_job', array($job));
 }

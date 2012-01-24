@@ -480,7 +480,7 @@ function tmgmt_job_attachment_access($op, $attachment = NULL, $account = NULL) {
   return TRUE;
   // We just forward the access request to the job entity.
   if (isset($attachment) && $job = $attachment->getJob()) {
-    return entity_access($op, 'tmgmt_job', $job, $account);
+    return tmgmt_job_access($op, $job, $account);
   }
   // If we can't retrieve the job entity, we can't grant access.
   return FALSE;
