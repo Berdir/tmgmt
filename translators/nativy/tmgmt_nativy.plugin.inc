@@ -180,36 +180,13 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     //dpm($template);
     $soapvar = new SoapVar($template, XSD_ANYXML);
       
-    $response = FALSE;
-    try {
-      $response = $client->CreateOffer($soapvar);
+    $response = $client->xmlRequest('CreateOffer', $template);
+    if ($response) {
       $iframe_url = $response->CreateOfferResult;
       $settings['iframe']['#markup'] = "<iframe width=\"100%\" height=\"800\" src=\"$iframe_url\"></iframe>";
     }
-    catch (Exception $e) {
-      dpm($e, 'Exception');
-    }
-    dpm($response);
-    dpm($client->__getLastRequest());
+    $client->printDebug();
 
-    dpm($client->__getLastRequestHeaders()); 
-
-    
-/*
-And this is what we get
-
-(Object) SoapFault
-
-    faultstring (String, 11 characters ) Bad Request
-    faultcode (String, 4 characters ) HTTP
-    xdebug_message (String, 861 characters ) SoapFault: Bad Request in /var/workspace/drupa...
-
-SoapFault: Bad Request in /var/workspace/drupal7/sites/all/modules/translation_management/translators/nativy/tmgmt_nativy.plugin.inc on line 184 Call Stack: 0.0000 332892 1. {main}() /var/workspace/drupal7/index.php:0 0.0349 3037948 2. menu_execute_active_handler() /var/workspace/drupal7/index.php:20 0.0349 3038600 3. call_user_func_array() /var/workspace/drupal7/includes/menu.inc:503 0.0350 3038852 4. tmgmt_nativy_test_page() /var/workspace/drupal7/includes/menu.inc:0 0.0414 3695884 5. TMGMTNativyTranslatorController->jobSettingsForm() /var/workspace/drupal7/sites/all/modules/translation_management/translators/nativy/tmgmt_nativy.module:90 0.1751 3771464 6. SoapClient->CreateOffer() /var/workspace/drupal7/sites/all/modules/translation_management/translators/nativy/tmgmt_nativy.plugin.inc:184
-
-
- */
-
-     
     return $settings;
   }
 
@@ -225,9 +202,7 @@ SoapFault: Bad Request in /var/workspace/drupal7/sites/all/modules/translation_m
   protected function nativySoapRequest($method, $params) {
     $client = $this->nativySoapClient();
     $response = $client->$method($params);
-    dpm($response);
-    dpm(array ('REQUEST' => $client->__getLastRequest()), 'Last Request');
-    dpm($client->__getLastRequestHeaders(), 'Last Request Headers'); 
+    $client->printDebug();
     return $response;
   }
   /**
@@ -254,6 +229,21 @@ SoapFault: Bad Request in /var/workspace/drupal7/sites/all/modules/translation_m
  * Nativy SOAP client
  */
 class TMGMTNativySoapClient extends SoapClient {
+  /**
+   * Run request from full raw XML body
+   */
+  public function xmlRequest($method, $xmldata) {
+    $soapvar = new SoapVar($xmldata, XSD_ANYXML);
+      
+    $response = FALSE;
+    try {
+      $response = $this->$method($soapvar);
+    }
+    catch (Exception $e) {
+      dpm($e, 'Exception');
+    }
+    return $response;
+  }
    /**
     * Authenticate to the service
     */
@@ -263,15 +253,8 @@ class TMGMTNativySoapClient extends SoapClient {
        'Password' => $pass,
      ));
      $response = $this->AuthenticateUser();
-     //dpm($response, $response->AuthenticateUserResult);
-     //dpm($client->__getLastRequest());
-     //dpm($client->__getLastRequestHeaders()); 
-     // Got token that should be valid for 20 mins.
      $token = $response->AuthenticateUserResult;
      $this->setAuthHeader(array('AuthenticatedToken' => $token));
-     //dpm($response);
-     //dpm($client->__getLastRequest());
-     //dpm($client->__getLastRequestHeaders()); 
      return TRUE;
    } 
    /**
@@ -289,8 +272,21 @@ class TMGMTNativySoapClient extends SoapClient {
         'SecuredWebServiceHeader',
         $soapvar
      );
-     //$client = $this->nativySoapClient();
      $this->__setSoapHeaders(NULL); 
      $this->__setSoapHeaders($headers);
-   }  
+   }
+
+   /**
+    * Debug. Print out last request and response
+    */
+   public function printDebug() {
+     dpm(array(
+       'Request' => $this->__getLastRequest(),
+       'RequestHeaders' => $this->__getLastRequestHeaders()
+     ), 'SOAP REQUEST');
+     dpm(array(
+       'Response' => $this->__getLastResponse(),
+       'ResponseHeaders' => $this->__getLastResponseHeaders()
+     ), 'SOAP RESPONSE');
+   }
 }
