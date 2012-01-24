@@ -183,7 +183,7 @@ class TMGMTJobUIController extends EntityDefaultUIController {
       'type' => MENU_DEFAULT_LOCAL_TASK,
       'weight' => -10,
     );
-    $items[$this->path . '/' . $wildcard] = array(
+    $items[$this->path . '/' . $wildcard . '/review'] = array(
       'title' => 'Review',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('tmgmt_ui_job_review_form', $id_count),
