@@ -904,6 +904,16 @@ function tmgmt_unflatten_data($flattened_data) {
   return $data;
 }
 
+/**
+ * Helper function for recursively marking form elements as #disabled if the
+ * parent form element is marked as such.
+ *
+ * @param $form
+ *   A renderable Form API array structure.
+ *
+ * @return array
+ *   The processed array.
+ */
 function _tmgmt_form_inherit_disabled($form) {
   foreach (element_children($form) as $key) {
     if (!empty($form['#disabled'])) {
