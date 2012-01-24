@@ -61,10 +61,10 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
           $data[$key]['#text'] = $items->item(0)->nodeValue;
           break;
         case 400:
-          $job->rejected('Rejected by Microsoft Translator: @error', array('@error' => $result->data));
+          $job->rejected('Rejected by Microsoft Translator: !error', array('!error' => $result->data));
           return;
         default:
-          $job->addMessage('Unknown error from Microsoft Translator: @error', array('@error' => $result->data), 'error');
+          $job->addMessage('Unknown error from Microsoft Translator: !error', array('!error' => $result->data), 'error');
           return;
       }
     }
