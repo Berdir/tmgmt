@@ -167,6 +167,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
       '#prefix' => '<div id="nativity-quote">',
       '#suffix' => '</div>',
     );
+
     $translator = $job->getTranslator();
     $client = $this->nativySoapClient();
     // First try authentication and if successful, go for the offer.
@@ -174,22 +175,54 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
       $translator->getSetting('api_user_name'),
       $translator->getSetting('api_password')
     );
-    // Build offer parameters
-    $template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest_sample_good.xml');
-    //$template = '<requ>' . $template . '</requ>';
-    //dpm($template);
-    $soapvar = new SoapVar($template, XSD_ANYXML);
-      
+    // Build offer parameters for straight text replacement
+    // Customer data
+    $data['!customerEmail'] = 'demo@nativy.com';
+    $data['!customerFirstName'] = 'Jose';
+    $data['!customerLastName'] = 'Reyero';
+    // Languages
+    $data['!primaryLangCode']= $job->source_language; //"de-DE";
+    $data['!langCode'] = $job->target_language; //"en";
+    // Add text
+    $data['!textblocks'] = $this->nativyBuildText($job);
+    $data['!emailCallbackLink'] = url('nativy/callback', array('absolute' => TRUE));
+    //$template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest_sample_good.xml');
+    $template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest.xml');
+    $template = strtr($template, $data);    
     $response = $client->xmlRequest('CreateOffer', $template);
     if ($response) {
       $iframe_url = $response->CreateOfferResult;
-      $settings['iframe']['#markup'] = "<iframe width=\"100%\" height=\"800\" src=\"$iframe_url\"></iframe>";
+      $settings['iframe']['#markup'] = "<iframe width=\"800\" height=\"800\" src=\"$iframe_url\"></iframe>";
     }
     $client->printDebug();
 
     return $settings;
   }
-
+  /**
+   * Build text as xml
+   */
+  protected function nativyBuildText($job) {
+    $output = '';
+    $template = '<textblock diffgr:id="textblock!number" msdata:rowOrder="!order" code="!code" label="!label" msdata:hiddentextblock_Id="!order">';
+    $template .= '<description langCode="!langCode">';
+    $template .= '!text';
+    $template .= '</description>';
+    $template .= "</textblock>\n";
+    $data['!langCode'] = $job->source_language;
+    $text = tmgmt_flatten_data($job->getSourceData());
+    $number = $order = 0;
+    foreach ($text as $key => $item) {
+      $data['!order'] = $order;
+      $data['!number'] = $number;
+      $data['!code'] = $key;
+      $data['!label'] = $item['#label'];
+      $data['!text'] = $item['#text'];
+      $output .= strtr($template, $data);
+      $number++;
+      $order++;
+    }
+    return $output;
+  }
   /**
    * Build offer xml
    */
@@ -248,14 +281,20 @@ class TMGMTNativySoapClient extends SoapClient {
     * Authenticate to the service
     */
    public function authenticate($user, $pass) {
-     $this->setAuthHeader(array(
-       'Username' => $user,
-       'Password' => $pass,
-     ));
-     $response = $this->AuthenticateUser();
-     $token = $response->AuthenticateUserResult;
-     $this->setAuthHeader(array('AuthenticatedToken' => $token));
-     return TRUE;
+     try {
+       $this->setAuthHeader(array(
+         'Username' => $user,
+         'Password' => $pass,
+       ));
+       $response = $this->AuthenticateUser();
+       $token = $response->AuthenticateUserResult;
+       $this->setAuthHeader(array('AuthenticatedToken' => $token));
+       return TRUE;
+     }
+     catch (Exception $e) {
+       dpm($exception);
+       $this->debug();
+     }
    } 
    /**
     * Set authentication header.

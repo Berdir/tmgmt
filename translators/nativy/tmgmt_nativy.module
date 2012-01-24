@@ -12,7 +12,6 @@
  * Implements hook_menu().
  */
 function tmgmt_nativy_menu() {
-
   /* Remove this path after finishing development! */
   $items['soaptest'] = array(
     'title' => 'Testcallback',
@@ -20,25 +19,13 @@ function tmgmt_nativy_menu() {
     'page callback' => 'tmgmt_nativy_test_page',
     'access arguments' => array('access content'),
   );
-
-  $items['admin/config/services/nativy'] = array(
-    'title' => 'Nativy Translator',
-    'description' => 'Configure Nativy Translator service.',
-    'type' => MENU_CALLBACK,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_nativy_settings'),
-    'access arguments' => array('administer site configuration'),
-  );
-  
   // @todo menu callback for order complete callback
-  $items['nativy/notification'] = array(
+  $items['nativy/callback'] = array(
     'title' => 'Nativy Notification',
     'description' => 'Callback for the completion notification of a translation job.',
     'type' => MENU_CALLBACK,
-    'page callback' => 'tmgmt_nativy_process_translation_result',
-    // @todo add a tmgmt permission: 'access arguments' => array('administer site configuration'),
+    'page callback' => 'tmgmt_nativy_process_callback',
   );
-
   return $items;
 }
 
@@ -56,25 +43,12 @@ function tmgmt_nativy_tmgmt_translator_plugin_info() {
 }
 
 /**
- * Form callback used to configure nativy.com translation service.
+ * Callback page.
+ * 
+ * @TODO Real processing. For now we just log whatever comes in.
  */
-function tmgmt_nativy_settings() {
-
-  $form['tmgmt_nativy_username'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Nativy.com username'),
-    '#default_value' => variable_get('tmgmt_nativy_username'),
-    '#description' => t('Please enter your username for your account on nativy.com.'),
-  );
-
-  $form['tmgmt_nativy_password'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Nativy.com password'),
-    '#default_value' => variable_get('tmgmt_nativy_password'),
-    '#description' => t('Please enter your password for your account on nativy.com.'),
-  );
-
-  return system_settings_form($form);
+function tmgmt_nativy_process_callback() {
+  watchdog('nativy', 'Callback REQUEST.  <br /><pre>!post</pre>', array('!post' => print_r($_REQUEST, TRUE)));
 }
 
 /*
