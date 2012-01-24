@@ -591,6 +591,28 @@ function tmgmt_translator_load_multiple($names = array(), $conditions = array())
 }
 
 /**
+ * Checks whether a translator with a certain name is busy and therefore can't
+ * be modified or deleted. A translator is considered 'busy' if there are jobs
+ * attached to it that are in an active state.
+ *
+ * @param $translator
+ *   The machine-readable name of a translator.
+ *
+ * @return boolean
+ *   TRUE if the translator is busy, FALSE otherwise.
+ */
+function tmgmt_translator_busy($translator) {
+  $query = new EntityFieldQuery();
+  return (boolean) $query->entityCondition('entity_type', 'tmgmt_job')
+    // @todo is TMGMT_JOB_STATE_SUBMITTED really the only state in which we
+    // don't want our translator to be modified or deleted?
+    ->propertyCondition('state', TMGMT_JOB_STATE_SUBMITTED, '!=')
+    ->range(0, 1)
+    ->count()
+    ->execute();
+}
+
+/**
  * Creates a translator.
  *
  * @param $plugin

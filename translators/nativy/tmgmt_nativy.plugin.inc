@@ -41,7 +41,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    * Here we will acutally query source and get translations.
    */
   public function requestTranslation(TMGMTJob $job) {
-    
+
     // @todo - who is handling cron / batch here, we or some other controler?
     $translate_url = $this->translatorURL . '/Translate';
 
@@ -113,7 +113,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
       '#title' => t('Password'),
       '#default_value' => $translator->getSetting('api_password', ''),
     );
-    return $form;
+    return parent::translatorSettingsForm($form, $form_state, $translator);
   }
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
@@ -188,7 +188,7 @@ geringfügigen Vermittlungsaufschlags.
     }
     dpm($response);
     dpm($client->__getLastRequest());
-    dpm($client->__getLastRequestHeaders()); 
+    dpm($client->__getLastRequestHeaders());
     /*
     $quality = !empty($form_state['values']['settings']['quality']) ? $form_state['values']['settings']['quality'] : 'machine';
     $translation_array = $this->generateMyGengoTranslationJobArray($job, $quality);
@@ -273,7 +273,7 @@ geringfügigen Vermittlungsaufschlags.
     $response = $client->$method($params);
     dpm($response);
     dpm($client->__getLastRequest(), 'Last Request');
-    dpm($client->__getLastRequestHeaders(), 'Last Request Headers'); 
+    dpm($client->__getLastRequestHeaders(), 'Last Request Headers');
     return $response;
   }
   /**
@@ -295,7 +295,7 @@ geringfügigen Vermittlungsaufschlags.
   }
   /**
    * Perform authentication
-   * 
+   *
    * Enter description here ...
    */
  function nativyAuthenticate($user, $pass) {
@@ -307,31 +307,31 @@ geringfügigen Vermittlungsaufschlags.
    $rawheader .= "<Password>$pass</Password>";
    $rawheader .= '</SecuredWebServiceHeader>';
    $soapvar = new SoapVar($rawheader, XSD_ANYXML);
-   $headers['SecuredWebServiceHeader'] = new SoapHeader('http://www.nativy.com/nis', 
+   $headers['SecuredWebServiceHeader'] = new SoapHeader('http://www.nativy.com/nis',
                             'SecuredWebServiceHeader',
                              $soapvar);
    $client->__setSoapHeaders($headers);
    $response = $client->AuthenticateUser();
    // Got token that should be valid for 20 mins.
    $token = $response->AuthenticateUserResult;
-   
+
    //dpm($response, $response->AuthenticateUserResult);
    //dpm($client->__getLastRequest());
-   //dpm($client->__getLastRequestHeaders()); 
-   
+   //dpm($client->__getLastRequestHeaders());
+
    // Now replace previous header with our new token and set new headers
    $rawheader = '<SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">';
    $rawheader .= "<AuthenticatedToken>$token</AuthenticatedToken>";
    $rawheader .= '</SecuredWebServiceHeader>';
    $soapvar = new SoapVar($rawheader, XSD_ANYXML);
-   $headers['SecuredWebServiceHeader'] = new SoapHeader('http://www.nativy.com/nis', 
+   $headers['SecuredWebServiceHeader'] = new SoapHeader('http://www.nativy.com/nis',
                             'SecuredWebServiceHeader',
                              $soapvar);
    // Note (From Nativy doc):
    // You should set Username and Password to an empty string for security reasons,
 	 // because it is not used anymore after the authentication.
-   $client->__setSoapHeaders(NULL); 
-   $client->__setSoapHeaders($headers);   
+   $client->__setSoapHeaders(NULL);
+   $client->__setSoapHeaders($headers);
  }
 
   public function getXMLTemplate($request_type, $params = array()) {

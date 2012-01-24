@@ -93,7 +93,7 @@ class TMGMTHTMLTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
       '#default_value' => $translator->getSetting('export_format'),
       '#description' => t('Please select the format you want to export data.'),
     );
-    return $form;
+    return parent::translatorSettingsForm($form, $form_state, $translator);
   }
 
 }

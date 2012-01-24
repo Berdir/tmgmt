@@ -12,18 +12,19 @@
  * translation jobs in the database that use the translator.
  */
 function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator, $op = 'edit') {
+  // Build up the stored entity from the last (failed) form submit.
+  if (!empty($form_state['values'])) {
+    $translator = entity_ui_form_submit_build_entity($form, $form_state);
+  }
   // We don't want the terrible long title that Entity API generates for us.
   if (in_array($op, array('import', 'add'))) {
     drupal_set_title($op == 'import' ? t('Add Translator') : t('Import Translator'), PASS_THROUGH);
   }
-  $available_plugins = tmgmt_translator_plugin_labels();
-  // Initialize some of the default values.
-  foreach (array('description', 'label', 'name', 'translator_plugin') as $key) {
-    $translator->{$key} = isset($form_state['values'][$key]) ? $form_state['values'][$key] : $translator->{$key};
-  }
+  $available = tmgmt_translator_plugin_labels();
   // If the translator plugin is not set, pick the first available plugin as the
   // default.
-  $translator->translator_plugin = empty($translator->translator_plugin) ? key($available_plugins) : $translator->translator_plugin;
+  $translator->translator_plugin = empty($translator->translator_plugin) ? key($available) : $translator->translator_plugin;
+  $used = empty($translator->is_new) ? tmgmt_translator_in_use($translator->name) : FALSE;
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
@@ -54,66 +55,38 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#size' => 32,
     '#maxlength' => 64,
   );
-  if (!empty($available_plugins)) {
-    $controller = tmgmt_translator_plugin_controller($translator->translator_plugin);
-    $info = $controller->pluginInfo();
-    $element = &$form['translator_plugin_wrapper'];
-    $element = array(
-      '#type' => 'container',
-      '#prefix' => '<div id="tmgmt-translator-plugin-wrapper">',
-      '#suffix' => '</div>',
-    );
-    if (!empty($translator->is_new)) {
-      $element['translator_plugin'] = array(
-        '#type' => 'select',
-        '#title' => t('Translator plugin'),
-        '#description' => check_plain($info['description']),
-        '#options' => $available_plugins,
-        '#default_value' => $translator->translator_plugin,
-        '#required' => TRUE,
-        '#ajax' => array(
-          'callback' => 'tmgmt_ui_ajax_callback_translator_plugin',
-          'wrapper' => 'tmgmt-translator-plugin-wrapper',
-        ),
-      );
-    }
-    else {
-      $element['translator_plugin'] = array(
-        '#type' => 'item',
-        '#title' => t('Translator plugin'),
-        '#description' => check_plain($info['label'] . ' - ' . $info['description']),
-        '#required' => TRUE,
-      );
-    }
-    $element = &$element['translator_plugin_settings'];
-    $element = array(
-      '#type' => 'fieldset',
-      '#title' => t('@plugin plugin settings', array('@plugin' => $info['label'])),
-      '#collapsible' => TRUE,
-    );
-    if ($settings = $controller->translatorSettingsForm(array(), $form_state, $translator)) {
-      $element['#description'] = t('These settings apply to the @plugin plugin when this translator is used.', array('@plugin' => $info['label']));
-      $element['settings'] = $settings;
-      $element['settings']['#tree'] = TRUE;
-    }
-    else {
-      $element['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $info['label']));
-    }
-  }
-  else {
-    // Fallback for when no translator plugins are available.
-    $form['translator_plugin'] = array(
-      '#type' => 'item',
-      '#title' => t('Translator plugin'),
-      '#description' => t('There are no available translator plugins.'),
-      '#required' => TRUE,
-    );
-  }
+  $form['plugin_wrapper'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div id="tmgmt-plugin-wrapper">',
+    '#suffix' => '</div>',
+  );
+  // Pull the translator plugin info if any.
+  $info = !empty($translator->translator_plugin) ? tmgmt_translator_plugin_info($translator->translator_plugin) : array();
+  $form['plugin_wrapper']['translator_plugin'] = array(
+    '#type' => 'select',
+    '#title' => t('Translator plugin'),
+    '#description' => isset($info['description']) ? $info['description'] : t('The plugin that controls the translator.'),
+    '#options' => $available,
+    '#default_value' => $translator->translator_plugin,
+    '#required' => TRUE,
+    '#ajax' => array(
+      'callback' => 'tmgmt_ui_ajax_callback_translator_plugin',
+      'wrapper' => 'tmgmt-plugin-wrapper',
+    ),
+  );
+  $form['plugin_wrapper']['settings'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#tree' => TRUE,
+  );
+  // Add the translator plugin settings form.
+  $form['plugin_wrapper']['settings'] += tmgmt_ui_translator_settings_form(array(), $form_state, $translator);
+  // Add a submit button and a cancel link to the form.
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save translator'),
-    '#disabled' => empty($available_plugins),
+    '#disabled' => empty($available),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'link',
@@ -353,17 +326,18 @@ function tmgmt_job_form_validate($form, &$form_state) {
  * Helper function for retrieving the job settings form.
  */
 function tmgmt_ui_job_settings_form($form, &$form_state, TMGMTJob $job) {
-  if ($translator = tmgmt_translator_load($job->translator)) {
-    switch (tmgmt_translator_check($translator, $job->source_language, $job->target_language)) {
-      case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-        $form['#description'] = t('The selected translator is not available: @reason.', array('@reason' => $translator->getNotAvailableReason()));
-        break;
-      case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-        $form['#description'] = t('The selected translator is not available for translations from @source to @target.', array('@source' => tmgmt_language_label($job->source_language), '@target' => tmgmt_language_label($job->target_language)));
-        break;
-      default:
-        $form = $translator->jobSettingsForm(array(), $form_state, $job);
-    }
+  if ($settings = $job->settingsForm($form, $form_state)) {
+    return $settings;
+  }
+  return $form;
+}
+
+/**
+ * Helper function for retrieving the translator settings form.
+ */
+function tmgmt_ui_translator_settings_form($form, &$form_state, TMGMTTranslator $translator) {
+  if ($settings = $translator->settingsForm($form, $form_state)) {
+    return $settings;
   }
   return $form;
 }
@@ -388,7 +362,7 @@ function tmgmt_ui_job_list_items($items) {
  * currently selected translator plugin.
  */
 function tmgmt_ui_ajax_callback_translator_plugin($form, &$form_state) {
-  return $form['translator_plugin_wrapper'];
+  return $form['plugin_wrapper'];
 }
 
 /**

@@ -341,7 +341,14 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
   public function translatorSettingsForm($form, &$form_state, TMGMTTRanslator $translator) {
-    return array();
+    $form['#title'] = t('@plugin plugin settings', array('@plugin' => $this->pluginInfo['label']));
+    if (empty($form)) {
+      $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginInfo['label']));
+    }
+    else {
+      $form['#description'] = t('These settings are handled by the @plugin plugin and apply whenever this translator is used in a job.', array('@plugin' => $this->pluginInfo['label']));
+    }
+    return $form;
   }
 
   /**

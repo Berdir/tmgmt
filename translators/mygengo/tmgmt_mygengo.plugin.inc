@@ -206,7 +206,6 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    * @param $form_state array
    */
   public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
-
     $form['api_public_key'] = array(
       '#type' => 'textfield',
       '#title' => t('myGengo API Public key'),
@@ -219,7 +218,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
       '#default_value' => $translator->getSetting('api_private_key', ''),
       '#description' => t('Please enter your myGengo API Private key.'),
     );
-    return $form;
+    return parent::translatorSettingsForm($form, $form_state, $translator);
   }
 
   /**

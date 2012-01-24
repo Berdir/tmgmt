@@ -93,7 +93,7 @@ class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPlugi
         3 => t('Option three'),
       ),
     );
-    return $form;
+    return parent::translatorSettingsForm($form, $form_state, $translator);
   }
 
 }
