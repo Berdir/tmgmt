@@ -359,7 +359,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::pluginSettingsForm().
    */
-  public function pluginForm($form, &$form_state, TMGMTTRanslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['#title'] = t('@plugin plugin settings', array('@plugin' => $this->pluginInfo['label']));
     if (empty($form)) {
       $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginInfo['label']));
@@ -373,7 +373,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::checkoutSettingsForm().
    */
-  public function checkoutForm($form, &$form_state, TMGMTJob $job, TMGMTTranslator $translator) {
+  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     $form['#title'] = t('@translator checkout settings', array('@translator' => $translator->label()));
     if (empty($form)) {
       $form['#description'] = t("@translator doesn't provide any checkout settings.", array('@translator' => $translator->label()));

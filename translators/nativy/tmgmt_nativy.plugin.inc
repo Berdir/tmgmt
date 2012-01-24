@@ -41,61 +41,34 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    * Here we will acutally query source and get translations.
    */
   public function requestTranslation(TMGMTJob $job) {
-
-    // @todo - who is handling cron / batch here, we or some other controler?
-    $translate_url = $this->translatorURL . '/Translate';
-
-    // Pull the source data array from through the job and flatten it..
-    $data = tmgmt_flatten_data($job->getSourceData());
-    foreach ($data as $key => $value) {
-      if (isset($value['#translate']) && $value['#translate'] === FALSE) {
-        continue;
-      }
-
-      $query_data = drupal_http_build_query(array(
-        'appId'       => $this->getSetting('bing_api_id'),
-        'from'        => $job->source_language,
-        'to'          => $job->target_language,
-        'contentType' => 'text/plain',
-        // @todo - if length is more then 10000 chars we need to split request.
-        'text'        => $value['#text'],
-      ));
-
-      $options = array(
-        // @todo - for some reason post is returning 202 status and service
-        // is not translating things, maybe check this later.
-        //'method' => 'POST',
-        //'data' => $query_data,
-        'headers' => array('Content-Type' => 'text/plain')
-      );
-      $result = drupal_http_request($translate_url. '?' . $query_data, $options);
-      switch ($result->code) {
-        case 200:
-          // Lets leave DOMDocument for now because this service enable us
-          // to send array of translation sources, and we will probably use
-          // this soon.
-          $dom = new DOMDocument;
-          $dom->loadXML($result->data);
-          $string_items = $dom->getElementsByTagName('string');
-          $data[$key]['#text'] = $string_items->item(0)->nodeValue;
-          break;
-        case 400:
-          return new TMGMTTranslatorResponse(TMGMTJob::STATE_REJECTED, $result->data);
-          break;
-        default:
-          // @todo - we need to think here more what to do if service is not
-          // responding for some items and is responding for some others.
-          // Ideally we should save sources that we manage to translate and
-          // not just return.
-          return new TMGMTTranslatorResponse(NULL, $result->data);
-          break;
-      }
-    }
-    // Save the translated data through the job.
-    $job->addTranslatedData(tmgmt_unflatten_data($data));
-    return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Microsoft Translator translation completed.'));
+    // This is hexadecimal order id, we'd need to store it in some field to search.
+    $job->reference = $job->settings['orderid'];
+    $job->submitted(t('Job submitted to Nativy for translation. You will get an e-mail when the translation is ready.'));
   }
 
+  /**
+   * Retrieve job when ready (we got an email with a link?)
+   */
+  public function retrieveTranslation(TMGMTJob $job) {
+    if ($document = $this->nativyRetrieveTranslation($job)) {
+      $translation = array();
+      foreach ($document->offerrequest->textblocks as $textblock) {
+        $block = $textblock->textblock;
+        $code = (string)$block['code'];
+        $label = (string)$block['label'];
+        $text = (string)$block->description;
+        $translation[$code] = array(
+          '#text' => $text,
+          '#label' => $label,
+        );
+      }
+      $job->addTranslatedData(tmgmt_unflatten_data($translation));
+      $job->needsReview('Got translation from Nativy');
+      return TRUE;
+    }
+    // @todo Implement retrieve translation
+    return FALSE;
+  }
   /**
    * Defines plugin settings form.
    *
@@ -161,40 +134,114 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    *   Settings form.
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
-    $settings['quote'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Quote'),
-      '#prefix' => '<div id="nativity-quote">',
-      '#suffix' => '</div>',
-    );
+    if ($iframe_url = $this->nativyCreateOffer($job)) {
+      // This should look like http://test.nativy.com/client/createorder.aspx?token=a19fd9f9-4bdc-4396-aebf-277fafd9c42a&amp;orderid=f1446707-ae2f-499e-a08e-47131533a88d
+      $parts = explode('orderid=', $iframe_url);
+      if (count($parts) == 2 && ($orderid = $parts[1])) {
+      $settings['help']['#markup'] =
+    		'<p>' . t('You need to complete your order through Nativy pages below and then click on <em>Submit to translator</em>.') . '</p>';
+
+        $settings['orderid'] = array('#type' => 'value', '#value' => $orderid);
+        // If we complete the order we should be at http://test.nativy.com/client/nisfinish.aspx
+        // @TODO The idea is we add a hidden variable and check whether we've reached that page
+        $settings['nativyurl'] = array('#type' => 'hidden', '#value' => $iframe_url);
+        $settings['iframe']['#markup'] = "<iframe width=\"800\" height=\"600\" src=\"$iframe_url\"></iframe>";
+        return $settings;
+      }
+    }
+    // Something went wrong, just print message and get out.
+    $settings['error']['#markup'] =
+        '<p>' . t('Cannot authenticate to Nativy server. Pleaser review your user name and password.') .'</p>';
+    return $settings;
+  }
+  /**
+   * Build text as xml
+   */
+  protected function nativyBuildText($job) {
+    $output = '';
+    $template = '<textblock diffgr:id="textblock!number" msdata:rowOrder="!order" code="!code" label="!label" msdata:hiddentextblock_Id="!order">';
+    $template .= '<description langCode="!langCode">';
+    $template .= '!text';
+    $template .= '</description>';
+    $template .= "</textblock>\n";
+    $data['!langCode'] = $job->source_language;
+    $text = tmgmt_flatten_data($job->getSourceData());
+    $number = $order = 0;
+    foreach ($text as $key => $item) {
+      $data['!order'] = $order;
+      $data['!number'] = $number;
+      $data['!code'] = $key;
+      $data['!label'] = $item['#label'];
+      $data['!text'] = $item['#text'];
+      $output .= strtr($template, $data);
+      $number++;
+      $order++;
+    }
+    return $output;
+  }
+    /**
+   * Create offer and return iframe URL
+   */
+  protected function nativyRetrieveTranslation($job) {
+    $orderid = $job->reference;
     $translator = $job->getTranslator();
     $client = $this->nativySoapClient();
     // First try authentication and if successful, go for the offer.
-    $client->authenticate(
-      $translator->getSetting('api_user_name'),
-      $translator->getSetting('api_password')
-    );
-    // Build offer parameters
-    $template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest_sample_good.xml');
-    //$template = '<requ>' . $template . '</requ>';
-    //dpm($template);
-    $soapvar = new SoapVar($template, XSD_ANYXML);
-
-    $response = $client->xmlRequest('CreateOffer', $template);
-    if ($response) {
-      $iframe_url = $response->CreateOfferResult;
-      $settings['iframe']['#markup'] = "<iframe width=\"100%\" height=\"800\" src=\"$iframe_url\"></iframe>";
+    $authenticated = $client->authenticate($translator->getSetting('api_user_name'), $translator->getSetting('api_password'));
+    if ($authenticated) {
+      try {
+        $response = $client->GetOffer(array('OrderId' => $orderid));
+        $prefix = '<?xml version="1.0" standalone="yes"?>';
+        $content = $response->GetOfferResult->any;
+        // Since response is not valid XML we take out the nonsense par of it (schema)
+        // Note it has nothing to do with the documented theoretical response.
+        $content = array_pop(explode('</xs:schema>', $content));
+        $document = new SimpleXMLElement($content);
+        return $document;
+      }
+      catch (Exception $e) {
+        dpm($e, 'Exception');
+      }
     }
+    //$content = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_getoffer_response.xml');
+    // $document = new SimpleXMLElement($content);
+    // Something went wrong, just print message and get out.
     $client->printDebug();
-
-    return $settings;
+    return FALSE;
   }
-
   /**
-   * Build offer xml
+   * Create offer and return iframe URL
    */
-  protected function nativyBuildOffer($job) {
-
+  protected function nativyCreateOffer($job) {
+    $translator = $job->getTranslator();
+    $client = $this->nativySoapClient();
+    // First try authentication and if successful, go for the offer.
+    $authenticated = $client->authenticate($translator->getSetting('api_user_name'), $translator->getSetting('api_password'));
+    if ($authenticated) {
+      // Build offer parameters for straight text replacement
+      // Customer data
+      $data['!customerEmail'] = variable_get('site_mail', ini_get('sendmail_from'));
+      $data['!customerFirstName'] = 'Drupal';
+      $data['!customerLastName'] = 'Translator';
+      // Languages
+      $data['!primaryLangCode']= $job->source_language; //"de-DE";
+      $data['!langCode'] = $job->target_language; //"en";
+      // Add text
+      $data['!textblocks'] = $this->nativyBuildText($job);
+      $data['!emailCallbackLink'] = url('nativy/callback', array('absolute' => TRUE));
+      //$template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest_sample_good.xml');
+      $template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest.xml');
+      $template = strtr($template, $data);
+      $response = $client->xmlRequest('CreateOffer', $template);
+      if ($response) {
+        // This should look like http://test.nativy.com/client/createorder.aspx?token=a19fd9f9-4bdc-4396-aebf-277fafd9c42a&amp;orderid=f1446707-ae2f-499e-a08e-47131533a88d
+        $iframe_url = $response->CreateOfferResult;
+        return $iframe_url;
+      }
+    }
+    // Something went wrong, just print message and get out.
+    $client->printDebug();
+    return FALSE;
   }
   /**
    * Send request to nativy, get response
@@ -248,15 +295,22 @@ class TMGMTNativySoapClient extends SoapClient {
     * Authenticate to the service
     */
    public function authenticate($user, $pass) {
-     $this->setAuthHeader(array(
-       'Username' => $user,
-       'Password' => $pass,
-     ));
-     $response = $this->AuthenticateUser();
-     $token = $response->AuthenticateUserResult;
-     $this->setAuthHeader(array('AuthenticatedToken' => $token));
-     return TRUE;
+     try {
+       $this->setAuthHeader(array(
+         'Username' => $user,
+         'Password' => $pass,
+       ));
+       $response = $this->AuthenticateUser();
+       $token = $response->AuthenticateUserResult;
+       $this->setAuthHeader(array('AuthenticatedToken' => $token));
+       return TRUE;
+     }
+     catch (Exception $e) {
+       dpm($exception);
+       $this->debug();
+     }
    }
+
    /**
     * Set authentication header.
     */

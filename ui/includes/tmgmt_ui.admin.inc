@@ -27,9 +27,6 @@ function tmgmt_ui_job_review_form($form, &$form_state, TMGMTJob $job) {
 
 /**
  * Entity API form for the translator entity.
- *
- * @todo Make the translator field and settings #disabled if there are
- * translation jobs in the database that use the translator.
  */
 function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator, $op = 'edit') {
   // Check if the translator entity is completely new or not.
@@ -40,7 +37,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   }
   // We don't want the terrible long title that Entity API generates for us.
   if (in_array($op, array('import', 'add'))) {
-    drupal_set_title($op == 'import' ? t('Add Translator') : t('Import Translator'), PASS_THROUGH);
+    drupal_set_title($op == 'import' ? t('Import Translator') : t('Add Translator'), PASS_THROUGH);
   }
   // Check if the translator is currently in use.
   if ($busy = $old ? tmgmt_translator_busy($translator->name) : FALSE) {
@@ -383,7 +380,7 @@ function tmgmt_ui_checkout_settings_form($form, &$form_state, TMGMTJob $job) {
  * Helper function for retrieving the translator settings form.
  */
 function tmgmt_ui_plugin_settings_form($form, &$form_state, TMGMTTranslator $translator) {
-  if ($settings = $translator->pluginForm($form, $form_state)) {
+  if ($settings = $translator->pluginSettingsForm($form, $form_state)) {
     return $settings;
   }
   return $form;

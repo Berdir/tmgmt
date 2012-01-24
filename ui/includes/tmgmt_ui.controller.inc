@@ -151,7 +151,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
    */
   public function applyOperation($op, $entity) {
     if ($op == 'delete' && tmgmt_translator_busy($entity->name)) {
-      drupal_set_message(t("The translator %translator could not be deleted because it is currently being used by at least one active translation job.", array('%translator' => $entity->label())));
+      drupal_set_message(t("The translator %translator could not be deleted because it is currently being used by at least one active translation job.", array('%translator' => $entity->label())), 'error');
       return FALSE;
     }
     return parent::applyOperation($op, $entity);

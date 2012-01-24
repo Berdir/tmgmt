@@ -117,7 +117,7 @@ class TMGMTTranslator extends Entity {
   /**
    * Get the job settings form from the respective translator plugin.
    */
-  public function checkoutSettingsForm($form, $form_state, $job) {
+  public function checkoutSettingsForm($form, &$form_state, $job) {
     if ($controller = $this->getPluginController()) {
       return $controller->checkoutSettingsForm($form, $form_state, $job);
     }

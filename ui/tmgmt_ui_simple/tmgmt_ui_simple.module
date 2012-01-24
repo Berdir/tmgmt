@@ -74,7 +74,7 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
   );
   // As keys are numeric, we assume languages are in the same order, need to rekey rows
   $language_list = module_exists('i18n_node') ? i18n_node_language_list($node) : locale_language_list();
-  $jobs = tmgmt_job_item_load_by_source($form['source_plugin']['#value'], $form['item_type']['#value'], $form['item_id']['#value'], $form['source_language']['#value'], array_keys($language_list));
+  $jobs = tmgmt_job_load_by_source($form['source_plugin']['#value'], $form['item_type']['#value'], $form['item_id']['#value'], $form['source_language']['#value'], array_keys($language_list));
   $running_jobs = array();
   foreach ($language_list as $langcode => $language_name) {
     if ($langcode == LANGUAGE_NONE) {
