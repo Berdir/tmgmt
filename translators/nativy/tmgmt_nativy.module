@@ -19,19 +19,7 @@ function tmgmt_nativy_menu() {
     'page callback' => 'tmgmt_nativy_test_page',
     'access arguments' => array('access content'),
   );
-<<<<<<< HEAD
 
-  $items['admin/config/services/nativy'] = array(
-    'title' => 'Nativy Translator',
-    'description' => 'Configure Nativy Translator service.',
-    'type' => MENU_CALLBACK,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_nativy_settings'),
-    'access arguments' => array('administer site configuration'),
-  );
-
-=======
->>>>>>> ccdf8d743ec9d0a44c4c44110cfe60916f92ce17
   // @todo menu callback for order complete callback
   $items['nativy/callback'] = array(
     'title' => 'Nativy Notification',
@@ -58,7 +46,7 @@ function tmgmt_nativy_tmgmt_translator_plugin_info() {
 
 /**
  * Callback page.
- * 
+ *
  * @TODO Real processing. For now we just log whatever comes in.
  */
 function tmgmt_nativy_process_callback() {
