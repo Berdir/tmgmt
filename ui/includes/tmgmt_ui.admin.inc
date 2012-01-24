@@ -170,6 +170,8 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
   $job->target_language = $preselected['target_language'] ? $preselected['target_language'] : (isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available));
   $job->source_language = $preselected['source_language'] ? $preselected['source_language'] : (isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : key($available));
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
+  // Mark certain form elements as disabled under certain circumstances.
+  $disabled = !$job->isNew() && !$job->isPrepared() && !$job->isCancelled() && !$job->isRejected();
   // Show the items that are attached to this job if there are not more than 20.
   $form['label'] = array(
     '#type' => 'textfield',
@@ -177,133 +179,87 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
     '#description' => t('You can provide a label for this job in order to identify it easily later on.'),
     '#default_value' => $job->label,
   );
-  if (count($items) <= 20) {
-    $form['items'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Attached items'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['items']['links']['#theme'] = 'links';
-    foreach ($job->getItems() as $item) {
-      $uri = $item->uri();
-      $form['items']['links']['#links'][$item->tjiid] = array(
-        'title' => $item->label(),
-        'href' => $uri['path'],
-      );
-    }
-  }
+  // Add a list of job items.
+  $form['items'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Attached items'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['items'] += tmgmt_ui_job_list_items($items);
   // Show the source and target language in a fieldset.
   $form['languages'] = array(
     '#type' => 'fieldset',
     '#title' => t('Source and target language'),
+    '#disabled' => $disabled,
   );
   // Make the source and target language flexible by showing either a select
   // dropdown or the plain string (if preselected).
   $form['languages']['source_language'] = array(
     '#title' => t('Source language'),
+    '#type' => 'select',
+    '#options' => $available,
+    '#default_value' => $job->source_language,
     '#required' => TRUE,
     '#prefix' => '<div class="tmgmt-ui-source-language">',
     '#suffix' => '</div>',
+    '#disabled' => !empty($preselected['source_language']),
+    '#ajax' => array(
+      'callback' => 'tmgmt_ui_ajax_callback_get_supported_translators',
+      'wrapper' => 'tmgmt-translator-wrapper',
+    ),
   );
-  if (!empty($preselected['source_language'])) {
-    $form['languages']['source_language'] += array(
-      '#type' => 'item',
-      '#markup' => tmgmt_language_label($preselected['source_language']),
-    );
-  }
-  else {
-    $form['languages']['source_language'] += array(
-      '#type' => 'select',
-      '#options' => $available,
-      '#default_value' => $job->source_language,
-      '#ajax' => array(
-        'callback' => 'tmgmt_ui_ajax_callback_get_supported_translators',
-        'wrapper' => 'tmgmt-translator-wrapper',
-      ),
-    );
-  }
   $form['languages']['target_language'] = array(
     '#title' => t('Target language'),
+    '#type' => 'select',
+    '#options' => $available,
+    '#default_value' => $job->target_language,
     '#required' => TRUE,
     '#prefix' => '<div class="tmgmt-ui-source-language">',
     '#suffix' => '</div>',
+    '#disabled' => !empty($preselected['target_language']),
+    '#ajax' => array(
+      'callback' => 'tmgmt_ui_ajax_callback_supported_translators',
+      'wrapper' => 'tmgmt-translator-wrapper',
+    ),
   );
-  if (!empty($preselected['target_language'])) {
-    $form['languages']['target_language'] += array(
-      '#type' => 'item',
-      '#markup' => tmgmt_language_label($preselected['target_language']),
-    );
-  }
-  else {
-    $form['languages']['target_language'] += array(
-      '#type' => 'select',
-      '#options' => $available,
-      '#default_value' => $job->target_language,
-      '#ajax' => array(
-        'callback' => 'tmgmt_ui_ajax_callback_supported_translators',
-        'wrapper' => 'tmgmt-translator-wrapper',
-      ),
-    );
-  }
   $form['translator_wrapper'] = array(
     '#type' => 'container',
     '#prefix' => '<div id="tmgmt-translator-wrapper">',
     '#suffix' => '</div>',
+    '#disabled' => $disabled,
   );
-  if (!empty($translators)) {
-    $form['translator_wrapper']['translator'] = array(
-      '#type' => 'select',
-      '#title' => t('Translator'),
-      '#options' => $translators,
-      '#default_value' => $job->translator,
-      '#required' => TRUE,
-      '#ajax' => array(
-        'callback' => 'tmgmt_ui_ajax_callback_translator_settings',
-        'wrapper' => 'tmgmt-translator-settings',
-      ),
-    );
-    $form['translator_wrapper']['settings'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Translator checkout settings'),
-      '#prefix' => '<div id="tmgmt-translator-settings">',
-      '#suffix' => '</div>',
-      '#tree' => TRUE,
-    );
-    if ($translator = tmgmt_translator_load($job->translator)) {
-      switch (tmgmt_translator_check($translator, $job->source_language, $job->target_language)) {
-        case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-          $form['translator_wrapper']['settings']['#markup'] = t('The selected translator is not available: @reason.', array('@reason' => $translator->getNotAvailableReason()));
-          break;
-        case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-          $form['translator_wrapper']['settings']['#markup'] = t('The selected translator is not available for translations from @source to @target.', array('@source' => tmgmt_language_label($job->source_language), '@target' => tmgmt_language_label($job->target_language)));
-          break;
-        default:
-          if ($settings = $translator->jobSettingsForm(array(), $form_state, $job)) {
-            $form['translator_wrapper']['settings'] += $settings;
-          }
-          else {
-            $form['#description'] = t('The @translator translator does not provide any per job settings.', array('@translator' => $translator->identifier()));
-          }
-      }
-    }
-  }
-  else {
-    $form['translator_wrapper']['settings'] = array(
-      '#markup' => t('None of the available translators supports the selected source and target language combination.'),
-    );
-  }
+  $form['translator_wrapper']['translator'] = array(
+    '#type' => 'select',
+    '#title' => t('Translator'),
+    '#options' => $translators,
+    '#default_value' => $job->translator,
+    '#required' => TRUE,
+    '#ajax' => array(
+      'callback' => 'tmgmt_ui_ajax_callback_translator_settings',
+      'wrapper' => 'tmgmt-translator-settings',
+    ),
+  );
+  $form['translator_wrapper']['settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Translator checkout settings'),
+    '#prefix' => '<div id="tmgmt-translator-settings">',
+    '#suffix' => '</div>',
+    '#tree' => TRUE,
+  );
+  // Add the job settings form.
+  $form['translator_wrapper']['settings'] += tmgmt_ui_job_settings_form(array(), $form_state, $job);
+  // Add the buttons and action links.
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save job'),
   );
-  if (!$job->isSubmitted() && !$job->isAccepted() && !$job->isNeedsReview()) {
-    $form['actions']['checkout'] = array(
-      '#type' => 'submit',
-      '#value' => t('Submit to translator'),
-    );
-  }
+  $form['actions']['checkout'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit to translator'),
+    '#access' => !$job->isSubmitted() && !$job->isAccepted() && !$job->isNeedsReview(),
+  );
   $form['actions']['delete'] = array(
     '#type' => 'link',
     '#title' => t('Delete'),
@@ -311,16 +267,15 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
   );
   // Only show the 'Cancel' button if the job has been submitted to the
   // translator.
-  if ($job->isSubmitted()) {
-    $form['actions']['cancel'] = array(
-      '#type' => 'link',
-      '#title' => t('Cancel'),
-      '#href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/cancel',
-    );
-  }
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/cancel',
+    '#access' => $job->isSubmitted(),
+  );
   // We need some CSS for showing the source and target language in one row.
   $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
-  return $form;
+  return _tmgmt_form_inherit_disabled($form);
 }
 
 /**
@@ -381,6 +336,40 @@ function tmgmt_job_form_validate($form, &$form_state) {
     // @todo Add a generic error message.
     form_set_error('translator', t('Something went wrong.'));
   }
+}
+
+/**
+ * Helper function for retrieving the job settings form.
+ */
+function tmgmt_ui_job_settings_form($form, &$form_state, TMGMTJob $job) {
+  if ($translator = tmgmt_translator_load($job->translator)) {
+    switch (tmgmt_translator_check($translator, $job->source_language, $job->target_language)) {
+      case TMTGT_TRANSLATOR_NOT_AVAILABLE:
+        $form['#description'] = t('The selected translator is not available: @reason.', array('@reason' => $translator->getNotAvailableReason()));
+        break;
+      case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
+        $form['#description'] = t('The selected translator is not available for translations from @source to @target.', array('@source' => tmgmt_language_label($job->source_language), '@target' => tmgmt_language_label($job->target_language)));
+        break;
+      default:
+        $form = $translator->jobSettingsForm(array(), $form_state, $job);
+    }
+  }
+  return $form;
+}
+
+/**
+ * Helper function for listing a set of job items.
+ */
+function tmgmt_ui_job_list_items($items) {
+  $links['#theme'] = 'links';
+  foreach ($items as $item) {
+    $uri = $item->uri();
+    $links['#links'][$item->tjiid] = array(
+      'title' => $item->label(),
+      'href' => $uri['path'],
+    );
+  }
+  return $links;
 }
 
 /**

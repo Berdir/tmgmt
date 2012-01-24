@@ -903,3 +903,15 @@ function tmgmt_unflatten_data($flattened_data) {
   }
   return $data;
 }
+
+function _tmgmt_form_inherit_disabled($form) {
+  foreach (element_children($form) as $key) {
+    if (!empty($form['#disabled'])) {
+      $form[$key]['#disabled'] = TRUE;
+    }
+    if (is_array($form[$key])) {
+      $form[$key] = _tmgmt_form_inherit_disabled($form[$key]);
+    }
+  }
+  return $form;
+}
