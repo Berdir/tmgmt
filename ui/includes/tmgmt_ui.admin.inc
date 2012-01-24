@@ -24,7 +24,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   // If the translator plugin is not set, pick the first available plugin as the
   // default.
   $translator->translator_plugin = empty($translator->translator_plugin) ? key($available) : $translator->translator_plugin;
-  $used = empty($translator->is_new) ? tmgmt_translator_in_use($translator->name) : FALSE;
+  $busy = empty($translator->is_new) ? tmgmt_translator_busy($translator->name) : FALSE;
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
@@ -59,6 +59,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#type' => 'container',
     '#prefix' => '<div id="tmgmt-plugin-wrapper">',
     '#suffix' => '</div>',
+    '#disabled' => $busy,
   );
   // Pull the translator plugin info if any.
   $info = !empty($translator->translator_plugin) ? tmgmt_translator_plugin_info($translator->translator_plugin) : array();
@@ -87,6 +88,13 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#type' => 'submit',
     '#value' => t('Save translator'),
     '#disabled' => empty($available),
+  );
+  $form['actions']['delete'] = array(
+    '#type' => 'submit',
+    '#value' => t('Delete'),
+    '#submit' => array('tmgmt_ui_submit_redirect'),
+    '#redirect' => 'admin/config/regional/tmgmt/translators/manage/' . $translator->name . '/delete',
+    '#access' => empty($translator->is_new) && $op != 'clone',
   );
   $form['actions']['cancel'] = array(
     '#type' => 'link',
@@ -245,16 +253,18 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
     '#access' => !$job->isSubmitted() && !$job->isAccepted() && !$job->isNeedsReview(),
   );
   $form['actions']['delete'] = array(
-    '#type' => 'link',
-    '#title' => t('Delete'),
-    '#href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/delete',
+    '#type' => 'submit',
+    '#value' => t('Delete'),
+    '#submit' => array('tmgmt_ui_submit_redirect'),
+    '#redirect' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/delete',
   );
   // Only show the 'Cancel' button if the job has been submitted to the
   // translator.
   $form['actions']['cancel'] = array(
-    '#type' => 'link',
-    '#title' => t('Cancel'),
-    '#href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/cancel',
+    '#type' => 'button',
+    '#value' => t('Cancel'),
+    '#submit' => array('tmgmt_ui_submit_redirect'),
+    '#redirect' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/cancel',
     '#access' => $job->isSubmitted(),
   );
   // We need some CSS for showing the source and target language in one row.
@@ -340,6 +350,15 @@ function tmgmt_ui_translator_settings_form($form, &$form_state, TMGMTTranslator 
     return $settings;
   }
   return $form;
+}
+
+/**
+ * Helper function for redirecting a form after a button has been clicked.
+ */
+function tmgmt_ui_submit_redirect($form, &$form_state){
+  if (isset($form_state['triggering_element']['#redirect'])) {
+    $form_state['redirect'] = $form_state['triggering_element']['#redirect'];
+  }
 }
 
 /**
