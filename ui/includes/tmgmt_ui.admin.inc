@@ -172,12 +172,19 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job) {
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
   // Mark certain form elements as disabled under certain circumstances.
   $disabled = !$job->isNew() && !$job->isPrepared() && !$job->isCancelled() && !$job->isRejected();
+  // Get the job metadata wrapper so we can display the current status nicely.
+  $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
   // Show the items that are attached to this job if there are not more than 20.
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
     '#description' => t('You can provide a label for this job in order to identify it easily later on.'),
     '#default_value' => $job->label,
+  );
+  $form['state'] = array(
+    '#type' => 'item',
+    '#title' => t('Current status'),
+    '#markup' => $wrapper->state->label(),
   );
   // Add a list of job items.
   $form['items'] = array(
@@ -295,7 +302,7 @@ function tmgmt_job_form_submit($form, &$form_state) {
     // Request the job to be translated.
     $job->requestTranslation();
     // Print all messages to the screen and redirect the user.
-    foreach ($job->getMessagesSince(REQUEST_TIME) as $message) {
+    foreach ($job->getMessagesSince() as $message) {
       // Ignore debug messages.
       if ($message->type == 'debug') {
         continue;

@@ -648,12 +648,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Returns all job messages attached to this job with timestamp newer than $time.
    *
    * @param $time
-   *   Messages need to have a newer timestamp than $time.
+   *   (Optional) Messages need to have a newer timestamp than $time. Defaults
+   *   to REQUEST_TIME.
    *
    * @return array
    *   An array of translation job messages.
    */
-  public function getMessagesSince($time) {
+  public function getMessagesSince($time = NULL) {
+    $time = isset($time) ? $time : REQUEST_TIME;
     $messages = $this->getAttachedEntities('tmgmt_job_message');
     $new_messages = array();
     foreach ($messages as $message) {
