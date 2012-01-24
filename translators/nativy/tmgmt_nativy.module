@@ -12,7 +12,7 @@
  * Implements hook_menu().
  */
 function tmgmt_nativy_menu() {
-  /* Remove this path after finishing development! */
+  // @todo Remove this path after finishing development!
   $items['soaptest'] = array(
     'title' => 'Testcallback',
     'type' => MENU_CALLBACK,
@@ -25,6 +25,7 @@ function tmgmt_nativy_menu() {
     'description' => 'Callback for the completion notification of a translation job.',
     'type' => MENU_CALLBACK,
     'page callback' => 'tmgmt_nativy_process_callback',
+    'access callback' => TRUE,
   );
   return $items;
 }
@@ -48,7 +49,39 @@ function tmgmt_nativy_tmgmt_translator_plugin_info() {
  * @TODO Real processing. For now we just log whatever comes in.
  */
 function tmgmt_nativy_process_callback() {
+  $items[] = t('Checking for your translation from Nativy.');
   watchdog('nativy', 'Callback REQUEST.  <br /><pre>!post</pre>', array('!post' => print_r($_REQUEST, TRUE)));
+  // Get the order id
+  if (isset($_REQUEST['orderid'])) {
+    $orderid = $_REQUEST['orderid'];
+    $items[] = t('Your order id is @orderid', array('@orderid' => $orderid));
+    if ($jobs = tmgmt_job_load_multiple(array(), array('reference' => $orderid))) {
+      $job = reset($jobs);
+      dpm($job);
+      $controller = $job->getTranslatorController();
+      if (!is_a($controller, 'TMGMTNativyTranslatorController')) {
+        $items[] = t('The job was not assigned to Nativy.');
+      }
+      elseif ($controller->retrieveTranslation($job)) {
+        $items[] = t('Your translation has been retrieved successfully.');
+      }
+      else {
+        $items[] = t('We cannot retrieve your translation.');
+      }
+
+    }
+    else {
+      $items[] = t('Cannot find a translation job matching that order id');
+    }
+  }
+  else {
+    $items[] = t('We cannot find your order id.');
+  }
+  $build['steps'] = array(
+    '#theme' => 'item_list',
+    '#items' => $items,
+  );
+  return $build;
 }
 
 /*

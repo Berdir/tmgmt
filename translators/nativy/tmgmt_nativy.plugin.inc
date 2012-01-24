@@ -41,10 +41,18 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    * Here we will acutally query source and get translations.
    */
   public function requestTranslation(TMGMTJob $job) {
-    dpm($job);
-    return new TMGMTTranslatorResponse(TMGMTJob::STATE_REVIEW, t('Microsoft Translator translation completed.'));
+    // This is hexadecimal order id, we'd need to store it in some field to search.
+    $job->reference = $job->settings['orderid'];
+    $job->submitted(t('Job submitted to Nativy for translation. You will get an e-mail when the translation is ready.'));
   }
 
+  /**
+   * Retrieve job when ready (we got an email with a link?)
+   */
+  public function retrieveTranslation(TMGMTJob $job) {
+    // @todo Implement retrieve translation
+    return FALSE;
+  }
   /**
    * Defines plugin settings form.
    *
@@ -119,9 +127,9 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     		'<p>' . t('You need to complete your order through Nativy pages below') . '</p>';
       // Build offer parameters for straight text replacement
       // Customer data
-      $data['!customerEmail'] = 'demo@nativy.com';
-      $data['!customerFirstName'] = 'Jose';
-      $data['!customerLastName'] = 'Reyero';
+      $data['!customerEmail'] = variable_get('site_mail', ini_get('sendmail_from'));
+      $data['!customerFirstName'] = 'Drupal';
+      $data['!customerLastName'] = 'Translator';
       // Languages
       $data['!primaryLangCode']= $job->source_language; //"de-DE";
       $data['!langCode'] = $job->target_language; //"en";
@@ -138,7 +146,10 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
         $parts = explode('orderid=', $iframe_url);
         if (count($parts) == 2 && ($orderid = $parts[1])) {
           $settings['orderid'] = array('#type' => 'value', '#value' => $orderid);
-          $settings['iframe']['#markup'] = "<iframe width=\"800\" height=\"800\" src=\"$iframe_url\"></iframe>";
+          // If we complete the order we should be at http://test.nativy.com/client/nisfinish.aspx
+          // @TODO The idea is we add a hidden variable and check whether we've reached that page
+          $settings['nativyurl'] = array('#type' => 'hidden', '#value' => $iframe_url);
+          $settings['iframe']['#markup'] = "<iframe width=\"800\" height=\"600\" src=\"$iframe_url\"></iframe>";
           return $settings;
         }
       }     
