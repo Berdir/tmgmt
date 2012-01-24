@@ -41,7 +41,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    * Here we will acutally query source and get translations.
    */
   public function requestTranslation(TMGMTJob $job) {
-    
+
     // @todo - who is handling cron / batch here, we or some other controler?
     $translate_url = $this->translatorURL . '/Translate';
 
@@ -113,7 +113,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
       '#title' => t('Password'),
       '#default_value' => $translator->getSetting('api_password', ''),
     );
-    return $form;
+    return parent::translatorSettingsForm($form, $form_state, $translator);
   }
   
   /**
@@ -191,6 +191,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     }
     dpm($response);
     dpm($client->__getLastRequest());
+
     dpm($client->__getLastRequestHeaders()); 
 
     
@@ -248,7 +249,7 @@ SoapFault: Bad Request in /var/workspace/drupal7/sites/all/modules/translation_m
   }
   /**
    * Perform authentication
-   * 
+   *
    * Enter description here ...
    */
    function nativyAuthenticate($user, $pass) {
@@ -269,8 +270,7 @@ SoapFault: Bad Request in /var/workspace/drupal7/sites/all/modules/translation_m
      //dpm($client->__getLastRequestHeaders()); 
       
    }
-
-}
+ }
 
 /**
  * Nativy SOAP client

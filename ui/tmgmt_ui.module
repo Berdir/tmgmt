@@ -50,22 +50,6 @@ function tmgmt_ui_menu() {
     'file' => 'includes/tmgmt_ui.pages.inc',
     'weight' => -10,
   );
-  $items['admin/config/regional/tmgmt/jobs/%tmgmt_job'] = array(
-    'title' => 'Job',
-    'page callback' => 'tmgmt_job_view',
-    'page arguments' => array(5),
-    'access arguments' => array('access tmgmt ui'),
-    'file' => 'includes/tmgmt_ui.pages.inc',
-  );
-  $items['admin/config/regional/tmgmt/jobs/%tmgmt_job/view'] = array(
-    'title' => 'view',
-    'page callback' => 'tmgmt_job_view',
-    'page arguments' => array(5),
-    'access arguments' => array('access tmgmt ui'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'file' => 'includes/tmgmt_ui.pages.inc',
-    'weight' => -10,
-  );
   $items['admin/config/regional/tmgmt/add-item/%/%/%/%'] = array(
     'title' => 'Create a Job',
     'page callback' => 'tmgmt_job_add_item',

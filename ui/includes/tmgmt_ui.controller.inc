@@ -71,7 +71,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
     $form['label'] = array(
       '#theme' => 'tmgmt_ui_translator_overview_item',
       '#attached' => array('css' => array(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css')),
-      '#label' => entity_label($this->entityType, $entity),
+      '#label' => $entity->label(),
       '#name' => !empty($this->entityInfo['exportable']) ? entity_id($this->entityType, $entity) : FALSE,
       '#url' => FALSE,
       '#description' => $entity->description,
@@ -146,25 +146,61 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
     return $form;
   }
 
+  /**
+   * Overrides EntityDefaultUIController::applyOperation().
+   */
+  public function applyOperation($op, $entity) {
+    if ($op == 'delete' && tmgmt_translator_busy($entity->name)) {
+      drupal_set_message(t("The translator %translator could not be deleted because it is currently being used by at least one active translation job.", array('%translator' => $entity->label())));
+      return FALSE;
+    }
+    return parent::applyOperation($op, $entity);
+  }
+
 }
 
 class TMGMTJobUIController extends EntityDefaultUIController {
 
-  /**
-   * @todo Use real access callbacks.
-   *
+  /*
    * Overrides EntityDefaultUIController::hook_menu().
    */
   public function hook_menu() {
     $id_count = count(explode('/', $this->path));
     $wildcard = isset($this->entityInfo['admin ui']['menu wildcard']) ? $this->entityInfo['admin ui']['menu wildcard'] : '%entity_object';
+    $items[$this->path . '/' . $wildcard] = array(
+      'title' => 'Job',
+      'page callback' => 'tmgmt_ui_job_view',
+      'page arguments' => array($id_count),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'tmgmt_job_access',
+      'access arguments' => array('view', $id_count),
+      'file' => $this->entityInfo['admin ui']['file'],
+      'file path' => $this->entityInfo['admin ui']['file path'],
+    );
+    $items[$this->path . '/' . $wildcard . '/view'] = array(
+      'title' => 'View',
+      'load arguments' => array($this->entityType),
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+    );
+    $items[$this->path . '/' . $wildcard] = array(
+      'title' => 'Review',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('tmgmt_ui_job_review_form', $id_count),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'tmgmt_job_access',
+      'access arguments' => array('review', $id_count),
+      'type' => MENU_LOCAL_TASK,
+      'file' => $this->entityInfo['admin ui']['file'],
+      'file path' => $this->entityInfo['admin ui']['file path'],
+    );
     $items[$this->path . '/' . $wildcard . '/manage'] = array(
-      'title' => 'Edit',
+      'title' => 'Manage',
       'page callback' => 'entity_ui_get_form',
       'page arguments' => array($this->entityType, $id_count),
       'load arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
-      'access arguments' => array('update', $this->entityType, $id_count),
+      'access callback' => 'tmgmt_job_access',
+      'access arguments' => array('update', $id_count),
       'type' => MENU_LOCAL_TASK,
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],
@@ -174,7 +210,7 @@ class TMGMTJobUIController extends EntityDefaultUIController {
       'page callback' => 'drupal_get_form',
       'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
       'load arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
+      'access callback' => 'tmgmt_job_access',
       'access arguments' => array('update', $this->entityType, $id_count),
       'type' => MENU_CALLBACK,
     );
@@ -185,16 +221,15 @@ class TMGMTJobUIController extends EntityDefaultUIController {
    * Overrides EntityDefaultUIController::operationForm().
    */
   public function operationForm($form, &$form_state, $entity, $op) {
-    $label = entity_label($this->entityType, $entity);
     switch ($op) {
       case 'cancel':
-        $confirm_question = t('Are you sure you want to cancel the translation job %label?', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+        $confirm_question = t('Are you sure you want to cancel the translation job %label?', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
         return confirm_form($form, $confirm_question, $this->path);
       case 'delete':
-        $confirm_question = t('Are you sure you want to delete the translation job %label?', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+        $confirm_question = t('Are you sure you want to delete the translation job %label?', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
         return confirm_form($form, $confirm_question, $this->path);
       case 'accept':
-        $confirm_question = t('Are you sure you want to accept the translation job %label?', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+        $confirm_question = t('Are you sure you want to accept the translation job %label?', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
         return confirm_form($form, $confirm_question, $this->path);
     }
     drupal_not_found();
@@ -204,18 +239,17 @@ class TMGMTJobUIController extends EntityDefaultUIController {
   /**
    * Overrides EntityDefaultUIController::applyOperation().
    */
-  public function applyOperation($op, TMGMTJob $entity) {
-    $label = entity_label($this->entityType, $entity);
+  public function applyOperation($op, $entity) {
     switch ($op) {
       case 'cancel':
         $entity->cancelTranslation($GLOBALS['user']);
-        return t('Cancelled %entity %label to the defaults.', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+        return t('Cancelled %entity %label to the defaults.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
       case 'delete':
         $entity->delete();
-        return t('Deleted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+        return t('Deleted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
       case 'accept':
         $entity->accepted(t('The translation has been accepted by !user.', array('!user' => theme('username', array('account' => $GLOBALS['user'])))));
-        return t('Accepted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $label));
+        return t('Accepted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
     }
     return FALSE;
   }

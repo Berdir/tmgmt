@@ -118,14 +118,19 @@ class TMGMTTranslator extends Entity {
    * Get the job settings form from the respective translator plugin.
    */
   public function jobSettingsForm($form, $form_state, $job) {
-    return $this->getPluginController()->jobSettingsForm($form, $form_state, $job);
+    if ($controller = $this->getPluginController()) {
+      return $controller->jobSettingsForm($form, $form_state, $job);
+    }
   }
 
   /**
    * Get the settings form from the respective translator plugin.
    */
-  public function translatorSettingsForm($form, $form_state) {
-    return $this->getPluginController()->translatorSettingsForm($form, $form_state, $this);
+  public function settingsForm($form, $form_state) {
+    if ($controller = $this->getPluginController()) {
+      return $controller->translatorSettingsForm($form, $form_state, $this);
+    }
+    return FALSE;
   }
 
   /**
@@ -765,7 +770,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     $message = tmgmt_job_message_create($state_before, $state_after, $message, $variables, array(
       'tjid' => $this->tjid,
       'type' => $type,
-      ));
+    ));
     // Remove old state again so that future log messages will use the correct
     // state.
     unset($this->old_state);
@@ -1015,6 +1020,16 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
         }
       }
     }
+  }
+
+  /**
+   * Retrieves the job settings form.
+   */
+  public function settingsForm($form, &$form_state) {
+    if ($translator = $this->getTranslator()) {
+      return $translator->jobSettingsForm($form, $form_state, $this);
+    }
+    return FALSE;
   }
 
 }

@@ -148,7 +148,7 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
       '#title' => t('Use Sandbox'),
       '#default_value' => $translator->getSetting('use_sandbox', TRUE),
     );
-    return $form;
+    return parent::translatorSettingsForm($form, $form_state, $translator);
   }
 
 

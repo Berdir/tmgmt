@@ -124,7 +124,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       '#default_value' => $translator->getSetting('api'),
       '#description' => t('Please enter your Microsoft API ID, or follow this <a hef="!link">link</a> to generate one.', array('!link' => 'http://www.bing.com/developers/appids.aspx.')),
     );
-    return $form;
+    return parent::translatorSettingsForm($form, $form_state, $translator);
   }
 
   /**
