@@ -42,6 +42,9 @@ class TMGMTTranslatorController extends EntityAPIControllerExportable {
     return $query;
   }
 
+  /**
+   * Overrides EntityAPIControllerExportable::delete().
+   */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
     // We are never going to have many entities here, so we can risk a loop.
     foreach ($ids as $key => $name) {
