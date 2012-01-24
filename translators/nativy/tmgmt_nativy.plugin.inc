@@ -115,128 +115,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     );
     return parent::translatorSettingsForm($form, $form_state, $translator);
   }
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
-   */
-  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
-    $languages = $this->getSupportedLanguages($translator);
-    unset($languages[$source_language]);
-    return $languages;
-  }
-
-  /**
-   * Defines plugin job settings form.
-   *
-   * @param $form array
-   * @param $form_state array
-   * @return array
-   *   Settings form.
-   */
-  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
-    $translator = $job->getTranslator();
-    $client = $this->nativySoapClient();
-    // First try authentication and if successful, go for the offer.
-    $this->nativyAuthenticate(
-      $translator->getSetting('api_user_name'),
-      $translator->getSetting('api_password')
-    );
-    // Build offer parameters
-    /*
-    $params = array();
-    $params['settings'] = array(
-      'emailCallbackLink' => 'https://www.yourapplication.com/nisinterface/gettranslation',
-    );
-    $params['customer'] = array(
-      'customerEmail' => 'demo@nativy.com',
-      'customerFirstName' => 'Demofirstname',
-      'customerLastName' => 'Demolastname',
-    );
-    $params['languages'] = array(
-      'primaryLangCode' => "de-DE",
-      'language' => array('ms', 'jv', 'en', 'es'),
-    );
-    $params['textblocks'] = array (
-      'textblock' => array(
-        'code' => "faq_question1",
-        'label' => "Wie funktioniert nativy?",
-        'description langCode="de-DE"' => '
-nativy hat ein System entwickelt, um den/die ideale ÜbersetzerIn für jeden
-Auftrag zu finden. KundInnen können dabei ihre individuellen Kriterien in der Suche
-nach dem/der idealen ÜbersetzerIn einbringen. nativy übernimmt in dem gesamten Prozess
-die wichtigsten administrativen Aufgaben, um seinen NutzerInnen das Leben etwas zu
-erleichtern und die Zusammenarbeit zu beschleunigen. nativy verrechnet seinen
-KundInnen das von dem/der ÜbersetzerIn festgelegte Honorar inklusive eines
-geringfügigen Vermittlungsaufschlags.
-'
-      ),
-    );
-    */
-    //$response = $this->nativySoapRequest('CreateOffer', array('requ' => $params));
-    $template = $this->getXMLTemplate('TranslationRequest');
-    $template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest_sample.xml');
-    //dpm($template);
-    $soapvar = new SoapVar($template, XSD_ANYXML);
-    $response = FALSE;
-    try {
-    //$response = $this->nativySoapRequest('CreateOffer', array($soapvar));
-    //$response = $client->CreateOffer($soapvar);
-    //$params = (object)$params;
-    $response = $client->CreateOffer($soapvar); //$template));
-    }
-    catch (Exception $e) {
-      dpm($e, 'Exception');
-    }
-    dpm($response);
-    dpm($client->__getLastRequest());
-    dpm($client->__getLastRequestHeaders());
-    /*
-    $quality = !empty($form_state['values']['settings']['quality']) ? $form_state['values']['settings']['quality'] : 'machine';
-    $translation_array = $this->generateMyGengoTranslationJobArray($job, $quality);
-    $response = $this->requestFromGengo($job->getTranslator(), '/translate/service/quote', 'POST', array(
-      'jobs' => $translation_array,
-      'as_group' => 1
-      ));
-    $sum_credits = 0;
-    $highest_eta = "";
-    $sum_unit_count = 0;
-    foreach ($response->jobs as $mygengo_job) {
-      $sum_unit_count = $sum_unit_count + $mygengo_job->unit_count;
-      $sum_credits = $sum_credits + $mygengo_job->credits;
-      $highest_eta = ($mygengo_job->eta > $highest_eta) ? $mygengo_job->eta : $highest_eta;
-    }
-
-
-    $settings['word_count'] = array(
-      '#type' => 'item',
-      '#title' => t('Word count'),
-      '#markup' => $sum_unit_count,
-    );
-
-    $settings['quality'] = array(
-      '#type' => 'select',
-      '#title' => t('Quality'),
-      '#options' => array(
-        'machine' => t('Machine'),
-        'standard' => t('Standard'),
-        'pro' => t('Pro'),
-        'ultra' => t('Ultra'),
-      ),
-      '#description' => t('With which Quality you want to translate?'),
-      '#ajax' => array(
-        'callback' => 'tmgmt_mygengo_quote',
-        'wrapper' => 'mygengo-quote',
-      ),
-    );
-*/
-    $settings['quote'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Quote'),
-      '#prefix' => '<div id="nativity-quote">',
-      '#suffix' => '</div>',
-    );
-
-    return $settings;
-  }
+  
   /**
    * Returns all languages that are supported by this service.
    *
@@ -263,17 +142,67 @@ geringfügigen Vermittlungsaufschlags.
     }
     return $languages;
   }
+  
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   */
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
+    $languages = $this->getSupportedLanguages($translator);
+    unset($languages[$source_language]);
+    return $languages;
+  }
 
+  /**
+   * Defines plugin job settings form.
+   *
+   * @param $form array
+   * @param $form_state array
+   * @return array
+   *   Settings form.
+   */
+  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+    $settings['quote'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Quote'),
+      '#prefix' => '<div id="nativity-quote">',
+      '#suffix' => '</div>',
+    );
+    $translator = $job->getTranslator();
+    $client = $this->nativySoapClient();
+    // First try authentication and if successful, go for the offer.
+    $client->authenticate(
+      $translator->getSetting('api_user_name'),
+      $translator->getSetting('api_password')
+    );
+    // Build offer parameters
+    $template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest_sample_good.xml');
+    //$template = '<requ>' . $template . '</requ>';
+    //dpm($template);
+    $soapvar = new SoapVar($template, XSD_ANYXML);
+      
+    $response = $client->xmlRequest('CreateOffer', $template);
+    if ($response) {
+      $iframe_url = $response->CreateOfferResult;
+      $settings['iframe']['#markup'] = "<iframe width=\"100%\" height=\"800\" src=\"$iframe_url\"></iframe>";
+    }
+    $client->printDebug();
 
+    return $settings;
+  }
+
+  /**
+   * Build offer xml
+   */
+  protected function nativyBuildOffer($job) {
+    
+  }
   /**
    * Send request to nativy, get response
    */
   protected function nativySoapRequest($method, $params) {
     $client = $this->nativySoapClient();
     $response = $client->$method($params);
-    dpm($response);
-    dpm($client->__getLastRequest(), 'Last Request');
-    dpm($client->__getLastRequestHeaders(), 'Last Request Headers');
+    $client->printDebug();
     return $response;
   }
   /**
@@ -282,120 +211,82 @@ geringfügigen Vermittlungsaufschlags.
   protected function nativySoapClient() {
     static $client;
     if (!isset($client)) {
-      $client = new SoapClient(
+      $client = new TMGMTNativySoapClient(
         drupal_get_path('module', 'tmgmt_nativy') . '/tmgmt_nativy_test.wsdl',
         //drupal_get_path('module', 'tmgmt_nativy') . '/tmgmt_nativy_live.wsdl',
         array('trace' => TRUE)
       );
       // For debugging we can pull API information from the WSDL
-      dpm($client->__getFunctions(), 'Functions');
-      dpm($client->__getTypes(), 'Types');
+      //dpm($client->__getFunctions(), 'Functions');
+      //dpm($client->__getTypes(), 'Types');
     }
     return $client;
   }
-  /**
-   * Perform authentication
-   *
-   * Enter description here ...
-   */
- function nativyAuthenticate($user, $pass) {
-   $client = $this->nativySoapClient();
 
-   // As no other thing seems to work (schema may be wrong?) we build a raw header
-   $rawheader = '<SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">';
-   $rawheader .= "<Username>$user</Username>";
-   $rawheader .= "<Password>$pass</Password>";
-   $rawheader .= '</SecuredWebServiceHeader>';
-   $soapvar = new SoapVar($rawheader, XSD_ANYXML);
-   $headers['SecuredWebServiceHeader'] = new SoapHeader('http://www.nativy.com/nis',
-                            'SecuredWebServiceHeader',
-                             $soapvar);
-   $client->__setSoapHeaders($headers);
-   $response = $client->AuthenticateUser();
-   // Got token that should be valid for 20 mins.
-   $token = $response->AuthenticateUserResult;
-
-   //dpm($response, $response->AuthenticateUserResult);
-   //dpm($client->__getLastRequest());
-   //dpm($client->__getLastRequestHeaders());
-
-   // Now replace previous header with our new token and set new headers
-   $rawheader = '<SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">';
-   $rawheader .= "<AuthenticatedToken>$token</AuthenticatedToken>";
-   $rawheader .= '</SecuredWebServiceHeader>';
-   $soapvar = new SoapVar($rawheader, XSD_ANYXML);
-   $headers['SecuredWebServiceHeader'] = new SoapHeader('http://www.nativy.com/nis',
-                            'SecuredWebServiceHeader',
-                             $soapvar);
-   // Note (From Nativy doc):
-   // You should set Username and Password to an empty string for security reasons,
-	 // because it is not used anymore after the authentication.
-   $client->__setSoapHeaders(NULL);
-   $client->__setSoapHeaders($headers);
  }
 
-  public function getXMLTemplate($request_type, $params = array()) {
-    switch($request_type) {
-      case 'Authentication':
-        $xml = '<?xml version="1.0" encoding="utf-8"?>
-                <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-                  <soap:Header>
-                    <SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">
-                      <Username>' . $params['username'] . '</Username>
-                      <Password>' . $params['password'] . '</Password>
-                    </SecuredWebServiceHeader>
-                  </soap:Header>
-                  <soap:Body>
-                    <AuthenticateUser xmlns="https://www.nativy.com/nis" />
-                  </soap:Body>
-                </soap:Envelope>';
-        break;
-      case 'TranslationRequest':
-								return '<?xml version="1.0"?>
-									<settings>
-										<emailCallbackLink>
-											https://www.yourapplication.com/nisinterface/gettranslation
-										</emailCallbackLink>
-									</settings>
-								<customer customerId="mailto:demo@nativy.com">
-									<customerEmail>demo@nativy.com</customerEmail>
-									<customerFirstName>Demofirstname</customerFirstName>
-									<customerLastName>Demolastname</customerLastName>
-								</customer>
-								<languages primaryLangCode="de-DE">
-									<language langCode="ms" />
-									<language langCode="jv" />
-									<language langCode="en" />
-									<language langCode="es" />
-								</languages>
-								<textblocks>
-									<textblock code="faq_question1" label="Wie funktioniert nativy?">
-										<description langCode="de-DE">
-											nativy hat ein System entwickelt, um den/die ideale ÜbersetzerIn für jeden
-                      Auftrag zu finden. KundInnen können dabei ihre individuellen Kriterien in der Suche
-                      nach dem/der idealen ÜbersetzerIn einbringen. nativy übernimmt in dem gesamten Prozess
-                      die wichtigsten administrativen Aufgaben, um seinen NutzerInnen das Leben etwas zu
-                      erleichtern und die Zusammenarbeit zu beschleunigen. nativy verrechnet seinen
-                      KundInnen das von dem/der ÜbersetzerIn festgelegte Honorar inklusive eines
-                      geringfügigen Vermittlungsaufschlags.
-										</description>
-									</textblock>
-								<textblock code="faq_question2" label="Wer übersetzt bei nativy?">
-									<description langCode="de-DE">
-										Nur professionelle ÜbersetzerInnen werden bei nativy zugelassen. Übersetzungen
-										in die Muttersprache werden bevorzugt. Die Qualifikationen jedes/r ÜbersetzerIn werden
-										durch nativy geprüft.
-									</description>
-								</textblock>
-								<textblock code="faq_question3" label="Stehen AuftraggeberInnen und ÜbersetzerInnen in direktem Kontakt?">
-  								<description langCode="de-DE">
-  									Ja, auf der Webseite von nativy können Kurznachrichten zu den jeweiligen
-  									Aufträgen ausgetauscht werden.
-  								</description>
-								</textblock>
-							</textblocks>
-						</offerrequest>';
-        break;
+/**
+ * Nativy SOAP client
+ */
+class TMGMTNativySoapClient extends SoapClient {
+  /**
+   * Run request from full raw XML body
+   */
+  public function xmlRequest($method, $xmldata) {
+    $soapvar = new SoapVar($xmldata, XSD_ANYXML);
+      
+    $response = FALSE;
+    try {
+      $response = $this->$method($soapvar);
     }
+    catch (Exception $e) {
+      dpm($e, 'Exception');
+    }
+    return $response;
   }
+   /**
+    * Authenticate to the service
+    */
+   public function authenticate($user, $pass) {
+     $this->setAuthHeader(array(
+       'Username' => $user,
+       'Password' => $pass,
+     ));
+     $response = $this->AuthenticateUser();
+     $token = $response->AuthenticateUserResult;
+     $this->setAuthHeader(array('AuthenticatedToken' => $token));
+     return TRUE;
+   } 
+   /**
+    * Set authentication header.
+    */
+   public function setAuthHeader($params) {
+     $rawheader = '<SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">';
+     foreach ($params as $name => $value) {
+       $rawheader .= "<$name>$value</$name>";
+     }
+     $rawheader .= '</SecuredWebServiceHeader>';
+     $soapvar = new SoapVar($rawheader, XSD_ANYXML);
+     $headers['SecuredWebServiceHeader'] = new SoapHeader(
+     		'http://www.nativy.com/nis', 
+        'SecuredWebServiceHeader',
+        $soapvar
+     );
+     $this->__setSoapHeaders(NULL); 
+     $this->__setSoapHeaders($headers);
+   }
+
+   /**
+    * Debug. Print out last request and response
+    */
+   public function printDebug() {
+     dpm(array(
+       'Request' => $this->__getLastRequest(),
+       'RequestHeaders' => $this->__getLastRequestHeaders()
+     ), 'SOAP REQUEST');
+     dpm(array(
+       'Response' => $this->__getLastResponse(),
+       'ResponseHeaders' => $this->__getLastResponseHeaders()
+     ), 'SOAP RESPONSE');
+   }
 }

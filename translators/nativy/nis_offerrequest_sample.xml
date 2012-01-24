@@ -1,4 +1,5 @@
-﻿<?xml version="1.0"?>
+﻿<CreateOffer xmlns="https://www.nativy.com/nis">
+<requ>
 <offerrequest xmlns="http://www.nativy.com/nis">
   <settings>
     <emailCallbackLink>https://www.yourapplication.com/nisinterface/gettranslation</emailCallbackLink>
@@ -29,3 +30,5 @@
     </textblock>
   </textblocks>
 </offerrequest>
+</requ>
+</CreateOffer>
