@@ -454,7 +454,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Overrides Entity::defaultUri().
    */
   public function defaultUri() {
-    return array('path' => 'admin/config/regional/tmgmt/jobs/' . $this->tjid . '/view');
+    return array('path' => 'admin/config/regional/tmgmt/jobs/' . $this->tjid);
   }
 
   /**
