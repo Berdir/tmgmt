@@ -19,6 +19,7 @@ function tmgmt_nativy_menu() {
     'page callback' => 'tmgmt_nativy_test_page',
     'access arguments' => array('access content'),
   );
+
   // @todo menu callback for order complete callback
   $items['nativy/callback'] = array(
     'title' => 'Nativy Notification',
@@ -45,7 +46,7 @@ function tmgmt_nativy_tmgmt_translator_plugin_info() {
 
 /**
  * Callback page.
- * 
+ *
  * @TODO Real processing. For now we just log whatever comes in.
  */
 function tmgmt_nativy_process_callback() {
@@ -94,8 +95,8 @@ function tmgmt_nativy_test_page($jobid) {
   $translator = tmgmt_translator_load($translator_name);
   $controller = $translator->getPluginController();
   $form = $form_state = array();
-  $job->translator = $translator_name; 
-  $form = $controller->jobSettingsForm($form, $form_state, $job);
+  $job->translator = $translator_name;
+  $form = $controller->checkoutSettingsForm($form, $form_state, $job);
   return $form;
   return "TESTPAGE Job Id = $jobid";
 }

@@ -50,7 +50,7 @@ class TMGMTMicrosoftTestCase extends TMGMTBaseTestCase {
     $item->save();
     // We didn't define a API key, so let's check whether it now matches the
     // default setting.
-    $settings = $job->getTranslatorController()->defaultTranslatorSettings();
+    $settings = $job->getTranslatorController()->defaultPluginSettings();
     $this->assertEqual($settings['api'], $job->getTranslator()->getSetting('api'));
     $this->assertTrue($job->isTranslatable());
 

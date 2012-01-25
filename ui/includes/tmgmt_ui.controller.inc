@@ -151,7 +151,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
    */
   public function applyOperation($op, $entity) {
     if ($op == 'delete' && tmgmt_translator_busy($entity->name)) {
-      drupal_set_message(t("The translator %translator could not be deleted because it is currently being used by at least one active translation job.", array('%translator' => $entity->label())));
+      drupal_set_message(t("The translator %translator could not be deleted because it is currently being used by at least one active translation job.", array('%translator' => $entity->label())), 'error');
       return FALSE;
     }
     return parent::applyOperation($op, $entity);
@@ -168,7 +168,8 @@ class TMGMTJobUIController extends EntityDefaultUIController {
     $id_count = count(explode('/', $this->path));
     $wildcard = isset($this->entityInfo['admin ui']['menu wildcard']) ? $this->entityInfo['admin ui']['menu wildcard'] : '%entity_object';
     $items[$this->path . '/' . $wildcard] = array(
-      'title' => 'Job',
+      'title callback' => 'entity_label',
+      'title arguments' => array($this->entityType, $id_count),
       'page callback' => 'tmgmt_ui_job_view',
       'page arguments' => array($id_count),
       'load arguments' => array($this->entityType),

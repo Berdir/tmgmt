@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * @file
+ * Views field handler for the tmgmt_job_messages.message field.
+ */
+
+/**
+ * Field handler which allows to render the job message with replaced variables.
+ *
+ * @ingroup views_field_handlers
+ */
+class tmgmt_handler_field_tmgmt_job_message_message extends views_handler_field_xss {
+  function init(&$view, &$options) {
+    parent::init($view, $options);
+    $this->additional_fields['variables'] = 'variables';
+  }
+
+  function option_definition() {
+    $options = parent::option_definition();
+    $options['format'] = array('default' => 'formatted');
+
+    return $options;
+  }
+
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+    $form['format'] = array(
+      '#type' => 'select',
+      '#title' => t('Format'),
+      '#description' => t("Choose whether the field should display the raw text or display formatted text with replaced variables with it's values."),
+      '#default_value' => $this->options['format'],
+      '#options' => array(
+        'formatted' => t('Formatted'),
+        'raw' => t('Raw'),
+      ),
+    );
+  }
+
+
+  function render($values) {
+    $message = $this->get_value($values);
+
+    if ($this->options['format'] == 'formatted') {
+      $variables = unserialize($this->get_value($values, 'variables'));
+      $message = $this->sanitize_value(t($message, $variables));
+    }
+    else {
+      $message = $this->sanitize_value($message);
+    }
+
+    return $message;
+  }
+}

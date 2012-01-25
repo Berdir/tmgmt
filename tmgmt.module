@@ -418,6 +418,7 @@ function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id, $so
     unset($available_languages[LANGUAGE_NONE], $available_languages[$source_language]);
     $target_languages = array_keys($available_languages);
   }
+  $jobs = array();
   // @todo Why are we looping here? Can't this be done with an IN statement?
   foreach ($target_languages as $target_language) {
     $query = db_select('tmgmt_job_item', 'ji');
@@ -609,8 +610,8 @@ function tmgmt_translator_load_multiple($names = array(), $conditions = array())
 function tmgmt_translator_busy($translator) {
   $query = new EntityFieldQuery();
   return (boolean) $query->entityCondition('entity_type', 'tmgmt_job')
-    // @todo is TMGMT_JOB_STATE_SUBMITTED really the only state in which we
-    // don't want our translator to be modified or deleted?
+  // @todo is TMGMT_JOB_STATE_SUBMITTED really the only state in which we
+  // don't want our translator to be modified or deleted?
     ->propertyCondition('state', TMGMT_JOB_STATE_ACCEPTED, '!=')
     ->range(0, 1)
     ->count()
@@ -658,7 +659,7 @@ function tmgmt_translator_auto_create($plugin) {
       $label = $info['label'] . ' (auto created)';
       $translator = tmgmt_translator_create($plugin, $plugin, $label, $info['description']);
       // Append some default settings from the translator plugin definition.
-      $translator->settings = $translator->getPluginController()->defaultTranslatorSettings();
+      $translator->settings = $translator->getPluginController()->defaultPluginSettings();
       $translator->save();
     }
   }
@@ -670,6 +671,9 @@ function tmgmt_translator_auto_create($plugin) {
  *
  * @param $plugin
  *   The machine-readable name of a service plugin.
+ *
+ * @return array
+ *   An array of translator plugin definitions.
  */
 function tmgmt_translator_plugin_info($plugin = NULL) {
   return _tmgmt_plugin_info('translator', $plugin);
@@ -768,6 +772,9 @@ function tmgmt_translator_check(TMGMTTranslator $translator, $source_language, $
  *
  * @param $plugin
  *   The machine-readable name of a source plugin.
+ *
+ * @return array
+ *   An array of source plugin definitions.
  */
 function tmgmt_source_plugin_info($plugin = NULL) {
   return _tmgmt_plugin_info('source', $plugin);
@@ -801,12 +808,14 @@ function tmgmt_source_plugin_labels() {
  */
 
 /**
- * Discovers all available source object plugins.
- *
+ * Discovers all available source and/or translator plugins.
  * @param $type
  *   The type of the plugin. Can be 'translator' or 'source'.
  * @param $plugin
  *   The machine-readable name of a source plugin.
+ *
+ * @return array
+ *   An array of source and/or translator plugins.
  */
 function _tmgmt_plugin_info($type, $plugin) {
   $info = &drupal_static(__FUNCTION__);

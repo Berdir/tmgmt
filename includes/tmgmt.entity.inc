@@ -117,18 +117,18 @@ class TMGMTTranslator extends Entity {
   /**
    * Get the job settings form from the respective translator plugin.
    */
-  public function jobSettingsForm($form, $form_state, $job) {
+  public function checkoutSettingsForm($form, &$form_state, $job) {
     if ($controller = $this->getPluginController()) {
-      return $controller->jobSettingsForm($form, $form_state, $job);
+      return $controller->checkoutSettingsForm($form, $form_state, $job);
     }
   }
 
   /**
    * Get the settings form from the respective translator plugin.
    */
-  public function settingsForm($form, $form_state) {
+  public function pluginSettingsForm($form, $form_state) {
     if ($controller = $this->getPluginController()) {
-      return $controller->translatorSettingsForm($form, $form_state, $this);
+      return $controller->pluginSettingsForm($form, $form_state, $this);
     }
     return FALSE;
   }
@@ -136,9 +136,9 @@ class TMGMTTranslator extends Entity {
   /**
    * Get information about a job from the respective translator plugin.
    */
-  public function getJobInfo(TMGMTJob $job) {
+  public function checkoutInfo(TMGMTJob $job) {
     if ($controller = $this->getPluginController()) {
-      return $controller->getJobInfo($job);
+      return $controller->checkoutInfo($job);
     }
     return FALSE;
   }
@@ -165,7 +165,7 @@ class TMGMTTranslator extends Entity {
     if (isset($this->settings[$name])) {
       return $this->settings[$name];
     }
-    elseif ($defaults = $this->getPluginController()->defaultTranslatorSettings()) {
+    elseif ($defaults = $this->getPluginController()->defaultPluginSettings()) {
       if (isset($defaults[$name])) {
         return $defaults[$name];
       }
@@ -669,7 +669,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function getInfo() {
     if ($translator = $this->getTranslator()) {
-      return $translator->getJobInfo($this);
+      return $translator->checkoutInfo($this);
     }
     return FALSE;
   }
@@ -690,7 +690,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       return $this->settings[$name];
     }
     else if ($controller = $this->getTranslatorController()) {
-      $defaults = $controller->defaultJobSettings();
+      $defaults = $controller->defaultPluginSettings();
       if (isset($defaults[$name])) {
         return $defaults[$name];
       }
@@ -1051,9 +1051,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Retrieves the job settings form.
    */
-  public function settingsForm($form, &$form_state) {
+  public function checkoutSettingsForm($form, &$form_state) {
     if ($translator = $this->getTranslator()) {
-      return $translator->jobSettingsForm($form, $form_state, $this);
+      return $translator->checkoutSettingsForm($form, $form_state, $this);
     }
     return FALSE;
   }

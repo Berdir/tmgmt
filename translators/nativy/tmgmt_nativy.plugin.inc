@@ -63,7 +63,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
         );
       }
       $job->addTranslatedData(tmgmt_unflatten_data($translation));
-      $job->needsReview('Got translation from Nativy');     
+      $job->needsReview('Got translation from Nativy');
       return TRUE;
     }
     // @todo Implement retrieve translation
@@ -75,7 +75,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    * @param $form array
    * @param $form_state array
    */
-  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['api_user_name'] = array(
       '#type' => 'textfield',
       '#title' => t('User name'),
@@ -86,9 +86,9 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
       '#title' => t('Password'),
       '#default_value' => $translator->getSetting('api_password', ''),
     );
-    return parent::translatorSettingsForm($form, $form_state, $translator);
+    return parent::pluginSettingsForm($form, $form_state, $translator);
   }
-  
+
   /**
    * Returns all languages that are supported by this service.
    *
@@ -115,7 +115,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     }
     return $languages;
   }
-  
+
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
@@ -133,14 +133,14 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    * @return array
    *   Settings form.
    */
-  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     if ($iframe_url = $this->nativyCreateOffer($job)) {
       // This should look like http://test.nativy.com/client/createorder.aspx?token=a19fd9f9-4bdc-4396-aebf-277fafd9c42a&amp;orderid=f1446707-ae2f-499e-a08e-47131533a88d
       $parts = explode('orderid=', $iframe_url);
       if (count($parts) == 2 && ($orderid = $parts[1])) {
       $settings['help']['#markup'] =
     		'<p>' . t('You need to complete your order through Nativy pages below and then click on <em>Submit to translator</em>.') . '</p>';
-        
+
         $settings['orderid'] = array('#type' => 'value', '#value' => $orderid);
         // If we complete the order we should be at http://test.nativy.com/client/nisfinish.aspx
         // @TODO The idea is we add a hidden variable and check whether we've reached that page
@@ -208,7 +208,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     // $document = new SimpleXMLElement($content);
     // Something went wrong, just print message and get out.
     $client->printDebug();
-    return FALSE; 
+    return FALSE;
   }
   /**
    * Create offer and return iframe URL
@@ -232,7 +232,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
       $data['!emailCallbackLink'] = url('nativy/callback', array('absolute' => TRUE));
       //$template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest_sample_good.xml');
       $template = file_get_contents(drupal_get_path('module', 'tmgmt_nativy') . '/nis_offerrequest.xml');
-      $template = strtr($template, $data);    
+      $template = strtr($template, $data);
       $response = $client->xmlRequest('CreateOffer', $template);
       if ($response) {
         // This should look like http://test.nativy.com/client/createorder.aspx?token=a19fd9f9-4bdc-4396-aebf-277fafd9c42a&amp;orderid=f1446707-ae2f-499e-a08e-47131533a88d
@@ -242,7 +242,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     }
     // Something went wrong, just print message and get out.
     $client->printDebug();
-    return FALSE;      
+    return FALSE;
   }
   /**
    * Send request to nativy, get response
@@ -282,7 +282,7 @@ class TMGMTNativySoapClient extends SoapClient {
    */
   public function xmlRequest($method, $xmldata) {
     $soapvar = new SoapVar($xmldata, XSD_ANYXML);
-      
+
     $response = FALSE;
     try {
       $response = $this->$method($soapvar);
@@ -310,7 +310,8 @@ class TMGMTNativySoapClient extends SoapClient {
        dpm($exception);
        $this->debug();
      }
-   } 
+   }
+
    /**
     * Set authentication header.
     */
@@ -322,11 +323,11 @@ class TMGMTNativySoapClient extends SoapClient {
      $rawheader .= '</SecuredWebServiceHeader>';
      $soapvar = new SoapVar($rawheader, XSD_ANYXML);
      $headers['SecuredWebServiceHeader'] = new SoapHeader(
-     		'http://www.nativy.com/nis', 
+     		'http://www.nativy.com/nis',
         'SecuredWebServiceHeader',
         $soapvar
      );
-     $this->__setSoapHeaders(NULL); 
+     $this->__setSoapHeaders(NULL);
      $this->__setSoapHeaders($headers);
    }
 

@@ -34,9 +34,13 @@ class TMGMTTranslatorController extends EntityAPIControllerExportable {
    */
   protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     $query = parent::buildQuery($ids, $conditions, $revision_id);
-    // Filter by available translator plugins.
-    $plugins = tmgmt_translator_plugin_info();
-    $query->condition('translator_plugin', array_keys($plugins));
+    if ($plugins = tmgmt_translator_plugin_info()) {
+      $query->condition('translator_plugin', array_keys($plugins));
+    }
+    else {
+      // Don't return any translators if no plugin exists.
+      $query->where('1 = 0');
+    }
     // Sort by the weight of the translator.
     $query->orderBy('weight');
     return $query;

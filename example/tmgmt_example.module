@@ -15,19 +15,14 @@ function tmgmt_example_tmgmt_translator_plugin_info() {
       'description' => t('Example translator plugin.'),
       'controller class' => 'TMGMTExampleTranslatorPluginController',
       'auto create' => TRUE,
-    ),
-  );
-}
-
-/**
- * Implements hook_tmgmt_source_plugin_info().
- */
-function tmgmt_example_tmgmt_source_plugin_info() {
-  return array(
-    'example' => array(
-      'label' => t('Example source'),
-      'description' => t('Example source plugin.'),
-      'controller class' => 'TMGMTExampleSourcePluginController',
+      'default plugin settings' => array(
+        'sample_checkboxes' => array(1),
+        'sample_textfield' => t('Example default text.'),
+      ),
+      'default checkout settings' => array(
+        'sample_radios' => array(1, 2),
+        'sample_textfield' => t('Example default text.'),
+      ),
     ),
   );
 }

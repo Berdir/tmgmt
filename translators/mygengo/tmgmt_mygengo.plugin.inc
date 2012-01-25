@@ -205,7 +205,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    * @param $form array
    * @param $form_state array
    */
-  public function translatorSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
     $form['api_public_key'] = array(
       '#type' => 'textfield',
       '#title' => t('myGengo API Public key'),
@@ -218,7 +218,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
       '#default_value' => $translator->getSetting('api_private_key', ''),
       '#description' => t('Please enter your myGengo API Private key.'),
     );
-    return parent::translatorSettingsForm($form, $form_state, $translator);
+    return parent::pluginSettingsForm($form, $form_state, $translator);
   }
 
   /**
@@ -229,7 +229,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    * @return array
    *   Settings form.
    */
-  public function jobSettingsForm($form, &$form_state, TMGMTJob $job) {
+  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     $quality = !empty($form_state['values']['settings']['quality']) ? $form_state['values']['settings']['quality'] : 'machine';
     $translation_array = $this->generateMyGengoTranslationJobArray($job, $quality);
     $response = $this->requestFromGengo($job->getTranslator(), '/translate/service/quote', 'POST', array(
