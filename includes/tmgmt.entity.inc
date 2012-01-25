@@ -129,9 +129,9 @@ class TMGMTTranslator extends Entity {
   /**
    * Get the settings form from the respective translator plugin.
    */
-  public function pluginSettingsForm($form, $form_state) {
+  public function pluginSettingsForm($form, $form_state, $busy = FALSE) {
     if ($controller = $this->getPluginController()) {
-      return $controller->pluginSettingsForm($form, $form_state, $this);
+      return $controller->pluginSettingsForm($form, $form_state, $this, $busy);
     }
     return FALSE;
   }

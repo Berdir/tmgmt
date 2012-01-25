@@ -52,7 +52,7 @@ class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPlugi
   /**
    * Overrides TMGMTDefaultTranslatorPluginController::pluginSettingsForm().
    */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['sample_textfield'] = array(
       '#type' => 'textfield',
       '#title' => t('Sample API key'),
@@ -69,7 +69,7 @@ class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPlugi
         3 => t('Option three'),
       ),
     );
-    return parent::pluginSettingsForm($form, $form_state, $translator);
+    return parent::pluginSettingsForm($form, $form_state, $translator, $busy);
   }
 
 }
