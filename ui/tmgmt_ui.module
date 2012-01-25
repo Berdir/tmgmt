@@ -62,20 +62,6 @@ function tmgmt_ui_menu() {
 }
 
 /**
- * Access callback for the checkout local task.
- *
- * @param TMGMTJob $job
- *
- * @return
- *   TRUE if the job can be checked out and the user has access to do this.
- */
-function tmgmt_ui_checkout_access(TMGMTJob $job) {
-  if ($job->isNew() || $job->isPrepared() || $job->isRejected()) {
-    return user_access('access tmgmt ui');
-  }
-}
-
-/**
  * Implements hook_theme().
  */
 function tmgmt_ui_theme() {

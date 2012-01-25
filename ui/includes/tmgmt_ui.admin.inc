@@ -132,9 +132,9 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
 function tmgmt_translator_form_validate($form, &$form_state) {
   // We need to clone this here so we don't change the translator entity in the
   // form state. Otherwise the form will break.
-  $backup = clone $form_state['tmgmt_translator'];
+  $backup = clone $form_state[$form_state['entity_type']];
   $translator = entity_ui_form_submit_build_entity($form, $form_state);
-  $form_state['tmgmt_translator'] = $backup;
+  $form_state[$form_state['entity_type']] = $backup;
   if (empty($translator->translator_plugin)) {
     form_set_error('translator_plugin', t('You have to select a translator plugin.'));
   }
@@ -176,8 +176,8 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $job->target_language = $preselected['target_language'] ? $preselected['target_language'] : (isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available));
   $job->source_language = $preselected['source_language'] ? $preselected['source_language'] : (isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : key($available));
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
-  // Mark certain form elements as disabled under certain circumstances.
-  $disabled = !$job->isNew() && !$job->isPrepared() && !$job->isCancelled() && !$job->isRejected();
+  // Mark form elements as disabled under certain circumstances.
+  $disabled = !$job->isNew() && !$job->isCancelled() && !$job->isRejected();
   // Get the job metadata wrapper so we can display the current status nicely.
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
   // Show the items that are attached to this job if there are not more than 20.
@@ -308,15 +308,16 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
  * Submit function, will set a job to request translation status.
  */
 function tmgmt_job_form_submit($form, &$form_state) {
+  // Build up the job from the submitted form values and save here so we got the
+  // plain 'Submit' case covered. Also, if the translator fails it won't save on
+  // its own.
+  entity_ui_form_submit_build_entity($form, $form_state)->save();
   // Per default we want to redirect the user to the overview.
   $form_state['redirect'] = 'admin/config/regional/tmgmt';
-  // Build up the job from the submitted form values.
-  $job = entity_ui_form_submit_build_entity($form, $form_state);
-  // Save here so we got the plain 'Submit' case covered. Also, if the
-  // translator fails it won't save on its own.
-  $job->save();
-  // Everything below this line is only invoked if the 'Submit to translator' button
-  // was clicked.
+  // This is now the job that we previously saved.
+  $job = $form_state[$form_state['entity_type']];
+  // Everything below this line is only invoked if the 'Submit to translator'
+  // button was clicked.
   if ($form_state['triggering_element']['#value'] == t('Submit to translator')) {
     // Request the job to be translated.
     $job->requestTranslation();
@@ -328,7 +329,8 @@ function tmgmt_job_form_submit($form, &$form_state) {
       }
       if ($message->type == 'error') {
         // There was an error, so redirect the user to the job. This is the
-        // default behavior, so we just need to clear the previously set redirect.
+        // default behavior, so we just need to clear the previously set
+        // redirect.
         $form_state['redirect'] = NULL;
       }
       drupal_set_message(filter_xss($message->getMessage()), $message->type);
@@ -342,9 +344,9 @@ function tmgmt_job_form_submit($form, &$form_state) {
 function tmgmt_job_form_validate($form, &$form_state) {
   // We need to clone this here so we don't change the job entity in the form
   // state. Otherwise the form will break.
-  $backup = clone $form_state['tmgmt_job'];
+  $backup = clone $form_state[$form_state['entity_type']];
   $job = entity_ui_form_submit_build_entity($form, $form_state);
-  $form_state['tmgmt_job'] = $backup;
+  $form_state[$form_state['entity_type']] = $backup;
   // Load the selected translator.
   $translator = tmgmt_translator_load($job->translator);
   // Load the metadata wrapper so we can display the selected language

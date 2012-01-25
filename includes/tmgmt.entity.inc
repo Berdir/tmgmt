@@ -97,7 +97,10 @@ class TMGMTTranslator extends Entity {
    *   TRUE if the job can be processed and translated, FALSE otherwise.
    */
   public function canTranslate(TMGMTJob $job) {
-    return $this->getPluginController()->canTranslate($job);
+    if ($controller = $this->getPluginController()) {
+      return $controller->canTranslate($job);
+    }
+    return FALSE;
   }
 
   /**
@@ -520,16 +523,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns whether the state of this transaction is prepared.
-   *
-   * @return boolean
-   *   TRUE if the state is prepared, FALSE otherwise.
-   */
-  public function isPrepared() {
-    return $this->isState(TMGMT_JOB_STATE_PREPARED);
-  }
-
-  /**
    * Returns whether the state of this transaction is submitted.
    *
    * @return boolean
@@ -822,22 +815,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Set the state of the job to prepared.
-   *
-   * @param $message
-   *   The log message to be saved along with the state change.
-   * @param $variables
-   *   (Optional) An array of variables to replace in the message on display.
-   *
-   * @see TMGMTJob::addMessage()
-   */
-  public function prepared($message = NULL, $variables = array()) {
-    $this->setState(TMGMT_JOB_STATE_PREPARED);
-    $this->addMessage($message, $variables);
-    $this->save();
-  }
-
-  /**
    * Set the state of the job to submitted.
    *
    * @param $message
@@ -924,11 +901,10 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Checks whether a job is translatable by checking if it is prepared and
-   * the translator can handle it.
+   * Checks whether a job is translatable.
    *
    * @return boolean
-   *   TRUE if the job is prepared and can be translated, FALSE otherwise.
+   *   TRUE if the job can be translated, FALSE otherwise.
    */
   public function isTranslatable() {
     if ($translator = $this->getTranslator()) {
@@ -948,7 +924,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public function requestTranslation() {
     if ($this->isTranslatable()) {
       // We don't know if the translator plugin already processed our
-      // translation request at this point. That means that the plugin has to
+      // translation request after this point. That means that the plugin has to
       // set the 'submitted', 'needs review', etc. states on its own.
       $this->getTranslatorController()->requestTranslation($this);
     }

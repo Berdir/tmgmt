@@ -17,7 +17,7 @@ class tmgmt_handler_field_tmgmt_job_actions extends views_handler_field_entity {
       'href' => $uri['path'],
       'title' => t('view'),
     );
-    if ($job->isNew() || $job->isPrepared() | $job->isRejected()) {
+    if ($job->isNew() || $job->isRejected() || $job->isCancelled()) {
       $element['#links']['checkout'] = array(
         'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/manage",
         'title' => t('checkout'),
@@ -33,7 +33,7 @@ class tmgmt_handler_field_tmgmt_job_actions extends views_handler_field_entity {
         'title' => t('accept'),
       );
     }
-    if ($job->isSubmitted()) {
+    if ($job->isSubmitted() || $job->isNeedsReview()) {
       $element['#links']['cancel'] = array(
         'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/cancel",
         'title' => t('cancel'),

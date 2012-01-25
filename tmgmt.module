@@ -4,6 +4,7 @@
  * @file
  * Main module file for the Translation Management module.
  */
+
 /**
  * @addtogroup tmgmt_job
  * @{
@@ -17,21 +18,13 @@
 define('TMGMT_JOB_STATE_NEW', 0);
 
 /**
- * A prepared translation job, not yet submitted to a translator.
- *
- * Before a job can be submitted, he needs to be marked as prepared. This is
- * handled automatically be the default checkout form.
- */
-define('TMGMT_JOB_STATE_PREPARED', 1);
-
-/**
  * A translation job that has been submitted to the translator.
  *
  * Translator plugins are responsible for setting this state in their
  * implementation of
  * TMGMTTranslatorPluginControllerInterface::requestTranslation().
  */
-define('TMGMT_JOB_STATE_SUBMITTED', 2);
+define('TMGMT_JOB_STATE_SUBMITTED', 1);
 
 /**
  * A translation job that has been rejected by the translator.
@@ -42,7 +35,7 @@ define('TMGMT_JOB_STATE_SUBMITTED', 2);
  *
  * A rejected job can be re-submitted.
  */
-define('TMGMT_JOB_STATE_REJECTED', 3);
+define('TMGMT_JOB_STATE_REJECTED', 2);
 
 /**
  * The translation job was translated and needs to be reviewed.
@@ -50,7 +43,7 @@ define('TMGMT_JOB_STATE_REJECTED', 3);
  * This state needs to be set by the translator plugin once the job has been
  * completely translated.
  */
-define('TMGMT_JOB_STATE_REVIEW', 4);
+define('TMGMT_JOB_STATE_REVIEW', 3);
 
 /**
  * The translation has been accepted and the job is finished.
@@ -58,7 +51,7 @@ define('TMGMT_JOB_STATE_REVIEW', 4);
  * Once the job has been accepted, the source plugins are called to update their
  * sources with the translated data.
  */
-define('TMGMT_JOB_STATE_ACCEPTED', 5);
+define('TMGMT_JOB_STATE_ACCEPTED', 4);
 
 /**
  * The translation job has been cancelled.
@@ -67,14 +60,14 @@ define('TMGMT_JOB_STATE_ACCEPTED', 5);
  * the translator plugin is asked if this translation can be cancelled and needs
  * to confirm it by returning TRUE in cancelTranslation().
  */
-define('TMGMT_JOB_STATE_CANCELLED', 6);
+define('TMGMT_JOB_STATE_CANCELLED', 5);
 
 /**
  * The translation job has been finished.
  *
  * Not yet used.
  */
-define('TMGMT_JOB_STATE_FINISHED', 7);
+define('TMGMT_JOB_STATE_FINISHED', 6);
 
 /**
  * @} End of "addtogroup tmgmt_job".
@@ -361,6 +354,26 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
 }
 
 /**
+ * Access callback for checking out a job.
+ *
+ * @param TMGMTJob $job
+ *   A translation job.
+ * @param $account
+ *   (Optional) The user to check access permissions for. Defaults to the
+ *   current user.
+ *
+ * @return bool
+ *   TRUE if the job can be checked out and the user has access to do this,
+ *   FALSE otherwise.
+ */
+function tmgmt_job_checkout_access(TMGMTJob $job, $account = NULL) {
+  if ($job->isNew() || $job->isRejected() || $job->isCancelled()) {
+    return tmgmt_job_access('checkout', $job, $account);
+  }
+  return FALSE;
+}
+
+/**
  * Static method to retrieve a labeled list of all available states.
  *
  * @return array
@@ -369,7 +382,6 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
 function tmgmt_job_states() {
   return array(
     TMGMT_JOB_STATE_NEW => t('New'),
-    TMGMT_JOB_STATE_PREPARED => t('Prepared'),
     TMGMT_JOB_STATE_SUBMITTED => t('Submitted'),
     TMGMT_JOB_STATE_REJECTED => t('Rejected'),
     TMGMT_JOB_STATE_REVIEW => t('Needs review'),
@@ -610,7 +622,7 @@ function tmgmt_translator_load_multiple($names = array(), $conditions = array())
 function tmgmt_translator_busy($translator) {
   $query = new EntityFieldQuery();
   return (boolean) $query->entityCondition('entity_type', 'tmgmt_job')
-    ->propertyCondition('state', TMGMT_JOB_STATE_ACCEPTED, '<>')
+    ->propertyCondition('state', array(TMGMT_TRANSLATOR_JOB_STATE_SUBMITTED, TMGMT_TRANSLATOR_JOB_STATE_REVIEW))
     ->propertyCondition('translator', $translator)
     ->range(0, 1)
     ->count()
