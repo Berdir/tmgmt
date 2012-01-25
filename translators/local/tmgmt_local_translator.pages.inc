@@ -43,8 +43,10 @@ function tmgmt_local_translator_job_form($form, &$form_state, $job) {
   $form['job'] = array('#type' => 'value', '#value' => $job);
   $form['controls'] = array(
     '#type' => 'fieldset',
+    '#title' => $job->defaultLabel(),
   );
   $languages = locale_language_list('name', TRUE);
+  $states = tmgmt_job_states();
   $form['controls']['source'] = array(
     '#type' => 'item',
     '#title' => t('From'),
@@ -55,23 +57,55 @@ function tmgmt_local_translator_job_form($form, &$form_state, $job) {
     '#title' => t('To'),
     '#markup' => $languages[$job->target_language],
   );
+  // Now depending on state we may have different actions
+  $state = $job->getState();
   $form['controls']['state'] = array(
-  	'#type' => 'select',
-    '#options' => tmgmt_job_states(),
-    '#default_value' => $job->getState(),
+  	'#type' => 'item',
+    '#title' => t('State'),
+    '#markup' => $states[$state],
   );
-  $form['controls']['submit'] = array('#type' => 'submit', '#value' => t('Submit job'));
+  // @todo Check permissions and limit what we can do with this form.
+  switch ($state) {
+    case TMGMT_JOB_STATE_SUBMITTED:
+      $action = t('Submit translation');
+      break;
+    case TMGMT_JOB_STATE_NEW:
+      $action = t('Request translation');
+      break;
+    case TMGMT_JOB_STATE_REVIEW:
+      $action = t('Approve translation');
+      break;      
+  }
+  if (!empty($action)) {
+    $form['controls']['submit'] = array(
+    	'#type' => 'submit', 
+    	'#value' => $action,
+    );
+  }
   return $form;
 }
 
 /**
  * Job form for submitting to review.
+ * 
+ * @todo Proper logging, user names, etc..
  */
 function tmgmt_local_translator_job_form_submit($form, &$form_state) {
   $job = $form_state['values']['job'];
-  $job->setState($form_state['values']['state']);
-  $job->save();
-  drupal_set_message(t('The translation job has been submitted.'));
+  switch ($form_state['values']['op']) {
+    case t('Submit translation'):
+      $job->needsReview(t('The job has been translated by a local translator.'));
+      drupal_set_message(t('The translation has been submitted.'));
+      break;
+    case t('Request translation'):
+      $job->requestTranslation();
+      drupal_set_message(t('The job has been submitted for translation.'));
+      break;
+    case t('Approve translation'):
+      $job->finished(t('The translation has been approved by a local translator.'));
+      drupal_set_message(t('The translation has been approved.'));
+      break;      
+  }  
 }
 
 /**
@@ -82,16 +116,33 @@ function tmgmt_local_translator_job_item_form($form, &$form_state, $job, $item) 
   $form['job_item'] = array('#type' => 'value', '#value' => $item);
   $data = $item->getSourceData();
   $translation = $item->translation;
+  $wrapper_id = 'translate-translate-job-item-' . $item->tjiid;
   $form['text'] = tmgmt_local_translator_job_item_subform($data, $translation);
+  $form['text']['#prefix'] = "<div id=\"$wrapper_id\">";
+  $form['text']['#suffix'] = '</div>';
   $form['text']['#type'] = 'fieldset';
   $form['text']['#collapsible'] = TRUE;
-  $form['text']['#collapsed'] = TRUE;
+  //$form['text']['#collapsed'] = TRUE;
   $form['text']['#group'] = 'vertical';
-  $form['text']['controls']['save'] = array('#type' => 'submit', '#value' => t('Save translation'));
+  $form['text']['controls']['save'] = array(
+  	'#type' => 'submit',
+  	'#value' => t('Save item'),
+    '#ajax' => array(
+      'callback' => 'tmgmt_local_translator_job_item_callback',
+      'wrapper' => $wrapper_id,
+      'method' => 'replace',
+    ),
+  );
   $form['#attributes'] = array('class' => array('tmgmt-job-item'));
   return $form;
 }
 
+/**
+ * Ajax callback after saving job item
+ */
+function tmgmt_local_translator_job_item_callback($form, $form_state) {
+  return $form['text'];
+}
 /**
  * Build subform for translating single text
  */
@@ -136,7 +187,7 @@ function tmgmt_local_translator_job_item_form_submit($form, &$form_state) {
   if ($translation) {
     $item->addTranslatedData($translation);
     //$job->needsReview();
-    drupal_set_message(t('Your translation has been submitted'));
+    drupal_set_message(t('Your item translation has been saved'));
   }
 }
 
@@ -146,7 +197,7 @@ function tmgmt_local_translator_job_item_form_submit($form, &$form_state) {
 function tmgmt_local_translator_job_item_strings($source, $values) {
   $translation = array();
   if (isset($source['#text']) && !empty($values['translation'])) {
-    $translation['#text'] = $source['#text'];
+    $translation['#text'] = $values['translation'];
   }
   foreach (element_children($source) as $key) {
     if (isset($values[$key])) {
@@ -161,10 +212,17 @@ function tmgmt_local_translator_job_item_strings($source, $values) {
  */
 function tmgmt_local_translator_user_languages_form($form, &$form_state, $account, $language_list) {
   $form['user'] = array('#type' => 'value', '#value' => $account);
-  $user_list = isset($account->tmgmt_local_translator) ? $account->tmgmt_local_translator : array();
-  $user_list += array('source' => array(), 'target' => array());
-
+  $form['language_list'] = array('#type' => 'value', '#value' => $language_list);
+  if (isset($form_state['user_list'])) {
+    $user_list = $form_state['user_list'];
+  }
+  else {
+    $user_list = isset($account->tmgmt_local_translator) ? $account->tmgmt_local_translator : array();
+    $user_list += array('source' => array(), 'target' => array());
+    $form_state['user_list'] = $user_list;
+  }
   $form['translate'] = array(
+    '#prefix' => '<div id="user-languages-translate">', '#suffix' => '</div>',
     '#tree' => TRUE,
     '#type' => 'fieldset',
     '#description' => t('Please define your translation capabilities telling us which languages you can understand (Source) and into which languages you can translate (Target). You can add languages one at a time or remove existing ones.'),
@@ -177,7 +235,9 @@ function tmgmt_local_translator_user_languages_form($form, &$form_state, $accoun
   );
   // We'll build a column for each type of languages
   foreach (array('source' => t('Source languages (translate from)') , 'target' => t('Target languages (translate into)')) as $type => $type_name) {
+    $wrapper_id = 'user-languages-translate-' . $type;
     $form['translate'][$type] = array(
+      '#prefix' => "<div id=\"$wrapper_id\">", '#suffix' => '</div>',
       '#type' => 'fieldset',
       '#title' => $type_name,
       '#tree' => TRUE,
@@ -185,19 +245,49 @@ function tmgmt_local_translator_user_languages_form($form, &$form_state, $accoun
     // Compute available languages to be added for each category.
     $available_list = $language_list;
     foreach (array_keys($user_list[$type]) as $langcode) {
-      $form['translate'][$type][$langcode] = array(
-        '#type' => 'select',
-        '#options' => array($langcode => $language_list[$langcode]) + array('' => t('<remove language>')),
-        '#default_value' => $langcode,
-      );
+    $form['translate'][$type][$langcode]['language'] = array(
+      '#type' => 'hidden',
+      '#value' => $langcode,
+      '#parents' => array('translate', $type, $langcode),
+    );
+    $form['translate'][$type][$langcode]['display'] = array(
+      '#markup' => $language_list[$langcode],
+    );
+    $form['translate'][$type][$langcode]['remove'] = array(
+      '#name' => $type . '_' . $langcode . '_remove_button',
+      '#type' => 'submit',
+      '#value' => t('remove'),
+      '#parents' => array('controls', $type, $langcode),
+      '#ajax' =>  array(     
+      	'callback' => 'tmgmt_local_translator_user_ajax_callback',
+    		'wrapper' => $wrapper_id,
+    		'method' => 'replace',
+      ),
+      '#suffix' => '<br />',
+    );
       unset($available_list[$langcode]);
     }
     // If there are any language left, add the option to add it (override options so blank is first)
     if ($available_list) {
       $form['translate'][$type]['new'] = array(
+        '#type' => 'fieldset',
+      );
+      $form['translate'][$type]['new']['select'] = array(
         '#type' => 'select',
         '#options' => array('' => t('<more languages>'))  + $available_list,
         '#default_value' => key($language_blank),
+        '#parents' => array('translate', $type, 'new'),
+      );
+      $form['translate'][$type]['new']['add'] = array(
+        '#name' => $type . '_' . $langcode . '_add_button',
+        '#type' => 'submit',
+        '#value' => t('add'),
+        '#parents' => array('controls', $type, 'add'),
+        '#ajax' =>  array(     
+        	'callback' => 'tmgmt_local_translator_user_ajax_callback',
+      		'wrapper' => $wrapper_id,
+      		'method' => 'replace',
+        ),      
       );
     }
   }
@@ -219,8 +309,32 @@ function tmgmt_local_translator_user_languages_form_submit($form, &$form_state) 
   else {
     $user_list = array();
   }
-  // Save account
-  $account->tmgmt_local_translator = $user_list;
-  user_save($account);
-  drupal_set_message(t('Your translator\'s language preferences have been saved.'));
+  $form_state['user_list'] = $user_list;
+  switch ($form_state['values']['op']) {
+    case t('Update languages'):
+      // Save account
+      $account->tmgmt_local_translator = $user_list;
+      user_save($account);
+      drupal_set_message(t('Your translator\'s language preferences have been saved.'));
+      break;
+    default:
+      // Remove or add language
+      $trigger = $form_state['triggering_element'];
+      list($type, $langcode, $control) = explode('_', $trigger['#name']);
+      if ($control == 'remove') {
+        unset($form_state['user_list'][$type][$langcode]);
+      }
+      $form_state['rebuild'] = TRUE;
+      break;
+  }
+}
+
+/**
+ * Ajax callback for user languages form
+ */
+function tmgmt_local_translator_user_ajax_callback($form, &$form_state) {
+  $trigger = $form_state['triggering_element'];
+  // Remove from main list, add to selector.
+  list($type, $langcode) = explode('_', $trigger['#name']);
+  return $form['translate'][$type];
 }

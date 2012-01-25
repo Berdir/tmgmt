@@ -247,6 +247,11 @@ interface TMGMTTranslatorPluginControllerInterface {
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job);
 
+  /**
+   * Returns if the translator has any settings for the passed job.
+   */
+  public function hasCheckoutSettings(TMGMTJob $job);
+
 }
 
 /**
@@ -374,7 +379,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::checkoutSettingsForm().
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
-    $form['#title'] = t('@translator checkout settings', array('@translator' => $translator->label()));
+    $form['#title'] = t('@translator checkout settings', array('@translator' => $job->getTranslator()->label()));
     if (empty($form)) {
       $form['#description'] = t("@translator doesn't provide any checkout settings.", array('@translator' => $translator->label()));
     }
@@ -391,4 +396,10 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
     return $form;
   }
 
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
+   */
+  public function hasCheckoutSettings(TMGMTJob $job) {
+    return TRUE;
+  }
 }

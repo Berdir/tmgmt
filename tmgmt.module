@@ -594,6 +594,8 @@ function tmgmt_translator_exists($name) {
 
 /**
  * Loads a translator based on the name.
+ *
+ * @return TMGMTTranslator
  */
 function tmgmt_translator_load($name) {
   $translators = entity_load_multiple_by_name('tmgmt_translator', array($name));
