@@ -6,63 +6,35 @@
  */
 
 /**
- * Allows modules to alter the default Workbench landing page.
+ * Allows to alter job checkout workflow before the default behavior kicks in.
  *
- * This hook is a convenience function to be used instead of
- * hook_page_alter(). In addition to the normal Render API elements,
- * you may also specify a #view and #view_display attribute, both
- * of which are strings that indicate which View to render on the page.
+ * Note: The default behavior will ignore jobs that have already been checked
+ * out. Remove jobs from the array to prevent the default behavior for them.
  *
- * The left and right columns in this output are given widths of 35% and 65%
- * respectively by tmgmt_ui.my-tmgmt.css.
- *
- * @param $output
- *  A Render API array of content items, passed by reference.
- *
- * @see tmgmt_content()
+ * @param $redirects
+ *   List of redirects the user is supposed to be redirected to.
+ * @param $jobs
+ *   Array with the translation jobs to be checked out.
  */
-function hook_tmgmt_ui_content_alter(&$output) {
-  // Replace the default "Recent Content" view with our custom View.
-  $output['tmgmt_ui_recent_content']['#view'] = 'custom_view';
-  $output['tmgmt_ui_recent_content']['#view_display'] = 'block_2';
+function hook_tmgmt_ui_job_checkout_before_alter(&$redirects, &$jobs) {
+  foreach ($jobs as $job) {
+    // Automatically check out all jobs using the default settings.
+    $job->translator = 'example';
+    $job->translator_context = $job->getTranslator()->getPluginController()->defaultCheckoutSettings();
+  }
 }
 
 /**
- * Allows modules to alter the jobs overview.
+ * Allows to alter job checkout workflow after the default behavior.
  *
- * @param $output
- *  A Render API array of content items, passed by reference.
- *
- * @see tmgmt_ui_jobs()
+ * @param $redirects
+ *   List of redirects the user is supposed to be redirected to.
+ * @param $jobs
+ *   Array with the translation jobs to be checked out.
  */
-function hook_tmgmt_ui_jobs_alter(&$output) {
-  $output = array();
-  $output['field_tmgmt_jobs_dummy'] = array(
-    '#title' => t('Jobs Overview'),
-    '#markup' => 'dummy overview',
-    '#theme' => 'tmgmt_element',
-    '#weight' => -1,
-  );
-
-  return $output;
-}
-
-/**
- * Allows modules to alter the nodes overview.
- *
- * @param $output
- *  A Render API array of content items, passed by reference.
- *
- * @see tmgmt_ui_nodes()
- */
-function hook_tmgmt_ui_nodes_alter(&$output) {
-  $output = array();
-  $output['field_tmgmt_nodes_dummy'] = array(
-    '#title' => t('Nodes Overview'),
-    '#markup' => 'dummy overview',
-    '#theme' => 'tmgmt_element',
-    '#weight' => -1,
-  );
-
-  return $output;
+function hook_tmgmt_ui_job_checkout_after_alter(&$redirects, &$jobs) {
+  // Redirect to custom multi-checkout form if there are multple redirects.
+  if (count($redirects) > 2) {
+    $redirects = array('/my/custom/checkout/form/' . implode(',', array_keys($jobs)));
+  }
 }
