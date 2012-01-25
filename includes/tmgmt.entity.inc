@@ -247,7 +247,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    */
   public function defaultLabel() {
     if ($controller = $this->getSourceController()) {
-      return $this->getSourceController()->getLabel($this);
+      return $controller->getLabel($this);
     }
     return FALSE;
   }
@@ -257,7 +257,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    */
   public function defaultUri() {
     if ($controller = $this->getSourceController()) {
-      return $this->getSourceController()->getUri($this);
+      return $controller->getUri($this);
     }
     return FALSE;
   }

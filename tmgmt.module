@@ -120,6 +120,7 @@ function tmgmt_entity_info() {
     'entity class' => 'TMGMTJobItem',
     'base table' => 'tmgmt_job_item',
     'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
     'access callback' => 'tmgmt_job_attachment_access',
     'entity keys' => array(
       'id' => 'tjiid',
