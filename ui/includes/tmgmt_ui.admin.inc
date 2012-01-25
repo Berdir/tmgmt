@@ -39,7 +39,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   $available = tmgmt_translator_plugin_labels();
   // If the translator plugin is not set, pick the first available plugin as the
   // default.
-  $translator->translator_plugin = empty($translator->translator_plugin) ? key($available) : $translator->translator_plugin;
+  $translator->plugin = empty($translator->plugin) ? key($available) : $translator->plugin;
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
@@ -76,13 +76,13 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#suffix' => '</div>',
   );
   // Pull the translator plugin info if any.
-  $info = !empty($translator->translator_plugin) ? tmgmt_translator_plugin_info($translator->translator_plugin) : array();
-  $form['plugin_wrapper']['translator_plugin'] = array(
+  $info = !empty($translator->plugin) ? tmgmt_translator_plugin_info($translator->plugin) : array();
+  $form['plugin_wrapper']['plugin'] = array(
     '#type' => 'select',
     '#title' => t('Translator plugin'),
     '#description' => isset($info['description']) ? $info['description'] : t('The plugin that controls the translator.'),
     '#options' => $available,
-    '#default_value' => $translator->translator_plugin,
+    '#default_value' => $translator->plugin,
     '#required' => TRUE,
     '#disabled' => $busy,
     '#ajax' => array(
@@ -128,8 +128,8 @@ function tmgmt_translator_form_validate($form, &$form_state) {
   $backup = clone $form_state[$form_state['entity_type']];
   $translator = entity_ui_form_submit_build_entity($form, $form_state);
   $form_state[$form_state['entity_type']] = $backup;
-  if (empty($translator->translator_plugin)) {
-    form_set_error('translator_plugin', t('You have to select a translator plugin.'));
+  if (empty($translator->plugin)) {
+    form_set_error('plugin', t('You have to select a translator plugin.'));
   }
 }
 
@@ -295,7 +295,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   );
   // We need some CSS for showing the source and target language in one row.
   $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
-  return _tmgmt_form_inherit_disabled($form);
+  return $form;
 }
 
 /**

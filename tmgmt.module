@@ -423,7 +423,7 @@ function tmgmt_job_item_load($tjiid) {
  * @return TMGMTJobItem
  *   The loaded job items.
  */
-function tmgmt_job_load_by_source($source_plugin, $item_type, $item_id, $source_language, $target_languages = array()) {
+function tmgmt_job_load_by_source($plugin, $item_type, $item_id, $source_language, $target_languages = array()) {
   if (empty($target_languages)) {
     $available_languages = entity_metadata_language_list();
     unset($available_languages[LANGUAGE_NONE], $available_languages[$source_language]);
@@ -435,7 +435,7 @@ function tmgmt_job_load_by_source($source_plugin, $item_type, $item_id, $source_
     $query = db_select('tmgmt_job_item', 'ji');
     $query->join('tmgmt_job', 'j', 'j.tjid = ji.tjid AND j.target_language = :target_language', array(':target_language' => $target_language));
     $query = $query->fields('j', array('tjid'))
-      ->condition('source_plugin', $source_plugin)
+      ->condition('plugin', $plugin)
       ->condition('item_type', $item_type)
       ->condition('item_id', $item_id)
       ->orderBy('changed', 'DESC')
@@ -457,7 +457,7 @@ function tmgmt_job_item_load_multiple($tjiids = array(), $conditions = array()) 
 /**
  * Creates a translation job item.
  *
- * @param $source_plugin
+ * @param $plugin
  *   The plugin name.
  * @param $item_type
  *   The source item type.
@@ -469,9 +469,9 @@ function tmgmt_job_item_load_multiple($tjiids = array(), $conditions = array()) 
  * @return TMGMTJobItem
  *   The created, not yet saved, job item entity.
  */
-function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $values = array()) {
+function tmgmt_job_item_create($plugin, $item_type, $item_id, array $values = array()) {
   return entity_create('tmgmt_job_item', array_merge($values, array(
-    'source_plugin' => $source_plugin,
+    'plugin' => $plugin,
     'item_type' => $item_type,
     'item_id' => $item_id,
   )));
@@ -651,7 +651,7 @@ function tmgmt_translator_busy($translator) {
  */
 function tmgmt_translator_create($plugin, $name, $label, $description = '', $settings = array(), $values = array()) {
   return entity_create('tmgmt_translator', array_merge($values, array(
-    'translator_plugin' => $plugin,
+    'plugin' => $plugin,
     'name' => $name,
     'label' => $label,
     'description' => $description,
@@ -950,26 +950,4 @@ function tmgmt_unflatten_data($flattened_data) {
     drupal_array_set_nested_value($data, explode(TMGMT_ARRAY_DELIMITER, $key), $flattened_data_entry);
   }
   return $data;
-}
-
-/**
- * Helper function for recursively marking form elements as #disabled if the
- * parent form element is marked as such.
- *
- * @param $form
- *   A renderable Form API array structure.
- *
- * @return array
- *   The processed array.
- */
-function _tmgmt_form_inherit_disabled($form) {
-  foreach (element_children($form) as $key) {
-    if (!empty($form['#disabled'])) {
-      $form[$key]['#disabled'] = TRUE;
-    }
-    if (is_array($form[$key])) {
-      $form[$key] = _tmgmt_form_inherit_disabled($form[$key]);
-    }
-  }
-  return $form;
 }

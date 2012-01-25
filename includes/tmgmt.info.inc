@@ -56,7 +56,7 @@ class TMGMTJobItemMetadataController extends EntityDefaultMetadataController {
     ) + $properties['tjid'];
 
     // Add the options list for all available source plugins.
-    $properties['source_plugin']['options list'] = 'tmgmt_source_plugin_labels';
+    $properties['plugin']['options list'] = 'tmgmt_source_plugin_labels';
 
     return _tmgmt_override_property_description($info, $this->type);
   }
@@ -97,7 +97,7 @@ class TMGMTTranslatorMetadataController extends EntityDefaultMetadataController 
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
 
-    $properties['translator_plugin']['options list'] = 'tmgmt_translator_plugin_labels';
+    $properties['plugin']['options list'] = 'tmgmt_translator_plugin_labels';
 
     return _tmgmt_override_property_description($info, $this->type);
   }

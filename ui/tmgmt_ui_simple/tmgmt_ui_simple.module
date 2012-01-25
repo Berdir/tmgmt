@@ -11,7 +11,7 @@
 function tmgmt_ui_simple_page_translate_node_multiple($ids) {
   $item_ids = explode('+', $ids);
   $params = array(
-    'source_plugin' => 'node',
+    'plugin' => 'node',
     'item_type' => 'node',
     'source_language' => $GLOBALS['language']->language,
   );
@@ -30,7 +30,7 @@ function tmgmt_ui_simple_page_translate_node_multiple($ids) {
  */
 function tmgmt_ui_simple_form_i18n_string_translate_page_overview_form_alter(&$form, &$form_state) {
   $object = $form['object']['#value'];
-  $form['source_plugin'] = array('#type' => 'value', '#value' => 'i18n_string');
+  $form['plugin'] = array('#type' => 'value', '#value' => 'i18n_string');
   $form['item_type'] = array('#type' => 'value', '#value' => 'i18n_string');
   $object_key = $object->get_key();
   $item_id = $object->get_type() . ':' . (is_array($object_key) ? implode(':', $object_key) : $object_key);
@@ -63,7 +63,7 @@ function tmgmt_ui_simple_page_alter(&$page) {
  */
 function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
   $form['object'] = array('#type' => 'value', '#value' => $node);
-  $form['source_plugin'] = array('#type' => 'value', '#value' => 'node');
+  $form['plugin'] = array('#type' => 'value', '#value' => 'node');
   $form['item_type'] = array('#type' => 'value', '#value' => 'node');
   $form['item_id'] = array('#type' => 'value', '#value' => $node->nid);
   $form['source_language'] = array('#type' => 'value', '#value' => $node->language);
@@ -74,7 +74,7 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
   );
   // As keys are numeric, we assume languages are in the same order, need to rekey rows
   $language_list = module_exists('i18n_node') ? i18n_node_language_list($node) : locale_language_list();
-  $jobs = tmgmt_job_load_multiple_by_source($form['source_plugin']['#value'], $form['item_type']['#value'], $form['item_id']['#value'], $form['source_language']['#value'], array_keys($language_list));
+  $jobs = tmgmt_job_load_multiple_by_source($form['plugin']['#value'], $form['item_type']['#value'], $form['item_id']['#value'], $form['source_language']['#value'], array_keys($language_list));
   $running_jobs = array();
   foreach ($language_list as $langcode => $language_name) {
     if ($langcode == LANGUAGE_NONE) {
@@ -130,7 +130,7 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       // Create job items and add them to the job. This may take a single value or an array of item_id's.
       $items = is_array($values['item_id']) ? $values['item_id'] : array($values['item_id']);
       foreach ($items as $item_id) {
-        $job->addItem($values['source_plugin'], $values['item_type'], $item_id);
+        $job->addItem($values['plugin'], $values['item_type'], $item_id);
       }
       $job->save();
       $jobs[] = $job;
@@ -183,9 +183,9 @@ function tmgmt_ui_simple_node_translate_add_to_cart($form, &$form_state) {
  * Subform for selecting translation method.
  */
 function tmgmt_ui_simple_controls_element($form, &$form_state) {
-  $translator_plugins = tmgmt_translator_plugin_labels(TRUE);
-  $translator_plugins_keyed = array_keys($translator_plugins);
-  $selected_translator_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : reset($translator_plugins_keyed);
+  $plugins = tmgmt_translator_plugin_labels(TRUE);
+  $plugins_keyed = array_keys($plugins);
+  $selected_plugin = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : reset($plugins_keyed);
   $element['request'] = array(
     '#type' => 'submit',
     '#value' => t('Request translation')

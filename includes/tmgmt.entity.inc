@@ -52,7 +52,7 @@ class TMGMTTranslator extends Entity {
    *
    * @type string
    */
-  public $translator_plugin;
+  public $plugin;
 
   /**
    * Translator type specific settings.
@@ -74,7 +74,7 @@ class TMGMTTranslator extends Entity {
    * @return TMGMTTranslatorPluginControllerInterface
    */
   public function getPluginController() {
-    return tmgmt_translator_plugin_controller($this->translator_plugin);
+    return tmgmt_translator_plugin_controller($this->plugin);
   }
 
   /**
@@ -199,7 +199,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *
    * @var varchar
    */
-  public $source_plugin;
+  public $plugin;
 
   /**
    * The identifier of the translation job.
@@ -319,7 +319,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * @return TMGMTSourcePluginControllerInterface
    */
   public function getSourceController() {
-    return tmgmt_source_plugin_controller($this->source_plugin);
+    return tmgmt_source_plugin_controller($this->plugin);
   }
 
   /**
@@ -349,7 +349,6 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
     if (!is_array($this->translation)) {
       $this->translation = array();
     }
-    dpm($translation);
     drupal_array_set_nested_value($this->translation, $key, $translation);
     if ($this->save()) {
       return TRUE;
@@ -622,7 +621,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Adds an item to the translation job.
    *
-   * @param $source_plugin
+   * @param $plugin
    *   The plugin name.
    * @param $item_type
    *   The source item type.
@@ -632,10 +631,10 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @return TMGMTJobItem
    *   The job item that was added to the job or NULL if it couldn't be saved.
    */
-  public function addItem($source_plugin, $item_type, $item_id) {
+  public function addItem($plugin, $item_type, $item_id) {
     // Save the job if it hasn't yet been saved.
     if (!empty($this->tjid) || $this->save()) {
-      $item = tmgmt_job_item_create($source_plugin, $item_type, $item_id, array('tjid' => $this->tjid));
+      $item = tmgmt_job_item_create($plugin, $item_type, $item_id, array('tjid' => $this->tjid));
       if ($item->save()) {
         return $item;
       }

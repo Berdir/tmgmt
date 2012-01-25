@@ -36,7 +36,7 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
     $translator = new TMGMTTranslator();
     $translator->name = $this->randomName();
     $translator->label = $this->randomName();
-    $translator->translator_plugin = 'test_translator';
+    $translator->plugin = 'test_translator';
     $translator->settings = array(
       'key' => $this->randomName(),
       'another_key' => $this->randomName(),
@@ -161,10 +161,10 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $items = $job->getItems();
     $this->assertEqual(2, count($items));
 
-    $this->assertEqual($item1->source_plugin, $items[$item1->tjiid]->source_plugin);
+    $this->assertEqual($item1->plugin, $items[$item1->tjiid]->plugin);
     $this->assertEqual($item1->item_type, $items[$item1->tjiid]->item_type);
     $this->assertEqual($item1->item_id, $items[$item1->tjiid]->item_id);
-    $this->assertEqual($item2->source_plugin, $items[$item2->tjiid]->source_plugin);
+    $this->assertEqual($item2->plugin, $items[$item2->tjiid]->plugin);
     $this->assertEqual($item2->item_type, $items[$item2->tjiid]->item_type);
     $this->assertEqual($item2->item_id, $items[$item2->tjiid]->item_id);
 
@@ -185,7 +185,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
 
     // Test single load callback.
     $item = tmgmt_job_item_load($item1->tjiid);
-    $this->assertEqual($item1->source_plugin, $item->source_plugin);
+    $this->assertEqual($item1->plugin, $item->plugin);
     $this->assertEqual($item1->item_type, $item->item_type);
     $this->assertEqual($item1->item_id, $item->item_id);
 
@@ -194,10 +194,10 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
 
     $this->assertEqual(2, count($items));
 
-    $this->assertEqual($item1->source_plugin, $items[$item1->tjiid]->source_plugin);
+    $this->assertEqual($item1->plugin, $items[$item1->tjiid]->plugin);
     $this->assertEqual($item1->item_type, $items[$item1->tjiid]->item_type);
     $this->assertEqual($item1->item_id, $items[$item1->tjiid]->item_id);
-    $this->assertEqual($item2->source_plugin, $items[$item2->tjiid]->source_plugin);
+    $this->assertEqual($item2->plugin, $items[$item2->tjiid]->plugin);
     $this->assertEqual($item2->item_type, $items[$item2->tjiid]->item_type);
     $this->assertEqual($item2->item_id, $items[$item2->tjiid]->item_id);
   }

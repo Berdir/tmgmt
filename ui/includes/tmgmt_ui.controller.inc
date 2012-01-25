@@ -87,7 +87,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
     $wrapper = entity_metadata_wrapper($this->entityType, $entity);
     // Add a column to show the translator plugin via the metadata wrapper.
     $form['plugin'] = array(
-      '#markup' => $wrapper->translator_plugin->label(),
+      '#markup' => $wrapper->plugin->label(),
       '#status' => $entity->{$this->statusKey},
     );
     $form['weight'] = array(

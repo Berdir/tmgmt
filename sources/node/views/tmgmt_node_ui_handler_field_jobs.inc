@@ -16,7 +16,7 @@ class tmgmt_node_ui_handler_field_jobs extends views_handler_field_prerender_lis
 
     $select = db_select('tmgmt_job', 'tj');
     $select->join('tmgmt_job_item', 'tji', "tj.id = %alias.tjid");
-    $select->join('node', 'n', "tji.item_type = 'node' AND tji.source_plugin = 'node' AND tji.item_id = node.nid");
+    $select->join('node', 'n', "tji.item_type = 'node' AND tji.plugin = 'node' AND tji.item_id = node.nid");
     $select->addField('n', 'nid');
     $select->addExpression('MAX(tj.id)');
 

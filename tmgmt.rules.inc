@@ -86,7 +86,7 @@ function tmgmt_rules_action_info() {
         'label' => t('Translation Job'),
         'description' => t('The translation job that should be canceled.'),
       ),
-      'source_plugin' => array(
+      'plugin' => array(
         'type' => 'token',
         'label' => t('Source plugin'),
         'description' => t('The source plugin of this item'),
@@ -145,6 +145,6 @@ function tmgmt_rules_get_job_for_language($source_language, $target_language, $a
 /**
  * Rules callback to add an item to a job.
  */
-function tmgmt_rules_job_add_item(TMGMTJob $job, $source_plugin, $item_type, $item_id) {
-  $job->addItem($source_plugin, $item_type, $item_id);
+function tmgmt_rules_job_add_item(TMGMTJob $job, $plugin, $item_type, $item_id) {
+  $job->addItem($plugin, $item_type, $item_id);
 }

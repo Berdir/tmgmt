@@ -33,7 +33,7 @@ class TMGMTMicrosoftTestCase extends TMGMTBaseTestCase {
    */
   function testMicrosoft() {
     $translator = $this->createTranslator();
-    $translator->translator_plugin = 'microsoft';
+    $translator->plugin = 'microsoft';
     $translator->settings = array(
       'url' => url('tmgmt_microsoft_mock/v2/Http.svc', array('absolute' => TRUE)),
     );

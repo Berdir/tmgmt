@@ -320,10 +320,10 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['filters']['item_type']['field'] = 'item_type';
   $handler->display->display_options['filters']['item_type']['value'] = 'node';
   /* Filter criterion: Translation Management Job Item: Source_plugin */
-  $handler->display->display_options['filters']['source_plugin']['id'] = 'source_plugin';
-  $handler->display->display_options['filters']['source_plugin']['table'] = 'tmgmt_job_item';
-  $handler->display->display_options['filters']['source_plugin']['field'] = 'source_plugin';
-  $handler->display->display_options['filters']['source_plugin']['value'] = array(
+  $handler->display->display_options['filters']['plugin']['id'] = 'plugin';
+  $handler->display->display_options['filters']['plugin']['table'] = 'tmgmt_job_item';
+  $handler->display->display_options['filters']['plugin']['field'] = 'plugin';
+  $handler->display->display_options['filters']['plugin']['value'] = array(
     'node' => 'node',
   );
   $translatables['job_items_current_node'] = array(

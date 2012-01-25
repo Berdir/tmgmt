@@ -36,7 +36,7 @@ $handler->display->display_options['style_options']['columns'] = array(
   'label' => 'label',
   'tjid' => 'tjid',
   'item_type' => 'item_type',
-  'source_plugin' => 'source_plugin',
+  'plugin' => 'plugin',
 );
 $handler->display->display_options['style_options']['default'] = '-1';
 $handler->display->display_options['style_options']['info'] = array(
@@ -75,7 +75,7 @@ $handler->display->display_options['style_options']['info'] = array(
     'separator' => '',
     'empty_column' => 0,
   ),
-  'source_plugin' => array(
+  'plugin' => array(
     'sortable' => 0,
     'default_sort_order' => 'asc',
     'align' => '',
