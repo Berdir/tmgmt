@@ -339,11 +339,26 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
     if (!is_array($this->translation)) {
       $this->translation = array();
     }
+    dpm($translation);
     drupal_array_set_nested_value($this->translation, $key, $translation);
     if ($this->save()) {
       return TRUE;
     }
     return FALSE;
+  }
+
+  /**
+   * Retrieves the translated data from a job item.
+   *
+   * @return
+   *   The array of translated data or FALSE if no translated data has been
+   *   saved yet.
+   */
+  public function getTranslatedData() {
+    if (!empty($this->translation)) {
+      return $this->translation;
+    }
+    return array();
   }
 
 }
@@ -1031,6 +1046,25 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
+   * Retrieves the translated data from a job item.
+   *
+   * @return
+   *   The array of translated data or FALSE if no translated data has been
+   *   saved yet.
+   */
+  public function getTranslatedData() {
+    $data = array();
+    foreach ($this->getItems() as $item) {
+      // Only create an array key if the item actually returned any translated
+      // data.
+      if ($item_data = $item->getTranslatedData()) {
+        $data[$item->tjiid] = $item_data;
+      }
+    }
+    return $data;
+  }
+
+  /**
    * Retrieves the job settings form.
    */
   public function checkoutSettingsForm($form, &$form_state) {
@@ -1117,7 +1151,6 @@ class TMGMTJobMessage extends Entity {
       $this->type = 'status';
     }
   }
-
   /**
    * Overrides Entity::label().
    */

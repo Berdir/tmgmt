@@ -19,13 +19,6 @@ function tmgmt_ui_job_view(TMGMTJob $job) {
 }
 
 /**
- * Review form for translation jobs.
- */
-function tmgmt_ui_job_review_form($form, &$form_state, TMGMTJob $job) {
-  return $form;
-}
-
-/**
  * Entity API form for the translator entity.
  */
 function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator, $op = 'edit') {

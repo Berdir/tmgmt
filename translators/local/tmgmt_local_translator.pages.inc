@@ -32,6 +32,7 @@ function tmgmt_local_translator_page_job_translate(TMGMTJob $job) {
     //$build['items'][$key]['#title'] = t('Item @key', array('@key' => $key));
   }
 
+  dpm($build);
   return $build;
 }
 
@@ -104,7 +105,6 @@ function tmgmt_local_translator_job_item_subform($items, $translation) {
   if (!empty($items['#text'])) {
     // Approximate the number of rows to use in the default textarea.
     $rows = min(ceil(str_word_count($items['#text']) / 12), 10);
-
     $form['source'] = array(
       '#type' => 'textarea',
       '#disabled' => TRUE,
