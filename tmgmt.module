@@ -622,7 +622,7 @@ function tmgmt_translator_load_multiple($names = array(), $conditions = array())
 function tmgmt_translator_busy($translator) {
   $query = new EntityFieldQuery();
   return (boolean) $query->entityCondition('entity_type', 'tmgmt_job')
-    ->propertyCondition('state', array(TMGMT_TRANSLATOR_JOB_STATE_SUBMITTED, TMGMT_TRANSLATOR_JOB_STATE_REVIEW))
+    ->propertyCondition('state', array(TMGMT_JOB_STATE_SUBMITTED, TMGMT_JOB_STATE_REVIEW))
     ->propertyCondition('translator', $translator)
     ->range(0, 1)
     ->count()
