@@ -63,13 +63,13 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getTitle().
+   * Implements TMGMTSourcePluginControllerInterface::getLabel().
    */
-  public function getTitle(TMGMTJobItem $job_item) {
+  public function getLabel(TMGMTJobItem $job_item) {
     if ($node = node_load($job_item->item_id)) {
       return entity_label('node', $node);
     }
-    return parent::getTitle($job_item);
+    return parent::getLabel($job_item);
   }
 
   /**

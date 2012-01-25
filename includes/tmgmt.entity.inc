@@ -243,16 +243,16 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public $translation = array();
 
   /**
-   * Overrides Entity::label()
+   * Overrides Entity::defaultLabel()
    */
-  public function label() {
-    return $this->getSourceController()->getTitle($this);
+  public function defaultLabel() {
+    return $this->getSourceController()->getLabel($this);
   }
 
   /**
-   * Overrides Entity::uri()
+   * Overrides Entity::defaultUri()
    */
-  public function uri() {
+  public function defaultUri() {
     return $this->getSourceController()->getUri($this);
   }
 
@@ -425,9 +425,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Overrides Entity::label().
+   * Overrides Entity::defaultLabel().
    */
-  public function label() {
+  public function defaultLabel() {
     // In some cases we might have a user-defined label.
     if (!empty($this->label)) {
       return $this->label;
@@ -445,9 +445,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Overrides Entity::uri().
+   * Overrides Entity::defaultUri().
    */
-  public function uri() {
+  public function defaultUri() {
     return array('path' => 'admin/config/regional/tmgmt/jobs/' . $this->tjid . '/view');
   }
 
@@ -1113,11 +1113,26 @@ class TMGMTJobMessage extends Entity {
   }
 
   /**
+   * Overrides Entity::label().
+   */
+  public function defaultLabel() {
+    $wrapper = entity_metadata_wrapper($this->entityType, $this);
+    switch ($this->type) {
+      case 'error':
+        return t('Error message from @time', array('@time' => $this->created->label()));
+      case 'status':
+        return t('Status message from @time', array('@time' => $this->created->label()));
+      case 'debug':
+        return t('Debug message from @time', array('@time' => $this->created->label()));
+    }
+  }
+
+  /**
    * Returns the translated message.
    */
   public function getMessage() {
     $text = $this->message;
-    if (is_array($this->variables)) {
+    if (is_array($this->variables) && !empty($this->variables)) {
       $text = t($text, $this->variables);
     }
     return $text;

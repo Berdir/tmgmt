@@ -50,7 +50,7 @@ interface TMGMTSourcePluginControllerInterface {
   /**
    * Return a title for this job item.
    */
-  public function getTitle(TMGMTJobItem $job_item);
+  public function getLabel(TMGMTJobItem $job_item);
 
   /**
    * Returns the Uri for this job item.
@@ -94,9 +94,9 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getTitle().
+   * Implements TMGMTSourcePluginControllerInterface::getLabel().
    */
-  public function getTitle(TMGMTJobItem $job_item) {
+  public function getLabel(TMGMTJobItem $job_item) {
     return t('@plugin item unavailable (@item)', array('@plugin' => $this->pluginInfo['label'], '@item' => $job_item->item_type . ':' . $job_item->item_id));
   }
 

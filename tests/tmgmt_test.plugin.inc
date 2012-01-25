@@ -88,9 +88,9 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
 class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController {
 
   /**
-   * Overrides TMGMTDefaultSourcePluginController::getTitle().
+   * Overrides TMGMTDefaultSourcePluginController::getLabel().
    */
-  public function getTitle(TMGMTJobItem $job_item) {
+  public function getLabel(TMGMTJobItem $job_item) {
     return $this->pluginType . ':' . $job_item->item_type . ':' . $job_item->item_id;
   }
 

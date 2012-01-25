@@ -119,7 +119,6 @@ function tmgmt_entity_info() {
     'views controller class' => 'TMGMTJobItemViewsController',
     'entity class' => 'TMGMTJobItem',
     'base table' => 'tmgmt_job_item',
-    'uri callback' => 'entity_class_uri',
     'label callback' => 'entity_class_label',
     'access callback' => 'tmgmt_job_attachment_access',
     'entity keys' => array(
@@ -134,7 +133,6 @@ function tmgmt_entity_info() {
     'views controller class' => 'TMGMTJobMessageViewsController',
     'entity class' => 'TMGMTJobMessage',
     'base table' => 'tmgmt_job_message',
-    'uri callback' => 'entity_class_uri',
     'label callback' => 'entity_class_label',
     'access callback' => 'tmgmt_job_attachment_access',
     'entity keys' => array(
