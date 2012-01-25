@@ -115,16 +115,33 @@ function tmgmt_local_translator_job_item_form($form, &$form_state, $job, $item) 
   $form['job_item'] = array('#type' => 'value', '#value' => $item);
   $data = $item->getSourceData();
   $translation = $item->translation;
+  $wrapper_id = 'translate-translate-job-item-' . $item->tjiid;
   $form['text'] = tmgmt_local_translator_job_item_subform($data, $translation);
+  $form['text']['#prefix'] = "<div id=\"$wrapper_id\">";
+  $form['text']['#suffix'] = '</div>';
   $form['text']['#type'] = 'fieldset';
   $form['text']['#collapsible'] = TRUE;
-  $form['text']['#collapsed'] = TRUE;
+  //$form['text']['#collapsed'] = TRUE;
   $form['text']['#group'] = 'vertical';
-  $form['text']['controls']['save'] = array('#type' => 'submit', '#value' => t('Save translation'));
+  $form['text']['controls']['save'] = array(
+  	'#type' => 'submit',
+  	'#value' => t('Save item'),
+    '#ajax' => array(
+      'callback' => 'tmgmt_local_translator_job_item_callback',
+      'wrapper' => $wrapper_id,
+      'method' => 'replace',
+    ),
+  );
   $form['#attributes'] = array('class' => array('tmgmt-job-item'));
   return $form;
 }
 
+/**
+ * Ajax callback after saving job item
+ */
+function tmgmt_local_translator_job_item_callback($form, $form_state) {
+  return $form['text'];
+}
 /**
  * Build subform for translating single text
  */
@@ -170,7 +187,7 @@ function tmgmt_local_translator_job_item_form_submit($form, &$form_state) {
   if ($translation) {
     $item->addTranslatedData($translation);
     //$job->needsReview();
-    drupal_set_message(t('Your translation has been submitted'));
+    drupal_set_message(t('Your item translation has been saved'));
   }
 }
 
@@ -180,7 +197,7 @@ function tmgmt_local_translator_job_item_form_submit($form, &$form_state) {
 function tmgmt_local_translator_job_item_strings($source, $values) {
   $translation = array();
   if (isset($source['#text']) && !empty($values['translation'])) {
-    $translation['#text'] = $source['#text'];
+    $translation['#text'] = $values['translation'];
   }
   foreach (element_children($source) as $key) {
     if (isset($values[$key])) {
