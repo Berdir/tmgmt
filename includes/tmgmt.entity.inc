@@ -1122,14 +1122,16 @@ class TMGMTJobMessage extends Entity {
    * Overrides Entity::label().
    */
   public function defaultLabel() {
-    $wrapper = entity_metadata_wrapper($this->entityType, $this);
+    $created = format_date($this->created);
     switch ($this->type) {
       case 'error':
-        return t('Error message from @time', array('@time' => $this->created->label()));
+        return t('Error message from @time', array('@time' => $created));
       case 'status':
-        return t('Status message from @time', array('@time' => $this->created->label()));
+        return t('Status message from @time', array('@time' => $created));
+      case 'warning':
+        return t('Warning message from @time', array('@time' => $created));
       case 'debug':
-        return t('Debug message from @time', array('@time' => $this->created->label()));
+        return t('Debug message from @time', array('@time' => $created));
     }
   }
 
