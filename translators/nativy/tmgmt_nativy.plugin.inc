@@ -196,6 +196,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
         // Since response is not valid XML we take out the nonsense par of it (schema)
         // Note it has nothing to do with the documented theoretical response.
         $content = array_pop(explode('</xs:schema>', $content));
+        dpm($content);
         $document = new SimpleXMLElement($content);
         return $document;
       }

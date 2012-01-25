@@ -64,18 +64,19 @@ function tmgmt_nativy_process_callback() {
       }
       elseif ($controller->retrieveTranslation($job)) {
         $items[] = t('Your translation has been retrieved successfully.');
+        drupal_set_message(t('Retrieved translation for job @jobid.', array('@jobid' => $job->tjid)));
       }
       else {
-        $items[] = t('We cannot retrieve your translation.');
+        drupal_set_message(t('We cannot retrieve your translation.'), 'warning');
       }
 
     }
     else {
-      $items[] = t('Cannot find a translation job matching that order id');
+      drupal_set_message(t('Cannot find a translation job matching that order id'), 'warning');
     }
   }
   else {
-    $items[] = t('We cannot find your order id.');
+    drupal_set_message(t('We cannot find your order id.'), 'error');
   }
   $build['steps'] = array(
     '#theme' => 'item_list',
