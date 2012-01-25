@@ -344,13 +344,13 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_ui'));
+    parent::setUp(array('tmgmt_ui', 'tmgmt_file'));
   }
 
   /**
-   * Test the page callback to create a job cart and
+   * Test the page callbacks to create jobs and check them out.
    */
-  function testCheckout() {
+  function dtestCheckoutForm() {
 
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
     $this->drupalLogin($this->admin_user);
@@ -500,6 +500,53 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     // Attempt to add items to a non-existing job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/en/test_source/test/5/' . ($tjid + 1));
     $this->assertResponse(404);
+  }
+
+  /**
+   * Tests the tmgmt_ui_job_checkout() function.
+   */
+  function testCheckoutFunction() {
+    $job = $this->createJob();
+
+    // Check out a job when only the test translator is available. That one has
+    // settings, so a checkout is necessary.
+    $redirect = tmgmt_ui_job_checkout(array($job));
+    $uri = $job->uri();
+    $this->assertEqual($uri['path'] . '/manage', $redirect);
+    $this->assertTrue($job->isNew());
+    $job->delete();
+
+    // Delete the test translator, create a file translator. This should check
+    // out immediatly.
+    $test_translator = tmgmt_translator_load('test_translator');
+    $test_translator->delete();
+    $file_translator = $this->createTranslator();
+    $file_translator->translator_plugin = 'html';
+    $job = $this->createJob();
+    $file_translator->save();
+
+    $redirect = tmgmt_ui_job_checkout(array($job));
+    $this->assertFalse($redirect);
+    $this->assertTrue($job->isSubmitted());
+
+    // A job without target language needs to be checked out.
+    $job = $this->createJob('en', '');
+    $redirect = tmgmt_ui_job_checkout(array($job));    $uri = $job->uri();
+    $this->assertEqual($uri['path'] . '/manage', $redirect);
+    $this->assertTrue($job->isNew());
+
+    // Create a second file translator. This should check
+    // out immediatly.
+    $job = $this->createJob();
+
+    $file_translator2 = $this->createTranslator();
+    $file_translator2->translator_plugin = 'html';
+    $file_translator2->save();
+
+    $redirect = tmgmt_ui_job_checkout(array($job));
+    $uri = $job->uri();
+    $this->assertEqual($uri['path'] . '/manage', $redirect);
+    $this->assertTrue($job->isNew());
   }
 }
 

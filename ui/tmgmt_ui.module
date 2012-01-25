@@ -199,6 +199,7 @@ function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
   // @todo: This doesn't actually work yet because that function just alters
   // the labels.
   $translators = tmgmt_translator_filtered_by_language($job->source_language, $job->target_language);
+  debug($translators);
   if (count($translators) > 1) {
     return TRUE;
   }
