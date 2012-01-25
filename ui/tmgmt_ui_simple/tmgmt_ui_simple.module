@@ -236,7 +236,7 @@ function tmgmt_ui_simple_translate_list_form($form, &$form_state, $params, $item
  * Implements hook_node_operations().
  */
 function tmgmt_ui_simple_node_operations() {
-  if (module_exists('tgmt_node')) {
+  if (module_exists('tmgmt_node')) {
     $operations = array(
       'translate_simple' => array(
         'label' => t('Translate selected content'),
