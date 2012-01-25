@@ -404,7 +404,7 @@ function tmgmt_update_7010() {
     'length' => 128,
     'not null' => TRUE,
   ));
-  db_change_field('tmgmt_job_item', 'plugin', 'plugin', array(
+  db_change_field('tmgmt_job_item', 'source_plugin', 'plugin', array(
     'description' => 'Indicates the plugin which provides this item.',
     'type' => 'varchar',
     'length' => 128,
