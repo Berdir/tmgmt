@@ -4,6 +4,7 @@
  * @file
  * Main module file for the Translation Management module.
  */
+
 /**
  * @addtogroup tmgmt_job
  * @{
@@ -17,21 +18,13 @@
 define('TMGMT_JOB_STATE_NEW', 0);
 
 /**
- * A prepared translation job, not yet submitted to a translator.
- *
- * Before a job can be submitted, he needs to be marked as prepared. This is
- * handled automatically be the default checkout form.
- */
-define('TMGMT_JOB_STATE_PREPARED', 1);
-
-/**
  * A translation job that has been submitted to the translator.
  *
  * Translator plugins are responsible for setting this state in their
  * implementation of
  * TMGMTTranslatorPluginControllerInterface::requestTranslation().
  */
-define('TMGMT_JOB_STATE_SUBMITTED', 2);
+define('TMGMT_JOB_STATE_SUBMITTED', 1);
 
 /**
  * A translation job that has been rejected by the translator.
@@ -42,7 +35,7 @@ define('TMGMT_JOB_STATE_SUBMITTED', 2);
  *
  * A rejected job can be re-submitted.
  */
-define('TMGMT_JOB_STATE_REJECTED', 3);
+define('TMGMT_JOB_STATE_REJECTED', 2);
 
 /**
  * The translation job was translated and needs to be reviewed.
@@ -50,7 +43,7 @@ define('TMGMT_JOB_STATE_REJECTED', 3);
  * This state needs to be set by the translator plugin once the job has been
  * completely translated.
  */
-define('TMGMT_JOB_STATE_REVIEW', 4);
+define('TMGMT_JOB_STATE_REVIEW', 3);
 
 /**
  * The translation has been accepted and the job is finished.
@@ -58,7 +51,7 @@ define('TMGMT_JOB_STATE_REVIEW', 4);
  * Once the job has been accepted, the source plugins are called to update their
  * sources with the translated data.
  */
-define('TMGMT_JOB_STATE_ACCEPTED', 5);
+define('TMGMT_JOB_STATE_ACCEPTED', 4);
 
 /**
  * The translation job has been cancelled.
@@ -67,14 +60,14 @@ define('TMGMT_JOB_STATE_ACCEPTED', 5);
  * the translator plugin is asked if this translation can be cancelled and needs
  * to confirm it by returning TRUE in cancelTranslation().
  */
-define('TMGMT_JOB_STATE_CANCELLED', 6);
+define('TMGMT_JOB_STATE_CANCELLED', 5);
 
 /**
  * The translation job has been finished.
  *
  * Not yet used.
  */
-define('TMGMT_JOB_STATE_FINISHED', 7);
+define('TMGMT_JOB_STATE_FINISHED', 6);
 
 /**
  * @} End of "addtogroup tmgmt_job".
@@ -141,7 +134,6 @@ function tmgmt_entity_info() {
     'views controller class' => 'TMGMTJobMessageViewsController',
     'entity class' => 'TMGMTJobMessage',
     'base table' => 'tmgmt_job_message',
-    'uri callback' => 'entity_class_uri',
     'label callback' => 'entity_class_label',
     'access callback' => 'tmgmt_job_attachment_access',
     'entity keys' => array(
@@ -612,7 +604,7 @@ function tmgmt_translator_busy($translator) {
   return (boolean) $query->entityCondition('entity_type', 'tmgmt_job')
   // @todo is TMGMT_JOB_STATE_SUBMITTED really the only state in which we
   // don't want our translator to be modified or deleted?
-    ->propertyCondition('state', TMGMT_JOB_STATE_ACCEPTED, '!=')
+    ->propertyCondition('state', TMGMT_JOB_STATE_ACCEPTED, '')
     ->range(0, 1)
     ->count()
     ->execute();
