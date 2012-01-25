@@ -42,8 +42,10 @@ function tmgmt_local_translator_job_form($form, &$form_state, $job) {
   $form['job'] = array('#type' => 'value', '#value' => $job);
   $form['controls'] = array(
     '#type' => 'fieldset',
+    '#title' => $job->defaultLabel(),
   );
   $languages = locale_language_list('name', TRUE);
+  $states = tmgmt_job_states();
   $form['controls']['source'] = array(
     '#type' => 'item',
     '#title' => t('From'),
@@ -54,23 +56,55 @@ function tmgmt_local_translator_job_form($form, &$form_state, $job) {
     '#title' => t('To'),
     '#markup' => $languages[$job->target_language],
   );
+  // Now depending on state we may have different actions
+  $state = $job->getState();
   $form['controls']['state'] = array(
-  	'#type' => 'select',
-    '#options' => tmgmt_job_states(),
-    '#default_value' => $job->getState(),
+  	'#type' => 'item',
+    '#title' => t('State'),
+    '#markup' => $states[$state],
   );
-  $form['controls']['submit'] = array('#type' => 'submit', '#value' => t('Submit job'));
+  // @todo Check permissions and limit what we can do with this form.
+  switch ($state) {
+    case TMGMT_JOB_STATE_SUBMITTED:
+      $action = t('Submit translation');
+      break;
+    case TMGMT_JOB_STATE_NEW:
+      $action = t('Request translation');
+      break;
+    case TMGMT_JOB_STATE_REVIEW:
+      $action = t('Approve translation');
+      break;      
+  }
+  if (!empty($action)) {
+    $form['controls']['submit'] = array(
+    	'#type' => 'submit', 
+    	'#value' => $action,
+    );
+  }
   return $form;
 }
 
 /**
  * Job form for submitting to review.
+ * 
+ * @todo Proper logging, user names, etc..
  */
 function tmgmt_local_translator_job_form_submit($form, &$form_state) {
   $job = $form_state['values']['job'];
-  $job->setState($form_state['values']['state']);
-  $job->save();
-  drupal_set_message(t('The translation job has been submitted.'));
+  switch ($form_state['values']['op']) {
+    case t('Submit translation'):
+      $job->needsReview(t('The job has been translated by a local translator.'));
+      drupal_set_message(t('The translation has been submitted.'));
+      break;
+    case t('Request translation'):
+      $job->requestTranslation();
+      drupal_set_message(t('The job has been submitted for translation.'));
+      break;
+    case t('Approve translation'):
+      $job->finished(t('The translation has been approved by a local translator.'));
+      drupal_set_message(t('The translation has been approved.'));
+      break;      
+  }  
 }
 
 /**
