@@ -254,22 +254,24 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       'wrapper' => 'tmgmt-translator-settings',
     ),
   );
+  // Display the checkout settings form if the job can be checked out.
   if (!$job->isSubmitted() && !$job->isAccepted() && !$job->isNeedsReview()) {
     $form['translator_wrapper']['settings'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Translator checkout settings'),
+      '#title' => t('Checkout settings'),
       '#prefix' => '<div id="tmgmt-translator-settings">',
       '#suffix' => '</div>',
       '#tree' => TRUE,
     );
-    // Add the job settings form.
     $form['translator_wrapper']['settings'] += tmgmt_ui_checkout_settings_form(array(), $form_state, $job);
   }
-  if ($info = $job->getInfo()) {
-    $form['translator_wrapper']['info'] = $info + array(
+  // Otherwise display the checkout info form.
+  else {
+    $form['translator_wrapper']['info'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Information about this translation job'),
+      '#title' => t('Checkout information'),
     );
+    $form['translator_wrapper']['info'] += $job->getInfo();
   }
   // Add the buttons and action links.
   $form['actions']['#type'] = 'actions';

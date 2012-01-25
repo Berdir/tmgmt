@@ -246,14 +246,20 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * Overrides Entity::defaultLabel()
    */
   public function defaultLabel() {
-    return $this->getSourceController()->getLabel($this);
+    if ($controller = $this->getSourceController()) {
+      return $this->getSourceController()->getLabel($this);
+    }
+    return FALSE;
   }
 
   /**
    * Overrides Entity::defaultUri()
    */
   public function defaultUri() {
-    return $this->getSourceController()->getUri($this);
+    if ($controller = $this->getSourceController()) {
+      return $this->getSourceController()->getUri($this);
+    }
+    return FALSE;
   }
 
   /**
