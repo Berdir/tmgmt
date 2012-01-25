@@ -74,7 +74,7 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
   );
   // As keys are numeric, we assume languages are in the same order, need to rekey rows
   $language_list = module_exists('i18n_node') ? i18n_node_language_list($node) : locale_language_list();
-  $jobs = tmgmt_job_load_by_source($form['source_plugin']['#value'], $form['item_type']['#value'], $form['item_id']['#value'], $form['source_language']['#value'], array_keys($language_list));
+  $jobs = tmgmt_job_load_multiple_by_source($form['source_plugin']['#value'], $form['item_type']['#value'], $form['item_id']['#value'], $form['source_language']['#value'], array_keys($language_list));
   $running_jobs = array();
   foreach ($language_list as $langcode => $language_name) {
     if ($langcode == LANGUAGE_NONE) {
@@ -123,10 +123,8 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   if ($languages = array_filter($values['languages'])) {
     // Request a job for every selected language
-    $count = 0;
-    $tjids = array();
+    $jobs = array();
     foreach (array_keys($languages) as $langcode) {
-      $count++;
       // Create the job object.
       $job = tmgmt_job_create($values['source_language'], $langcode);
       // Create job items and add them to the job. This may take a single value or an array of item_id's.
@@ -134,21 +132,25 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       foreach ($items as $item_id) {
         $job->addItem($values['source_plugin'], $values['item_type'], $item_id);
       }
-      $job->setState(TMGMT_JOB_STATE_NEW);
-      $tjids[] = $job->identifier();
       $job->save();
+      $jobs[] = $job;
       // Print a message to the screen and redirect the user.
     }
-    $form_state['redirect'] = array(
-      'admin/config/regional/tmgmt/jobs/' . implode(',', $tjids) . '/manage',
-      array(
-        // @fixme: drupal_get_destination returns a string here so it's not usuable.
-        'query' => array(
-          'destination' => $_GET['q'],
+
+    $redirect = tmgmt_ui_job_checkout($jobs);
+
+    // If necessary, do a redirect.
+    if ($redirect) {
+      $form_state['redirect'] = array(
+        $redirect,
+        array(
+          // @fixme: drupal_get_destination returns a string here so it's not usuable.
+          'query' => array(
+            'destination' => $_GET['q'],
+          ),
         ),
-      ),
-    );
-    drupal_set_message(format_plural($count, 'A translation job has been created. you will need to configure them now.', '@count translation jobs have been created.'));
+      );
+    }
   } else {
     drupal_set_message(t('You need to select one or more languages for requesting a translation.'), 'warning');
   }

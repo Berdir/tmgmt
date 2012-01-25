@@ -147,6 +147,16 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
+   * Returns if the plugin has any settings for this job.
+   */
+  public function hasCheckoutSettings(TMGMTJob $job) {
+    if ($controller = $this->getPluginController()) {
+      return $controller->hasCheckoutSettings($job);
+    }
+    return FALSE;
+  }
+
+  /**
    * @todo
    */
   public function getNotAvailableReason() {
