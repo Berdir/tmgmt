@@ -516,18 +516,16 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertTrue($job->isNew());
     $job->delete();
 
-    // Delete the test translator, create a file translator. This should check
-    // out immediatly.
-    $test_translator = tmgmt_translator_load('test_translator');
-    $test_translator->delete();
-    $file_translator = $this->createTranslator();
-    $file_translator->translator_plugin = 'html';
+    // Hide settings on the test translator.
+    $default_translator = tmgmt_translator_load('test_translator');
+    $default_translator->settings = array(
+      'expose_settings' => FALSE,
+    );
     $job = $this->createJob();
-    $file_translator->save();
 
     $redirect = tmgmt_ui_job_checkout(array($job));
     $this->assertFalse($redirect);
-    $this->assertTrue($job->isSubmitted());
+    $this->assertTrue($job->isNeedsReview());
 
     // A job without target language needs to be checked out.
     $job = $this->createJob('en', '');
@@ -539,9 +537,11 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     // out immediatly.
     $job = $this->createJob();
 
-    $file_translator2 = $this->createTranslator();
-    $file_translator2->translator_plugin = 'html';
-    $file_translator2->save();
+    $second_translator = $this->createTranslator();
+    $second_translator->settings = array(
+      'expose_settings' => FALSE,
+    );
+    $second_translator->save();
 
     $redirect = tmgmt_ui_job_checkout(array($job));
     $uri = $job->uri();
