@@ -97,4 +97,11 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     return parent::pluginSettingsForm($form, $form_state, $translator);
   }
 
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
+   */
+  public function hasCheckoutSettings(TMGMTJob $job) {
+    return FALSE;
+  }
+
 }

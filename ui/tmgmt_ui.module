@@ -134,22 +134,37 @@ function _tmgmt_ui_load_all_exports($module, $directory, $extension, $name = NUL
   return $return;
 }
 
+/**
+ * Attempts to check out a number of jobs.
+ *
+ * Performs a number of checks on each job and also allows to alter the behavior
+ * through hooks.
+ *
+ * @param $jobs
+ *   The jobs to be checked out.
+ * @return string
+ */
 function tmgmt_ui_job_checkout(array $jobs) {
   $redirects = array();
+
+  // Allow other modules to jump in and eg. auto-checkout with rules or use a
+  // customized checkout form.
+  drupal_alter('tmgmt_ui_job_checkout_before', $redirects, $jobs);
 
   foreach ($jobs as $job) {
     /* @var $job TMGMTJob */
 
-    // @todo: Dummy code. Update once the entity UI controller is in.
-    if (!user_access('checkout tmgmt job')) {
-      // User does not have permissions to actually check out. Just mark them as
-      // prepared and be done with it.
-      $job->prepared('Job %label prepared for checkout.', array('%label' => $job->label()));
+    if (!$job->isNew()) {
+      // Job is already checked out, just ignore that one. This could happen
+      // if jobs have already been submitted in the before hook.
       continue;
     }
 
+    // @todo: Add permission checks.
+
     if (tmgmt_ui_job_needs_checkout_form($job)) {
-      $redirects[] = $job->uri() . '/checkout';
+      $uri = $job->uri();
+      $redirects[] = $uri['path'] . '/manage';
     }
     else {
       // No manual checkout required. Request translations now.
@@ -157,16 +172,22 @@ function tmgmt_ui_job_checkout(array $jobs) {
     }
   }
 
-  // Allow other modules to jump in and act.
-  drupal_alter('tmgmt_ui_job_checkout', $redirects, $jobs);
+  // Allow other modules to jump in and eg. auto-checkout with rules or use a
+  // customized checkout form.
+  drupal_alter('tmgmt_ui_job_checkout_after', $redirects, $jobs);
 
-
-  return $redirects;
+  // @todo Find a way to deal with multi-redirects.
+  return $redirects ? reset($redirects) : FALSE;
 }
 
 /**
+ * Check if a job needs a checkout form.
  *
- * @param TMGMTJob $job
+ * The current checks include if there is more than one translator available,
+ * if he has settings and if the job has a fixed target language.
+ *
+ * @return
+ *   TRUE if the job needs a checkout form.
  */
 function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
   // If the job has no target language set, checkout is mandatory.
@@ -183,14 +204,27 @@ function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
   }
 
   // If that translator has settings, the checkout is mandatory.
-  // @todo: Maybe introduce a hasJobSettings($job) method for translators?
-  $settings = reset($translators)->getJobSettingsForm(array(), array(), $job);
+  $translator_name = key($translators);
+  $translator = tmgmt_translator_load($translator_name);
+  $job->translator = $translator_name;
+  $settings = $translator->hasCheckoutSettings($job);
   if (!empty($settings)) {
     return TRUE;
   }
   return FALSE;
 }
 
+/**
+ * Requests translations for a job and prints messages which have happened since
+ * then.
+ *
+ * @param TMGMTJob $job
+ *   The job object for which translations should be requested.
+ *
+ * @return
+ *   TRUE if it worked, FALSE if there were any errors of the type error which
+ *   means that something did go wrong.
+ */
 function tmgmt_ui_job_request_translation(TMGMTJob $job) {
   $job->requestTranslation();
 
@@ -209,5 +243,5 @@ function tmgmt_ui_job_request_translation(TMGMTJob $job) {
     }
     drupal_set_message(filter_xss($text), $message->type);
   }
-  return $had_error;
+  return !$had_error;
 }

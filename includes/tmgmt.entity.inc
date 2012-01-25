@@ -147,6 +147,16 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
+   * Returns if the plugin has any settings for this job.
+   */
+  public function hasCheckoutSettings(TMGMTJob $job) {
+    if ($controller = $this->getPluginController()) {
+      return $controller->hasCheckoutSettings($job);
+    }
+    return FALSE;
+  }
+
+  /**
    * @todo
    */
   public function getNotAvailableReason() {
@@ -454,7 +464,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Overrides Entity::defaultUri().
    */
   public function defaultUri() {
-    return array('path' => 'admin/config/regional/tmgmt/jobs/' . $this->tjid . '/view');
+    return array('path' => 'admin/config/regional/tmgmt/jobs/' . $this->tjid);
   }
 
   /**

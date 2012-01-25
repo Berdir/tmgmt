@@ -52,5 +52,12 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
     return array_flip($list);
   }
 
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
+   */
+  public function hasCheckoutSettings(TMGMTJob $job) {
+    return FALSE;
+  }
+
 }
 
