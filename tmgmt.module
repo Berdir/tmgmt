@@ -721,7 +721,7 @@ function tmgmt_translator_plugin_labels() {
 function tmgmt_translator_labels() {
   $labels = array();
   foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
-    $labels[$translator->identifier()] = $translator->label();
+    $labels[$translator->name] = $translator->label();
   }
   return $labels;
 }
@@ -740,13 +740,13 @@ function tmgmt_translator_filtered_by_language($source_language, $selected_targe
   foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
     switch (tmgmt_translator_check($translator, $source_language, $selected_target_language)) {
       case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-        $translators[$translator->identifier()] = t('@label (not available)', array('@label' => $translator->label()));
+        $translators[$translator->name] = t('@label (not available)', array('@label' => $translator->label()));
         break;
       case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-        $translators[$translator->identifier()] = t('@label (not available for this language)', array('@label' => $translator->label()));
+        $translators[$translator->name] = t('@label (not available for this language)', array('@label' => $translator->label()));
         break;
       default:
-        $translators[$translator->identifier()] = $translator->label();
+        $translators[$translator->name] = $translator->label();
     }
   }
   return $translators;

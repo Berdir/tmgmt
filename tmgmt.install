@@ -398,12 +398,7 @@ function tmgmt_update_7009() {
  */
 function tmgmt_update_7010() {
   // Rename 'translated_data' to 'translation'.
-  db_change_field('tmgmt_translator', 'translator_plugin', 'plugin', array(
-    'description' => 'Name of the translator service plugin.',
-    'type' => 'varchar',
-    'length' => 128,
-    'not null' => TRUE,
-  ));
+
   db_change_field('tmgmt_job_item', 'source_plugin', 'plugin', array(
     'description' => 'Indicates the plugin which provides this item.',
     'type' => 'varchar',
