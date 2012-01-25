@@ -424,7 +424,7 @@ function tmgmt_job_item_load($tjiid) {
  * @return TMGMTJobItem
  *   The loaded job items.
  */
-function tmgmt_job_item_load_by_source($source_plugin, $item_type, $item_id, $source_language, $target_languages = array()) {
+function tmgmt_job_load_by_source($source_plugin, $item_type, $item_id, $source_language, $target_languages = array()) {
   if (empty($target_languages)) {
     $available_languages = entity_metadata_language_list();
     unset($available_languages[LANGUAGE_NONE], $available_languages[$source_language]);
