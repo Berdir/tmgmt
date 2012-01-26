@@ -174,11 +174,23 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   // Get the job metadata wrapper so we can display the current status nicely.
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
   // Show the items that are attached to this job if there are not more than 20.
+
+  $form['override_label'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Override the default label (%label)', array('%label' => $job->label())),
+    '#default_value' => !empty($job->label),
+  );
+
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
     '#description' => t('You can provide a label for this job in order to identify it easily later on.'),
     '#default_value' => $job->label,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="override_label"]' => array('checked' => TRUE),
+      )
+    )
   );
   // Show the current state of the job.
   $form['state'] = array(
@@ -305,30 +317,19 @@ function tmgmt_job_form_submit($form, &$form_state) {
   // Build up the job from the submitted form values and save here so we got the
   // plain 'Submit' case covered. Also, if the translator fails it won't save on
   // its own.
-  entity_ui_form_submit_build_entity($form, $form_state)->save();
+  $job = entity_ui_form_submit_build_entity($form, $form_state);
+  if (!$form_state['values']['override_label']) {
+    // Make sure the job label is empty if the override checkbox isn't checked.
+    $job->label = '';
+  }
+  $job->save();
+
   // Per default we want to redirect the user to the overview.
   $form_state['redirect'] = 'admin/config/regional/tmgmt';
-  // This is now the job that we previously saved.
-  $job = $form_state[$form_state['entity_type']];
   // Everything below this line is only invoked if the 'Submit to translator'
   // button was clicked.
   if ($form_state['triggering_element']['#value'] == t('Submit to translator')) {
-    // Request the job to be translated.
-    $job->requestTranslation();
-    // Print all messages to the screen and redirect the user.
-    foreach ($job->getMessagesSince() as $message) {
-      // Ignore debug messages.
-      if ($message->type == 'debug') {
-        continue;
-      }
-      if ($message->type == 'error') {
-        // There was an error, so redirect the user to the job. This is the
-        // default behavior, so we just need to clear the previously set
-        // redirect.
-        $form_state['redirect'] = NULL;
-      }
-      drupal_set_message(filter_xss($message->getMessage()), $message->type);
-    }
+    tmgmt_ui_job_request_translation($job);
   }
 }
 
