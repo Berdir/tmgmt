@@ -110,10 +110,10 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * The translation plugin will then request the text from the source plugin.
  * Depending on the plugin, the text might be sent to an external service
  * or assign it to a local user or team of users. At some point, a translation
- * will be returned and saved in the translation.
+ * will be returned and saved in the job items.
  *
  * The translation can now be reviewed, accepted and the source plugins be told
- * // to save the translation.
+ * to save the translation.
  *
  * @code
  * $job->accepted('Optional message');
