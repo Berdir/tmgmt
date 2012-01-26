@@ -54,7 +54,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
     else {
       $options['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
       $options['data'] = drupal_http_build_query(array(
-        'api_key' => $translator->getSetting(),
+        'api_key' => $translator->getSetting('api_public_key'),
         'api_sig' => hash_hmac('sha1', $timestamp, $translator->getSetting('api_private_key')),
         'ts' => $timestamp,
         'data' => json_encode($data)
@@ -209,13 +209,13 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
     $form['api_public_key'] = array(
       '#type' => 'textfield',
       '#title' => t('myGengo API Public key'),
-      '#default_value' => $translator->getSetting('api_public_key', ''),
+      '#default_value' => $translator->getSetting('api_public_key'),
       '#description' => t('Please enter yout myGengo API Public key.'),
     );
     $form['api_private_key'] = array(
       '#type' => 'textfield',
       '#title' => t('myGengo API Private key'),
-      '#default_value' => $translator->getSetting('api_private_key', ''),
+      '#default_value' => $translator->getSetting('api_private_key'),
       '#description' => t('Please enter your myGengo API Private key.'),
     );
     return parent::pluginSettingsForm($form, $form_state, $translator);
@@ -244,7 +244,6 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
       $sum_credits = $sum_credits + $mygengo_job->credits;
       $highest_eta = ($mygengo_job->eta > $highest_eta) ? $mygengo_job->eta : $highest_eta;
     }
-
 
     $settings['word_count'] = array(
       '#type' => 'item',

@@ -100,7 +100,6 @@ define('TMGMT_JOB_ITEM_STATE_REVIEW', 2);
  * Is accepted.
  */
 define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
-
 /**
  * @} End of "addtogroup tmgmt_job".
  */
@@ -109,21 +108,6 @@ define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
  * String used to delimit flattened array keys.
  */
 define('TMGMT_ARRAY_DELIMITER', '][');
-
-/**
- * The selected translator is available for the target language.
- */
-define('TMGMT_TRANSLATOR_AVAILABLE', 0);
-
-/**
- * The selected translator is not available yet.
- */
-define('TMTGT_TRANSLATOR_NOT_AVAILABLE', 1);
-
-/**
- * The selected translator is not available for the selected language.
- */
-define('TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE', 2);
 
 /**
  * Implements hook_entity_info().
@@ -200,10 +184,6 @@ function tmgmt_permission() {
   $perms = array();
   $perms['administer tmgmt'] = array(
     'title' => t('Administer Translation Management'),
-  );
-  // @todo Remove this access check once entity access is finished.
-  $perms['access tmgmt ui'] = array(
-    'title' => t('Access Translation Management UI'),
   );
   return $perms;
 }
@@ -652,8 +632,15 @@ function tmgmt_translator_load($name) {
 /**
  * Loads translation maps.
  */
-function tmgmt_translator_load_multiple($names = array(), $conditions = array()) {
-  return entity_load_multiple_by_name('tmgmt_translator', $names, $conditions);
+function tmgmt_translator_load_multiple($names = array()) {
+  return entity_load_multiple_by_name('tmgmt_translator', $names);
+}
+
+/**
+ * Loads translation maps.
+ */
+function tmgmt_translator_load_all() {
+  return entity_load('tmgmt_translator', FALSE);
 }
 
 /**
@@ -718,7 +705,7 @@ function tmgmt_translator_auto_create($plugin) {
       $label = $info['label'] . ' (auto created)';
       $translator = tmgmt_translator_create($plugin, $plugin, $label, $info['description']);
       // Append some default settings from the translator plugin definition.
-      $translator->settings = $translator->getPluginController()->defaultPluginSettings();
+      $translator->settings = $translator->getPluginController()->defaultSettings();
       $translator->save();
     }
   }
@@ -763,60 +750,47 @@ function tmgmt_translator_plugin_labels() {
 }
 
 /**
- * Returns a list of translator labels.
+ * Returns a list of all available translator labels.
+ *
+ * @return array
+ *   An array containing all available translator labels.
  */
 function tmgmt_translator_labels() {
   $labels = array();
-  foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
+  foreach (tmgmt_translator_load_all() as $translator) {
     $labels[$translator->name] = $translator->label();
   }
   return $labels;
 }
 
 /**
- * @todo Lets see if we can make this work in a better way.
+ * Returns a list of flagged translator labels. If a translator is not available
+ * it will be suffixed with a short text explaining why it is not available.
+ * This can either be because the selected language combination is not supported
+ * or because the translator service can't be reached.
  *
- * @param $plugin
  * @param $source_language
- * @param array $languages
- *   (Optional)
+ *   The source language.
+ * @param $target_language
+ *   The target language.
+ *
  * @return array
+ *   An array of flagged translator labels.
  */
-function tmgmt_translator_filtered_by_language($source_language, $selected_target_language) {
-  $translators = array();
-  foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
-    switch (tmgmt_translator_check($translator, $source_language, $selected_target_language)) {
-      case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-        $translators[$translator->name] = t('@label (not available)', array('@label' => $translator->label()));
-        break;
-      case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-        $translators[$translator->name] = t('@label (not available for this language)', array('@label' => $translator->label()));
-        break;
-      default:
-        $translators[$translator->name] = $translator->label();
+function tmgmt_translator_labels_flagged($source_language, $target_language) {
+  $labels = array();
+  foreach (tmgmt_translator_load_all() as $translator) {
+    if (!$translator->isAvailable()) {
+      $labels[$translator->name] = t('@label (not available)', array('@label' => $translator->label()));
+    }
+    elseif (!array_key_exists($target_language, $translator->getSupportedTargetLanguages($source_language))) {
+      $labels[$translator->name] = t('@label (not available for this language)', array('@label' => $translator->label()));
+    }
+    else {
+      $labels[$translator->name] = $translator->label();
     }
   }
-  return $translators;
-}
-
-/**
- * @todo Lets see if we can make this work in a better way.
- *
- * @param TMGMTTranslator $translator
- * @param $source_language
- * @param $selected_target_language
- * @return int
- */
-function tmgmt_translator_check(TMGMTTranslator $translator, $source_language, $selected_target_language) {
-  if (!$translator->isAvailable()) {
-    return TMTGT_TRANSLATOR_NOT_AVAILABLE;
-  }
-  elseif (array_key_exists($selected_target_language, $translator->getSupportedTargetLanguages($source_language))) {
-    return TMGMT_TRANSLATOR_AVAILABLE;
-  }
-  else {
-    return TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE;
-  }
+  return $labels;
 }
 /**
  * @} End of "addtogroup tmgmt_translator".

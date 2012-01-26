@@ -164,7 +164,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $preselected['translator'] = !empty($job->translator) ? $job->translator : FALSE;
   // Show a list of translators tagged by availability for the selected source
   // and target language combination
-  $translators = tmgmt_translator_filtered_by_language($job->source_language, $job->target_language);
+  $translators = tmgmt_translator_labels_flagged($job->source_language, $job->target_language);
   $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
   $job->target_language = $preselected['target_language'] ? $preselected['target_language'] : (isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available));
   $job->source_language = $preselected['source_language'] ? $preselected['source_language'] : (isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : key($available));
@@ -344,16 +344,14 @@ function tmgmt_job_form_validate($form, &$form_state) {
   $form_state[$form_state['entity_type']] = $backup;
   // Load the selected translator.
   $translator = tmgmt_translator_load($job->translator);
-  // Load the metadata wrapper so we can display the selected language
+  // Load the metadata wrapper so we can display the selected language.
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
-  // @todo Also make this a little bit nicer... The constants look wonky.
-  switch (tmgmt_translator_check($translator, $job->source_language, $job->target_language)) {
-    case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-      form_set_error('translator', t('@translator is not available: @reason.', array('@translator' => $translator->label(), '@reason' => $translator->getNotAvailableReason())));
-      break;
-    case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-      form_set_error('translator', t('@translator can not translate from @source to @target.', array('@translator' => $translator->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())));
-      break;
+  // Check translator availability.
+  if (!$translator->isAvailable()) {
+    form_set_error('translator', t('@translator is not available: @reason.', array('@translator' => $translator->label(), '@reason' => $translator->getNotAvailableReason())));
+  }
+  elseif (!array_key_exists($job->target_language, $translator->getSupportedTargetLanguages($job->source_language))) {
+    form_set_error('translator', t('@translator can not translate from @source to @target.', array('@translator' => $translator->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())));
   }
   if (!$job->isTranslatable()) {
     // @todo Add a generic error message.

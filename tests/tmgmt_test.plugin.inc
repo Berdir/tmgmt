@@ -11,20 +11,18 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
    * Overrides TMGMTDefaultTranslatorPluginController::pluginSettingsForm().
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
-
     $form['expose_settings'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display settings'),
       '#default_value' => TRUE,
     );
-
     return parent::pluginSettingsForm($form, $form_state, $translator);
   }
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::pluginSettingsForm().
+   * Overrides TMGMTDefaultTranslatorPluginController::defaultSettings().
    */
-  public function defaultPluginSettings() {
+  public function defaultSettings() {
     return array(
       'expose_settings' => TRUE,
     );
@@ -62,7 +60,6 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
    * Overrides TMGMTDefaultTranslatorPluginController::requestTranslation().
    */
   function requestTranslation(TMGMTJob $job) {
-
     // Add a debug message.
     $job->addMessage('Test translator called', array(), 'debug');
 

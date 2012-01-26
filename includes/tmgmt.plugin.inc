@@ -221,7 +221,7 @@ interface TMGMTTranslatorPluginControllerInterface {
    * @return array
    *   An array of default settings.
    */
-  public function defaultPluginSettings();
+  public function defaultSettings();
 
   /**
    * Retrieves information about a translation job.
@@ -232,12 +232,12 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function checkoutInfo(TMGMTJob $job);
 
   /**
-   * A plugin can implement this method if it needs a settings form.
+   * Plugin settings form.
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE);
 
   /**
-   * A plugin can implement this method if it needs a job settings form.
+   * Checkout settings form.
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job);
 
@@ -334,23 +334,12 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::defaultCheckoutSettings().
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultSettings().
    */
-  public function defaultCheckoutSettings() {
+  public function defaultSettings() {
     // Check if any default settings are defined in the plugin info.
-    if (isset($this->pluginInfo['default checkout settings'])) {
-      return $this->pluginInfo['default checkout settings'];
-    }
-    return array();
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::defaultPluginSettings().
-   */
-  public function defaultPluginSettings() {
-    // Check if any default settings are defined in the plugin info.
-    if (isset($this->pluginInfo['default plugin settings'])) {
-      return $this->pluginInfo['default plugin settings'];
+    if (isset($this->pluginInfo['default settings'])) {
+      return $this->pluginInfo['default settings'];
     }
     return array();
   }

@@ -39,7 +39,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->setEnvironment('es');
     $this->setEnvironment('el');
 
-    $user = $this->drupalCreateUser(array('access administration pages', 'access tmgmt ui'));
+    $user = $this->drupalCreateUser(array('access administration pages', 'administer tmgmt'));
     $this->drupalLogin($user);
 
     // Add a first item to the job. This will auto-create the job.

@@ -39,13 +39,13 @@ function tmgmt_ui_menu() {
     'title' => 'Translation Management',
     'description' => 'Use the Translation Management',
     'page callback' => 'tmgmt_ui_content',
-    'access arguments' => array('access tmgmt ui'),
+    'access arguments' => array('administer tmgmt'),
     'file' => 'includes/tmgmt_ui.pages.inc',
   );
-  $items['admin/config/regional/tmgmt/my-translation-management'] = array(
+  $items['admin/config/regional/tmgmt/overview'] = array(
     'title' => 'Overview',
     'page callback' => 'tmgmt_ui_content',
-    'access arguments' => array('access tmgmt ui'),
+    'access arguments' => array('administer tmgmt'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
     'weight' => -10,
@@ -54,7 +54,7 @@ function tmgmt_ui_menu() {
     'title' => 'Create a Job',
     'page callback' => 'tmgmt_job_add_item',
     'page arguments' => array(5, 6, 7, 8),
-    'access arguments' => array('access tmgmt ui'),
+    'access arguments' => array('administer tmgmt'),
     'file' => 'includes/tmgmt_ui.pages.inc',
     'type' => MENU_CALLBACK,
   );
@@ -158,25 +158,21 @@ function tmgmt_ui_job_checkout(array $jobs) {
  *   TRUE if the job needs a checkout form.
  */
 function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
-  // If the job has no target language set, checkout is mandatory.
-  if (empty($job->target_language)) {
+  // If the job has no target language (or source language, even though this
+  // should never be the case in our use case), checkout is mandatory.
+  if (empty($job->target_language) || empty($job->source_language)) {
     return TRUE;
   }
-
-  // If there is more than a single translator available, checkout is mandatory.
-  // @todo: This doesn't actually work yet because that function just alters
-  // the labels.
-  $translators = tmgmt_translator_filtered_by_language($job->source_language, $job->target_language);
-  if (count($translators) > 1) {
+  // If there is more than a single translator available or if there are no
+  // translators available at all checkout is mandatory.
+  $translators = tmgmt_translator_available_translators();
+  if (empty($translators) || count($translators) > 1) {
     return TRUE;
   }
-
+  $translator = reset($translators);
+  $job->translator = $translator->name;
   // If that translator has settings, the checkout is mandatory.
-  $translator_name = key($translators);
-  $translator = tmgmt_translator_load($translator_name);
-  $job->translator = $translator_name;
-  $settings = $translator->hasCheckoutSettings($job);
-  if (!empty($settings)) {
+  if ($translator->hasCheckoutSettings($job)) {
     return TRUE;
   }
   return FALSE;
@@ -194,22 +190,21 @@ function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
  *   means that something did go wrong.
  */
 function tmgmt_ui_job_request_translation(TMGMTJob $job) {
+  // Process the translation request.
   $job->requestTranslation();
-
-  // Print a message to the screen and redirect the user.
-  $messages = $job->getMessagesSince(REQUEST_TIME);
-  $had_error = FALSE;
-  foreach ($messages as $message) {
+  // Print all messages that occurred since our request to the screen.
+  $errors = FALSE;
+  foreach ($job->getMessagesSince() as $message) {
     // Ignore debug messages.
     if ($message->type == 'debug') {
       continue;
     }
-
-    $text = $message->getMessage();
     if ($message->type == 'error') {
-      $had_error = TRUE;
+      $errors = TRUE;
     }
-    drupal_set_message(filter_xss($text), $message->type);
+    if ($text = $message->getMessage()) {
+      drupal_set_message(filter_xss($text), $message->type);
+    }
   }
-  return !$had_error;
+  return !$errors;
 }

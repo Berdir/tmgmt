@@ -184,8 +184,8 @@ class TMGMTTranslator extends Entity {
     if (isset($this->settings[$name])) {
       return $this->settings[$name];
     }
-    else if ($controller = $this->getPluginController()) {
-      $defaults = $controller->defaultPluginSettings();
+    elseif ($controller = $this->getPluginController()) {
+      $defaults = $controller->defaultSettings();
       if (isset($defaults[$name])) {
         return $defaults[$name];
       }
@@ -757,7 +757,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       }
     }
     if ($controller = $this->getTranslatorController()) {
-      $defaults = $controller->defaultCheckoutSettings();
+      $defaults = $controller->defaultSettings();
       if (isset($defaults[$name])) {
         return $defaults[$name];
       }
