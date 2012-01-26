@@ -136,7 +136,7 @@ function tmgmt_ui_job_checkout(array $jobs) {
       // Normally I would expect this to catch all failed requests and
       // afterwards send the user through a multistep form which contains the
       // failed elements.
-      
+
       // No manual checkout required. Request translations now.
       tmgmt_ui_job_request_translation($job);
     }

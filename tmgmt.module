@@ -410,9 +410,9 @@ function tmgmt_job_states() {
  */
 function tmgmt_job_item_states() {
   return array(
-    TMGMT_JOB_STATE_WAITING => t('Unfinished'),
-    TMGMT_JOB_STATE_REVIEW => t('Needs review'),
-    TMGMT_JOB_STATE_ACCEPTED => t('Accepted'),
+    TMGMT_JOB_ITEM_STATE_WAITING => t('Unfinished'),
+    TMGMT_JOB_ITEM_STATE_REVIEW => t('Needs review'),
+    TMGMT_JOB_ITEM_STATE_ACCEPTED => t('Accepted'),
   );
 }
 

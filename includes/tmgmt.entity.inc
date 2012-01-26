@@ -347,6 +347,31 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   }
 
   /**
+   * Sets the state of the job item to 'needs review'.
+   */
+  public function needsReview() {
+    $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW);
+    return $this;
+  }
+
+  /**
+   * Updates the state of the job item.
+   *
+   * @param $state
+   *   The new state of the job. Has to be one of the job item state constants.
+   *
+   * @return boolean
+   *   TRUE if the state could be set, FALSE otherwise.
+   */
+  public function setState($state) {
+    // Return TRUE if the state could be set. Return FALSE otherwise.
+    if (array_key_exists($state, tmgmt_job_item_states())) {
+      $this->state = $state;
+    }
+    return $this->state;
+  }
+
+  /**
    * Add translated data to a job item.
    *
    * Note: This does not merge existing data which already exists below the
@@ -366,6 +391,13 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public function addTranslatedData($translation, $key = array()) {
     if (empty($key)) {
       $key = array();
+      // Having no key basically means that we are inserting at the root level
+      // which in return means that the item seems to be fully translated.
+      // In this case we can assume that we can set it to "Needs Review".
+      // This automated state change only works for translation services that
+      // return the entire translated item in one go. Translation services like
+      // MyGengo will need to handle this themselves.
+      $this->needsReview();
     }
     if (!is_array($key)) {
       $key = explode(TMGMT_ARRAY_DELIMITER, $key);
@@ -812,8 +844,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Updates the state of the job.
    *
    * @param $state
-   *   The new state of the job. Has to be one of the state constants defined
-   *   in the state
+   *   The new state of the job. Has to be one of the job state constants.
    *
    * @return boolean
    *   TRUE if the state could be set, FALSE otherwise.
@@ -823,9 +854,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     if (array_key_exists($state, tmgmt_job_states())) {
       $this->old_state = $this->getState();
       $this->state = $state;
-      return TRUE;
     }
-    return FALSE;
+    return $this->state;
   }
 
   /**
