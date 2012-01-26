@@ -58,6 +58,14 @@ class TMGMTMicrosoftTestCase extends TMGMTBaseTestCase {
     $translator->settings['api'] = 'wrong key';
     $translator->save();
 
+    // Make sure the translator returns the correct supported languages.
+    $languages = $job->getTranslatorController()->getSupportedLanguages($job->getTranslator());
+    $this->assertTrue(isset($languages['en']));
+    $this->assertTrue(isset($languages['zh-hans']));
+    $this->assertTrue(isset($languages['zh-hant']));
+    $this->assertFalse(isset($languages['zh-CHS']));
+    $this->assertFalse(isset($languages['zh-CHT']));
+
     // @todo Actually check if the api key is valid.
     $this->assertTrue($job->isTranslatable());
     $job->requestTranslation();

@@ -100,6 +100,18 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
         }
       }
     }
+
+    // Microsoft translator reports chinese language codes with their old names.
+    // Replace them with the offical identifiers.
+    if (isset($languages['zh-CHS'])) {
+      unset($languages['zh-CHS']);
+      $languages['zh-hans'] = 'zh-hans';
+    }
+    if (isset($languages['zh-CHT'])) {
+      unset($languages['zh-CHT']);
+      $languages['zh-hant'] = 'zh-hant';
+    }
+
     return $languages;
   }
 
