@@ -243,28 +243,4 @@ $handler->display->display_options['filters']['state']['value'] = array(
 );
 
 /* Display: Block */
-$handler = $view->new_display('block', 'Block', 'block_1');
-$translatables['tmgmt_ui_cart_overview'] = array(
-  t('Master'),
-  t('Cart overview'),
-  t('more'),
-  t('Apply'),
-  t('Reset'),
-  t('Sort by'),
-  t('Asc'),
-  t('Desc'),
-  t('Items per page'),
-  t('- All -'),
-  t('Offset'),
-  t('job'),
-  t('User'),
-  t('Source_language'),
-  t('checkout'),
-  t('admin/config/regional/tmgmt/jobs/[tjid_1]/manage'),
-  t('.'),
-  t(','),
-  t('Cart: [tjid] [tjid_1] <br> source: [source_language] target: [target_language] '),
-  t('Label'),
-  t('Item_type'),
-  t('Block'),
-);
+$handler = $view->new_display('block', 'Block', 'block');

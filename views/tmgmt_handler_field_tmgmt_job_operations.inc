@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Field handler which shows the actions for a job.
+ * Field handler which shows the operations for a job.
  *
  * @ingroup views_field_handlers
  */
-class tmgmt_handler_field_tmgmt_job_actions extends views_handler_field_entity {
+class tmgmt_handler_field_tmgmt_job_operations extends views_handler_field_entity {
 
   function render($values) {
     $job = $this->get_value($values);
