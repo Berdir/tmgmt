@@ -350,7 +350,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
   /**
    * Test the page callbacks to create jobs and check them out.
    */
-  function dtestCheckoutForm() {
+  function testCheckoutForm() {
 
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
     $this->drupalLogin($this->admin_user);
