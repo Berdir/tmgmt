@@ -170,7 +170,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $job->source_language = $preselected['source_language'] ? $preselected['source_language'] : (isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : key($available));
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
   // Mark form elements as disabled under certain circumstances.
-  $disabled = !$job->isNew() && !$job->isCancelled() && !$job->isRejected();
+  $disabled = !$job->isUnprocessed() && !$job->isCancelled() && !$job->isRejected();
   // Get the job metadata wrapper so we can display the current status nicely.
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
   // Show the items that are attached to this job if there are not more than 20.
@@ -247,7 +247,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     ),
   );
   // Display the checkout settings form if the job can be checked out.
-  if (!$job->isSubmitted() && !$job->isAccepted() && !$job->isNeedsReview()) {
+  if (!$job->isActive() && !$job->isAccepted() && !$job->isNeedsReview()) {
     $form['translator_wrapper']['settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Checkout settings'),
@@ -274,7 +274,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $form['actions']['checkout'] = array(
     '#type' => 'submit',
     '#value' => t('Submit to translator'),
-    '#access' => !$job->isSubmitted() && !$job->isAccepted() && !$job->isNeedsReview(),
+    '#access' => !$job->isActive() && !$job->isAccepted() && !$job->isNeedsReview(),
   );
   if ($old) {
     $form['actions']['delete'] = array(
@@ -291,7 +291,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#value' => t('Cancel'),
     '#submit' => array('tmgmt_ui_submit_redirect'),
     '#redirect' => 'admin/config/regional/tmgmt/jobs',
-    '#access' => $job->isSubmitted(),
+    '#access' => $job->isActive(),
   );
   // We need some CSS for showing the source and target language in one row.
   $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';

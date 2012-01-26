@@ -154,7 +154,7 @@ function tmgmt_ui_job_checkout(array $jobs) {
   foreach ($jobs as $job) {
     /* @var $job TMGMTJob */
 
-    if (!$job->isNew()) {
+    if (!$job->isUnprocessed()) {
       // Job is already checked out, just ignore that one. This could happen
       // if jobs have already been submitted in the before hook.
       continue;

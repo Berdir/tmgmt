@@ -250,11 +250,11 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $submit_job = $this->createJob('submit');
     $submit_job->requestTranslation();
     $submit_job = tmgmt_job_load($submit_job->tjid);
-    $this->assertTrue($submit_job->isSubmitted());
+    $this->assertTrue($submit_job->isActive());
     $messages = $submit_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual(TMGMT_JOB_STATE_NEW, $last_message->state_before);
-    $this->assertEqual(TMGMT_JOB_STATE_SUBMITTED, $last_message->state_after);
+    $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
+    $this->assertEqual(TMGMT_JOB_STATE_ACTIVE, $last_message->state_after);
     $this->assertEqual('Test submit', $last_message->message);
 
     // Translate a job.
@@ -264,7 +264,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertTrue($translate_job->isNeedsReview());
     $messages = $translate_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual(TMGMT_JOB_STATE_NEW, $last_message->state_before);
+    $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
     $this->assertEqual(TMGMT_JOB_STATE_REVIEW, $last_message->state_after);
     $this->assertEqual('Test translation created', $last_message->message);
 
@@ -304,7 +304,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     $messages = $reject_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual(TMGMT_JOB_STATE_NEW, $last_message->state_before);
+    $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
     $this->assertEqual(TMGMT_JOB_STATE_REJECTED, $last_message->state_after);
     $this->assertEqual('This is not supported', $last_message->message);
     $this->assertEqual('error', $last_message->type);
@@ -313,12 +313,12 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $failing_job = $this->createJob('fail');
     $failing_job->requestTranslation();
     // Still new.
-    $this->assertTrue($failing_job->isNew());
+    $this->assertTrue($failing_job->isUnprocessed());
 
     $messages = $failing_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual(TMGMT_JOB_STATE_NEW, $last_message->state_before);
-    $this->assertEqual(TMGMT_JOB_STATE_NEW, $last_message->state_after);
+    $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
+    $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_after);
     $this->assertEqual('Service not reachable', $last_message->message);
     $this->assertEqual('error', $last_message->type);
   }
@@ -401,7 +401,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Job still needs to be in state new.
     $job = tmgmt_job_load($tjid, FALSE);
-    $this->assertTrue($job->isNew());
+    $this->assertTrue($job->isUnprocessed());
 
     $edit = array(
       'target_language' => 'es',
@@ -435,7 +435,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->drupalPost(NULL, $edit, t('Submit to translator'));
     $this->assertText(t('Test submit'));
     $job = tmgmt_job_load($tjid, FALSE);
-    $this->assertTrue($job->isSubmitted());
+    $this->assertTrue($job->isActive());
 
     // Another job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/de/test_source/test/1');
@@ -472,7 +472,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Service not reachable'));
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));
     $job = tmgmt_job_load($tjid);
-    $this->assertTrue($job->isNew());
+    $this->assertTrue($job->isUnprocessed());
 
     // Verify that we are still on the form.
     $this->assertText('You can provide a label for this job in order to identify it easily later on.');
@@ -495,7 +495,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Fail'));
     entity_get_controller('tmgmt_job')->resetCache(array($tjid));
     $job = tmgmt_job_load($tjid);
-    $this->assertTrue($job->isNew());
+    $this->assertTrue($job->isUnprocessed());
 
     // Attempt to add items to a non-existing job.
     $this->drupalGet('admin/config/regional/tmgmt/add-item/en/test_source/test/5/' . ($tjid + 1));
@@ -513,7 +513,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $redirect = tmgmt_ui_job_checkout(array($job));
     $uri = $job->uri();
     $this->assertEqual($uri['path'] . '/manage', $redirect);
-    $this->assertTrue($job->isNew());
+    $this->assertTrue($job->isUnprocessed());
     $job->delete();
 
     // Hide settings on the test translator.
@@ -531,7 +531,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $job = $this->createJob('en', '');
     $redirect = tmgmt_ui_job_checkout(array($job));    $uri = $job->uri();
     $this->assertEqual($uri['path'] . '/manage', $redirect);
-    $this->assertTrue($job->isNew());
+    $this->assertTrue($job->isUnprocessed());
 
     // Create a second file translator. This should check
     // out immediatly.
@@ -546,7 +546,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $redirect = tmgmt_ui_job_checkout(array($job));
     $uri = $job->uri();
     $this->assertEqual($uri['path'] . '/manage', $redirect);
-    $this->assertTrue($job->isNew());
+    $this->assertTrue($job->isUnprocessed());
   }
 }
 

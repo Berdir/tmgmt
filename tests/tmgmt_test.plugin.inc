@@ -10,7 +10,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   /**
    * Overrides TMGMTDefaultTranslatorPluginController::pluginSettingsForm().
    */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
 
     $form['expose_settings'] = array(
       '#type' => 'checkbox',

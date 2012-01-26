@@ -253,6 +253,16 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public $translation = array();
 
   /**
+   * Overrides Entity::__construct().
+   */
+  public function __construct(array $values = array()) {
+    parent::__construct($values, 'tmgmt_job_item');
+    if (!isset($this->state)) {
+      $this->state = TMGMT_JOB_ITEM_STATE_WAITING;
+    }
+  }
+
+  /**
    * Overrides Entity::defaultLabel()
    */
   public function defaultLabel() {
@@ -450,7 +460,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       $this->created = REQUEST_TIME;
     }
     if (!isset($this->state)) {
-      $this->state = TMGMT_JOB_STATE_NEW;
+      $this->state = TMGMT_JOB_STATE_UNPROCESSED;
     }
   }
 
@@ -548,8 +558,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @return boolean
    *   TRUE if the state is new, FALSE otherwise.
    */
-  public function isNew() {
-    return $this->isState(TMGMT_JOB_STATE_NEW);
+  public function isUnprocessed() {
+    return $this->isState(TMGMT_JOB_STATE_UNPROCESSED);
   }
 
   /**
@@ -558,8 +568,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @return boolean
    *   TRUE if the state is submitted, FALSE otherwise.
    */
-  public function isSubmitted() {
-    return $this->isState(TMGMT_JOB_STATE_SUBMITTED);
+  public function isActive() {
+    return $this->isState(TMGMT_JOB_STATE_ACTIVE);
   }
 
   /**
@@ -855,7 +865,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @see TMGMTJob::addMessage()
    */
   public function submitted($message = NULL, $variables = array()) {
-    $this->setState(TMGMT_JOB_STATE_SUBMITTED);
+    $this->setState(TMGMT_JOB_STATE_ACTIVE);
     $this->addMessage($message, $variables);
     $this->save();
   }
@@ -979,7 +989,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     // If the job is not currently pending by the translator (submitted), we can
     // cancel without any checks. Otherwise, ask the translator plugin if the
     // job can be cancelled.
-    if (!$this->isSubmitted() || $this->getTranslatorController()->cancelTranslation($this)) {
+    if (!$this->isActive() || $this->getTranslatorController()->cancelTranslation($this)) {
       if (isset($account)) {
         $this->cancelled('The translation job has been canceled by !user.', array('!user' => theme('username', array('account' => $account))));
       }

@@ -111,6 +111,11 @@ function tmgmt_schema() {
         'length' => 128,
         'not null' => TRUE,
       ),
+      'state' => array(
+        'description' => 'The state of the translation job item.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
       'data' => array(
         'description' => 'Can be used by the source plugin to store the data if it can not be retrieved anymore later on.',
         'type' => 'text',
@@ -397,7 +402,6 @@ function tmgmt_update_7009() {
  * Rename source_plugin and translator_plugin to plugin only.
  */
 function tmgmt_update_7010() {
-  // Rename 'translated_data' to 'translation'.
   db_change_field('tmgmt_translator', 'translator_plugin', 'plugin', array(
     'description' => 'Name of the translator service plugin.',
     'type' => 'varchar',
@@ -409,5 +413,17 @@ function tmgmt_update_7010() {
     'type' => 'varchar',
     'length' => 128,
     'not null' => TRUE,
+  ));
+}
+
+/**
+ * Add a state field to translation job items.
+ */
+function tmgmt_update_7011() {
+  db_add_field('tmgmt_job_item', 'state', array(
+    'description' => 'The state of the translation job.',
+    'type' => 'int',
+    'not null' => TRUE,
+    'initial' => 1,
   ));
 }

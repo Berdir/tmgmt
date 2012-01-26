@@ -10,21 +10,25 @@
  * @{
  */
 /**
+ * upcoming D8 entities as well as the current $entity->is_new property.
+ *
  * A new translation job.
  *
  * In the default user interface, jobs with this state are so called cart jobs.
  * Each user gets his cart jobs listed in a block and can check them out.
  */
-define('TMGMT_JOB_STATE_NEW', 0);
+define('TMGMT_JOB_STATE_UNPROCESSED', 0);
 
 /**
+ * once we have migrated to using job item states.
+ *
  * A translation job that has been submitted to the translator.
  *
  * Translator plugins are responsible for setting this state in their
  * implementation of
  * TMGMTTranslatorPluginControllerInterface::requestTranslation().
  */
-define('TMGMT_JOB_STATE_SUBMITTED', 1);
+define('TMGMT_JOB_STATE_ACTIVE', 1);
 
 /**
  * A translation job that has been rejected by the translator.
@@ -38,6 +42,8 @@ define('TMGMT_JOB_STATE_SUBMITTED', 1);
 define('TMGMT_JOB_STATE_REJECTED', 2);
 
 /**
+ * @todo remove this once we have migrated to using job item states for this.
+ *
  * The translation job was translated and needs to be reviewed.
  *
  * This state needs to be set by the translator plugin once the job has been
@@ -46,6 +52,8 @@ define('TMGMT_JOB_STATE_REJECTED', 2);
 define('TMGMT_JOB_STATE_REVIEW', 3);
 
 /**
+ * @todo remove this once we have migrated to using job item states for this.
+ *
  * The translation has been accepted and the job is finished.
  *
  * Once the job has been accepted, the source plugins are called to update their
@@ -63,12 +71,35 @@ define('TMGMT_JOB_STATE_ACCEPTED', 4);
 define('TMGMT_JOB_STATE_CANCELLED', 5);
 
 /**
+ * @todo Use this instead of TMGMT_JOB_STATE_ACCEPTED once we have migrated to
+ * using job item states.
+ *
  * The translation job has been finished.
  *
  * Not yet used.
  */
 define('TMGMT_JOB_STATE_FINISHED', 6);
 
+/**
+ * @todo Implement job item states. Maybe rename this.
+ *
+ * Waiting for translation.
+ */
+define('TMGMT_JOB_ITEM_STATE_WAITING', 1);
+
+/**
+ * @todo Implement job item states.
+ *
+ * Needs to be reviewed.
+ */
+define('TMGMT_JOB_ITEM_STATE_REVIEW', 2);
+
+/**
+ * @todo Implement job item states.
+ *
+ * Is accepted.
+ */
+define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
 /**
  * @} End of "addtogroup tmgmt_job".
  */
@@ -288,7 +319,7 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
     ->propertyCondition('source_language', $source_language)
     ->propertyCondition('target_language', $target_language)
     ->propertyCondition('uid', $account->uid)
-    ->propertyCondition('state', TMGMT_JOB_STATE_NEW)
+    ->propertyCondition('state', TMGMT_JOB_STATE_UNPROCESSED)
     ->execute();
   if (!empty($result['tmgmt_job'])) {
     return tmgmt_job_load(reset($result['tmgmt_job'])->tjid);
@@ -366,7 +397,7 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
  *   FALSE otherwise.
  */
 function tmgmt_job_checkout_access(TMGMTJob $job, $account = NULL) {
-  if ($job->isNew() || $job->isRejected() || $job->isCancelled()) {
+  if ($job->isUnprocessed() || $job->isRejected() || $job->isCancelled()) {
     return tmgmt_job_access('checkout', $job, $account);
   }
   return FALSE;
@@ -380,8 +411,8 @@ function tmgmt_job_checkout_access(TMGMTJob $job, $account = NULL) {
  */
 function tmgmt_job_states() {
   return array(
-    TMGMT_JOB_STATE_NEW => t('New'),
-    TMGMT_JOB_STATE_SUBMITTED => t('Submitted'),
+    TMGMT_JOB_STATE_UNPROCESSED => t('Unprocessed'),
+    TMGMT_JOB_STATE_ACTIVE => t('Active'),
     TMGMT_JOB_STATE_REJECTED => t('Rejected'),
     TMGMT_JOB_STATE_REVIEW => t('Needs review'),
     TMGMT_JOB_STATE_ACCEPTED => t('Accepted'),
@@ -623,7 +654,7 @@ function tmgmt_translator_load_multiple($names = array(), $conditions = array())
 function tmgmt_translator_busy($translator) {
   $query = new EntityFieldQuery();
   return (boolean) $query->entityCondition('entity_type', 'tmgmt_job')
-    ->propertyCondition('state', array(TMGMT_JOB_STATE_SUBMITTED, TMGMT_JOB_STATE_REVIEW))
+    ->propertyCondition('state', array(TMGMT_JOB_STATE_ACTIVE, TMGMT_JOB_STATE_REVIEW))
     ->propertyCondition('translator', $translator)
     ->range(0, 1)
     ->count()
