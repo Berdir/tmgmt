@@ -84,7 +84,10 @@ class TMGMTTranslator extends Entity {
    *  An array of supported target languages in ISO format.
    */
   public function getSupportedTargetLanguages($source_language) {
-    return $this->getPluginController()->getSupportedTargetLanguages($this, $source_language);
+    if ($controller = $this->getPluginController()) {
+      return $controller->getSupportedTargetLanguages($this, $source_language);
+    }
+    return FALSE;
   }
 
   /**
@@ -110,9 +113,8 @@ class TMGMTTranslator extends Entity {
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
   public function isAvailable() {
-    $plugin = $this->getPluginController();
-    if ($plugin) {
-      return $plugin->isAvailable($this);
+    if ($controller = $this->getPluginController()) {
+      return $controller->isAvailable($this);
     }
     return FALSE;
   }
@@ -124,6 +126,7 @@ class TMGMTTranslator extends Entity {
     if ($controller = $this->getPluginController()) {
       return $controller->checkoutSettingsForm($form, $form_state, $job);
     }
+    return FALSE;
   }
 
   /**
@@ -160,7 +163,10 @@ class TMGMTTranslator extends Entity {
    * @todo
    */
   public function getNotAvailableReason() {
-    return $this->getPluginController()->getNotAvailableReason($this);
+    if ($controller = $this->getPluginController()) {
+      return $controller->getNotAvailableReason($this);
+    }
+    return FALSE;
   }
 
   /**
@@ -178,7 +184,8 @@ class TMGMTTranslator extends Entity {
     if (isset($this->settings[$name])) {
       return $this->settings[$name];
     }
-    elseif ($defaults = $this->getPluginController()->defaultPluginSettings()) {
+    else if ($controller = $this->getPluginController()) {
+      $defaults = $controller->defaultPluginSettings();
       if (isset($defaults[$name])) {
         return $defaults[$name];
       }
@@ -722,8 +729,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     if (isset($this->settings[$name])) {
       return $this->settings[$name];
     }
-    else if ($controller = $this->getTranslatorController()) {
-      $defaults = $controller->defaultPluginSettings();
+    // The translator might provide default settings.
+    if ($translator = $this->getTranslator()) {
+      if (($setting = $translator->getSetting($name)) !== NULL) {
+        return $setting;
+      }
+    }
+    if ($controller = $this->getTranslatorController()) {
+      $defaults = $controller->defaultCheckoutSettings();
       if (isset($defaults[$name])) {
         return $defaults[$name];
       }

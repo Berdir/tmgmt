@@ -373,9 +373,8 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::checkoutSettingsForm().
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
-    $form['#title'] = t('@translator checkout settings', array('@translator' => $job->getTranslator()->label()));
     if (empty($form)) {
-      $form['#description'] = t("@translator doesn't provide any checkout settings.", array('@translator' => $job->label()));
+      $form['#description'] = t("@translator doesn't provide any checkout settings.", array('@translator' => $job->getTranslator()->label()));
     }
     return $form;
   }
