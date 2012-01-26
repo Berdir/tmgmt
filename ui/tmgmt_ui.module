@@ -114,14 +114,11 @@ function tmgmt_ui_views_pre_render($view) {
  */
 function tmgmt_ui_job_checkout(array $jobs) {
   $redirects = array();
-
   // Allow other modules to jump in and eg. auto-checkout with rules or use a
   // customized checkout form.
   drupal_alter('tmgmt_ui_job_checkout_before', $redirects, $jobs);
 
   foreach ($jobs as $job) {
-    /* @var $job TMGMTJob */
-
     if (!$job->isUnprocessed()) {
       // Job is already checked out, just ignore that one. This could happen
       // if jobs have already been submitted in the before hook.
@@ -135,6 +132,11 @@ function tmgmt_ui_job_checkout(array $jobs) {
       $redirects[] = $uri['path'] . '/manage';
     }
     else {
+      // @todo this is dangerous because we don't catch request fails at all.
+      // Normally I would expect this to catch all failed requests and
+      // afterwards send the user through a multistep form which contains the
+      // failed elements.
+      
       // No manual checkout required. Request translations now.
       tmgmt_ui_job_request_translation($job);
     }
