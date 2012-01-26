@@ -237,6 +237,13 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public $item_id;
 
   /**
+   * The time when the job item was changed as a timestamp.
+   *
+   * @var integer
+   */
+  public $changed;
+
+  /**
    * Can be used by the source plugin to store the data instead of creating it
    * on demand.
    *
@@ -404,6 +411,11 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public $tjid;
 
   /**
+   * A custom label for this job.
+   */
+  public $label;
+
+  /**
    * Current state of the translation job
    * @var type
    */
@@ -447,16 +459,25 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public $reference;
 
   /**
+   * The time when the job was created as a timestamp.
+   *
+   * @var integer
+   */
+  public $created;
+
+  /**
+   * The time when the job was changed as a timestamp.
+   *
+   * @var integer
+   */
+  public $changed;
+
+  /**
    * The user id of the creator of the job.
    *
    * @var integer
    */
   public $uid;
-
-  /**
-   * A custom label for this job.
-   */
-  public $label;
 
   /**
    * Overrides Entity::__construct().
