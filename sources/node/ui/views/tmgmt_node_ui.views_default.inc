@@ -261,7 +261,7 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['fields']['nothing']['id'] = 'nothing';
   $handler->display->display_options['fields']['nothing']['table'] = 'views';
   $handler->display->display_options['fields']['nothing']['field'] = 'nothing';
-  $handler->display->display_options['fields']['nothing']['label'] = 'Actions';
+  $handler->display->display_options['fields']['nothing']['label'] = 'Operations';
   $handler->display->display_options['fields']['nothing']['alter']['text'] = 'No actions avalible yet.';
   $handler->display->display_options['fields']['nothing']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['nothing']['alter']['absolute'] = 0;
@@ -345,7 +345,7 @@ function tmgmt_node_ui_views_default_views() {
     t('Destination language'),
     t('Job created'),
     t('Changed'),
-    t('Actions'),
+    t('Operations'),
     t('No actions avalible yet.'),
     t('All'),
   );
@@ -600,7 +600,7 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['fields']['language']['id'] = 'language';
   $handler->display->display_options['fields']['language']['table'] = 'node';
   $handler->display->display_options['fields']['language']['field'] = 'language';
-  $handler->display->display_options['fields']['language']['label'] = 'Source';
+  $handler->display->display_options['fields']['language']['label'] = 'From';
   $handler->display->display_options['fields']['language']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['language']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['language']['alter']['absolute'] = 0;
@@ -741,7 +741,7 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['filters']['language']['group'] = 1;
   $handler->display->display_options['filters']['language']['exposed'] = TRUE;
   $handler->display->display_options['filters']['language']['expose']['operator_id'] = 'language_op';
-  $handler->display->display_options['filters']['language']['expose']['label'] = 'Source';
+  $handler->display->display_options['filters']['language']['expose']['label'] = 'From';
   $handler->display->display_options['filters']['language']['expose']['operator'] = 'language_op';
   $handler->display->display_options['filters']['language']['expose']['identifier'] = 'language';
   $handler->display->display_options['filters']['language']['expose']['multiple'] = 1;
@@ -754,7 +754,7 @@ function tmgmt_node_ui_views_default_views() {
   $handler->display->display_options['filters']['target_language']['group'] = 1;
   $handler->display->display_options['filters']['target_language']['exposed'] = TRUE;
   $handler->display->display_options['filters']['target_language']['expose']['operator_id'] = 'target_language_op';
-  $handler->display->display_options['filters']['target_language']['expose']['label'] = 'Target';
+  $handler->display->display_options['filters']['target_language']['expose']['label'] = 'To';
   $handler->display->display_options['filters']['target_language']['expose']['operator'] = 'target_language_op';
   $handler->display->display_options['filters']['target_language']['expose']['identifier'] = 'target_language';
   $handler->display->display_options['filters']['target_language']['expose']['multiple'] = 1;
@@ -803,13 +803,13 @@ function tmgmt_node_ui_views_default_views() {
     t('Bulk operations'),
     t('node title (in source language)'),
     t('type'),
-    t('Source'),
+    t('From'),
     t('All translation languages'),
     t('Updated date'),
     t('Translation management job ID'),
     t('.'),
     t(','),
-    t('Target'),
+    t('To'),
     t('Type'),
     t('Page'),
   );

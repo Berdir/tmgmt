@@ -195,5 +195,5 @@ $translatables['tmgmt_ui_reviews_pending'] = array(
   t('from'),
   t('to'),
   t('created'),
-  t('Actions'),
+  t('Operations'),
 );

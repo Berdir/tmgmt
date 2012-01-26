@@ -29,7 +29,7 @@ class TMGMTJobViewsController extends EntityDefaultViewsController {
   public function views_data() {
     $data = parent::views_data();
     $data['tmgmt_job']['actions'] = array(
-      'title' => t('Actions'),
+      'title' => t('Operations'),
       'help' => t('Displays a list of options which are available for a job.'),
       'real field' => 'tjid',
       'field' => array(

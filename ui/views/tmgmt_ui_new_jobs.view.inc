@@ -226,5 +226,5 @@ $translatables['tmgmt_ui_new_jobs'] = array(
   t('from'),
   t('to'),
   t('created'),
-  t('Actions'),
+  t('Operations'),
 );

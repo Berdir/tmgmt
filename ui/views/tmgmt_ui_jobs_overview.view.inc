@@ -245,7 +245,7 @@ $handler->display->display_options['fields']['created']['date_format'] = 'short'
 $handler->display->display_options['fields']['source_language']['id'] = 'source_language';
 $handler->display->display_options['fields']['source_language']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['source_language']['field'] = 'source_language';
-$handler->display->display_options['fields']['source_language']['label'] = 'Source';
+$handler->display->display_options['fields']['source_language']['label'] = 'From';
 $handler->display->display_options['fields']['source_language']['alter']['alter_text'] = 0;
 $handler->display->display_options['fields']['source_language']['alter']['make_link'] = 0;
 $handler->display->display_options['fields']['source_language']['alter']['absolute'] = 0;
@@ -289,7 +289,7 @@ $handler->display->display_options['fields']['state']['hide_alter_empty'] = 1;
 $handler->display->display_options['fields']['target_language']['id'] = 'target_language';
 $handler->display->display_options['fields']['target_language']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['target_language']['field'] = 'target_language';
-$handler->display->display_options['fields']['target_language']['label'] = 'Target';
+$handler->display->display_options['fields']['target_language']['label'] = 'To';
 $handler->display->display_options['fields']['target_language']['alter']['alter_text'] = 0;
 $handler->display->display_options['fields']['target_language']['alter']['make_link'] = 0;
 $handler->display->display_options['fields']['target_language']['alter']['absolute'] = 0;
@@ -417,11 +417,11 @@ $translatables['tmgmt_job_management_job_overview'] = array(
   t('Label'),
   t('Changed'),
   t('Created'),
-  t('Source'),
+  t('From'),
   t('State'),
-  t('Target'),
+  t('To'),
   t('Translator'),
-  t('Actions'),
+  t('Operations'),
   t('Source language'),
   t('Target language'),
   t('Page'),
