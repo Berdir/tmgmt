@@ -623,6 +623,7 @@ function tmgmt_translator_exists($name) {
  * Loads a translator based on the name.
  *
  * @return TMGMTTranslator
+ *   A translator entity.
  */
 function tmgmt_translator_load($name) {
   $translators = entity_load_multiple_by_name('tmgmt_translator', array($name));
@@ -630,17 +631,37 @@ function tmgmt_translator_load($name) {
 }
 
 /**
- * Loads translation maps.
+ * Loads multiple translators based on their name.
+ *
+ * @return array
+ *   An array of translators with the machine-readable name of the translators
+ *   as array keys.
  */
 function tmgmt_translator_load_multiple($names = array()) {
   return entity_load_multiple_by_name('tmgmt_translator', $names);
 }
 
 /**
- * Loads translation maps.
+ * Loads all translators that are available and support the given source and
+ * target language combination.
+ *
+ * @param $source_language
+ *   The source language.
+ * @param $target_language
+ *   The target language.
+ *
+ * @return array
+ *   An array of translators with the machine-readable name of the translators
+ *   as array keys.
  */
-function tmgmt_translator_load_all() {
-  return entity_load('tmgmt_translator', FALSE);
+function tmgmt_translator_load_available($source_language, $target_language) {
+  $translators = tmgmt_translator_load_multiple(FALSE);
+  foreach ($translators as $name => $translator) {
+    if (!$translator->isAvailable() || !array_key_exists($target_language, $translator->getSupportedTargetLanguages($source_language))) {
+      unset($translators[$name]);
+    }
+  }
+  return $translators;
 }
 
 /**
@@ -757,7 +778,7 @@ function tmgmt_translator_plugin_labels() {
  */
 function tmgmt_translator_labels() {
   $labels = array();
-  foreach (tmgmt_translator_load_all() as $translator) {
+  foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
     $labels[$translator->name] = $translator->label();
   }
   return $labels;
@@ -779,7 +800,7 @@ function tmgmt_translator_labels() {
  */
 function tmgmt_translator_labels_flagged($source_language, $target_language) {
   $labels = array();
-  foreach (tmgmt_translator_load_all() as $translator) {
+  foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
     if (!$translator->isAvailable()) {
       $labels[$translator->name] = t('@label (not available)', array('@label' => $translator->label()));
     }

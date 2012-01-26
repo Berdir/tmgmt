@@ -165,7 +165,7 @@ function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
   }
   // If there is more than a single translator available or if there are no
   // translators available at all checkout is mandatory.
-  $translators = tmgmt_translator_available_translators();
+  $translators = tmgmt_translator_load_available($job->source_language, $job->target_language);
   if (empty($translators) || count($translators) > 1) {
     return TRUE;
   }

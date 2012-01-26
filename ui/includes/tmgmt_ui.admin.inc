@@ -323,7 +323,6 @@ function tmgmt_job_form_submit($form, &$form_state) {
     $job->label = '';
   }
   $job->save();
-
   // Per default we want to redirect the user to the overview.
   $form_state['redirect'] = 'admin/config/regional/tmgmt';
   // Everything below this line is only invoked if the 'Submit to translator'

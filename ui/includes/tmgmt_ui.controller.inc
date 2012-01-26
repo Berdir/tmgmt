@@ -34,7 +34,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
     $form['translators']['#theme'] = 'tmgmt_ui_translator_overview_form';
     $form['translators']['#entity_info'] = $this->entityInfo;
     // Load all translator entities.
-    $translators = tmgmt_translator_load_all();
+    $translators = tmgmt_translator_load_multiple(FALSE);
     foreach ($translators as $key => $translator) {
       $form['translators'][$key] = $this->overviewFormRow(array(), $form_state, $translator, $key);
       $form['translators'][$key]['#translator'] = $translator;
