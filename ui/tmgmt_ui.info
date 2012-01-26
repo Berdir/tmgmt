@@ -7,3 +7,4 @@ dependencies[] = tmgmt
 dependencies[] = views
 dependencies[] = views_bulk_operations
 files[] = includes/tmgmt_ui.controller.inc
+files[] = tmgmt_ui.test
