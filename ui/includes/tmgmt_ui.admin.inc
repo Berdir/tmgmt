@@ -285,7 +285,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   );
   $form['actions']['checkout'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit to translator'),
+    '#value' => tmgmt_ui_redirect_queue_empty() ? t('Submit to translator') : t('Submit to translator and continue'),
     '#access' => !$job->isActive() && !$job->isAccepted() && !$job->isNeedsReview(),
   );
   if ($old) {
@@ -324,11 +324,18 @@ function tmgmt_job_form_submit($form, &$form_state) {
   }
   $job->save();
 
-  // Per default we want to redirect the user to the overview.
-  $form_state['redirect'] = 'admin/config/regional/tmgmt';
+  // Check the redirect queue.
+  if (tmgmt_ui_redirect_queue_empty()) {
+    // Per default we want to redirect the user to the overview.
+    $form_state['redirect'] = 'admin/config/regional/tmgmt';
+  }
+  else {
+    $form_state['redirect'] = tmgmt_ui_redirect_queue_dequeue();
+  }
+
   // Everything below this line is only invoked if the 'Submit to translator'
   // button was clicked.
-  if ($form_state['triggering_element']['#value'] == t('Submit to translator')) {
+  if ($form_state['triggering_element']['#value'] == $form['actions']['checkout']['#value']) {
     tmgmt_ui_job_request_translation($job);
   }
 }

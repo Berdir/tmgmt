@@ -137,19 +137,15 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
       // Print a message to the screen and redirect the user.
     }
 
-    $redirect = tmgmt_ui_job_checkout($jobs);
-
+    $redirects = tmgmt_ui_job_checkout($jobs);
     // If necessary, do a redirect.
-    if ($redirect) {
-      $form_state['redirect'] = array(
-        $redirect,
-        array(
-          // @fixme: drupal_get_destination returns a string here so it's not usuable.
-          'query' => array(
-            'destination' => $_GET['q'],
-          ),
-        ),
-      );
+    if ($redirects) {
+      // Append the current path to the end of the queue.
+      $redirects[] = $_GET['q'];
+      tmgmt_ui_redirect_queue_set($redirects);
+      $form_state['redirect'] = tmgmt_ui_redirect_queue_dequeue();
+
+      drupal_set_message(format_plural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
     }
   } else {
     drupal_set_message(t('You need to select one or more languages for requesting a translation.'), 'warning');

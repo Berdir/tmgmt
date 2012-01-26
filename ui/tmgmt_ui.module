@@ -175,9 +175,7 @@ function tmgmt_ui_job_checkout(array $jobs) {
   // Allow other modules to jump in and eg. auto-checkout with rules or use a
   // customized checkout form.
   drupal_alter('tmgmt_ui_job_checkout_after', $redirects, $jobs);
-
-  // @todo Find a way to deal with multi-redirects.
-  return $redirects ? reset($redirects) : FALSE;
+  return $redirects;
 }
 
 /**
@@ -244,4 +242,26 @@ function tmgmt_ui_job_request_translation(TMGMTJob $job) {
     drupal_set_message(filter_xss($text), $message->type);
   }
   return !$had_error;
+}
+
+/**
+ * Set a redirect queue than can then be worked through.
+ */
+function tmgmt_ui_redirect_queue_set(array $redirects) {
+  $_SESSION['tmgmt_ui']['redirect_queue'] = $redirects;
+}
+
+/**
+ * Returns TRUE if the redirect queue is empty.
+ * @return type
+ */
+function tmgmt_ui_redirect_queue_empty() {
+  return empty($_SESSION['tmgmt_ui']['redirect_queue']);
+}
+
+/**
+ * Deqeues one redirect in the queue and returns that.
+ */
+function tmgmt_ui_redirect_queue_dequeue() {
+  return array_shift($_SESSION['tmgmt_ui']['redirect_queue']);
 }
