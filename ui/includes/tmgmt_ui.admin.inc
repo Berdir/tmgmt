@@ -350,7 +350,7 @@ function tmgmt_job_form_validate($form, &$form_state) {
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
   // Check translator availability.
   if (!$translator->isAvailable()) {
-    form_set_error('translator', t('@translator is not available: @reason.', array('@translator' => $translator->label(), '@reason' => $translator->getNotAvailableReason())));
+    form_set_error('translator', $translator->getNotAvailableReason());
   }
   elseif (!array_key_exists($job->target_language, $translator->getSupportedTargetLanguages($job->source_language))) {
     form_set_error('translator', t('@translator can not translate from @source to @target.', array('@translator' => $translator->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())));
@@ -365,9 +365,22 @@ function tmgmt_job_form_validate($form, &$form_state) {
  * Helper function for retrieving the job settings form.
  */
 function tmgmt_ui_checkout_settings_form($form, &$form_state, TMGMTJob $job) {
+  $translator = $job->getTranslator();
+  if (!$translator->isAvailable()) {
+    return array(
+      '#description' => $job->getTranslator()->getNotAvailableReason(),
+    );
+  }
+  elseif (!array_key_exists($job->target_language, $translator->getSupportedTargetLanguages($job->source_language))) {
+    $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
+    return array(
+      '#description' => t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())),
+    );
+  }
   if ($settings = $job->checkoutSettingsForm($form, $form_state)) {
     return $settings;
   }
+  // @todo: Why return $form here?
   return $form;
 }
 

@@ -194,8 +194,8 @@ function tmgmt_permission() {
 function tmgmt_modules_installed($modules) {
   foreach (tmgmt_translator_plugin_info() as $key => $info) {
     // Check if this translator plugin has been added by one of the recently
-    // installed modules.
-    if (!empty($info['auto create']) && in_array($info['module'], $modules)) {
+    // installed modules and doesn't prevent auto creation.
+    if ((!isset($info['auto create']) || $info['auto create'] == TRUE) && in_array($info['module'], $modules)) {
       tmgmt_translator_auto_create($key);
     }
   }

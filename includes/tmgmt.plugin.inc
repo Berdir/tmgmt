@@ -330,7 +330,8 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::getNotAvailableReason().
    */
   public function getNotAvailableReason(TMGMTTranslator $translator) {
-    return t('@plugin needs to be configured before it can be used', array('@plugin' => $this->pluginInfo['label']));
+    $configure_url = url('admin/config/regional/tmgmt/translators/manage/' . $translator->name);
+    return t('@translator is not available. Make sure it is <a href="!configure_url">properly configured</a>.', array('@translator' => $this->pluginInfo['label'], '!configure_url' => $configure_url));
   }
 
   /**
