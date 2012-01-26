@@ -11,6 +11,7 @@
  * @ingroup views_field_handlers
  */
 class tmgmt_handler_field_tmgmt_job_message_message extends views_handler_field_xss {
+
   function init(&$view, &$options) {
     parent::init($view, $options);
     $this->additional_fields['variables'] = 'variables';
@@ -19,7 +20,6 @@ class tmgmt_handler_field_tmgmt_job_message_message extends views_handler_field_
   function option_definition() {
     $options = parent::option_definition();
     $options['format'] = array('default' => 'formatted');
-
     return $options;
   }
 
@@ -37,18 +37,16 @@ class tmgmt_handler_field_tmgmt_job_message_message extends views_handler_field_
     );
   }
 
-
   function render($values) {
-    $message = $this->get_value($values);
-
-    if ($this->options['format'] == 'formatted') {
-      $variables = unserialize($this->get_value($values, 'variables'));
-      $message = $this->sanitize_value(t($message, $variables));
+    if ($message = $this->get_value($values)) {
+      if ($this->options['format'] == 'formatted') {
+        $message = $this->sanitize_value(t($message, unserialize($this->get_value($values, 'variables'))));
+      }
+      else {
+        $message = $this->sanitize_value($message);
+      }
+      return $message;
     }
-    else {
-      $message = $this->sanitize_value($message);
-    }
-
-    return $message;
   }
+
 }

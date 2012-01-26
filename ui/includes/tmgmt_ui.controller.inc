@@ -249,7 +249,7 @@ class TMGMTJobUIController extends EntityDefaultUIController {
         $entity->delete();
         return t('Deleted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
       case 'accept':
-        $entity->accepted(t('The translation has been accepted by !user.', array('!user' => theme('username', array('account' => $GLOBALS['user'])))));
+        $entity->accepted('The translation has been accepted by !user.', array('!user' => theme('username', array('account' => $GLOBALS['user']))));
         return t('Accepted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
     }
     return FALSE;

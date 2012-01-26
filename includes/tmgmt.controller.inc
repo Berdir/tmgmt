@@ -23,6 +23,23 @@ class TMGMTJobController extends EntityAPIController {
 }
 
 /**
+ * Controller class for the job item entity.
+ *
+ * @ingroup tmgmt_job
+ */
+class TMGMTJobItemController extends EntityAPIController {
+
+  /**
+   * Overrides EntityAPIController::save().
+   */
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
+    $entity->changed = REQUEST_TIME;
+    return parent::save($entity, $transaction);
+  }
+
+}
+
+/**
  * Controller class for the job entity.
  *
  * @ingroup tmgmt_translator

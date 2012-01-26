@@ -130,6 +130,12 @@ function tmgmt_schema() {
         'size' => 'big',
         'serialize' => TRUE,
       ),
+      'changed' => array(
+        'description' => 'Changed timestamp.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
     ),
     'primary key' => array('tjiid'),
     'indexes' => array(
@@ -425,5 +431,29 @@ function tmgmt_update_7011() {
     'type' => 'int',
     'not null' => TRUE,
     'initial' => 1,
+  ));
+}
+
+/**
+ * Add a 'changed' field to the job items.
+ */
+function tmgmt_update_7012() {
+  db_add_field('tmgmt_job_item', 'changed', array(
+    'description' => 'Changed timestamp.',
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'initial' => REQUEST_TIME,
+  ));
+}
+
+/**
+ * Add the  field to the job items.
+ */
+function tmgmt_update_7013() {
+  db_add_field('tmgmt_job_item', 'changed', array(
+    'description' => 'Changed timestamp.',
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'initial' => REQUEST_TIME,
   ));
 }

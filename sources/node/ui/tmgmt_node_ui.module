@@ -38,8 +38,12 @@ function tmgmt_node_ui_translation_overview() {
  * Implements hook_views_api().
  */
 function tmgmt_node_ui_views_api() {
-  return array(
-    'api' => 3,
-    'path' => drupal_get_path('module', 'tmgmt_node_ui') . '/views',
-  );
+  return array('api' => 3);
+}
+
+/**
+ * Implements hook_views_default_views().
+ */
+function tmgmt_node_ui_views_default_views() {
+  return _tmgmt_load_exports('tmgmt_node_ui', 'views', 'view.inc', 'view');
 }

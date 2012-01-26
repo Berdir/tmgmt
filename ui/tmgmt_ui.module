@@ -90,7 +90,7 @@ function tmgmt_ui_views_api() {
  * Implements hook_views_default_views().
  */
 function tmgmt_ui_views_default_views() {
-  return _tmgmt_ui_load_all_exports('tmgmt_ui', 'views', 'view.inc', 'view');
+  return _tmgmt_load_exports('tmgmt_ui', 'views', 'view.inc', 'view');
 }
 
 /**
@@ -100,38 +100,6 @@ function tmgmt_ui_views_pre_render($view) {
   if ($view->name == 'tmgmt_ui_cart_overview' && $view->current_display == 'block_1') {
     drupal_add_css(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.cart.css');
   }
-}
-
-/**
- * Fetches an array of exportables from files.
- *
- * @param $module
- *   The module invoking this request. (Can be called by other modules.)
- * @param $directory
- *   The subdirectory in the custom module.
- * @param $extension
- *   The file extension.
- * @param $name
- *   The name of the variable found in each file. Defaults to the same as
- *   $extension.
- *
- * @return array
- *   Array of $name objects.
- */
-function _tmgmt_ui_load_all_exports($module, $directory, $extension, $name = NULL) {
-  if (!$name) {
-    $name = $extension;
-  }
-  $return = array();
-  // Find all the files in the directory with the correct extension.
-  $files = file_scan_directory(drupal_get_path('module', $module) . "/$directory", "/\.{$extension}$/");
-  foreach ($files as $path => $file) {
-    require DRUPAL_ROOT . '/' . $path;
-    if (isset($name)) {
-      $return[$$name->name] = $$name;
-    }
-  }
-  return $return;
 }
 
 /**

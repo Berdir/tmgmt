@@ -6,9 +6,9 @@
  * @ingroup views_field_handlers
  */
 class tmgmt_handler_field_tmgmt_job_actions extends views_handler_field_entity {
+
   function render($values) {
     $job = $this->get_value($values);
-    /* @var $job TMGMTJob */
     $element = array();
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('inline'));

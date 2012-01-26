@@ -15,7 +15,7 @@ class TMGMTJobItemViewsController extends EntityDefaultViewsController {
       'title' => t('Label'),
       'help' => t('Displays a label of the job item'),
       'field' => array(
-        'handler' => 'tmgmt_handler_field_tmgmt_job_item_label',
+        'handler' => 'tmgmt_handler_field_tmgmt_entity_label',
       ),
     );
     return $data;
@@ -36,7 +36,7 @@ class TMGMTJobViewsController extends EntityDefaultViewsController {
         'handler' => 'tmgmt_handler_field_tmgmt_job_actions',
       ),
     );
-    $data['tmgmt_job']['label']['field']['handler'] = 'tmgmt_handler_field_tmgmt_job_label';
+    $data['tmgmt_job']['label']['field']['handler'] = 'tmgmt_handler_field_tmgmt_entity_label';
     return $data;
   }
 }

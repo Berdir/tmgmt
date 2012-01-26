@@ -145,7 +145,7 @@ function tmgmt_entity_info() {
   $info['tmgmt_job_item'] = array(
     'label' => t('Translation Management Job Item'),
     'module' => 'tmgmt',
-    'controller class' => 'EntityAPIController',
+    'controller class' => 'TMGMTJobItemController',
     'metadata controller class' => 'TMGMTJobItemMetadataController',
     'views controller class' => 'TMGMTJobItemViewsController',
     'entity class' => 'TMGMTJobItem',
@@ -417,6 +417,20 @@ function tmgmt_job_states() {
     TMGMT_JOB_STATE_REVIEW => t('Needs review'),
     TMGMT_JOB_STATE_ACCEPTED => t('Accepted'),
     TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
+  );
+}
+
+/**
+ * Static method to retrieve a labeled list of all available states.
+ *
+ * @return array
+ *   A list of all available states.
+ */
+function tmgmt_job_item_states() {
+  return array(
+    TMGMT_JOB_STATE_WAITING => t('Unfinished'),
+    TMGMT_JOB_STATE_REVIEW => t('Needs review'),
+    TMGMT_JOB_STATE_ACCEPTED => t('Accepted'),
   );
 }
 
@@ -981,4 +995,36 @@ function tmgmt_unflatten_data($flattened_data) {
     drupal_array_set_nested_value($data, explode(TMGMT_ARRAY_DELIMITER, $key), $flattened_data_entry);
   }
   return $data;
+}
+
+/**
+ * Fetches an array of exportables from files.
+ *
+ * @param $module
+ *   The module invoking this request. (Can be called by other modules.)
+ * @param $directory
+ *   The subdirectory in the custom module.
+ * @param $extension
+ *   The file extension.
+ * @param $name
+ *   The name of the variable found in each file. Defaults to the same as
+ *   $extension.
+ *
+ * @return array
+ *   Array of $name objects.
+ */
+function _tmgmt_load_exports($module, $directory, $extension, $name = NULL) {
+  if (!$name) {
+    $name = $extension;
+  }
+  $return = array();
+  // Find all the files in the directory with the correct extension.
+  $files = file_scan_directory(drupal_get_path('module', $module) . "/$directory", "/\.{$extension}$/");
+  foreach ($files as $path => $file) {
+    require DRUPAL_ROOT . '/' . $path;
+    if (isset($name)) {
+      $return[$$name->name] = $$name;
+    }
+  }
+  return $return;
 }

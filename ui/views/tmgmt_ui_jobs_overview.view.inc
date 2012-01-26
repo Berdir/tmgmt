@@ -400,29 +400,3 @@ $handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Job overview';
 $handler->display->display_options['menu']['weight'] = '-1';
 $handler->display->display_options['menu']['context'] = 0;
-$translatables['tmgmt_job_management_job_overview'] = array(
-  t('Master'),
-  t('Job overview'),
-  t('more'),
-  t('Apply'),
-  t('Reset'),
-  t('Sort by'),
-  t('Asc'),
-  t('Desc'),
-  t('Items per page'),
-  t('- All -'),
-  t('Offset'),
-  t('Translation Management Translator'),
-  t('Bulk operations'),
-  t('Label'),
-  t('Changed'),
-  t('Created'),
-  t('Source'),
-  t('State'),
-  t('Target'),
-  t('Translator'),
-  t('Actions'),
-  t('Source language'),
-  t('Target language'),
-  t('Page'),
-);
