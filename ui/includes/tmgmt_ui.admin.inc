@@ -349,7 +349,7 @@ function tmgmt_job_form_validate($form, &$form_state) {
   // @todo Also make this a little bit nicer... The constants look wonky.
   switch (tmgmt_translator_check($translator, $job->source_language, $job->target_language)) {
     case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-      form_set_error('translator', t('@translator is not available: @reason.', array('@translator' => $translator->label(), '@reason' => $translator->getNotAvailableReason())));
+      form_set_error('translator', $translator->getNotAvailableReason());
       break;
     case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
       form_set_error('translator', t('@translator can not translate from @source to @target.', array('@translator' => $translator->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())));
@@ -365,8 +365,22 @@ function tmgmt_job_form_validate($form, &$form_state) {
  * Helper function for retrieving the job settings form.
  */
 function tmgmt_ui_checkout_settings_form($form, &$form_state, TMGMTJob $job) {
-  if ($settings = $job->checkoutSettingsForm($form, $form_state)) {
-    return $settings;
+   switch (tmgmt_translator_check($job->getTranslator(), $job->source_language, $job->target_language)) {
+    case TMTGT_TRANSLATOR_NOT_AVAILABLE:
+      return array(
+        '#description' => $job->getTranslator()->getNotAvailableReason(),
+      );
+      break;
+    case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
+      $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
+      return array(
+        '#description' => t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())),
+      );
+      break;
+    default:
+     if ($settings = $job->checkoutSettingsForm($form, $form_state)) {
+       return $settings;
+     }
   }
   return $form;
 }

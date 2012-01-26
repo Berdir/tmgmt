@@ -50,9 +50,9 @@ function hook_tmgmt_translator_plugin_info() {
       'label' => t('Test translator'),
       'description' => t('Simple translator for testing purposes.'),
       'controller class' => 'TMGMTTestTranslatorPluginController',
-      // Automatically create a translator instance with the same name and
-      // default settings.
-      'auto create' => TRUE,
+      // By default, a translator is automatically created with the default
+      // settings. Set auto create to FALSE to prevent this.
+      'auto create' => FALSE,
     ),
   );
 }
