@@ -17,6 +17,9 @@ class TMGMTJobMetadataController extends EntityDefaultMetadataController {
     // Make the created and changed property appear as date.
     $properties['changed']['type'] = $properties['created']['type'] = 'date';
 
+    // Use the defined entity label callback instead of the custom label directly.
+    $properties['label']['getter callback'] = 'entity_class_label';
+
     // Add the options list for the available languages.
     $properties['target_language']['options list'] = $properties['source_language']['options list'] = 'entity_metadata_language_list';
 
