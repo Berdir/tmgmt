@@ -445,15 +445,3 @@ function tmgmt_update_7012() {
     'initial' => REQUEST_TIME,
   ));
 }
-
-/**
- * Add the  field to the job items.
- */
-function tmgmt_update_7013() {
-  db_add_field('tmgmt_job_item', 'changed', array(
-    'description' => 'Changed timestamp.',
-    'type' => 'int',
-    'unsigned' => TRUE,
-    'initial' => REQUEST_TIME,
-  ));
-}
