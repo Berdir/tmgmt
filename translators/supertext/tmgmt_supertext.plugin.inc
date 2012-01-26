@@ -128,7 +128,7 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
    */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['api_account_id'] = array(
       '#type' => 'textfield',
       '#title' => t('Supertext API Account Id'),

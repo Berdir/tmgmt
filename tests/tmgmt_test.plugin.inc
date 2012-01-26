@@ -8,21 +8,54 @@
 class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
+   * Overrides TMGMTDefaultTranslatorPluginController::pluginSettingsForm().
+   */
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
+
+    $form['expose_settings'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display settings'),
+      '#default_value' => TRUE,
+    );
+
+    return parent::pluginSettingsForm($form, $form_state, $translator);
+  }
+
+  /**
+   * Overrides TMGMTDefaultTranslatorPluginController::pluginSettingsForm().
+   */
+  public function defaultPluginSettings() {
+    return array(
+      'expose_settings' => TRUE,
+    );
+  }
+
+  /**
    * Overrides TMGMTDefaultTranslatorPluginController::checkoutSettingsForm().
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
-    $settings['action'] = array(
-      '#type' => 'select',
-      '#title' => t('Action'),
-      '#options' => array(
-        'translate' => t('Translate'),
-        'submit' => t('Submit'),
-        'reject' => t('Reject'),
-        'fail' => t('Fail'),
-        'not_translatable' => t('Not translatable'),
-      ),
-    );
-    return $settings;
+    if ($job->getTranslator()->getSetting('expose_settings')) {
+      $settings['action'] = array(
+        '#type' => 'select',
+        '#title' => t('Action'),
+        '#options' => array(
+          'translate' => t('Translate'),
+          'submit' => t('Submit'),
+          'reject' => t('Reject'),
+          'fail' => t('Fail'),
+          'not_translatable' => t('Not translatable'),
+        ),
+      );
+      return $settings;
+    }
+    return parent::checkoutSettingsForm($form, $form_state, $job);
+  }
+
+  /**
+   * Overrides TMGMTDefaultTranslatorPluginController::hasCheckoutSettings().
+   */
+  public function hasCheckoutSettings(TMGMTJob $job) {
+    return $job->getTranslator()->getSetting('expose_settings');
   }
 
   /**

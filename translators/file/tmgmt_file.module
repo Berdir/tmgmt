@@ -10,6 +10,7 @@
  */
 function tmgmt_file_tmgmt_translator_plugin_info() {
   return array(
+    // @todo Rename plugin.
     'html' => array(
       'label' => t('File translator'),
       'description' => t('File translator that exports and imports files.'),

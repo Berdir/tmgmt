@@ -79,7 +79,7 @@ function tmgmt_ui_default_rules_configuration() {
                     },
                     { "tmgmt_rules_job_add_item" : {
                         "job" : [ "job" ],
-                        "source_plugin" : "node",
+                        "plugin" : "node",
                         "item_type" : "node",
                         "item_id" : [ "node:nid" ]
                       }

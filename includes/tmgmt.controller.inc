@@ -35,7 +35,7 @@ class TMGMTTranslatorController extends EntityAPIControllerExportable {
   protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     $query = parent::buildQuery($ids, $conditions, $revision_id);
     if ($plugins = tmgmt_translator_plugin_info()) {
-      $query->condition('translator_plugin', array_keys($plugins));
+      $query->condition('plugin', array_keys($plugins));
     }
     else {
       // Don't return any translators if no plugin exists.

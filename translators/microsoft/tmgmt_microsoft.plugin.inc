@@ -117,7 +117,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::pluginSettingsForm().
    */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['api'] = array(
       '#type' => 'textfield',
       '#title' => t('Microsoft API Key'),
@@ -131,12 +131,21 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Implements TMGMTTranslatorPluginControllerInterface::checkoutSettingsForm().
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
-    $settings['group_translations'] = array(
+    // Disable the setting for now as it is not yet implemented.
+    return parent::checkoutSettingsForm($form, $form_state, $job);
+    /**$settings['group_translations'] = array(
       '#type' => 'checkbox',
       '#title' => t('Group translation items (@TODO)'),
       '#description' => t('If checked all text items in this translation job will be send to server in one request.')
     );
-    return $settings;
+    return $settings;*/
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
+   */
+  public function hasCheckoutSettings(TMGMTJob $job) {
+    return FALSE;
   }
 
   /**

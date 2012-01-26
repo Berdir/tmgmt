@@ -23,7 +23,7 @@ function tmgmt_node_views_data_alter(&$data) {
         ),
         array(
           'table' => 'tmgmt_job_item',
-          'field' => 'source_plugin',
+          'field' => 'plugin',
           'operator' => '=',
           'value' => 'node',
         ),
@@ -45,7 +45,7 @@ function tmgmt_node_views_data_alter(&$data) {
           'value' => 'node',
         ),
         array(
-          'field' => 'source_plugin',
+          'field' => 'plugin',
           'operator' => '=',
           'value' => 'node',
         ),
@@ -87,7 +87,7 @@ function tmgmt_node_views_data_alter(&$data) {
           'value' => 'node',
         ),
         array(
-          'field' => 'source_plugin',
+          'field' => 'plugin',
           'operator' => '=',
           'value' => 'node',
         ),

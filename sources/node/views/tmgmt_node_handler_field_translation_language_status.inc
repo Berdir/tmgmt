@@ -59,7 +59,7 @@ class tmgmt_node_handler_field_translation_language_status extends views_handler
     }
 
     $select = db_select('node', 'n');
-    $select->leftJoin('tmgmt_job_item', 'tji', "n.vid = tji.item_id AND tji.source_plugin = 'node' AND tji.item_type = 'node'");
+    $select->leftJoin('tmgmt_job_item', 'tji', "n.vid = tji.item_id AND tji.plugin = 'node' AND tji.item_type = 'node'");
     $select->leftJoin('tmgmt_job', 'tj', 'tji.tjid = tj.tjid');
     $select->condition('tji.item_id', $vids);
 

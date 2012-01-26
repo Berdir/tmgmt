@@ -32,6 +32,7 @@ function tmgmt_local_translator_page_job_translate(TMGMTJob $job) {
     //$build['items'][$key]['#title'] = t('Item @key', array('@key' => $key));
   }
 
+  dpm($build);
   return $build;
 }
 
@@ -65,19 +66,19 @@ function tmgmt_local_translator_job_form($form, &$form_state, $job) {
   );
   // @todo Check permissions and limit what we can do with this form.
   switch ($state) {
-    case TMGMT_JOB_STATE_SUBMITTED:
+    case TMGMT_JOB_STATE_ACTIVE:
       $action = t('Submit translation');
       break;
-    case TMGMT_JOB_STATE_NEW:
+    case TMGMT_JOB_STATE_UNPROCESSED:
       $action = t('Request translation');
       break;
     case TMGMT_JOB_STATE_REVIEW:
       $action = t('Approve translation');
-      break;      
+      break;
   }
   if (!empty($action)) {
     $form['controls']['submit'] = array(
-    	'#type' => 'submit', 
+    	'#type' => 'submit',
     	'#value' => $action,
     );
   }
@@ -86,7 +87,7 @@ function tmgmt_local_translator_job_form($form, &$form_state, $job) {
 
 /**
  * Job form for submitting to review.
- * 
+ *
  * @todo Proper logging, user names, etc..
  */
 function tmgmt_local_translator_job_form_submit($form, &$form_state) {
@@ -103,8 +104,8 @@ function tmgmt_local_translator_job_form_submit($form, &$form_state) {
     case t('Approve translation'):
       $job->finished(t('The translation has been approved by a local translator.'));
       drupal_set_message(t('The translation has been approved.'));
-      break;      
-  }  
+      break;
+  }
 }
 
 /**
@@ -155,7 +156,6 @@ function tmgmt_local_translator_job_item_subform($items, $translation) {
   if (!empty($items['#text'])) {
     // Approximate the number of rows to use in the default textarea.
     $rows = min(ceil(str_word_count($items['#text']) / 12), 10);
-
     $form['source'] = array(
       '#type' => 'textarea',
       '#disabled' => TRUE,
@@ -258,7 +258,7 @@ function tmgmt_local_translator_user_languages_form($form, &$form_state, $accoun
       '#type' => 'submit',
       '#value' => t('remove'),
       '#parents' => array('controls', $type, $langcode),
-      '#ajax' =>  array(     
+      '#ajax' =>  array(
       	'callback' => 'tmgmt_local_translator_user_ajax_callback',
     		'wrapper' => $wrapper_id,
     		'method' => 'replace',
@@ -283,11 +283,11 @@ function tmgmt_local_translator_user_languages_form($form, &$form_state, $accoun
         '#type' => 'submit',
         '#value' => t('add'),
         '#parents' => array('controls', $type, 'add'),
-        '#ajax' =>  array(     
+        '#ajax' =>  array(
         	'callback' => 'tmgmt_local_translator_user_ajax_callback',
       		'wrapper' => $wrapper_id,
       		'method' => 'replace',
-        ),      
+        ),
       );
     }
   }

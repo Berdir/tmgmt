@@ -10,21 +10,25 @@
  * @{
  */
 /**
+ * upcoming D8 entities as well as the current $entity->is_new property.
+ *
  * A new translation job.
  *
  * In the default user interface, jobs with this state are so called cart jobs.
  * Each user gets his cart jobs listed in a block and can check them out.
  */
-define('TMGMT_JOB_STATE_NEW', 0);
+define('TMGMT_JOB_STATE_UNPROCESSED', 0);
 
 /**
+ * once we have migrated to using job item states.
+ *
  * A translation job that has been submitted to the translator.
  *
  * Translator plugins are responsible for setting this state in their
  * implementation of
  * TMGMTTranslatorPluginControllerInterface::requestTranslation().
  */
-define('TMGMT_JOB_STATE_SUBMITTED', 1);
+define('TMGMT_JOB_STATE_ACTIVE', 1);
 
 /**
  * A translation job that has been rejected by the translator.
@@ -38,6 +42,8 @@ define('TMGMT_JOB_STATE_SUBMITTED', 1);
 define('TMGMT_JOB_STATE_REJECTED', 2);
 
 /**
+ * @todo remove this once we have migrated to using job item states for this.
+ *
  * The translation job was translated and needs to be reviewed.
  *
  * This state needs to be set by the translator plugin once the job has been
@@ -46,6 +52,8 @@ define('TMGMT_JOB_STATE_REJECTED', 2);
 define('TMGMT_JOB_STATE_REVIEW', 3);
 
 /**
+ * @todo remove this once we have migrated to using job item states for this.
+ *
  * The translation has been accepted and the job is finished.
  *
  * Once the job has been accepted, the source plugins are called to update their
@@ -63,12 +71,35 @@ define('TMGMT_JOB_STATE_ACCEPTED', 4);
 define('TMGMT_JOB_STATE_CANCELLED', 5);
 
 /**
+ * @todo Use this instead of TMGMT_JOB_STATE_ACCEPTED once we have migrated to
+ * using job item states.
+ *
  * The translation job has been finished.
  *
  * Not yet used.
  */
 define('TMGMT_JOB_STATE_FINISHED', 6);
 
+/**
+ * @todo Implement job item states. Maybe rename this.
+ *
+ * Waiting for translation.
+ */
+define('TMGMT_JOB_ITEM_STATE_WAITING', 1);
+
+/**
+ * @todo Implement job item states.
+ *
+ * Needs to be reviewed.
+ */
+define('TMGMT_JOB_ITEM_STATE_REVIEW', 2);
+
+/**
+ * @todo Implement job item states.
+ *
+ * Is accepted.
+ */
+define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
 /**
  * @} End of "addtogroup tmgmt_job".
  */
@@ -288,7 +319,7 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
     ->propertyCondition('source_language', $source_language)
     ->propertyCondition('target_language', $target_language)
     ->propertyCondition('uid', $account->uid)
-    ->propertyCondition('state', TMGMT_JOB_STATE_NEW)
+    ->propertyCondition('state', TMGMT_JOB_STATE_UNPROCESSED)
     ->execute();
   if (!empty($result['tmgmt_job'])) {
     return tmgmt_job_load(reset($result['tmgmt_job'])->tjid);
@@ -366,7 +397,7 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
  *   FALSE otherwise.
  */
 function tmgmt_job_checkout_access(TMGMTJob $job, $account = NULL) {
-  if ($job->isNew() || $job->isRejected() || $job->isCancelled()) {
+  if ($job->isUnprocessed() || $job->isRejected() || $job->isCancelled()) {
     return tmgmt_job_access('checkout', $job, $account);
   }
   return FALSE;
@@ -380,8 +411,8 @@ function tmgmt_job_checkout_access(TMGMTJob $job, $account = NULL) {
  */
 function tmgmt_job_states() {
   return array(
-    TMGMT_JOB_STATE_NEW => t('New'),
-    TMGMT_JOB_STATE_SUBMITTED => t('Submitted'),
+    TMGMT_JOB_STATE_UNPROCESSED => t('Unprocessed'),
+    TMGMT_JOB_STATE_ACTIVE => t('Active'),
     TMGMT_JOB_STATE_REJECTED => t('Rejected'),
     TMGMT_JOB_STATE_REVIEW => t('Needs review'),
     TMGMT_JOB_STATE_ACCEPTED => t('Accepted'),
@@ -423,7 +454,7 @@ function tmgmt_job_item_load($tjiid) {
  * @return TMGMTJobItem
  *   The loaded job items.
  */
-function tmgmt_job_load_by_source($source_plugin, $item_type, $item_id, $source_language, $target_languages = array()) {
+function tmgmt_job_load_by_source($plugin, $item_type, $item_id, $source_language, $target_languages = array()) {
   if (empty($target_languages)) {
     $available_languages = entity_metadata_language_list();
     unset($available_languages[LANGUAGE_NONE], $available_languages[$source_language]);
@@ -435,7 +466,7 @@ function tmgmt_job_load_by_source($source_plugin, $item_type, $item_id, $source_
     $query = db_select('tmgmt_job_item', 'ji');
     $query->join('tmgmt_job', 'j', 'j.tjid = ji.tjid AND j.target_language = :target_language', array(':target_language' => $target_language));
     $query = $query->fields('j', array('tjid'))
-      ->condition('source_plugin', $source_plugin)
+      ->condition('plugin', $plugin)
       ->condition('item_type', $item_type)
       ->condition('item_id', $item_id)
       ->orderBy('changed', 'DESC')
@@ -457,7 +488,7 @@ function tmgmt_job_item_load_multiple($tjiids = array(), $conditions = array()) 
 /**
  * Creates a translation job item.
  *
- * @param $source_plugin
+ * @param $plugin
  *   The plugin name.
  * @param $item_type
  *   The source item type.
@@ -469,9 +500,9 @@ function tmgmt_job_item_load_multiple($tjiids = array(), $conditions = array()) 
  * @return TMGMTJobItem
  *   The created, not yet saved, job item entity.
  */
-function tmgmt_job_item_create($source_plugin, $item_type, $item_id, array $values = array()) {
+function tmgmt_job_item_create($plugin, $item_type, $item_id, array $values = array()) {
   return entity_create('tmgmt_job_item', array_merge($values, array(
-    'source_plugin' => $source_plugin,
+    'plugin' => $plugin,
     'item_type' => $item_type,
     'item_id' => $item_id,
   )));
@@ -594,6 +625,8 @@ function tmgmt_translator_exists($name) {
 
 /**
  * Loads a translator based on the name.
+ *
+ * @return TMGMTTranslator
  */
 function tmgmt_translator_load($name) {
   $translators = entity_load_multiple_by_name('tmgmt_translator', array($name));
@@ -621,7 +654,7 @@ function tmgmt_translator_load_multiple($names = array(), $conditions = array())
 function tmgmt_translator_busy($translator) {
   $query = new EntityFieldQuery();
   return (boolean) $query->entityCondition('entity_type', 'tmgmt_job')
-    ->propertyCondition('state', array(TMGMT_JOB_STATE_SUBMITTED, TMGMT_JOB_STATE_REVIEW))
+    ->propertyCondition('state', array(TMGMT_JOB_STATE_ACTIVE, TMGMT_JOB_STATE_REVIEW))
     ->propertyCondition('translator', $translator)
     ->range(0, 1)
     ->count()
@@ -649,7 +682,7 @@ function tmgmt_translator_busy($translator) {
  */
 function tmgmt_translator_create($plugin, $name, $label, $description = '', $settings = array(), $values = array()) {
   return entity_create('tmgmt_translator', array_merge($values, array(
-    'translator_plugin' => $plugin,
+    'plugin' => $plugin,
     'name' => $name,
     'label' => $label,
     'description' => $description,
@@ -719,7 +752,7 @@ function tmgmt_translator_plugin_labels() {
 function tmgmt_translator_labels() {
   $labels = array();
   foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
-    $labels[$translator->identifier()] = $translator->label();
+    $labels[$translator->name] = $translator->label();
   }
   return $labels;
 }
@@ -738,13 +771,13 @@ function tmgmt_translator_filtered_by_language($source_language, $selected_targe
   foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
     switch (tmgmt_translator_check($translator, $source_language, $selected_target_language)) {
       case TMTGT_TRANSLATOR_NOT_AVAILABLE:
-        $translators[$translator->identifier()] = t('@label (not available)', array('@label' => $translator->label()));
+        $translators[$translator->name] = t('@label (not available)', array('@label' => $translator->label()));
         break;
       case TMGMT_TRANSLATOR_NOT_AVAILABLE_FOR_LANGUAGE:
-        $translators[$translator->identifier()] = t('@label (not available for this language)', array('@label' => $translator->label()));
+        $translators[$translator->name] = t('@label (not available for this language)', array('@label' => $translator->label()));
         break;
       default:
-        $translators[$translator->identifier()] = $translator->label();
+        $translators[$translator->name] = $translator->label();
     }
   }
   return $translators;
@@ -948,26 +981,4 @@ function tmgmt_unflatten_data($flattened_data) {
     drupal_array_set_nested_value($data, explode(TMGMT_ARRAY_DELIMITER, $key), $flattened_data_entry);
   }
   return $data;
-}
-
-/**
- * Helper function for recursively marking form elements as #disabled if the
- * parent form element is marked as such.
- *
- * @param $form
- *   A renderable Form API array structure.
- *
- * @return array
- *   The processed array.
- */
-function _tmgmt_form_inherit_disabled($form) {
-  foreach (element_children($form) as $key) {
-    if (!empty($form['#disabled'])) {
-      $form[$key]['#disabled'] = TRUE;
-    }
-    if (is_array($form[$key])) {
-      $form[$key] = _tmgmt_form_inherit_disabled($form[$key]);
-    }
-  }
-  return $form;
 }

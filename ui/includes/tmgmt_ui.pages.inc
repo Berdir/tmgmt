@@ -9,7 +9,7 @@
  * Creates and adds a jobitem to a certain job. If job is not defined, a new job
  * will be created. Destinatoin will be needed to return to the submitters page.
  */
-function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_ids, $tjid = NULL) {
+function tmgmt_job_add_item($source_language, $plugin, $item_type, $item_ids, $tjid = NULL) {
   if (!$tjid) {
     $job = tmgmt_job_create($source_language, '');
   }
@@ -25,7 +25,7 @@ function tmgmt_job_add_item($source_language, $source_plugin, $item_type, $item_
   else {
     $item_ids = explode(',', $item_ids);
     foreach ($item_ids as $item_id) {
-      $job->addItem($source_plugin, $item_type, $item_id);
+      $job->addItem($plugin, $item_type, $item_id);
     }
   }
   drupal_goto('admin/config/regional/tmgmt/jobs/' . $job->tjid . '/manage');

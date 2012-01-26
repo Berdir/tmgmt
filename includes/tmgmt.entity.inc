@@ -52,7 +52,7 @@ class TMGMTTranslator extends Entity {
    *
    * @type string
    */
-  public $translator_plugin;
+  public $plugin;
 
   /**
    * Translator type specific settings.
@@ -74,7 +74,7 @@ class TMGMTTranslator extends Entity {
    * @return TMGMTTranslatorPluginControllerInterface
    */
   public function getPluginController() {
-    return tmgmt_translator_plugin_controller($this->translator_plugin);
+    return tmgmt_translator_plugin_controller($this->plugin);
   }
 
   /**
@@ -84,7 +84,10 @@ class TMGMTTranslator extends Entity {
    *  An array of supported target languages in ISO format.
    */
   public function getSupportedTargetLanguages($source_language) {
-    return $this->getPluginController()->getSupportedTargetLanguages($this, $source_language);
+    if ($controller = $this->getPluginController()) {
+      return $controller->getSupportedTargetLanguages($this, $source_language);
+    }
+    return FALSE;
   }
 
   /**
@@ -110,9 +113,8 @@ class TMGMTTranslator extends Entity {
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
   public function isAvailable() {
-    $plugin = $this->getPluginController();
-    if ($plugin) {
-      return $plugin->isAvailable($this);
+    if ($controller = $this->getPluginController()) {
+      return $controller->isAvailable($this);
     }
     return FALSE;
   }
@@ -124,14 +126,15 @@ class TMGMTTranslator extends Entity {
     if ($controller = $this->getPluginController()) {
       return $controller->checkoutSettingsForm($form, $form_state, $job);
     }
+    return FALSE;
   }
 
   /**
    * Get the settings form from the respective translator plugin.
    */
-  public function pluginSettingsForm($form, $form_state) {
+  public function pluginSettingsForm($form, $form_state, $busy = FALSE) {
     if ($controller = $this->getPluginController()) {
-      return $controller->pluginSettingsForm($form, $form_state, $this);
+      return $controller->pluginSettingsForm($form, $form_state, $this, $busy);
     }
     return FALSE;
   }
@@ -147,10 +150,23 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
+   * Returns if the plugin has any settings for this job.
+   */
+  public function hasCheckoutSettings(TMGMTJob $job) {
+    if ($controller = $this->getPluginController()) {
+      return $controller->hasCheckoutSettings($job);
+    }
+    return FALSE;
+  }
+
+  /**
    * @todo
    */
   public function getNotAvailableReason() {
-    return $this->getPluginController()->getNotAvailableReason($this);
+    if ($controller = $this->getPluginController()) {
+      return $controller->getNotAvailableReason($this);
+    }
+    return FALSE;
   }
 
   /**
@@ -168,7 +184,8 @@ class TMGMTTranslator extends Entity {
     if (isset($this->settings[$name])) {
       return $this->settings[$name];
     }
-    elseif ($defaults = $this->getPluginController()->defaultPluginSettings()) {
+    else if ($controller = $this->getPluginController()) {
+      $defaults = $controller->defaultPluginSettings();
       if (isset($defaults[$name])) {
         return $defaults[$name];
       }
@@ -189,7 +206,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *
    * @var varchar
    */
-  public $source_plugin;
+  public $plugin;
 
   /**
    * The identifier of the translation job.
@@ -241,6 +258,16 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * @var array
    */
   public $translation = array();
+
+  /**
+   * Overrides Entity::__construct().
+   */
+  public function __construct(array $values = array()) {
+    parent::__construct($values, 'tmgmt_job_item');
+    if (!isset($this->state)) {
+      $this->state = TMGMT_JOB_ITEM_STATE_WAITING;
+    }
+  }
 
   /**
    * Overrides Entity::defaultLabel()
@@ -309,7 +336,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * @return TMGMTSourcePluginControllerInterface
    */
   public function getSourceController() {
-    return tmgmt_source_plugin_controller($this->source_plugin);
+    return tmgmt_source_plugin_controller($this->plugin);
   }
 
   /**
@@ -344,6 +371,20 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
       return TRUE;
     }
     return FALSE;
+  }
+
+  /**
+   * Retrieves the translated data from a job item.
+   *
+   * @return
+   *   The array of translated data or FALSE if no translated data has been
+   *   saved yet.
+   */
+  public function getTranslatedData() {
+    if (!empty($this->translation)) {
+      return $this->translation;
+    }
+    return array();
   }
 
 }
@@ -426,7 +467,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       $this->created = REQUEST_TIME;
     }
     if (!isset($this->state)) {
-      $this->state = TMGMT_JOB_STATE_NEW;
+      $this->state = TMGMT_JOB_STATE_UNPROCESSED;
     }
   }
 
@@ -454,7 +495,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Overrides Entity::defaultUri().
    */
   public function defaultUri() {
-    return array('path' => 'admin/config/regional/tmgmt/jobs/' . $this->tjid . '/view');
+    return array('path' => 'admin/config/regional/tmgmt/jobs/' . $this->tjid);
   }
 
   /**
@@ -524,8 +565,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @return boolean
    *   TRUE if the state is new, FALSE otherwise.
    */
-  public function isNew() {
-    return $this->isState(TMGMT_JOB_STATE_NEW);
+  public function isUnprocessed() {
+    return $this->isState(TMGMT_JOB_STATE_UNPROCESSED);
   }
 
   /**
@@ -534,8 +575,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @return boolean
    *   TRUE if the state is submitted, FALSE otherwise.
    */
-  public function isSubmitted() {
-    return $this->isState(TMGMT_JOB_STATE_SUBMITTED);
+  public function isActive() {
+    return $this->isState(TMGMT_JOB_STATE_ACTIVE);
   }
 
   /**
@@ -597,7 +638,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   /**
    * Adds an item to the translation job.
    *
-   * @param $source_plugin
+   * @param $plugin
    *   The plugin name.
    * @param $item_type
    *   The source item type.
@@ -607,10 +648,10 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @return TMGMTJobItem
    *   The job item that was added to the job or NULL if it couldn't be saved.
    */
-  public function addItem($source_plugin, $item_type, $item_id) {
+  public function addItem($plugin, $item_type, $item_id) {
     // Save the job if it hasn't yet been saved.
     if (!empty($this->tjid) || $this->save()) {
-      $item = tmgmt_job_item_create($source_plugin, $item_type, $item_id, array('tjid' => $this->tjid));
+      $item = tmgmt_job_item_create($plugin, $item_type, $item_id, array('tjid' => $this->tjid));
       if ($item->save()) {
         return $item;
       }
@@ -688,8 +729,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     if (isset($this->settings[$name])) {
       return $this->settings[$name];
     }
-    else if ($controller = $this->getTranslatorController()) {
-      $defaults = $controller->defaultPluginSettings();
+    // The translator might provide default settings.
+    if ($translator = $this->getTranslator()) {
+      if (($setting = $translator->getSetting($name)) !== NULL) {
+        return $setting;
+      }
+    }
+    if ($controller = $this->getTranslatorController()) {
+      $defaults = $controller->defaultCheckoutSettings();
       if (isset($defaults[$name])) {
         return $defaults[$name];
       }
@@ -831,7 +878,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @see TMGMTJob::addMessage()
    */
   public function submitted($message = NULL, $variables = array()) {
-    $this->setState(TMGMT_JOB_STATE_SUBMITTED);
+    $this->setState(TMGMT_JOB_STATE_ACTIVE);
     $this->addMessage($message, $variables);
     $this->save();
   }
@@ -955,7 +1002,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     // If the job is not currently pending by the translator (submitted), we can
     // cancel without any checks. Otherwise, ask the translator plugin if the
     // job can be cancelled.
-    if (!$this->isSubmitted() || $this->getTranslatorController()->cancelTranslation($this)) {
+    if (!$this->isActive() || $this->getTranslatorController()->cancelTranslation($this)) {
       if (isset($account)) {
         $this->cancelled('The translation job has been canceled by !user.', array('!user' => theme('username', array('account' => $account))));
       }
@@ -1028,6 +1075,25 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
         }
       }
     }
+  }
+
+  /**
+   * Retrieves the translated data from a job item.
+   *
+   * @return
+   *   The array of translated data or FALSE if no translated data has been
+   *   saved yet.
+   */
+  public function getTranslatedData() {
+    $data = array();
+    foreach ($this->getItems() as $item) {
+      // Only create an array key if the item actually returned any translated
+      // data.
+      if ($item_data = $item->getTranslatedData()) {
+        $data[$item->tjiid] = $item_data;
+      }
+    }
+    return $data;
   }
 
   /**
@@ -1117,7 +1183,6 @@ class TMGMTJobMessage extends Entity {
       $this->type = 'status';
     }
   }
-
   /**
    * Overrides Entity::label().
    */

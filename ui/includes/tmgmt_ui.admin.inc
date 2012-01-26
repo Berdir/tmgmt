@@ -19,13 +19,6 @@ function tmgmt_ui_job_view(TMGMTJob $job) {
 }
 
 /**
- * Review form for translation jobs.
- */
-function tmgmt_ui_job_review_form($form, &$form_state, TMGMTJob $job) {
-  return $form;
-}
-
-/**
  * Entity API form for the translator entity.
  */
 function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator, $op = 'edit') {
@@ -46,7 +39,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   $available = tmgmt_translator_plugin_labels();
   // If the translator plugin is not set, pick the first available plugin as the
   // default.
-  $translator->translator_plugin = empty($translator->translator_plugin) ? key($available) : $translator->translator_plugin;
+  $translator->plugin = empty($translator->plugin) ? key($available) : $translator->plugin;
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
@@ -81,17 +74,17 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#type' => 'container',
     '#prefix' => '<div id="tmgmt-plugin-wrapper">',
     '#suffix' => '</div>',
-    '#disabled' => $busy,
   );
   // Pull the translator plugin info if any.
-  $info = !empty($translator->translator_plugin) ? tmgmt_translator_plugin_info($translator->translator_plugin) : array();
-  $form['plugin_wrapper']['translator_plugin'] = array(
+  $info = !empty($translator->plugin) ? tmgmt_translator_plugin_info($translator->plugin) : array();
+  $form['plugin_wrapper']['plugin'] = array(
     '#type' => 'select',
     '#title' => t('Translator plugin'),
     '#description' => isset($info['description']) ? $info['description'] : t('The plugin that controls the translator.'),
     '#options' => $available,
-    '#default_value' => $translator->translator_plugin,
+    '#default_value' => $translator->plugin,
     '#required' => TRUE,
+    '#disabled' => $busy,
     '#ajax' => array(
       'callback' => 'tmgmt_ui_ajax_callback_translator_plugin',
       'wrapper' => 'tmgmt-plugin-wrapper',
@@ -103,7 +96,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#tree' => TRUE,
   );
   // Add the translator plugin settings form.
-  $form['plugin_wrapper']['settings'] += tmgmt_ui_plugin_settings_form(array(), $form_state, $translator);
+  $form['plugin_wrapper']['settings'] += tmgmt_ui_plugin_settings_form(array(), $form_state, $translator, $busy);
   // Add a submit button and a cancel link to the form.
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
@@ -135,8 +128,8 @@ function tmgmt_translator_form_validate($form, &$form_state) {
   $backup = clone $form_state[$form_state['entity_type']];
   $translator = entity_ui_form_submit_build_entity($form, $form_state);
   $form_state[$form_state['entity_type']] = $backup;
-  if (empty($translator->translator_plugin)) {
-    form_set_error('translator_plugin', t('You have to select a translator plugin.'));
+  if (empty($translator->plugin)) {
+    form_set_error('plugin', t('You have to select a translator plugin.'));
   }
 }
 
@@ -177,7 +170,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $job->source_language = $preselected['source_language'] ? $preselected['source_language'] : (isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : key($available));
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
   // Mark form elements as disabled under certain circumstances.
-  $disabled = !$job->isNew() && !$job->isCancelled() && !$job->isRejected();
+  $disabled = !$job->isUnprocessed() && !$job->isCancelled() && !$job->isRejected();
   // Get the job metadata wrapper so we can display the current status nicely.
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
   // Show the items that are attached to this job if there are not more than 20.
@@ -205,7 +198,6 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $form['languages'] = array(
     '#type' => 'fieldset',
     '#title' => t('Source and target language'),
-    '#disabled' => $disabled,
   );
   // Make the source and target language flexible by showing either a select
   // dropdown or the plain string (if preselected).
@@ -217,7 +209,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#required' => TRUE,
     '#prefix' => '<div class="tmgmt-ui-source-language">',
     '#suffix' => '</div>',
-    '#disabled' => !empty($preselected['source_language']),
+    '#disabled' => !empty($preselected['source_language']) || $disabled,
     '#ajax' => array(
       'callback' => 'tmgmt_ui_ajax_callback_get_supported_translators',
       'wrapper' => 'tmgmt-translator-wrapper',
@@ -231,7 +223,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#required' => TRUE,
     '#prefix' => '<div class="tmgmt-ui-source-language">',
     '#suffix' => '</div>',
-    '#disabled' => !empty($preselected['target_language']),
+    '#disabled' => !empty($preselected['target_language']) || $disabled,
     '#ajax' => array(
       'callback' => 'tmgmt_ui_ajax_callback_supported_translators',
       'wrapper' => 'tmgmt-translator-wrapper',
@@ -241,7 +233,6 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#type' => 'container',
     '#prefix' => '<div id="tmgmt-translator-wrapper">',
     '#suffix' => '</div>',
-    '#disabled' => $disabled,
   );
   $form['translator_wrapper']['translator'] = array(
     '#type' => 'select',
@@ -249,13 +240,14 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#options' => $translators,
     '#default_value' => $job->translator,
     '#required' => TRUE,
+    '#disabled' => $disabled,
     '#ajax' => array(
       'callback' => 'tmgmt_ui_ajax_callback_translator_settings',
       'wrapper' => 'tmgmt-translator-settings',
     ),
   );
   // Display the checkout settings form if the job can be checked out.
-  if (!$job->isSubmitted() && !$job->isAccepted() && !$job->isNeedsReview()) {
+  if (!$job->isActive() && !$job->isAccepted() && !$job->isNeedsReview()) {
     $form['translator_wrapper']['settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Checkout settings'),
@@ -282,7 +274,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $form['actions']['checkout'] = array(
     '#type' => 'submit',
     '#value' => t('Submit to translator'),
-    '#access' => !$job->isSubmitted() && !$job->isAccepted() && !$job->isNeedsReview(),
+    '#access' => !$job->isActive() && !$job->isAccepted() && !$job->isNeedsReview(),
   );
   if ($old) {
     $form['actions']['delete'] = array(
@@ -299,11 +291,11 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#value' => t('Cancel'),
     '#submit' => array('tmgmt_ui_submit_redirect'),
     '#redirect' => 'admin/config/regional/tmgmt/jobs',
-    '#access' => $job->isSubmitted(),
+    '#access' => $job->isActive(),
   );
   // We need some CSS for showing the source and target language in one row.
   $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
-  return _tmgmt_form_inherit_disabled($form);
+  return $form;
 }
 
 /**
@@ -381,8 +373,8 @@ function tmgmt_ui_checkout_settings_form($form, &$form_state, TMGMTJob $job) {
 /**
  * Helper function for retrieving the translator settings form.
  */
-function tmgmt_ui_plugin_settings_form($form, &$form_state, TMGMTTranslator $translator) {
-  if ($settings = $translator->pluginSettingsForm($form, $form_state)) {
+function tmgmt_ui_plugin_settings_form($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
+  if ($settings = $translator->pluginSettingsForm($form, $form_state, $busy)) {
     return $settings;
   }
   return $form;

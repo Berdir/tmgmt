@@ -83,7 +83,7 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   /**
    * The settings form.
    */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['export_format'] = array(
       '#type' => 'radios',
       '#title' => t('Export to'),
@@ -95,6 +95,13 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
       '#description' => t('Please select the format you want to export data.'),
     );
     return parent::pluginSettingsForm($form, $form_state, $translator);
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
+   */
+  public function hasCheckoutSettings(TMGMTJob $job) {
+    return FALSE;
   }
 
 }

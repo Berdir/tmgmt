@@ -75,7 +75,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    * @param $form array
    * @param $form_state array
    */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator) {
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['api_user_name'] = array(
       '#type' => 'textfield',
       '#title' => t('User name'),
