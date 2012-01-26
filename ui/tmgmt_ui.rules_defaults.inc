@@ -15,7 +15,7 @@ function tmgmt_ui_default_rules_configuration() {
       "PLUGIN" : "reaction rule",
       "REQUIRES" : [ "rules", "tmgmt" ],
       "ON" : [ "tmgmt_job_update" ],
-      "IF" : [ { "data_is" : { "data" : [ "tmgmt-job:state" ], "value" : "4" } } ],
+      "IF" : [ { "data_is" : { "data" : [ "tmgmt-job:state" ], "value" : "3" } } ],
       "DO" : [
         { "tmgmt_rules_job_accept_translation" : {
             "job" : [ "tmgmt-job" ],
@@ -33,7 +33,7 @@ function tmgmt_ui_default_rules_configuration() {
       "PLUGIN" : "rule",
       "REQUIRES" : [ "rules", "tmgmt" ],
       "USES VARIABLES" : { "job" : { "label" : "Job", "type" : "tmgmt_job" } },
-      "IF" : [ { "data_is" : { "data" : [ "job:state" ], "value" : "4" } } ],
+      "IF" : [ { "data_is" : { "data" : [ "job:state" ], "value" : "3" } } ],
       "DO" : [ { "tmgmt_rules_job_accept_translation" : { "job" : [ "job" ] } } ]
     }
   }';
