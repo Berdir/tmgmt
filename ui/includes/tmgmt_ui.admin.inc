@@ -328,7 +328,10 @@ function tmgmt_job_form_submit($form, &$form_state) {
   // Everything below this line is only invoked if the 'Submit to translator'
   // button was clicked.
   if ($form_state['triggering_element']['#value'] == t('Submit to translator')) {
-    tmgmt_ui_job_request_translation($job);
+    if (!tmgmt_ui_job_request_translation($job)) {
+      // Don't redirect the user if the translation request failed.
+      $form_state['redirect'] = NULL;
+    }
   }
 }
 
