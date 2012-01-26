@@ -368,7 +368,7 @@ $handler->display->display_options['filters']['source_language']['table'] = 'tmg
 $handler->display->display_options['filters']['source_language']['field'] = 'source_language';
 $handler->display->display_options['filters']['source_language']['exposed'] = TRUE;
 $handler->display->display_options['filters']['source_language']['expose']['operator_id'] = 'source_language_op';
-$handler->display->display_options['filters']['source_language']['expose']['label'] = 'Source language';
+$handler->display->display_options['filters']['source_language']['expose']['label'] = 'From';
 $handler->display->display_options['filters']['source_language']['expose']['operator'] = 'source_language_op';
 $handler->display->display_options['filters']['source_language']['expose']['identifier'] = 'source_language';
 $handler->display->display_options['filters']['source_language']['expose']['reduce'] = 0;
@@ -378,7 +378,7 @@ $handler->display->display_options['filters']['target_language']['table'] = 'tmg
 $handler->display->display_options['filters']['target_language']['field'] = 'target_language';
 $handler->display->display_options['filters']['target_language']['exposed'] = TRUE;
 $handler->display->display_options['filters']['target_language']['expose']['operator_id'] = 'target_language_op';
-$handler->display->display_options['filters']['target_language']['expose']['label'] = 'Target language';
+$handler->display->display_options['filters']['target_language']['expose']['label'] = 'To';
 $handler->display->display_options['filters']['target_language']['expose']['operator'] = 'target_language_op';
 $handler->display->display_options['filters']['target_language']['expose']['identifier'] = 'target_language';
 $handler->display->display_options['filters']['target_language']['expose']['reduce'] = 0;
@@ -422,7 +422,7 @@ $translatables['tmgmt_job_management_job_overview'] = array(
   t('To'),
   t('Translator'),
   t('Operations'),
-  t('Source language'),
-  t('Target language'),
+  t('From'),
+  t('To'),
   t('Page'),
 );

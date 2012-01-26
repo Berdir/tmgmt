@@ -209,12 +209,12 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   // Show the source and target language in a fieldset.
   $form['languages'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Source and target language'),
+    '#title' => t('Language'),
   );
   // Make the source and target language flexible by showing either a select
   // dropdown or the plain string (if preselected).
   $form['languages']['source_language'] = array(
-    '#title' => t('Source language'),
+    '#title' => t('From'),
     '#type' => 'select',
     '#options' => $available,
     '#default_value' => $job->source_language,
@@ -228,7 +228,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     ),
   );
   $form['languages']['target_language'] = array(
-    '#title' => t('Target language'),
+    '#title' => t('To'),
     '#type' => 'select',
     '#options' => $available,
     '#default_value' => $job->target_language,
