@@ -368,6 +368,11 @@ function tmgmt_job_form_validate($form, &$form_state) {
  */
 function tmgmt_ui_checkout_settings_form($form, &$form_state, TMGMTJob $job) {
   $translator = $job->getTranslator();
+  if (!$translator) {
+    return array(
+      '#description' => t('No translator available.'),
+    );
+  }
   if (!$translator->isAvailable()) {
     return array(
       '#description' => $job->getTranslator()->getNotAvailableReason(),
