@@ -72,15 +72,6 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
-   */
-  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
-    $languages = entity_metadata_language_list();
-    unset($languages[LANGUAGE_NONE], $languages[$source_language]);
-    return drupal_map_assoc(array_keys($languages));
-  }
-
-  /**
    * The settings form.
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {

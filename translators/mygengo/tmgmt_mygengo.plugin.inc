@@ -176,7 +176,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
       ));
 
     foreach ($targets as $target) {
-      $results[$target->lc_tgt] = 1;
+      $results[$target->lc_tgt] = $target->lc_tgt;
     }
     return $results;
   }
@@ -193,7 +193,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
       $languages = array();
 
       foreach ($supported_languages as $language) {
-        array_push($languages, $language->lc);
+        $languages[$language->lc] = $language->lc;
       }
     }
     return $languages;

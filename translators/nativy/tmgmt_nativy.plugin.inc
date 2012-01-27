@@ -99,30 +99,8 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
    *   An array of languages in ISO format.
    */
   public function getSupportedLanguages(TMGMTTranslator $translator) {
+    // @todo: Implement this. If necessary, hardcode.
     return parent::getSupportedLanguages($translator);
-    $languages = &drupal_static(__FUNCTION__);
-    if (!isset($languages)) {
-      $languages = array();
-      $res = drupal_http_request($this->translatorURL . '/GetLanguagesForTranslate' . '?appId=' . $this->getOption('bing_api_id'));
-      if ($res->code == 200) {
-        $dom = new DOMDocument;
-        $dom->loadXML($res->data);
-        $string_items = $dom->getElementsByTagName('string');
-        foreach($string_items as $item) {
-          $languages[$item->nodeValue] = $item->nodeValue;
-        }
-      }
-    }
-    return $languages;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
-   */
-  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
-    $languages = $this->getSupportedLanguages($translator);
-    unset($languages[$source_language]);
-    return $languages;
   }
 
   /**

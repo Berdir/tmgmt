@@ -116,13 +116,13 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
    */
-  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
-    // @TODO Not real data, we are returning list of languages for now
+  public function getSupportedLanguages(TMGMTTranslator $translator) {
+    // @todo: Not real data, we are returning list of languages for now.
 
-    // Array like array('es' => TRUE, 'de' => TRUE);
-    return array_flip(array_keys(language_list()));
+    // Array like array('es' => 'es', 'de' => 'de');
+    return drupal_map_assoc(array_keys(language_list()));
   }
 
   /**

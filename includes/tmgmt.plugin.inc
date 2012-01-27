@@ -323,6 +323,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function getSupportedLanguages(TMGMTTranslator $translator) {
     $languages = entity_metadata_language_list();
+    unset($languages[LANGUAGE_NONE]);
     return drupal_map_assoc(array_keys($languages));
   }
 

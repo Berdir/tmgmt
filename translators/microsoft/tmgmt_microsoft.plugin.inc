@@ -75,15 +75,6 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
-   */
-  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
-    $languages = $this->getSupportedLanguages($translator);
-    unset($languages[$source_language]);
-    return $languages;
-  }
-
-  /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
    */
   public function getSupportedLanguages(TMGMTTranslator $translator) {
