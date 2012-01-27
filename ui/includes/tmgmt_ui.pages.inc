@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * tmgmt page callbacks.
@@ -101,4 +100,27 @@ function tmgmt_ui_embed_view($view) {
     }
   }
   return '';
+}
+
+/**
+ * Callbakc for the settings form.
+ */
+function tmgmt_ui_settings() {
+  return drupal_get_form('tmgmt_ui_settings_form');
+}
+
+/**
+ * The settings form.
+ */
+function tmgmt_ui_settings_form($form, &$form_state) {
+  $form['container'] = array(
+    '#type' => 'item',
+    '#title' => t('Alloaccept translations'),
+  );
+  $form['container']['translator_auto_accept'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Make it possible to autoaccept translations by translator'),
+    '#default_value' => variable_get('translator_auto_accept'),
+  );
+  return system_settings_form($form);
 }

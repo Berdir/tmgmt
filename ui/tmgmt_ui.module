@@ -50,6 +50,14 @@ function tmgmt_ui_menu() {
     'file' => 'includes/tmgmt_ui.pages.inc',
     'weight' => -10,
   );
+  $items['admin/config/regional/tmgmt/settings'] = array(
+    'title' => 'Settings',
+    'page callback' => 'tmgmt_ui_settings',
+    'access arguments' => array('administer tmgmt'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/tmgmt_ui.pages.inc',
+    'weight' => 10,
+  );
   $items['admin/config/regional/tmgmt/add-item/%/%/%/%'] = array(
     'title' => 'Create a Job',
     'page callback' => 'tmgmt_job_add_item',
