@@ -2,10 +2,10 @@ name = Content Translation Source
 description = Content Translation source plugin for the Translation Management system.
 package = Translation Management
 core = 7.x
-dependencies[] = node
 dependencies[] = tmgmt
 dependencies[] = tmgmt_field
-dependencies[] = views
+dependencies[] = translation
+
 files[] = tmgmt_node.plugin.inc
 files[] = tmgmt_node.test
 
