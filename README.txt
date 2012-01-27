@@ -17,7 +17,6 @@ Locale
 Internationalization / i18n for String translation (latest dev Version!)
 
 
-
 Getting started (the first simple translation job using Microsofts translating service)
 
 1) Preparation
@@ -36,7 +35,7 @@ Getting started (the first simple translation job using Microsofts translating s
   - Content Translation Source
   - Simple Translation UI
   - Microsoft Translator
-- Add a translator (Configuration » Regional and language » Translation Management » Translators). Give it a name of your choide 
+- Add a translator (Configuration > Regional and language > Translation Management > Translators). Give it a name of your choice 
   and choose the Microsoft translator plugin
 
 3) Translate
