@@ -259,6 +259,13 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   protected $pluginInfo;
 
   /**
+   * Contains the supported languages cache.
+   *
+   * @var array
+   */
+  protected static $languageCache;
+
+  /**
    * Impelements TMGMTTranslatorPluginController::__construct().
    */
   public function __construct($plugin) {
@@ -313,9 +320,39 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
+    if ($cached_languages = $this->languageCacheGet($translator, $source_language)) {
+      return $cached_languages;
+    }
     $languages = $this->getSupportedLanguages($translator);
     unset($languages[$source_language]);
+    $this->languageCacheSet($translator, $source_language, $languages);
     return $languages;
+  }
+
+  /**
+   * Returns the supported languages array from the cache if existing.
+   */
+  protected function languageCacheGet(TMGMTTranslator $translator, $source_language) {
+    // Initialize cache array.
+    if (!is_array(self::$languageCache)) {
+      self::$languageCache = array();
+      if ($cache = cache_get('tmgmt_translator_languages')) {
+        self::$languageCache = $cache->data;
+      }
+    }
+    // Return cached languages if existing.
+    if (isset(self::$languageCache[$translator->name][$source_language])) {
+      return self::$languageCache[$translator->name][$source_language];
+    }
+  }
+
+  /**
+   * Write the supported languages to the cache.
+   */
+  protected function languageCacheSet(TMGMTTranslator $translator, $source_language, $languages) {
+    self::$languageCache[$translator->name][$source_language] = $languages;
+    // @todo: Improve performance by doing this in a __destruct().
+    cache_set('tmgmt_translator_languages', self::$languageCache);
   }
 
   /**

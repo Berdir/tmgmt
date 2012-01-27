@@ -170,6 +170,9 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
+    if ($cached_languages = $this->languageCacheGet($translator, $source_language)) {
+      return $cached_languages;
+    }
     $results = array();
     $targets = $this->requestFromGengo($translator, 'translate/service/language_pairs', 'GET', array(
       'lc_src' => $source_language
@@ -178,6 +181,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
     foreach ($targets as $target) {
       $results[$target->lc_tgt] = $target->lc_tgt;
     }
+    $this->languageCacheSet($translator, $source_language, $results);
     return $results;
   }
 
