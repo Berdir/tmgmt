@@ -19,20 +19,13 @@ function tmgmt_local_translator_page_user_configure($account) {
  */
 function tmgmt_local_translator_page_job_translate(TMGMTJob $job) {
   drupal_add_css(drupal_get_path('module', 'tmgmt_local_translator') . '/tmgmt_local_translator.css');
-  // @TODO We will provide a form for each job item, arranged as vertical tabs.
-  // For now this is just a collection of forms.
+  drupal_set_title(t('Translate %title', array('%title' => $job->defaultLabel())), PASS_THROUGH);
   $build = array();
   $build['job'] = drupal_get_form('tmgmt_local_translator_job_form', $job);
-    // Build the form with one vertical tab per display
-  $build['vertical'] = array(
-    '#type' => 'vertical_tabs',
-  );
+  // Build multiple forms with a wrapping fieldset for each
   foreach ($job->getItems() as $key => $item) {
     $build['items'][$key] = drupal_get_form('tmgmt_local_translator_job_item_form', $job, $item);
-    //$build['items'][$key]['#title'] = t('Item @key', array('@key' => $key));
   }
-
-  dpm($build);
   return $build;
 }
 
@@ -43,7 +36,8 @@ function tmgmt_local_translator_job_form($form, &$form_state, $job) {
   $form['job'] = array('#type' => 'value', '#value' => $job);
   $form['controls'] = array(
     '#type' => 'fieldset',
-    '#title' => $job->defaultLabel(),
+    '#title' => t('Job'),
+    '#description' => check_plain($job->defaultLabel()),
   );
   $languages = locale_language_list('name', TRUE);
   $states = tmgmt_job_states();
@@ -122,8 +116,6 @@ function tmgmt_local_translator_job_item_form($form, &$form_state, $job, $item) 
   $form['text']['#suffix'] = '</div>';
   $form['text']['#type'] = 'fieldset';
   $form['text']['#collapsible'] = TRUE;
-  //$form['text']['#collapsed'] = TRUE;
-  $form['text']['#group'] = 'vertical';
   $form['text']['controls']['save'] = array(
   	'#type' => 'submit',
   	'#value' => t('Save item'),
