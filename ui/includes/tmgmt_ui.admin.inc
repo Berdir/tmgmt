@@ -162,12 +162,14 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $preselected['target_language'] = !empty($job->target_language) ? $job->target_language : FALSE;
   $preselected['source_language'] = !empty($job->source_language) ? $job->source_language : FALSE;
   $preselected['translator'] = !empty($job->translator) ? $job->translator : FALSE;
+  $job->target_language = $preselected['target_language'] ? $preselected['target_language'] : (isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available));
+  $job->source_language = $preselected['source_language'] ? $preselected['source_language'] : (isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : key($available));
+
   // Show a list of translators tagged by availability for the selected source
   // and target language combination
   $translators = tmgmt_translator_labels_flagged($job->source_language, $job->target_language);
   $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
-  $job->target_language = $preselected['target_language'] ? $preselected['target_language'] : (isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available));
-  $job->source_language = $preselected['source_language'] ? $preselected['source_language'] : (isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : key($available));
+
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
   // Mark form elements as disabled under certain circumstances.
   $disabled = !$job->isUnprocessed() && !$job->isCancelled() && !$job->isRejected();
