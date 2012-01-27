@@ -78,17 +78,13 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
    */
   public function getSupportedLanguages(TMGMTTranslator $translator) {
-    // @todo Maybe add database caching?
-    $languages = &drupal_static(__CLASS__ . '::' . __METHOD__);
-    if (!isset($languages)) {
-      $languages = array();
-      $request = $this->doRequest($translator, 'GetLanguagesForTranslate');
-      if ($request->code == 200) {
-        $dom = new DOMDocument;
-        $dom->loadXML($request->data);
-        foreach ($dom->getElementsByTagName('string') as $item) {
-          $languages[$item->nodeValue] = $item->nodeValue;
-        }
+    $languages = array();
+    $request = $this->doRequest($translator, 'GetLanguagesForTranslate');
+    if ($request->code == 200) {
+      $dom = new DOMDocument;
+      $dom->loadXML($request->data);
+      foreach ($dom->getElementsByTagName('string') as $item) {
+        $languages[$item->nodeValue] = $item->nodeValue;
       }
     }
 
