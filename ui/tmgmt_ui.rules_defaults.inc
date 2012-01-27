@@ -27,7 +27,7 @@ function tmgmt_ui_default_rules_configuration() {
   }';
   $rule = rules_import($data);
   $configs[$rule->name] = $rule;
-
+  /*
   $data = '{ "rules_tmgmt_job_accept_translation" : {
       "LABEL" : "Accept translation",
       "PLUGIN" : "rule",
@@ -39,7 +39,7 @@ function tmgmt_ui_default_rules_configuration() {
   }';
   $rule = rules_import($data);
   $configs[$rule->name] = $rule;
-
+  */
   $data = '{ "rules_tmgmt_job_cancel_translation" : {
       "LABEL" : "Cancel Translation",
       "PLUGIN" : "rule",
