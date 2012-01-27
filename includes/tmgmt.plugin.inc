@@ -392,7 +392,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
       $form['auto_accept'] = array(
         '#type' => 'checkbox',
         '#title' => t('Auto accept every transmition'),
-        '#default_value' => $form_state['tmgmt_translator']->settings['auto_accept'],
+        '#default_value' => $translator->getSetting('auto_accept'),
         '#weight' => -1,
       );
     }
