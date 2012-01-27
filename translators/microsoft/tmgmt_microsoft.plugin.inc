@@ -107,8 +107,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    */
   public function defaultSettings() {
     return array(
-      // @todo Remove default API Key once development is finished.
-      'api' => 'DA903AE0DF7668FD33F53192B5382E4D1D2CF369',
+      'api' => '',
       'url' => $this->translatorUrl,
     );
   }
