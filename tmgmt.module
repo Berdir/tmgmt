@@ -205,7 +205,7 @@ function tmgmt_modules_installed($modules) {
  * Implements hook_flush_caches().
  */
 function tmgmt_flush_caches() {
-  return array('cache_tmgmt_language');
+  return array('cache_tmgmt');
 }
 
 /**
