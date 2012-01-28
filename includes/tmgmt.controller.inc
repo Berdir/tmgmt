@@ -82,8 +82,9 @@ class TMGMTTranslatorController extends EntityAPIControllerExportable {
   * Overrides EntityAPIControllerExportable::save().
   */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
-    parent::save($entity, $transaction);
+    $return = parent::save($entity, $transaction);
     // Clear the languages cache.
     cache_clear_all('tmgmt_translator_languages', 'cache');
+    return $return;
   }
 }
