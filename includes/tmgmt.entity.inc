@@ -915,8 +915,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public function needsReview($message, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_REVIEW);
     $this->addMessage($message, $variables);
-    if ($this->getTranslator()->getSetting('auto_accept') == 1) {
-      $this->accepted('Automatically accepted "' . $this->label());
+    if ($this->getTranslator()->getSetting('auto_accept')) {
+      $this->accepted('Automatically accepted %label', array('%label' => $this->label()));
     }
     $this->save();
   }
