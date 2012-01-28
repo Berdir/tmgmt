@@ -8,6 +8,9 @@
  * Translator @endlink. Note that we are using HTTP API.
  */
 
+/**
+ * Nativity translator plugin controller.
+ */
 class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginController {
   /**
    * Translation service URL.
@@ -54,9 +57,9 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
       $translation = array();
       foreach ($document->offerrequest->textblocks as $textblock) {
         $block = $textblock->textblock;
-        $code = (string)$block['code'];
-        $label = (string)$block['label'];
-        $text = (string)$block->description;
+        $code = (string) $block['code'];
+        $label = (string) $block['label'];
+        $text = (string) $block->description;
         $translation[$code] = array(
           '#text' => $text,
           '#label' => $label,
@@ -69,6 +72,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     // @todo Implement retrieve translation
     return FALSE;
   }
+
   /**
    * Defines plugin settings form.
    *
@@ -116,8 +120,8 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
       // This should look like http://test.nativy.com/client/createorder.aspx?token=a19fd9f9-4bdc-4396-aebf-277fafd9c42a&amp;orderid=f1446707-ae2f-499e-a08e-47131533a88d
       $parts = explode('orderid=', $iframe_url);
       if (count($parts) == 2 && ($orderid = $parts[1])) {
-      $settings['help']['#markup'] =
-    		'<p>' . t('You need to complete your order through Nativy pages below and then click on <em>Submit to translator</em>.') . '</p>';
+        $settings['help']['#markup'] =
+          '<p>' . t('You need to complete your order through Nativy pages below and then click on <em>Submit to translator</em>.') . '</p>';
 
         $settings['orderid'] = array('#type' => 'value', '#value' => $orderid);
         // If we complete the order we should be at http://test.nativy.com/client/nisfinish.aspx
@@ -129,9 +133,10 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     }
     // Something went wrong, just print message and get out.
     $settings['error']['#markup'] =
-        '<p>' . t('Cannot authenticate to Nativy server. Pleaser review your user name and password.') .'</p>';
+      '<p>' . t('Cannot authenticate to Nativy server. Pleaser review your user name and password.') . '</p>';
     return $settings;
   }
+
   /**
    * Build text as xml
    */
@@ -157,7 +162,8 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     }
     return $output;
   }
-    /**
+
+  /**
    * Create offer and return iframe URL
    */
   protected function nativyRetrieveTranslation($job) {
@@ -177,8 +183,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
         dpm($content);
         $document = new SimpleXMLElement($content);
         return $document;
-      }
-      catch (Exception $e) {
+      } catch (Exception $e) {
         dpm($e, 'Exception');
       }
     }
@@ -188,6 +193,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     $client->printDebug();
     return FALSE;
   }
+
   /**
    * Create offer and return iframe URL
    */
@@ -203,7 +209,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
       $data['!customerFirstName'] = 'Drupal';
       $data['!customerLastName'] = 'Translator';
       // Languages
-      $data['!primaryLangCode']= $job->source_language; //"de-DE";
+      $data['!primaryLangCode'] = $job->source_language; //"de-DE";
       $data['!langCode'] = $job->target_language; //"en";
       // Add text
       $data['!textblocks'] = $this->nativyBuildText($job);
@@ -222,6 +228,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     $client->printDebug();
     return FALSE;
   }
+
   /**
    * Send request to nativy, get response
    */
@@ -231,6 +238,7 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     $client->printDebug();
     return $response;
   }
+
   /**
    * Get SOAP client for Nativy service
    */
@@ -238,9 +246,9 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     static $client;
     if (!isset($client)) {
       $client = new TMGMTNativySoapClient(
-        drupal_get_path('module', 'tmgmt_nativy') . '/tmgmt_nativy_test.wsdl',
-        //drupal_get_path('module', 'tmgmt_nativy') . '/tmgmt_nativy_live.wsdl',
-        array('trace' => TRUE)
+          drupal_get_path('module', 'tmgmt_nativy') . '/tmgmt_nativy_test.wsdl',
+          //drupal_get_path('module', 'tmgmt_nativy') . '/tmgmt_nativy_live.wsdl',
+          array('trace' => TRUE)
       );
       // For debugging we can pull API information from the WSDL
       //dpm($client->__getFunctions(), 'Functions');
@@ -249,12 +257,13 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     return $client;
   }
 
- }
+}
 
 /**
  * Nativy SOAP client
  */
 class TMGMTNativySoapClient extends SoapClient {
+
   /**
    * Run request from full raw XML body
    */
@@ -264,62 +273,62 @@ class TMGMTNativySoapClient extends SoapClient {
     $response = FALSE;
     try {
       $response = $this->$method($soapvar);
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       dpm($e, 'Exception');
     }
     return $response;
   }
-   /**
-    * Authenticate to the service
-    */
-   public function authenticate($user, $pass) {
-     try {
-       $this->setAuthHeader(array(
-         'Username' => $user,
-         'Password' => $pass,
-       ));
-       $response = $this->AuthenticateUser();
-       $token = $response->AuthenticateUserResult;
-       $this->setAuthHeader(array('AuthenticatedToken' => $token));
-       return TRUE;
-     }
-     catch (Exception $e) {
-       dpm($exception);
-       $this->debug();
-     }
-   }
 
-   /**
-    * Set authentication header.
-    */
-   public function setAuthHeader($params) {
-     $rawheader = '<SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">';
-     foreach ($params as $name => $value) {
-       $rawheader .= "<$name>$value</$name>";
-     }
-     $rawheader .= '</SecuredWebServiceHeader>';
-     $soapvar = new SoapVar($rawheader, XSD_ANYXML);
-     $headers['SecuredWebServiceHeader'] = new SoapHeader(
-     		'http://www.nativy.com/nis',
+  /**
+   * Authenticate to the service
+   */
+  public function authenticate($user, $pass) {
+    try {
+      $this->setAuthHeader(array(
+        'Username' => $user,
+        'Password' => $pass,
+      ));
+      $response = $this->AuthenticateUser();
+      $token = $response->AuthenticateUserResult;
+      $this->setAuthHeader(array('AuthenticatedToken' => $token));
+      return TRUE;
+    } catch (Exception $e) {
+      dpm($exception);
+      $this->debug();
+    }
+  }
+
+  /**
+   * Set authentication header.
+   */
+  public function setAuthHeader($params) {
+    $rawheader = '<SecuredWebServiceHeader xmlns="https://www.nativy.com/nis">';
+    foreach ($params as $name => $value) {
+      $rawheader .= "<$name>$value</$name>";
+    }
+    $rawheader .= '</SecuredWebServiceHeader>';
+    $soapvar = new SoapVar($rawheader, XSD_ANYXML);
+    $headers['SecuredWebServiceHeader'] = new SoapHeader(
+        'http://www.nativy.com/nis',
         'SecuredWebServiceHeader',
         $soapvar
-     );
-     $this->__setSoapHeaders(NULL);
-     $this->__setSoapHeaders($headers);
-   }
+    );
+    $this->__setSoapHeaders(NULL);
+    $this->__setSoapHeaders($headers);
+  }
 
-   /**
-    * Debug. Print out last request and response
-    */
-   public function printDebug() {
-     dpm(array(
-       'Request' => $this->__getLastRequest(),
-       'RequestHeaders' => $this->__getLastRequestHeaders()
-     ), 'SOAP REQUEST');
-     dpm(array(
-       'Response' => $this->__getLastResponse(),
-       'ResponseHeaders' => $this->__getLastResponseHeaders()
-     ), 'SOAP RESPONSE');
-   }
+  /**
+   * Debug. Print out last request and response
+   */
+  public function printDebug() {
+    dpm(array(
+      'Request' => $this->__getLastRequest(),
+      'RequestHeaders' => $this->__getLastRequestHeaders()
+      ), 'SOAP REQUEST');
+    dpm(array(
+      'Response' => $this->__getLastResponse(),
+      'ResponseHeaders' => $this->__getLastResponseHeaders()
+      ), 'SOAP RESPONSE');
+  }
+
 }

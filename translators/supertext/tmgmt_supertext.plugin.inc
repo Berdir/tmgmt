@@ -4,6 +4,10 @@
  * @file
  * Provides a Supertext translation plugin controller.
  */
+
+/**
+ * Supertext translator plugin controller.
+ */
 class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**

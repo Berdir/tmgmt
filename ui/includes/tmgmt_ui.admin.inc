@@ -80,7 +80,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   $form['plugin_wrapper']['plugin'] = array(
     '#type' => 'select',
     '#title' => t('Translator plugin'),
-    '#description' => isset($info['description']) ? $info['description'] : t('The plugin that controls the translator.'),
+    '#description' => isset($info['description']) ? filter_xss($info['description']) : t('The plugin that controls the translator.'),
     '#options' => $available,
     '#default_value' => $translator->plugin,
     '#required' => TRUE,
@@ -375,7 +375,7 @@ function tmgmt_ui_checkout_settings_form($form, &$form_state, TMGMTJob $job) {
   }
   if (!$translator->isAvailable()) {
     return array(
-      '#description' => $job->getTranslator()->getNotAvailableReason(),
+      '#description' => filter_xss($job->getTranslator()->getNotAvailableReason()),
     );
   }
   elseif (!array_key_exists($job->target_language, $translator->getSupportedTargetLanguages($job->source_language))) {

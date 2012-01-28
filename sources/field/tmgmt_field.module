@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @file
+ * Main module file for the Translation Management Source Field module.
+ */
 
 /**
  * Implements hook_tmgmt_source_translation_structure().

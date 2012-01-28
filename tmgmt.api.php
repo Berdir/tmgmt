@@ -27,6 +27,9 @@ function hook_tmgmt_source_plugin_info() {
  * Alter source plugins information.
  *
  * @param $info
+ *   The defined source plugin information.
+ *
+ * @see hook_tmgmt_source_plugin_info()
  */
 function hook_tmgmt_source_plugin_info_alter(&$info) {
   $info['test_source']['description'] = t('Updated description');

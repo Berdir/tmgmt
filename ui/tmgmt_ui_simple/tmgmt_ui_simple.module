@@ -52,7 +52,8 @@ function tmgmt_ui_simple_page_alter(&$page) {
   if (module_exists('tmgmt_node') && ($node = menu_get_object())) {
     if (isset($page['content']['system_main']['translation_node_overview'])) {
       $page['content']['system_main']['translation_node_overview'] = drupal_get_form('tmgmt_ui_simple_node_form', $node, $page['content']['system_main']['translation_node_overview']);
-    } elseif (isset($page['content']['system_main']['entity_translation_overview'])) {
+    }
+    elseif (isset($page['content']['system_main']['entity_translation_overview'])) {
       $page['content']['system_main']['entity_translation_overview'] = drupal_get_form('tmgmt_ui_simple_node_form', $node, $page['content']['system_main']['entity_translation_overview']);
     }
   }
@@ -91,13 +92,15 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
         '#disabled' => TRUE,
         '#type' => 'checkbox',
       );
-    } elseif (isset($jobs[$langcode])) {
+    }
+    elseif (isset($jobs[$langcode])) {
       $job_uri = $jobs[$langcode]->uri();
       $running_jobs[] = array(
         'language' => $langcode,
         'path' => $job_uri['path'],
       );
-    } elseif ($langcode == $node->language) {
+    }
+    elseif ($langcode == $node->language) {
       $form['languages'][$langcode] = array(
         '#disabled' => TRUE,
         '#type' => 'checkbox',
@@ -109,7 +112,7 @@ function tmgmt_ui_simple_node_form($form, &$form_state, $node, $original) {
     $existing_job_languages .= l($language_list[$job_language['language']], $job_language['path']) . ', ';
   }
   if (!empty($running_jobs)) {
-    drupal_set_message('There are currently existing jobs for: ' . substr($existing_job_languages, 0, -2) . '. They are potentially outdated.', 'warning');
+    drupal_set_message(t('There are currently existing jobs for: @existing. They are potentially outdated.', array('@existing' => substr($existing_job_languages, 0, -2))), 'warning');
   }
   $form['controls'] = tmgmt_ui_simple_controls_element($form, $form_state);
   $form['#submit'][] = 'tmgmt_ui_simple_translate_form_submit';
@@ -151,7 +154,8 @@ function tmgmt_ui_simple_translate_form_submit($form, &$form_state) {
         ),
       );
     }
-  } else {
+  }
+  else {
     drupal_set_message(t('You need to select one or more languages for requesting a translation.'), 'warning');
   }
 }

@@ -1,9 +1,9 @@
 <?php
+
 /**
  * @file
  * Pages for local translation.
  */
-
 
 /**
  * Menu callback. Configure which languages a user can handle.
@@ -54,7 +54,7 @@ function tmgmt_local_translator_job_form($form, &$form_state, $job) {
   // Now depending on state we may have different actions
   $state = $job->getState();
   $form['controls']['state'] = array(
-  	'#type' => 'item',
+    '#type' => 'item',
     '#title' => t('State'),
     '#markup' => $states[$state],
   );
@@ -72,8 +72,8 @@ function tmgmt_local_translator_job_form($form, &$form_state, $job) {
   }
   if (!empty($action)) {
     $form['controls']['submit'] = array(
-    	'#type' => 'submit',
-    	'#value' => $action,
+      '#type' => 'submit',
+      '#value' => $action,
     );
   }
   return $form;
@@ -117,8 +117,8 @@ function tmgmt_local_translator_job_item_form($form, &$form_state, $job, $item) 
   $form['text']['#type'] = 'fieldset';
   $form['text']['#collapsible'] = TRUE;
   $form['text']['controls']['save'] = array(
-  	'#type' => 'submit',
-  	'#value' => t('Save item'),
+    '#type' => 'submit',
+    '#value' => t('Save item'),
     '#ajax' => array(
       'callback' => 'tmgmt_local_translator_job_item_callback',
       'wrapper' => $wrapper_id,
@@ -135,6 +135,7 @@ function tmgmt_local_translator_job_item_form($form, &$form_state, $job, $item) 
 function tmgmt_local_translator_job_item_callback($form, $form_state) {
   return $form['text'];
 }
+
 /**
  * Build subform for translating single text
  */
@@ -170,6 +171,7 @@ function tmgmt_local_translator_job_item_subform($items, $translation) {
   }
   return $form;
 }
+
 /**
  * Provide a form to translate a job item, submit.
  */
@@ -226,7 +228,7 @@ function tmgmt_local_translator_user_languages_form($form, &$form_state, $accoun
     '#options' => $language_list + $language_blank,
   );
   // We'll build a column for each type of languages
-  foreach (array('source' => t('Source languages (translate from)') , 'target' => t('Target languages (translate into)')) as $type => $type_name) {
+  foreach (array('source' => t('From'), 'target' => t('To')) as $type => $type_name) {
     $wrapper_id = 'user-languages-translate-' . $type;
     $form['translate'][$type] = array(
       '#prefix' => "<div id=\"$wrapper_id\">", '#suffix' => '</div>',
@@ -237,26 +239,26 @@ function tmgmt_local_translator_user_languages_form($form, &$form_state, $accoun
     // Compute available languages to be added for each category.
     $available_list = $language_list;
     foreach (array_keys($user_list[$type]) as $langcode) {
-    $form['translate'][$type][$langcode]['language'] = array(
-      '#type' => 'hidden',
-      '#value' => $langcode,
-      '#parents' => array('translate', $type, $langcode),
-    );
-    $form['translate'][$type][$langcode]['display'] = array(
-      '#markup' => $language_list[$langcode],
-    );
-    $form['translate'][$type][$langcode]['remove'] = array(
-      '#name' => $type . '_' . $langcode . '_remove_button',
-      '#type' => 'submit',
-      '#value' => t('remove'),
-      '#parents' => array('controls', $type, $langcode),
-      '#ajax' =>  array(
-      	'callback' => 'tmgmt_local_translator_user_ajax_callback',
-    		'wrapper' => $wrapper_id,
-    		'method' => 'replace',
-      ),
-      '#suffix' => '<br />',
-    );
+      $form['translate'][$type][$langcode]['language'] = array(
+        '#type' => 'hidden',
+        '#value' => $langcode,
+        '#parents' => array('translate', $type, $langcode),
+      );
+      $form['translate'][$type][$langcode]['display'] = array(
+        '#markup' => $language_list[$langcode],
+      );
+      $form['translate'][$type][$langcode]['remove'] = array(
+        '#name' => $type . '_' . $langcode . '_remove_button',
+        '#type' => 'submit',
+        '#value' => t('remove'),
+        '#parents' => array('controls', $type, $langcode),
+        '#ajax' => array(
+          'callback' => 'tmgmt_local_translator_user_ajax_callback',
+          'wrapper' => $wrapper_id,
+          'method' => 'replace',
+        ),
+        '#suffix' => '<br />',
+      );
       unset($available_list[$langcode]);
     }
     // If there are any language left, add the option to add it (override options so blank is first)
@@ -266,7 +268,7 @@ function tmgmt_local_translator_user_languages_form($form, &$form_state, $accoun
       );
       $form['translate'][$type]['new']['select'] = array(
         '#type' => 'select',
-        '#options' => array('' => t('<more languages>'))  + $available_list,
+        '#options' => array('' => t('<more languages>')) + $available_list,
         '#default_value' => key($language_blank),
         '#parents' => array('translate', $type, 'new'),
       );
@@ -275,10 +277,10 @@ function tmgmt_local_translator_user_languages_form($form, &$form_state, $accoun
         '#type' => 'submit',
         '#value' => t('add'),
         '#parents' => array('controls', $type, 'add'),
-        '#ajax' =>  array(
-        	'callback' => 'tmgmt_local_translator_user_ajax_callback',
-      		'wrapper' => $wrapper_id,
-      		'method' => 'replace',
+        '#ajax' => array(
+          'callback' => 'tmgmt_local_translator_user_ajax_callback',
+          'wrapper' => $wrapper_id,
+          'method' => 'replace',
         ),
       );
     }
@@ -294,7 +296,7 @@ function tmgmt_local_translator_user_languages_form($form, &$form_state, $accoun
 function tmgmt_local_translator_user_languages_form_submit($form, &$form_state) {
   $account = $form_state['values']['user'];
   if (isset($form_state['values']['translate'])) {
-    $user_list  = array_map('array_filter', $form_state['values']['translate']);
+    $user_list = array_map('array_filter', $form_state['values']['translate']);
     $user_list = array_map('array_unique', $user_list);
     $user_list = array_map('array_flip', $user_list);
   }

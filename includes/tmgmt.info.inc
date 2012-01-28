@@ -129,13 +129,13 @@ class TMGMTTranslatorMetadataController extends EntityDefaultMetadataController 
 }
 
 /**
- * Populates all entity property descriptions with the values from the
- * description of the corresponding entity base table.
+ * Populates all entity property descriptions based on the schema definition.
  *
- * @param array $info
+ * @param $info
+ *  Entity propety info array.
  *
- * @return array
- *   The altered properties array.
+ * @return
+ *   The altered entity properties array.
  */
 function _tmgmt_override_property_description($info, $entity_type) {
   // Load tmgmt.install so we can access the schema.

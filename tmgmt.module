@@ -183,7 +183,7 @@ function tmgmt_entity_info() {
 function tmgmt_permission() {
   $perms = array();
   $perms['administer tmgmt'] = array(
-    'title' => t('Administer Translation Management'),
+    'title' => t('Administer translation management'),
   );
   return $perms;
 }
@@ -255,8 +255,7 @@ function tmgmt_job_load_multiple(array $tjids = array(), $conditions = array()) 
 }
 
 /**
- * Queries the database for all job entities that host a job item that
- * links to a specific source object.
+ * Loads job entities that has a job item with the identifiers.
  *
  * @param $source_type
  *   The source type.
@@ -368,7 +367,7 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
 /**
  * Access callback for checking out a job.
  *
- * @param TMGMTJob $job
+ * @param $job
  *   A translation job.
  * @param $account
  *   (Optional) The user to check access permissions for. Defaults to the
@@ -642,8 +641,7 @@ function tmgmt_translator_load_multiple($names = array()) {
 }
 
 /**
- * Loads all translators that are available and support the given source and
- * target language combination.
+ * Loads all translators that are available for the given language combination.
  *
  * @param $source_language
  *   The source language.

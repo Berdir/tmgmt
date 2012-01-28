@@ -93,7 +93,7 @@ class TMGMTTranslator extends Entity {
   /**
    * Check whether this translator can handle a particular translation job.
    *
-   * @param TMGMTJob $job
+   * @param $job
    *   The TMGMTJob entity that should be translated.
    *
    * @return boolean
