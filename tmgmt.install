@@ -6,6 +6,14 @@
  */
 
 /**
+ * Implements hook_uninstall().
+ */
+function tmgmt_uninstall() {
+  // Remove all variables that we added.
+  variable_del('tmgmt_auto_accept');
+}
+
+/**
  * Implements hook_schema().
  */
 function tmgmt_schema() {

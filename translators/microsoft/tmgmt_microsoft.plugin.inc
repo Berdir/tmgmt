@@ -30,9 +30,13 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   public function requestTranslation(TMGMTJob $job) {
-    // @todo Who is handling cron / batch here, we or some other controller?
-    // @todo If length is more then 10000 chars we need to split the request.
     // Pull the source data array from through the job and flatten it.
+    foreach ($job->getItems() as $item) {
+      $data = tmgmt_flatten_data($item->getSourcData());
+      foreach ($data as $key => $value) {
+
+      }
+    }
     $data = tmgmt_flatten_data($job->getSourceData());
     foreach ($data as $key => $value) {
       if (isset($value['#translate']) && $value['#translate'] === FALSE) {
@@ -45,8 +49,6 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
         'text' => $value['#text'],
       );
       $options = array(
-        // @todo For some reason post is returning 202 status and service is not
-        // translating things, maybe check this later.
         'headers' => array('Content-Type' => 'text/plain'),
       );
       $result = $this->doRequest($job->getTranslator(), 'Translate', $query, $options);
