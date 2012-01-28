@@ -215,7 +215,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertTrue($job->isUnprocessed());
 
     // Create a second file translator. This should check
-    // out immediatly.
+    // out immediately.
     $job = $this->createJob();
 
     $second_translator = $this->createTranslator();

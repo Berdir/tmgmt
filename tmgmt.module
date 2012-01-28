@@ -205,7 +205,7 @@ function tmgmt_modules_installed($modules) {
  * Implements hook_flush_caches().
  */
 function tmgmt_flush_caches() {
-  return array('cache_tmgmt');
+  return array('cache_tmgmt_language');
 }
 
 /**
@@ -618,11 +618,11 @@ function tmgmt_translator_access($op, TMGMTTranslator $translator = NULL, $accou
  */
 function tmgmt_translator_exists($name) {
   $query = new EntityFieldQuery();
-  $query = $query->entityCondition('entity_type', 'tmgmt_translator')
+  return (boolean) $query->entityCondition('entity_type', 'tmgmt_translator')
     ->propertyCondition('name', $name)
     ->count()
-    ->range(0, 1);
-  return (boolean) $query->execute();
+    ->range(0, 1)
+    ->execute();
 }
 
 /**

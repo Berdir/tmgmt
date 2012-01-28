@@ -8,13 +8,6 @@
 class TMGMTExampleTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
-   * Overrides
-   */
-  public function canTranslate(TMGMTJob $job) {
-    return TRUE;
-  }
-
-  /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   public function requestTranslation(TMGMTJob $job) {
