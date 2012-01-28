@@ -334,7 +334,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['#title'] = t('@plugin plugin settings', array('@plugin' => $this->pluginInfo['label']));
-    if (variable_get('translator_auto_accept', FALSE)) {
+    if (variable_get('tmgmt_auto_accept', FALSE)) {
       $form['auto_accept'] = array(
         '#type' => 'checkbox',
         '#title' => t('Auto accept finished translations.'),

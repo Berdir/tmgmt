@@ -956,8 +956,10 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public function needsReview($message, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_REVIEW);
     $this->addMessage($message, $variables);
-    if ($this->getTranslator()->getSetting('auto_accept')) {
-      $this->accepted('Automatically accepted %label', array('%label' => $this->label()));
+    // Automatically accept this translation if the translator or job are
+    // configured for that.
+    if (variable_get('tmgmt_auto_accept', FALSE) && $this->getSetting('auto_accept')) {
+      $this->accepted('Automatically accepted %label.', array('%label' => $this->label()));
     }
     $this->save();
   }
@@ -1008,7 +1010,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @see TMGMTJob::addMessage()
    */
   public function finished($message = NULL, $variables = array()) {
-    // @todo Maybe we should clean up the job items here.
     $this->setState(TMGMT_JOB_STATE_ACCEPTED);
     $this->addMessage($message, $variables);
     $this->save();
