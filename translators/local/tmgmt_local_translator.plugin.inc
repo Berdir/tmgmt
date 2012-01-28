@@ -11,6 +11,7 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
    * It can 'translate' any job
    */
   function canTranslate(TMGMTJob $job) {
+    parent::canTranslate();
     return TRUE;
   }
 
@@ -19,24 +20,6 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
    */
   function requestTranslation(TMGMTJob $job) {
     $job->submitted('Job queued for local translation.');
-  }
-
-  /**
-   * Returns all languages that are supported by this service.
-   *
-   * @param TMGMTTranslator $translator
-   *   The translator entity.
-   *
-   * @return array
-   *   An array of languages in ISO format.
-   */
-  public function getSupportedLanguages(TMGMTTranslator $translator) {
-    $query = db_select('tmgmt_local_user', 't')
-      ->fields('t', array('language'))
-      ->condition('t.type', 'source')
-      ->distinct();
-    $list = $query->execute()->fetchCol();
-    return array_flip($list);
   }
 
   /**

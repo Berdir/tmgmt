@@ -75,9 +75,9 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
-  public function getSupportedLanguages(TMGMTTranslator $translator) {
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $languages = array();
     $request = $this->doRequest($translator, 'GetLanguagesForTranslate');
     if ($request->code == 200) {
@@ -87,7 +87,6 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
         $languages[$item->nodeValue] = $item->nodeValue;
       }
     }
-
     // Microsoft translator reports chinese language codes with their old names.
     // Replace them with the offical identifiers.
     if (isset($languages['zh-CHS'])) {
@@ -98,8 +97,11 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       unset($languages['zh-CHT']);
       $languages['zh-hant'] = 'zh-hant';
     }
-
-    return $languages;
+    // Check if the source language is available.
+    if (array_key_exists($source_language, $languages)) {
+      return $languages;
+    }
+    return array();
   }
 
   /**

@@ -170,37 +170,12 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
-    if ($cached_languages = $this->languageCacheGet($translator, $source_language)) {
-      return $cached_languages;
-    }
     $results = array();
-    $targets = $this->requestFromGengo($translator, 'translate/service/language_pairs', 'GET', array(
-      'lc_src' => $source_language
-      ));
-
+    $targets = $this->requestFromGengo($translator, 'translate/service/language_pairs', 'GET', array('lc_src' => $source_language));
     foreach ($targets as $target) {
       $results[$target->lc_tgt] = $target->lc_tgt;
     }
-    $this->languageCacheSet($translator, $source_language, $results);
     return $results;
-  }
-
-  /**
-   * Returns array of service supported languages.
-   *
-   * @return array
-   */
-  public function getSupportedLanguages(TMGMTTranslator $translator) {
-    $languages = &drupal_static(__FUNCTION__);
-    if (!isset($languages)) {
-      $supported_languages = $this->requestFromGengo($translator, 'translate/service/languages', 'GET');
-      $languages = array();
-
-      foreach ($supported_languages as $language) {
-        $languages[$language->lc] = $language->lc;
-      }
-    }
-    return $languages;
   }
 
   /**

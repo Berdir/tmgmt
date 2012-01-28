@@ -184,17 +184,6 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language);
 
   /**
-   * Returns all languages that are supported by this service.
-   *
-   * @param TMGMTTranslator $translator
-   *   The translator entity.
-   *
-   * @return array
-   *   An array of languages in ISO format.
-   */
-  public function getSupportedLanguages(TMGMTTranslator $translator);
-
-  /**
    * @abstract
    *
    * Submits the translation request and sends it to the translation provider.
@@ -259,13 +248,6 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   protected $pluginInfo;
 
   /**
-   * Contains the supported languages cache.
-   *
-   * @var array
-   */
-  protected static $languageCache;
-
-  /**
    * Impelements TMGMTTranslatorPluginController::__construct().
    */
   public function __construct($plugin) {
@@ -300,10 +282,12 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function canTranslate(TMGMTJob $job) {
     // The job is only translatable if the translator is available too.
-    if ($this->isAvailable($job->getTranslator()) && array_key_exists($job->target_language, $this->getSupportedTargetLanguages($job->getTranslator(), $job->source_language))) {
-      // We can only translate this job if the target language of the job is in
-      // one of the supported languages.
-      return TRUE;
+    if ($translator = $job->getTranslator()) {
+      if ($this->isAvailable($translator) && array_key_exists($job->target_language, $translator->getSupportedTargetLanguages($job->source_language))) {
+        // We can only translate this job if the target language of the job is in
+        // one of the supported languages.
+        return TRUE;
+      }
     }
     return FALSE;
   }
@@ -320,47 +304,8 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
-    if ($cached_languages = $this->languageCacheGet($translator, $source_language)) {
-      return $cached_languages;
-    }
-    $languages = $this->getSupportedLanguages($translator);
-    unset($languages[$source_language]);
-    $this->languageCacheSet($translator, $source_language, $languages);
-    return $languages;
-  }
-
-  /**
-   * Returns the supported languages array from the cache if existing.
-   */
-  protected function languageCacheGet(TMGMTTranslator $translator, $source_language) {
-    // Initialize cache array.
-    if (!is_array(self::$languageCache)) {
-      self::$languageCache = array();
-      if ($cache = cache_get('tmgmt_translator_languages')) {
-        self::$languageCache = $cache->data;
-      }
-    }
-    // Return cached languages if existing.
-    if (isset(self::$languageCache[$translator->name][$source_language])) {
-      return self::$languageCache[$translator->name][$source_language];
-    }
-  }
-
-  /**
-   * Write the supported languages to the cache.
-   */
-  protected function languageCacheSet(TMGMTTranslator $translator, $source_language, $languages) {
-    self::$languageCache[$translator->name][$source_language] = $languages;
-    // @todo: Improve performance by doing this in a __destruct().
-    cache_set('tmgmt_translator_languages', self::$languageCache);
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
-   */
-  public function getSupportedLanguages(TMGMTTranslator $translator) {
     $languages = entity_metadata_language_list();
-    unset($languages[LANGUAGE_NONE]);
+    unset($languages[LANGUAGE_NONE], $languages[$source_language]);
     return drupal_map_assoc(array_keys($languages));
   }
 
@@ -376,11 +321,12 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::defaultSettings().
    */
   public function defaultSettings() {
+    $defaults = array('translator_auto_accept' => FALSE);
     // Check if any default settings are defined in the plugin info.
     if (isset($this->pluginInfo['default settings'])) {
-      return $this->pluginInfo['default settings'];
+      return array_merge($defaults, $this->pluginInfo['default settings']);
     }
-    return array();
+    return $defaults;
   }
 
   /**
@@ -388,15 +334,16 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['#title'] = t('@plugin plugin settings', array('@plugin' => $this->pluginInfo['label']));
-    if (variable_get('translator_auto_accept')) {
-      $form['auto_accept'] = array(
+    if (variable_get('translator_auto_accept', FALSE)) {
+      $form['translator_auto_accept'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Auto accept every transmition'),
-        '#default_value' => $translator->getSetting('auto_accept'),
+        '#title' => t('Auto accept inbound translations when they are finished.'),
+        '#description' => t('This skips the reviewing process and automatically accepts all translations as soon as they are returned by the translation provider.'),
+        '#default_value' => $translator->getSetting('translator_auto_accept'),
         '#weight' => -1,
       );
     }
-    if (count(element_children($form)) == 0) {
+    if (!element_children($form)) {
       $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginInfo['label']));
     }
     else {

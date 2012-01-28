@@ -94,17 +94,11 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
   }
 
   /**
-   * Returns all languages that are supported by this service.
-   *
-   * @param TMGMTTranslator $translator
-   *   The translator entity.
-   *
-   * @return array
-   *   An array of languages in ISO format.
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
-  public function getSupportedLanguages(TMGMTTranslator $translator) {
-    // @todo: Implement this. If necessary, hardcode.
-    return parent::getSupportedLanguages($translator);
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
+    // @todo: Implement this properly.
+    return parent::getSupportedTargetLanguages($translator, $source_language);
   }
 
   /**

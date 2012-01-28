@@ -62,6 +62,20 @@ class TMGMTTranslator extends Entity {
   public $settings;
 
   /**
+   * The supported target languages caches.
+   *
+   * @var array
+   */
+  protected $languageCache;
+
+  /**
+   * Whether the language cache in the database is outdated.
+   *
+   * @var boolean
+   */
+  protected $languageCacheOutdated;
+
+  /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
@@ -81,13 +95,29 @@ class TMGMTTranslator extends Entity {
    * Returns the supported target languages for this translator.
    *
    * @return array
-   *  An array of supported target languages in ISO format.
+   *   An array of supported target languages in ISO format.
    */
   public function getSupportedTargetLanguages($source_language) {
     if ($controller = $this->getPluginController()) {
-      return $controller->getSupportedTargetLanguages($this, $source_language);
+      if (isset($this->pluginInfo['cache languages']) && empty($this->pluginInfo['cache languages'])) {
+        // This plugin doesn't support language caching.
+        return $controller->getSupportedTargetLanguages($this, $source_language);
+      }
+      else {
+        // Retrieve the supported languages from the cache.
+        if (empty($this->languageCache) && $cache = cache_get($this->name, 'cache_tmgmt_language')) {
+          $this->languageCache = $cache->data;
+        }
+        // Even if we successfully queried the cache it might not have an entry
+        // for our source language yet.
+        if (!isset($this->languageCache[$source_language])) {
+          $this->languageCache[$source_language] = $controller->getSupportedTargetLanguages($this, $source_language);
+          $this->languageCacheOutdated = TRUE;
+        }
+      }
+      dpm($this->languageCache);
+      return $this->languageCache[$source_language];
     }
-    return FALSE;
   }
 
   /**
@@ -188,6 +218,18 @@ class TMGMTTranslator extends Entity {
       $defaults = $controller->defaultSettings();
       if (isset($defaults[$name])) {
         return $defaults[$name];
+      }
+    }
+  }
+
+  /**
+   *
+   */
+  public function __destruct() {
+    if ($controller = $this->getPluginController()) {
+      $info = $controller->pluginInfo();
+      if (!isset($info['language cache']) || !empty($info['language cache']) && !empty($this->languageCacheOutdated)) {
+        cache_set($this->name, $this->languageCache, 'cache_tmgmt_language');
       }
     }
   }
