@@ -7,6 +7,7 @@
  * Check @link http://msdn.microsoft.com/en-us/library/dd576287.aspx Microsoft
  * Translator @endlink. Note that we are using HTTP API.
  */
+
 class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginController {
 
   /**
@@ -24,7 +25,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   protected $maxCharacters = 10000;
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
+   * Overrides TMGMTDefaultTranslatorPluginController::isAvailable().
    */
   public function isAvailable(TMGMTTranslator $translator) {
     if ($translator->getSetting('api')) {
@@ -34,9 +35,12 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
+   * Overrides TMGMTDefaultTranslatorPluginController::canTranslate().
    */
   public function canTranslate(TMGMTJob $job) {
+    if (!parent::canTranslate($job)) {
+      return FALSE;
+    }
     foreach (tmgmt_flatten_data($job->getSourceData()) as $value) {
       if (drupal_strlen($value['#text']) > $this->maxCharacters) {
         return FALSE;
@@ -55,16 +59,14 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       if (isset($value['#translate']) && $value['#translate'] === FALSE) {
         continue;
       }
-      $query = array(
+      // Query the translator API.
+      $result = $this->doRequest($job->getTranslator(), 'Translate', array(
         'from' => $job->source_language,
         'to' => $job->target_language,
         'contentType' => 'text/plain',
         'text' => $value['#text'],
-      );
-      $options = array(
-        'headers' => array('Content-Type' => 'text/plain'),
-      );
-      $result = $this->doRequest($job->getTranslator(), 'Translate', $query, $options);
+      ), array('headers' => array('Content-Type' => 'text/plain')));
+      // Check the result code for possible errors.
       switch ($result->code) {
         case 200:
           // Lets use DOMDocument for now because this service enables us to
@@ -90,7 +92,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   * Overrides TMGMTDefaultTranslatorPluginController::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $languages = array();
@@ -120,17 +122,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::defaultSettings().
-   */
-  public function defaultSettings() {
-    return array(
-      'api' => '',
-      'url' => $this->translatorUrl,
-    );
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::pluginSettingsForm().
+   * Overrides TMGMTDefaultTranslatorPluginController::pluginSettingsForm().
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['api'] = array(
@@ -143,21 +135,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::checkoutSettingsForm().
-   */
-  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
-    // Disable the setting for now as it is not yet implemented.
-    return parent::checkoutSettingsForm($form, $form_state, $job);
-    /**$settings['group_translations'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Group translation items (@TODO)'),
-      '#description' => t('If checked all text items in this translation job will be send to server in one request.')
-    );
-    return $settings;*/
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
+   * Overrides TMGMTDefaultTranslatorPluginController::hasCheckoutSettings().
    */
   public function hasCheckoutSettings(TMGMTJob $job) {
     return FALSE;
@@ -182,7 +160,6 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   protected function doRequest(TMGMTTranslator $translator, $path, array $query = array(), array $options = array()) {
     // Allow to override the url, e.g. for the tests.
     $url = $translator->getSetting('url') . '/' . $path;
-
     // Add the appId to the query arguments and build the query string.
     $query = array('appId' => $translator->getSetting('api')) + $query;
     $url = url($url, array('query' => $query));
