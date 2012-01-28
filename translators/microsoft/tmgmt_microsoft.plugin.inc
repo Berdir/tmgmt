@@ -159,7 +159,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    */
   protected function doRequest(TMGMTTranslator $translator, $path, array $query = array(), array $options = array()) {
     // Allow to override the url, e.g. for the tests.
-    $url = $translator->getSetting('url') . '/' . $path;
+    $url = $this->translatorUrl . '/' . $path;
     // Add the appId to the query arguments and build the query string.
     $query = array('appId' => $translator->getSetting('api')) + $query;
     $url = url($url, array('query' => $query));
