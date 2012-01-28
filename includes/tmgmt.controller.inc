@@ -21,7 +21,7 @@ class TMGMTJobController extends EntityAPIController {
   }
 
   /**
-   *
+   * Overrides EntityAPIController::delete().
    */
   public function delete($ids, $transaction = NULL) {
     parent::delete($ids, $transaction);
