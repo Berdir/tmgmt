@@ -15,7 +15,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
       'group' => t('Translation Management'),
       // @todo Disable these tests until i18n 7.x-1.4 is released or a way
       // has been found to use 7.x-1.x-dev on the testbot.
-      'dependencies' => array('i18n_needs_new_release'),
+      #'dependencies' => array('i18n_needs_new_release'),
     );
   }
 
