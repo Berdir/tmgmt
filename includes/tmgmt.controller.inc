@@ -20,6 +20,27 @@ class TMGMTJobController extends EntityAPIController {
     return parent::save($entity, $transaction);
   }
 
+  /**
+   *
+   */
+  public function delete($ids, $transaction = NULL) {
+    parent::delete($ids, $transaction);
+    // Since we are deleting one or multiple jobs here we also need to delete
+    // the attached job items and messages.
+    foreach (array('tmgmt_job_item', 'tmgmt_job_message') as $entity_type) {
+      $query = new EntityFieldQuery();
+      $result = $query->entityCondition('entity_type', $entity_type)
+        ->propertyCondition('tjid', $ids)
+        ->execute();
+      if (!empty($result[$entity_type])) {
+        $controller = entity_get_controller($entity_type);
+        // We need to directly query the entity controller so we can pass on
+        // the transaction object.
+        $controller->delete(array_keys($result[$entity_type]), $transaction);
+      }
+    }
+  }
+
 }
 
 /**
