@@ -3,8 +3,6 @@ description = i18n String source plugin for the Translation Management system.
 package = Translation Management
 core = 7.x
 dependencies[] = tmgmt
-# This line is just to be able to declare a dependency that works with git_deploy
-dependencies[] = i18n (>7.x-1.3)
 dependencies[] = i18n_string
 files[] = tmgmt_i18n_string.plugin.inc
 files[] = tmgmt_i18n_string.test
