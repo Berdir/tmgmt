@@ -90,12 +90,17 @@ class TMGMTTranslatorController extends EntityAPIControllerExportable {
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
     // We are never going to have many entities here, so we can risk a loop.
     foreach ($ids as $key => $name) {
-      if (tmgmt_translator_busy($name)) {
+      if (tmgmt_translator_busy($key)) {
         // The translator can't be deleted because it is currently busy. Remove
         // it from the ids so it wont get deleted in the parent implementation.
         unset($ids[$key]);
       }
+      else {
+        $cids[$key] = 'language:' . $key;
+      }
     }
+    // Clear the language cache for the deleted translators.
+    cache_clear_all($cids, 'cache_tmgmt');
     parent::delete($ids, $transaction);
   }
 

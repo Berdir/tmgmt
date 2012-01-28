@@ -321,7 +321,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::defaultSettings().
    */
   public function defaultSettings() {
-    $defaults = array('translator_auto_accept' => FALSE);
+    $defaults = array('auto_accept' => FALSE);
     // Check if any default settings are defined in the plugin info.
     if (isset($this->pluginInfo['default settings'])) {
       return array_merge($defaults, $this->pluginInfo['default settings']);
@@ -335,11 +335,11 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['#title'] = t('@plugin plugin settings', array('@plugin' => $this->pluginInfo['label']));
     if (variable_get('translator_auto_accept', FALSE)) {
-      $form['translator_auto_accept'] = array(
+      $form['auto_accept'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Auto accept inbound translations when they are finished.'),
+        '#title' => t('Auto accept finished translations.'),
         '#description' => t('This skips the reviewing process and automatically accepts all translations as soon as they are returned by the translation provider.'),
-        '#default_value' => $translator->getSetting('translator_auto_accept'),
+        '#default_value' => $translator->getSetting('auto_accept'),
         '#weight' => -1,
       );
     }

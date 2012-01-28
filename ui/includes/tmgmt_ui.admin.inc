@@ -96,7 +96,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#tree' => TRUE,
   );
   // Add the translator plugin settings form.
-  $form['plugin_wrapper']['settings'] += tmgmt_ui_plugin_settings_form(array(), $form_state, $translator, $busy);
+  $form['plugin_wrapper']['settings'] += tmgmt_ui_plugin_settings_form($form_state, $translator, $busy);
   // Add a submit button and a cancel link to the form.
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
@@ -164,25 +164,21 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $preselected['translator'] = !empty($job->translator) ? $job->translator : FALSE;
   $job->target_language = $preselected['target_language'] ? $preselected['target_language'] : (isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available));
   $job->source_language = $preselected['source_language'] ? $preselected['source_language'] : (isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : key($available));
-
   // Show a list of translators tagged by availability for the selected source
   // and target language combination
   $translators = tmgmt_translator_labels_flagged($job->source_language, $job->target_language);
   $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
-
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
   // Mark form elements as disabled under certain circumstances.
   $disabled = !$job->isUnprocessed() && !$job->isCancelled() && !$job->isRejected();
   // Get the job metadata wrapper so we can display the current status nicely.
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
   // Show the items that are attached to this job if there are not more than 20.
-
   $form['override_label'] = array(
     '#type' => 'checkbox',
     '#title' => t('Override the default label (%label)', array('%label' => $job->label())),
     '#default_value' => !empty($job->label),
   );
-
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
@@ -191,8 +187,8 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#states' => array(
       'visible' => array(
         ':input[name="override_label"]' => array('checked' => TRUE),
-      )
-    )
+      ),
+    ),
   );
   // Show the current state of the job.
   $form['state'] = array(
@@ -269,7 +265,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       '#suffix' => '</div>',
       '#tree' => TRUE,
     );
-    $form['translator_wrapper']['settings'] += tmgmt_ui_checkout_settings_form(array(), $form_state, $job);
+    $form['translator_wrapper']['settings'] += tmgmt_ui_checkout_settings_form($form_state, $job);
   }
   // Otherwise display the checkout info form.
   else {
@@ -366,7 +362,7 @@ function tmgmt_job_form_validate($form, &$form_state) {
 /**
  * Helper function for retrieving the job settings form.
  */
-function tmgmt_ui_checkout_settings_form($form, &$form_state, TMGMTJob $job) {
+function tmgmt_ui_checkout_settings_form(&$form_state, TMGMTJob $job) {
   $translator = $job->getTranslator();
   if (!$translator) {
     return array(
@@ -384,21 +380,20 @@ function tmgmt_ui_checkout_settings_form($form, &$form_state, TMGMTJob $job) {
       '#description' => t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())),
     );
   }
-  if ($settings = $job->checkoutSettingsForm($form, $form_state)) {
+  if ($settings = $job->checkoutSettingsForm(array(), $form_state)) {
     return $settings;
   }
-  // @todo: Why return $form here?
-  return $form;
+  return array();
 }
 
 /**
  * Helper function for retrieving the translator settings form.
  */
-function tmgmt_ui_plugin_settings_form($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
-  if ($settings = $translator->pluginSettingsForm($form, $form_state, $busy)) {
+function tmgmt_ui_plugin_settings_form(&$form_state, TMGMTTranslator $translator, $busy = FALSE) {
+  if ($settings = $translator->pluginSettingsForm(array(), $form_state, $busy)) {
     return $settings;
   }
-  return $form;
+  return array();
 }
 
 /**

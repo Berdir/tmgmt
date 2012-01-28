@@ -88,6 +88,15 @@ function tmgmt_ui_theme() {
 }
 
 /**
+ * Implements hook_system_info_alter().
+ */
+function tmgmt_ui_system_info_alter(&$info, $file, $type) {
+  if ($file->name == 'tmgmt') {
+    $info['configure'] = 'admin/config/regional/tmgmt/settings';
+  }
+}
+
+/**
  * Implements hook_views_api().
  */
 function tmgmt_ui_views_api() {

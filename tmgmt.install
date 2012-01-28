@@ -269,7 +269,7 @@ function tmgmt_schema() {
   );
 
   // Clone the schema for our cache table from Drupal core.
-  $schema['cache_tmgmt_language'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_tmgmt'] = drupal_get_schema_unprocessed('system', 'cache');
 
   return $schema;
 }
@@ -450,8 +450,8 @@ function tmgmt_update_7012() {
 }
 
 /**
- * Add a 'cache_tmgmt_language' table.
+ * Add a 'cache_tmgmt' table.
  */
 function tmgmt_update_7013() {
-  db_create_table('cache_tmgmt_language', drupal_get_schema_unprocessed('system', 'cache'));
+  db_create_table('cache_tmgmt', drupal_get_schema_unprocessed('system', 'cache'));
 }

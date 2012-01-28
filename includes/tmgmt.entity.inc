@@ -105,7 +105,7 @@ class TMGMTTranslator extends Entity {
       }
       else {
         // Retrieve the supported languages from the cache.
-        if (empty($this->languageCache) && $cache = cache_get($this->name, 'cache_tmgmt_language')) {
+        if (empty($this->languageCache) && $cache = cache_get('languages:' . $this->name, 'cache_tmgmt')) {
           $this->languageCache = $cache->data;
         }
         // Even if we successfully queried the cache it might not have an entry
@@ -115,7 +115,6 @@ class TMGMTTranslator extends Entity {
           $this->languageCacheOutdated = TRUE;
         }
       }
-      dpm($this->languageCache);
       return $this->languageCache[$source_language];
     }
   }
@@ -223,13 +222,13 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
-   *
+   * Updates the language cache if it has changed.
    */
   public function __destruct() {
     if ($controller = $this->getPluginController()) {
       $info = $controller->pluginInfo();
       if (!isset($info['language cache']) || !empty($info['language cache']) && !empty($this->languageCacheOutdated)) {
-        cache_set($this->name, $this->languageCache, 'cache_tmgmt_language');
+        cache_set('languages:' . $this->name, $this->languageCache, 'cache_tmgmt');
       }
     }
   }

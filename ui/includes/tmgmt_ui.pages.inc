@@ -113,14 +113,11 @@ function tmgmt_ui_settings() {
  * The settings form.
  */
 function tmgmt_ui_settings_form($form, &$form_state) {
-  $form['container'] = array(
-    '#type' => 'item',
-    '#title' => t('Alloaccept translations'),
-  );
-  $form['container']['translator_auto_accept'] = array(
+  $form['translator_auto_accept'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Make it possible to autoaccept translations by translator'),
-    '#default_value' => variable_get('translator_auto_accept'),
+    '#title' => t('Allow translators to automatically accept translations.'),
+    '#description' => t("This allows translators to optionally skip the reviewing process and automatically accept all translations as soon as they are returned by the translation provider."),
+    '#default_value' => variable_get('translator_auto_accept', FALSE),
   );
   return system_settings_form($form);
 }
