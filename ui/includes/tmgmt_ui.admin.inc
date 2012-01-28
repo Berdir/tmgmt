@@ -327,8 +327,11 @@ function tmgmt_job_form_submit($form, &$form_state) {
   // button was clicked.
   if ($form_state['triggering_element']['#value'] == t('Submit to translator')) {
     if (!tmgmt_ui_job_request_translation($job)) {
-      // Don't redirect the user if the translation request failed.
-      $form_state['redirect'] = NULL;
+      // Don't redirect the user if the translation request failed but retain
+      // existing destination parameters so we can redirect once the request
+      // finished successfully.
+      $form_state['redirect'] = array(current_path(), array('query' => drupal_get_destination()));
+      unset($_GET['destination']);
     }
   }
 }

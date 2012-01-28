@@ -17,6 +17,13 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   protected $translatorUrl = 'http://api.microsofttranslator.com/v2/Http.svc';
 
   /**
+   * Maximum supported characters.
+   *
+   * @var int
+   */
+  protected $maxCharacters = 10000;
+
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
   public function isAvailable(TMGMTTranslator $translator) {
@@ -27,16 +34,22 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
   }
 
   /**
+   * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
+   */
+  public function canTranslate(TMGMTJob $job) {
+    foreach (tmgmt_flatten_data($job->getSourceData()) as $value) {
+      if (drupal_strlen($value['#text']) > $this->maxCharacters) {
+        return FALSE;
+      }
+    }
+    return TRUE;
+  }
+
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   public function requestTranslation(TMGMTJob $job) {
     // Pull the source data array from through the job and flatten it.
-    foreach ($job->getItems() as $item) {
-      $data = tmgmt_flatten_data($item->getSourcData());
-      foreach ($data as $key => $value) {
-
-      }
-    }
     $data = tmgmt_flatten_data($job->getSourceData());
     foreach ($data as $key => $value) {
       if (isset($value['#translate']) && $value['#translate'] === FALSE) {
