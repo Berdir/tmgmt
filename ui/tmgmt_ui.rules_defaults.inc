@@ -9,25 +9,6 @@
  * Implements hook_default_rules_configuration().
  */
 function tmgmt_ui_default_rules_configuration() {
-
-  $data = '{ "rules_auto_accept_a_translation_job" : {
-      "LABEL" : "Auto-Accept a translation job",
-      "PLUGIN" : "reaction rule",
-      "REQUIRES" : [ "rules", "tmgmt" ],
-      "ON" : [ "tmgmt_job_update" ],
-      "IF" : [ { "data_is" : { "data" : [ "tmgmt-job:state" ], "value" : "3" } } ],
-      "DO" : [
-        { "tmgmt_rules_job_accept_translation" : {
-            "job" : [ "tmgmt-job" ],
-            "message" : "Automatically accepted \u0022[tmgmt-job:label]\u0022 with rules."
-          }
-        }
-      ]
-    }
-  }';
-  $rule = rules_import($data);
-  $configs[$rule->name] = $rule;
-
   $data = '{ "rules_tmgmt_job_cancel_translation" : {
       "LABEL" : "Cancel Translation",
       "PLUGIN" : "rule",
@@ -38,7 +19,6 @@ function tmgmt_ui_default_rules_configuration() {
   }';
   $rule = rules_import($data);
   $configs[$rule->name] = $rule;
-
   $data = '{ "rules_tmgmt_source_node_add_to_job" : {
       "LABEL" : "Add to Translation Job",
       "PLUGIN" : "rule",
@@ -81,9 +61,7 @@ function tmgmt_ui_default_rules_configuration() {
       ]
     }
   }';
-
   $rule = rules_import($data);
   $configs[$rule->name] = $rule;
-
   return $configs;
 }

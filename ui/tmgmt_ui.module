@@ -21,6 +21,12 @@ function tmgmt_ui_entity_info() {
       'path' => 'admin/config/regional/tmgmt/jobs',
     ),
   );
+  $info['tmgmt_job_item'] = array(
+    'admin ui' => array(
+      'controller class' => 'TMGMTJobItemUIController',
+      'path' => 'admin/config/regional/tmgmt/jobs/%/items',
+    ),
+  );
   foreach ($info as $key => $item) {
     // Entity API defaults to the path that implements the entity type, but
     // since this happens in the TMGMT core module, we need to manually

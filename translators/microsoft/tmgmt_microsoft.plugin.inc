@@ -8,6 +8,9 @@
  * Translator @endlink. Note that we are using HTTP API.
  */
 
+/**
+ * Microsoft translator plugin.
+ */
 class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginController {
 
   /**
@@ -89,19 +92,17 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
           $data[$key]['#text'] = $items->item(0)->nodeValue;
           break;
         case 400:
-          $job->addMessage('Rejected by Microsoft Translator: !error', array('!error' => $result->data), 'error');
-          return FALSE;
+          $job->rejected('Rejected by Microsoft Translator: !error', array('!error' => $result->data), 'error');
+          return;
         default:
-          $job->addMessage('Unknown error from Microsoft Translator: !error', array('!error' => $result->data), 'error');
-          return FALSE;
+          $job->rejected('Unknown error from Microsoft Translator: !error', array('!error' => $result->data), 'error');
+          return;
       }
     }
     // The translation job has been successfully submitted.
     $job->submitted('The translation job has been submitted successfully.');
     // Save the translated data through the job.
     $job->addTranslatedData(tmgmt_unflatten_data($data));
-    // Translation finished successfully.
-    return TRUE;
   }
 
   /**
@@ -129,6 +130,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
     }
     // Check if the source language is available.
     if (array_key_exists($source_language, $languages)) {
+      unset($languages[$source_language]);
       return $languages;
     }
     return array();
@@ -171,8 +173,11 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    *   The response object returned by drupal_http_request().
    */
   protected function doRequest(TMGMTTranslator $translator, $path, array $query = array(), array $options = array()) {
-    // Allow to override the url, e.g. for the tests.
-    $url = $this->translatorUrl . '/' . $path;
+    // fubhy, can you please stop removing this setting? This is used for the
+    // tests. Thanks.
+    // Answer: Okay. Will try to keep my cool :D...
+    $custom_url = $translator->getSetting('url');
+    $url = ($custom_url ? $custom_url : $this->translatorUrl) . '/' . $path;
     // Add the appId to the query arguments and build the query string.
     $query = array('appId' => $translator->getSetting('api')) + $query;
     $url = url($url, array('query' => $query));

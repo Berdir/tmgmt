@@ -63,6 +63,7 @@ class TMGMTMicrosoftTestCase extends TMGMTBaseTestCase {
     $this->assertTrue(isset($languages['es']));
     $this->assertTrue(isset($languages['it']));
     $this->assertTrue(isset($languages['zh-hans']));
+    $this->assertTrue(isset($languages['zh-hant']));
     $this->assertFalse(isset($languages['zh-CHS']));
     $this->assertFalse(isset($languages['zh-CHT']));
     $this->assertFalse(isset($languages['en']));

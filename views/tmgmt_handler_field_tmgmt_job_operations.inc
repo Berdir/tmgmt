@@ -17,7 +17,7 @@ class tmgmt_handler_field_tmgmt_job_operations extends views_handler_field_entit
       'href' => $uri['path'],
       'title' => t('view'),
     );
-    if ($job->isSubmitable()) {
+    if ($job->isSubmittable()) {
       $element['#links']['checkout'] = array(
         'href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/manage',
         'query' => array('destination' => current_path()),

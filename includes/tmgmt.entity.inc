@@ -331,7 +331,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * Overrides Entity::defaultUri()
    */
   public function defaultUri() {
-    return array('path' => 'admin/config/regional/tmgmt/items/' . $this->tjid);
+    return array('path' => 'admin/config/regional/tmgmt/jobs/' . $this->tjid . '/items/' . $this->tjiid);
   }
 
   /**
@@ -349,7 +349,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
       '#title' => t('State'),
       '#markup' => $wrapper->state->label(),
     );
-    if (module_exists('views') && $view = views_get_view('tmgmt_job_item_messages')) {
+    if (module_exists('views') && $view = views_get_view('tmgmt_ui_job_item_messages')) {
       $content['messages'] = array(
         '#type' => 'item',
         '#title' => $view->get_title(),
@@ -451,6 +451,14 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   }
 
   /**
+   * Sets the state of the job item to 'finished'.
+   */
+  public function finished() {
+    $this->setState(TMGMT_JOB_ITEM_STATE_FINISHED);
+    return $this;
+  }
+
+  /**
    * Updates the state of the job item.
    *
    * @param $state
@@ -461,7 +469,6 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *   The updated state of the job item if it could be set.
    */
   public function setState($state) {
-    // Return TRUE if the state could be set. Return FALSE otherwise.
     if (array_key_exists($state, tmgmt_job_item_states())) {
       $this->state = $state;
     }
@@ -473,12 +480,12 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * constants.
    *
    * @return integer
-   *   The state of the job item or NULL if it hasn't been set yet.
+   *   The state of the job item.
    */
   public function getState() {
-    if (isset($this->state)) {
-      return $this->state;
-    }
+    // We don't need to check if the state is actually set because we always set
+    // it in the constructor.
+    return $this->state;
   }
 
   /**
@@ -522,6 +529,16 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    */
   public function isNeedsReview() {
     return $this->isState(TMGMT_JOB_ITEM_STATE_REVIEW);
+  }
+
+  /**
+   * Checks whether the state of this transaction is 'finished'.
+   *
+   * @return boolean
+   *   TRUE if the state is 'finished', FALSE otherwise.
+   */
+  public function isFinished() {
+    return $this->isState(TMGMT_JOB_ITEM_STATE_FINISHED);
   }
 
   /**
@@ -1033,9 +1050,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   The state of the job or NULL if it hasn't been set yet.
    */
   public function getState() {
-    if (isset($this->state)) {
-      return $this->state;
-    }
+    // We don't need to check if the state is actually set because we always set
+    // it in the constructor.
+    return $this->state;
   }
 
   /**
@@ -1092,30 +1109,50 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns whether the state of this transaction is new.
+   * Returns whether the state of this job is 'unprocessed'.
    *
    * @return boolean
-   *   TRUE if the state is new, FALSE otherwise.
+   *   TRUE if the state is 'unprocessed', FALSE otherwise.
    */
   public function isUnprocessed() {
     return $this->isState(TMGMT_JOB_STATE_UNPROCESSED);
   }
 
   /**
-   * Returns whether the state of this transaction is submitted.
+   * Returns whether the state of this job is 'cancelled'.
    *
    * @return boolean
-   *   TRUE if the state is submitted, FALSE otherwise.
+   *   TRUE if the state is 'cancelled', FALSE otherwise.
+   */
+  public function isCancelled() {
+    return $this->isState(TMGMT_JOB_STATE_CANCELLED);
+  }
+
+  /**
+   * Returns whether the state of this job is 'active'.
+   *
+   * @return boolean
+   *   TRUE if the state is 'active', FALSE otherwise.
    */
   public function isActive() {
     return $this->isState(TMGMT_JOB_STATE_ACTIVE);
   }
 
   /**
-   * Returns whether the state of this transaction is cancelled.
+   * Returns whether the state of this job is 'rejected'.
    *
    * @return boolean
-   *   TRUE if the state is cancelled, FALSE otherwise.
+   *   TRUE if the state is 'rejected', FALSE otherwise.
+   */
+  public function isRejected() {
+    return $this->isState(TMGMT_JOB_STATE_REJECTED);
+  }
+
+  /**
+   * Returns whether the state of this jon is 'finished'.
+   *
+   * @return boolean
+   *   TRUE if the state is 'finished', FALSE otherwise.
    */
   public function isFinished() {
     return $this->isState(TMGMT_JOB_STATE_FINISHED);
@@ -1143,7 +1180,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   TRUE if the job can be cancelled, FALSE otherwise.
    */
   public function isCancelable() {
-    // Already accepted translation jobs can't be cancelled.
+    // Only non-submitted translation jobs can be cancelled.
     if ($this->isActive() && $translator = $this->getTranslator()) {
       if ($translator->isCancelable($this)) {
         return TRUE;
@@ -1159,7 +1196,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   TRUE if the job can be submitted, FALSE otherwise.
    */
   public function isSubmittable() {
-    return $this->isActive();
+    return $this->isUnprocessed() || $this->isRejected() || $this->isCancelled();
   }
 
   /**
@@ -1170,6 +1207,20 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function isDeletable() {
     return !$this->isActive();
+  }
+
+  /**
+   * Set the state of the job to 'unprocessed'.
+   *
+   * @param $message
+   *   The log message to be saved along with the state change.
+   * @param $variables
+   *   (Optional) An array of variables to replace in the message on display.
+   *
+   * @see TMGMTJob::addMessage()
+   */
+  public function unprocessed($message = NULL, $variables = array()) {
+    $this->setState(TMGMT_JOB_STATE_UNPROCESSED, $message, $variables);
   }
 
   /**
@@ -1201,7 +1252,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Sets the state of the job to 'unprocessed'.
+   * Sets the state of the job to 'cancelled'.
    *
    * @param $message
    *   The log message to be saved along with the state change.
@@ -1213,7 +1264,21 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @see TMGMTJob::addMessage()
    */
   public function cancelled($message = NULL, $variables = array()) {
-    $this->setState(TMGMT_JOB_STATE_UNPROCESSED, $message, $variables);
+    $this->setState(TMGMT_JOB_STATE_CANCELLED, $message, $variables);
+  }
+
+  /**
+   * Sets the state of the job to 'rejected'.
+   *
+   * @param $message
+   *   The log message to be saved along with the state change.
+   * @param $variables
+   *   (Optional) An array of variables to replace in the message on display.
+   *
+   * @see TMGMTJob::addMessage()
+   */
+  public function rejected($message = NULL, $variables = array()) {
+    $this->setState(TMGMT_JOB_STATE_REJECTED, $message, $variables);
   }
 
   /**
@@ -1470,8 +1535,10 @@ class TMGMTJobMessage extends Entity {
    */
   public function getMessage() {
     $text = $this->message;
-    $variables = is_array($this->variables) && !empty($this->variables) ? $this->variables : array();
-    return t($text, $variables);
+    if (is_array($this->variables) && !empty($this->variables)) {
+      $text = t($text, $this->variables);
+    }
+    return $text;
   }
 
   /**

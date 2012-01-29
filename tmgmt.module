@@ -20,6 +20,8 @@
 define('TMGMT_JOB_STATE_UNPROCESSED', 0);
 
 /**
+ * once we have migrated to using job item states.
+ *
  * A translation job that has been submitted to the translator.
  *
  * Translator plugins are responsible for setting this state in their
@@ -29,26 +31,75 @@ define('TMGMT_JOB_STATE_UNPROCESSED', 0);
 define('TMGMT_JOB_STATE_ACTIVE', 1);
 
 /**
- * The translation job has been finished.
+ * A translation job that has been rejected by the translator.
  *
- * Not yet used.
+ * The translator plugin can use this state if the job has been actively
+ * rejected. However, this should be avoided by doing the necessary checks
+ * in the canTranslate() method and in the job configuration settings.
+ *
+ * A rejected job can be re-submitted.
  */
-define('TMGMT_JOB_STATE_FINISHED', 2);
+define('TMGMT_JOB_STATE_REJECTED', 2);
 
 /**
- * Waiting for translation.
+ * The translation has been accepted and the job is finished.
+ *
+ * Once the job has been accepted, the source plugins are called to update their
+ * sources with the translated data.
+ */
+define('TMGMT_JOB_STATE_ACCEPTED', 3);
+
+/**
+ * The translation job has been cancelled.
+ *
+ * A job can be cancelled at any time. If he is currently in the submitted state
+ * the translator plugin is asked if this translation can be cancelled and needs
+ * to confirm it by returning TRUE in cancelTranslation().
+ */
+define('TMGMT_JOB_STATE_CANCELLED', 4);
+
+/**
+ * The translation job has been finished.
+ *
+ * A job is marked as 'finished' after every single attached job item has been
+ * reviewed, accepted and saved.
+ */
+define('TMGMT_JOB_STATE_FINISHED', 5);
+
+/**
+ * The translation job item is active and waiting to be translated.
+ *
+ * A job item is marked as 'active' until every translatable piece of text in
+ * the job item has been translated and cached on the job item entity.
  */
 define('TMGMT_JOB_ITEM_STATE_ACTIVE', 1);
 
 /**
- * Needs to be reviewed.
+ * The translation job item needs to be reviewed.
+ *
+ * A job item is marked as 'needs review' after every single piece of text in
+ * the job item has been translated by the translation provider. After the
+ * review procedure is finished the job item can be accepted and saved.
  */
 define('TMGMT_JOB_ITEM_STATE_REVIEW', 2);
 
 /**
- * Is accepted.
+ * The translation job item has been reviewed and accepted.
+ *
+ * After reviewing a job item it can be accepted by the reviewer. After a job
+ * item has been accepted the attached translation can be propagated to the
+ * source controller which then takes care of saving the translated content.
  */
 define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
+
+/**
+ * The translation job item is finished.
+ *
+ * After successfully saving a translated, reviewed and accepted job item it can
+ * be marked as 'finished'. This closes the case for a job item and eventually,
+ * once all siblings are finished as well, the job.
+ */
+define('TMGMT_JOB_ITEM_STATE_FINISHED', 4);
 /**
  * @} End of "addtogroup tmgmt_job".
  */
@@ -194,7 +245,6 @@ function tmgmt_language_label($language) {
  * @addtogroup tmgmt_job
  * @{
  */
-
 /**
  * Loads a translation job.
  */
@@ -247,7 +297,7 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
  * @return TMGMTJob
  *   The job entity.
  */
-function tmgmt_job_match_($source_language, $target_language, $account = NULL) {
+function tmgmt_job_match_item($source_language, $target_language, $account = NULL) {
   $account = isset($account) ? $account : $GLOBALS['user'];
   $query = new EntityFieldQuery();
   $result = $query->entityCondition('entity_type', 'tmgmt_job')
@@ -323,7 +373,9 @@ function tmgmt_job_checkout_access(TMGMTJob $job, $account = NULL) {
 function tmgmt_job_states() {
   return array(
     TMGMT_JOB_STATE_UNPROCESSED => t('Unprocessed'),
-    TMGMT_JOB_STATE_ACTIVE => t('In progress'),
+    TMGMT_JOB_STATE_ACTIVE => t('Active'),
+    TMGMT_JOB_STATE_REJECTED => t('Rejected'),
+    TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
     TMGMT_JOB_STATE_FINISHED => t('Finished'),
   );
 }
@@ -339,6 +391,7 @@ function tmgmt_job_item_states() {
     TMGMT_JOB_ITEM_STATE_ACTIVE => t('In progress'),
     TMGMT_JOB_ITEM_STATE_REVIEW => t('Needs review'),
     TMGMT_JOB_ITEM_STATE_ACCEPTED => t('Accepted'),
+    TMGMT_JOB_STATE_FINISHED => t('Finished'),
   );
 }
 
@@ -364,6 +417,48 @@ function tmgmt_job_item_load_multiple($tjiids = array(), $conditions = array()) 
 }
 
 /**
+ * Loads a translation job item per source. It will order the related jobs by
+ * the latest change.
+ *
+ * @param $source_type
+ *   The source type.
+ * @param $item_type
+ *   The source item type.
+ * @param $item_id
+ *   The source item id.
+ * @param $source_language
+ *   The source language.
+ * @param $target_languages
+ *   (Optional) An array of target language.
+ *
+ * @return TMGMTJobItem
+ *   The loaded job items.
+ */
+function tmgmt_job_load_by_source($plugin, $item_type, $item_id, $source_language, $target_languages = array()) {
+  if (empty($target_languages)) {
+    $available_languages = entity_metadata_language_list();
+    unset($available_languages[LANGUAGE_NONE], $available_languages[$source_language]);
+    $target_languages = array_keys($available_languages);
+  }
+  $jobs = array();
+  // @todo This requires some optimizing.
+  foreach ($target_languages as $target_language) {
+    $query = db_select('tmgmt_job_item', 'ji');
+    $query->join('tmgmt_job', 'j', 'j.tjid = ji.tjid AND j.target_language = :target_language', array(':target_language' => $target_language));
+    $query = $query->fields('j', array('tjid'))
+      ->condition('plugin', $plugin)
+      ->condition('item_type', $item_type)
+      ->condition('item_id', $item_id)
+      ->orderBy('changed', 'DESC')
+      ->range(0, 1);
+    if ($tjid = $query->execute()->fetchfield()) {
+      $jobs[$target_language] = tmgmt_job_load($tjid);
+    }
+  }
+  return isset($jobs) ? $jobs : FALSE;
+}
+
+/**
  * Creates a translation job item.
  *
  * @param $plugin
@@ -384,26 +479,6 @@ function tmgmt_job_item_create($plugin, $item_type, $item_id, array $values = ar
     'item_type' => $item_type,
     'item_id' => $item_id,
   )));
-}
-
-/**
- * Access callback for the job item entity.
- *
- * @param $op
- *   The operation being performed. One of 'view', 'update', 'create' or
- *   'delete'.
- * @param $attachment
- *   (Optional) Either a TMGMTJobItem entity or a TMGMTJobMessage entity.
- * @param $account
- *   The user to check for. Leave it to NULL to check for the global user.
- *
- * @return boolean
- *   TRUE if the user has access to the performed operation on the job that this
- *   job item or message is attached to, FALSE otherwise.
- */
-function tmgmt_job_attachment_access($op, $attachment = NULL, $account = NULL) {
-  // Return TRUE in all cases for now :)
-  return TRUE;
 }
 
 /**
@@ -553,7 +628,7 @@ function tmgmt_translator_load_available($source_language, $target_language) {
 function tmgmt_translator_busy($translator) {
   $query = new EntityFieldQuery();
   return (boolean) $query->entityCondition('entity_type', 'tmgmt_job')
-    ->propertyCondition('state', array(TMGMT_JOB_STATE_ACTIVE, TMGMT_JOB_STATE_REVIEW))
+    ->propertyCondition('state', TMGMT_JOB_STATE_ACTIVE)
     ->propertyCondition('translator', $translator)
     ->range(0, 1)
     ->count()

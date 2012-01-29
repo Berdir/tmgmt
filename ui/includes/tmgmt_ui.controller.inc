@@ -236,15 +236,11 @@ class TMGMTJobUIController extends EntityDefaultUIController {
   public function applyOperation($op, $entity) {
     switch ($op) {
       case 'delete':
-        if ($entity->isDeletable() && $entity->delete()) {
-          return t('Deleted the translation job %label.', array('%label' => $entity->label()));
-        }
-        break;
+        $entity->delete();
+        return t('Deleted the translation job %label.', array('%label' => $entity->label()));
       case 'cancel':
-        if ($entity->isCancelable() && $entity->cancelTranslation()) {
-          return t('Cancelled the translation job %label.', array('%label' => $entity->label()));
-        }
-        break;
+        $entity->cancelTranslation();
+        return t('Cancelled the translation job %label.', array('%label' => $entity->label()));
     }
     return FALSE;
   }
@@ -281,8 +277,8 @@ class TMGMTJobItemUIController extends EntityDefaultUIController {
     );
     $items[$this->path . '/' . $wildcard . '/review'] = array(
       'title' => 'Review',
-      'page callback' => 'entity_ui_get_form',
-      'page arguments' => array($this->entityType, $id_count),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('tmgmt_ui_job_item_review', $id_count),
       'load arguments' => array($this->entityType),
       'access callback' => 'tmgmt_job_item_access',
       'access arguments' => array('review', $id_count),
@@ -326,23 +322,14 @@ class TMGMTJobItemUIController extends EntityDefaultUIController {
   public function applyOperation($op, $entity) {
     switch ($op) {
       case 'cancel':
-        if ($entity->isCancelable()) {
-          $entity->cancelTranslation();
-          return t('Cancelled %entity %label to the defaults.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
-        }
-        break;
+        $entity->cancelTranslation();
+        return t('Cancelled %entity %label to the defaults.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
       case 'delete':
-        if ($entity->isDeletable()) {
-          $entity->delete();
-          return t('Deleted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
-        }
-        break;
+        $entity->delete();
+        return t('Deleted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
       case 'accept':
-        if ($entity->isNeedsReview()) {
-          $entity->accepted('The translation has been accepted by !user.', array('!user' => theme('username', array('account' => $GLOBALS['user']))));
-          return t('Accepted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
-        }
-        break;
+        $entity->accepted('The translation has been accepted by !user.', array('!user' => theme('username', array('account' => $GLOBALS['user']))));
+        return t('Accepted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
     }
     return FALSE;
   }
