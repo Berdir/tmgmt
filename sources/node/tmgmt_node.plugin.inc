@@ -4,9 +4,12 @@
  * @file
  * Provides the node source controller.
  */
+
 class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController {
 
   /**
+   * Implements TMGMTSourcePluginControllerInterface::getData().
+   *
    * Returns the data from the fields as a structure that can be processed by
    * the Translation Management system.
    */
@@ -30,7 +33,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
   }
 
   /**
-   * Overriden.
+   * Implements TMGMTSourcePluginControllerInterface::saveTranslation().
    */
   public function saveTranslation(TMGMTJobItem $job_item) {
     $node = node_load($job_item->item_id);

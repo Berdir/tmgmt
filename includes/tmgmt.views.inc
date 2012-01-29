@@ -18,6 +18,14 @@ class TMGMTJobItemViewsController extends EntityDefaultViewsController {
         'handler' => 'tmgmt_handler_field_tmgmt_entity_label',
       ),
     );
+    $data['tmgmt_job_item']['operations'] = array(
+      'title' => t('Operations'),
+      'help' => t('Displays a list of options which are available for a job item.'),
+      'real field' => 'tjiid',
+      'field' => array(
+        'handler' => 'tmgmt_handler_field_tmgmt_job_item_operations',
+      ),
+    );
     return $data;
   }
 }

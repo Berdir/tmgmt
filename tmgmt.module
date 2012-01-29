@@ -20,8 +20,6 @@
 define('TMGMT_JOB_STATE_UNPROCESSED', 0);
 
 /**
- * once we have migrated to using job item states.
- *
  * A translation job that has been submitted to the translator.
  *
  * Translator plugins are responsible for setting this state in their
@@ -31,72 +29,23 @@ define('TMGMT_JOB_STATE_UNPROCESSED', 0);
 define('TMGMT_JOB_STATE_ACTIVE', 1);
 
 /**
- * A translation job that has been rejected by the translator.
- *
- * The translator plugin can use this state if the job has been actively
- * rejected. However, this should be avoided by doing the necessary checks
- * in the canTranslate() method and in the job configuration settings.
- *
- * A rejected job can be re-submitted.
- */
-define('TMGMT_JOB_STATE_REJECTED', 2);
-
-/**
- * The translation job was translated and needs to be reviewed.
- *
- * @todo remove this once we have migrated to using job item states for this.
- *
- * This state needs to be set by the translator plugin once the job has been
- * completely translated.
- */
-define('TMGMT_JOB_STATE_REVIEW', 3);
-
-/**
- * The translation has been accepted and the job is finished.
- *
- * @todo remove this once we have migrated to using job item states for this.
- *
- * Once the job has been accepted, the source plugins are called to update their
- * sources with the translated data.
- */
-define('TMGMT_JOB_STATE_ACCEPTED', 4);
-
-/**
- * The translation job has been cancelled.
- *
- * A job can be cancelled at any time. If he is currently in the submitted state
- * the translator plugin is asked if this translation can be cancelled and needs
- * to confirm it by returning TRUE in cancelTranslation().
- */
-define('TMGMT_JOB_STATE_CANCELLED', 5);
-
-/**
  * The translation job has been finished.
- *
- * @todo Use this instead of TMGMT_JOB_STATE_ACCEPTED once we have migrated to
- * using job item states.
  *
  * Not yet used.
  */
-define('TMGMT_JOB_STATE_FINISHED', 6);
+define('TMGMT_JOB_STATE_FINISHED', 2);
 
 /**
- * @todo Implement job item states. Maybe rename this.
- *
  * Waiting for translation.
  */
-define('TMGMT_JOB_ITEM_STATE_WAITING', 1);
+define('TMGMT_JOB_ITEM_STATE_ACTIVE', 1);
 
 /**
- * @todo Implement job item states.
- *
  * Needs to be reviewed.
  */
 define('TMGMT_JOB_ITEM_STATE_REVIEW', 2);
 
 /**
- * @todo Implement job item states.
- *
  * Is accepted.
  */
 define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
@@ -138,7 +87,7 @@ function tmgmt_entity_info() {
     'base table' => 'tmgmt_job_item',
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
-    'access callback' => 'tmgmt_job_attachment_access',
+    'access callback' => 'tmgmt_job_item_access',
     'entity keys' => array(
       'id' => 'tjiid',
     ),
@@ -152,7 +101,7 @@ function tmgmt_entity_info() {
     'entity class' => 'TMGMTJobMessage',
     'base table' => 'tmgmt_job_message',
     'label callback' => 'entity_class_label',
-    'access callback' => 'tmgmt_job_attachment_access',
+    'access callback' => 'tmgmt_job_message_access',
     'entity keys' => array(
       'id' => 'tjmid',
     ),
@@ -262,7 +211,7 @@ function tmgmt_job_load_multiple(array $tjids = array(), $conditions = array()) 
 }
 
 /**
- * Loads job entities that has a job item with the identifiers.
+ * Loads job entities that have a job item with the identifiers.
  *
  * @param $source_type
  *   The source type.
@@ -285,8 +234,6 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
 }
 
 /**
- * @todo Is this really a good function name?
- *
  * Returns a job which matches the requested source- and target language by
  * user. If no job exists, a new job object will be created.
  *
@@ -300,7 +247,7 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
  * @return TMGMTJob
  *   The job entity.
  */
-function tmgmt_job_match_item($source_language, $target_language, $account = NULL) {
+function tmgmt_job_match_($source_language, $target_language, $account = NULL) {
   $account = isset($account) ? $account : $GLOBALS['user'];
   $query = new EntityFieldQuery();
   $result = $query->entityCondition('entity_type', 'tmgmt_job')
@@ -310,7 +257,8 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
     ->propertyCondition('state', TMGMT_JOB_STATE_UNPROCESSED)
     ->execute();
   if (!empty($result['tmgmt_job'])) {
-    return tmgmt_job_load(reset($result['tmgmt_job'])->tjid);
+    $job = reset($result['tmgmt_job']);
+    return tmgmt_job_load($job->tjid);
   }
   else {
     return tmgmt_job_create($source_language, $target_language, $account->uid);
@@ -342,33 +290,8 @@ function tmgmt_job_create($source_language, $target_language, $uid = NULL, array
  * Access callback for the job entity.
  */
 function tmgmt_job_access($op, $job = NULL, $account = NULL) {
-  if (isset($job)) {
-    if ($op == 'review') {
-      // Simple check for wether the job needs a review for now.
-      return $job->isNeedsReview();
-    }
-  }
   // Return TRUE in all cases for now :)
   return TRUE;
-  switch ($op) {
-    case 'create':
-      return user_access('tmgmt create new jobs', $account);
-    case 'view':
-    case 'update':
-    case 'delete':
-      if (isset($job)) {
-        if ($job->isAuthor($account)) {
-          // Covers cases in which the user described by $account is the author.
-          return user_access('tmgmt ' . $op . ' own jobs', $account) || user_access('tmgmt ' . $op . ' all jobs', $account);
-        }
-        else {
-          // Covers all other cases.
-          return user_access('tmgmt ' . $op . ' all jobs', $account);
-        }
-      }
-    default:
-      return FALSE;
-  }
 }
 
 /**
@@ -385,7 +308,7 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
  *   FALSE otherwise.
  */
 function tmgmt_job_checkout_access(TMGMTJob $job, $account = NULL) {
-  if ($job->isUnprocessed() || $job->isRejected() || $job->isCancelled()) {
+  if ($job->isUnprocessed()) {
     return tmgmt_job_access('checkout', $job, $account);
   }
   return FALSE;
@@ -400,11 +323,8 @@ function tmgmt_job_checkout_access(TMGMTJob $job, $account = NULL) {
 function tmgmt_job_states() {
   return array(
     TMGMT_JOB_STATE_UNPROCESSED => t('Unprocessed'),
-    TMGMT_JOB_STATE_ACTIVE => t('Active'),
-    TMGMT_JOB_STATE_REJECTED => t('Rejected'),
-    TMGMT_JOB_STATE_REVIEW => t('Needs review'),
-    TMGMT_JOB_STATE_ACCEPTED => t('Accepted'),
-    TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
+    TMGMT_JOB_STATE_ACTIVE => t('In progress'),
+    TMGMT_JOB_STATE_FINISHED => t('Finished'),
   );
 }
 
@@ -416,7 +336,7 @@ function tmgmt_job_states() {
  */
 function tmgmt_job_item_states() {
   return array(
-    TMGMT_JOB_ITEM_STATE_WAITING => t('Unfinished'),
+    TMGMT_JOB_ITEM_STATE_ACTIVE => t('In progress'),
     TMGMT_JOB_ITEM_STATE_REVIEW => t('Needs review'),
     TMGMT_JOB_ITEM_STATE_ACCEPTED => t('Accepted'),
   );
@@ -434,50 +354,6 @@ function tmgmt_job_item_states() {
 function tmgmt_job_item_load($tjiid) {
   $jobs = tmgmt_job_item_load_multiple(array($tjiid), array());
   return $jobs ? reset($jobs) : FALSE;
-}
-
-/**
- * @todo Looks ineffective to me. Let's remove that loop.
- *
- * Loads a translation job item per source. It will order the related jobs by
- * the latest change.
- *
- * @param $source_type
- *   The source type.
- * @param $item_type
- *   The source item type.
- * @param $item_id
- *   The source item id.
- * @param $source_language
- *   The source language.
- * @param $target_languages
- *   (Optional) An array of target language.
- *
- * @return TMGMTJobItem
- *   The loaded job items.
- */
-function tmgmt_job_load_by_source($plugin, $item_type, $item_id, $source_language, $target_languages = array()) {
-  if (empty($target_languages)) {
-    $available_languages = entity_metadata_language_list();
-    unset($available_languages[LANGUAGE_NONE], $available_languages[$source_language]);
-    $target_languages = array_keys($available_languages);
-  }
-  $jobs = array();
-  // @todo Why are we looping here? Can't this be done with an IN statement?
-  foreach ($target_languages as $target_language) {
-    $query = db_select('tmgmt_job_item', 'ji');
-    $query->join('tmgmt_job', 'j', 'j.tjid = ji.tjid AND j.target_language = :target_language', array(':target_language' => $target_language));
-    $query = $query->fields('j', array('tjid'))
-      ->condition('plugin', $plugin)
-      ->condition('item_type', $item_type)
-      ->condition('item_id', $item_id)
-      ->orderBy('changed', 'DESC')
-      ->range(0, 1);
-    if ($tjid = $query->execute()->fetchfield()) {
-      $jobs[$target_language] = tmgmt_job_load($tjid);
-    }
-  }
-  return isset($jobs) ? $jobs : FALSE;
 }
 
 /**
@@ -528,12 +404,6 @@ function tmgmt_job_item_create($plugin, $item_type, $item_id, array $values = ar
 function tmgmt_job_attachment_access($op, $attachment = NULL, $account = NULL) {
   // Return TRUE in all cases for now :)
   return TRUE;
-  // We just forward the access request to the job entity.
-  if (isset($attachment) && $job = $attachment->getJob()) {
-    return tmgmt_job_access($op, $job, $account);
-  }
-  // If we can't retrieve the job entity, we can't grant access.
-  return FALSE;
 }
 
 /**

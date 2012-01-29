@@ -1,18 +1,18 @@
 <?php
 
 $view = new view;
-$view->name = 'tmgmt_ui_recently_published';
-$view->description = 'Lists translation jobs that have been published recently.';
+$view->name = 'tmgmt_ui_job_unprocessed';
+$view->description = 'Lists all translation jobs that have not yet been submitted to a translation service.';
 $view->tag = 'Translation Management';
 $view->base_table = 'tmgmt_job';
-$view->human_name = 'Recently Published Translation Jobs';
+$view->human_name = 'Unprocessed Translation Jobs';
 $view->core = 7;
 $view->api_version = '3.0';
 $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
 /* Display: Master */
 $handler = $view->new_display('default', 'Master', 'default');
-$handler->display->display_options['title'] = 'Recently Published Translation Jobs';
+$handler->display->display_options['title'] = 'Unprocessed Translation Jobs';
 $handler->display->display_options['access']['type'] = 'none';
 $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['query']['type'] = 'views_query';
@@ -21,15 +21,47 @@ $handler->display->display_options['exposed_form']['type'] = 'basic';
 $handler->display->display_options['pager']['type'] = 'full';
 $handler->display->display_options['pager']['options']['items_per_page'] = '10';
 $handler->display->display_options['pager']['options']['offset'] = '0';
-$handler->display->display_options['pager']['options']['id'] = '3';
+$handler->display->display_options['pager']['options']['id'] = '1';
 $handler->display->display_options['pager']['options']['expose']['items_per_page_options_all'] = 0;
 $handler->display->display_options['style_plugin'] = 'table';
 $handler->display->display_options['style_options']['columns'] = array(
   'tjid' => 'tjid',
+  'label' => 'label',
+  'source_language' => 'source_language',
+  'target_language' => 'target_language',
+  'created' => 'created',
 );
 $handler->display->display_options['style_options']['default'] = '-1';
 $handler->display->display_options['style_options']['info'] = array(
   'tjid' => array(
+    'sortable' => 0,
+    'default_sort_order' => 'asc',
+    'align' => '',
+    'separator' => '',
+    'empty_column' => 0,
+  ),
+  'label' => array(
+    'sortable' => 0,
+    'default_sort_order' => 'asc',
+    'align' => '',
+    'separator' => '',
+    'empty_column' => 0,
+  ),
+  'source_language' => array(
+    'sortable' => 0,
+    'default_sort_order' => 'asc',
+    'align' => '',
+    'separator' => '',
+    'empty_column' => 0,
+  ),
+  'target_language' => array(
+    'sortable' => 0,
+    'default_sort_order' => 'asc',
+    'align' => '',
+    'separator' => '',
+    'empty_column' => 0,
+  ),
+  'created' => array(
     'sortable' => 0,
     'default_sort_order' => 'asc',
     'align' => '',
@@ -110,29 +142,6 @@ $handler->display->display_options['fields']['target_language']['hide_empty'] = 
 $handler->display->display_options['fields']['target_language']['empty_zero'] = 0;
 $handler->display->display_options['fields']['target_language']['hide_alter_empty'] = 1;
 $handler->display->display_options['fields']['target_language']['machine_name'] = 0;
-/* Field: Changed */
-$handler->display->display_options['fields']['changed']['id'] = 'changed';
-$handler->display->display_options['fields']['changed']['table'] = 'tmgmt_job';
-$handler->display->display_options['fields']['changed']['field'] = 'changed';
-$handler->display->display_options['fields']['changed']['ui_name'] = 'Changed';
-$handler->display->display_options['fields']['changed']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['external'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['changed']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['changed']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['html'] = 0;
-$handler->display->display_options['fields']['changed']['element_label_colon'] = 1;
-$handler->display->display_options['fields']['changed']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['changed']['hide_empty'] = 0;
-$handler->display->display_options['fields']['changed']['empty_zero'] = 0;
-$handler->display->display_options['fields']['changed']['hide_alter_empty'] = 1;
-$handler->display->display_options['fields']['changed']['date_format'] = 'medium';
 /* Field: Created */
 $handler->display->display_options['fields']['created']['id'] = 'created';
 $handler->display->display_options['fields']['created']['table'] = 'tmgmt_job';
@@ -155,7 +164,30 @@ $handler->display->display_options['fields']['created']['element_default_classes
 $handler->display->display_options['fields']['created']['hide_empty'] = 0;
 $handler->display->display_options['fields']['created']['empty_zero'] = 0;
 $handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
-$handler->display->display_options['fields']['created']['date_format'] = 'medium';
+$handler->display->display_options['fields']['created']['date_format'] = 'short';
+/* Field: Changed */
+$handler->display->display_options['fields']['changed']['id'] = 'changed';
+$handler->display->display_options['fields']['changed']['table'] = 'tmgmt_job';
+$handler->display->display_options['fields']['changed']['field'] = 'changed';
+$handler->display->display_options['fields']['changed']['ui_name'] = 'Changed';
+$handler->display->display_options['fields']['changed']['alter']['alter_text'] = 0;
+$handler->display->display_options['fields']['changed']['alter']['make_link'] = 0;
+$handler->display->display_options['fields']['changed']['alter']['absolute'] = 0;
+$handler->display->display_options['fields']['changed']['alter']['external'] = 0;
+$handler->display->display_options['fields']['changed']['alter']['replace_spaces'] = 0;
+$handler->display->display_options['fields']['changed']['alter']['trim_whitespace'] = 0;
+$handler->display->display_options['fields']['changed']['alter']['nl2br'] = 0;
+$handler->display->display_options['fields']['changed']['alter']['word_boundary'] = 1;
+$handler->display->display_options['fields']['changed']['alter']['ellipsis'] = 1;
+$handler->display->display_options['fields']['changed']['alter']['strip_tags'] = 0;
+$handler->display->display_options['fields']['changed']['alter']['trim'] = 0;
+$handler->display->display_options['fields']['changed']['alter']['html'] = 0;
+$handler->display->display_options['fields']['changed']['element_label_colon'] = 1;
+$handler->display->display_options['fields']['changed']['element_default_classes'] = 1;
+$handler->display->display_options['fields']['changed']['hide_empty'] = 0;
+$handler->display->display_options['fields']['changed']['empty_zero'] = 0;
+$handler->display->display_options['fields']['changed']['hide_alter_empty'] = 1;
+$handler->display->display_options['fields']['changed']['date_format'] = 'short';
 /* Field: operations */
 $handler->display->display_options['fields']['operations']['id'] = 'operations';
 $handler->display->display_options['fields']['operations']['table'] = 'tmgmt_job';
@@ -178,17 +210,11 @@ $handler->display->display_options['fields']['operations']['element_default_clas
 $handler->display->display_options['fields']['operations']['hide_empty'] = 0;
 $handler->display->display_options['fields']['operations']['empty_zero'] = 0;
 $handler->display->display_options['fields']['operations']['hide_alter_empty'] = 1;
-/* Sort criterion: Changed */
-$handler->display->display_options['sorts']['changed']['id'] = 'changed';
-$handler->display->display_options['sorts']['changed']['table'] = 'tmgmt_job';
-$handler->display->display_options['sorts']['changed']['field'] = 'changed';
-$handler->display->display_options['sorts']['changed']['ui_name'] = 'Changed';
-$handler->display->display_options['sorts']['changed']['order'] = 'DESC';
 /* Filter criterion: State */
 $handler->display->display_options['filters']['state']['id'] = 'state';
 $handler->display->display_options['filters']['state']['table'] = 'tmgmt_job';
 $handler->display->display_options['filters']['state']['field'] = 'state';
 $handler->display->display_options['filters']['state']['ui_name'] = 'State';
 $handler->display->display_options['filters']['state']['value'] = array(
-  4 => '4',
+  0 => '0',
 );

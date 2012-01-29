@@ -1,0 +1,2775 @@
+diff --git a/includes/tmgmt.entity.inc b/includes/tmgmt.entity.inc
+index b966d7d..387bb51 100755
+--- a/includes/tmgmt.entity.inc
++++ b/includes/tmgmt.entity.inc
+@@ -313,7 +313,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
+   public function __construct(array $values = array()) {
+     parent::__construct($values, 'tmgmt_job_item');
+     if (!isset($this->state)) {
+-      $this->state = TMGMT_JOB_ITEM_STATE_WAITING;
++      $this->state = TMGMT_JOB_ITEM_STATE_ACTIVE;
+     }
+   }
+ 
+@@ -331,6 +331,41 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
+    * Overrides Entity::defaultUri()
+    */
+   public function defaultUri() {
++    return array('path' => 'admin/config/regional/tmgmt/items/' . $this->tjid);
++  }
++
++  /**
++   * Overrides Entity::buildContent().
++   */
++  public function buildContent($view_mode = 'full', $langcode = NULL) {
++    $wrapper = entity_metadata_wrapper('tmgmt_job_item', $this);
++    $content['changed'] = array(
++      '#type' => 'item',
++      '#title' => t('Last change'),
++      '#markup' => format_date($wrapper->changed->value()),
++    );
++    $content['state'] = array(
++      '#type' => 'item',
++      '#title' => t('State'),
++      '#markup' => $wrapper->state->label(),
++    );
++    if (module_exists('views') && $view = views_get_view('tmgmt_job_item_messages')) {
++      $content['messages'] = array(
++        '#type' => 'item',
++        '#title' => $view->get_title(),
++        '#markup' => $view->preview('block', array($this->tjiid)),
++      );
++    }
++    return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
++  }
++
++  /**
++   * Retrieves the path to the source object via the source controller.
++   *
++   * @return
++   *   The path to the source object.
++   */
++  public function getSourceUri() {
+     if ($controller = $this->getSourceController()) {
+       return $controller->getUri($this);
+     }
+@@ -365,17 +400,21 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
+    *
+    * The key can be an alphanumeric string.
+    *
++   * @param $reset
++   *   (Optional) Whether the data should be regenerated from the source object.
++   *   Defaults to FALSE.
++   *
+    * @return array
+    *   A data array structured in the
+    *
+    * @see TMGMTJobItem::getFlattenedData()
+    */
+-  public function getSourceData() {
+-    // If something is stored in data, return it immediately.
+-    if (!empty($this->data)) {
+-      return $this->data;
++  public function getSourceData($reset = FALSE) {
++    if ($reset || empty($this->data)) {
++      $this->data = $this->getSourceController()->getData($this);
++      $this->save();
+     }
+-    return $this->getSourceController()->getData($this);
++    return $this->data;
+   }
+ 
+   /**
+@@ -396,13 +435,30 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
+   }
+ 
+   /**
++   * Sets the state of the job item to 'accepted'.
++   */
++  public function accepted() {
++    $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED);
++    return $this;
++  }
++
++  /**
++   * Sets the state of the job item to 'active'.
++   */
++  public function active() {
++    $this->setState(TMGMT_JOB_ITEM_STATE_ACTIVE);
++    return $this;
++  }
++
++  /**
+    * Updates the state of the job item.
+    *
+    * @param $state
+-   *   The new state of the job. Has to be one of the job item state constants.
++   *   The new state of the job item. Has to be one of the job item state
++   *   constants.
+    *
+-   * @return boolean
+-   *   TRUE if the state could be set, FALSE otherwise.
++   * @return int
++   *   The updated state of the job item if it could be set.
+    */
+   public function setState($state) {
+     // Return TRUE if the state could be set. Return FALSE otherwise.
+@@ -413,6 +469,62 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
+   }
+ 
+   /**
++   * Returns the state of the job item. Can be one of the job item state
++   * constants.
++   *
++   * @return integer
++   *   The state of the job item or NULL if it hasn't been set yet.
++   */
++  public function getState() {
++    if (isset($this->state)) {
++      return $this->state;
++    }
++  }
++
++  /**
++   * Checks whether the passed value matches the current state.
++   *
++   * @param $state
++   *   The value to check the current state against.
++   *
++   * @return boolean
++   *   TRUE if the passed state matches the current state, FALSE otherwise.
++   */
++  public function isState($state) {
++    return $this->getState() == $state;
++  }
++
++  /**
++   * Checks whether the state of this transaction is 'accepted'.
++   *
++   * @return boolean
++   *   TRUE if the state is 'accepted', FALSE otherwise.
++   */
++  public function isAccepted() {
++    return $this->isState(TMGMT_JOB_ITEM_STATE_ACCEPTED);
++  }
++
++  /**
++   * Checks whether the state of this transaction is 'active'.
++   *
++   * @return boolean
++   *   TRUE if the state is 'active', FALSE otherwise.
++   */
++  public function isActive() {
++    return $this->isState(TMGMT_JOB_ITEM_STATE_ACTIVE);
++  }
++
++  /**
++   * Checks whether the state of this transaction is 'needs review'.
++   *
++   * @return boolean
++   *   TRUE if the state is 'needs review', FALSE otherwise.
++   */
++  public function isNeedsReview() {
++    return $this->isState(TMGMT_JOB_ITEM_STATE_REVIEW);
++  }
++
++  /**
+    * Add translated data to a job item.
+    *
+    * Note: This does not merge existing data which already exists below the
+@@ -432,13 +544,6 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
+   public function addTranslatedData($translation, $key = array()) {
+     if (empty($key)) {
+       $key = array();
+-      // Having no key basically means that we are inserting at the root level
+-      // which in return means that the item seems to be fully translated.
+-      // In this case we can assume that we can set it to "Needs Review".
+-      // This automated state change only works for translation services that
+-      // return the entire translated item in one go. Translation services like
+-      // MyGengo will need to handle this themselves.
+-      $this->needsReview();
+     }
+     if (!is_array($key)) {
+       $key = explode(TMGMT_ARRAY_DELIMITER, $key);
+@@ -447,6 +552,12 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
+       $this->translation = array();
+     }
+     drupal_array_set_nested_value($this->translation, $key, $translation);
++    // Check if the job item has all the translated data that it needs now.
++    $unfinished = array_diff_key(tmgmt_flatten_data($this->getSourceData()), tmgmt_flatten_data($this->translation));
++    if (empty($unfinished)) {
++      // There are no unfinished elements left.
++      $this->needsReview('The translation job item for the source ');
++    }
+     if ($this->save()) {
+       return TRUE;
+     }
+@@ -454,6 +565,22 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
+   }
+ 
+   /**
++   * Propagates the returned job item translations to the sources.
++   *
++   * @return boolean
++   *   TRUE if we were able to propagate the translated data and the item could
++   *   be saved, FALSE otherwise.
++   */
++  public function propagateTranslatedData() {
++    if ($this->isAccepted()) {
++      if ($controller = $this->getSourceController()) {
++        return $controller->saveTranslation($this);
++      }
++    }
++    return FALSE;
++  }
++
++  /**
+    * Retrieves the translated data from a job item.
+    *
+    * @return
+@@ -467,6 +594,89 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
+     return array();
+   }
+ 
++  /**
++   * Returns all job messages attached to this job item.
++   *
++   * @return array
++   *   An array of translation job messages.
++   */
++  public function getMessages() {
++    return $this->getAttachedEntities('tmgmt_job_message');
++  }
++
++  /**
++   * Retrieves all siblings of this job item.
++   *
++   * @return array
++   *   An array of job items that are the siblings of this job item.
++   */
++  public function getSiblings() {
++    $query = new EntityFieldQuery();
++    $result = $query->entityCondition('entity_type', 'tmgmt_job_item')
++      ->propertyCondition('tjiid', $this->tjiid, '<>')
++      ->propertyCondition('tjid', $this->tjid)
++      ->execute();
++    if (!empty($result['tmgmt_job_item'])) {
++      return entity_load('tmgmt_job_item', array_keys($result['tmgmt_job_item']));
++    }
++    return FALSE;
++  }
++
++  /**
++   * Returns all job messages attached to this job item with timestamp newer
++   * than $time.
++   *
++   * @param $time
++   *   (Optional) Messages need to have a newer timestamp than $time. Defaults
++   *   to REQUEST_TIME.
++   *
++   * @return array
++   *   An array of translation job messages.
++   */
++  public function getMessagesSince($time = NULL) {
++    $time = isset($time) ? $time : REQUEST_TIME;
++    $messages = $this->getAttachedEntities('tmgmt_job_message', array(
++      'created' => array(
++        'value' => $time,
++        'operator' => '>=',
++      ),
++    ));
++    return $messages;
++  }
++
++  /**
++   * Returns all entities of a given entity type that are attached to this job
++   * item.
++   *
++   * @param $entity_type
++   *   The attached entity type to look for.
++   * @param $conditions
++   *   (Optional) An array of property conditions that should be applied to the
++   *   query.
++   *
++   * @return array
++   *   An array of entities that are attached to this job item.
++   */
++  public function getAttachedEntities($entity_type, $conditions = array()) {
++    $query = new EntityFieldQuery();
++    $query->entityCondition('entity_type', $entity_type);
++    $query->propertyCondition('tjiid', $this->tjiid);
++    foreach ($conditions as $key => $condition) {
++      if (is_array($condition)) {
++        $operator = isset($condition['operator']) ? $condition['operator'] : '=';
++        $query->propertyCondition($key, $condition['value'], $operator);
++      }
++      else {
++        $query->propertyCondition($key, $condition);
++      }
++    }
++    $results = $query->execute();
++    if (!empty($results[$entity_type])) {
++      return entity_load($entity_type, array_keys($results[$entity_type]));
++    }
++    return array();
++  }
++
+ }
+ 
+ /**
+@@ -553,6 +763,13 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+   public $uid;
+ 
+   /**
++   * Tracks the previous state for internal use.
++   *
++   * @var int
++   */
++  protected $previousState;
++
++  /**
+    * Overrides Entity::__construct().
+    */
+   public function __construct(array $values = array()) {
+@@ -563,6 +780,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+     if (!isset($this->state)) {
+       $this->state = TMGMT_JOB_STATE_UNPROCESSED;
+     }
++    // We are tracking state changes for internal use.
++    $this->previousState = $this->state;
+   }
+ 
+   /**
+@@ -612,121 +831,23 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+       '#title' => t('State'),
+       '#markup' => $wrapper->state->label(),
+     );
+-    $content['created'] = array(
+-      '#type' => 'item',
+-      '#title' => t('Created'),
+-      '#markup' => format_date($wrapper->created->value()),
+-    );
+-    $content['items'] = array(
+-      '#type' => 'item',
+-      '#title' => t('Items'),
+-      'links' => array(
+-        '#theme' => 'links',
+-      ),
+-    );
+-    foreach ($this->getItems() as $item) {
+-      $uri = $item->uri();
+-      $content['items']['links']['#links'][$item->tjiid] = array(
+-        'title' => $item->label(),
+-        'href' => $uri['path'],
+-      );
+-    }
+     if (module_exists('views')) {
+-      $view = views_get_view('translation_job_messages');
+-      $content['messages'] = array(
+-        '#type' => 'item',
+-        '#title' => $view->get_title(),
+-        '#markup' => $view->preview('block', array($this->tjid)),
+-      );
+-    }
+-    return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
+-  }
+-
+-  /**
+-   * Checks whether the user described by $account is the author of this job.
+-   *
+-   * @param $account
+-   *   (Optional) A user object. Defaults to the currently logged in user.
+-   */
+-  public function isAuthor($account = NULL) {
+-    $account = isset($account) ? $account : $GLOBALS['user'];
+-    return $this->uid == $account->uid;
+-  }
+-
+-  /**
+-   * Returns whether the state of this transaction is new.
+-   *
+-   * @return boolean
+-   *   TRUE if the state is new, FALSE otherwise.
+-   */
+-  public function isUnprocessed() {
+-    return $this->isState(TMGMT_JOB_STATE_UNPROCESSED);
+-  }
+-
+-  /**
+-   * Returns whether the state of this transaction is submitted.
+-   *
+-   * @return boolean
+-   *   TRUE if the state is submitted, FALSE otherwise.
+-   */
+-  public function isActive() {
+-    return $this->isState(TMGMT_JOB_STATE_ACTIVE);
+-  }
+-
+-  /**
+-   * Returns whether the state of this transaction is rejected.
+-   *
+-   * @return boolean
+-   *   TRUE if the state is rejected, FALSE otherwise.
+-   */
+-  public function isRejected() {
+-    return $this->isState(TMGMT_JOB_STATE_REJECTED);
+-  }
+-
+-  /**
+-   * Returns whether the state of this transaction needs to be reviewed.
+-   *
+-   * @return boolean
+-   *   TRUE if the state is needs review, FALSE otherwise.
+-   */
+-  public function isNeedsReview() {
+-    return $this->isState(TMGMT_JOB_STATE_REVIEW);
+-  }
+-
+-  /**
+-   * Returns whether the state of this transaction is accepted.
+-   *
+-   * @return boolean
+-   *   TRUE if the state is accepted, FALSE otherwise.
+-   */
+-  public function isAccepted() {
+-    return $this->isState(TMGMT_JOB_STATE_ACCEPTED);
+-  }
+-
+-  /**
+-   * Returns whether the state of this transaction is cancelled.
+-   *
+-   * @return boolean
+-   *   TRUE if the state is cancelled, FALSE otherwise.
+-   */
+-  public function isCancelled() {
+-    return $this->isState(TMGMT_JOB_STATE_CANCELLED);
+-  }
+-
+-  /**
+-   * Propagates the returned job item translations to the sources.
+-   *
+-   * @return boolean
+-   *   TRUE if we were able to propagate the translated data, FALSE otherwise.
+-   */
+-  public function propagateTranslatedData() {
+-    if ($this->isAccepted()) {
+-      foreach ($this->getItems() as $item) {
+-        $item->getSourceController()->saveTranslation($item);
++      if ($view = views_get_view('tmgmt_ui_job_items')) {
++        $content['items'] = array(
++          '#type' => 'item',
++          '#title' => $view->get_title(),
++          '#markup' => $view->preview('block', array($this->tjid)),
++        );
++      }
++      if ($view = views_get_view('tmgmt_ui_job_messages')) {
++        $content['messages'] = array(
++          '#type' => 'item',
++          '#title' => $view->get_title(),
++          '#markup' => $view->preview('block', array($this->tjid)),
++        );
+       }
+-      return TRUE;
+     }
+-    return FALSE;
++    return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
+   }
+ 
+   /**
+@@ -740,7 +861,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+    *   The source item id.
+    *
+    * @return TMGMTJobItem
+-   *   The job item that was added to the job or NULL if it couldn't be saved.
++   *   The job item that was added to the job or FALSE if it couldn't be saved.
+    */
+   public function addItem($plugin, $item_type, $item_id) {
+     // Save the job if it hasn't yet been saved.
+@@ -750,6 +871,30 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+         return $item;
+       }
+     }
++    return FALSE;
++  }
++
++  /**
++   * Add a log message for this job.
++   *
++   * @param $message
++   *   The message to store in the log. Keep $message translatable by not
++   *   concatenating dynamic values into it! Variables in the message should be
++   *   added by using placeholder strings alongside the variables argument to
++   *   declare the value of the placeholders. See t() for documentation on how
++   *   $message and $variables interact.   *
++   * @param $variables
++   *   (Optional) An array of variables to replace in the message on display.
++   */
++  public function addMessage($message, $variables = array(), $type = 'status') {
++    // Save the job if it hasn't yet been saved.
++    if (!empty($this->tjid) || $this->save()) {
++      $message = tmgmt_job_message_create($this->previousState, $this->getState(), $message, $variables, array('tjid' => $this->tjid, 'type' => $type));
++      if ($message->save()) {
++        return $message;
++      }
++    }
++    return FALSE;
+   }
+ 
+   /**
+@@ -773,7 +918,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+   }
+ 
+   /**
+-   * Returns all job messages attached to this job with timestamp newer than $time.
++   * Returns all job messages attached to this job with timestamp newer than
++   * $time.
+    *
+    * @param $time
+    *   (Optional) Messages need to have a newer timestamp than $time. Defaults
+@@ -784,14 +930,45 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+    */
+   public function getMessagesSince($time = NULL) {
+     $time = isset($time) ? $time : REQUEST_TIME;
+-    $messages = $this->getAttachedEntities('tmgmt_job_message');
+-    $new_messages = array();
+-    foreach ($messages as $message) {
+-      if ($message->created >= $time) {
+-        $new_messages[] = $message;
++    $messages = $this->getAttachedEntities('tmgmt_job_message', array(
++      'created' => array(
++        'value' => $time,
++        'operator' => '>=',
++      ),
++    ));
++    return $messages;
++  }
++
++  /**
++   * Returns all entities of a given entity type that are attached to this job.
++   *
++   * @param $entity_type
++   *   The attached entity type to look for.
++   * @param $conditions
++   *   (Optional) An array of property conditions that should be applied to the
++   *   query.
++   *
++   * @return array
++   *   An array of entities that are attached to this job.
++   */
++  public function getAttachedEntities($entity_type, $conditions = array()) {
++    $query = new EntityFieldQuery();
++    $query->entityCondition('entity_type', $entity_type);
++    $query->propertyCondition('tjid', $this->tjid);
++    foreach ($conditions as $key => $condition) {
++      if (is_array($condition)) {
++        $operator = isset($condition['operator']) ? $condition['operator'] : '=';
++        $query->propertyCondition($key, $condition['value'], $operator);
++      }
++      else {
++        $query->propertyCondition($key, $condition);
+       }
+     }
+-    return $new_messages;
++    $results = $query->execute();
++    if (!empty($results[$entity_type])) {
++      return entity_load($entity_type, array_keys($results[$entity_type]));
++    }
++    return array();
+   }
+ 
+   /**
+@@ -838,26 +1015,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+   }
+ 
+   /**
+-   * Returns all entities of a given entity type that are attached to this job.
+-   *
+-   * @param $entity_type
+-   *   The attached entity type to look for.
+-   *
+-   * @return array
+-   *   An array of entities that are attached to this job.
+-   */
+-  public function getAttachedEntities($entity_type) {
+-    $query = new EntityFieldQuery();
+-    $query->entityCondition('entity_type', $entity_type);
+-    $query->propertyCondition('tjid', $this->tjid);
+-    $results = $query->execute();
+-    if (!empty($results[$entity_type])) {
+-      return entity_load($entity_type, array_keys($results[$entity_type]));
+-    }
+-    return array();
+-  }
+-
+-  /**
+    * Returns the translator for this job.
+    *
+    * @return TMGMTTranslator
+@@ -886,15 +1043,26 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+    *
+    * @param $state
+    *   The new state of the job. Has to be one of the job state constants.
++   * @param $message
++   *   (Optional) The log message to be saved along with the state change.
++   * @param $variables
++   *   (Optional) An array of variables to replace in the message on display.
+    *
+-   * @return boolean
+-   *   TRUE if the state could be set, FALSE otherwise.
++   * @return int
++   *   The updated state of the job if it could be set.
+    */
+-  public function setState($state) {
++  public function setState($state, $message = NULL, $variables = array()) {
+     // Return TRUE if the state could be set. Return FALSE otherwise.
+     if (array_key_exists($state, tmgmt_job_states())) {
+-      $this->old_state = $this->getState();
+       $this->state = $state;
++      // If a message is attached to this state change add it now. Note: All
++      // state changes are 'debug' messages.
++      if (isset($message)) {
++        $this->addMessage($message, $variables, 'debug');
++      }
++      // We are updating the internal state tracker here so that future messages
++      // get it right.
++      $this->previousState = $state;
+     }
+     return $this->state;
+   }
+@@ -913,94 +1081,99 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+   }
+ 
+   /**
+-   * Add a log message for this job.
++   * Checks whether the user described by $account is the author of this job.
+    *
+-   * @param $message
+-   *   The message to store in the log. Keep $message translatable by not
+-   *   concatenating dynamic values into it! Variables in the message should be
+-   *   added by using placeholder strings alongside the variables argument to
+-   *   declare the value of the placeholders. See t() for documentation on how
+-   *   $message and $variables interact.   *
+-   * @param $variables
+-   *   (Optional) An array of variables to replace in the message on display.
++   * @param $account
++   *   (Optional) A user object. Defaults to the currently logged in user.
+    */
+-  public function addMessage($message, $variables = array(), $type = 'status') {
+-    // Save the job if it hasn't yet been saved.
+-    if (empty($this->tjid) && !$this->save()) {
+-      return;
+-    }
+-    $state_before = isset($this->old_state) ? $this->old_state : $this->getState();
+-    $state_after = $this->getState();
+-    $message = tmgmt_job_message_create($state_before, $state_after, $message, $variables, array(
+-      'tjid' => $this->tjid,
+-      'type' => $type,
+-    ));
+-    // Remove old state again so that future log messages will use the correct
+-    // state.
+-    unset($this->old_state);
+-    if ($message->save()) {
+-      return $message;
+-    }
++  public function isAuthor($account = NULL) {
++    $account = isset($account) ? $account : $GLOBALS['user'];
++    return $this->uid == $account->uid;
+   }
+ 
+   /**
+-   * Set the state of the job to needs review.
+-   *
+-   * @param $message
+-   *   The log message to be saved along with the state change.
+-   * @param $variables
+-   *   (Optional) An array of variables to replace in the message on display.
++   * Returns whether the state of this transaction is new.
+    *
+-   * @see TMGMTJob::addMessage()
++   * @return boolean
++   *   TRUE if the state is new, FALSE otherwise.
+    */
+-  public function needsReview($message, $variables = array()) {
+-    $this->setState(TMGMT_JOB_STATE_REVIEW);
+-    $this->addMessage($message, $variables);
+-    // Automatically accept this translation if the translator or job are
+-    // configured for that.
+-    if (variable_get('tmgmt_auto_accept', FALSE) && $this->getSetting('auto_accept')) {
+-      $this->accepted('Automatically accepted %label.', array('%label' => $this->label()));
+-    }
+-    $this->save();
++  public function isUnprocessed() {
++    return $this->isState(TMGMT_JOB_STATE_UNPROCESSED);
+   }
+ 
+   /**
+-   * Set the state of the job to submitted.
++   * Returns whether the state of this transaction is submitted.
+    *
+-   * @param $message
+-   *   The log message to be saved along with the state change.
+-   * @param $variables
+-   *   (Optional) An array of variables to replace in the message on display.
++   * @return boolean
++   *   TRUE if the state is submitted, FALSE otherwise.
++   */
++  public function isActive() {
++    return $this->isState(TMGMT_JOB_STATE_ACTIVE);
++  }
++
++  /**
++   * Returns whether the state of this transaction is cancelled.
+    *
+-   * @see TMGMTJob::addMessage()
++   * @return boolean
++   *   TRUE if the state is cancelled, FALSE otherwise.
+    */
+-  public function submitted($message = NULL, $variables = array()) {
+-    $this->setState(TMGMT_JOB_STATE_ACTIVE);
+-    $this->addMessage($message, $variables);
+-    $this->save();
++  public function isFinished() {
++    return $this->isState(TMGMT_JOB_STATE_FINISHED);
+   }
+ 
+   /**
+-   * Set the state of the job to accepted
++   * Checks whether a job is translatable.
+    *
+-   * @param $message
+-   *   The log message to be saved along with the state change.
+-   * @param $variables
+-   *   (Optional) An array of variables to replace in the message on display.
++   * @return boolean
++   *   TRUE if the job can be translated, FALSE otherwise.
++   */
++  public function isTranslatable() {
++    if ($translator = $this->getTranslator()) {
++      if ($translator->canTranslate($this)) {
++        return TRUE;
++      }
++    }
++    return FALSE;
++  }
++
++  /**
++   * Checks whether a job is cancelable.
+    *
+-   * @see TMGMTJob::addMessage()
++   * @return boolean
++   *   TRUE if the job can be cancelled, FALSE otherwise.
+    */
+-  public function accepted($message = NULL, $variables = array()) {
+-    $this->setState(TMGMT_JOB_STATE_ACCEPTED);
+-    // @todo Find a solution for what happens if the propagation of the translated data fails.
+-    if ($this->propagateTranslatedData()) {
+-      $this->addMessage($message, $variables);
+-      $this->save();
++  public function isCancelable() {
++    // Already accepted translation jobs can't be cancelled.
++    if ($this->isActive() && $translator = $this->getTranslator()) {
++      if ($translator->isCancelable($this)) {
++        return TRUE;
++      }
+     }
++    return FALSE;
++  }
++
++  /**
++   * Checks whether a job is submittable.
++   *
++   * @return boolean
++   *   TRUE if the job can be submitted, FALSE otherwise.
++   */
++  public function isSubmittable() {
++    return $this->isActive();
+   }
+ 
+   /**
+-   * Set the state of the job to finished.
++   * Checks whether a job is deletable.
++   *
++   * @return boolean
++   *   TRUE if the job can be deleted, FALSE otherwise.
++   */
++  public function isDeletable() {
++    return !$this->isActive();
++  }
++
++  /**
++   * Set the state of the job to 'submitted'.
+    *
+    * @param $message
+    *   The log message to be saved along with the state change.
+@@ -1009,14 +1182,12 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+    *
+    * @see TMGMTJob::addMessage()
+    */
+-  public function finished($message = NULL, $variables = array()) {
+-    $this->setState(TMGMT_JOB_STATE_ACCEPTED);
+-    $this->addMessage($message, $variables);
+-    $this->save();
++  public function submitted($message = NULL, $variables = array()) {
++    $this->setState(TMGMT_JOB_STATE_ACTIVE, $message, $variables);
+   }
+ 
+   /**
+-   * Set the state of the job to rejected.
++   * Set the state of the job to 'finished'.
+    *
+    * @param $message
+    *   The log message to be saved along with the state change.
+@@ -1025,14 +1196,12 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+    *
+    * @see TMGMTJob::addMessage()
+    */
+-  public function rejected($message = NULL, $variables = array()) {
+-    $this->setState(TMGMT_JOB_STATE_REJECTED);
+-    $this->addMessage($message, $variables, 'error');
+-    $this->save();
++  public function finished($message = NULL, $variables = array()) {
++    $this->setState(TMGMT_JOB_STATE_FINISHED, $message, $variables);
+   }
+ 
+   /**
+-   * Set the state of the job to cancelled.
++   * Sets the state of the job to 'unprocessed'.
+    *
+    * @param $message
+    *   The log message to be saved along with the state change.
+@@ -1044,24 +1213,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+    * @see TMGMTJob::addMessage()
+    */
+   public function cancelled($message = NULL, $variables = array()) {
+-    $this->setState(TMGMT_JOB_STATE_CANCELLED);
+-    $this->addMessage($message, $variables);
+-    $this->save();
+-  }
+-
+-  /**
+-   * Checks whether a job is translatable.
+-   *
+-   * @return boolean
+-   *   TRUE if the job can be translated, FALSE otherwise.
+-   */
+-  public function isTranslatable() {
+-    if ($translator = $this->getTranslator()) {
+-      if ($translator->canTranslate($this)) {
+-        return TRUE;
+-      }
+-    }
+-    return FALSE;
++    $this->setState(TMGMT_JOB_STATE_UNPROCESSED, $message, $variables);
+   }
+ 
+   /**
+@@ -1071,12 +1223,13 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+    *   The updated job status.
+    */
+   public function requestTranslation() {
+-    if ($this->isTranslatable()) {
++    if ($this->isTranslatable() && $controller = $this->getTranslatorController()) {
+       // We don't know if the translator plugin already processed our
+       // translation request after this point. That means that the plugin has to
+       // set the 'submitted', 'needs review', etc. states on its own.
+-      $this->getTranslatorController()->requestTranslation($this);
++      return $controller->requestTranslation($this);
+     }
++    return FALSE;
+   }
+ 
+   /**
+@@ -1084,28 +1237,18 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+    * cancelled, submitted jobs only if supported by the translator plugin.
+    * Always use this method if you want to cancel a translation job.
+    *
+-   * @param $account
+-   *   (Optional) The user that cancelled the translation job.
+-   *
+    * @return boolean
+    *   TRUE if the translation job was cancelled, FALSE otherwise.
+    */
+-  public function cancelTranslation($account = NULL) {
+-    // Already accepted translation jobs can't be cancelled.
+-    if (!$this->isAccepted()) {
+-      return FALSE;
+-    }
++  public function cancelTranslation() {
+     // If the job is not currently pending by the translator (submitted), we can
+     // cancel without any checks. Otherwise, ask the translator plugin if the
+     // job can be cancelled.
+-    if (!$this->isActive() || $this->getTranslatorController()->cancelTranslation($this)) {
+-      if (isset($account)) {
+-        $this->cancelled('The translation job has been canceled by !user.', array('!user' => theme('username', array('account' => $account))));
+-      }
+-      else {
+-        $this->cancelled('The translation job has been canceled.');
++    if ($this->isCancelable() && $controller = $this->getTranslatorController()) {
++      if ($controller->cancelTranslation($this)) {
++        $this->cancelled('The translation job has been cancelled.')->save();
++        return TRUE;
+       }
+-      return TRUE;
+     }
+     return FALSE;
+   }
+@@ -1124,14 +1267,17 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+   /**
+    * Returns the source data of all job items.
+    *
++   * @param $reset
++   *   Whether the source data should be regenerated from the source objects.
++   *
+    * @return array
+    *   A nested array with the source data where the most upper key is the job
+    *   item id.
+    */
+-  public function getSourceData() {
++  public function getSourceData($reset = FALSE) {
+     $data = array();
+     foreach ($this->getItems() as $key => $item) {
+-      $data[$key] = $item->getSourceData();
++      $data[$key] = $item->getSourceData($reset);
+     }
+     return $data;
+   }
+@@ -1193,7 +1339,19 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
+   }
+ 
+   /**
+-   * Retrieves the job settings form.
++   * Propagates the returned job item translations to the sources.
++   *
++   * @return boolean
++   *   TRUE if we were able to propagate the translated data, FALSE otherwise.
++   */
++  public function propagateTranslatedData() {
++    foreach ($this->getItems() as $item) {
++      $item->propagateTranslatedData();
++    }
++  }
++
++  /**
++   * Retrieves the checkout settings form.
+    */
+   public function checkoutSettingsForm($form, &$form_state) {
+     if ($translator = $this->getTranslator()) {
+@@ -1226,6 +1384,13 @@ class TMGMTJobMessage extends Entity {
+   public $tjid;
+ 
+   /**
++   * The ID of the job item.
++   *
++   * @var integer
++   */
++  public $tjiid;
++
++  /**
+    * The message text.
+    *
+    * @var string
+@@ -1279,6 +1444,7 @@ class TMGMTJobMessage extends Entity {
+       $this->type = 'status';
+     }
+   }
++
+   /**
+    * Overrides Entity::label().
+    */
+@@ -1298,13 +1464,14 @@ class TMGMTJobMessage extends Entity {
+ 
+   /**
+    * Returns the translated message.
++   *
++   * @return
++   *   The translated message.
+    */
+   public function getMessage() {
+     $text = $this->message;
+-    if (is_array($this->variables) && !empty($this->variables)) {
+-      $text = t($text, $this->variables);
+-    }
+-    return $text;
++    $variables = is_array($this->variables) && !empty($this->variables) ? $this->variables : array();
++    return t($text, $variables);
+   }
+ 
+   /**
+@@ -1321,4 +1488,18 @@ class TMGMTJobMessage extends Entity {
+     return FALSE;
+   }
+ 
++  /**
++   * Loads the job entity that this job message is attached to.
++   *
++   * @return TMGMTJobItem
++   *   The job item entity that this job message is attached to or FALSE if
++   *   there was a problem.
++   */
++  public function getJobItem() {
++    if (!empty($this->tjiid)) {
++      return tmgmt_job_item_load($this->tjiid);
++    }
++    return FALSE;
++  }
++
+ }
+diff --git a/includes/tmgmt.views.inc b/includes/tmgmt.views.inc
+index 7bbdcaa..3e60f14 100644
+--- a/includes/tmgmt.views.inc
++++ b/includes/tmgmt.views.inc
+@@ -18,6 +18,14 @@ class TMGMTJobItemViewsController extends EntityDefaultViewsController {
+         'handler' => 'tmgmt_handler_field_tmgmt_entity_label',
+       ),
+     );
++    $data['tmgmt_job_item']['operations'] = array(
++      'title' => t('Operations'),
++      'help' => t('Displays a list of options which are available for a job item.'),
++      'real field' => 'tjiid',
++      'field' => array(
++        'handler' => 'tmgmt_handler_field_tmgmt_job_item_operations',
++      ),
++    );
+     return $data;
+   }
+ }
+diff --git a/sources/entity/tmgmt_entity.plugin.inc b/sources/entity/tmgmt_entity.plugin.inc
+index dc7bb23..5a1e0ef 100644
+--- a/sources/entity/tmgmt_entity.plugin.inc
++++ b/sources/entity/tmgmt_entity.plugin.inc
+@@ -8,6 +8,8 @@
+ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginController {
+ 
+   /**
++   * Implements TMGMTEntitySourcePluginController::getData().
++   *
+    * Returns the data from the fields as a structure that can be processed by
+    * the Translation Management system.
+    */
+@@ -30,7 +32,7 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
+   }
+ 
+   /**
+-   * Overriden.
++   * Implements TMGMTEntitySourcePluginController::saveTranslation().
+    */
+   public function saveTranslation(TMGMTJobItem $job_item) {
+     $entity = entity_load_single($job_item->item_type, $job_item->item_id);
+diff --git a/sources/node/tmgmt_node.plugin.inc b/sources/node/tmgmt_node.plugin.inc
+index 48b8928..6b0fea3 100644
+--- a/sources/node/tmgmt_node.plugin.inc
++++ b/sources/node/tmgmt_node.plugin.inc
+@@ -4,9 +4,12 @@
+  * @file
+  * Provides the node source controller.
+  */
++
+ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController {
+ 
+   /**
++   * Implements TMGMTSourcePluginControllerInterface::getData().
++   *
+    * Returns the data from the fields as a structure that can be processed by
+    * the Translation Management system.
+    */
+@@ -30,7 +33,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
+   }
+ 
+   /**
+-   * Overriden.
++   * Implements TMGMTSourcePluginControllerInterface::saveTranslation().
+    */
+   public function saveTranslation(TMGMTJobItem $job_item) {
+     $node = node_load($job_item->item_id);
+diff --git a/tmgmt.info b/tmgmt.info
+index f07c4ef..d93b10b 100755
+--- a/tmgmt.info
++++ b/tmgmt.info
+@@ -16,3 +16,4 @@ files[] = tmgmt.test
+ files[] = views/tmgmt_handler_field_tmgmt_entity_label.inc
+ files[] = views/tmgmt_handler_field_tmgmt_job_operations.inc
+ files[] = views/tmgmt_handler_field_tmgmt_job_message_message.inc
++files[] = views/tmgmt_handler_field_tmgmt_job_item_operations.inc
+diff --git a/tmgmt.install b/tmgmt.install
+index cc26793..2b1311e 100755
+--- a/tmgmt.install
++++ b/tmgmt.install
+@@ -235,6 +235,10 @@ function tmgmt_schema() {
+         'type' => 'int',
+         'not null' => TRUE,
+       ),
++      'tjiid' => array(
++        'description' => 'The identifier of the translation job item.',
++        'type' => 'int',
++      ),
+       'message' => array(
+         'description' => 'The language into the data should be translated.',
+         'type' => 'text',
+@@ -463,3 +467,13 @@ function tmgmt_update_7012() {
+ function tmgmt_update_7013() {
+   db_create_table('cache_tmgmt', drupal_get_schema_unprocessed('system', 'cache'));
+ }
++
++/**
++ * Add a 'tjiid' column to the job messages.
++ */
++function tmgmt_update_7014() {
++  db_add_field('tmgmt_job_message', 'tjiid', array(
++    'description' => 'The identifier of the translation job item.',
++    'type' => 'int',
++  ));
++}
+diff --git a/tmgmt.module b/tmgmt.module
+index e57fa76..ec407cc 100644
+--- a/tmgmt.module
++++ b/tmgmt.module
+@@ -20,8 +20,6 @@
+ define('TMGMT_JOB_STATE_UNPROCESSED', 0);
+ 
+ /**
+- * once we have migrated to using job item states.
+- *
+  * A translation job that has been submitted to the translator.
+  *
+  * Translator plugins are responsible for setting this state in their
+@@ -31,72 +29,23 @@ define('TMGMT_JOB_STATE_UNPROCESSED', 0);
+ define('TMGMT_JOB_STATE_ACTIVE', 1);
+ 
+ /**
+- * A translation job that has been rejected by the translator.
+- *
+- * The translator plugin can use this state if the job has been actively
+- * rejected. However, this should be avoided by doing the necessary checks
+- * in the canTranslate() method and in the job configuration settings.
+- *
+- * A rejected job can be re-submitted.
+- */
+-define('TMGMT_JOB_STATE_REJECTED', 2);
+-
+-/**
+- * The translation job was translated and needs to be reviewed.
+- *
+- * @todo remove this once we have migrated to using job item states for this.
+- *
+- * This state needs to be set by the translator plugin once the job has been
+- * completely translated.
+- */
+-define('TMGMT_JOB_STATE_REVIEW', 3);
+-
+-/**
+- * The translation has been accepted and the job is finished.
+- *
+- * @todo remove this once we have migrated to using job item states for this.
+- *
+- * Once the job has been accepted, the source plugins are called to update their
+- * sources with the translated data.
+- */
+-define('TMGMT_JOB_STATE_ACCEPTED', 4);
+-
+-/**
+- * The translation job has been cancelled.
+- *
+- * A job can be cancelled at any time. If he is currently in the submitted state
+- * the translator plugin is asked if this translation can be cancelled and needs
+- * to confirm it by returning TRUE in cancelTranslation().
+- */
+-define('TMGMT_JOB_STATE_CANCELLED', 5);
+-
+-/**
+  * The translation job has been finished.
+  *
+- * @todo Use this instead of TMGMT_JOB_STATE_ACCEPTED once we have migrated to
+- * using job item states.
+- *
+  * Not yet used.
+  */
+-define('TMGMT_JOB_STATE_FINISHED', 6);
++define('TMGMT_JOB_STATE_FINISHED', 2);
+ 
+ /**
+- * @todo Implement job item states. Maybe rename this.
+- *
+  * Waiting for translation.
+  */
+-define('TMGMT_JOB_ITEM_STATE_WAITING', 1);
++define('TMGMT_JOB_ITEM_STATE_ACTIVE', 1);
+ 
+ /**
+- * @todo Implement job item states.
+- *
+  * Needs to be reviewed.
+  */
+ define('TMGMT_JOB_ITEM_STATE_REVIEW', 2);
+ 
+ /**
+- * @todo Implement job item states.
+- *
+  * Is accepted.
+  */
+ define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
+@@ -138,7 +87,7 @@ function tmgmt_entity_info() {
+     'base table' => 'tmgmt_job_item',
+     'label callback' => 'entity_class_label',
+     'uri callback' => 'entity_class_uri',
+-    'access callback' => 'tmgmt_job_attachment_access',
++    'access callback' => 'tmgmt_job_item_access',
+     'entity keys' => array(
+       'id' => 'tjiid',
+     ),
+@@ -152,7 +101,7 @@ function tmgmt_entity_info() {
+     'entity class' => 'TMGMTJobMessage',
+     'base table' => 'tmgmt_job_message',
+     'label callback' => 'entity_class_label',
+-    'access callback' => 'tmgmt_job_attachment_access',
++    'access callback' => 'tmgmt_job_message_access',
+     'entity keys' => array(
+       'id' => 'tjmid',
+     ),
+@@ -285,8 +234,6 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
+ }
+ 
+ /**
+- * @todo Is this really a good function name?
+- *
+  * Returns a job which matches the requested source- and target language by
+  * user. If no job exists, a new job object will be created.
+  *
+@@ -300,7 +247,7 @@ function tmgmt_job_load_multiple_by_source($source_type, $item_type, $item_id) {
+  * @return TMGMTJob
+  *   The job entity.
+  */
+-function tmgmt_job_match_item($source_language, $target_language, $account = NULL) {
++function tmgmt_job_match_($source_language, $target_language, $account = NULL) {
+   $account = isset($account) ? $account : $GLOBALS['user'];
+   $query = new EntityFieldQuery();
+   $result = $query->entityCondition('entity_type', 'tmgmt_job')
+@@ -310,7 +257,8 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
+     ->propertyCondition('state', TMGMT_JOB_STATE_UNPROCESSED)
+     ->execute();
+   if (!empty($result['tmgmt_job'])) {
+-    return tmgmt_job_load(reset($result['tmgmt_job'])->tjid);
++    $job = reset($result['tmgmt_job']);
++    return tmgmt_job_load($job->tjid);
+   }
+   else {
+     return tmgmt_job_create($source_language, $target_language, $account->uid);
+@@ -342,33 +290,8 @@ function tmgmt_job_create($source_language, $target_language, $uid = NULL, array
+  * Access callback for the job entity.
+  */
+ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
+-  if (isset($job)) {
+-    if ($op == 'review') {
+-      // Simple check for wether the job needs a review for now.
+-      return $job->isNeedsReview();
+-    }
+-  }
+   // Return TRUE in all cases for now :)
+   return TRUE;
+-  switch ($op) {
+-    case 'create':
+-      return user_access('tmgmt create new jobs', $account);
+-    case 'view':
+-    case 'update':
+-    case 'delete':
+-      if (isset($job)) {
+-        if ($job->isAuthor($account)) {
+-          // Covers cases in which the user described by $account is the author.
+-          return user_access('tmgmt ' . $op . ' own jobs', $account) || user_access('tmgmt ' . $op . ' all jobs', $account);
+-        }
+-        else {
+-          // Covers all other cases.
+-          return user_access('tmgmt ' . $op . ' all jobs', $account);
+-        }
+-      }
+-    default:
+-      return FALSE;
+-  }
+ }
+ 
+ /**
+@@ -385,7 +308,7 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
+  *   FALSE otherwise.
+  */
+ function tmgmt_job_checkout_access(TMGMTJob $job, $account = NULL) {
+-  if ($job->isUnprocessed() || $job->isRejected() || $job->isCancelled()) {
++  if ($job->isUnprocessed()) {
+     return tmgmt_job_access('checkout', $job, $account);
+   }
+   return FALSE;
+@@ -400,11 +323,8 @@ function tmgmt_job_checkout_access(TMGMTJob $job, $account = NULL) {
+ function tmgmt_job_states() {
+   return array(
+     TMGMT_JOB_STATE_UNPROCESSED => t('Unprocessed'),
+-    TMGMT_JOB_STATE_ACTIVE => t('Active'),
+-    TMGMT_JOB_STATE_REJECTED => t('Rejected'),
+-    TMGMT_JOB_STATE_REVIEW => t('Needs review'),
+-    TMGMT_JOB_STATE_ACCEPTED => t('Accepted'),
+-    TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
++    TMGMT_JOB_STATE_ACTIVE => t('In progress'),
++    TMGMT_JOB_STATE_FINISHED => t('Finished'),
+   );
+ }
+ 
+@@ -416,7 +336,7 @@ function tmgmt_job_states() {
+  */
+ function tmgmt_job_item_states() {
+   return array(
+-    TMGMT_JOB_ITEM_STATE_WAITING => t('Unfinished'),
++    TMGMT_JOB_ITEM_STATE_ACTIVE => t('In progress'),
+     TMGMT_JOB_ITEM_STATE_REVIEW => t('Needs review'),
+     TMGMT_JOB_ITEM_STATE_ACCEPTED => t('Accepted'),
+   );
+@@ -437,50 +357,6 @@ function tmgmt_job_item_load($tjiid) {
+ }
+ 
+ /**
+- * @todo Looks ineffective to me. Let's remove that loop.
+- *
+- * Loads a translation job item per source. It will order the related jobs by
+- * the latest change.
+- *
+- * @param $source_type
+- *   The source type.
+- * @param $item_type
+- *   The source item type.
+- * @param $item_id
+- *   The source item id.
+- * @param $source_language
+- *   The source language.
+- * @param $target_languages
+- *   (Optional) An array of target language.
+- *
+- * @return TMGMTJobItem
+- *   The loaded job items.
+- */
+-function tmgmt_job_load_by_source($plugin, $item_type, $item_id, $source_language, $target_languages = array()) {
+-  if (empty($target_languages)) {
+-    $available_languages = entity_metadata_language_list();
+-    unset($available_languages[LANGUAGE_NONE], $available_languages[$source_language]);
+-    $target_languages = array_keys($available_languages);
+-  }
+-  $jobs = array();
+-  // @todo Why are we looping here? Can't this be done with an IN statement?
+-  foreach ($target_languages as $target_language) {
+-    $query = db_select('tmgmt_job_item', 'ji');
+-    $query->join('tmgmt_job', 'j', 'j.tjid = ji.tjid AND j.target_language = :target_language', array(':target_language' => $target_language));
+-    $query = $query->fields('j', array('tjid'))
+-      ->condition('plugin', $plugin)
+-      ->condition('item_type', $item_type)
+-      ->condition('item_id', $item_id)
+-      ->orderBy('changed', 'DESC')
+-      ->range(0, 1);
+-    if ($tjid = $query->execute()->fetchfield()) {
+-      $jobs[$target_language] = tmgmt_job_load($tjid);
+-    }
+-  }
+-  return isset($jobs) ? $jobs : FALSE;
+-}
+-
+-/**
+  * Loads translation job items.
+  */
+ function tmgmt_job_item_load_multiple($tjiids = array(), $conditions = array()) {
+@@ -528,12 +404,6 @@ function tmgmt_job_item_create($plugin, $item_type, $item_id, array $values = ar
+ function tmgmt_job_attachment_access($op, $attachment = NULL, $account = NULL) {
+   // Return TRUE in all cases for now :)
+   return TRUE;
+-  // We just forward the access request to the job entity.
+-  if (isset($attachment) && $job = $attachment->getJob()) {
+-    return tmgmt_job_access($op, $job, $account);
+-  }
+-  // If we can't retrieve the job entity, we can't grant access.
+-  return FALSE;
+ }
+ 
+ /**
+diff --git a/translators/microsoft/tmgmt_microsoft.plugin.inc b/translators/microsoft/tmgmt_microsoft.plugin.inc
+index 5981ef2..82d8e51 100644
+--- a/translators/microsoft/tmgmt_microsoft.plugin.inc
++++ b/translators/microsoft/tmgmt_microsoft.plugin.inc
+@@ -42,6 +42,13 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
+       return FALSE;
+     }
+     foreach (tmgmt_flatten_data($job->getSourceData()) as $value) {
++      // We don't need to check texts that are not going to be translated
++      // anyways.
++      if (isset($value['#translate']) && $value['#translate'] === FALSE) {
++        continue;
++      }
++      // If one of the texts in this job exceeds the max character count the job
++      // can't be translated.
+       if (drupal_strlen($value['#text']) > $this->maxCharacters) {
+         return FALSE;
+       }
+@@ -53,7 +60,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
+    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
+    */
+   public function requestTranslation(TMGMTJob $job) {
+-    // Pull the source data array from through the job and flatten it.
++    // Pull the source data array through the job and flatten it.
+     $data = tmgmt_flatten_data($job->getSourceData());
+     foreach ($data as $key => $value) {
+       if (isset($value['#translate']) && $value['#translate'] === FALSE) {
+@@ -65,7 +72,11 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
+         'to' => $job->target_language,
+         'contentType' => 'text/plain',
+         'text' => $value['#text'],
+-      ), array('headers' => array('Content-Type' => 'text/plain')));
++      ), array(
++        'headers' => array(
++          'Content-Type' => 'text/plain',
++        ),
++      ));
+       // Check the result code for possible errors.
+       switch ($result->code) {
+         case 200:
+@@ -78,17 +89,19 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
+           $data[$key]['#text'] = $items->item(0)->nodeValue;
+           break;
+         case 400:
+-          $job->rejected('Rejected by Microsoft Translator: !error', array('!error' => $result->data));
+-          return;
++          $job->addMessage('Rejected by Microsoft Translator: !error', array('!error' => $result->data), 'error');
++          return FALSE;
+         default:
+           $job->addMessage('Unknown error from Microsoft Translator: !error', array('!error' => $result->data), 'error');
+-          return;
++          return FALSE;
+       }
+     }
++    // The translation job has been successfully submitted.
++    $job->submitted('The translation job has been submitted successfully.');
+     // Save the translated data through the job.
+     $job->addTranslatedData(tmgmt_unflatten_data($data));
+-    // Mark this string as translatable.
+-    $job->needsReview('Microsoft Translator translation completed.');
++    // Translation finished successfully.
++    return TRUE;
+   }
+ 
+   /**
+diff --git a/ui/includes/tmgmt_ui.admin.inc b/ui/includes/tmgmt_ui.admin.inc
+index 34e5727..88f8a7b 100644
+--- a/ui/includes/tmgmt_ui.admin.inc
++++ b/ui/includes/tmgmt_ui.admin.inc
+@@ -19,6 +19,19 @@ function tmgmt_ui_job_view(TMGMTJob $job) {
+ }
+ 
+ /**
++ * Simple page callback for viewing a job item.
++ *
++ * @param TMGMTJobItem $job
++ *   The viewed job item.
++ *
++ * @return array
++ *   A renderable array.
++ */
++function tmgmt_ui_job_item_view(TMGMTJobItem $job_item) {
++  return entity_view($job_item->entityType(), array($job_item), 'full', NULL, TRUE);
++}
++
++/**
+  * Entity API form for the translator entity.
+  */
+ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator, $op = 'edit') {
+@@ -169,8 +182,6 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
+   $translators = tmgmt_translator_labels_flagged($job->source_language, $job->target_language);
+   $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
+   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
+-  // Mark form elements as disabled under certain circumstances.
+-  $disabled = !$job->isUnprocessed() && !$job->isCancelled() && !$job->isRejected();
+   // Get the job metadata wrapper so we can display the current status nicely.
+   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
+   // Show the items that are attached to this job if there are not more than 20.
+@@ -196,14 +207,13 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
+     '#title' => t('Current status'),
+     '#markup' => $wrapper->state->label(),
+   );
+-  // Add a list of job items.
+-  $form['items'] = array(
+-    '#type' => 'fieldset',
+-    '#title' => format_plural(count($items), '@count attached item', '@count attached items'),
+-    '#collapsible' => TRUE,
+-    '#collapsed' => TRUE,
+-  );
+-  $form['items'] += tmgmt_ui_job_list_items($items);
++  if (module_exists('views') && $view = views_get_view('tmgmt_ui_job_items')) {
++    $form['items'] = array(
++      '#type' => 'item',
++      '#title' => $view->get_title(),
++      '#markup' => $view->preview('block', array($job->tjid)),
++    );
++  }
+   // Show the source and target language in a fieldset.
+   $form['languages'] = array(
+     '#type' => 'fieldset',
+@@ -219,7 +229,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
+     '#required' => TRUE,
+     '#prefix' => '<div class="tmgmt-ui-source-language">',
+     '#suffix' => '</div>',
+-    '#disabled' => !empty($preselected['source_language']) || $disabled,
++    '#disabled' => !empty($preselected['source_language']) || !$job->isUnprocessed(),
+     '#ajax' => array(
+       'callback' => 'tmgmt_ui_ajax_callback_get_supported_translators',
+       'wrapper' => 'tmgmt-translator-wrapper',
+@@ -233,7 +243,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
+     '#required' => TRUE,
+     '#prefix' => '<div class="tmgmt-ui-source-language">',
+     '#suffix' => '</div>',
+-    '#disabled' => !empty($preselected['target_language']) || $disabled,
++    '#disabled' => !empty($preselected['target_language']) || !$job->isUnprocessed(),
+     '#ajax' => array(
+       'callback' => 'tmgmt_ui_ajax_callback_supported_translators',
+       'wrapper' => 'tmgmt-translator-wrapper',
+@@ -250,14 +260,14 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
+     '#options' => $translators,
+     '#default_value' => $job->translator,
+     '#required' => TRUE,
+-    '#disabled' => $disabled,
++    '#disabled' => !$job->isUnprocessed(),
+     '#ajax' => array(
+       'callback' => 'tmgmt_ui_ajax_callback_translator_settings',
+       'wrapper' => 'tmgmt-translator-settings',
+     ),
+   );
+   // Display the checkout settings form if the job can be checked out.
+-  if (!$job->isActive() && !$job->isAccepted() && !$job->isNeedsReview()) {
++  if ($job->isUnprocessed()) {
+     $form['translator_wrapper']['settings'] = array(
+       '#type' => 'fieldset',
+       '#title' => t('Checkout settings'),
+@@ -284,7 +294,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
+   $form['actions']['checkout'] = array(
+     '#type' => 'submit',
+     '#value' => t('Submit to translator'),
+-    '#access' => !$job->isActive() && !$job->isAccepted() && !$job->isNeedsReview(),
++    '#access' => $job->isUnprocessed(),
+   );
+   if ($old) {
+     $form['actions']['delete'] = array(
+diff --git a/ui/includes/tmgmt_ui.controller.inc b/ui/includes/tmgmt_ui.controller.inc
+index 04558eb..6109b1d 100644
+--- a/ui/includes/tmgmt_ui.controller.inc
++++ b/ui/includes/tmgmt_ui.controller.inc
+@@ -5,6 +5,9 @@
+  * Please supply a file description.
+  */
+ 
++/**
++ * Entity UI controller for the Translator Entity.
++ */
+ class TMGMTTranslatorUIController extends EntityDefaultUIController {
+ 
+   /**
+@@ -159,9 +162,13 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
+ 
+ }
+ 
++
++/**
++ * Entity UI controller for the Job Entity.
++ */
+ class TMGMTJobUIController extends EntityDefaultUIController {
+ 
+-  /*
++  /**
+    * Overrides EntityDefaultUIController::hook_menu().
+    */
+   public function hook_menu() {
+@@ -184,17 +191,6 @@ class TMGMTJobUIController extends EntityDefaultUIController {
+       'type' => MENU_DEFAULT_LOCAL_TASK,
+       'weight' => -10,
+     );
+-    $items[$this->path . '/' . $wildcard . '/review'] = array(
+-      'title' => 'Review',
+-      'page callback' => 'drupal_get_form',
+-      'page arguments' => array('tmgmt_ui_job_review_form', $id_count),
+-      'load arguments' => array($this->entityType),
+-      'access callback' => 'tmgmt_job_access',
+-      'access arguments' => array('review', $id_count),
+-      'type' => MENU_LOCAL_TASK,
+-      'file' => $this->entityInfo['admin ui']['file'],
+-      'file path' => $this->entityInfo['admin ui']['file path'],
+-    );
+     $items[$this->path . '/' . $wildcard . '/manage'] = array(
+       'title' => 'Manage',
+       'page callback' => 'entity_ui_get_form',
+@@ -242,62 +238,18 @@ class TMGMTJobUIController extends EntityDefaultUIController {
+    */
+   public function applyOperation($op, $entity) {
+     switch ($op) {
+-      case 'cancel':
+-        $entity->cancelTranslation($GLOBALS['user']);
+-        return t('Cancelled %entity %label to the defaults.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
+       case 'delete':
+-        $entity->delete();
+-        return t('Deleted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
+-      case 'accept':
+-        $entity->accepted('The translation has been accepted by !user.', array('!user' => theme('username', array('account' => $GLOBALS['user']))));
+-        return t('Accepted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
++        if ($entity->isDeletable() && $entity->delete()) {
++          return t('Deleted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
++        }
++        break;
++      case 'cancel':
++        if ($entity->isCancelable() && $entity->cancelTranslation()) {
++          return t('Cancelled %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
++        }
++        break;
+     }
+     return FALSE;
+   }
+ 
+ }
+-
+-/**
+- * Adds a description to the translator entity on the entity overview form.
+- *
+- * @see theme_entity_ui_overview_item()
+- */
+-function theme_tmgmt_ui_translator_overview_item($variables) {
+-  $output = theme('entity_ui_overview_item', $variables);
+-  if (!empty($variables['description'])) {
+-    $output = '<div class="tmgmt-ui-translator-label-wrapper">' . $output . '<div class="description">' . $variables['description'] . '</div></div>';
+-  }
+-  return $output;
+-}
+-
+-/**
+- * Theme callback for adding the tabledrag to the translator entity overview
+- * form.
+- */
+-function theme_tmgmt_ui_translator_overview_form($variables) {
+-  $form = $variables['form'];
+-  $colspan = !empty($form['#entity_info']['exportable']) ? 4 : 3;
+-  $rows = array();
+-  $header = array(
+-    t('Label'),
+-    t('Plugin'),
+-    t('Status'),
+-    array('data' => t('Operations'), 'colspan' => $colspan),
+-    t('Weight'),
+-  );
+-  foreach (element_children($form) as $key) {
+-    $row = array();
+-    $form[$key]['weight']['#attributes']['class'] = array('tmgmt-ui-translator-weight');
+-    $row[] = drupal_render($form[$key]['label']);
+-    $row[] = drupal_render($form[$key]['plugin']);
+-    $row[] = drupal_render($form[$key]['status']);
+-    $operations = element_children($form[$key]['operations']);
+-    foreach ($operations as $op) {
+-      $row[] = array('data' => $form[$key]['operations'][$op]);
+-    }
+-    $row[] = drupal_render($form[$key]['weight']);
+-    $rows[] = array('data' => $row, 'class' => array('draggable'));
+-  }
+-  drupal_add_tabledrag('tmgmt-ui-translator-overview', 'order', 'sibling', 'tmgmt-ui-translator-weight');
+-  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('None.'), 'attributes' => array('id' => 'tmgmt-ui-translator-overview')));
+-}
+diff --git a/ui/views/tmgmt_ui_job_messages.view.inc b/ui/views/tmgmt_ui_job_messages.view.inc
+index 2853006..14e184f 100644
+--- a/ui/views/tmgmt_ui_job_messages.view.inc
++++ b/ui/views/tmgmt_ui_job_messages.view.inc
+@@ -1,7 +1,7 @@
+ <?php
+ 
+ $view = new view;
+-$view->name = 'translation_job_messages';
++$view->name = 'tmgmt_ui_job_messages';
+ $view->description = 'Lists the messages that are related to a job.';
+ $view->tag = 'Translation Management';
+ $view->base_table = 'tmgmt_job_message';
+@@ -90,7 +90,7 @@ $handler->display->display_options['fields']['state_before']['id'] = 'state_befo
+ $handler->display->display_options['fields']['state_before']['table'] = 'tmgmt_job_message';
+ $handler->display->display_options['fields']['state_before']['field'] = 'state_before';
+ $handler->display->display_options['fields']['state_before']['ui_name'] = 'State before';
+-$handler->display->display_options['fields']['state_before']['label'] = 'Before';
++$handler->display->display_options['fields']['state_before']['label'] = 'State before';
+ $handler->display->display_options['fields']['state_before']['alter']['alter_text'] = 0;
+ $handler->display->display_options['fields']['state_before']['alter']['make_link'] = 0;
+ $handler->display->display_options['fields']['state_before']['alter']['absolute'] = 0;
+@@ -114,7 +114,7 @@ $handler->display->display_options['fields']['state_after']['id'] = 'state_after
+ $handler->display->display_options['fields']['state_after']['table'] = 'tmgmt_job_message';
+ $handler->display->display_options['fields']['state_after']['field'] = 'state_after';
+ $handler->display->display_options['fields']['state_after']['ui_name'] = 'State after';
+-$handler->display->display_options['fields']['state_after']['label'] = 'After';
++$handler->display->display_options['fields']['state_after']['label'] = 'State after';
+ $handler->display->display_options['fields']['state_after']['alter']['alter_text'] = 0;
+ $handler->display->display_options['fields']['state_after']['alter']['make_link'] = 0;
+ $handler->display->display_options['fields']['state_after']['alter']['absolute'] = 0;
+@@ -173,6 +173,3 @@ $handler->display->display_options['arguments']['tjid']['summary']['format'] = '
+ $handler->display->display_options['arguments']['tjid']['summary_options']['items_per_page'] = '25';
+ $handler->display->display_options['arguments']['tjid']['break_phrase'] = 0;
+ $handler->display->display_options['arguments']['tjid']['not'] = 0;
+-
+-/* Display: Block */
+-$handler = $view->new_display('block', 'Block', 'block');
+diff --git a/ui/views/tmgmt_ui_jobs_overview.view.inc b/ui/views/tmgmt_ui_jobs_overview.view.inc
+deleted file mode 100644
+index 03cdbbc..0000000
+--- a/ui/views/tmgmt_ui_jobs_overview.view.inc
++++ /dev/null
+@@ -1,402 +0,0 @@
+-<?php
+-
+-$view = new view;
+-$view->name = 'tmgmt_job_management_job_overview';
+-$view->description = '';
+-$view->tag = 'default';
+-$view->base_table = 'tmgmt_job';
+-$view->human_name = 'Translation Managment Job Overview';
+-$view->core = 7;
+-$view->api_version = '3.0';
+-$view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+-
+-/* Display: Master */
+-$handler = $view->new_display('default', 'Master', 'default');
+-$handler->display->display_options['title'] = 'Job overview';
+-$handler->display->display_options['access']['type'] = 'perm';
+-$handler->display->display_options['access']['perm'] = 'administer tmgmt';
+-$handler->display->display_options['cache']['type'] = 'none';
+-$handler->display->display_options['query']['type'] = 'views_query';
+-$handler->display->display_options['query']['options']['query_comment'] = FALSE;
+-$handler->display->display_options['exposed_form']['type'] = 'basic';
+-$handler->display->display_options['pager']['type'] = 'full';
+-$handler->display->display_options['pager']['options']['items_per_page'] = '10';
+-$handler->display->display_options['style_plugin'] = 'table';
+-$handler->display->display_options['style_options']['columns'] = array(
+-  'views_bulk_operations' => 'views_bulk_operations',
+-  'changed' => 'changed',
+-  'created' => 'created',
+-  'source_language' => 'source_language',
+-  'state' => 'state',
+-  'target_language' => 'target_language',
+-  'translator' => 'translator',
+-);
+-$handler->display->display_options['style_options']['default'] = 'changed';
+-$handler->display->display_options['style_options']['info'] = array(
+-  'views_bulk_operations' => array(
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-  'changed' => array(
+-    'sortable' => 1,
+-    'default_sort_order' => 'desc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-  'created' => array(
+-    'sortable' => 1,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-  'source_language' => array(
+-    'sortable' => 1,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-  'state' => array(
+-    'sortable' => 1,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-  'target_language' => array(
+-    'sortable' => 1,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-  'translator' => array(
+-    'sortable' => 1,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-);
+-$handler->display->display_options['style_options']['override'] = 1;
+-$handler->display->display_options['style_options']['sticky'] = 0;
+-$handler->display->display_options['style_options']['empty_table'] = 0;
+-/* Relationship: Translation Management Job: Translator */
+-$handler->display->display_options['relationships']['translator']['id'] = 'translator';
+-$handler->display->display_options['relationships']['translator']['table'] = 'tmgmt_job';
+-$handler->display->display_options['relationships']['translator']['field'] = 'translator';
+-$handler->display->display_options['relationships']['translator']['required'] = 0;
+-/* Field: Translation Management Job: Bulk operations */
+-$handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
+-$handler->display->display_options['fields']['views_bulk_operations']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['views_bulk_operations']['field'] = 'views_bulk_operations';
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['views_bulk_operations']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['views_bulk_operations']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['entity_load_capacity'] = '10';
+-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['operations'] = array(
+-  'rules_tmgmt_job_accept_translation' => array(
+-    'selected' => 1,
+-    'use_queue' => 0,
+-    'skip_confirmation' => 1,
+-    'override_label' => 0,
+-    'label' => '',
+-  ),
+-  'rules_tmgmt_job_cancel_translation' => array(
+-    'selected' => 1,
+-    'use_queue' => 0,
+-    'skip_confirmation' => 1,
+-    'override_label' => 0,
+-    'label' => '',
+-  ),
+-  'views_bulk_operations_delete_item' => array(
+-    'selected' => 0,
+-    'use_queue' => 0,
+-    'skip_confirmation' => 0,
+-    'override_label' => 0,
+-    'label' => '',
+-  ),
+-  'system_message_action' => array(
+-    'selected' => 0,
+-    'use_queue' => 0,
+-    'skip_confirmation' => 0,
+-    'override_label' => 0,
+-    'label' => '',
+-  ),
+-  'views_bulk_operations_script_action' => array(
+-    'selected' => 0,
+-    'use_queue' => 0,
+-    'skip_confirmation' => 0,
+-    'override_label' => 0,
+-    'label' => '',
+-  ),
+-  'views_bulk_operations_argument_selector_action' => array(
+-    'selected' => 0,
+-    'skip_confirmation' => 0,
+-    'override_label' => 0,
+-    'label' => '',
+-    'settings' => array(
+-      'url' => '',
+-    ),
+-  ),
+-  'system_goto_action' => array(
+-    'selected' => 0,
+-    'use_queue' => 0,
+-    'skip_confirmation' => 0,
+-    'override_label' => 0,
+-    'label' => '',
+-  ),
+-  'system_send_email_action' => array(
+-    'selected' => 0,
+-    'use_queue' => 0,
+-    'skip_confirmation' => 0,
+-    'override_label' => 0,
+-    'label' => '',
+-  ),
+-);
+-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['enable_select_all_pages'] = 1;
+-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_type'] = '0';
+-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_result'] = 1;
+-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['merge_single_action'] = 0;
+-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['force_single'] = 0;
+-/* Field: Translation Management Job: Label */
+-$handler->display->display_options['fields']['label']['id'] = 'label';
+-$handler->display->display_options['fields']['label']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['label']['field'] = 'label';
+-$handler->display->display_options['fields']['label']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['label']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['label']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['label']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['label']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['label']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['label']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['label']['hide_alter_empty'] = 1;
+-/* Field: Translation Management Job: Changed */
+-$handler->display->display_options['fields']['changed']['id'] = 'changed';
+-$handler->display->display_options['fields']['changed']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['changed']['field'] = 'changed';
+-$handler->display->display_options['fields']['changed']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['changed']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['changed']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['changed']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['changed']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['changed']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['changed']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['changed']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['changed']['date_format'] = 'short';
+-/* Field: Translation Management Job: Created */
+-$handler->display->display_options['fields']['created']['id'] = 'created';
+-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['created']['field'] = 'created';
+-$handler->display->display_options['fields']['created']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['created']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['created']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['created']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['created']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['created']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['created']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['created']['date_format'] = 'short';
+-/* Field: Translation Management Job: Source_language */
+-$handler->display->display_options['fields']['source_language']['id'] = 'source_language';
+-$handler->display->display_options['fields']['source_language']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['source_language']['field'] = 'source_language';
+-$handler->display->display_options['fields']['source_language']['label'] = 'From';
+-$handler->display->display_options['fields']['source_language']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['source_language']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['source_language']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['source_language']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['source_language']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['source_language']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['source_language']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['source_language']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['source_language']['machine_name'] = 0;
+-/* Field: Translation Management Job: State */
+-$handler->display->display_options['fields']['state']['id'] = 'state';
+-$handler->display->display_options['fields']['state']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['state']['field'] = 'state';
+-$handler->display->display_options['fields']['state']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['state']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['state']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['state']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['state']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['state']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['state']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['state']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['state']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['state']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['state']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['state']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['state']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['state']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['state']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['state']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['state']['hide_alter_empty'] = 1;
+-/* Field: Translation Management Job: Target_language */
+-$handler->display->display_options['fields']['target_language']['id'] = 'target_language';
+-$handler->display->display_options['fields']['target_language']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['target_language']['field'] = 'target_language';
+-$handler->display->display_options['fields']['target_language']['label'] = 'To';
+-$handler->display->display_options['fields']['target_language']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['target_language']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['target_language']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['target_language']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['target_language']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['target_language']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['target_language']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['target_language']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['target_language']['machine_name'] = 0;
+-/* Field: Translation Management Translator: Label */
+-$handler->display->display_options['fields']['label_1']['id'] = 'label_1';
+-$handler->display->display_options['fields']['label_1']['table'] = 'tmgmt_translator';
+-$handler->display->display_options['fields']['label_1']['field'] = 'label';
+-$handler->display->display_options['fields']['label_1']['relationship'] = 'translator';
+-$handler->display->display_options['fields']['label_1']['label'] = 'Translator';
+-$handler->display->display_options['fields']['label_1']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['label_1']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['label_1']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['label_1']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['label_1']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['label_1']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['label_1']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['label_1']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['label_1']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['label_1']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['label_1']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['label_1']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['label_1']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['label_1']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['label_1']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['label_1']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['label_1']['hide_alter_empty'] = 1;
+-/* Field: Translation Management Job: operations */
+-$handler->display->display_options['fields']['operations']['id'] = 'operations';
+-$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['operations']['field'] = 'operations';
+-$handler->display->display_options['fields']['operations']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['operations']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['operations']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['operations']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['operations']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['operations']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['operations']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['operations']['hide_alter_empty'] = 1;
+-/* Filter criterion: Translation Management Job: State */
+-$handler->display->display_options['filters']['state']['id'] = 'state';
+-$handler->display->display_options['filters']['state']['table'] = 'tmgmt_job';
+-$handler->display->display_options['filters']['state']['field'] = 'state';
+-$handler->display->display_options['filters']['state']['exposed'] = TRUE;
+-$handler->display->display_options['filters']['state']['expose']['operator_id'] = 'state_op';
+-$handler->display->display_options['filters']['state']['expose']['label'] = 'State';
+-$handler->display->display_options['filters']['state']['expose']['operator'] = 'state_op';
+-$handler->display->display_options['filters']['state']['expose']['identifier'] = 'state';
+-$handler->display->display_options['filters']['state']['expose']['reduce'] = 0;
+-/* Filter criterion: Translation Management Job: Source_language */
+-$handler->display->display_options['filters']['source_language']['id'] = 'source_language';
+-$handler->display->display_options['filters']['source_language']['table'] = 'tmgmt_job';
+-$handler->display->display_options['filters']['source_language']['field'] = 'source_language';
+-$handler->display->display_options['filters']['source_language']['exposed'] = TRUE;
+-$handler->display->display_options['filters']['source_language']['expose']['operator_id'] = 'source_language_op';
+-$handler->display->display_options['filters']['source_language']['expose']['label'] = 'From';
+-$handler->display->display_options['filters']['source_language']['expose']['operator'] = 'source_language_op';
+-$handler->display->display_options['filters']['source_language']['expose']['identifier'] = 'source_language';
+-$handler->display->display_options['filters']['source_language']['expose']['reduce'] = 0;
+-/* Filter criterion: Translation Management Job: Target_language */
+-$handler->display->display_options['filters']['target_language']['id'] = 'target_language';
+-$handler->display->display_options['filters']['target_language']['table'] = 'tmgmt_job';
+-$handler->display->display_options['filters']['target_language']['field'] = 'target_language';
+-$handler->display->display_options['filters']['target_language']['exposed'] = TRUE;
+-$handler->display->display_options['filters']['target_language']['expose']['operator_id'] = 'target_language_op';
+-$handler->display->display_options['filters']['target_language']['expose']['label'] = 'To';
+-$handler->display->display_options['filters']['target_language']['expose']['operator'] = 'target_language_op';
+-$handler->display->display_options['filters']['target_language']['expose']['identifier'] = 'target_language';
+-$handler->display->display_options['filters']['target_language']['expose']['reduce'] = 0;
+-/* Filter criterion: Translation Management Job: Translator */
+-$handler->display->display_options['filters']['translator']['id'] = 'translator';
+-$handler->display->display_options['filters']['translator']['table'] = 'tmgmt_job';
+-$handler->display->display_options['filters']['translator']['field'] = 'translator';
+-$handler->display->display_options['filters']['translator']['exposed'] = TRUE;
+-$handler->display->display_options['filters']['translator']['expose']['operator_id'] = 'translator_op';
+-$handler->display->display_options['filters']['translator']['expose']['label'] = 'Translator';
+-$handler->display->display_options['filters']['translator']['expose']['operator'] = 'translator_op';
+-$handler->display->display_options['filters']['translator']['expose']['identifier'] = 'translator';
+-$handler->display->display_options['filters']['translator']['expose']['reduce'] = 0;
+-
+-/* Display: Page */
+-$handler = $view->new_display('page', 'Page', 'page');
+-$handler->display->display_options['path'] = 'admin/config/regional/tmgmt/jobs';
+-$handler->display->display_options['menu']['type'] = 'tab';
+-$handler->display->display_options['menu']['title'] = 'Job overview';
+-$handler->display->display_options['menu']['weight'] = '-1';
+-$handler->display->display_options['menu']['context'] = 0;
+diff --git a/ui/views/tmgmt_ui_new_jobs.view.inc b/ui/views/tmgmt_ui_new_jobs.view.inc
+deleted file mode 100644
+index 61ab9f8..0000000
+--- a/ui/views/tmgmt_ui_new_jobs.view.inc
++++ /dev/null
+@@ -1,220 +0,0 @@
+-<?php
+-
+-$view = new view;
+-$view->name = 'tmgmt_ui_new_jobs';
+-$view->description = 'Lists all translation jobs that have not yet been submitted to a translation service.';
+-$view->tag = 'Translation Management';
+-$view->base_table = 'tmgmt_job';
+-$view->human_name = 'Unsubmitted Translation Jobs';
+-$view->core = 7;
+-$view->api_version = '3.0';
+-$view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+-
+-/* Display: Master */
+-$handler = $view->new_display('default', 'Master', 'default');
+-$handler->display->display_options['title'] = 'Unsubmitted Translation Jobs';
+-$handler->display->display_options['access']['type'] = 'none';
+-$handler->display->display_options['cache']['type'] = 'none';
+-$handler->display->display_options['query']['type'] = 'views_query';
+-$handler->display->display_options['query']['options']['query_comment'] = FALSE;
+-$handler->display->display_options['exposed_form']['type'] = 'basic';
+-$handler->display->display_options['pager']['type'] = 'full';
+-$handler->display->display_options['pager']['options']['items_per_page'] = '10';
+-$handler->display->display_options['pager']['options']['offset'] = '0';
+-$handler->display->display_options['pager']['options']['id'] = '1';
+-$handler->display->display_options['pager']['options']['expose']['items_per_page_options_all'] = 0;
+-$handler->display->display_options['style_plugin'] = 'table';
+-$handler->display->display_options['style_options']['columns'] = array(
+-  'tjid' => 'tjid',
+-  'label' => 'label',
+-  'source_language' => 'source_language',
+-  'target_language' => 'target_language',
+-  'created' => 'created',
+-);
+-$handler->display->display_options['style_options']['default'] = '-1';
+-$handler->display->display_options['style_options']['info'] = array(
+-  'tjid' => array(
+-    'sortable' => 0,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-  'label' => array(
+-    'sortable' => 0,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-  'source_language' => array(
+-    'sortable' => 0,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-  'target_language' => array(
+-    'sortable' => 0,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-  'created' => array(
+-    'sortable' => 0,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-);
+-$handler->display->display_options['style_options']['override'] = 1;
+-$handler->display->display_options['style_options']['sticky'] = 0;
+-$handler->display->display_options['style_options']['empty_table'] = 0;
+-/* Field: Label */
+-$handler->display->display_options['fields']['label']['id'] = 'label';
+-$handler->display->display_options['fields']['label']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['label']['field'] = 'label';
+-$handler->display->display_options['fields']['label']['ui_name'] = 'Label';
+-$handler->display->display_options['fields']['label']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['label']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['label']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['label']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['label']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['label']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['label']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['label']['hide_alter_empty'] = 1;
+-/* Field: Language From */
+-$handler->display->display_options['fields']['source_language']['id'] = 'source_language';
+-$handler->display->display_options['fields']['source_language']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['source_language']['field'] = 'source_language';
+-$handler->display->display_options['fields']['source_language']['ui_name'] = 'Language From';
+-$handler->display->display_options['fields']['source_language']['label'] = 'From';
+-$handler->display->display_options['fields']['source_language']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['source_language']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['source_language']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['source_language']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['source_language']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['source_language']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['source_language']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['source_language']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['source_language']['machine_name'] = 0;
+-/* Field: Language To */
+-$handler->display->display_options['fields']['target_language']['id'] = 'target_language';
+-$handler->display->display_options['fields']['target_language']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['target_language']['field'] = 'target_language';
+-$handler->display->display_options['fields']['target_language']['ui_name'] = 'Language To';
+-$handler->display->display_options['fields']['target_language']['label'] = 'To';
+-$handler->display->display_options['fields']['target_language']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['target_language']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['target_language']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['target_language']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['target_language']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['target_language']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['target_language']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['target_language']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['target_language']['machine_name'] = 0;
+-/* Field: Created */
+-$handler->display->display_options['fields']['created']['id'] = 'created';
+-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['created']['field'] = 'created';
+-$handler->display->display_options['fields']['created']['ui_name'] = 'Created';
+-$handler->display->display_options['fields']['created']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['created']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['created']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['created']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['created']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['created']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['created']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['created']['date_format'] = 'short';
+-/* Field: Changed */
+-$handler->display->display_options['fields']['changed']['id'] = 'changed';
+-$handler->display->display_options['fields']['changed']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['changed']['field'] = 'changed';
+-$handler->display->display_options['fields']['changed']['ui_name'] = 'Changed';
+-$handler->display->display_options['fields']['changed']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['changed']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['changed']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['changed']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['changed']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['changed']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['changed']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['changed']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['changed']['date_format'] = 'short';
+-/* Field: operations */
+-$handler->display->display_options['fields']['operations']['id'] = 'operations';
+-$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['operations']['field'] = 'operations';
+-$handler->display->display_options['fields']['operations']['ui_name'] = 'Operations';
+-$handler->display->display_options['fields']['operations']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['operations']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['operations']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['operations']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['operations']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['operations']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['operations']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['operations']['hide_alter_empty'] = 1;
+-/* Filter criterion: State */
+-$handler->display->display_options['filters']['state']['id'] = 'state';
+-$handler->display->display_options['filters']['state']['table'] = 'tmgmt_job';
+-$handler->display->display_options['filters']['state']['field'] = 'state';
+-$handler->display->display_options['filters']['state']['ui_name'] = 'State';
+-$handler->display->display_options['filters']['state']['value'] = array(
+-  0 => '0',
+-);
+diff --git a/ui/views/tmgmt_ui_recently_published.view.inc b/ui/views/tmgmt_ui_recently_published.view.inc
+deleted file mode 100644
+index 278bb94..0000000
+--- a/ui/views/tmgmt_ui_recently_published.view.inc
++++ /dev/null
+@@ -1,194 +0,0 @@
+-<?php
+-
+-$view = new view;
+-$view->name = 'tmgmt_ui_recently_published';
+-$view->description = 'Lists translation jobs that have been published recently.';
+-$view->tag = 'Translation Management';
+-$view->base_table = 'tmgmt_job';
+-$view->human_name = 'Recently Published Translation Jobs';
+-$view->core = 7;
+-$view->api_version = '3.0';
+-$view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+-
+-/* Display: Master */
+-$handler = $view->new_display('default', 'Master', 'default');
+-$handler->display->display_options['title'] = 'Recently Published Translation Jobs';
+-$handler->display->display_options['access']['type'] = 'none';
+-$handler->display->display_options['cache']['type'] = 'none';
+-$handler->display->display_options['query']['type'] = 'views_query';
+-$handler->display->display_options['query']['options']['query_comment'] = FALSE;
+-$handler->display->display_options['exposed_form']['type'] = 'basic';
+-$handler->display->display_options['pager']['type'] = 'full';
+-$handler->display->display_options['pager']['options']['items_per_page'] = '10';
+-$handler->display->display_options['pager']['options']['offset'] = '0';
+-$handler->display->display_options['pager']['options']['id'] = '3';
+-$handler->display->display_options['pager']['options']['expose']['items_per_page_options_all'] = 0;
+-$handler->display->display_options['style_plugin'] = 'table';
+-$handler->display->display_options['style_options']['columns'] = array(
+-  'tjid' => 'tjid',
+-);
+-$handler->display->display_options['style_options']['default'] = '-1';
+-$handler->display->display_options['style_options']['info'] = array(
+-  'tjid' => array(
+-    'sortable' => 0,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-);
+-$handler->display->display_options['style_options']['override'] = 1;
+-$handler->display->display_options['style_options']['sticky'] = 0;
+-$handler->display->display_options['style_options']['empty_table'] = 0;
+-/* Field: Label */
+-$handler->display->display_options['fields']['label']['id'] = 'label';
+-$handler->display->display_options['fields']['label']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['label']['field'] = 'label';
+-$handler->display->display_options['fields']['label']['ui_name'] = 'Label';
+-$handler->display->display_options['fields']['label']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['label']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['label']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['label']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['label']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['label']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['label']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['label']['hide_alter_empty'] = 1;
+-/* Field: Language From */
+-$handler->display->display_options['fields']['source_language']['id'] = 'source_language';
+-$handler->display->display_options['fields']['source_language']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['source_language']['field'] = 'source_language';
+-$handler->display->display_options['fields']['source_language']['ui_name'] = 'Language From';
+-$handler->display->display_options['fields']['source_language']['label'] = 'From';
+-$handler->display->display_options['fields']['source_language']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['source_language']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['source_language']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['source_language']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['source_language']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['source_language']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['source_language']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['source_language']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['source_language']['machine_name'] = 0;
+-/* Field: Language To */
+-$handler->display->display_options['fields']['target_language']['id'] = 'target_language';
+-$handler->display->display_options['fields']['target_language']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['target_language']['field'] = 'target_language';
+-$handler->display->display_options['fields']['target_language']['ui_name'] = 'Language To';
+-$handler->display->display_options['fields']['target_language']['label'] = 'To';
+-$handler->display->display_options['fields']['target_language']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['target_language']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['target_language']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['target_language']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['target_language']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['target_language']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['target_language']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['target_language']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['target_language']['machine_name'] = 0;
+-/* Field: Changed */
+-$handler->display->display_options['fields']['changed']['id'] = 'changed';
+-$handler->display->display_options['fields']['changed']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['changed']['field'] = 'changed';
+-$handler->display->display_options['fields']['changed']['ui_name'] = 'Changed';
+-$handler->display->display_options['fields']['changed']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['changed']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['changed']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['changed']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['changed']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['changed']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['changed']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['changed']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['changed']['date_format'] = 'medium';
+-/* Field: Created */
+-$handler->display->display_options['fields']['created']['id'] = 'created';
+-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['created']['field'] = 'created';
+-$handler->display->display_options['fields']['created']['ui_name'] = 'Created';
+-$handler->display->display_options['fields']['created']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['created']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['created']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['created']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['created']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['created']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['created']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['created']['date_format'] = 'medium';
+-/* Field: operations */
+-$handler->display->display_options['fields']['operations']['id'] = 'operations';
+-$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['operations']['field'] = 'operations';
+-$handler->display->display_options['fields']['operations']['ui_name'] = 'Operations';
+-$handler->display->display_options['fields']['operations']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['operations']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['operations']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['operations']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['operations']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['operations']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['operations']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['operations']['hide_alter_empty'] = 1;
+-/* Sort criterion: Changed */
+-$handler->display->display_options['sorts']['changed']['id'] = 'changed';
+-$handler->display->display_options['sorts']['changed']['table'] = 'tmgmt_job';
+-$handler->display->display_options['sorts']['changed']['field'] = 'changed';
+-$handler->display->display_options['sorts']['changed']['ui_name'] = 'Changed';
+-$handler->display->display_options['sorts']['changed']['order'] = 'DESC';
+-/* Filter criterion: State */
+-$handler->display->display_options['filters']['state']['id'] = 'state';
+-$handler->display->display_options['filters']['state']['table'] = 'tmgmt_job';
+-$handler->display->display_options['filters']['state']['field'] = 'state';
+-$handler->display->display_options['filters']['state']['ui_name'] = 'State';
+-$handler->display->display_options['filters']['state']['value'] = array(
+-  4 => '4',
+-);
+diff --git a/ui/views/tmgmt_ui_reviews_pending.view.inc b/ui/views/tmgmt_ui_reviews_pending.view.inc
+deleted file mode 100644
+index b5f7c44..0000000
+--- a/ui/views/tmgmt_ui_reviews_pending.view.inc
++++ /dev/null
+@@ -1,184 +0,0 @@
+-<?php
+-
+-$view = new view;
+-$view->name = 'tmgmt_ui_reviews_pending';
+-$view->description = 'Lists all translation jobs that need to be reviewed.';
+-$view->tag = 'Translation Management';
+-$view->base_table = 'tmgmt_job';
+-$view->human_name = 'Pending Translation Job Reviews';
+-$view->core = 7;
+-$view->api_version = '3.0';
+-$view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+-
+-/* Display: Master */
+-$handler = $view->new_display('default', 'Master', 'default');
+-$handler->display->display_options['title'] = 'Reviews Pending';
+-$handler->display->display_options['access']['type'] = 'none';
+-$handler->display->display_options['cache']['type'] = 'none';
+-$handler->display->display_options['query']['type'] = 'views_query';
+-$handler->display->display_options['query']['options']['query_comment'] = FALSE;
+-$handler->display->display_options['exposed_form']['type'] = 'basic';
+-$handler->display->display_options['pager']['type'] = 'full';
+-$handler->display->display_options['style_plugin'] = 'table';
+-$handler->display->display_options['style_options']['columns'] = array(
+-  'tjid' => 'tjid',
+-);
+-$handler->display->display_options['style_options']['default'] = '-1';
+-$handler->display->display_options['style_options']['info'] = array(
+-  'tjid' => array(
+-    'sortable' => 0,
+-    'default_sort_order' => 'asc',
+-    'align' => '',
+-    'separator' => '',
+-    'empty_column' => 0,
+-  ),
+-);
+-$handler->display->display_options['style_options']['override'] = 1;
+-$handler->display->display_options['style_options']['sticky'] = 0;
+-$handler->display->display_options['style_options']['empty_table'] = 0;
+-/* Field: Label */
+-$handler->display->display_options['fields']['label']['id'] = 'label';
+-$handler->display->display_options['fields']['label']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['label']['field'] = 'label';
+-$handler->display->display_options['fields']['label']['ui_name'] = 'Label';
+-$handler->display->display_options['fields']['label']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['label']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['label']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['label']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['label']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['label']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['label']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['label']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['label']['hide_alter_empty'] = 1;
+-/* Field: Language From */
+-$handler->display->display_options['fields']['source_language']['id'] = 'source_language';
+-$handler->display->display_options['fields']['source_language']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['source_language']['field'] = 'source_language';
+-$handler->display->display_options['fields']['source_language']['ui_name'] = 'Language From';
+-$handler->display->display_options['fields']['source_language']['label'] = 'From';
+-$handler->display->display_options['fields']['source_language']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['source_language']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['source_language']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['source_language']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['source_language']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['source_language']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['source_language']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['source_language']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['source_language']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['source_language']['machine_name'] = 0;
+-/* Field: Language To */
+-$handler->display->display_options['fields']['target_language']['id'] = 'target_language';
+-$handler->display->display_options['fields']['target_language']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['target_language']['field'] = 'target_language';
+-$handler->display->display_options['fields']['target_language']['ui_name'] = 'Language To';
+-$handler->display->display_options['fields']['target_language']['label'] = 'To';
+-$handler->display->display_options['fields']['target_language']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['target_language']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['target_language']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['target_language']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['target_language']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['target_language']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['target_language']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['target_language']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['target_language']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['target_language']['machine_name'] = 0;
+-/* Field: Created */
+-$handler->display->display_options['fields']['created']['id'] = 'created';
+-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['created']['field'] = 'created';
+-$handler->display->display_options['fields']['created']['ui_name'] = 'Created';
+-$handler->display->display_options['fields']['created']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['created']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['created']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['created']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['created']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['created']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['created']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['created']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['created']['date_format'] = 'short';
+-/* Field: Changed */
+-$handler->display->display_options['fields']['changed']['id'] = 'changed';
+-$handler->display->display_options['fields']['changed']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['changed']['field'] = 'changed';
+-$handler->display->display_options['fields']['changed']['ui_name'] = 'Changed';
+-$handler->display->display_options['fields']['changed']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['changed']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['changed']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['changed']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['changed']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['changed']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['changed']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['changed']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['changed']['hide_alter_empty'] = 1;
+-$handler->display->display_options['fields']['changed']['date_format'] = 'short';
+-/* Field: operations */
+-$handler->display->display_options['fields']['operations']['id'] = 'operations';
+-$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_job';
+-$handler->display->display_options['fields']['operations']['field'] = 'operations';
+-$handler->display->display_options['fields']['operations']['ui_name'] = 'Operations';
+-$handler->display->display_options['fields']['operations']['alter']['alter_text'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['make_link'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['absolute'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['external'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['replace_spaces'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['trim_whitespace'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['nl2br'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['word_boundary'] = 1;
+-$handler->display->display_options['fields']['operations']['alter']['ellipsis'] = 1;
+-$handler->display->display_options['fields']['operations']['alter']['strip_tags'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['trim'] = 0;
+-$handler->display->display_options['fields']['operations']['alter']['html'] = 0;
+-$handler->display->display_options['fields']['operations']['element_label_colon'] = 1;
+-$handler->display->display_options['fields']['operations']['element_default_classes'] = 1;
+-$handler->display->display_options['fields']['operations']['hide_empty'] = 0;
+-$handler->display->display_options['fields']['operations']['empty_zero'] = 0;
+-$handler->display->display_options['fields']['operations']['hide_alter_empty'] = 1;
+-/* Filter criterion: State */
+-$handler->display->display_options['filters']['state']['id'] = 'state';
+-$handler->display->display_options['filters']['state']['table'] = 'tmgmt_job';
+-$handler->display->display_options['filters']['state']['field'] = 'state';
+-$handler->display->display_options['filters']['state']['ui_name'] = 'State';
+-$handler->display->display_options['filters']['state']['value'] = array(
+-  3 => '3',
+-);
+diff --git a/views/tmgmt_handler_field_tmgmt_job_operations.inc b/views/tmgmt_handler_field_tmgmt_job_operations.inc
+index 740ac81..e9be6d0 100644
+--- a/views/tmgmt_handler_field_tmgmt_job_operations.inc
++++ b/views/tmgmt_handler_field_tmgmt_job_operations.inc
+@@ -17,31 +17,24 @@ class tmgmt_handler_field_tmgmt_job_operations extends views_handler_field_entit
+       'href' => $uri['path'],
+       'title' => t('view'),
+     );
+-    if ($job->isUnprocessed() || $job->isRejected() || $job->isCancelled()) {
++    if ($job->isSubmitable()) {
+       $element['#links']['checkout'] = array(
+-        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/manage",
++        'href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/manage',
++        'query' => array('destination' => current_path()),
+         'title' => t('checkout'),
+       );
+     }
+-    if ($job->isNeedsReview()) {
+-      $element['#links']['review'] = array(
+-        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/review",
+-        'title' => t('review'),
+-      );
+-      $element['#links']['accept'] = array(
+-        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/accept",
+-        'title' => t('accept'),
+-      );
+-    }
+-    if ($job->isActive() || $job->isNeedsReview()) {
++    if ($job->isCancelable()) {
+       $element['#links']['cancel'] = array(
+-        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/cancel",
++        'href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/cancel',
++        'query' => array('destination' => current_path()),
+         'title' => t('cancel'),
+       );
+     }
+-    else {
++    if ($job->isDeletable()) {
+       $element['#links']['delete'] = array(
+-        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/delete",
++        'href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/delete',
++        'query' => array('destination' => current_path()),
+         'title' => t('delete'),
+       );
+     }

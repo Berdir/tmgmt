@@ -19,6 +19,19 @@ function tmgmt_ui_job_view(TMGMTJob $job) {
 }
 
 /**
+ * Simple page callback for viewing a job item.
+ *
+ * @param TMGMTJobItem $job
+ *   The viewed job item.
+ *
+ * @return array
+ *   A renderable array.
+ */
+function tmgmt_ui_job_item_view(TMGMTJobItem $job_item) {
+  return entity_view($job_item->entityType(), array($job_item), 'full', NULL, TRUE);
+}
+
+/**
  * Entity API form for the translator entity.
  */
 function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator, $op = 'edit') {
@@ -169,8 +182,6 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $translators = tmgmt_translator_labels_flagged($job->source_language, $job->target_language);
   $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
-  // Mark form elements as disabled under certain circumstances.
-  $disabled = !$job->isUnprocessed() && !$job->isCancelled() && !$job->isRejected();
   // Get the job metadata wrapper so we can display the current status nicely.
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
   // Show the items that are attached to this job if there are not more than 20.
@@ -196,14 +207,13 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#title' => t('Current status'),
     '#markup' => $wrapper->state->label(),
   );
-  // Add a list of job items.
-  $form['items'] = array(
-    '#type' => 'fieldset',
-    '#title' => format_plural(count($items), '@count attached item', '@count attached items'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['items'] += tmgmt_ui_job_list_items($items);
+  if (module_exists('views') && $view = views_get_view('tmgmt_ui_job_items')) {
+    $form['items'] = array(
+      '#type' => 'item',
+      '#title' => $view->get_title(),
+      '#markup' => $view->preview('block', array($job->tjid)),
+    );
+  }
   // Show the source and target language in a fieldset.
   $form['languages'] = array(
     '#type' => 'fieldset',
@@ -219,7 +229,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#required' => TRUE,
     '#prefix' => '<div class="tmgmt-ui-source-language">',
     '#suffix' => '</div>',
-    '#disabled' => !empty($preselected['source_language']) || $disabled,
+    '#disabled' => !empty($preselected['source_language']) || !$job->isUnprocessed(),
     '#ajax' => array(
       'callback' => 'tmgmt_ui_ajax_callback_get_supported_translators',
       'wrapper' => 'tmgmt-translator-wrapper',
@@ -233,7 +243,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#required' => TRUE,
     '#prefix' => '<div class="tmgmt-ui-source-language">',
     '#suffix' => '</div>',
-    '#disabled' => !empty($preselected['target_language']) || $disabled,
+    '#disabled' => !empty($preselected['target_language']) || !$job->isUnprocessed(),
     '#ajax' => array(
       'callback' => 'tmgmt_ui_ajax_callback_supported_translators',
       'wrapper' => 'tmgmt-translator-wrapper',
@@ -250,14 +260,14 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#options' => $translators,
     '#default_value' => $job->translator,
     '#required' => TRUE,
-    '#disabled' => $disabled,
+    '#disabled' => !$job->isUnprocessed(),
     '#ajax' => array(
       'callback' => 'tmgmt_ui_ajax_callback_translator_settings',
       'wrapper' => 'tmgmt-translator-settings',
     ),
   );
   // Display the checkout settings form if the job can be checked out.
-  if (!$job->isActive() && !$job->isAccepted() && !$job->isNeedsReview()) {
+  if ($job->isUnprocessed()) {
     $form['translator_wrapper']['settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Checkout settings'),
@@ -284,7 +294,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $form['actions']['checkout'] = array(
     '#type' => 'submit',
     '#value' => t('Submit to translator'),
-    '#access' => !$job->isActive() && !$job->isAccepted() && !$job->isNeedsReview(),
+    '#access' => $job->isUnprocessed(),
   );
   if ($old) {
     $form['actions']['delete'] = array(

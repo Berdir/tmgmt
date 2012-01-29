@@ -1,11 +1,6 @@
 <?php
 
 /**
- * @file
- * Views field handler for the tmgmt_job_messages.message field.
- */
-
-/**
  * Field handler which allows to render the job message with replaced variables.
  *
  * @ingroup views_field_handlers

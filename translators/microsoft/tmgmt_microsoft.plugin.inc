@@ -42,6 +42,13 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       return FALSE;
     }
     foreach (tmgmt_flatten_data($job->getSourceData()) as $value) {
+      // We don't need to check texts that are not going to be translated
+      // anyways.
+      if (isset($value['#translate']) && $value['#translate'] === FALSE) {
+        continue;
+      }
+      // If one of the texts in this job exceeds the max character count the job
+      // can't be translated.
       if (drupal_strlen($value['#text']) > $this->maxCharacters) {
         return FALSE;
       }
@@ -53,7 +60,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   public function requestTranslation(TMGMTJob $job) {
-    // Pull the source data array from through the job and flatten it.
+    // Pull the source data array through the job and flatten it.
     $data = tmgmt_flatten_data($job->getSourceData());
     foreach ($data as $key => $value) {
       if (isset($value['#translate']) && $value['#translate'] === FALSE) {
@@ -65,7 +72,11 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
         'to' => $job->target_language,
         'contentType' => 'text/plain',
         'text' => $value['#text'],
-      ), array('headers' => array('Content-Type' => 'text/plain')));
+      ), array(
+        'headers' => array(
+          'Content-Type' => 'text/plain',
+        ),
+      ));
       // Check the result code for possible errors.
       switch ($result->code) {
         case 200:
@@ -78,17 +89,19 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
           $data[$key]['#text'] = $items->item(0)->nodeValue;
           break;
         case 400:
-          $job->rejected('Rejected by Microsoft Translator: !error', array('!error' => $result->data));
-          return;
+          $job->addMessage('Rejected by Microsoft Translator: !error', array('!error' => $result->data), 'error');
+          return FALSE;
         default:
           $job->addMessage('Unknown error from Microsoft Translator: !error', array('!error' => $result->data), 'error');
-          return;
+          return FALSE;
       }
     }
+    // The translation job has been successfully submitted.
+    $job->submitted('The translation job has been submitted successfully.');
     // Save the translated data through the job.
     $job->addTranslatedData(tmgmt_unflatten_data($data));
-    // Mark this string as translatable.
-    $job->needsReview('Microsoft Translator translation completed.');
+    // Translation finished successfully.
+    return TRUE;
   }
 
   /**

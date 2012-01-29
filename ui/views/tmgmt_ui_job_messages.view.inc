@@ -1,7 +1,7 @@
 <?php
 
 $view = new view;
-$view->name = 'translation_job_messages';
+$view->name = 'tmgmt_ui_job_messages';
 $view->description = 'Lists the messages that are related to a job.';
 $view->tag = 'Translation Management';
 $view->base_table = 'tmgmt_job_message';
@@ -90,7 +90,7 @@ $handler->display->display_options['fields']['state_before']['id'] = 'state_befo
 $handler->display->display_options['fields']['state_before']['table'] = 'tmgmt_job_message';
 $handler->display->display_options['fields']['state_before']['field'] = 'state_before';
 $handler->display->display_options['fields']['state_before']['ui_name'] = 'State before';
-$handler->display->display_options['fields']['state_before']['label'] = 'Before';
+$handler->display->display_options['fields']['state_before']['label'] = 'State before';
 $handler->display->display_options['fields']['state_before']['alter']['alter_text'] = 0;
 $handler->display->display_options['fields']['state_before']['alter']['make_link'] = 0;
 $handler->display->display_options['fields']['state_before']['alter']['absolute'] = 0;
@@ -114,7 +114,7 @@ $handler->display->display_options['fields']['state_after']['id'] = 'state_after
 $handler->display->display_options['fields']['state_after']['table'] = 'tmgmt_job_message';
 $handler->display->display_options['fields']['state_after']['field'] = 'state_after';
 $handler->display->display_options['fields']['state_after']['ui_name'] = 'State after';
-$handler->display->display_options['fields']['state_after']['label'] = 'After';
+$handler->display->display_options['fields']['state_after']['label'] = 'State after';
 $handler->display->display_options['fields']['state_after']['alter']['alter_text'] = 0;
 $handler->display->display_options['fields']['state_after']['alter']['make_link'] = 0;
 $handler->display->display_options['fields']['state_after']['alter']['absolute'] = 0;
@@ -173,6 +173,3 @@ $handler->display->display_options['arguments']['tjid']['summary']['format'] = '
 $handler->display->display_options['arguments']['tjid']['summary_options']['items_per_page'] = '25';
 $handler->display->display_options['arguments']['tjid']['break_phrase'] = 0;
 $handler->display->display_options['arguments']['tjid']['not'] = 0;
-
-/* Display: Block */
-$handler = $view->new_display('block', 'Block', 'block');

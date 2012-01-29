@@ -17,31 +17,24 @@ class tmgmt_handler_field_tmgmt_job_operations extends views_handler_field_entit
       'href' => $uri['path'],
       'title' => t('view'),
     );
-    if ($job->isUnprocessed() || $job->isRejected() || $job->isCancelled()) {
+    if ($job->isSubmitable()) {
       $element['#links']['checkout'] = array(
-        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/manage",
+        'href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/manage',
+        'query' => array('destination' => current_path()),
         'title' => t('checkout'),
       );
     }
-    if ($job->isNeedsReview()) {
-      $element['#links']['review'] = array(
-        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/review",
-        'title' => t('review'),
-      );
-      $element['#links']['accept'] = array(
-        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/accept",
-        'title' => t('accept'),
-      );
-    }
-    if ($job->isActive() || $job->isNeedsReview()) {
+    if ($job->isCancelable()) {
       $element['#links']['cancel'] = array(
-        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/cancel",
+        'href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/cancel',
+        'query' => array('destination' => current_path()),
         'title' => t('cancel'),
       );
     }
-    else {
+    if ($job->isDeletable()) {
       $element['#links']['delete'] = array(
-        'href' => "admin/config/regional/tmgmt/jobs/$job->tjid/delete",
+        'href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/delete',
+        'query' => array('destination' => current_path()),
         'title' => t('delete'),
       );
     }

@@ -1,7 +1,7 @@
 <?php
 
 $view = new view;
-$view->name = 'tmgmt_job_management_job_overview';
+$view->name = 'tmgmt_ui_job_overview';
 $view->description = '';
 $view->tag = 'default';
 $view->base_table = 'tmgmt_job';
