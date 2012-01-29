@@ -8,6 +8,9 @@
  * Translator @endlink. Note that we are using HTTP API.
  */
 
+/**
+ * Microsoft translator plugin.
+ */
 class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginController {
 
   /**
@@ -116,6 +119,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
     }
     // Check if the source language is available.
     if (array_key_exists($source_language, $languages)) {
+      unset($languages[$source_language]);
       return $languages;
     }
     return array();
@@ -158,8 +162,10 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    *   The response object returned by drupal_http_request().
    */
   protected function doRequest(TMGMTTranslator $translator, $path, array $query = array(), array $options = array()) {
-    // Allow to override the url, e.g. for the tests.
-    $url = $this->translatorUrl . '/' . $path;
+    // fubhy, can you please stop removing this setting? This is used for the
+    // tests. Thanks.
+    $custom_url = $translator->getSetting('url');
+    $url = ($custom_url ? $custom_url : $this->translatorUrl) . '/' . $path;
     // Add the appId to the query arguments and build the query string.
     $query = array('appId' => $translator->getSetting('api')) + $query;
     $url = url($url, array('query' => $query));
