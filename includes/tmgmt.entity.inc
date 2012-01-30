@@ -189,7 +189,7 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
-   * @todo
+   * @todo Remove this once http://drupal.org/node/1420364 is done.
    */
   public function getNotAvailableReason() {
     if ($controller = $this->getPluginController()) {
@@ -441,6 +441,9 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
 
   /**
    * Sets the state of the job item to 'needs review'.
+   *
+   * @return TMGMTJobItem
+   *   The job item entity.
    */
   public function needsReview() {
     $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW);
@@ -449,6 +452,9 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
 
   /**
    * Sets the state of the job item to 'accepted'.
+   *
+   * @return TMGMTJobItem
+   *   The job item entity.
    */
   public function accepted() {
     $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED);
@@ -457,6 +463,9 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
 
   /**
    * Sets the state of the job item to 'active'.
+   *
+   * @return TMGMTJobItem
+   *   The job item entity.
    */
   public function active() {
     $this->setState(TMGMT_JOB_ITEM_STATE_ACTIVE);
@@ -465,6 +474,9 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
 
   /**
    * Sets the state of the job item to 'finished'.
+   *
+   * @return TMGMTJobItem
+   *   The job item entity.
    */
   public function finished() {
     $this->setState(TMGMT_JOB_ITEM_STATE_FINISHED);
@@ -1195,10 +1207,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function isCancelable() {
     // Only non-submitted translation jobs can be cancelled.
-    if ($this->isActive()) {
-      return TRUE;
-    }
-    return FALSE;
+    return $this->isActive();
   }
 
   /**
@@ -1229,6 +1238,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
    *
+   * @return TMGMTJob
+   *   The job entity.
+   *
    * @see TMGMTJob::addMessage()
    */
   public function unprocessed($message = NULL, $variables = array()) {
@@ -1244,6 +1256,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
    *
+   * @return TMGMTJob
+   *   The job entity.
+   *
    * @see TMGMTJob::addMessage()
    */
   public function submitted($message = NULL, $variables = array()) {
@@ -1258,6 +1273,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   The log message to be saved along with the state change.
    * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
+   *
+   * @return TMGMTJob
+   *   The job entity.
    *
    * @see TMGMTJob::addMessage()
    */
@@ -1276,6 +1294,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * Use TMGMTJob::cancelTranslation() to cancel a translation.
    *
+   * @return TMGMTJob
+   *   The job entity.
+   *
    * @see TMGMTJob::addMessage()
    */
   public function cancelled($message = NULL, $variables = array()) {
@@ -1291,6 +1312,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
    *
+   * @return TMGMTJob
+   *   The job entity.
+   *
    * @see TMGMTJob::addMessage()
    */
   public function rejected($message = NULL, $variables = array()) {
@@ -1305,13 +1329,13 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   The updated job status.
    */
   public function requestTranslation() {
-    if ($this->isTranslatable() && $controller = $this->getTranslatorController()) {
-      // We don't know if the translator plugin already processed our
-      // translation request after this point. That means that the plugin has to
-      // set the 'submitted', 'needs review', etc. states on its own.
-      return $controller->requestTranslation($this);
+    if (!$this->isTranslatable() || !$controller = $this->getTranslatorController()) {
+      return FALSE;
     }
-    return FALSE;
+    // We don't know if the translator plugin already processed our
+    // translation request after this point. That means that the plugin has to
+    // set the 'submitted', 'needs review', etc. states on its own.
+    $controller->requestTranslation($this);
   }
 
   /**
@@ -1323,16 +1347,15 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   TRUE if the translation job was cancelled, FALSE otherwise.
    */
   public function cancelTranslation() {
-    // If the job is not currently pending by the translator (submitted), we can
-    // cancel without any checks. Otherwise, ask the translator plugin if the
-    // job can be cancelled.
+    // Since inactive (unsubmitted, rejected, etc.) jobs can be deleted directly
+    // we don't need to be able to cancel them.
     if ($this->isCancelable() && $controller = $this->getTranslatorController()) {
-      if ($controller->cancelTranslation($this)) {
-        $this->cancelled('The translation job has been cancelled.')->save();
-        return TRUE;
-      }
+      return FALSE;
     }
-    return FALSE;
+    // We don't know if the translator plugin was able to cancel the translation
+    // job after this point. That means that the plugin has to set the
+    // 'cancelled' state on its own.
+    $controller->cancelTranslation($this);
   }
 
   /**
@@ -1388,6 +1411,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     if (!empty($key)) {
       $item_id = array_shift($key);
       if (!isset($items[$item_id])) {
+        // @todo Do we really want to throw an exception here? I think it is
+        // valid that a user chooses to delete a single job item after
+        // submitting the job. Therefore the item would not exist anymore.
         throw new Exception(t('Item id @id does not exist', array('@id' => $item_id)));
       }
       $items[$item_id]->addTranslatedData($data, $key);

@@ -155,6 +155,8 @@ interface TMGMTTranslatorPluginControllerInterface {
    *
    * Might be called when isAvailable() returns FALSE to get a reason that
    * can be displayed to the user.
+   *
+   * @todo Remove this once http://drupal.org/node/1420364 is done.
    */
   public function getNotAvailableReason(TMGMTTranslator $translator);
 

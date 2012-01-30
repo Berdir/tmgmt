@@ -13,7 +13,7 @@ class TMGMTJobItemViewsController extends EntityDefaultViewsController {
     $data = parent::views_data();
     $data['tmgmt_job_item']['label'] = array(
       'title' => t('Label'),
-      'help' => t('Displays a label of the job item'),
+      'help' => t('Displays a label of the job item.'),
       'field' => array(
         'handler' => 'tmgmt_handler_field_tmgmt_entity_label',
       ),
