@@ -1,18 +1,18 @@
 <?php
 
 $view = new view;
-$view->name = 'tmgmt_ui_job_unprocessed';
+$view->name = 'tmgmt_ui_new_jobs';
 $view->description = 'Lists all translation jobs that have not yet been submitted to a translation service.';
 $view->tag = 'Translation Management';
 $view->base_table = 'tmgmt_job';
-$view->human_name = 'Unprocessed Translation Jobs';
+$view->human_name = 'Unsubmitted Translation Jobs';
 $view->core = 7;
 $view->api_version = '3.0';
 $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
 /* Display: Master */
 $handler = $view->new_display('default', 'Master', 'default');
-$handler->display->display_options['title'] = 'Unprocessed Translation Jobs';
+$handler->display->display_options['title'] = 'Unsubmitted Translation Jobs';
 $handler->display->display_options['access']['type'] = 'none';
 $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['query']['type'] = 'views_query';
