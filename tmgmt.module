@@ -20,8 +20,6 @@
 define('TMGMT_JOB_STATE_UNPROCESSED', 0);
 
 /**
- * once we have migrated to using job item states.
- *
  * A translation job that has been submitted to the translator.
  *
  * Translator plugins are responsible for setting this state in their
@@ -345,23 +343,19 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
 }
 
 /**
- * Access callback for checking out a job.
- *
- * @param $job
- *   A translation job.
- * @param $account
- *   (Optional) The user to check access permissions for. Defaults to the
- *   current user.
- *
- * @return bool
- *   TRUE if the job can be checked out and the user has access to do this,
- *   FALSE otherwise.
+ * Access callback for the job item entity.
  */
-function tmgmt_job_checkout_access(TMGMTJob $job, $account = NULL) {
-  if ($job->isUnprocessed()) {
-    return tmgmt_job_access('checkout', $job, $account);
-  }
-  return FALSE;
+function tmgmt_job_item_access($op, $item = NULL, $account = NULL) {
+  // Return TRUE in all cases for now :)
+  return TRUE;
+}
+
+/**
+ * Access callback for the job message entity.
+ */
+function tmgmt_job_message_access($op, $message = NULL, $account = NULL) {
+  // Return TRUE in all cases for now :)
+  return TRUE;
 }
 
 /**
@@ -636,7 +630,7 @@ function tmgmt_translator_busy($translator) {
 }
 
 /**
- * Creates a translator.
+ * Creates a translator entity.
  *
  * @param $plugin
  *   The plugin of the translator.

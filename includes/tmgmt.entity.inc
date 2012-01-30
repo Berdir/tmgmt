@@ -322,9 +322,9 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    */
   public function defaultLabel() {
     if ($controller = $this->getSourceController()) {
-      return $controller->getLabel($this);
+      return t('Translation for @label', array('@label' => $controller->getLabel($this)));
     }
-    return FALSE;
+    return parent::defaultLabel();
   }
 
   /**
@@ -357,6 +357,19 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
       );
     }
     return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
+  }
+
+  /**
+   * Retrieves the label of the source object via the source controller.
+   *
+   * @return
+   *   The label of the source object.
+   */
+  public function getSourceLabel() {
+    if ($controller = $this->getSourceController()) {
+      return $controller->getLabel($this);
+    }
+    return FALSE;
   }
 
   /**
@@ -573,7 +586,8 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
     $unfinished = array_diff_key(tmgmt_flatten_data($this->getSourceData()), tmgmt_flatten_data($this->translation));
     if (empty($unfinished)) {
       // There are no unfinished elements left.
-      $this->needsReview('The translation job item for the source ');
+      $uri = $this->getSourceUri();
+      $this->needsReview('The translation for !source is finished and needs to be reviewed.', array('!source' => l($this->getSourceLabel(), $uri['path'])));
     }
     if ($this->save()) {
       return TRUE;
@@ -1181,10 +1195,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function isCancelable() {
     // Only non-submitted translation jobs can be cancelled.
-    if ($this->isActive() && $translator = $this->getTranslator()) {
-      if ($translator->isCancelable($this)) {
-        return TRUE;
-      }
+    if ($this->isActive()) {
+      return TRUE;
     }
     return FALSE;
   }
@@ -1221,6 +1233,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function unprocessed($message = NULL, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_UNPROCESSED, $message, $variables);
+    return $this;
   }
 
   /**
@@ -1235,6 +1248,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function submitted($message = NULL, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_ACTIVE, $message, $variables);
+    return $this;
   }
 
   /**
@@ -1249,6 +1263,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function finished($message = NULL, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_FINISHED, $message, $variables);
+    return $this;
   }
 
   /**
@@ -1265,6 +1280,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function cancelled($message = NULL, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_CANCELLED, $message, $variables);
+    return $this;
   }
 
   /**
@@ -1279,6 +1295,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function rejected($message = NULL, $variables = array()) {
     $this->setState(TMGMT_JOB_STATE_REJECTED, $message, $variables);
+    return $this;
   }
 
   /**

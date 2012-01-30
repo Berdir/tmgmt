@@ -321,15 +321,12 @@ class TMGMTJobItemUIController extends EntityDefaultUIController {
    */
   public function applyOperation($op, $entity) {
     switch ($op) {
-      case 'cancel':
-        $entity->cancelTranslation();
-        return t('Cancelled %entity %label to the defaults.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
       case 'delete':
         $entity->delete();
-        return t('Deleted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
+        return t('The translation job item %label has been deleted.', array('%label' => $entity->label()));
       case 'accept':
-        $entity->accepted('The translation has been accepted by !user.', array('!user' => theme('username', array('account' => $GLOBALS['user']))));
-        return t('Accepted %entity %label.', array('%entity' => $this->entityInfo['label'], '%label' => $entity->label()));
+        $entity->accepted('The translation job item has been accepted by !user.', array('!user' => theme('username', array('account' => $GLOBALS['user']))));
+        return t('The translation job item %label has been accepted.', array('%label' => $entity->label()));
     }
     return FALSE;
   }
