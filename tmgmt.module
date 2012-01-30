@@ -939,6 +939,13 @@ function tmgmt_unflatten_data($flattened_data) {
 }
 
 /**
+ * Array filter callback for filtering untranslatable source data elements.
+ */
+function _tmgmt_filter_data($value) {
+  return !(empty($value) || (isset($value['#translate']) && $value['#translate'] === FALSE));
+}
+
+/**
  * Fetches an array of exportables from files.
  *
  * @param $module

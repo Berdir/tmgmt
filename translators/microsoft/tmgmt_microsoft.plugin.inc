@@ -44,12 +44,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
     if (!parent::canTranslate($job)) {
       return FALSE;
     }
-    foreach (tmgmt_flatten_data($job->getSourceData()) as $value) {
-      // We don't need to check texts that are not going to be translated
-      // anyways.
-      if (isset($value['#translate']) && $value['#translate'] === FALSE) {
-        continue;
-      }
+    foreach (array_filter(tmgmt_flatten_data($job->getSourceData()), '_tmgmt_filter_data') as $value) {
       // If one of the texts in this job exceeds the max character count the job
       // can't be translated.
       if (drupal_strlen($value['#text']) > $this->maxCharacters) {
@@ -64,11 +59,8 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
    */
   public function requestTranslation(TMGMTJob $job) {
     // Pull the source data array through the job and flatten it.
-    $data = tmgmt_flatten_data($job->getSourceData());
+    $data = array_filter(tmgmt_flatten_data($job->getSourceData()), '_tmgmt_filter_data');
     foreach ($data as $key => $value) {
-      if (isset($value['#translate']) && $value['#translate'] === FALSE) {
-        continue;
-      }
       // Query the translator API.
       $result = $this->doRequest($job->getTranslator(), 'Translate', array(
         'from' => $job->source_language,
