@@ -1,11 +1,9 @@
-name = Content Translation Source User Interface
+name = Content Source User Interface
 description = User Interface for the content translation source plugin.
 package = Translation Management
 core = 7.x
 
-
 dependencies[] = tmgmt_node
-dependencies[] = views
 dependencies[] = views_bulk_operations
 
 ; Views handlers

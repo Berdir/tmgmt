@@ -2,8 +2,9 @@ name = Translation Management UI
 description = User interface.
 package = Translation Management
 core = 7.x
+
 dependencies[] = tmgmt
-dependencies[] = views
 dependencies[] = views_bulk_operations
+
 files[] = includes/tmgmt_ui.controller.inc
 files[] = tmgmt_ui.test

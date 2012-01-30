@@ -29,6 +29,7 @@ function tmgmt_i18n_string_source_tab_page($object_type) {
     );
     foreach ($language_query['languages'] as $lang_code) {
       // $state = isset($states[$item->{"state_$lang_code"}]) ? $states[$item->{"state_$lang_code"}] : '';
+      // @todo What on earth is this? :D
       $row[$lang_code] = isset($item->{"lang_$lang_code"}) ? '✔' : '✖';
       // $row[$lang_code] .= ' ' . $state;
     }

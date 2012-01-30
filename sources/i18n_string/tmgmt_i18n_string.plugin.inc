@@ -9,6 +9,7 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
 
 
   public function getData(TMGMTJobItem $job_item) {
+    // @todo Why doesn't this use the item_type?
     $i18n_object = explode(':', $job_item->item_id);
     $i18n_object_type = array_shift($i18n_object);
     $i18n_object_id = (count($i18n_object) == 1) ? reset($i18n_object) : $i18n_object;
