@@ -275,6 +275,10 @@ function tmgmt_job_item_load_latest($plugin, $item_type, $item_id, $source_langu
   $query = db_select('tmgmt_job_item', 'tji');
   $query->innerJoin('tmgmt_job', 'tj', 'tj.tjid = tji.tjid');
   $result = $query->condition('tj.source_language', $source_language)
+    // Only query for jobs that are currently active.
+    ->condition('tj.state', TMGMT_JOB_STATE_ACTIVE)
+    // And only query for job items that are not yet finished.
+    ->condition('tji.state', TMGMT_JOB_ITEM_STATE_FINISHED, '<>')
     ->condition('tji.plugin', $plugin)
     ->condition('tji.item_type', $item_type)
     ->condition('tji.item_id', $item_id)

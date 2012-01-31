@@ -21,18 +21,16 @@ function tmgmt_node_ui_node_form($form, &$form_state, $node, $original) {
   // submit handler.
   $form_state['node'] = $node;
   // Inject our additional column into the header.
-  array_splice($original['#header'], -1, 0, array(t('Latest translation job')));
+  array_splice($original['#header'], -1, 0, array(t('Pending Translations')));
   // Make this a tableselect form.
   $form['languages'] = array(
     '#type' => 'tableselect',
     '#header' => $original['#header'],
     '#options' => array(),
-    '#js_select' => TRUE,
   );
   $languages = module_exists('i18n_node') ? i18n_node_language_list($node) : language_list();
   // Check if there is a job / job item that references this translation.
   $items = tmgmt_job_item_load_latest('node', 'node', $node->nid, $node->language);
-  // Collect possibly outdated translation jobs.
   foreach ($languages as $langcode => $language) {
     if ($langcode == LANGUAGE_NONE) {
       // Never show language neutral on the overview.
@@ -42,7 +40,7 @@ function tmgmt_node_ui_node_form($form, &$form_state, $node, $original) {
     // after the other from the original non-form rows.
     $option = array_shift($original['#rows']);
     if ($langcode == $node->language) {
-      $additional = t('Source');
+      $additional = '<strong>' . t('Source') . '</strong>';
       // This is the source object so we disable the checkbox for this row.
       $form['languages'][$langcode] = array(
         '#type' => 'checkbox',
@@ -50,25 +48,19 @@ function tmgmt_node_ui_node_form($form, &$form_state, $node, $original) {
       );
     }
     elseif (isset($items[$langcode])) {
-      // Load the job that hosts this item.
       $item = $items[$langcode];
-      $job = $item->getJob();
-      // Prepare the
-      $item_uri = $item->uri();
-      $item_wrapper = entity_metadata_wrapper('tmgmt_job_item', $item);
-      $job_uri = $job->uri();
-      $job_wrapper = entity_metadata_wrapper('tmgmt_job', $job);
-      $additional = t('!item (@item-state) in !job (@job-state)', array('!item' => l(t('Job item'), $item_uri['path']), '@item-state' => $item_wrapper->state->label(), '!job' => l($job->label(), $job_uri['path']), '@job-state' => $job_wrapper->state->label()));
+      $uri = $item->uri();
+      $path = $item->isNeedsReview() ? $uri['path'] . '/review' : $uri['path'];
+      $wrapper = entity_metadata_wrapper('tmgmt_job_item', $item);
+      $additional = l($wrapper->state->label(), $path);
       // Disable the checkbox for this row since there is already a translation
-      // in progress that has not yet been accepted. This way we make sure that
+      // in progress that has not yet been finished. This way we make sure that
       // we don't stack multiple active translations for the same item on top
       // of each other.
-      if (!$item->isAccepted()) {
-        $form['languages'][$langcode] = array(
-          '#type' => 'checkbox',
-          '#disabled' => TRUE,
-        );
-      }
+      $form['languages'][$langcode] = array(
+        '#type' => 'checkbox',
+        '#disabled' => TRUE,
+      );
     }
     else {
       // There is no translation job / job item for this target language.
@@ -83,9 +75,9 @@ function tmgmt_node_ui_node_form($form, &$form_state, $node, $original) {
   $form['actions']['request'] = array(
     '#type' => 'submit',
     '#value' => t('Request translation'),
+    '#submit' => array('tmgmt_node_ui_translate_form_submit'),
+    '#validate' => array('tmgmt_node_ui_translate_form_validate'),
   );
-  $form['#submit'][] = 'tmgmt_node_ui_translate_form_submit';
-  $form['#validate'][] = 'tmgmt_node_ui_translate_form_validate';
   return $form;
 }
 
