@@ -99,7 +99,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#required' => TRUE,
     '#disabled' => $busy,
     '#ajax' => array(
-      'callback' => 'tmgmt_ui_ajax_callback_translator_plugin',
+      'callback' => 'tmgmt_ui_ajax_callback_translator_plugin_select',
       'wrapper' => 'tmgmt-plugin-wrapper',
     ),
   );
@@ -166,19 +166,24 @@ function tmgmt_translator_form_submit($form, &$form_state) {
 function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   // Check if the translator entity is completely new or not.
   $old = empty($job->is_new) && $op != 'clone';
-  // Look up the items on the job.
-  $items = $job->getItems();
-  // Find pre-selected values and get all available languages.
-  // @todo Make sure that our ajax callback also replaces the opposite language
-  // options list so we never have the same source and target language.
-  $available = tmgmt_available_languages();
-  $preselected['target_language'] = !empty($job->target_language) ? $job->target_language : FALSE;
-  $preselected['source_language'] = !empty($job->source_language) ? $job->source_language : FALSE;
-  $preselected['translator'] = !empty($job->translator) ? $job->translator : FALSE;
-  $job->target_language = $preselected['target_language'] ? $preselected['target_language'] : (isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : key($available));
-  $job->source_language = $preselected['source_language'] ? $preselected['source_language'] : (isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : key($available));
+  // Find pre-selected values.
+  foreach (array('source_language', 'target_language') as $key) {
+    // Retrieve a list of available languages per dropdown.
+    $available[$key] = tmgmt_available_languages();
+    // We need this information because we will lock down the language dropdown
+    // fields if these values have been predefined.
+    $preselected[$key] = !empty($job->{$key});
+    $job->{$key} = isset($form_state['values'][$key]) ? $form_state['values'][$key] : $job->{$key};
+  }
+  // Remove impossible combinations so we don't end up with the same source and
+  // target language in the dropdowns.
+  foreach (array('source_language' => 'target_language', 'target_language' => 'source_language') as $key => $opposite) {
+    if (!empty($job->{$key})) {
+      unset($available[$opposite][$job->{$key}]);
+    }
+  }
   // Show a list of translators tagged by availability for the selected source
-  // and target language combination
+  // and target language combination.
   $translators = tmgmt_translator_labels_flagged($job->source_language, $job->target_language);
   $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
@@ -224,34 +229,32 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $form['languages']['source_language'] = array(
     '#title' => t('From'),
     '#type' => 'select',
-    '#options' => $available,
+    '#options' => $available['source_language'],
     '#default_value' => $job->source_language,
     '#required' => TRUE,
-    '#prefix' => '<div class="tmgmt-ui-source-language">',
+    '#prefix' => '<div id="tmgmt-ui-source-language" class="tmgmt-ui-source-language">',
     '#suffix' => '</div>',
     '#disabled' => !empty($preselected['source_language']) || !$job->isUnprocessed(),
     '#ajax' => array(
-      'callback' => 'tmgmt_ui_ajax_callback_get_supported_translators',
-      'wrapper' => 'tmgmt-translator-wrapper',
+      'callback' => 'tmgmt_ui_ajax_callback_language_select',
     ),
   );
   $form['languages']['target_language'] = array(
     '#title' => t('To'),
     '#type' => 'select',
-    '#options' => $available,
+    '#options' => $available['target_language'],
     '#default_value' => $job->target_language,
     '#required' => TRUE,
-    '#prefix' => '<div class="tmgmt-ui-source-language">',
+    '#prefix' => '<div id="tmgmt-ui-target-language" class="tmgmt-ui-target-language">',
     '#suffix' => '</div>',
     '#disabled' => !empty($preselected['target_language']) || !$job->isUnprocessed(),
     '#ajax' => array(
-      'callback' => 'tmgmt_ui_ajax_callback_supported_translators',
-      'wrapper' => 'tmgmt-translator-wrapper',
+      'callback' => 'tmgmt_ui_ajax_callback_language_select',
     ),
   );
   $form['translator_wrapper'] = array(
     '#type' => 'container',
-    '#prefix' => '<div id="tmgmt-translator-wrapper">',
+    '#prefix' => '<div id="tmgmt-ui-translator-wrapper">',
     '#suffix' => '</div>',
   );
   $form['translator_wrapper']['translator'] = array(
@@ -262,8 +265,8 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#required' => TRUE,
     '#disabled' => !$job->isUnprocessed(),
     '#ajax' => array(
-      'callback' => 'tmgmt_ui_ajax_callback_translator_settings',
-      'wrapper' => 'tmgmt-translator-settings',
+      'callback' => 'tmgmt_ui_ajax_callback_translator_select',
+      'wrapper' => 'tmgmt-ui-translator-settings',
     ),
   );
   // Display the checkout settings form if the job can be checked out.
@@ -271,7 +274,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     $form['translator_wrapper']['settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Checkout settings'),
-      '#prefix' => '<div id="tmgmt-translator-settings">',
+      '#prefix' => '<div id="tmgmt-ui-translator-settings">',
       '#suffix' => '</div>',
       '#tree' => TRUE,
     );
@@ -437,20 +440,24 @@ function tmgmt_ui_job_list_items($items) {
  * Ajax callback for loading the translator plugin settings form for the
  * currently selected translator plugin.
  */
-function tmgmt_ui_ajax_callback_translator_plugin($form, &$form_state) {
+function tmgmt_ui_ajax_callback_translator_plugin_select($form, &$form_state) {
   return $form['plugin_wrapper'];
 }
 
 /**
- * Ajax callback to fetch the supported translator services.
+ * Ajax callback to fetch the supported translator services and rebuild the
+ * target / source language dropdowns.
  */
-function tmgmt_ui_ajax_callback_supported_translators($form, &$form_state) {
-  return $form['translator_wrapper'];
+function tmgmt_ui_ajax_callback_language_select($form, &$form_state) {
+  $replace = $form_state['input']['_triggering_element_name'] == 'source_language' ? 'target_language' : 'source_language';
+  $commands[] = ajax_command_replace('#tmgmt-ui-translator-wrapper', drupal_render($form['translator_wrapper']));
+  $commands[] = ajax_command_replace('#tmgmt-ui-' . str_replace('_', '-', $replace), drupal_render($form['languages'][$replace]));
+  return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 /**
  * Ajax callback to fetch the options provided by a translator.
  */
-function tmgmt_ui_ajax_callback_translator_settings($form, &$form_state) {
+function tmgmt_ui_ajax_callback_translator_select($form, &$form_state) {
   return $form['translator_wrapper']['settings'];
 }
