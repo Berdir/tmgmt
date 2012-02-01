@@ -254,7 +254,9 @@ function tmgmt_ui_job_request_translation(TMGMTJob $job) {
 function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJobItem $item) {
   // We store the item in the root of the form state so we can easily access it
   // in all the form functions.
-  $form_state['item'] = $item;;
+  $form_state['item'] = $item;
+  // Actually build the review form elements...
+  $form = _tmgmt_ui_review_form_recursive($form, $form_state, $item->getSourceData());
   // Add the form actions as well.
   $form['actions']['#type'] = 'actions';
   $form['actions']['accept'] = array(
@@ -294,10 +296,14 @@ function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
   $item = $form_state['item'];
   // First invoke the validation method on the source controller.
   $source = $item->getSourceController();
-  $source->reviewFormValidate($form, $form_state, $item);
+  if (method_exists($source, 'reviewFormValidate')) {
+    $source->reviewFormValidate($form, $form_state, $item);
+  }
   // Then invoke the validation method on the source controller.
   $translator = $item->getTranslatorController();
-  $translator->reviewFormValidate($form, $form_state, $item);
+  if (method_exists($translator, 'reviewFormValidate')) {
+    $translator->reviewFormValidate($form, $form_state, $item);
+  }
 }
 
 /**
@@ -307,10 +313,23 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   $item = $form_state['item'];
   // First invoke the validation method on the source controller.
   $source = $item->getSourceController();
-  $source->reviewFormSubmit($form, $form_state, $item);
+  if (method_exists($source, 'reviewFormSubmit')) {
+    $source->reviewFormSubmit($form, $form_state, $item);
+  }
   // Then invoke the validation method on the source controller.
   $translator = $item->getTranslatorController();
-  $translator->reviewFormSubmit($form, $form_state, $item);
+  if (method_exists($translator, 'reviewFormSubmit')) {
+    $translator->reviewFormSubmit($form, $form_state, $item);
+  }
   // Submit the entity.
   $item->data = $form_state['values']['data'];
+  $item->save();
+}
+
+/**
+ * Helper function for recursively building a review form.
+ */
+function _tmgmt_ui_review_form_recursive($form, &$form_state, $data, $parents = array()) {
+  // @todo Actually implement this.
+  return $form;
 }
