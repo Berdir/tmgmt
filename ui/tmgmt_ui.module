@@ -24,7 +24,7 @@ function tmgmt_ui_entity_info() {
   $info['tmgmt_job_item'] = array(
     'admin ui' => array(
       'controller class' => 'TMGMTJobItemUIController',
-      'path' => 'admin/config/regional/tmgmt/jobs/%/items',
+      'path' => 'admin/config/regional/tmgmt/items',
     ),
   );
   foreach ($info as $key => $item) {
@@ -32,7 +32,7 @@ function tmgmt_ui_entity_info() {
     // since this happens in the TMGMT core module, we need to manually
     // define the path here.
     $info[$key]['admin ui']['file path'] = drupal_get_path('module', 'tmgmt_ui');
-    $info[$key]['admin ui']['file'] = 'includes/tmgmt_ui.admin.inc';
+    $info[$key]['admin ui']['file'] = 'includes/tmgmt_ui.pages.inc';
   }
   return $info;
 }
@@ -44,21 +44,19 @@ function tmgmt_ui_menu() {
   $items['admin/config/regional/tmgmt'] = array(
     'title' => 'Translation Management',
     'description' => 'Use the Translation Management',
-    'page callback' => 'tmgmt_ui_content',
+    'page callback' => 'tmgmt_ui_overview_page',
     'access arguments' => array('administer tmgmt'),
     'file' => 'includes/tmgmt_ui.pages.inc',
   );
   $items['admin/config/regional/tmgmt/overview'] = array(
     'title' => 'Overview',
-    'page callback' => 'tmgmt_ui_content',
-    'access arguments' => array('administer tmgmt'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'file' => 'includes/tmgmt_ui.pages.inc',
     'weight' => -10,
   );
   $items['admin/config/regional/tmgmt/settings'] = array(
     'title' => 'Settings',
-    'page callback' => 'tmgmt_ui_settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tmgmt_ui_settings_form'),
     'access arguments' => array('administer tmgmt'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
@@ -86,6 +84,20 @@ function tmgmt_ui_theme() {
 }
 
 /**
+ * Implements hook_forms().
+ */
+function tmgmt_ui_forms() {
+  $forms = array();
+  foreach (tmgmt_source_plugin_info() as $plugin => $info) {
+    $forms['tmgmt_ui_' . $plugin . '_translation_review_form'] = array(
+      'callback' => 'tmgmt_ui_translation_review_form',
+      'wrapper_callback' => 'tmgmt_ui_translation_review_form_defaults',
+    );
+  }
+  return $forms;
+}
+
+/**
  * Implements hook_system_info_alter().
  */
 function tmgmt_ui_system_info_alter(&$info, $file, $type) {
@@ -109,60 +121,64 @@ function tmgmt_ui_views_default_views() {
 }
 
 /**
- * Add a class class to the cart view.
+ * Embed a view but don't render it if it's empty.
+ *
+ * @param $view
+ *   The machine-readable name of the view.
+ *
+ * @return
+ *   The rendered view or an empty string if the view doesn't exist if it was
+ *   empty.
  */
-function tmgmt_ui_views_pre_render($view) {
-  if ($view->name == 'tmgmt_ui_cart_overview' && $view->current_display == 'block_1') {
-    drupal_add_css(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.cart.css');
+function tmgmt_ui_embed_view($view) {
+  $view = views_get_view($view);
+  if (!empty($view)) {
+    $view->init_display();
+    $output = $view->preview();
+    if (!empty($view->result)) {
+      return $output;
+    }
   }
+  return '';
 }
 
 /**
  * Attempts to check out a number of jobs.
  *
- * Performs a number of checks on each job and also allows to alter the behavior
- * through hooks.
- *
  * @param $jobs
  *   The jobs to be checked out.
+ * @param $redirect
+ *   Path to redirect to after all jobs have been checked out.
+ *
  * @return string
  */
-function tmgmt_ui_job_checkout(array $jobs) {
-  $redirects = array();
-  // Allow other modules to jump in and eg. auto-checkout with rules or use a
-  // customized checkout form.
-  drupal_alter('tmgmt_ui_job_checkout_before', $redirects, $jobs);
-
-  foreach ($jobs as $job) {
-    if (!$job->isUnprocessed()) {
-      // Job is already checked out, just ignore that one. This could happen
-      // if jobs have already been submitted in the before hook.
-      continue;
+function tmgmt_ui_job_checkout_multiple($jobs = array(), $quick = TRUE, $redirect = NULL) {
+  // We only need to proceed with the quick checkout procedure if it is enabled.
+  if (variable_get('tmgmt_quick_checkout', TRUE)) {
+    $errors = FALSE;
+    $count = 0;
+    foreach ($jobs as $job) {
+      if (!tmgmt_ui_job_needs_checkout_form($job)) {
+        if (tmgmt_ui_job_request_translation($job)) {
+          // If a job doesn't need a checkout form and the translation request was
+          // submitted successfully remove it from the to-do list.
+          unset($job);
+        }
+        else {
+          // If, however, something went wrong during the translation request we
+          // will want to display an error on the next page and present this job
+          // in the following checkout (multistep) form.
+          $errors = TRUE;
+        }
+      }
     }
-
-    // @todo: Add permission checks.
-
-    if (tmgmt_ui_job_needs_checkout_form($job)) {
-      $uri = $job->uri();
-      $redirects[] = $uri['path'] . '/manage';
-    }
-    else {
-      // @todo this is dangerous because we don't catch request fails at all.
-      // Normally I would expect this to catch all failed requests and
-      // afterwards send the user through a multistep form which contains the
-      // failed elements.
-
-      // No manual checkout required. Request translations now.
-      tmgmt_ui_job_request_translation($job);
+    // If one or more of the previous 'quick checkout' jobs failed, print an
+    // short notice to the screen.
+    if ($errors) {
+      drupal_set_message(t('At least one of the provided translation jobs could not be successfully translated in the quick checkout process and have been added to the checkout queue.'), 'warning');
     }
   }
-
-  // Allow other modules to jump in and eg. auto-checkout with rules or use a
-  // customized checkout form.
-  drupal_alter('tmgmt_ui_job_checkout_after', $redirects, $jobs);
-
-  // @todo Find a way to deal with multi-redirects.
-  return $redirects ? reset($redirects) : FALSE;
+  // @todo Now we just need the multistep form right here :).
 }
 
 /**
@@ -175,6 +191,10 @@ function tmgmt_ui_job_checkout(array $jobs) {
  *   TRUE if the job needs a checkout form.
  */
 function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
+  // If quick checkout is disabled, always show the checkout form.
+  if (!variable_get('tmgmt_quick_checkout', TRUE)) {
+    return TRUE;
+  }
   // If the job has no target language (or source language, even though this
   // should never be the case in our use case), checkout is mandatory.
   if (empty($job->target_language) || empty($job->source_language)) {
@@ -224,4 +244,73 @@ function tmgmt_ui_job_request_translation(TMGMTJob $job) {
     }
   }
   return !$errors;
+}
+
+/**
+ * Form wrapper callback for the job item review form.
+ *
+ * @see tmgmt_ui_forms()
+ */
+function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJobItem $item) {
+  // We store the item in the root of the form state so we can easily access it
+  // in all the form functions.
+  $form_state['item'] = $item;;
+  // Add the form actions as well.
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['accept'] = array(
+    '#type' => 'submit',
+    '#value' => t('Accept'),
+  );
+  $form['actions']['reject'] = array(
+    '#type' => 'submit',
+    '#value' => t('Reject'),
+  );
+  return $form;
+}
+
+/**
+ * Form callback for the job item review form.
+ *
+ * @see tmgmt_ui_forms()
+ */
+function tmgmt_ui_translation_review_form($form, &$form_state, TMGMTJobItem $item) {
+  if ($source = $item->getSourceController()) {
+    if ($translator = $item->getTranslatorController()) {
+      // The basic review form gets built by the source controller.
+      $form = $source->reviewForm($form, $form_state, $item);
+      // After that, the translator controller may append additional form fields.
+      // This way, the translator controller can append per-text comment fields for
+      // for example.
+      $form = $translator->reviewForm($form, $form_state, $item);
+      return $form;
+    }
+  }
+}
+
+/**
+ * Validation callback for the job item review form.
+ */
+function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
+  $item = $form_state['item'];
+  // First invoke the validation method on the source controller.
+  $source = $item->getSourceController();
+  $source->reviewFormValidate($form, $form_state, $item);
+  // Then invoke the validation method on the source controller.
+  $translator = $item->getTranslatorController();
+  $translator->reviewFormValidate($form, $form_state, $item);
+}
+
+/**
+ * Submit callback for the job item review form.
+ */
+function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
+  $item = $form_state['item'];
+  // First invoke the validation method on the source controller.
+  $source = $item->getSourceController();
+  $source->reviewFormSubmit($form, $form_state, $item);
+  // Then invoke the validation method on the source controller.
+  $translator = $item->getTranslatorController();
+  $translator->reviewFormSubmit($form, $form_state, $item);
+  // Submit the entity.
+  $item->data = $form_state['values']['data'];
 }

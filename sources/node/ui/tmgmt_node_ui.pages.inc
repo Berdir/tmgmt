@@ -2,14 +2,15 @@
 
 /**
  * @file
- * Please supply a file description.
+ * Provides page and form callbacks for the Translation Management Tool Node
+ * Source User Interface module.
  */
 
-/*
-* Ebeds the view.
-*/
+/**
+ * Simple page callback for displaying the translation job history for a node.
+ */
 function tmgmt_node_ui_translation_history() {
-  return views_embed_view('tmgmt_node_ui_job_history');
+  return tmgmt_ui_embed_view('tmgmt_node_ui_job_history');
 }
 
 /**
@@ -50,6 +51,8 @@ function tmgmt_node_ui_node_form($form, &$form_state, $node, $original) {
     elseif (isset($items[$langcode])) {
       $item = $items[$langcode];
       $uri = $item->uri();
+      // If the job item needs to be reviewed, point to the review form.
+      // Otherwise just use the plain entity uri.
       $path = $item->isNeedsReview() ? $uri['path'] . '/review' : $uri['path'];
       $wrapper = entity_metadata_wrapper('tmgmt_job_item', $item);
       $additional = l($wrapper->state->label(), $path);
@@ -97,6 +100,7 @@ function tmgmt_node_ui_translate_form_validate($form, &$form_state) {
 function tmgmt_node_ui_translate_form_submit($form, &$form_state) {
   $node = $form_state['node'];
   $values = $form_state['values'];
+  $jobs = array();
   foreach (array_keys(array_filter($values['languages'])) as $langcode) {
     // Create the job object.
     $job = tmgmt_job_create($node->language, $langcode, $GLOBALS['user']->uid);
@@ -106,14 +110,6 @@ function tmgmt_node_ui_translate_form_submit($form, &$form_state) {
     // to a multistep checkout form if necessary.
     $jobs[$job->tjid] = $job;
   }
-  if (count($jobs) > 1) {
-    // @todo We need to redirect to a multistep form here.
-  }
-  else {
-    // We only got one job.
-    $job = reset($jobs);
-    // Append a destination query so that the user gets redirected to this very
-    // page after pressing the checkout button.
-    $form_state['redirect'] = array('admin/config/regional/tmgmt/jobs/' . $job->tjid . '/manage', array('query' => array('destination' => current_path())));
-  }
+  // Process the job via the built-in multiple checkout functionality.
+  tmgmt_ui_job_checkout_multiple($jobs);
 }

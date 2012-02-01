@@ -88,7 +88,10 @@ class TMGMTTranslator extends Entity {
    * @return TMGMTTranslatorPluginControllerInterface
    */
   public function getPluginController() {
-    return tmgmt_translator_plugin_controller($this->plugin);
+    if (!empty($this->plugin)) {
+      return tmgmt_translator_plugin_controller($this->plugin);
+    }
+    return FALSE;
   }
 
   /**
@@ -329,9 +332,15 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
 
   /**
    * Overrides Entity::defaultUri()
+   *
+   * @see _tmgmt_ui_breadcrumb()
    */
   public function defaultUri() {
-    return array('path' => 'admin/config/regional/tmgmt/jobs/' . $this->tjid . '/items/' . $this->tjiid);
+    // The path of a job item is not directly below the job that it belongs to.
+    // Having to maintain two unknowns / wildcards (job and job item) in the
+    // path is more complex than it has to be. Instead we just append the
+    // additional breadcrumb pieces manually with _tmgmt_ui_breadcrumb().
+    return array('path' => 'admin/config/regional/tmgmt/items/' . $this->tjiid);
   }
 
   /**
@@ -348,6 +357,13 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
       '#type' => 'item',
       '#title' => t('State'),
       '#markup' => $wrapper->state->label(),
+    );
+    $job = $this->getJob();
+    $uri = $job->uri();
+    $content['job'] = array(
+      '#type' => 'item',
+      '#title' => t('Job'),
+      '#markup' => l($job->label(), $uri['path']),
     );
     if (module_exists('views') && $view = views_get_view('tmgmt_ui_job_item_messages')) {
       $content['messages'] = array(
@@ -400,6 +416,32 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   }
 
   /**
+   * Returns the translator for this job item.
+   *
+   * @return TMGMTTranslator
+   *   The translator entity or FALSE if there was a problem.
+   */
+  public function getTranslator() {
+    if ($job = $this->getJob()) {
+      return $job->getTranslator();
+    }
+    return FALSE;
+  }
+
+  /**
+   * Returns the translator plugin controller of the translator of this job item.
+   *
+   * @return TMGMTTranslatorPluginControllerInterface
+   *   The controller of the translator plugin or FALSE if there was a problem.
+   */
+  public function getTranslatorController() {
+    if ($job = $this->getJob()) {
+      return $job->getTranslatorController();
+    }
+    return FALSE;
+  }
+
+  /**
    * Array of the data to be translated.
    *
    * The structure is similar to the form API in the way that it is a possibly
@@ -436,7 +478,10 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * @return TMGMTSourcePluginControllerInterface
    */
   public function getSourceController() {
-    return tmgmt_source_plugin_controller($this->plugin);
+    if (!empty($this->plugin)) {
+      return tmgmt_source_plugin_controller($this->plugin);
+    }
+    return FALSE;
   }
 
   /**
@@ -1061,12 +1106,13 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Returns the translator for this job.
    *
    * @return TMGMTTranslator
-   *   The translator entity or NULL if it hasn't been defined yet.
+   *   The translator entity or FALSE if there was a problem.
    */
   public function getTranslator() {
     if (isset($this->translator)) {
       return tmgmt_translator_load($this->translator);
     }
+    returN FALSE;
   }
 
   /**
@@ -1349,7 +1395,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public function cancelTranslation() {
     // Since inactive (unsubmitted, rejected, etc.) jobs can be deleted directly
     // we don't need to be able to cancel them.
-    if ($this->isCancelable() && $controller = $this->getTranslatorController()) {
+    if (!$this->isCancelable() || !$controller = $this->getTranslatorController()) {
       return FALSE;
     }
     // We don't know if the translator plugin was able to cancel the translation
@@ -1362,11 +1408,13 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * Returns the translator plugin controller of the translator of this job.
    *
    * @return TMGMTTranslatorPluginControllerInterface
+   *   The controller of the translator plugin.
    */
   public function getTranslatorController() {
     if ($translator = $this->getTranslator($this)) {
       return $translator->getPluginController();
     }
+    return FALSE;
   }
 
   /**
@@ -1410,13 +1458,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     // If there is a key, get the specific item and forward the call.
     if (!empty($key)) {
       $item_id = array_shift($key);
-      if (!isset($items[$item_id])) {
-        // @todo Do we really want to throw an exception here? I think it is
-        // valid that a user chooses to delete a single job item after
-        // submitting the job. Therefore the item would not exist anymore.
-        throw new Exception(t('Item id @id does not exist', array('@id' => $item_id)));
+      if (isset($items[$item_id])) {
+        $items[$item_id]->addTranslatedData($data, $key);
       }
-      $items[$item_id]->addTranslatedData($data, $key);
     }
     else {
       foreach ($data as $key => $value) {

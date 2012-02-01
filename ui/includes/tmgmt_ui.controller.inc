@@ -277,11 +277,11 @@ class TMGMTJobItemUIController extends EntityDefaultUIController {
     );
     $items[$this->path . '/' . $wildcard . '/review'] = array(
       'title' => 'Review',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('tmgmt_ui_job_item_review', $id_count),
+      'page callback' => 'tmgmt_ui_job_item_review',
+      'page arguments' => array($id_count),
       'load arguments' => array($this->entityType),
-      'access callback' => 'tmgmt_job_item_access',
-      'access arguments' => array('review', $id_count),
+      'access callback' => 'tmgmt_job_item_review_access',
+      'access arguments' => array($id_count),
       'type' => MENU_LOCAL_TASK,
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],

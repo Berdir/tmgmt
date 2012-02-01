@@ -104,6 +104,6 @@ function tmgmt_node_ui_translate_node_multiple($nodes) {
   foreach ($nodes as $node) {
     $job->addItem('node', 'node', $node->nid);
   }
-  // Redirect the user to the checkout form.
-  drupal_goto('admin/config/regional/tmgmt/jobs/' . $job->tjid . '/manage', array('query' => array('destination' => current_path())));
+  // Fire the checkout procedure for this job.
+  tmgmt_ui_job_checkout_multiple(array($job));
 }

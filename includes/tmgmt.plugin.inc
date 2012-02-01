@@ -59,6 +59,11 @@ interface TMGMTSourcePluginControllerInterface {
    */
   public function getUri(TMGMTJobItem $job_item);
 
+  /**
+   * Form callback for reviewing job items.
+   */
+  public function reviewForm($form, &$form_state, TMGMTJobItem $item);
+
 }
 
 /**
@@ -105,6 +110,13 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
    */
   public function getUri(TMGMTJobItem $job_item) {
     return FALSE;
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::reviewForm().
+   */
+  public function reviewForm($form, &$form_state, TMGMTJobItem $item) {
+    return $form;
   }
 
 }
@@ -236,6 +248,11 @@ interface TMGMTTranslatorPluginControllerInterface {
    * Returns if the translator has any settings for the passed job.
    */
   public function hasCheckoutSettings(TMGMTJob $job);
+
+  /**
+   * Form callback for reviewing job items.
+   */
+  public function reviewForm($form, &$form_state, TMGMTJobItem $item);
 
 }
 
@@ -379,6 +396,13 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function hasCheckoutSettings(TMGMTJob $job) {
     return TRUE;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::reviewForm().
+   */
+  public function reviewForm($form, &$form_state, TMGMTJobItem $item) {
+    return $form;
   }
 
 }

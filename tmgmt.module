@@ -365,6 +365,16 @@ function tmgmt_job_item_access($op, $item = NULL, $account = NULL) {
 }
 
 /**
+ * Access callback wrapper for reviewing a job item entity.
+ */
+function tmgmt_job_item_review_access(TMGMTJobItem $item, $account = NULL) {
+  if ($item->isNeedsReview() && $item->getSourceController() && $item->getTranslatorController()) {
+    return tmgmt_job_item_access('review', $item, $account);
+  }
+  return FALSE;
+}
+
+/**
  * Access callback for the job message entity.
  */
 function tmgmt_job_message_access($op, $message = NULL, $account = NULL) {
