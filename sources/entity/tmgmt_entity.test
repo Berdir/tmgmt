@@ -121,8 +121,10 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       $job->addItem('entity', 'node', $node->nid);
     }
     $job->requestTranslation();
-    $job->accepted();
     foreach ($job->getItems() as $job_item) {
+      /* @var $job_item TMGMTJobItem */
+      $job_item->accepted();
+      $job_item->propagateTranslatedData();
       $entity = entity_load_single($job_item->item_type, $job_item->item_id);
       $this->checkTranslatedData($entity, $job_item->translation, $langcode);
       $this->checkUntranslatedData($entity, $this->field_names['node'][$bundle], $job_item->translation, $langcode);
@@ -169,9 +171,11 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     }
     // Request the translation and accept it.
     $job->requestTranslation();
-    $job->accepted();
     // Check if the fields were translated.
     foreach ($job->getItems() as $job_item) {
+      /* @var $job_item TMGMTJobItem */
+      $job_item->accepted();
+      $job_item->propagateTranslatedData();
       $entity = entity_load_single($job_item->item_type, $job_item->item_id);
       $this->checkTranslatedData($entity, $job_item->translation, $langcode);
       $this->checkUntranslatedData($entity, $this->field_names['taxonomy_term'][$bundle], $job_item->translation, $langcode);

@@ -90,7 +90,6 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
           $data[$key]['#text'] = $job->target_language . '_' . $value['#text'];
         }
         $job->addTranslatedData(tmgmt_unflatten_data($data));
-        $job->needsReview('Test translation created');
         break;
     }
     return TRUE;

@@ -121,8 +121,10 @@ function tmgmt_rules_job_request_translation(TMGMTJob $job) {
  * Rules callback to accept a translation of a job.
  */
 function tmgmt_rules_job_accept_translation(TMGMTJob $job, $message) {
-  if ($job->isNeedsReview()) {
-    $job->accepted($message);
+  foreach ($job->getItems() as $item) {
+    if ($item->isNeedsReview()) {
+      $item->accepted();
+    }
   }
 }
 
