@@ -1561,14 +1561,14 @@ class TMGMTJobMessage extends Entity {
    *
    * @var integer
    */
-  public $status_before;
+  public $state_before;
 
   /**
    * The status after the event occurred.
    *
    * @var integer
    */
-  public $status_after;
+  public $state_after;
 
   /**
    * The time when the message object was created as a timestamp.
