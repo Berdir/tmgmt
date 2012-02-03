@@ -208,11 +208,12 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     $redirect = tmgmt_ui_job_checkout(array($job));
     $this->assertFalse($redirect);
-    $this->assertTrue($job->isNeedsReview());
+    $this->assertTrue($job->isActive());
 
     // A job without target language needs to be checked out.
     $job = $this->createJob('en', '');
-    $redirect = tmgmt_ui_job_checkout(array($job));    $uri = $job->uri();
+    $redirect = tmgmt_ui_job_checkout(array($job));
+    $uri = $job->uri();
     $this->assertEqual($uri['path'] . '/manage', $redirect);
     $this->assertTrue($job->isUnprocessed());
 
