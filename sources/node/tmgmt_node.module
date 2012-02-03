@@ -14,6 +14,11 @@ function tmgmt_node_tmgmt_source_plugin_info() {
       'label' => t('Node'),
       'description' => t('Source handler for nodes.'),
       'controller class' => 'TMGMTNodeSourcePluginController',
+      'translation ui' => array(
+        'controller class' => 'TMGMTDefaultSourceUIController',
+        'item base path' => 'node/%node/translate',
+        ''
+      ),
     ),
   );
 }

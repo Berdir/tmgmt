@@ -10,11 +10,6 @@
  * Implements hook_menu().
  */
 function tmgmt_node_ui_menu() {
-  $items['node/%node/translate/overview'] = array(
-    'title' => 'Translation Jobs',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => 10
-  );
   $items['node/%node/translate/history'] = array(
     'title' => 'Translation Job History',
     'page callback' => 'tmgmt_node_ui_translation_history',
