@@ -120,14 +120,27 @@ function tmgmt_ui_views_default_views() {
   return _tmgmt_load_exports('tmgmt_ui', 'views', 'view.inc', 'view');
 }
 
-/**
- * Add a class class to the cart view.
- */
-function tmgmt_ui_views_pre_render($view) {
-  if ($view->name == 'tmgmt_ui_cart_overview' && $view->current_display == 'block_1') {
-    drupal_add_css(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.cart.css');
-  }
-}
+ /**
+ * Embed a view but don't render it if it's empty.
+ *
+ * @param $view
+ *   The machine-readable name of the view.
+ *
+ * @return
+ *   The rendered view or an empty string if the view doesn't exist if it was
+ *   empty.
+  */
+function tmgmt_ui_embed_view($view) {
+  $view = views_get_view($view);
+  if (!empty($view)) {
+    $view->init_display();
+    $output = $view->preview();
+    if (!empty($view->result)) {
+      return $output;
+    }
+   }
+  return '';
+ }
 
 /**
  * Attempts to check out a number of jobs.
