@@ -939,6 +939,32 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
+   * Allows the job entity to react on events that affect a job item that
+   * belongs to this job.
+   *
+   * @param $hook
+   *   The type of the event. Can be one of 'insert', 'update' or 'delete'.
+   * @param TMGMTJobItem $item
+   *   The job item entity affected by this event.
+   */
+  public function itemHook($hook, TMGMTJobItem $item) {
+    if (!$this->isFinished()) {
+      // This checks whether there are unfinished job items left.
+      $query = new EntityFieldQuery();
+      $result = (boolean) $query->entityCondition('entity_type', 'tmgmt_job_item')
+        ->propertyCondition('state', TMGMT_JOB_ITEM_STATE_FINISHED, '<>')
+        ->count()
+        ->range(0, 1)
+        ->execute();
+      // If there are no unfinished job items left, set the state of this job
+      // to 'finished'.
+      if ($result) {
+        $this->finished();
+      }
+    }
+  }
+
+  /**
    * Adds an item to the translation job.
    *
    * @param $plugin
@@ -1308,6 +1334,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @see TMGMTJob::addMessage()
    */
   public function submitted($message = NULL, $variables = array()) {
+    if (!isset($message)) {
+      $message = 'The translation job has been submitted.';
+    }
     $this->setState(TMGMT_JOB_STATE_ACTIVE, $message, $variables);
     return $this;
   }
@@ -1326,6 +1355,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @see TMGMTJob::addMessage()
    */
   public function finished($message = NULL, $variables = array()) {
+    if (!isset($message)) {
+      $message = 'The translation job has been finished.';
+    }
     $this->setState(TMGMT_JOB_STATE_FINISHED, $message, $variables);
     return $this;
   }
@@ -1346,6 +1378,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @see TMGMTJob::addMessage()
    */
   public function cancelled($message = NULL, $variables = array()) {
+    if (!isset($message)) {
+      $message = 'The translation job has been cancelled.';
+    }
     $this->setState(TMGMT_JOB_STATE_CANCELLED, $message, $variables);
     return $this;
   }
@@ -1364,6 +1399,9 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @see TMGMTJob::addMessage()
    */
   public function rejected($message = NULL, $variables = array()) {
+    if (!isset($message)) {
+      $message = 'The translation job has been rejected by the translation provider.';
+    }
     $this->setState(TMGMT_JOB_STATE_REJECTED, $message, $variables);
     return $this;
   }
