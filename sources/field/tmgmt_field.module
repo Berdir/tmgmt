@@ -7,7 +7,7 @@
 
 /**
  * Implements hook_tmgmt_source_translation_structure().
- * 
+ *
  * This hook is implemented on behalf of the core text module.
  */
 function text_tmgmt_source_translation_structure($field_name, $entity, $field_info, $field_instance, $job_item) {
@@ -25,7 +25,7 @@ function text_tmgmt_source_translation_structure($field_name, $entity, $field_in
         $structure[$key]['summary'] = array(
           '#label' => t('!field_name: Summary nr. !count', array('!field_name' => $field_instance['label'], '!count' => $key), array('langcode' => $job->source_language)),
           '#text' => $value['summary'],
-          '#translate' => TRUE
+          '#translate' => TRUE,
         );
       }
     }
