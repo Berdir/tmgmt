@@ -64,8 +64,7 @@ class TMGMTJobItemController extends EntityAPIController {
   public function invoke($hook, $entity) {
     // Before invoking the default hooks, lets invoke the hook method on the
     // parent job entity.
-    // @todo: Re-enable once this is working.
-    if (FALSE && in_array($hook, array('insert', 'delete', 'update'))) {
+    if (in_array($hook, array('insert', 'delete', 'update'))) {
       $job = $entity->getJob();
       $job->itemHook($hook, $entity);
     }

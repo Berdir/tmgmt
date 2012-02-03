@@ -288,8 +288,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     foreach ($translate_job->getItems() as $job_item) {
       /* @var $job_item TMGMTJobItem */
-      $job_item->accepted();
-      $job_item->propagateTranslatedData();
+      $job_item->acceptTranslation();
     }
 
     // @todo Accepting does not result in messages on the job anymore.

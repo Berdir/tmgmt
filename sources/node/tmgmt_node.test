@@ -92,8 +92,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
 
     foreach ($job->getItems() as $item) {
       /* @var $item TMGMTJobItem */
-      $item->accepted();
-      $item->propagateTranslatedData();
+      $item->acceptTranslation();
       $node = node_load($item->item_id);
       // Check if the tnid attribute is bigger than 0.
       $this->assertTrue($node->tnid > 0, t('The source node is not part of a translation set.'));

@@ -36,9 +36,8 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
    * Implements TMGMTSourcePluginControllerInterface::saveTranslation().
    */
   public function saveTranslation(TMGMTJobItem $job_item) {
-    $node = node_load($job_item->item_id);
-    $job = tmgmt_job_load($job_item->tjid);
-    if (is_object($node) && is_object($job)) {
+    if ($node = node_load($job_item->item_id)) {
+      $job = $job_item->getJob();
       // in $tnode we will have the translated node.
       $tnode = NULL;
       if (empty($node->tnid)) {
@@ -62,6 +61,9 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
       }
       // Time to put the translated data into the node.
       tmgmt_node_update_node_translation($tnode, $job_item->translation, $job->target_language);
+      // We just saved the translation, set the sate of the job item to
+      // 'finished'.
+      $job_item->accepted()->save();
     }
   }
 

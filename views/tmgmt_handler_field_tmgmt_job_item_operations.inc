@@ -17,7 +17,7 @@ class tmgmt_handler_field_tmgmt_job_item_operations extends views_handler_field_
       'href' => $uri['path'],
       'title' => t('view'),
     );
-    if ($item->needsReview()) {
+    if ($item->isNeedsReview()) {
       $element['#links']['review'] = array(
         'href' => 'admin/config/regional/tmgmt/items/' . $item->tjiid . '/review',
         'query' => array('destination' => current_path()),

@@ -84,20 +84,12 @@ define('TMGMT_JOB_ITEM_STATE_REVIEW', 2);
 /**
  * The translation job item has been reviewed and accepted.
  *
- * After reviewing a job item it can be accepted by the reviewer. After a job
- * item has been accepted the attached translation can be propagated to the
- * source controller which then takes care of saving the translated content.
+ * After reviewing a job item it can be accepted by the reviewer. Once the user
+ * has accepted the job item, the translated data will be propagated to the
+ * source controller which will also take care of flagging the job item as
+ * 'accepted' if the translated object could be saved successfully.
  */
 define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
-
-/**
- * The translation job item is finished.
- *
- * After successfully saving a translated, reviewed and accepted job item it can
- * be marked as 'finished'. This closes the case for a job item and eventually,
- * once all siblings are finished as well, the job.
- */
-define('TMGMT_JOB_ITEM_STATE_FINISHED', 4);
 /**
  * @} End of "addtogroup tmgmt_job".
  */
@@ -278,7 +270,7 @@ function tmgmt_job_item_load_latest($plugin, $item_type, $item_id, $source_langu
     // Only query for jobs that are currently active.
     ->condition('tj.state', TMGMT_JOB_STATE_ACTIVE)
     // And only query for job items that are not yet finished.
-    ->condition('tji.state', TMGMT_JOB_ITEM_STATE_FINISHED, '<>')
+    ->condition('tji.state', TMGMT_JOB_ITEM_STATE_ACCEPTED, '<>')
     ->condition('tji.plugin', $plugin)
     ->condition('tji.item_type', $item_type)
     ->condition('tji.item_id', $item_id)
@@ -409,7 +401,6 @@ function tmgmt_job_item_states() {
     TMGMT_JOB_ITEM_STATE_ACTIVE => t('In progress'),
     TMGMT_JOB_ITEM_STATE_REVIEW => t('Needs review'),
     TMGMT_JOB_ITEM_STATE_ACCEPTED => t('Accepted'),
-    TMGMT_JOB_STATE_FINISHED => t('Finished'),
   );
 }
 

@@ -92,7 +92,7 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       }
     }
     // The translation job has been successfully submitted.
-    $job->submitted('The translation job has been submitted successfully.')->save();
+    $job->submitted('The translation job has been submitted.')->save();
     // Save the translated data through the job.
     $job->addTranslatedData(tmgmt_unflatten_data($data));
   }

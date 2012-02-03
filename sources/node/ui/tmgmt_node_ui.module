@@ -100,5 +100,5 @@ function tmgmt_node_ui_translate_node_multiple($nodes) {
     $job->addItem('node', 'node', $node->nid);
   }
   // Fire the checkout procedure for this job.
-  tmgmt_ui_job_checkout_multiple(array($job));
+  tmgmt_ui_job_checkout(array($job));
 }

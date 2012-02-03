@@ -111,5 +111,5 @@ function tmgmt_node_ui_translate_form_submit($form, &$form_state) {
     $jobs[$job->tjid] = $job;
   }
   // Process the job via the built-in multiple checkout functionality.
-  tmgmt_ui_job_checkout_multiple($jobs);
+  tmgmt_ui_job_checkout($jobs);
 }
