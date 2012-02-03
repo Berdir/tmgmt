@@ -89,7 +89,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
         foreach ($data as $key => $value) {
           $data[$key]['#text'] = $job->target_language . '_' . $value['#text'];
         }
-        $job->submitted('Test translation created');
+        $job->submitted('Test translation created.');
         $job->addTranslatedData(tmgmt_unflatten_data($data));
         break;
     }
