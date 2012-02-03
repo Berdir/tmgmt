@@ -250,7 +250,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $submit_job = $this->createJob('submit');
     $submit_job->requestTranslation();
     $submit_job = tmgmt_job_load($submit_job->tjid);
-    $this->assertTrue($submit_job->isActive());
+    $this->assertTrue($submit_job->isSubmittable());
     $messages = $submit_job->getMessages();
     $last_message = end($messages);
     $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
@@ -265,7 +265,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
       /* @var $job_item TMGMTJobItem */
       $this->assertTrue($job_item->isNeedsReview());
     }
-    
+
     $messages = $translate_job->getMessages();
     $last_message = end($messages);
     $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
@@ -292,12 +292,15 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
       $job_item->propagateTranslatedData();
     }
 
+    // @todo Accepting does not result in messages on the job anymore.
+    // Update once there are job item messages.
+    /*
     $messages = $translate_job->getMessages();
     $last_message = end($messages);
     $this->assertEqual(TMGMT_JOB_STATE_ACCEPTED, $last_message->state_before);
     $this->assertEqual(TMGMT_JOB_STATE_FINISHED, $last_message->state_after);
     $this->assertEqual('Job accepted', $last_message->message);
-    $this->assertEqual('status', $last_message->type);
+    $this->assertEqual('status', $last_message->type);*/
 
     // Check if the translations have been "saved".
     foreach ($translate_job->getItems() as $item) {
