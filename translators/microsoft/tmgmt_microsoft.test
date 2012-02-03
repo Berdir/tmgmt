@@ -87,7 +87,9 @@ class TMGMTMicrosoftTestCase extends TMGMTBaseTestCase {
     $job->requestTranslation();
 
     // Now it should be needs review.
-    $this->assertTrue($job->isNeedsReview());
+    foreach ($job->getItems() as $item) {
+      $this->assertTrue($item->isNeedsReview());
+    }
     $items = $job->getItems();
     $item = end($items);
     $this->assertEqual('de_Hello world', $item->translation['wrapper']['#text']);

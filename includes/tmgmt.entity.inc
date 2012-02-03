@@ -1166,14 +1166,14 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @return int
    *   The updated state of the job if it could be set.
    */
-  public function setState($state, $message = NULL, $variables = array()) {
+  public function setState($state, $message = NULL, $variables = array(), $type = 'debug') {
     // Return TRUE if the state could be set. Return FALSE otherwise.
     if (array_key_exists($state, tmgmt_job_states())) {
       $this->state = $state;
       // If a message is attached to this state change add it now. Note: All
       // state changes are 'debug' messages.
       if (isset($message)) {
-        $this->addMessage($message, $variables, 'debug');
+        $this->addMessage($message, $variables, $type);
       }
       // We are updating the internal state tracker here so that future messages
       // get it right.
@@ -1333,11 +1333,11 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @see TMGMTJob::addMessage()
    */
-  public function submitted($message = NULL, $variables = array()) {
+  public function submitted($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
       $message = 'The translation job has been submitted.';
     }
-    $this->setState(TMGMT_JOB_STATE_ACTIVE, $message, $variables);
+    $this->setState(TMGMT_JOB_STATE_ACTIVE, $message, $variables, $type);
     return $this;
   }
 
@@ -1354,11 +1354,11 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @see TMGMTJob::addMessage()
    */
-  public function finished($message = NULL, $variables = array()) {
+  public function finished($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
       $message = 'The translation job has been finished.';
     }
-    $this->setState(TMGMT_JOB_STATE_FINISHED, $message, $variables);
+    $this->setState(TMGMT_JOB_STATE_FINISHED, $message, $variables, $type);
     return $this;
   }
 
@@ -1377,11 +1377,11 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @see TMGMTJob::addMessage()
    */
-  public function cancelled($message = NULL, $variables = array()) {
+  public function cancelled($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
       $message = 'The translation job has been cancelled.';
     }
-    $this->setState(TMGMT_JOB_STATE_CANCELLED, $message, $variables);
+    $this->setState(TMGMT_JOB_STATE_CANCELLED, $message, $variables, $type);
     return $this;
   }
 
@@ -1398,11 +1398,11 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @see TMGMTJob::addMessage()
    */
-  public function rejected($message = NULL, $variables = array()) {
+  public function rejected($message = NULL, $variables = array(), $type = 'error') {
     if (!isset($message)) {
       $message = 'The translation job has been rejected by the translation provider.';
     }
-    $this->setState(TMGMT_JOB_STATE_REJECTED, $message, $variables);
+    $this->setState(TMGMT_JOB_STATE_REJECTED, $message, $variables, $type);
     return $this;
   }
 
@@ -1599,14 +1599,14 @@ class TMGMTJobMessage extends Entity {
    *
    * @var integer
    */
-  public $status_before;
+  public $state_before;
 
   /**
    * The status after the event occurred.
    *
    * @var integer
    */
-  public $status_after;
+  public $state_after;
 
   /**
    * The time when the message object was created as a timestamp.
