@@ -250,7 +250,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $submit_job = $this->createJob('submit');
     $submit_job->requestTranslation();
     $submit_job = tmgmt_job_load($submit_job->tjid);
-    $this->assertTrue($submit_job->isSubmittable());
+    $this->assertTrue($submit_job->isActive());
     $messages = $submit_job->getMessages();
     $last_message = end($messages);
     $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
@@ -270,7 +270,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $last_message = end($messages);
     $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
     $this->assertEqual(TMGMT_JOB_STATE_ACTIVE, $last_message->state_after);
-    $this->assertEqual('Test translation created', $last_message->message);
+    $this->assertEqual('Test translation created.', $last_message->message);
 
     $i = 1;
     foreach ($translate_job->getItems() as $item) {
