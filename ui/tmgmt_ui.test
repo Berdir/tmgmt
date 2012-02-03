@@ -87,9 +87,6 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Job needs to be in state active.
     $job = entity_load_unchanged('tmgmt_job', $job->tjid);
-    debug($job);
-    debug($job->getMessages());
-    debug($job->getItems());
     $this->assertTrue($job->isActive());
     foreach ($job->getItems() as $job_item) {
       /* @var $job_item TMGMTJobItem */
@@ -125,7 +122,6 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Another job.
     $job = tmgmt_job_match_item('en', 'es');
-    debug($job->tjid);
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
@@ -145,7 +141,6 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Another job.
     $job = tmgmt_job_match_item('en', 'es');
-    debug($job->tjid);
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
