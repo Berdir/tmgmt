@@ -101,6 +101,7 @@ function tmgmt_schema() {
         'description' => 'The identifier of the translation job.',
         'type' => 'int',
         'not null' => TRUE,
+        'unsigned' => TRUE,
       ),
       'plugin' => array(
         'description' => 'Indicates the plugin which provides this item.',
@@ -222,22 +223,25 @@ function tmgmt_schema() {
     ),
   );
 
-  $schema['tmgmt_job_message'] = array(
+  $schema['tmgmt_message'] = array(
     'description' => 'A log message can be used to store events that affect a job.',
     'fields' => array(
-      'tjmid' => array(
+      'mid' => array(
         'description' => 'The identifier of the message.',
         'type' => 'serial',
         'not null' => TRUE,
       ),
-      'tjid' => array(
-        'description' => 'The identifier of the translation job.',
-        'type' => 'int',
+      'entity_type' => array(
+        'description' => 'The type of the entity that the message belongs to.',
+        'type' => 'varchar',
+        'length' => 128,
         'not null' => TRUE,
       ),
-      'tjiid' => array(
-        'description' => 'The identifier of the translation job item.',
+      'entity_id' => array(
+        'description' => 'The identifier of the entity that this message belongs to.',
         'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
       ),
       'message' => array(
         'description' => 'The language into the data should be translated.',
@@ -264,17 +268,17 @@ function tmgmt_schema() {
         'description' => 'Created timestamp.',
         'type' => 'int',
         'unsigned' => TRUE,
-        'not null' => FALSE,
       ),
       'type' => array(
         'description' => 'Type of the message (debug, notice, warning or error)',
         'type' => 'varchar',
         'length' => 128,
+        'not null' => TRUE,
       ),
     ),
-    'primary key' => array('tjmid'),
+    'primary key' => array('mid'),
     'indexes' => array(
-      'job_id' => array('tjid'),
+      'reference' => array('entity_type', 'entity_id'),
       'state_before' => array('state_before'),
       'state_after' => array('state_after'),
     ),
@@ -475,5 +479,67 @@ function tmgmt_update_7014() {
   db_add_field('tmgmt_job_message', 'tjiid', array(
     'description' => 'The identifier of the translation job item.',
     'type' => 'int',
+  ));
+}
+
+/**
+ * Move the tmgmt_job_message table to tmgmt_message and change the way that
+ * we are referencing to the parent job or job item.
+ */
+function tmgmt_update_7015() {
+  db_drop_table('tmgmt_job_message');
+  db_create_table('tmgmt_message', array(
+    'description' => 'A log message can be used to store events that affect a job.',
+    'fields' => array(
+      'mid' => array(
+        'description' => 'The identifier of the message.',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'entity_type' => array(
+        'description' => 'The type of the entity that the message belongs to.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+      ),
+      'entity_id' => array(
+        'description' => 'The identifier of the entity that this message belongs to.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ),
+      'message' => array(
+        'description' => 'The language into the data should be translated.',
+        'type' => 'text',
+        'size' => 'big',
+      ),
+      'variables' => array(
+        'description' => 'The variables of the message as expected by t().',
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+      'state_before' => array(
+        'description' => 'The state of the translation job before the event that supplied the message occurred.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'state_after' => array(
+        'description' => 'The state of the translation job after the event that supplied the message occurred.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'description' => 'Created timestamp.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+      ),
+      'type' => array(
+        'description' => 'Type of the message (debug, notice, warning or error)',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+      ),
+    ),
   ));
 }

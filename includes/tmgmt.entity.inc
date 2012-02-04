@@ -399,7 +399,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job item if it hasn't yet been saved.
     if (!empty($this->tjiid) || $this->save()) {
-      $message = tmgmt_job_message_create($this->previousState, $this->getState(), $message, $variables, array('tjid' => $this->tjid, 'tjiid' => $this->tjiid, 'type' => $type));
+      $message = tmgmt_message_create($this->previousState, $this->getState(), $message, $variables, array('entity_type' => $this->entityType, 'entity_id' => $this->tjiid, 'type' => $type));
       if ($message->save()) {
         return $message;
       }
@@ -726,8 +726,25 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * @return array
    *   An array of translation job messages.
    */
-  public function getMessages() {
-    return $this->getAttachedEntities('tmgmt_job_message');
+  public function getMessages($conditions = array()) {
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'tmgmt_message');
+    $query->propertyCondition('entity_type', $this->entityType);
+    $query->propertyCondition('entity_id', $this->tjiid);
+    foreach ($conditions as $key => $condition) {
+      if (is_array($condition)) {
+        $operator = isset($condition['operator']) ? $condition['operator'] : '=';
+        $query->propertyCondition($key, $condition['value'], $operator);
+      }
+      else {
+        $query->propertyCondition($key, $condition);
+      }
+    }
+    $results = $query->execute();
+    if (!empty($results['tmgmt_message'])) {
+      return entity_load('tmgmt_message', array_keys($results['tmgmt_message']));
+    }
+    return array();
   }
 
   /**
@@ -752,7 +769,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * Returns all job messages attached to this job item with timestamp newer
    * than $time.
    *
-   * @param $time
+   * @param $timestamp
    *   (Optional) Messages need to have a newer timestamp than $time. Defaults
    *   to REQUEST_TIME.
    *
@@ -761,46 +778,8 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    */
   public function getMessagesSince($time = NULL) {
     $time = isset($time) ? $time : REQUEST_TIME;
-    $messages = $this->getAttachedEntities('tmgmt_job_message', array(
-      'created' => array(
-        'value' => $time,
-        'operator' => '>=',
-      ),
-    ));
-    return $messages;
-  }
-
-  /**
-   * Returns all entities of a given entity type that are attached to this job
-   * item.
-   *
-   * @param $entity_type
-   *   The attached entity type to look for.
-   * @param $conditions
-   *   (Optional) An array of property conditions that should be applied to the
-   *   query.
-   *
-   * @return array
-   *   An array of entities that are attached to this job item.
-   */
-  public function getAttachedEntities($entity_type, $conditions = array()) {
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', $entity_type);
-    $query->propertyCondition('tjiid', $this->tjiid);
-    foreach ($conditions as $key => $condition) {
-      if (is_array($condition)) {
-        $operator = isset($condition['operator']) ? $condition['operator'] : '=';
-        $query->propertyCondition($key, $condition['value'], $operator);
-      }
-      else {
-        $query->propertyCondition($key, $condition);
-      }
-    }
-    $results = $query->execute();
-    if (!empty($results[$entity_type])) {
-      return entity_load($entity_type, array_keys($results[$entity_type]));
-    }
-    return array();
+    $conditions = array('created' => array('value' => $time, 'operator' => '>='));
+    return $this->getMessages($conditions);
   }
 
 }
@@ -965,7 +944,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
           '#markup' => $view->preview('block', array($this->tjid)),
         );
       }
-      if ($view = views_get_view('tmgmt_ui_job_messages')) {
+      if ($view = views_get_view('tmgmt_ui_messages')) {
         $content['messages'] = array(
           '#type' => 'item',
           '#title' => $view->get_title(),
@@ -1054,7 +1033,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job if it hasn't yet been saved.
     if (!empty($this->tjid) || $this->save()) {
-      $message = tmgmt_job_message_create($this->previousState, $this->getState(), $message, $variables, array('tjid' => $this->tjid, 'type' => $type));
+      $message = tmgmt_message_create($this->previousState, $this->getState(), $message, $variables, array('entity_type' => $this->entityType, 'entity_id' => $this->tjid, 'type' => $type));
       if ($message->save()) {
         return $message;
       }
@@ -1068,8 +1047,24 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @return array
    *   An array of translation job items.
    */
-  public function getItems() {
-    return $this->getAttachedEntities('tmgmt_job_item');
+  public function getItems($conditions = array()) {
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'tmgmt_job_item');
+    $query->propertyCondition('tjid', $this->tjid);
+    foreach ($conditions as $key => $condition) {
+      if (is_array($condition)) {
+        $operator = isset($condition['operator']) ? $condition['operator'] : '=';
+        $query->propertyCondition($key, $condition['value'], $operator);
+      }
+      else {
+        $query->propertyCondition($key, $condition);
+      }
+    }
+    $results = $query->execute();
+    if (!empty($results['tmgmt_job_item'])) {
+      return entity_load('tmgmt_job_item', array_keys($results['tmgmt_job_item']));
+    }
+    return array();
   }
 
   /**
@@ -1078,8 +1073,25 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @return array
    *   An array of translation job messages.
    */
-  public function getMessages() {
-    return $this->getAttachedEntities('tmgmt_job_message');
+  public function getMessages($conditions = array()) {
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'tmgmt_message');
+    $query->propertyCondition('entity_type', $this->entityType);
+    $query->propertyCondition('entity_id', $this->tjid);
+    foreach ($conditions as $key => $condition) {
+      if (is_array($condition)) {
+        $operator = isset($condition['operator']) ? $condition['operator'] : '=';
+        $query->propertyCondition($key, $condition['value'], $operator);
+      }
+      else {
+        $query->propertyCondition($key, $condition);
+      }
+    }
+    $results = $query->execute();
+    if (!empty($results['tmgmt_message'])) {
+      return entity_load('tmgmt_message', array_keys($results['tmgmt_message']));
+    }
+    return array();
   }
 
   /**
@@ -1095,45 +1107,8 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function getMessagesSince($time = NULL) {
     $time = isset($time) ? $time : REQUEST_TIME;
-    $messages = $this->getAttachedEntities('tmgmt_job_message', array(
-      'created' => array(
-        'value' => $time,
-        'operator' => '>=',
-      ),
-    ));
-    return $messages;
-  }
-
-  /**
-   * Returns all entities of a given entity type that are attached to this job.
-   *
-   * @param $entity_type
-   *   The attached entity type to look for.
-   * @param $conditions
-   *   (Optional) An array of property conditions that should be applied to the
-   *   query.
-   *
-   * @return array
-   *   An array of entities that are attached to this job.
-   */
-  public function getAttachedEntities($entity_type, $conditions = array()) {
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', $entity_type);
-    $query->propertyCondition('tjid', $this->tjid);
-    foreach ($conditions as $key => $condition) {
-      if (is_array($condition)) {
-        $operator = isset($condition['operator']) ? $condition['operator'] : '=';
-        $query->propertyCondition($key, $condition['value'], $operator);
-      }
-      else {
-        $query->propertyCondition($key, $condition);
-      }
-    }
-    $results = $query->execute();
-    if (!empty($results[$entity_type])) {
-      return entity_load($entity_type, array_keys($results[$entity_type]));
-    }
-    return array();
+    $conditions = array('created' => array('value' => $time, 'operator' => '>='));
+    return $this->getMessages($conditions);
   }
 
   /**
@@ -1604,18 +1579,18 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
 }
 
 /**
- * Entity class for the tmgmt_job_message entity.
+ * Entity class for the tmgmt_message entity.
  *
  * @ingroup tmgmt_job
  */
-class TMGMTJobMessage extends Entity {
+class TMGMTMessage extends Entity {
 
   /**
    * The ID of the message..
    *
    * @var integer
    */
-  public $tjmid;
+  public $mid;
 
   /**
    * The ID of the job.
@@ -1677,7 +1652,7 @@ class TMGMTJobMessage extends Entity {
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
-    parent::__construct($values, 'tmgmt_job_message');
+    parent::__construct($values, 'tmgmt_message');
     if (empty($this->created)) {
       $this->created = REQUEST_TIME;
     }

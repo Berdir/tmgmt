@@ -1,10 +1,10 @@
 <?php
 
 $view = new view;
-$view->name = 'tmgmt_ui_job_messages';
+$view->name = 'tmgmt_ui_messages';
 $view->description = 'Lists the messages that are related to a job.';
 $view->tag = 'Translation Management';
-$view->base_table = 'tmgmt_job_message';
+$view->base_table = 'tmgmt_message';
 $view->human_name = 'Translation Job Messages';
 $view->core = 7;
 $view->api_version = '3.0';
@@ -64,7 +64,7 @@ $handler->display->display_options['style_options']['sticky'] = 0;
 $handler->display->display_options['style_options']['empty_table'] = 0;
 /* Field: Created */
 $handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_job_message';
+$handler->display->display_options['fields']['created']['table'] = 'tmgmt_message';
 $handler->display->display_options['fields']['created']['field'] = 'created';
 $handler->display->display_options['fields']['created']['ui_name'] = 'Created';
 $handler->display->display_options['fields']['created']['alter']['alter_text'] = 0;
@@ -87,7 +87,7 @@ $handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
 $handler->display->display_options['fields']['created']['date_format'] = 'short';
 /* Field: State before */
 $handler->display->display_options['fields']['state_before']['id'] = 'state_before';
-$handler->display->display_options['fields']['state_before']['table'] = 'tmgmt_job_message';
+$handler->display->display_options['fields']['state_before']['table'] = 'tmgmt_message';
 $handler->display->display_options['fields']['state_before']['field'] = 'state_before';
 $handler->display->display_options['fields']['state_before']['ui_name'] = 'State before';
 $handler->display->display_options['fields']['state_before']['label'] = 'Before';
@@ -111,7 +111,7 @@ $handler->display->display_options['fields']['state_before']['hide_alter_empty']
 $handler->display->display_options['fields']['state_before']['machine_name'] = 0;
 /* Field: State after */
 $handler->display->display_options['fields']['state_after']['id'] = 'state_after';
-$handler->display->display_options['fields']['state_after']['table'] = 'tmgmt_job_message';
+$handler->display->display_options['fields']['state_after']['table'] = 'tmgmt_message';
 $handler->display->display_options['fields']['state_after']['field'] = 'state_after';
 $handler->display->display_options['fields']['state_after']['ui_name'] = 'State after';
 $handler->display->display_options['fields']['state_after']['label'] = 'After';
@@ -135,7 +135,7 @@ $handler->display->display_options['fields']['state_after']['hide_alter_empty'] 
 $handler->display->display_options['fields']['state_after']['machine_name'] = 0;
 /* Field: Message */
 $handler->display->display_options['fields']['message']['id'] = 'message';
-$handler->display->display_options['fields']['message']['table'] = 'tmgmt_job_message';
+$handler->display->display_options['fields']['message']['table'] = 'tmgmt_message';
 $handler->display->display_options['fields']['message']['field'] = 'message';
 $handler->display->display_options['fields']['message']['ui_name'] = 'Message';
 $handler->display->display_options['fields']['message']['alter']['alter_text'] = 0;
@@ -157,13 +157,13 @@ $handler->display->display_options['fields']['message']['empty_zero'] = 0;
 $handler->display->display_options['fields']['message']['hide_alter_empty'] = 1;
 /* Sort criterion: Created */
 $handler->display->display_options['sorts']['created']['id'] = 'created';
-$handler->display->display_options['sorts']['created']['table'] = 'tmgmt_job_message';
+$handler->display->display_options['sorts']['created']['table'] = 'tmgmt_message';
 $handler->display->display_options['sorts']['created']['field'] = 'created';
 $handler->display->display_options['sorts']['created']['ui_name'] = 'Created';
 $handler->display->display_options['sorts']['created']['order'] = 'DESC';
 /* Contextual filter: Job Message */
 $handler->display->display_options['arguments']['tjid']['id'] = 'tjid';
-$handler->display->display_options['arguments']['tjid']['table'] = 'tmgmt_job_message';
+$handler->display->display_options['arguments']['tjid']['table'] = 'tmgmt_message';
 $handler->display->display_options['arguments']['tjid']['field'] = 'tjid';
 $handler->display->display_options['arguments']['tjid']['ui_name'] = 'Job Message';
 $handler->display->display_options['arguments']['tjid']['default_argument_type'] = 'node';

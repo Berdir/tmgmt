@@ -133,18 +133,18 @@ function tmgmt_entity_info() {
       'id' => 'tjiid',
     ),
   );
-  $info['tmgmt_job_message'] = array(
-    'label' => t('Translation Management Job Message'),
+  $info['tmgmt_message'] = array(
+    'label' => t('Translation Management Message'),
     'module' => 'tmgmt',
     'controller class' => 'EntityAPIController',
-    'metadata controller class' => 'TMGMTJobMessageMetadataController',
-    'views controller class' => 'TMGMTJobMessageViewsController',
-    'entity class' => 'TMGMTJobMessage',
-    'base table' => 'tmgmt_job_message',
+    'metadata controller class' => 'TMGMTMessageMetadataController',
+    'views controller class' => 'TMGMTMessageViewsController',
+    'entity class' => 'TMGMTMessage',
+    'base table' => 'tmgmt_message',
     'label callback' => 'entity_class_label',
-    'access callback' => 'tmgmt_job_message_access',
+    'access callback' => 'tmgmt_message_access',
     'entity keys' => array(
-      'id' => 'tjmid',
+      'id' => 'mid',
     ),
   );
   $info['tmgmt_translator'] = array(
@@ -369,7 +369,7 @@ function tmgmt_job_item_review_access(TMGMTJobItem $item, $account = NULL) {
 /**
  * Access callback for the job message entity.
  */
-function tmgmt_job_message_access($op, $message = NULL, $account = NULL) {
+function tmgmt_message_access($op, $message = NULL, $account = NULL) {
   // Return TRUE in all cases for now :)
   return TRUE;
 }
@@ -451,22 +451,22 @@ function tmgmt_job_item_create($plugin, $item_type, $item_id, array $values = ar
 /**
  * Loads a translation job message.
  *
- * @param $tjmid
+ * @param $mid
  *   A job message id.
  *
- * @return TMGMTJobMessage
+ * @return TMGMTMessage
  *   A job message entity or FALSE if the query didn't yield any results.
  */
-function tmgmt_job_message_load($tjmid) {
-  $jobs = tmgmt_job_load_multiple(array($tjmid));
+function tmgmt_message_load($mid) {
+  $jobs = tmgmt_message_load_multiple(array($mid));
   return $jobs ? reset($jobs) : FALSE;
 }
 
 /**
  * Loads translation job messages.
  */
-function tmgmt_job_message_load_multiple($tjmids = array(), $conditions = array()) {
-  return entity_load('tmgmt_job_message', $tjmids, $conditions);
+function tmgmt_message_load_multiple($mids = array(), $conditions = array()) {
+  return entity_load('tmgmt_message', $mids, $conditions);
 }
 
 /**
@@ -486,8 +486,8 @@ function tmgmt_job_message_load_multiple($tjmids = array(), $conditions = array(
  * @return TMGMTJobItem
  *   The created, not yet saved, job item entity.
  */
-function tmgmt_job_message_create($status_before, $status_after, $message = '', $variables = array(), $values = array()) {
-  return entity_create('tmgmt_job_message', array_merge($values, array(
+function tmgmt_message_create($status_before, $status_after, $message = '', $variables = array(), $values = array()) {
+  return entity_create('tmgmt_message', array_merge($values, array(
     'state_before' => $status_before,
     'state_after' => $status_after,
     'message' => $message,
