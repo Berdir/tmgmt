@@ -95,7 +95,9 @@ class TMGMTJobItemController extends EntityAPIController {
     // parent job entity.
     if (in_array($hook, array('insert', 'delete', 'update'))) {
       $job = $entity->getJob();
-      $job->itemHook($hook, $entity);
+      if ($job) {
+        $job->itemHook($hook, $entity);
+      }
     }
     // Move on to the default hooks provided by Entity API.
     parent::invoke($hook, $entity);
