@@ -97,9 +97,6 @@ class TMGMTMessageMetadataController extends EntityDefaultMetadataController {
     // Make the created property appear as date.
     $properties['created']['type'] = 'date';
 
-    // Add the options list for the defined state constants.
-    $properties['state_before']['options list'] = $properties['state_after']['options list'] = 'tmgmt_job_states';
-
     return $info;
   }
 

@@ -472,10 +472,6 @@ function tmgmt_message_load_multiple($mids = array(), $conditions = array()) {
 /**
  * Creates a translation job message.
  *
- * @param $status_before
- *   The status before the event occurred.
- * @param $status_after
- *   The status after the event occurred.
  * @param $message
  *   (Optional) The message to be saved.
  * @param $variables
@@ -486,10 +482,8 @@ function tmgmt_message_load_multiple($mids = array(), $conditions = array()) {
  * @return TMGMTJobItem
  *   The created, not yet saved, job item entity.
  */
-function tmgmt_message_create($status_before, $status_after, $message = '', $variables = array(), $values = array()) {
+function tmgmt_message_create($message = '', $variables = array(), $values = array()) {
   return entity_create('tmgmt_message', array_merge($values, array(
-    'state_before' => $status_before,
-    'state_after' => $status_after,
     'message' => $message,
     'variables' => $variables,
   )));

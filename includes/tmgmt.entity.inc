@@ -311,13 +311,6 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public $translation = array();
 
   /**
-   * Tracks the previous state for internal use.
-   *
-   * @var int
-   */
-  protected $previousState;
-
-  /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
@@ -325,8 +318,6 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
     if (!isset($this->state)) {
       $this->state = TMGMT_JOB_ITEM_STATE_ACTIVE;
     }
-    // We are tracking state changes for internal use.
-    $this->previousState = $this->state;
   }
 
   /**
@@ -395,11 +386,15 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *   $message and $variables interact.
    * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
+   * @param $type
+   *   (Optional) The type of the message. Can be one of 'status', 'error',
+   *   'warning' or 'debug'. Messages of the type 'debug' will not get printed
+   *   to the screen.
    */
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job item if it hasn't yet been saved.
     if (!empty($this->tjiid) || $this->save()) {
-      $message = tmgmt_message_create($this->previousState, $this->getState(), $message, $variables, array('entity_type' => $this->entityType, 'entity_id' => $this->tjiid, 'type' => $type));
+      $message = tmgmt_message_create($message, $variables, array('tjid' => $this->tjid, 'tjiid' => $this->tjiid, 'type' => $type));
       if ($message->save()) {
         return $message;
       }
@@ -518,44 +513,32 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
 
   /**
    * Sets the state of the job item to 'needs review'.
-   *
-   * @return TMGMTJobItem
-   *   The job item entity.
    */
   public function needsReview($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
       $message = 'The translation job item needs to be reviewed.';
     }
-    $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW, $message, $variables, $type);
-    return $this;
+    return $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW, $message, $variables, $type);
   }
 
   /**
    * Sets the state of the job item to 'accepted'.
-   *
-   * @return TMGMTJobItem
-   *   The job item entity.
    */
   public function accepted($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
       $message = 'The translation job item has been accepted.';
     }
-    $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED, $message, $variables, $type);
-    return $this;
+    return $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED, $message, $variables, $type);
   }
 
   /**
    * Sets the state of the job item to 'active'.
-   *
-   * @return TMGMTJobItem
-   *   The job item entity.
    */
   public function active($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
       $message = 'The translation job item is now active.';
     }
-    $this->setState(TMGMT_JOB_ITEM_STATE_ACTIVE, $message, $variables, $type);
-    return $this;
+    return $this->setState(TMGMT_JOB_ITEM_STATE_ACTIVE, $message, $variables, $type);
   }
 
   /**
@@ -570,19 +553,18 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *
    * @return int
    *   The updated state of the job if it could be set.
+   *
+   * @see TMGMTJob::addMessage()
    */
   public function setState($state, $message = NULL, $variables = array(), $type = 'debug') {
     // Return TRUE if the state could be set. Return FALSE otherwise.
-    if (array_key_exists($state, tmgmt_job_item_states())) {
+    if (array_key_exists($state, tmgmt_job_item_states()) && $this->state != $state) {
       $this->state = $state;
-      // If a message is attached to this state change add it now. Note: All
-      // state changes are 'debug' messages.
+      $this->save();
+      // If a message is attached to this state change add it now.
       if (isset($message)) {
         $this->addMessage($message, $variables, $type);
       }
-      // We are updating the internal state tracker here so that future messages
-      // get it right.
-      $this->previousState = $state;
     }
     return $this->state;
   }
@@ -729,8 +711,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public function getMessages($conditions = array()) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'tmgmt_message');
-    $query->propertyCondition('entity_type', $this->entityType);
-    $query->propertyCondition('entity_id', $this->tjiid);
+    $query->propertyCondition('tjiid', $this->tjiid);
     foreach ($conditions as $key => $condition) {
       if (is_array($condition)) {
         $operator = isset($condition['operator']) ? $condition['operator'] : '=';
@@ -868,13 +849,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public $uid;
 
   /**
-   * Tracks the previous state for internal use.
-   *
-   * @var int
-   */
-  protected $previousState;
-
-  /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
@@ -885,8 +859,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     if (!isset($this->state)) {
       $this->state = TMGMT_JOB_STATE_UNPROCESSED;
     }
-    // We are tracking state changes for internal use.
-    $this->previousState = $this->state;
   }
 
   /**
@@ -956,45 +928,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Allows the job entity to react on events that affect a job item that
-   * belongs to this job.
-   *
-   * @param $hook
-   *   The type of the event. Can be one of 'insert', 'update' or 'delete'.
-   * @param TMGMTJobItem $item
-   *   The job item entity affected by this event.
-   */
-  public function itemHook($hook, TMGMTJobItem $item) {
-    switch ($hook) {
-      case 'delete':
-      case 'update':
-        // If the passed job item is not finished or has already been finished
-        // before or if the job is already finished, we don't need to go through
-        // the next checks.
-        if ($hook == 'update' && (!$item->isAccepted() || $item->original->isAccepted() || $this->isFinished())) {
-          break;
-        }
-        // This checks whether there are unfinished job items left.
-        $query = new EntityFieldQuery();
-        $result = (boolean) $query->entityCondition('entity_type', 'tmgmt_job_item')
-          ->propertyCondition('state', TMGMT_JOB_ITEM_STATE_ACCEPTED, '<>')
-          ->count()
-          ->range(0, 1)
-          ->execute();
-        // If there are no unfinished job items left, set the state of this job
-        // to 'finished'.
-        if (!$result) {
-          $this->finished()->save();
-        }
-        break;
-
-      case 'insert':
-        // Nothing to do here.
-        break;
-    }
-  }
-
-  /**
    * Adds an item to the translation job.
    *
    * @param $plugin
@@ -1029,11 +962,15 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   $message and $variables interact.
    * @param $variables
    *   (Optional) An array of variables to replace in the message on display.
+   * @param $type
+   *   (Optional) The type of the message. Can be one of 'status', 'error',
+   *   'warning' or 'debug'. Messages of the type 'debug' will not get printed
+   *   to the screen.
    */
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job if it hasn't yet been saved.
     if (!empty($this->tjid) || $this->save()) {
-      $message = tmgmt_message_create($this->previousState, $this->getState(), $message, $variables, array('entity_type' => $this->entityType, 'entity_id' => $this->tjid, 'type' => $type));
+      $message = tmgmt_message_create($message, $variables, array('tjid' => $this->tjid, 'type' => $type));
       if ($message->save()) {
         return $message;
       }
@@ -1076,8 +1013,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public function getMessages($conditions = array()) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'tmgmt_message');
-    $query->propertyCondition('entity_type', $this->entityType);
-    $query->propertyCondition('entity_id', $this->tjid);
+    $query->propertyCondition('tjid', $this->tjid);
     foreach ($conditions as $key => $condition) {
       if (is_array($condition)) {
         $operator = isset($condition['operator']) ? $condition['operator'] : '=';
@@ -1191,19 +1127,18 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *
    * @return int
    *   The updated state of the job if it could be set.
+   *
+   * @see TMGMTJob::addMessage()
    */
   public function setState($state, $message = NULL, $variables = array(), $type = 'debug') {
     // Return TRUE if the state could be set. Return FALSE otherwise.
     if (array_key_exists($state, tmgmt_job_states())) {
       $this->state = $state;
-      // If a message is attached to this state change add it now. Note: All
-      // state changes are 'debug' messages.
+      $this->save();
+      // If a message is attached to this state change add it now.
       if (isset($message)) {
         $this->addMessage($message, $variables, $type);
       }
-      // We are updating the internal state tracker here so that future messages
-      // get it right.
-      $this->previousState = $state;
     }
     return $this->state;
   }
@@ -1329,24 +1264,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Set the state of the job to 'unprocessed'.
-   *
-   * @param $message
-   *   The log message to be saved along with the state change.
-   * @param $variables
-   *   (Optional) An array of variables to replace in the message on display.
-   *
-   * @return TMGMTJob
-   *   The job entity.
-   *
-   * @see TMGMTJob::addMessage()
-   */
-  public function unprocessed($message = NULL, $variables = array()) {
-    $this->setState(TMGMT_JOB_STATE_UNPROCESSED, $message, $variables);
-    return $this;
-  }
-
-  /**
    * Set the state of the job to 'submitted'.
    *
    * @param $message
@@ -1364,7 +1281,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       $message = 'The translation job has been submitted.';
     }
     $this->setState(TMGMT_JOB_STATE_ACTIVE, $message, $variables, $type);
-    return $this;
   }
 
   /**
@@ -1384,8 +1300,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     if (!isset($message)) {
       $message = 'The translation job has been finished.';
     }
-    $this->setState(TMGMT_JOB_STATE_FINISHED, $message, $variables, $type);
-    return $this;
+    return $this->setState(TMGMT_JOB_STATE_FINISHED, $message, $variables, $type);
   }
 
   /**
@@ -1407,8 +1322,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     if (!isset($message)) {
       $message = 'The translation job has been cancelled.';
     }
-    $this->setState(TMGMT_JOB_STATE_CANCELLED, $message, $variables, $type);
-    return $this;
+    return $this->setState(TMGMT_JOB_STATE_CANCELLED, $message, $variables, $type);
   }
 
   /**
@@ -1428,8 +1342,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     if (!isset($message)) {
       $message = 'The translation job has been rejected by the translation provider.';
     }
-    $this->setState(TMGMT_JOB_STATE_REJECTED, $message, $variables, $type);
-    return $this;
+    return $this->setState(TMGMT_JOB_STATE_REJECTED, $message, $variables, $type);
   }
 
   /**
@@ -1457,8 +1370,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   TRUE if the translation job was cancelled, FALSE otherwise.
    */
   public function cancelTranslation() {
-    // Since inactive (unsubmitted, rejected, etc.) jobs can be deleted directly
-    // we don't need to be able to cancel them.
     if (!$this->isCancelable() || !$controller = $this->getTranslatorController()) {
       return FALSE;
     }
@@ -1619,20 +1530,6 @@ class TMGMTMessage extends Entity {
    * @var array
    */
   public $variables;
-
-  /**
-   * The status before the event occurred.
-   *
-   * @var integer
-   */
-  public $state_before;
-
-  /**
-   * The status after the event occurred.
-   *
-   * @var integer
-   */
-  public $state_after;
 
   /**
    * The time when the message object was created as a timestamp.

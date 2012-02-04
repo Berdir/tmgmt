@@ -253,8 +253,6 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertTrue($submit_job->isActive());
     $messages = $submit_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
-    $this->assertEqual(TMGMT_JOB_STATE_ACTIVE, $last_message->state_after);
     $this->assertEqual('Test submit', $last_message->message);
 
     // Translate a job.
@@ -268,8 +266,6 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     $messages = $translate_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
-    $this->assertEqual(TMGMT_JOB_STATE_ACTIVE, $last_message->state_after);
     $this->assertEqual('Test translation created.', $last_message->message);
 
     $i = 1;
@@ -296,8 +292,6 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     /*
     $messages = $translate_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual(TMGMT_JOB_STATE_ACCEPTED, $last_message->state_before);
-    $this->assertEqual(TMGMT_JOB_STATE_FINISHED, $last_message->state_after);
     $this->assertEqual('Job accepted', $last_message->message);
     $this->assertEqual('status', $last_message->type);*/
 
@@ -314,8 +308,6 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     $messages = $reject_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
-    $this->assertEqual(TMGMT_JOB_STATE_REJECTED, $last_message->state_after);
     $this->assertEqual('This is not supported', $last_message->message);
     $this->assertEqual('error', $last_message->type);
 
@@ -327,8 +319,6 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     $messages = $failing_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_before);
-    $this->assertEqual(TMGMT_JOB_STATE_UNPROCESSED, $last_message->state_after);
     $this->assertEqual('Service not reachable', $last_message->message);
     $this->assertEqual('error', $last_message->type);
   }

@@ -39,8 +39,7 @@ class TMGMTJobController extends EntityAPIController {
     }
     $query = new EntityFieldQuery();
     $result = $query->entityCondition('entity_type', 'tmgmt_message')
-      ->propertyCondition('entity_type', $this->entityType)
-      ->propertyCondition('entity_id', $this->tjid)
+      ->propertyCondition('tjid', $ids)
       ->execute();
     if (!empty($result['tmgmt_message'])) {
       $controller = entity_get_controller('tmgmt_message');
@@ -76,8 +75,7 @@ class TMGMTJobItemController extends EntityAPIController {
     // delete the attached messages.
     $query = new EntityFieldQuery();
     $result = $query->entityCondition('entity_type', 'tmgmt_message')
-      ->propertyCondition('entity_type', $this->entityType)
-      ->propertyCondition('entity_id', $this->tjiid)
+      ->propertyCondition('tjiid', $ids)
       ->execute();
     if (!empty($result['tmgmt_message'])) {
       $controller = entity_get_controller('tmgmt_message');
@@ -85,20 +83,6 @@ class TMGMTJobItemController extends EntityAPIController {
       // the transaction object.
       $controller->delete(array_keys($result['tmgmt_message']), $transaction);
     }
-  }
-
-  /**
-   * Overrides EntityAPIController::invoke().
-   */
-  public function invoke($hook, $entity) {
-    // Before invoking the default hooks, lets invoke the hook method on the
-    // parent job entity.
-    if (in_array($hook, array('insert', 'delete', 'update'))) {
-      $job = $entity->getJob();
-      $job->itemHook($hook, $entity);
-    }
-    // Move on to the default hooks provided by Entity API.
-    parent::invoke($hook, $entity);
   }
 
 }

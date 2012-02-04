@@ -248,7 +248,6 @@ function tmgmt_supertext_callback() {
   watchdog('supertext', 'TRANSLATED DATA.  <br /><pre>!post</pre>', array('!post' => print_r($translation, TRUE)));
 
   $job->addTranslatedData($translation);
-  $job->save();
   $job->needsReview('Supertext sent us their translation');
 }
 

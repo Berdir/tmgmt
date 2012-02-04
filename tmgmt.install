@@ -231,16 +231,15 @@ function tmgmt_schema() {
         'type' => 'serial',
         'not null' => TRUE,
       ),
-      'entity_type' => array(
-        'description' => 'The type of the entity that the message belongs to.',
-        'type' => 'varchar',
-        'length' => 128,
+      'tjid' => array(
+        'description' => 'The identifier of the translation job that the message belongs to.',
+        'type' => 'int',
+        'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'entity_id' => array(
-        'description' => 'The identifier of the entity that this message belongs to.',
+      'tjiid' => array(
+        'description' => 'The identifier of the translation job item that the message belongs to.',
         'type' => 'int',
-        'not null' => TRUE,
         'unsigned' => TRUE,
       ),
       'message' => array(
@@ -253,16 +252,6 @@ function tmgmt_schema() {
         'type' => 'text',
         'size' => 'big',
         'serialize' => TRUE,
-      ),
-      'state_before' => array(
-        'description' => 'The state of the translation job before the event that supplied the message occurred.',
-        'type' => 'int',
-        'not null' => TRUE,
-      ),
-      'state_after' => array(
-        'description' => 'The state of the translation job after the event that supplied the message occurred.',
-        'type' => 'int',
-        'not null' => TRUE,
       ),
       'created' => array(
         'description' => 'Created timestamp.',
@@ -279,9 +268,8 @@ function tmgmt_schema() {
     ),
     'primary key' => array('mid'),
     'indexes' => array(
-      'reference' => array('entity_type', 'entity_id'),
-      'state_before' => array('state_before'),
-      'state_after' => array('state_after'),
+      'tjid' => array('tjid'),
+      'tjiid' => array('tjiid'),
     ),
   );
 
@@ -497,16 +485,15 @@ function tmgmt_update_7015() {
         'type' => 'serial',
         'not null' => TRUE,
       ),
-      'entity_type' => array(
-        'description' => 'The type of the entity that the message belongs to.',
-        'type' => 'varchar',
-        'length' => 128,
+      'tjid' => array(
+        'description' => 'The identifier of the translation job that the message belongs to.',
+        'type' => 'int',
+        'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'entity_id' => array(
-        'description' => 'The identifier of the entity that this message belongs to.',
+      'tjiid' => array(
+        'description' => 'The identifier of the translation job item that the message belongs to.',
         'type' => 'int',
-        'not null' => TRUE,
         'unsigned' => TRUE,
       ),
       'message' => array(
@@ -545,10 +532,21 @@ function tmgmt_update_7015() {
     ),
     'primary key' => array('mid'),
     'indexes' => array(
-      'reference' => array('entity_type', 'entity_id'),
+      'tjid' => array('tjid'),
+      'tjiid' => array('tjiid'),
       'state_before' => array('state_before'),
       'state_after' => array('state_after'),
     ),
->>>>>>> b14a617d8d7e418c19c0bd852c8e1151e5fb1e48
   ));
+}
+
+/**
+ * Move the tmgmt_job_message table to tmgmt_message and change the way that
+ * we are referencing to the parent job or job item.
+ */
+function tmgmt_update_7016() {
+  db_drop_field('tmgmt_message', 'state_before');
+  db_drop_field('tmgmt_message', 'state_after');
+  db_drop_index('tmgmt_message', 'state_before');
+  db_drop_index('tmgmt_message', 'state_after');
 }
