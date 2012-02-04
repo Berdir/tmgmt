@@ -268,6 +268,7 @@ function tmgmt_schema() {
         'description' => 'Created timestamp.',
         'type' => 'int',
         'unsigned' => TRUE,
+        'not null' => TRUE,
       ),
       'type' => array(
         'description' => 'Type of the message (debug, notice, warning or error)',
@@ -533,6 +534,7 @@ function tmgmt_update_7015() {
         'description' => 'Created timestamp.',
         'type' => 'int',
         'unsigned' => TRUE,
+        'not null' => TRUE,
       ),
       'type' => array(
         'description' => 'Type of the message (debug, notice, warning or error)',
@@ -541,5 +543,12 @@ function tmgmt_update_7015() {
         'not null' => TRUE,
       ),
     ),
+    'primary key' => array('mid'),
+    'indexes' => array(
+      'reference' => array('entity_type', 'entity_id'),
+      'state_before' => array('state_before'),
+      'state_after' => array('state_after'),
+    ),
+>>>>>>> b14a617d8d7e418c19c0bd852c8e1151e5fb1e48
   ));
 }
