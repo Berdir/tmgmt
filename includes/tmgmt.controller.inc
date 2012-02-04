@@ -38,9 +38,10 @@ class TMGMTJobController extends EntityAPIController {
       $controller->delete(array_keys($result['tmgmt_job_item']), $transaction);
     }
     $query = new EntityFieldQuery();
-    $result = $query->entityCondition('entity_type', 'tmgmt_message')
+    $result = $query
+      ->entityCondition('entity_type', 'tmgmt_message')
       ->propertyCondition('entity_type', $this->entityType)
-      ->propertyCondition('entity_id', $this->tjid)
+      ->propertyCondition('entity_id', $ids)
       ->execute();
     if (!empty($result['tmgmt_message'])) {
       $controller = entity_get_controller('tmgmt_message');
@@ -75,9 +76,10 @@ class TMGMTJobItemController extends EntityAPIController {
     // Since we are deleting one or multiple job items here we also need to
     // delete the attached messages.
     $query = new EntityFieldQuery();
-    $result = $query->entityCondition('entity_type', 'tmgmt_message')
+    $result = $query
+      ->entityCondition('entity_type', 'tmgmt_message')
       ->propertyCondition('entity_type', $this->entityType)
-      ->propertyCondition('entity_id', $this->tjiid)
+      ->propertyCondition('entity_id', $ids)
       ->execute();
     if (!empty($result['tmgmt_message'])) {
       $controller = entity_get_controller('tmgmt_message');

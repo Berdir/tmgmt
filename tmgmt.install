@@ -549,6 +549,5 @@ function tmgmt_update_7015() {
       'state_before' => array('state_before'),
       'state_after' => array('state_after'),
     ),
->>>>>>> b14a617d8d7e418c19c0bd852c8e1151e5fb1e48
   ));
 }
