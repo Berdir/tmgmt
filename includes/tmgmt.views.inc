@@ -51,10 +51,10 @@ class TMGMTJobViewsController extends EntityDefaultViewsController {
 /**
  * Views controller class for the tmgmt job message entity.
  */
-class TMGMTJobMessageViewsController extends EntityDefaultViewsController {
+class TMGMTMessageViewsController extends EntityDefaultViewsController {
   public function views_data() {
     $data = parent::views_data();
-    $data['tmgmt_job_message']['message']['field']['handler'] = 'tmgmt_handler_field_tmgmt_job_message_message';
+    $data['tmgmt_message']['message']['field']['handler'] = 'tmgmt_handler_field_tmgmt_message_message';
     return $data;
   }
 }

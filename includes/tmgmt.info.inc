@@ -84,7 +84,7 @@ class TMGMTJobItemMetadataController extends EntityDefaultMetadataController {
 /**
  * Metadata controller for the job message entity.
  */
-class TMGMTJobMessageMetadataController extends EntityDefaultMetadataController {
+class TMGMTMessageMetadataController extends EntityDefaultMetadataController {
 
   /**
    * Overrides EntityDefaultMetadataController::entityPropertyInfo().
@@ -93,18 +93,6 @@ class TMGMTJobMessageMetadataController extends EntityDefaultMetadataController 
     $info = parent::entityPropertyInfo();
     $info = _tmgmt_override_property_description($info, $this->type);
     $properties = &$info[$this->type]['properties'];
-
-    // Link the job id property to the corresponding job entity.
-    $properties['tjid'] = array(
-      'description' => t('Corresponding job entity.'),
-      'type' => 'tmgmt_job',
-    ) + $properties['tjid'];
-
-    // Link the job item id property to the corresponding job item entity.
-    $properties['tjiid'] = array(
-      'description' => t('Corresponding job item entity.'),
-      'type' => 'tmgmt_job_item',
-    ) + $properties['tjiid'];
 
     // Make the created property appear as date.
     $properties['created']['type'] = 'date';
