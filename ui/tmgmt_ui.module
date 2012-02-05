@@ -348,7 +348,7 @@ function _tmgmt_ui_review_form_recursive($form, &$form_state, $data, $parents = 
  */
 
 /**
- * Set a redirect queue than can then be worked through.
+ * Set a redirect queue that can then be worked through.
  *
  * @param $redirects
  *   An array of redirect url's to be processed. For example checkout pages as
@@ -366,27 +366,27 @@ function tmgmt_ui_redirect_queue_set(array $redirects, $destination = NULL) {
  *
  * This is the final destination after all queue items have been processed.
  *
- * @param $default_destination
+ * @param $destination
  *   The default destination that should be returned if none exists.
  *
  * @return
  *   The stored destination if defined, otherwise the passed in default
  *   destination.
  */
-function tmgmt_ui_redirect_queue_destination($default_destination = NULL) {
+function tmgmt_ui_redirect_queue_destination($destination = NULL) {
   if (!empty($_SESSION['tmgmt_ui']['destination'])) {
      $destination = $_SESSION['tmgmt_ui']['destination'];
      unset($_SESSION['tmgmt_ui']['destination']);
      return $destination;
   }
-  return $default_destination;
+  return $destination;
 }
 
 /**
- * Returns TRUE if the redirect queue is empty.
+ * Returns the amount of entries in the redirect queue.
  *
  * @return
- *   The amount of entries in the job redirect queue.
+ *   The amount of entries in the redirect queue.
  */
 function tmgmt_ui_redirect_queue_count() {
   if (!empty($_SESSION['tmgmt_ui']['redirect_queue'])) {
