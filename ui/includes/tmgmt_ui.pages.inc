@@ -33,19 +33,27 @@ function tmgmt_ui_overview_page() {
  * @see system_settings_form()
  */
 function tmgmt_ui_settings_form($form, &$form_state) {
-  $form['tmgmt_quick_checkout'] = array(
+  $form['workflow'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Workflow settings'),
+  );
+  $form['workflow']['tmgmt_quick_checkout'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow quick checkout'),
     '#description' => t("Enabling this will skip the checkout form and instead directly process the translation request in cases where there is only one translator available which doesn't provide any additional configuration options."),
     '#default_value' => variable_get('tmgmt_quick_checkout', TRUE),
   );
-  $form['tmgmt_auto_accept'] = array(
+  $form['workflow']['tmgmt_auto_accept'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow translators to automatically accept translations'),
     '#description' => t("This allows translators to optionally skip the reviewing process and automatically accept all translations as soon as they are returned by the translation provider."),
     '#default_value' => variable_get('tmgmt_auto_accept', FALSE),
   );
-  $form['tmgmt_purge_finished'] = array(
+  $form['performance'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Performance settings'),
+  );
+  $form['performance']['tmgmt_purge_finished'] = array(
     '#type' => 'select',
     '#title' => t('Purge finished jobs'),
     '#description' => t('If configured, translation jobs that have been marked as finished will be purged after a given time.'),
