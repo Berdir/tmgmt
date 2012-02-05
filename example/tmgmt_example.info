@@ -1,6 +1,0 @@
-name = Examples
-description = Example translator and source plugins.
-package = Translation Management
-core = 7.x
-dependencies[] = tmgmt
-files[] = tmgmt_example.plugin.inc

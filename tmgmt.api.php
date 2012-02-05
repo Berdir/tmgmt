@@ -12,6 +12,8 @@
 
 /**
  * Provide information about source plugins.
+ *
+ * @see TMGMTTestSourcePluginController
  */
 function hook_tmgmt_source_plugin_info() {
   return array(
@@ -46,6 +48,8 @@ function hook_tmgmt_source_plugin_info_alter(&$info) {
 
 /**
  * Provide information about translator plugins.
+ *
+ * @see TMGMTTestTranslatorPluginController
  */
 function hook_tmgmt_translator_plugin_info() {
   return array(
@@ -55,7 +59,7 @@ function hook_tmgmt_translator_plugin_info() {
       'controller class' => 'TMGMTTestTranslatorPluginController',
       // By default, a translator is automatically created with the default
       // settings. Set auto create to FALSE to prevent this.
-      'auto create' => FALSE,
+      'auto create' => TRUE,
     ),
   );
 }
