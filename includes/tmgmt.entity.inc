@@ -1359,6 +1359,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     // translation request after this point. That means that the plugin has to
     // set the 'submitted', 'needs review', etc. states on its own.
     $controller->requestTranslation($this);
+    $this->save();
   }
 
   /**

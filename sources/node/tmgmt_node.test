@@ -85,7 +85,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
 
     // Create the new job and job item.
     $job = $this->createJob();
-    $job->translator = 'dummy';
+    $job->translator = 'test_translator';
     $job->settings = array();
     $job->addItem('node', 'node', $node->nid);
     $job->requestTranslation();
@@ -96,7 +96,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
       $node = node_load($item->item_id);
       debug($node);
       // Check if the tnid attribute is bigger than 0.
-      $this->assertTrue($node->tnid > 0, t('The source node is not part of a translation set.'));
+      $this->assertTrue($node->tnid > 0, t('The source node is part of a translation set.'));
       // The translations may be statically cached, so make make sure
       // to reset the cache before loading the node translations.
       $cached_translations = &drupal_static('translation_node_get_translations', array());
@@ -104,7 +104,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
       // Load the translation set of the source node.
       $translations = translation_node_get_translations($node->tnid);
       if (!isset($translations[$langcode])) {
-        $this->assertNotNull($translations[$langcode], t('No translations found for the source node.'));
+        $this->assertNotNull($translations[$langcode], t('Translations found for the source node.'));
       }
       else {
         $tnode = node_load($translations[$langcode]->nid, NULL, TRUE);

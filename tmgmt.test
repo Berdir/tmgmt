@@ -265,8 +265,21 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     }
 
     $messages = $translate_job->getMessages();
-    $last_message = end($messages);
-    $this->assertEqual('Test translation created.', $last_message->message);
+    // array_values() results in numeric keys, which is necessary for list.
+    list($debug, $translated) = array_values($messages);
+    $this->assertEqual('Test translator called', $debug->message);
+    $this->assertEqual('debug', $debug->type);
+    $this->assertEqual('Test translation created.', $translated->message);
+    $this->assertEqual('status', $translated->type);
+
+    // The third message is specific to a job item and has different state
+    // constants.
+    /**
+     * @todo: Review message is gone again?
+     *
+    $this->assertEqual('The translation for !source is finished and needs to be reviewed.', $needs_review->message);
+    $this->assertEqual('status', $needs_review->type);
+     */
 
     $i = 1;
     foreach ($translate_job->getItems() as $item) {
