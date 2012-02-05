@@ -48,7 +48,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
-    $this->drupalGet(tmgmt_ui_job_checkout(array($job)));
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $this->drupalGet(reset($redirects));
 
     // Check checkout form.
     $this->assertText('test_source:test:1');
@@ -58,7 +59,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $job->addItem('test_source', 'test', 3);
 
     // Go to checkout form.
-    $this->drupalGet(tmgmt_ui_job_checkout(array($job)));
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $this->drupalGet(reset($redirects));
 
     // Check checkout form.
     $this->assertText('test_source:test:1');
@@ -105,7 +107,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertNotEqual($job->tjid, $previous_tjid);
 
     // Go to checkout form.
-    $this->drupalGet(tmgmt_ui_job_checkout(array($job)));
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $this->drupalGet(reset($redirects));
 
      // Check checkout form.
     $this->assertText('You can provide a label for this job in order to identify it easily later on.');
@@ -125,7 +128,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
-    $this->drupalGet(tmgmt_ui_job_checkout(array($job)));
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $this->drupalGet(reset($redirects));
 
      // Check checkout form.
     $this->assertText('You can provide a label for this job in order to identify it easily later on.');
@@ -144,7 +148,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
-    $this->drupalGet(tmgmt_ui_job_checkout(array($job)));
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $this->drupalGet(reset($redirects));
 
      // Check checkout form.
     $this->assertText('You can provide a label for this job in order to identify it easily later on.');
@@ -166,7 +171,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
-    $this->drupalGet(tmgmt_ui_job_checkout(array($job)));
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $this->drupalGet(reset($redirects));
 
     // Check checkout form.
     $this->assertText('You can provide a label for this job in order to identify it easily later on.');
@@ -190,9 +196,9 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Check out a job when only the test translator is available. That one has
     // settings, so a checkout is necessary.
-    $redirect = tmgmt_ui_job_checkout(array($job));
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
     $uri = $job->uri();
-    $this->assertEqual($uri['path'] . '/manage', $redirect);
+    $this->assertEqual($uri['path'] . '/manage', $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
     $job->delete();
 
@@ -203,15 +209,15 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     );
     $job = $this->createJob();
 
-    $redirect = tmgmt_ui_job_checkout(array($job));
-    $this->assertFalse($redirect);
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $this->assertFalse($redirects);
     $this->assertTrue($job->isActive());
 
     // A job without target language needs to be checked out.
     $job = $this->createJob('en', '');
-    $redirect = tmgmt_ui_job_checkout(array($job));
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
     $uri = $job->uri();
-    $this->assertEqual($uri['path'] . '/manage', $redirect);
+    $this->assertEqual($uri['path'] . '/manage', $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
 
     // Create a second file translator. This should check
@@ -224,9 +230,9 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     );
     $second_translator->save();
 
-    $redirect = tmgmt_ui_job_checkout(array($job));
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
     $uri = $job->uri();
-    $this->assertEqual($uri['path'] . '/manage', $redirect);
+    $this->assertEqual($uri['path'] . '/manage', $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
   }
 }

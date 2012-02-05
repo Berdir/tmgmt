@@ -376,7 +376,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   );
   $form['actions']['checkout'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit to translator'),
+    '#value' => tmgmt_ui_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
     '#access' => $job->isUnprocessed(),
   );
   if ($old) {
@@ -418,13 +418,23 @@ function tmgmt_job_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/config/regional/tmgmt';
   // Everything below this line is only invoked if the 'Submit to translator'
   // button was clicked.
-  if ($form_state['triggering_element']['#value'] == t('Submit to translator')) {
+  if ($form_state['triggering_element']['#value'] == $form['actions']['checkout']['#value']) {
     if (!tmgmt_ui_job_request_translation($job)) {
       // Don't redirect the user if the translation request failed but retain
       // existing destination parameters so we can redirect once the request
       // finished successfully.
+      // @todo: Change this to stay on the form in case of an error instead of
+      // doing a redirect.
       $form_state['redirect'] = array(current_path(), array('query' => drupal_get_destination()));
       unset($_GET['destination']);
+    }
+    else if ($redirect = tmgmt_ui_redirect_queue_dequeue()) {
+      // Proceed to the next redirect queue item, if there is one.
+      $form_state['redirect'] = $redirect;
+    }
+    else {
+      // Proceed to the defined destination if there is one.
+      $form_state['redirect'] = tmgmt_ui_redirect_queue_destination($form_state['redirect']);
     }
   }
 }

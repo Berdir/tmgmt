@@ -4,7 +4,10 @@ package = Translation Management
 core = 7.x
 
 dependencies[] = tmgmt_node
+dependencies[] = tmgmt_ui
 dependencies[] = views_bulk_operations
+
+files[] = tmgmt_node_ui.test
 
 ; Views handlers
 files[] = views/tmgmt_node_ui_handler_filter_node_translatable_types.inc

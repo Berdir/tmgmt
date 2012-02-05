@@ -110,6 +110,13 @@ function tmgmt_node_ui_translate_form_submit($form, &$form_state) {
     // to a multistep checkout form if necessary.
     $jobs[$job->tjid] = $job;
   }
-  // Process the job via the built-in multiple checkout functionality.
-  tmgmt_ui_job_checkout($jobs);
+  $redirects = tmgmt_ui_job_checkout_multiple($jobs);
+  // If necessary, do a redirect.
+  if ($redirects) {
+    tmgmt_ui_redirect_queue_set($redirects, current_path());
+    $form_state['redirect'] = tmgmt_ui_redirect_queue_dequeue();
+
+    // Count of the job messages is one less due to the final redirect.
+    drupal_set_message(format_plural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
+  }
 }
