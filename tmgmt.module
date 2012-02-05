@@ -199,6 +199,28 @@ function tmgmt_flush_caches() {
 }
 
 /**
+ * Implements hook_cron().
+ */
+function tmgmt_cron() {
+  $offset = variable_get('tmgmt_purge_finished', '_none');
+  if ($offset != '_none') {
+    // Delete all finished translation jobs that haven't been changed for a
+    // time span longer than the given offset.
+    $query = new EntityFieldQuery();
+    $result = $query->entityCondition('entity_type', 'tmgmt_job')
+      ->propertyCondition('state', TMGMT_JOB_STATE_FINISHED)
+      ->propertyCondition('changed', REQUEST_TIME - $offset, '<=')
+      ->execute();
+    if (!empty($result['tmgmt_job'])) {
+      $controller = entity_get_controller('tmgmt_job');
+      // Since the entity controller handles the deletion of the attached
+      // entities (messages, job items) we just need to invoke it directly.
+      $controller->delete(array_keys($result['tmgmt_job']));
+    }
+  }
+}
+
+/**
  * Returns an array of languages that are available for translation.
  *
  * @return array

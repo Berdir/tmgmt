@@ -10,7 +10,9 @@
  */
 function tmgmt_uninstall() {
   // Remove all variables that we added.
+  variable_del('tmgmt_quick_checkout');
   variable_del('tmgmt_auto_accept');
+  variable_del('tmgmt_purge_finished');
 }
 
 /**

@@ -45,6 +45,13 @@ function tmgmt_ui_settings_form($form, &$form_state) {
     '#description' => t("This allows translators to optionally skip the reviewing process and automatically accept all translations as soon as they are returned by the translation provider."),
     '#default_value' => variable_get('tmgmt_auto_accept', FALSE),
   );
+  $form['tmgmt_purge_finished'] = array(
+    '#type' => 'select',
+    '#title' => t('Purge finished jobs'),
+    '#description' => t('If configured, translation jobs that have been marked as finished will be purged after a given time.'),
+    '#options' => array('_none' => t('Never'), '0' => t('Immediately'), '86400' => t('After 24 hours'), '604800' => t('After 7 days'), '2592000' => t('After 30 days'), '31536000' => t('After 365 days')),
+    '#default_value' => variable_get('tmgmt_purge_finished', '_none'),
+  );
   return system_settings_form($form);
 }
 
