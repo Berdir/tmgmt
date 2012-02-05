@@ -352,21 +352,8 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::pluginSettingsForm().
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
-    $form['#title'] = t('@plugin plugin settings', array('@plugin' => $this->pluginInfo['label']));
-    if (variable_get('tmgmt_auto_accept', FALSE)) {
-      $form['auto_accept'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Auto accept finished translations.'),
-        '#description' => t('This skips the reviewing process and automatically accepts all translations as soon as they are returned by the translation provider.'),
-        '#default_value' => $translator->getSetting('auto_accept'),
-        '#weight' => -1,
-      );
-    }
     if (!element_children($form)) {
       $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginInfo['label']));
-    }
-    else {
-      $form['#description'] = t('These settings are handled by the @plugin plugin and apply whenever this translator is used in a job.', array('@plugin' => $this->pluginInfo['label']));
     }
     return $form;
   }
@@ -375,8 +362,8 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::checkoutSettingsForm().
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
-    if (empty($form)) {
-      $form['#description'] = t("@translator doesn't provide any checkout settings.", array('@translator' => $job->getTranslator()->label()));
+    if (!element_children($form)) {
+      $form['#description'] = t("The @translator translator doesn't provide any checkout settings.", array('@translator' => $job->getTranslator()->label()));
     }
     return $form;
   }

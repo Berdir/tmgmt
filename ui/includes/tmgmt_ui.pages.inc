@@ -163,33 +163,52 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#size' => 32,
     '#maxlength' => 64,
   );
+  $form['settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Translator settings'),
+    '#tree' => TRUE,
+  );
+  if (variable_get('tmgmt_auto_accept', FALSE)) {
+    $form['settings']['auto_accept'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Auto accept finished translations'),
+      '#description' => t('This skips the reviewing process and automatically accepts all translations as soon as they are returned by the translation provider.'),
+      '#default_value' => $translator->getSetting('auto_accept'),
+      '#weight' => -1,
+    );
+  }
+  if (!element_children($form['settings'])) {
+    unset($form['settings']);
+  }
   $form['plugin_wrapper'] = array(
     '#type' => 'container',
     '#prefix' => '<div id="tmgmt-plugin-wrapper">',
     '#suffix' => '</div>',
   );
   // Pull the translator plugin info if any.
-  $info = !empty($translator->plugin) ? tmgmt_translator_plugin_info($translator->plugin) : array();
-  $form['plugin_wrapper']['plugin'] = array(
-    '#type' => 'select',
-    '#title' => t('Translator plugin'),
-    '#description' => isset($info['description']) ? filter_xss($info['description']) : t('The plugin that controls the translator.'),
-    '#options' => $available,
-    '#default_value' => $translator->plugin,
-    '#required' => TRUE,
-    '#disabled' => $busy,
-    '#ajax' => array(
-      'callback' => 'tmgmt_ui_ajax_callback_translator_plugin_select',
-      'wrapper' => 'tmgmt-plugin-wrapper',
-    ),
-  );
-  $form['plugin_wrapper']['settings'] = array(
-    '#type' => 'fieldset',
-    '#collapsible' => TRUE,
-    '#tree' => TRUE,
-  );
-  // Add the translator plugin settings form.
-  $form['plugin_wrapper']['settings'] += tmgmt_ui_plugin_settings_form($form_state, $translator, $busy);
+  if ($translator->plugin) {
+    $info = tmgmt_translator_plugin_info($translator->plugin);
+    $form['plugin_wrapper']['plugin'] = array(
+      '#type' => 'select',
+      '#title' => t('Translator plugin'),
+      '#description' => isset($info['description']) ? filter_xss($info['description']) : '',
+      '#options' => $available,
+      '#default_value' => $translator->plugin,
+      '#required' => TRUE,
+      '#disabled' => $busy,
+      '#ajax' => array(
+        'callback' => 'tmgmt_ui_ajax_callback_translator_plugin_select',
+        'wrapper' => 'tmgmt-plugin-wrapper',
+      ),
+    );
+    $form['plugin_wrapper']['settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('@plugin plugin settings', array('@plugin' => $info['label'])),
+      '#tree' => TRUE,
+    );
+    // Add the translator plugin settings form.
+    $form['plugin_wrapper']['settings'] += tmgmt_ui_plugin_settings_form($form_state, $translator, $busy);
+  }
   // Add a submit button and a cancel link to the form.
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
@@ -489,20 +508,14 @@ function tmgmt_ui_checkout_settings_form(&$form_state, TMGMTJob $job) {
       '#description' => t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())),
     );
   }
-  if ($settings = $job->checkoutSettingsForm(array(), $form_state)) {
-    return $settings;
-  }
-  return array();
+  return $job->checkoutSettingsForm(array(), $form_state);
 }
 
 /**
  * Helper function for retrieving the translator settings form.
  */
 function tmgmt_ui_plugin_settings_form(&$form_state, TMGMTTranslator $translator, $busy = FALSE) {
-  if ($settings = $translator->pluginSettingsForm(array(), $form_state, $busy)) {
-    return $settings;
-  }
-  return array();
+  return $translator->pluginSettingsForm(array(), $form_state, $busy);
 }
 
 /**
