@@ -202,8 +202,8 @@ function tmgmt_flush_caches() {
  * Implements hook_cron().
  */
 function tmgmt_cron() {
-  $offset = variable_get('tmgmt_purge_finished', '_none');
-  if ($offset != '_none') {
+  $offset = variable_get('tmgmt_purge_finished', '_never');
+  if ($offset != '_never') {
     // Delete all finished translation jobs that haven't been changed for a
     // time span longer than the given offset.
     $query = new EntityFieldQuery();
