@@ -330,11 +330,3 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   $item->data = $form_state['values']['data'];
   $item->save();
 }
-
-/**
- * Helper function for recursively building a review form.
- */
-function _tmgmt_ui_review_form_recursive($form, &$form_state, $data, $parents = array()) {
-  // @todo Actually implement this.
-  return $form;
-}
