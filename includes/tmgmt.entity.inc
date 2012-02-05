@@ -518,7 +518,12 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
     if (!isset($message)) {
       $message = 'The translation job item needs to be reviewed.';
     }
-    return $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW, $message, $variables, $type);
+    $return = $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW, $message, $variables, $type);
+    // Auto accept the translation if the translator is configured for it.
+    if (variable_get('tmgmt_auto_accept', FALSE) && $this->getTranslator()->getSetting('auto_accept')) {
+      $this->acceptTranslation();
+    }
+    return $return;
   }
 
   /**
@@ -528,7 +533,13 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
     if (!isset($message)) {
       $message = 'The translation job item has been accepted.';
     }
-    return $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED, $message, $variables, $type);
+    $return = $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED, $message, $variables, $type);
+    // Check if this was the last unfinished job item in this job.
+    if (tmgmt_job_check_finished($this->tjid) && $job = $this->getJob()) {
+      // Mark the job as finished.
+      $job->finished();
+    }
+    return $return;
   }
 
   /**
@@ -654,21 +665,15 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
     }
     drupal_array_set_nested_value($this->translation, $key, $translation);
     // Check if the job item has all the translated data that it needs now.
-    $unfinished = array_diff_key(tmgmt_flatten_data($this->getSourceData()), tmgmt_flatten_data($this->translation));
-    if (empty($unfinished)) {
+    if (!array_diff_key(tmgmt_flatten_data($this->getSourceData()), tmgmt_flatten_data($this->translation))) {
       // There are no unfinished elements left.
       $uri = $this->getSourceUri();
-      $this->needsReview('The translation for !source is finished and needs to be reviewed.', array('!source' => l($this->getSourceLabel(), $uri['path'])));
-      // If we configured the translator to auto-accept translations do that
-      // right now.
-      if (variable_get('tmgmt_auto_accept', FALSE) && $this->getTranslator()->getSetting('auto_accept')) {
-        $this->acceptTranslation();
-      }
+      $this->needsReview('The translation for !source is finished and can now be reviewed.', array('!source' => l($this->getSourceLabel(), $uri['path'])));
     }
-    if ($this->save()) {
-      return TRUE;
+    else {
+      // We only need to save manually if no no state change was triggered.
+      $this->save();
     }
-    return FALSE;
   }
 
   /**
@@ -1359,7 +1364,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     // translation request after this point. That means that the plugin has to
     // set the 'submitted', 'needs review', etc. states on its own.
     $controller->requestTranslation($this);
-    $this->save();
   }
 
   /**

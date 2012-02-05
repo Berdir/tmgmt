@@ -85,6 +85,22 @@ class TMGMTJobItemController extends EntityAPIController {
     }
   }
 
+  /**
+   * Overrides EntityAPIController::invoke().
+   */
+  public function invoke($hook, $entity) {
+    // We need to check whether the state of the job is affected by this
+    // deletion.
+    if ($hook == 'delete' && $job = $entity->getJob()) {
+      // We only care for active jobs.
+      if ($job->isActive() && tmgmt_job_check_finished($this->tjid)) {
+        // Mark the job as finished.
+        $job->finished();
+      }
+    }
+    parent::invoke($hook, $entity);
+  }
+
 }
 
 /**
@@ -115,6 +131,7 @@ class TMGMTTranslatorController extends EntityAPIControllerExportable {
    * Overrides EntityAPIControllerExportable::delete().
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
+    $cids = array();
     // We are never going to have many entities here, so we can risk a loop.
     foreach ($ids as $key => $name) {
       if (tmgmt_translator_busy($key)) {

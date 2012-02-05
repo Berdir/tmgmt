@@ -320,6 +320,25 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
 }
 
 /**
+ * Checks whether a job is finished by querying the job item table for
+ * unfinished job items.
+ *
+ * @param $tjid
+ *   The identifier of the job.
+ * @return bool
+ *   TRUE if the job is finished, FALSE otherwise.
+ */
+function tmgmt_job_check_finished($tjid) {
+  $query = new EntityFieldQuery();
+  return !(boolean) $query->entityCondition('entity_type', 'tmgmt_job_item')
+    ->propertyCondition('tjid', $tjid)
+    ->propertyCondition('state', TMGMT_JOB_ITEM_STATE_ACCEPTED, '<>')
+    ->range(0, 1)
+    ->count()
+    ->execute();
+}
+
+/**
  * Creates a translation job.
  *
  * @param $source_language
