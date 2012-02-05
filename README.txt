@@ -1,7 +1,7 @@
 Translation Management Tools (tmgmt)
 -------------------------------------
 
-A collection of tools to facilitate the translation of text elements in Drupal. 
+A collection of tools to facilitate the translation of text elements in Drupal.
 
 Requirements
 ------------------
@@ -33,20 +33,17 @@ The first simple translation job using Microsoft's translation service.
 
 1) Preparation
 
-- Install and activate all of the above listed modules
+- Make sure you have downloaded all of the listed dependencies.
 - Define a second language using locale
-- Modify one content type to be multilingual. Choose 'Enabled, with tranlation'
+- Modify one content type to be multilingual. Choose 'Enabled, with translation'
   from the Publishing Options / Multilingual support.
 
 2) Set up Translation Management Tools
 
 - Download tmgmt module
-- Activate the minimal sub modules: 
-  - Translation Management Core
-  - Translation Management Field
+- Enable the following modules, this will also include all
   - Translation Management UI
-  - Content Translation Source
-  - Simple Translation UI
+  - Content translation Source UI
   - Microsoft Translator
 - A translator has been automatically created. Go to the Translator management
   page at:
