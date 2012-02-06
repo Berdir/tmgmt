@@ -119,6 +119,13 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
     return $form;
   }
 
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::hook_menu().
+   */
+  public function hook_menu() {
+    return array();
+  }
+
 }
 
 /**

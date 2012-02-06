@@ -62,6 +62,10 @@ function tmgmt_ui_menu() {
     'file' => 'includes/tmgmt_ui.pages.inc',
     'weight' => 10,
   );
+  // Some source plugins might provide menu items.
+  foreach (tmgmt_source_plugin_controller() as $controller) {
+    $items += $controller->hook_menu();
+  }
   return $items;
 }
 

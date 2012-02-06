@@ -689,7 +689,7 @@ function tmgmt_translator_auto_create($plugin) {
  * Determines all available service plugins.
  *
  * @param $plugin
- *   The machine-readable name of a service plugin.
+ *   (Optional) The machine-readable name of a service plugin.
  *
  * @return array
  *   An array of translator plugin definitions.
@@ -702,12 +702,14 @@ function tmgmt_translator_plugin_info($plugin = NULL) {
  * Determines the controller class for a given service plugin.
  *
  * @param $plugin
- *   The machine-readable name of a service plugin.
+ *   (Optional) The machine-readable name of a service plugin.
  *
  * @return TMGMTTranslatorPluginControllerInterface
- *   The controller object for the given source plugin.
+ *   The controller object for the given source plugin or an array containing
+ *   all available translator plugin controller objects if no plugin name was
+ *   given.
  */
-function tmgmt_translator_plugin_controller($plugin) {
+function tmgmt_translator_plugin_controller($plugin = NULL) {
   return _tmgmt_plugin_controller('translator', $plugin);
 }
 
@@ -777,7 +779,7 @@ function tmgmt_translator_labels_flagged($source_language, $target_language) {
  * Determines all available source object plugins.
  *
  * @param $plugin
- *   The machine-readable name of a source plugin.
+ *   (Optional) The machine-readable name of a source plugin.
  *
  * @return array
  *   An array of source plugin definitions.
@@ -790,12 +792,13 @@ function tmgmt_source_plugin_info($plugin = NULL) {
  * Get the controller class for a given source plugin.
  *
  * @param $plugin
- *   The machine-readable name of a source plugin.
+ *   (Optional) The machine-readable name of a source plugin.
  *
  * @return TMGMTSourcePluginControllerInterface
- *   The controller object for the given source plugin.
+ *   The controller object for the given source plugin or an array containing
+ *   all available source plugin controller objects if no plugin name was given.
  */
-function tmgmt_source_plugin_controller($plugin) {
+function tmgmt_source_plugin_controller($plugin = NULL) {
   return _tmgmt_plugin_controller('source', $plugin);
 }
 
@@ -818,12 +821,12 @@ function tmgmt_source_plugin_labels() {
  * @param $type
  *   The type of the plugin. Can be 'translator' or 'source'.
  * @param $plugin
- *   The machine-readable name of a source plugin.
+ *   (Optional) The machine-readable name of a source plugin.
  *
  * @return array
  *   An array of source and/or translator plugins.
  */
-function _tmgmt_plugin_info($type, $plugin) {
+function _tmgmt_plugin_info($type, $plugin = NULL) {
   $info = &drupal_static(__FUNCTION__);
   if (!isset($info[$type])) {
     $info[$type] = array();
@@ -850,23 +853,34 @@ function _tmgmt_plugin_info($type, $plugin) {
  * @param $type
  *   The type of the plugin. Can be 'translator' or 'source'.
  * @param $plugin
- *   The machine-readable name of a source plugin.
+ *   (Optional) The machine-readable name of a source plugin.
  *
  * @return
- *   The controller object for the given source plugin.
+ *   The controller object for the given plugin or an array containing all
+ *   available plugin controller objects if no plugin name was given.
  */
-function _tmgmt_plugin_controller($type, $plugin) {
+function _tmgmt_plugin_controller($type, $plugin = NULL) {
   $cache = &drupal_static(__FUNCTION__);
-  if (!isset($cache[$type][$plugin])) {
+  if (!isset($plugin) && !isset($cache[$type])) {
+    foreach (_tmgmt_plugin_info($type) as $name => $info) {
+      if (!isset($cache[$type][$name])) {
+        $cache[$type][$name] = new $info['controller class']($name);
+      }
+    }
+  }
+  elseif (!isset($cache[$type][$plugin])) {
     $info = _tmgmt_plugin_info($type, $plugin);
     if ($info && !empty($info['controller class'])) {
       $cache[$type][$plugin] = new $info['controller class']($plugin);
     }
-    else {
-      $cache[$type][$plugin] = FALSE;
-    }
   }
-  return $cache[$type][$plugin];
+  if (isset($plugin) && isset($cache[$type][$plugin])) {
+    return $cache[$type][$plugin];
+  }
+  elseif (!isset($plugin) && isset($cache[$type])) {
+    return $cache[$type];
+  }
+  return FALSE;
 }
 
 /**
