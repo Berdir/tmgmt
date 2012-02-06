@@ -268,17 +268,30 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
   // in all the form functions.
   $form_state['item'] = $item;
   // Actually build the review form elements...
-  $form = _tmgmt_ui_review_form_recursive($form, $form_state, $item->getSourceData());
+  $form['review'] = array(
+    '#type' => 'container',
+    '#tree' => TRUE,
+  );
+  // Recursively build the review form.
+  $form['review'] += _tmgmt_ui_review_form_recursive($form_state, $item->getTranslatedData());
   // Add the form actions as well.
   $form['actions']['#type'] = 'actions';
   $form['actions']['accept'] = array(
     '#type' => 'submit',
     '#value' => t('Accept'),
   );
-  $form['actions']['reject'] = array(
+  $form['actions']['save'] = array(
     '#type' => 'submit',
-    '#value' => t('Reject'),
+    '#value' => t('Save review'),
   );
+  $uri = $item->uri();
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $uri['path'],
+  );
+  // The reject functionality has to be implement by the translator plugin as
+  // that process is completely unique and custom for each translation service.
   return $form;
 }
 
@@ -323,6 +336,8 @@ function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
  */
 function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   $item = $form_state['item'];
+  // Rewrite the submitted data values to #text.
+  _tmgmt_ui_submit_translation_review_data($form_state['values']['review'], $item->translation);
   // First invoke the validation method on the source controller.
   $source = $item->getSourceController();
   if (method_exists($source, 'reviewFormSubmit')) {
@@ -333,24 +348,73 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   if (method_exists($translator, 'reviewFormSubmit')) {
     $translator->reviewFormSubmit($form, $form_state, $item);
   }
+  // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
+  if ($form_state['triggering_element']['#value'] == $form['actions']['accept']['#value']) {
+    $item->acceptTranslation();
+    // Check if the item could be saved and accepted successfully and redirect
+    // to the job item view if that is the case.
+    if ($item->isAccepted()) {
+      $uri = $item->uri();
+      $form_state['redirect'] = $uri['path'];
+    }
+    // Print all messages that have been saved while accepting the reviewed
+    // translation.
+    foreach ($item->getMessagesSince() as $message) {
+      // Ignore debug messages.
+      if ($message->type == 'debug') {
+        continue;
+      }
+      if ($text = $message->getMessage()) {
+        drupal_set_message(filter_xss($text), $message->type);
+      }
+    }
+  }
   // Submit the entity.
-  $item->data = $form_state['values']['data'];
   $item->save();
 }
 
 /**
  * Helper function for recursively building a review form.
  */
-function _tmgmt_ui_review_form_recursive($form, &$form_state, $data, $parents = array()) {
-  // @todo Actually implement this.
+function _tmgmt_ui_review_form_recursive(&$form_state, $translation) {
+  $form = array();
+  foreach (element_children($translation) as $key) {
+    if (is_array($translation[$key]) && !empty($translation[$key]['#text'])) {
+      $form[$key] = array(
+        '#type' => 'textarea',
+        '#title' => isset($translation[$key]['#label']) ? $translation[$key]['#label'] : t('Unlabelled'),
+        '#default_value' => isset($translation[$key]['#text']) ? $translation[$key]['#text'] : '',
+      );
+    }
+    elseif (is_array($translation[$key])) {
+      $form[$key] = _tmgmt_ui_review_form_recursive($form_state, $translation[$key]);
+    }
+  }
   return $form;
+}
+
+/**
+ * Helper function for recursively updating the translated data values in a job
+ * item when submitted in the review form.
+ *
+ * This workaround is necessary because we can't use '#text' as an array key in
+ * our FAPI structure.
+ */
+function _tmgmt_ui_submit_translation_review_data($values, &$data, $parents = array()) {
+  foreach ($values as $key => $value) {
+    if (is_array($value)) {
+      _tmgmt_ui_submit_translation_review_data($values[$key], $data, array_merge($parents, array($key)));
+    }
+    else {
+      drupal_array_set_nested_value($data, array_merge($parents, array($key, '#text')), $value);
+    }
+  }
 }
 
 /**
  * @addtogroup tmgmt_ui_redirect_queue
  * @{
  */
-
 /**
  * Set a redirect queue that can then be worked through.
  *
@@ -400,7 +464,7 @@ function tmgmt_ui_redirect_queue_count() {
 }
 
 /**
- * Deqeues one redirect in the queue and returns that.
+ * Dequeues one redirect in the queue and returns that.
  *
  * @return
  *   A redirect URL or NULL if the queue is empty.
@@ -410,7 +474,6 @@ function tmgmt_ui_redirect_queue_dequeue() {
     return array_shift($_SESSION['tmgmt_ui']['redirect_queue']);
   }
 }
-
 /**
  * @} End of "addtogroup tmgmt_ui_redirect_queue".
  */
