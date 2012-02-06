@@ -11,9 +11,10 @@
 class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
-   * It can 'translate' any job
+   * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
    */
   function canTranslate(TMGMTJob $job) {
+    // Anything can be exported.
     return TRUE;
   }
 
@@ -37,7 +38,8 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     $target_language = $job->target_language;
 
     $name = "JobID" . $tjid;
-    $file_template = theme("file_template", array(
+    $extension = 'html';
+    $file_content = theme("file_template", array(
         'tjid' => $tjid,
         'source_language' => $source_language,
         'target_language' => $target_language,
@@ -45,7 +47,7 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
 
     if ($job->getTranslator()->getSetting('export_format') == 'xliff') {
       $html = new DOMDocument();
-      @$html->loadXML($file_template);
+      @$html->loadXML($file_content);
 
       $xsl = new DOMDocument;
       $xsl->load(drupal_get_path('module', 'tmgmt_file') . '/xsl/xml2xliff.xsl');
@@ -54,32 +56,32 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
       $proc->ImportStyleSheet($xsl);
 
       $file_content = $proc->transformToXML($html);
-
-      drupal_add_http_header('Content-Type', 'text/xml; name="' . $name . '.xlf"');
-      drupal_add_http_header('Content-Length', mb_strlen($file_content));
-      drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $name . '.xlf"');
-      drupal_add_http_header('Cache-Control', 'private');
-
-      print $file_content;
-    }
-    else {
-      drupal_add_http_header('Content-Type', 'text/html; name="' . $name . '.html"');
-      drupal_add_http_header('Content-Length', mb_strlen($file_template));
-      drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $name . '.html"');
-      drupal_add_http_header('Cache-Control', 'private');
-
-      print $file_template;
+      $extension = 'xlf';
     }
 
-    $job->submitted('Translation exported');
-    drupal_exit();
+    // @todo: Make this configurable
+    $path = 'public://tmgmt_file/' . $name . $extension;
+    if (file_prepare_directory(dirname($path), FILE_CREATE_DIRECTORY)) {
+      file_put_contents($path, $file_content);
+      $job->submitted('Exported file can be downloaded <a href"!link">here</a>', array('!link', file_create_url($path)));
+    }
   }
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
    */
   public function hasCheckoutSettings(TMGMTJob $job) {
-    return FALSE;
+    return $job->getTranslator()->getSetting('allow_override');
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultSettings().
+   */
+  public function defaultSettings() {
+    return array(
+      'export_format' => 'xliff',
+      'allow_override' => TRUE,
+    );
   }
 
 }

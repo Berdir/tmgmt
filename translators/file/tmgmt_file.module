@@ -21,9 +21,6 @@ function tmgmt_file_tmgmt_translator_plugin_info() {
 
 /**
  * Implements hook_theme().
- *
- * Creates template file for Campaign Statistics block. The template may also
- * be moved under the current theme directory.
  */
 function tmgmt_file_theme() {
   return array(
@@ -35,15 +32,26 @@ function tmgmt_file_theme() {
 }
 
 /**
+ * Implements hook_permission().
+ */
+function tmgmt_file_permission() {
+  return array(
+    'import translated tmgmt files' => array(
+      'label' => t('Import translated tmgmt files'),
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function tmgmt_file_menu() {
-  $items['file-translator/import'] = array(
-    'type' => MENU_CALLBACK,
-    'title' => 'HTML Import',
+  $items['admin/config/regional/tmgmt/file'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'File Import',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tmgmt_file_import_form'),
-    'access callback' => TRUE,
+    'access arguments' => array('import translated tmgmt files'),
   );
   return $items;
 }
