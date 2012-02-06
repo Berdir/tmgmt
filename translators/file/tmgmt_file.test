@@ -1,0 +1,80 @@
+<?php
+
+/**
+ * @file
+ * Test cases for the file translator module.
+ */
+
+/**
+ * Basic tests for the file translator.
+ */
+class TMGMTFileTestCase extends TMGMTBaseTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => t('File Translator tests'),
+      'description' => t('Tests the file translator plugin integration.'),
+      'group' => t('Translation Management'),
+    );
+  }
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp() {
+    parent::setUp(array('tmgmt_file'));
+  }
+
+  /**
+   * Tests basic API methods of the plugin.
+   */
+  function dtestHTML() {
+    $translator = $this->createTranslator();
+    $translator->plugin = 'file';
+    $translator->settings = array(
+      'export_format' => 'html',
+    );
+    $translator->save();
+
+    $job = $this->createJob();
+    $job->translator = $translator->name;
+    $job->addItem('test_source', 'test', '1');
+    $job->addItem('test_source', 'test', '2');
+
+    $job->requestTranslation();
+    $messages = $job->getMessages();
+    $message = reset($messages);
+
+    $download_url = $message->variables['!link'];
+    $content = file_get_contents($download_url);
+    debug($content);
+  }
+
+  /**
+   * Tests basic API methods of the plugin.
+   */
+  function testXLIFF() {
+    $translator = $this->createTranslator();
+    $translator->plugin = 'file';
+    $translator->settings = array(
+      'export_format' => 'xliff',
+    );
+    $translator->save();
+
+    $job = $this->createJob();
+    $job->translator = $translator->name;
+    $job->addItem('test_source', 'test', '1');
+    $job->addItem('test_source', 'test', '2');
+
+    $job->requestTranslation();
+    $messages = $job->getMessages();
+    $message = reset($messages);
+
+    $download_url = $message->variables['!link'];
+    $content = file_get_contents($download_url);
+    debug($content);
+  }
+}

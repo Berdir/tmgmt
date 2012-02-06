@@ -11,7 +11,7 @@
 class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController {
 
   /**
-   * TMGMTDefaultTranslatorUIController
+   * Implements TMGMTTranslatorUIControllerInterface::checkoutSettingsForm().
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['export_format'] = array(
@@ -46,11 +46,11 @@ class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController
           'xliff' => t('XLIFF'),
           'html' => t('HTML'),
         ),
-        '#default_value' => $translator->getSetting('export_format'),
+        '#default_value' => $job->getTranslator()->getSetting('export_format'),
         '#description' => t('Please select the format you want to export data.'),
       );
     }
-    parent::checkoutSettingsForm($form, $form_state, $job);
+    return parent::checkoutSettingsForm($form, $form_state, $job);
   }
 
 }
