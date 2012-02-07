@@ -5,4 +5,5 @@ core = 7.x
 dependencies[] = tmgmt
 files[] = tmgmt_file.plugin.inc
 files[] = tmgmt_file.ui.inc
+files[] = tmgmt_file.export.inc
 files[] = tmgmt_file.test
