@@ -79,5 +79,18 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     $dom->loadXML($xliff);
     $xsd = file_get_contents(drupal_get_path('module', 'tmgmt_file') . '/xliff-core-1.2-strict.xsd');
     $this->assertTrue($dom->schemaValidateSource($xsd));
+
+    // "Translate" items.
+    $xml = simplexml_import_dom($dom);
+    foreach ($xml->file->body->children() as $group) {
+      foreach ($group->children() as $transunit) {
+        if ($transunit->getName() == 'trans-unit') {
+          $transunit->target = $xml->file['target-language'] . '_' . (string)$transunit->source;
+        }
+      }
+    }
+
+    debug($xml->asXML());
+
   }
 }

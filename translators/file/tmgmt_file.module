@@ -178,14 +178,33 @@ function tmgmt_file_import_form_submit($form, &$form_state) {
  *
  * @param $format
  *   File format, e.g. xliff or html.
- * @param $job
- *   The job entity to be exported.
  *
  * @return TMGMTFileExport
  */
-function tmgmt_file_export_factory($format, TMGMTJob $job) {
+function tmgmt_file_export_factory($format) {
   $class = 'TMGMTFileExport' . strtoupper($format);
   if (class_exists($class)) {
-    return new $class($job);
+    $export = new $class();
+    if ($export instanceof TMGMTFileExport) {
+      return $export;
+    }
+  }
+}
+
+/**
+ * Returns the file export class for this format.
+ *
+ * @param $format
+ *   File format, e.g. xliff or html.
+ *
+ * @return TMGMTFileExport
+ */
+function tmgmt_file_import_factory($format) {
+  $class = 'TMGMTFileImport' . strtoupper($format);
+  if (class_exists($class)) {
+    $export = new $class();
+    if ($export instanceof TMGMTFileExport) {
+      return $export;
+    }
   }
 }

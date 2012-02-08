@@ -5,11 +5,9 @@
  */
 interface TMGMTFileExport {
 
-  function __construct(TMGMTJob $job);
-
   function getExtension();
 
-  function getDocument();
+  function export(TMGMTJob $job);
 }
 
 /**
@@ -17,13 +15,41 @@ interface TMGMTFileExport {
  */
 class TMGMTFileExportXLIFF extends XMLWriter implements TMGMTFileExport {
 
-  /**
-   * The job object.
-   * @var TMGMTJob
-   */
   protected $job;
 
-  public function __construct(TMGMTJob $job) {
+  protected function addItem(TMGMTJobItem $item) {
+    $this->startElement('group');
+    $this->writeAttribute('id', $item->tjiid);
+
+    // Add a note.
+    $this->writeElement('note', $item->getSourceLabel());
+
+    // @todo: Write in nested groups instead of flattening it.
+    $data = array_filter(tmgmt_flatten_data($item->getSourceData()), '_tmgmt_filter_data');
+    foreach ($data as $key => $element) {
+      $this->addTransUnit($item->tjiid . '][' . $key, $element);
+    }
+    $this->endElement();
+  }
+
+  protected function addTransUnit($key, $element) {
+    $this->startElement('trans-unit');
+    $this->writeAttribute('id', $key);
+    $this->startElement('source');
+    $this->writeAttribute('xml:lang', $this->job->source_language);
+    $this->text($element['#text']);
+    $this->endElement();
+    $this->startElement('target');
+    $this->writeAttribute('xml:lang', $this->job->target_language);
+    $this->text($element['#text']);
+    $this->endElement();
+    if (isset($element['#label'])) {
+      $this->writeElement('note', $element['#label']);
+    }
+    $this->endElement();
+  }
+
+  public function export(TMGMTJob $job) {
 
     $this->job = $job;
 
@@ -67,40 +93,7 @@ class TMGMTFileExportXLIFF extends XMLWriter implements TMGMTFileExport {
     foreach ($job->getItems() as $item) {
       $this->addItem($item);
     }
-  }
 
-  protected function addItem(TMGMTJobItem $item) {
-    $this->startElement('group');
-    $this->writeAttribute('id', $item->tjiid);
-
-    // Add a note.
-    $this->writeElement('note', $item->getSourceLabel());
-
-    // @todo: Write in nested groups instead of flattening it.
-    $data = array_filter(tmgmt_flatten_data($item->getSourceData()), '_tmgmt_filter_data');
-    foreach ($data as $key => $element) {
-      $this->addTransUnit($item->tjiid . '][' . $key, $element);
-    }
-  }
-
-  protected function addTransUnit($key, $element) {
-    $this->startElement('trans-unit');
-    $this->writeAttribute('id', $key);
-    $this->startElement('source');
-    $this->writeAttribute('xml:lang', $this->job->source_language);
-    $this->text($element['#text']);
-    $this->endElement();
-    $this->startElement('target');
-    $this->writeAttribute('xml:lang', $this->job->target_language);
-    $this->text($element['#text']);
-    $this->endElement();
-    if (isset($element['#label'])) {
-      $this->writeElement('note', $element['#label']);
-    }
-    $this->endElement();
-  }
-
-  public function getDocument() {
     $this->endElement();
     $this->endElement();
     $this->endElement();
@@ -110,6 +103,27 @@ class TMGMTFileExportXLIFF extends XMLWriter implements TMGMTFileExport {
 
   public function getExtension() {
     return 'xlf';
+  }
+
+}
+
+class TMGMTFileExportHTML implements TMGMTFileExport {
+
+  public function export(TMGMTJob $job) {
+    $items = array();
+    foreach ($job->getItems() as $item) {
+      $items[$item->tjiid] = array_filter(tmgmt_flatten_data($item->getSourceData()), '_tmgmt_filter_data');
+    }
+    return theme("tmgmt_file_html_template", array(
+        'tjid' => $job->tjid,
+        'source_language' => $job->source_language,
+        'target_language' => $job->target_language,
+        'items' => $items,
+      ));
+  }
+
+  public function getExtension() {
+    return 'html';
   }
 
 }
