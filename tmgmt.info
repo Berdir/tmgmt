@@ -19,3 +19,4 @@ files[] = views/tmgmt_handler_field_tmgmt_entity_label.inc
 files[] = views/tmgmt_handler_field_tmgmt_job_operations.inc
 files[] = views/tmgmt_handler_field_tmgmt_message_message.inc
 files[] = views/tmgmt_handler_field_tmgmt_job_item_operations.inc
+files[] = views/tmgmt_handler_field_tmgmt_job_item_count.inc

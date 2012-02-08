@@ -45,6 +45,24 @@ class TMGMTJobViewsController extends EntityDefaultViewsController {
       ),
     );
     $data['tmgmt_job']['label']['field']['handler'] = 'tmgmt_handler_field_tmgmt_entity_label';
+    $data['tmgmt_job']['job_item'] = array(
+      'title' => t('Job items'),
+      'help' => t('Get the job items of the job'),
+      'relationship' => array(
+        'base' => 'tmgmt_job_item',
+        'base field' => 'tjid',
+        'real field' => 'tjid',
+        'label' => t('Job items'),
+      ),
+    );
+    $data['tmgmt_job']['item_count'] = array(
+      'title' => t('Job item count'),
+      'help' => t('Show the amount of job items per job (per job item status)'),
+      'real field' => 'tjid',
+      'field' => array(
+        'handler' => 'tmgmt_handler_field_tmgmt_job_item_count',
+      ),
+    );
     return $data;
   }
 }
