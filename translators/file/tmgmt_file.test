@@ -74,7 +74,10 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     $message = reset($messages);
 
     $download_url = $message->variables['!link'];
-    $content = file_get_contents($download_url);
-    debug($content);
+    $xliff = file_get_contents($download_url);
+    $dom = new DOMDocument();
+    $dom->loadXML($xliff);
+    $xsd = file_get_contents(drupal_get_path('module', 'tmgmt_file') . '/xliff-core-1.2-strict.xsd');
+    $this->assertTrue($dom->schemaValidateSource($xsd));
   }
 }
