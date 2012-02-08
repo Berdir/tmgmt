@@ -56,7 +56,7 @@ function tmgmt_ui_settings_form($form, &$form_state) {
   $form['performance']['tmgmt_purge_finished'] = array(
     '#type' => 'select',
     '#title' => t('Purge finished jobs'),
-    '#description' => t('If configured, translation jobs that have been marked as finished will be purged after a given time.'),
+    '#description' => t('If configured, translation jobs that have been marked as finished will be purged after a given time. The translations itself will not be deleted.'),
     '#options' => array('_never' => t('Never'), '0' => t('Immediately'), '86400' => t('After 24 hours'), '604800' => t('After 7 days'), '2592000' => t('After 30 days'), '31536000' => t('After 365 days')),
     '#default_value' => variable_get('tmgmt_purge_finished', '_never'),
   );
