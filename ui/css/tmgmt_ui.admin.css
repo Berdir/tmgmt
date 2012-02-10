@@ -1,0 +1,25 @@
+/**
+ * @file
+ * CSS for the tmgmt admin pages.
+ */
+
+.tmgmt-ui-left-48 {
+  float: left;
+  width: 48%;
+}
+
+.tmgmt-ui-right-48 {
+  float: right;
+  width: 48%;
+}
+
+.tmgmt-ui-translator-label-wrapper,
+.tmgmt-ui-target-language,
+.tmgmt-ui-source-language {
+  float: left;
+}
+
+.tmgmt-ui-source-language {
+  margin-right: 80px;
+}
+
