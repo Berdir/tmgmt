@@ -11,7 +11,7 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
    * It can 'translate' any job
    */
   function canTranslate(TMGMTJob $job) {
-    parent::canTranslate();
+    parent::canTranslate($job);
     return TRUE;
   }
 

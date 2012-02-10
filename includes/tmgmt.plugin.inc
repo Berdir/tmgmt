@@ -323,6 +323,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    */
   public function cancelTranslation(TMGMTJob $job) {
     // Assume that we can cancel a translation job at any time.
+    $job->setState(TMGMT_JOB_STATE_CANCELLED);
     return TRUE;
   }
 
