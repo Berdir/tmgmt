@@ -160,6 +160,7 @@ function tmgmt_entity_info() {
       'id' => 'tid',
       'name' => 'name',
       'label' => 'label',
+      'status' => 'status',
     ),
   );
   return $info;
@@ -928,6 +929,7 @@ function _tmgmt_plugin_controller($type, $plugin = NULL, $controller = 'plugin',
   $key = $controller . ' controller class';
   $cache = &drupal_static(__FUNCTION__);
   if (!isset($plugin) && !isset($cache[$type][$controller])) {
+    $cache[$type][$controller] = array();
     foreach (_tmgmt_plugin_info($type) as $name => $info) {
       if (!isset($cache[$type][$controller][$name])) {
         $class = isset($default) && !isset($info[$key]) ? $default : $info[$key];
