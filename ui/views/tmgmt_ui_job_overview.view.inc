@@ -395,7 +395,7 @@ $handler->display->display_options['filters']['translator']['expose']['reduce'] 
 
 /* Display: Page */
 $handler = $view->new_display('page', 'Page', 'page');
-$handler->display->display_options['path'] = 'admin/config/regional/tmgmt/jobs';
+$handler->display->display_options['path'] = 'admin/config/regional/tmgmt/overview/jobs';
 $handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Job overview';
 $handler->display->display_options['menu']['weight'] = '-1';

@@ -9,13 +9,18 @@
  * Implements hook_tmgmt_source_plugin_info().
  */
 function tmgmt_node_tmgmt_source_plugin_info() {
-  return array(
-    'node' => array(
-      'label' => t('Node'),
-      'description' => t('Source handler for nodes.'),
-      'controller class' => 'TMGMTNodeSourcePluginController',
-    ),
+  $info['node'] = array(
+    'label' => t('Node'),
+    'description' => t('Source handler for nodes.'),
+    'controller class' => 'TMGMTNodeSourcePluginController',
+    'item types' => array(),
   );
+  foreach (node_type_get_names() as $type => $name) {
+    if (translation_supported_type($type)) {
+      $info['node']['item types'][$type] = $name;
+    }
+  }
+  return $info;
 }
 
 /**
@@ -65,3 +70,18 @@ function tmgmt_node_get_source_node($node) {
   return $node;
 }
 
+/**
+ * Returns all node types which are translatable.
+ *
+ * @return array
+ */
+function get_translatable_node_types() {
+  $types = array();
+  foreach (node_type_get_names() as $type => $name) {
+    // @TODO: Figure out whether this is the right constant or > 0 is better here.
+    if (translation_supported_type($type) == TRANSLATION_ENABLED) {
+      $types[] = $type;
+    }
+  }
+  return $types;
+}

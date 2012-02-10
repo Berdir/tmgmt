@@ -424,11 +424,3 @@ $handler->display->display_options['filters']['source_translation']['table'] = '
 $handler->display->display_options['filters']['source_translation']['field'] = 'source_translation';
 $handler->display->display_options['filters']['source_translation']['operator'] = '1';
 $handler->display->display_options['filters']['source_translation']['group'] = 1;
-
-/* Display: Page */
-$handler = $view->new_display('page', 'Page', 'page');
-$handler->display->display_options['path'] = 'admin/config/regional/tmgmt/node';
-$handler->display->display_options['menu']['type'] = 'tab';
-$handler->display->display_options['menu']['title'] = 'Content overview';
-$handler->display->display_options['menu']['weight'] = '0';
-$handler->display->display_options['menu']['context'] = 0;

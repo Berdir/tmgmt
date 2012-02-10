@@ -43,14 +43,21 @@ function tmgmt_ui_entity_info() {
 function tmgmt_ui_menu() {
   $items['admin/config/regional/tmgmt'] = array(
     'title' => 'Translation Management',
-    'description' => 'Use the Translation Management',
-    'page callback' => 'tmgmt_ui_overview_page',
+    'description' => 'Use the Translation Management Tool',
+    'page callback' => 'tmgmt_ui_dashboard_page',
+    'page arguments' => array('tmgmt_job_overview'),
     'access arguments' => array('administer tmgmt'),
-    'file' => 'includes/tmgmt_ui.pages.inc',
   );
   $items['admin/config/regional/tmgmt/overview'] = array(
     'title' => 'Overview',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => array('administer tmgmt'),
+    'weight' => -10,
+  );
+  $items['admin/config/regional/tmgmt/overview/dashboard'] = array(
+    'title' => 'Dashboard',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => array('administer tmgmt'),
     'weight' => -10,
   );
   $items['admin/config/regional/tmgmt/settings'] = array(
@@ -98,6 +105,10 @@ function tmgmt_ui_forms() {
       'wrapper_callback' => 'tmgmt_ui_translation_review_form_defaults',
     );
   }
+  // Some source plugins might provide forms.
+  foreach (tmgmt_source_plugin_controller() as $controller) {
+    $forms += $controller->hook_forms();
+  }
   return $forms;
 }
 
@@ -142,9 +153,43 @@ function tmgmt_ui_embed_view($view) {
     if (!empty($view->result)) {
       return $output;
     }
-   }
+  }
   return '';
- }
+}
+
+/**
+ * Page callback for the overview page.
+ */
+function tmgmt_ui_dashboard_page() {
+  return array();
+}
+
+/**
+ * Form callback for the source overview form.
+ */
+function tmgmt_ui_source_overview_form($form, &$form_state, $plugin, $item_type = NULL) {
+  $controller = tmgmt_source_plugin_controller($plugin);
+  return $controller->overviewForm($form, $form_state, $item_type);
+}
+
+/**
+ * Form callback for the source overview form.
+ */
+function tmgmt_ui_source_overview_form_defaults($form, &$form_state, $plugin, $item_type = NULL) {
+  $controller = tmgmt_source_plugin_controller($plugin);
+  $info = $controller->pluginInfo();
+  drupal_set_title(t('@type overview (@plugin)', array('@type' => $controller->getItemTypeLabel($item_type), '@plugin' => $info['label'])), PASS_THROUGH);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Request translation'),
+  );
+  return $form;
+}
+
+function tmgmt_ui_source_overview_form_submit($form, &$form_state) {
+  dpm('asdasd');
+}
 
 /**
  * Attempts to check out a number of jobs.
