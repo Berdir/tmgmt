@@ -6,6 +6,7 @@
  * @ingroup views_field_handlers
  */
 class tmgmt_node_handler_field_translation_language_status extends views_handler_field_boolean {
+
   /**
    * @var views_plugin_query_default
    */
@@ -35,7 +36,6 @@ class tmgmt_node_handler_field_translation_language_status extends views_handler
           'table' => $this->table,
           'field' => $this->field . '_single',
           'label' => $lang_info->name,
-          'type' => $options['type'],
         );
         $handler->langcode = $langcode;
         $handler->main_field = $options['id'];
@@ -62,11 +62,9 @@ class tmgmt_node_handler_field_translation_language_status extends views_handler
     $select->leftJoin('tmgmt_job_item', 'tji', "n.vid = tji.item_id AND tji.plugin = 'node' AND tji.item_type = 'node'");
     $select->leftJoin('tmgmt_job', 'tj', 'tji.tjid = tj.tjid');
     $select->condition('tji.item_id', $vids);
-
     $select->fields('n', array('vid', 'nid'));
     $select->fields('tj', array('target_language'));
     $select->addExpression('MAX(tji.item_id)');
-
     $select->groupBy('n.vid');
     $select->groupBy('tj.target_language');
 

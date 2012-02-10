@@ -39,7 +39,8 @@ function tmgmt_nativy_tmgmt_translator_plugin_info() {
     'nativy' => array(
       'label' => t('Nativy translator'),
       'description' => t('Nativy translator plugin that returns translations from nativy.com.'),
-      'controller class' => 'TMGMTNativyTranslatorController',
+      'plugin controller class' => 'TMGMTNativyTranslatorPluginController',
+      'ui controller class' => 'TMGMTNativyTranslatorUIController',
     ),
   );
 }

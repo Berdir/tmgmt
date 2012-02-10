@@ -9,13 +9,14 @@
  * Implements hook_tmgmt_source_plugin_info().
  */
 function tmgmt_entity_tmgmt_source_plugin_info() {
-  return array(
-    'entity' => array(
-      'label' => t('Entity'),
-      'description' => t('Source handler for entities.'),
-      'controller class' => 'TMGMTEntitySourcePluginController',
-    ),
+  $info['entity'] = array(
+    'label' => t('Entity'),
+    'description' => t('Source handler for entities.'),
+    'plugin controller class' => 'TMGMTEntitySourcePluginController',
+    'item types' => array(),
   );
+  // @todo Implement item types.
+  return $info;
 }
 
 /**

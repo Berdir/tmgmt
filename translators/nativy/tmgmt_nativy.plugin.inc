@@ -2,22 +2,13 @@
 
 /**
  * @file
- * Provides Microsoft Translator plugin controller.
- *
- * Check @link http://msdn.microsoft.com/en-us/library/dd576287.aspx Microsoft
- * Translator @endlink. Note that we are using HTTP API.
+ * Provides the Nativy Translator plugin controller.
  */
 
 /**
- * Nativity translator plugin controller.
+ * Nativy translator plugin controller.
  */
-class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginController {
-  /**
-   * Translation service URL.
-   *
-   * @var string
-   */
-  //protected $translatorURL = 'http://api.microsofttranslator.com/v2/Http.svc';
+class TMGMTNativyTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
@@ -71,26 +62,6 @@ class TMGMTNativyTranslatorController extends TMGMTDefaultTranslatorPluginContro
     }
     // @todo Implement retrieve translation
     return FALSE;
-  }
-
-  /**
-   * Defines plugin settings form.
-   *
-   * @param $form array
-   * @param $form_state array
-   */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
-    $form['api_user_name'] = array(
-      '#type' => 'textfield',
-      '#title' => t('User name'),
-      '#default_value' => $translator->getSetting('api_user_name', ''),
-    );
-    $form['api_password'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Password'),
-      '#default_value' => $translator->getSetting('api_password', ''),
-    );
-    return parent::pluginSettingsForm($form, $form_state, $translator);
   }
 
   /**
@@ -287,7 +258,6 @@ class TMGMTNativySoapClient extends SoapClient {
       $this->setAuthHeader(array('AuthenticatedToken' => $token));
       return TRUE;
     } catch (Exception $e) {
-      dpm($exception);
       $this->debug();
     }
   }

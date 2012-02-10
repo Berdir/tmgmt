@@ -95,6 +95,18 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
+   * Returns the translator ui controller of this translator.
+   *
+   * @return TMGMTTranslatorUIControllerInterface
+   */
+  public function getUIController() {
+    if (!empty($this->plugin)) {
+      return tmgmt_translator_ui_controller($this->plugin);
+    }
+    return FALSE;
+  }
+
+  /**
    * Returns the supported target languages for this translator.
    *
    * @return array
@@ -155,7 +167,7 @@ class TMGMTTranslator extends Entity {
    * Get the job settings form from the respective translator plugin.
    */
   public function checkoutSettingsForm($form, &$form_state, $job) {
-    if ($controller = $this->getPluginController()) {
+    if ($controller = $this->getUiController()) {
       return $controller->checkoutSettingsForm($form, $form_state, $job);
     }
     return FALSE;
@@ -165,7 +177,7 @@ class TMGMTTranslator extends Entity {
    * Get the settings form from the respective translator plugin.
    */
   public function pluginSettingsForm($form, $form_state, $busy = FALSE) {
-    if ($controller = $this->getPluginController()) {
+    if ($controller = $this->getUiController()) {
       return $controller->pluginSettingsForm($form, $form_state, $this, $busy);
     }
     return FALSE;
@@ -175,7 +187,7 @@ class TMGMTTranslator extends Entity {
    * Get information about a job from the respective translator plugin.
    */
   public function checkoutInfo(TMGMTJob $job) {
-    if ($controller = $this->getPluginController()) {
+    if ($controller = $this->getUiController()) {
       return $controller->checkoutInfo($job);
     }
     return FALSE;
@@ -469,6 +481,19 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   }
 
   /**
+   * Returns the translator plugin controller of the translator of this job item.
+   *
+   * @return TMGMTTranslatorPluginControllerInterface
+   *   The controller of the translator plugin or FALSE if there was a problem.
+   */
+  public function getTranslatorUIController() {
+    if ($job = $this->getJob()) {
+      return $job->getTranslatorUIController();
+    }
+    return FALSE;
+  }
+
+  /**
    * Array of the data to be translated.
    *
    * The structure is similar to the form API in the way that it is a possibly
@@ -500,7 +525,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns the configured plugin controller.
+   * Returns the plugin controller of the configured plugin.
    *
    * @return TMGMTSourcePluginControllerInterface
    */
@@ -512,11 +537,25 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   }
 
   /**
+   * Returns the ui controller of the configured plugin.
+   *
+   * @return TMGMTSourceUIControllerInterface
+   */
+  public function getSourceUIController() {
+    if (!empty($this->plugin)) {
+      return tmgmt_source_ui_controller($this->plugin);
+    }
+    return FALSE;
+  }
+
+  /**
    * Sets the state of the job item to 'needs review'.
    */
   public function needsReview($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
-      $message = 'The translation job item needs to be reviewed.';
+      $uri = $this->getSourceUri();
+      $message = 'The translation for !source needs to be reviewed.';
+      $variables = array('!source' => l($this->getSourceLabel(), $uri['path']));
     }
     $return = $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW, $message, $variables, $type);
     // Auto accept the translation if the translator is configured for it.
@@ -531,7 +570,9 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    */
   public function accepted($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
-      $message = 'The translation job item has been accepted.';
+      $uri = $this->getSourceUri();
+      $message = 'The translation for !source has been accepted.';
+      $variables = array('!source' => l($this->getSourceLabel(), $uri['path']));
     }
     $return = $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED, $message, $variables, $type);
     // Check if this was the last unfinished job item in this job.
@@ -547,7 +588,9 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    */
   public function active($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
-      $message = 'The translation job item is now active.';
+      $uri = $this->getSourceUri();
+      $message = 'The translation for !source is now being processed.';
+      $variables = array('!source' => l($this->getSourceLabel(), $uri['path']));
     }
     return $this->setState(TMGMT_JOB_ITEM_STATE_ACTIVE, $message, $variables, $type);
   }
@@ -921,7 +964,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
           '#markup' => $view->preview('block', array($this->tjid)),
         );
       }
-      if ($view = views_get_view('tmgmt_ui_messages')) {
+      if ($view = views_get_view('tmgmt_ui_job_messages')) {
         $content['messages'] = array(
           '#type' => 'item',
           '#title' => $view->get_title(),
@@ -1393,6 +1436,19 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   public function getTranslatorController() {
     if ($translator = $this->getTranslator($this)) {
       return $translator->getPluginController();
+    }
+    return FALSE;
+  }
+
+  /**
+   * Returns the translator ui controller of the translator of this job.
+   *
+   * @return TMGMTTranslatorUIControllerInterface
+   *   The controller of the translator plugin.
+   */
+  public function getTranslatorUIController() {
+    if ($translator = $this->getTranslator($this)) {
+      return $translator->getUIController();
     }
     return FALSE;
   }

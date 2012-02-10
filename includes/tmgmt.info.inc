@@ -97,6 +97,18 @@ class TMGMTMessageMetadataController extends EntityDefaultMetadataController {
     // Make the created property appear as date.
     $properties['created']['type'] = 'date';
 
+    // Link the job id property to the corresponding job entity.
+    $properties['tjid'] = array(
+      'description' => t('Corresponding job entity.'),
+      'type' => 'tmgmt_job',
+    ) + $properties['tjid'];
+
+    // Link the job item id property to the corresponding job item entity.
+    $properties['tjiid'] = array(
+      'description' => t('Corresponding job item entity.'),
+      'type' => 'tmgmt_job_item',
+    ) + $properties['tjiid'];
+
     return $info;
   }
 

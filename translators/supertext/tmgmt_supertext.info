@@ -4,3 +4,4 @@ package = Translation Management
 core = 7.x
 dependencies[] = tmgmt
 files[] = tmgmt_supertext.plugin.inc
+files[] = tmgmt_supertext.ui.inc

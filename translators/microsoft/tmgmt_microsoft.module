@@ -13,7 +13,8 @@ function tmgmt_microsoft_tmgmt_translator_plugin_info() {
     'microsoft' => array(
       'label' => t('Microsoft translator'),
       'description' => t('Microsoft Translator service.'),
-      'controller class' => 'TMGMTMicrosoftTranslatorController',
+      'plugin controller class' => 'TMGMTMicrosoftTranslatorPluginController',
+      'ui controller class' => 'TMGMTMicrosoftTranslatorUIController',
       'default settings' => array(
         'api' => '',
       ),

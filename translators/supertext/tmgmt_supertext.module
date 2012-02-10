@@ -13,7 +13,7 @@ function tmgmt_supertext_tmgmt_translator_plugin_info() {
     'supertext' => array(
       'label' => t('Supertext translator'),
       'description' => t('A Supertext translator service.'),
-      'controller class' => 'TMGMTSupertextPluginController',
+      'plugin controller class' => 'TMGMTSupertextPluginController',
     ),
   );
 }

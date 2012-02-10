@@ -2,6 +2,7 @@ name = Nativy Translator
 description = Nativy translator plugin for Translation Management module.
 package = Translation Management
 core = 7.x
-
+dependencies[] = tmgmt
 files[] = tmgmt_nativy.module
 files[] = tmgmt_nativy.plugin.inc
+files[] = tmgmt_nativy.ui.inc

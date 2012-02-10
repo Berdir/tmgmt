@@ -10,11 +10,11 @@
  */
 function tmgmt_file_tmgmt_translator_plugin_info() {
   return array(
-    // @todo Rename plugin.
-    'html' => array(
+    'file' => array(
       'label' => t('File translator'),
       'description' => t('File translator that exports and imports files.'),
-      'controller class' => 'TMGMTFileTranslatorPluginController',
+      'plugin controller class' => 'TMGMTFileTranslatorPluginController',
+      'ui controller class' => 'TMGMTFileTranslatorUIController',
     ),
   );
 }
@@ -25,7 +25,7 @@ function tmgmt_file_tmgmt_translator_plugin_info() {
  * Creates template file for Campaign Statistics block. The template may also
  * be moved under the current theme directory.
  */
-function tmgmt_file_theme($existing, $type, $theme, $path) {
+function tmgmt_file_theme() {
   return array(
     'tmgmt_file_html_template' => array(
       'path' => drupal_get_path('module', 'tmgmt_file') . '/templates',
@@ -38,7 +38,7 @@ function tmgmt_file_theme($existing, $type, $theme, $path) {
  * Implements hook_menu().
  */
 function tmgmt_file_menu() {
-  $items['file_translator/import'] = array(
+  $items['file-translator/import'] = array(
     'type' => MENU_CALLBACK,
     'title' => 'HTML Import',
     'page callback' => 'drupal_get_form',
@@ -58,12 +58,10 @@ function tmgmt_file_import_form($form) {
     '#size' => 50,
     '#description' => t('A translated HTML or XLIFF File'),
   );
-
   $form['import']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Import'),
   );
-
   return $form;
 }
 

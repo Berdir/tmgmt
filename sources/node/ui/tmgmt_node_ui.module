@@ -43,13 +43,6 @@ function tmgmt_node_ui_views_api() {
 }
 
 /**
- * Implements hook_views_default_views().
- */
-function tmgmt_node_ui_views_default_views() {
-  return _tmgmt_load_exports('tmgmt_node_ui', 'views', 'view.inc', 'view');
-}
-
-/**
  * Implements hook_page_alter().
  */
 function tmgmt_node_ui_page_alter(&$page) {

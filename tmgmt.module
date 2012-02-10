@@ -14,8 +14,6 @@
  *
  * In the default user interface, jobs with this state are so called cart jobs.
  * Each user gets his cart jobs listed in a block and can check them out.
- *
- * upcoming D8 entities as well as the current $entity->is_new property. (??)
  */
 define('TMGMT_JOB_STATE_UNPROCESSED', 0);
 
@@ -218,6 +216,16 @@ function tmgmt_cron() {
       $controller->delete(array_keys($result['tmgmt_job']));
     }
   }
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function tmgmt_views_api() {
+  return array(
+    'api' => 3.0,
+    'path' => drupal_get_path('module', 'tmgmt') . '/views',
+  );
 }
 
 /**
@@ -714,6 +722,21 @@ function tmgmt_translator_plugin_controller($plugin = NULL) {
 }
 
 /**
+ * Get the ui controller class for a given translator plugin.
+ *
+ * @param $plugin
+ *   (Optional) The machine-readable name of a translator plugin.
+ *
+ * @return TMGMTTranslatorUIControllerInterface
+ *   The ui controller object for the given translator plugin or an array
+ *   containing all available translator plugin controller objects if no plugin
+ *   name was given.
+ */
+function tmgmt_translator_ui_controller($plugin = NULL) {
+  return _tmgmt_plugin_controller('translator', $plugin, 'ui', 'TMGMTDefaultTranslatorUIController');
+}
+
+/**
  * Returns an array of all available translator plugins with the labels as
  * values and the machine-readable name as the key.
  *
@@ -789,7 +812,7 @@ function tmgmt_source_plugin_info($plugin = NULL) {
 }
 
 /**
- * Get the controller class for a given source plugin.
+ * Get the plugin controller class for a given source plugin.
  *
  * @param $plugin
  *   (Optional) The machine-readable name of a source plugin.
@@ -803,6 +826,35 @@ function tmgmt_source_plugin_controller($plugin = NULL) {
 }
 
 /**
+ * Get the ui controller class for a given source plugin.
+ *
+ * @param $plugin
+ *   (Optional) The machine-readable name of a source plugin.
+ *
+ * @return TMGMTSourceUIControllerInterface
+ *   The ui controller object for the given source plugin or an array containing
+ *   all available source ui controller objects if no plugin name was given.
+ */
+function tmgmt_source_ui_controller($plugin = NULL) {
+  return _tmgmt_plugin_controller('source', $plugin, 'ui', 'TMGMTDefaultSourceUIController');
+}
+
+/**
+ * Get the views controller class for a given source plugin.
+ *
+ * @param $plugin
+ *   (Optional) The machine-readable name of a source plugin.
+ *
+ * @return TMGMTSourceViewsControllerInterface
+ *   The views controller object for the given source plugin or an array
+ *   containing all available source views controller objects if no plugin name
+ *   was given.
+ */
+function tmgmt_source_views_controller($plugin = NULL) {
+  return _tmgmt_plugin_controller('source', $plugin, 'views', 'TMGMTDefaultSourceViewsController');
+}
+
+/**
  * Returns an array of all available source plugins with the labels as
  * values and the machine-readable name as the key.
  *
@@ -811,6 +863,19 @@ function tmgmt_source_plugin_controller($plugin = NULL) {
  */
 function tmgmt_source_plugin_labels() {
   return _tmgmt_plugin_labels('source');
+}
+
+/**
+ * Returns an array of translatable item types of a source plugin.
+ *
+ * @param $plugin
+ *   The machine-readable name of a source plugin.
+ *
+ * @see TMGMTSourcePluginControllerInterface::getItemTypes()
+ */
+function tmgmt_source_translatable_item_types($plugin) {
+  $controller = tmgmt_source_plugin_controller($plugin);
+  return $controller->getItemTypes();
 }
 /**
  * @} End of "addtogroup tmgmt_source".
@@ -855,32 +920,37 @@ function _tmgmt_plugin_info($type, $plugin = NULL) {
  * @param $plugin
  *   (Optional) The machine-readable name of a source plugin.
  *
- * @return
+ * @return TMGMTPluginBaseInterface
  *   The controller object for the given plugin or an array containing all
  *   available plugin controller objects if no plugin name was given.
  */
-function _tmgmt_plugin_controller($type, $plugin = NULL) {
+function _tmgmt_plugin_controller($type, $plugin = NULL, $controller = 'plugin', $default = NULL) {
+  $key = $controller . ' controller class';
   $cache = &drupal_static(__FUNCTION__);
-  if (!isset($plugin) && !isset($cache[$type])) {
+  if (!isset($plugin) && !isset($cache[$type][$controller])) {
     foreach (_tmgmt_plugin_info($type) as $name => $info) {
-      if (!isset($cache[$type][$name])) {
-        $cache[$type][$name] = new $info['controller class']($name);
+      if (!isset($cache[$type][$controller][$name])) {
+        $class = isset($default) && !isset($info[$key]) ? $default : $info[$key];
+        $cache[$type][$controller][$name] = new $class($type, $name);
       }
     }
   }
-  elseif (!isset($cache[$type][$plugin])) {
+  elseif (isset($plugin) && !isset($cache[$type][$controller][$plugin])) {
     $info = _tmgmt_plugin_info($type, $plugin);
-    if ($info && !empty($info['controller class'])) {
-      $cache[$type][$plugin] = new $info['controller class']($plugin);
+    if (empty($info[$key]) && empty($default)) {
+      $cache[$type][$controller][$plugin] = FALSE;
+    }
+    else {
+      $class = empty($info[$key]) ? $default : $info[$key];
+      $cache[$type][$controller][$plugin] = new $class($type, $plugin);
     }
   }
-  if (isset($plugin) && isset($cache[$type][$plugin])) {
-    return $cache[$type][$plugin];
+  if (isset($plugin)) {
+    return $cache[$type][$controller][$plugin];
   }
-  elseif (!isset($plugin) && isset($cache[$type])) {
-    return $cache[$type];
+  else {
+    return array_filter($cache[$type][$controller]);
   }
-  return FALSE;
 }
 
 /**

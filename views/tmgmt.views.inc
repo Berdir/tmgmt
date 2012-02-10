@@ -2,13 +2,28 @@
 
 /**
  * @file
- * Contains TMGMT specific views controller.
+ * Contains Views controllers for the translation management module.
  */
+
+/**
+ * Implements hook_views_data().
+ */
+function tmgmt_views_data() {
+  $data = array();
+  foreach (tmgmt_source_views_controller() as $controller) {
+    $data += $controller->views_data();
+  }
+  return $data;
+}
 
 /**
  * Views controller class for the job item entity.
  */
 class TMGMTJobItemViewsController extends EntityDefaultViewsController {
+
+  /**
+   * Overrides EntityDefaultViewsController::views_data().
+   */
   public function views_data() {
     $data = parent::views_data();
     $data['tmgmt_job_item']['label'] = array(
@@ -28,12 +43,17 @@ class TMGMTJobItemViewsController extends EntityDefaultViewsController {
     );
     return $data;
   }
+
 }
 
 /**
  * Views controller class for the job entity.
  */
 class TMGMTJobViewsController extends EntityDefaultViewsController {
+
+  /**
+   * Overrides EntityDefaultViewsController::views_data().
+   */
   public function views_data() {
     $data = parent::views_data();
     $data['tmgmt_job']['operations'] = array(
@@ -65,14 +85,55 @@ class TMGMTJobViewsController extends EntityDefaultViewsController {
     );
     return $data;
   }
+
 }
 /**
- * Views controller class for the tmgmt job message entity.
+ * Views controller class for the job message entity.
  */
 class TMGMTMessageViewsController extends EntityDefaultViewsController {
+
+  /**
+   * Overrides EntityDefaultViewsController::views_data().
+   */
   public function views_data() {
     $data = parent::views_data();
     $data['tmgmt_message']['message']['field']['handler'] = 'tmgmt_handler_field_tmgmt_message_message';
     return $data;
   }
+
+}
+
+interface TMGMTSourceViewsControllerInterface extends TMGMTPluginBaseInterface {
+
+  /**
+   * Defines the result for hook_views_data().
+   */
+  public function views_data();
+
+}
+
+/**
+ * Vies controller class for source plugins.
+ */
+class TMGMTDefaultSourceViewsController extends TMGMTPluginBase implements TMGMTSourceViewsControllerInterface {
+
+  /**
+   * Implements TMGMTSourceViewsControllerInterface::views_data().
+   */
+  public function views_data() {
+    // @todo Implement this in a generic fashion.
+    /* $key = $this->pluginInfo['something'];
+    $data[$key]['tmgmt_translatable_types'] = array(
+      'title' => t('Translatable types'),
+      'help' => t('Filter translatable elements based on their types.'),
+      'filter' => array(
+        'handler' => 'views_handler_filter_in_operator',
+        'real field' => 'type',
+        'options callback' => 'tmgmt_source_translatable_item_types',
+        'options arguments' => array($this->pluginType),
+      ),
+    ); */
+    return array();
+  }
+
 }

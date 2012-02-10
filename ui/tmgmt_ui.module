@@ -70,7 +70,7 @@ function tmgmt_ui_menu() {
     'weight' => 10,
   );
   // Some source plugins might provide menu items.
-  foreach (tmgmt_source_plugin_controller() as $controller) {
+  foreach (tmgmt_source_ui_controller() as $controller) {
     $items += $controller->hook_menu();
   }
   return $items;
@@ -106,7 +106,7 @@ function tmgmt_ui_forms() {
     );
   }
   // Some source plugins might provide forms.
-  foreach (tmgmt_source_plugin_controller() as $controller) {
+  foreach (tmgmt_source_ui_controller() as $controller) {
     $forms += $controller->hook_forms();
   }
   return $forms;
@@ -168,7 +168,7 @@ function tmgmt_ui_dashboard_page() {
  * Form callback for the source overview form.
  */
 function tmgmt_ui_source_overview_form($form, &$form_state, $plugin, $item_type = NULL) {
-  $controller = tmgmt_source_plugin_controller($plugin);
+  $controller = tmgmt_source_ui_controller($plugin);
   return $controller->overviewForm($form, $form_state, $item_type);
 }
 
@@ -177,8 +177,9 @@ function tmgmt_ui_source_overview_form($form, &$form_state, $plugin, $item_type 
  */
 function tmgmt_ui_source_overview_form_defaults($form, &$form_state, $plugin, $item_type = NULL) {
   $controller = tmgmt_source_plugin_controller($plugin);
-  $info = $controller->pluginInfo();
-  drupal_set_title(t('@type overview (@plugin)', array('@type' => $controller->getItemTypeLabel($item_type), '@plugin' => $info['label'])), PASS_THROUGH);
+  $info = tmgmt_source_plugin_info($plugin);
+  // Set a generic title that includes the source plugin and item type label.
+  drupal_set_title(t('@plugin overview (@type)', array('@type' => $controller->getItemTypeLabel($item_type), '@plugin' => $info['label'])), PASS_THROUGH);
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -187,8 +188,31 @@ function tmgmt_ui_source_overview_form_defaults($form, &$form_state, $plugin, $i
   return $form;
 }
 
+/**
+ * Validation callback for the source overview form.
+ */
+function tmgmt_ui_source_overview_form_validate($form, &$form_state) {
+  // Copy the form state so we are not removing important information from it
+  // when sending it through form_state_values_clean().
+  $cleaned = $form_state;
+  form_state_values_clean($cleaned);
+  if (empty($cleaned['values'])) {
+    form_set_error('items', t("You didn't select any source objects"));
+  }
+  list($plugin, $item_type) = $form_state['build_info']['args'];
+  // Execute the validation method on the source plugin controller.
+  $controller = tmgmt_source_ui_controller($plugin);
+  $controller->overviewFormValidate($form, $form_state, $item_type);
+}
+
+/**
+ * Submit callback for the source overview form.
+ */
 function tmgmt_ui_source_overview_form_submit($form, &$form_state) {
-  dpm('asdasd');
+  list($plugin, $item_type) = $form_state['build_info']['args'];
+  // Execute the submit method on the source plugin controller.
+  $controller = tmgmt_source_ui_controller($plugin);
+  $controller->overviewFormSubmit($form, $form_state, $item_type);
 }
 
 /**
@@ -346,17 +370,19 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
  * @see tmgmt_ui_forms()
  */
 function tmgmt_ui_translation_review_form($form, &$form_state, TMGMTJobItem $item) {
-  if ($source = $item->getSourceController()) {
-    if ($translator = $item->getTranslatorController()) {
-      // The basic review form gets built by the source controller.
-      $form = $source->reviewForm($form, $form_state, $item);
-      // After that, the translator controller may append additional form fields.
-      // This way, the translator controller can append per-text comment fields for
-      // for example.
-      $form = $translator->reviewForm($form, $form_state, $item);
-      return $form;
-    }
+  $source = $item->getSourceUIController();
+  if (method_exists($source, 'reviewForm')) {
+    // The basic review form gets built by the source controller.
+    $form = $source->reviewForm($form, $form_state, $item);
   }
+  $translator = $item->getTranslatorUIController();
+  if (method_exists($translator, 'reviewForm')) {
+    // After that, the translator controller may append additional form fields.
+    // This way, the translator controller can append per-text comment fields for
+    // for example.
+    $form = $translator->reviewForm($form, $form_state, $item);
+  }
+  return $form;
 }
 
 /**
@@ -365,12 +391,12 @@ function tmgmt_ui_translation_review_form($form, &$form_state, TMGMTJobItem $ite
 function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
   $item = $form_state['item'];
   // First invoke the validation method on the source controller.
-  $source = $item->getSourceController();
+  $source = $item->getSourceUIController();
   if (method_exists($source, 'reviewFormValidate')) {
     $source->reviewFormValidate($form, $form_state, $item);
   }
   // Then invoke the validation method on the source controller.
-  $translator = $item->getTranslatorController();
+  $translator = $item->getTranslatorUIController();
   if (method_exists($translator, 'reviewFormValidate')) {
     $translator->reviewFormValidate($form, $form_state, $item);
   }
@@ -384,12 +410,12 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   // Rewrite the submitted data values to #text.
   _tmgmt_ui_submit_translation_review_data($form_state['values']['review'], $item->translation);
   // First invoke the validation method on the source controller.
-  $source = $item->getSourceController();
+  $source = $item->getSourceUIController();
   if (method_exists($source, 'reviewFormSubmit')) {
     $source->reviewFormSubmit($form, $form_state, $item);
   }
   // Then invoke the validation method on the source controller.
-  $translator = $item->getTranslatorController();
+  $translator = $item->getTranslatorUIController();
   if (method_exists($translator, 'reviewFormSubmit')) {
     $translator->reviewFormSubmit($form, $form_state, $item);
   }

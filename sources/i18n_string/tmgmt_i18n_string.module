@@ -9,13 +9,14 @@
  * Implements hook_tmgmt_source_plugin_info().
  */
 function tmgmt_i18n_string_tmgmt_source_plugin_info() {
-  return array(
-    'i18n_string' => array(
-      'label' => t('i18n String'),
-      'description' => t('Source handler for i18n strings.'),
-      'controller class' => 'TMGMTI18nStringSourcePluginController',
-    ),
+  $info['i18n_string'] = array(
+    'label' => t('i18n String'),
+    'description' => t('Source handler for i18n strings.'),
+    'plugin controller class' => 'TMGMTI18nStringSourcePluginController',
+    'item types' => array(),
   );
+  // @todo Implement item types.
+  return $info;
 }
 
 function tmgmt_i18n_string_select_query($i18n_object_type, $languages = NULL) {
@@ -51,8 +52,5 @@ function tmgmt_i18n_string_select_query($i18n_object_type, $languages = NULL) {
   $select->orderBy('i18n_s.textgroup');
   $select->orderBy('i18n_s.context');
 
-  return array(
-    'languages' => $languages,
-    'query' => $select,
-  );
+  return array('languages' => $languages, 'query' => $select);
 }

@@ -1,7 +1,9 @@
 <?php
 
 /**
- * Field handler which shows a label of a job item.
+ * Field handler which shows a label of a entity.
+ *
+ * @todo Remove this once http://drupal.org/node/1435418 is through.
  *
  * @ingroup views_field_handlers
  */

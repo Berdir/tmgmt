@@ -9,9 +9,9 @@
  */
 
 /**
- * Microsoft translator plugin.
+ * Microsoft translator plugin controller.
  */
-class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginController {
+class TMGMTMicrosoftTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * Translation service URL.
@@ -126,19 +126,6 @@ class TMGMTMicrosoftTranslatorController extends TMGMTDefaultTranslatorPluginCon
       return $languages;
     }
     return array();
-  }
-
-  /**
-   * Overrides TMGMTDefaultTranslatorPluginController::pluginSettingsForm().
-   */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
-    $form['api'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Microsoft API Key'),
-      '#default_value' => $translator->getSetting('api'),
-      '#description' => t('Please enter your Microsoft API ID, or follow this <a href="!link">link</a> to generate one.', array('!link' => 'http://www.bing.com/developers/appids.aspx')),
-    );
-    return parent::pluginSettingsForm($form, $form_state, $translator);
   }
 
   /**

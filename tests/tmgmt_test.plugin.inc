@@ -5,10 +5,10 @@
  * Provides the user translator plugin controller.
  */
 
-class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
+class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController {
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::pluginSettingsForm().
+   * Overrides TMGMTDefaultTranslatorUIController::pluginSettingsForm().
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['expose_settings'] = array(
@@ -17,15 +17,6 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
       '#default_value' => TRUE,
     );
     return parent::pluginSettingsForm($form, $form_state, $translator);
-  }
-
-  /**
-   * Overrides TMGMTDefaultTranslatorPluginController::defaultSettings().
-   */
-  public function defaultSettings() {
-    return array(
-      'expose_settings' => TRUE,
-    );
   }
 
   /**
@@ -48,6 +39,10 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     }
     return parent::checkoutSettingsForm($form, $form_state, $job);
   }
+
+}
+
+class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * Overrides TMGMTDefaultTranslatorPluginController::hasCheckoutSettings().

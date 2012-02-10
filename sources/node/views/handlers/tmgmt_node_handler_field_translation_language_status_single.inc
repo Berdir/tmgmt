@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Single field handler for
+ * @todo What is this?
  */
 class tmgmt_node_handler_field_translation_language_status_single extends views_handler_field_boolean {
+
   /**
    * @var tmgmt_node_handler_field_translation_language_status
    */
@@ -29,8 +30,8 @@ class tmgmt_node_handler_field_translation_language_status_single extends views_
     return FALSE;
   }
 
-
   function query() {
     $this->add_additional_fields();
   }
+
 }

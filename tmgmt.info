@@ -10,13 +10,14 @@ files[] = includes/tmgmt.controller.inc
 files[] = includes/tmgmt.data.inc
 files[] = includes/tmgmt.entity.inc
 files[] = includes/tmgmt.plugin.inc
-files[] = includes/tmgmt.views.inc
+files[] = includes/tmgmt.ui.inc
 files[] = includes/tmgmt.info.inc
 files[] = tmgmt.test
 
-; Views handlers
-files[] = views/tmgmt_handler_field_tmgmt_entity_label.inc
-files[] = views/tmgmt_handler_field_tmgmt_job_operations.inc
-files[] = views/tmgmt_handler_field_tmgmt_message_message.inc
-files[] = views/tmgmt_handler_field_tmgmt_job_item_operations.inc
-files[] = views/tmgmt_handler_field_tmgmt_job_item_count.inc
+; Views integration and handlers
+files[] = views/tmgmt.views.inc
+files[] = views/handlers/tmgmt_handler_field_tmgmt_entity_label.inc
+files[] = views/handlers/tmgmt_handler_field_tmgmt_job_operations.inc
+files[] = views/handlers/tmgmt_handler_field_tmgmt_message_message.inc
+files[] = views/handlers/tmgmt_handler_field_tmgmt_job_item_operations.inc
+files[] = views/handlers/tmgmt_handler_field_tmgmt_job_item_count.inc

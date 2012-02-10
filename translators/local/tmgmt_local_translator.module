@@ -39,7 +39,7 @@ function tmgmt_local_translator_tmgmt_translator_plugin_info() {
     'local' => array(
       'label' => t('Local translator'),
       'description' => t('Local translation team.'),
-      'controller class' => 'TMGMTLocalTranslatorPluginController',
+      'plugin controller class' => 'TMGMTLocalTranslatorPluginController',
     ),
   );
 }

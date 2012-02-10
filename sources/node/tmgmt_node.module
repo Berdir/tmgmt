@@ -12,7 +12,9 @@ function tmgmt_node_tmgmt_source_plugin_info() {
   $info['node'] = array(
     'label' => t('Node'),
     'description' => t('Source handler for nodes.'),
-    'controller class' => 'TMGMTNodeSourcePluginController',
+    'plugin controller class' => 'TMGMTNodeSourcePluginController',
+    'ui controller class' => 'TMGMTNodeSourceUIController',
+    'views controller class' => 'TMGMTNodeSourceViewsController',
     'item types' => array(),
   );
   foreach (node_type_get_names() as $type => $name) {
@@ -21,6 +23,13 @@ function tmgmt_node_tmgmt_source_plugin_info() {
     }
   }
   return $info;
+}
+
+/**
+ * Implements hook_views_default_views().
+ */
+function tmgmt_node_ui_views_default_views() {
+  return _tmgmt_load_exports('tmgmt_node', 'views', 'view.inc', 'view');
 }
 
 /**
@@ -46,42 +55,4 @@ function tmgmt_node_update_node_translation($node, $translation, $language) {
     tmgmt_field_populate_object($node, $language, $name, $values);
   }
   node_save($node);
-}
-
-/**
- * Implements hook_views_api().
- */
-function tmgmt_node_views_api() {
-  return array(
-    'api' => 3.0,
-    'path' => drupal_get_path('module', 'tmgmt_node') . '/views',
-);
-}
-
-/**
- * Get the translation source node of a node.
- *
- * @param $node
- */
-function tmgmt_node_get_source_node($node) {
-  if ($node->tnid != 0 && $node->tnid != $node->nid) {
-    $node = node_load($node->tnid);
-  }
-  return $node;
-}
-
-/**
- * Returns all node types which are translatable.
- *
- * @return array
- */
-function get_translatable_node_types() {
-  $types = array();
-  foreach (node_type_get_names() as $type => $name) {
-    // @TODO: Figure out whether this is the right constant or > 0 is better here.
-    if (translation_supported_type($type) == TRANSLATION_ENABLED) {
-      $types[] = $type;
-    }
-  }
-  return $types;
 }

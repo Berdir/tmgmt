@@ -13,7 +13,11 @@ function tmgmt_test_tmgmt_translator_plugin_info() {
     'test_translator' => array(
       'label' => t('Test translator'),
       'description' => t('Simple translator for testing purposes.'),
-      'controller class' => 'TMGMTTestTranslatorPluginController',
+      'plugin controller class' => 'TMGMTTestTranslatorPluginController',
+      'ui controller class' => 'TMGMTTestTranslatorUIController',
+      'default settings' => array(
+        'expose_settings' => TRUE,
+      ),
     ),
   );
 }
@@ -26,7 +30,7 @@ function tmgmt_test_tmgmt_source_plugin_info() {
     'test_source' => array(
       'label' => t('Test source'),
       'description' => t('Simple source for testing purposes.'),
-      'controller class' => 'TMGMTTestSourcePluginController',
+      'plugin controller class' => 'TMGMTTestSourcePluginController',
     ),
   );
 }

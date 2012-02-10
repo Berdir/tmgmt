@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Provides a Supertext translation plugin controller.
+ * Provides the Supertext translation plugin controller.
  */
 
 /**
@@ -41,22 +41,21 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
   }
 
   public function generateSupertextOrderObject(TMGMTJob $job){
-  $object = new stdClass();
+    $object = new stdClass();
     $object->AccountId = $job->getTranslator()->getSetting('api_account_id');
     $object->Password = $job->getTranslator()->getSetting('api_password');
     $object->CallbackUrl = url('tmgmt_supertext_callback', array('absolute' => TRUE));
     $object->CommunicationLang = "en-US";
     $object->ContentType = "text/plain";
     $object->Currency = "chf";
-	$object->Service = "translation";
+	  $object->Service = "translation";
     $object->SourceLang = $job->source_language;
     $object->TargetLang = $job->target_language;
     $object->ReferenceData = $job->tjid . ':' . tmgmt_supertext_hash($job->tjid);
     $object->Groups = array();
 
     $items = $job->getItems();
-          // @todo check to use $job->getSourceData();
-
+    // @todo check to use $job->getSourceData();
     foreach ($items as $tjiid => $item) {
       $itemSourceData = $item->getSourceData();
       $fields = tmgmt_flatten_data($itemSourceData);
@@ -69,7 +68,6 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
         $field->Content = $field_array['#text'];
         $field->Context = $field_array['#label'];
         $field->Id = $fieldarray_id;
-
         $group->Items[] = $field;
       }
       $object->Groups[] = $group;
@@ -83,13 +81,12 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
    * Here we will acutally query source and get translations.
    */
   public function requestTranslation(TMGMTJob $job) {
-
   	$object = $this->generateSupertextOrderObject($job);
   	$order_settings = explode(":", $job->settings['supertext-job']);
     $object->OrderTypeId = $order_settings[0];
     $object->DeliveryId = $order_settings[1];
     $job->label = $job->settings['job-label'];
-	$object->OrderTitle = $job->settings['job-label'];
+	  $object->OrderTitle = $job->settings['job-label'];
 
     $options = array(
       'method' => 'POST',
@@ -99,7 +96,6 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
 
     $job->addMessage("Sending request to supertext",'debug');
     $response = drupal_http_request($this->sandboxURL.'/translation/order', $options);
-
 
     if ($response->code == "200") {
       $job->submitted("Job sent to Supertext. Response: !response",array('!response'=> $response->data));
@@ -125,98 +121,6 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     // @todo: Implement this properly.
     return parent::getSupportedTargetLanguages($translator, $source_language);
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::settingsForm().
-   */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
-    $form['api_account_id'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Supertext API Account Id'),
-      '#default_value' => $translator->getSetting('api_account_id', ''),
-      '#description' => t('Please enter yout supertext API Account Id.'),
-    );
-
-    $form['api_password'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Supertext API password'),
-      '#default_value' => $translator->getSetting('api_password', ''),
-      '#description' => t('Please enter your Supertext API password.'),
-    );
-
-    $form['use_sandbox'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use Sandbox'),
-      '#default_value' => $translator->getSetting('use_sandbox', TRUE),
-    );
-    return parent::pluginSettingsForm($form, $form_state, $translator);
-  }
-
-
- /**
-   * Defines plugin job settings form.
-   *
-   * @param $form array
-   * @param $form_state array
-   * @return array
-   *   Settings form.
-   */
-  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
-    $object = $this->generateSupertextOrderObject($job);
-    $object->TargetLang = 'de-CH';
-    $options = array(
-      'method' => 'POST',
-      'data' => json_encode($object),
-      'headers' => array('Content-Type' => 'application/json'),
-    );
-
-    $response = drupal_http_request($this->sandboxURL.'/translation/quote', $options);
-
-    if ($response->code == "200") {
-      $responsedata = json_decode($response->data);
-      $joboptions = array();
-	  $settings['supertext-job'] = array(
-	  	'#type' => 'value',
-	  );
-	  $settings['job-label'] = array(
-	  	'#type' => 'textfield',
-	  '#title' => t('Job Title'),
- 	 '#default_value' => $job->label,
-	  '#size' => 60,
-  		'#maxlength' => 128,
-	  );
-      if (isset($responsedata->Options)) {
-       foreach ($responsedata->Options as $option_item) {
-            $settings[$option_item->OrderTypeId . "_markup"] = array(
-            	'#type' => 'item',
-		        '#title' => $option_item->Name,
-                '#markup' => $option_item->Description,
-		      );
-          foreach ($option_item->DeliveryOptions as $delivery_key => $delivery_item) {
-            $name = format_date(strtotime($delivery_item->DeliveryDate)) . ', Price ' . $delivery_item->Price . " ". $responsedata->Currency;
-            $settings[$option_item->OrderTypeId .":" .$delivery_item->DeliveryId] = array(
-		        '#type' => 'radio',
-		        '#title' => $name,
-                '#return_value' => $option_item->OrderTypeId .":" .$delivery_item->DeliveryId,
-                '#default_value' => NULL,
-                '#attributes' => array('name' => array('settings[supertext-job]')),
-		      );
-          }
-
-        }
-      }
-
-      return $settings;
-
-    } else {
-      $job->addMessage("Could not get quote from Supertext. Response: @response",array('@response'=>$response->data));
-      drupal_set_message(t("Could not get quote from Supertext. Error: @error",array('@error' => $response->error)),'error');
-
-      return;
-    }
-
-
   }
 
 }

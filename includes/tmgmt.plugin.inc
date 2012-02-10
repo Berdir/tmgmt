@@ -6,19 +6,19 @@
  */
 
 /**
- * Interface for source plugin controllers.
- *
- * @ingroup tmgmt_source
+ * Base interface for Translation Management plugins.
  */
-interface TMGMTSourcePluginControllerInterface {
+interface TMGMTPluginBaseInterface {
 
   /**
    * Constructor.
    *
+   * @param $type
+   *   The plugin type.
    * @param $plugin
-   *   The machine-readable name of the translator plugin.
+   *   The machine-readable name of the plugin.
    */
-  public function __construct($plugin);
+  public function __construct($type, $plugin);
 
   /**
    * Returns the info of the type of the plugin.
@@ -32,46 +32,12 @@ interface TMGMTSourcePluginControllerInterface {
    */
   public function pluginType();
 
-  /**
-   * Returns an array with the data structured for translation.
-   *
-   * @see TMGMTJobItem::getSourceData()
-   */
-  public function getData(TMGMTJobItem $job_item);
-
-  /**
-   * Saves a translation.
-   *
-   * @return boolean
-   *   TRUE if the translation was saved successfully, FALSE otherwise.
-   */
-  public function saveTranslation(TMGMTJobItem $job_item);
-
-  /**
-   * Return a title for this job item.
-   */
-  public function getLabel(TMGMTJobItem $job_item);
-
-  /**
-   * Returns the Uri for this job item.
-   *
-   * @see entity_uri()
-   */
-  public function getUri(TMGMTJobItem $job_item);
-
-  /**
-   * Form callback for reviewing job items.
-   */
-  public function reviewForm($form, &$form_state, TMGMTJobItem $item);
-
 }
 
 /**
- * Default controller class for source plugins.
- *
- * @ingroup tmgmt_source
+ * Base class for Translation Management plugins.
  */
-abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginControllerInterface {
+class TMGMTPluginBase implements TMGMTPluginBaseInterface {
 
   protected $pluginType;
   protected $pluginInfo;
@@ -79,9 +45,9 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
   /**
    * Implements TMGMTSourcePluginControllerInterface::__construct().
    */
-  public function __construct($plugin) {
+  public function __construct($type, $plugin) {
     $this->pluginType = $plugin;
-    $this->pluginInfo = tmgmt_source_plugin_info($plugin);
+    $this->pluginInfo = _tmgmt_plugin_info($type, $plugin);
   }
 
   /**
@@ -97,6 +63,76 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
   public function pluginType() {
     return $this->pluginType;
   }
+
+}
+
+/**
+ * Interface for source plugin controllers.
+ *
+ * @ingroup tmgmt_source
+ */
+interface TMGMTSourcePluginControllerInterface extends TMGMTPluginBaseInterface {
+
+  /**
+   * Returns an array with the data structured for translation.
+   *
+   * @param TMGMTJobItem $job_item
+   *   The job item entity.
+   *
+   * @see TMGMTJobItem::getSourceData()
+   */
+  public function getData(TMGMTJobItem $job_item);
+
+  /**
+   * Saves a translation.
+   *
+   * @param TMGMTJobItem $job_item
+   *   The job item entity.
+   *
+   * @return boolean
+   *   TRUE if the translation was saved successfully, FALSE otherwise.
+   */
+  public function saveTranslation(TMGMTJobItem $job_item);
+
+  /**
+   * Return a title for this job item.
+   *
+   * @param TMGMTJobItem $job_item
+   *   The job item entity.
+   */
+  public function getLabel(TMGMTJobItem $job_item);
+
+  /**
+   * Returns the Uri for this job item.
+   *
+   * @param TMGMTJobItem $job_item
+   *   The job item entity.
+   *
+   * @see entity_uri()
+   */
+  public function getUri(TMGMTJobItem $job_item);
+
+  /**
+   * Returns an array of translatable source item types.
+   */
+  public function getItemTypes();
+
+  /**
+   * Returns the label of a source item type.
+   *
+   * @param $type
+   *   The identifier of a source item type.
+   */
+  public function getItemTypeLabel($type);
+
+}
+
+/**
+ * Default controller class for source plugins.
+ *
+ * @ingroup tmgmt_source
+ */
+abstract class TMGMTDefaultSourcePluginController extends TMGMTPluginBase implements TMGMTSourcePluginControllerInterface {
 
   /**
    * Implements TMGMTSourcePluginControllerInterface::getLabel().
@@ -124,75 +160,9 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
    */
   public function getItemTypeLabel($type) {
     $types = $this->getItemTypes();
-    dpm($types);
     if (isset($types[$type])) {
       return $types[$type];
     }
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::reviewForm().
-   */
-  public function reviewForm($form, &$form_state, TMGMTJobItem $item) {
-    return $form;
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::overviewForm().
-   */
-  public function overviewForm($form, &$form_state, $item_type) {
-    return $form;
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::hook_menu().
-   */
-  public function hook_menu() {
-    $items = array();
-    if ($types = $this->getItemTypes()) {
-      $defaults = array(
-        'file' => isset($this->pluginInfo['file']) ? $this->pluginInfo['file'] : $this->pluginInfo['module'] . '.pages.inc',
-        'file path' => isset($this->pluginInfo['file path']) ? $this->pluginInfo['file path'] : drupal_get_path('module', $this->pluginInfo['module']),
-        'page callback' => 'drupal_get_form',
-        'access arguments' => array('administer tmgmt'),
-      );
-      foreach ($types as $type => $name) {
-        if (empty($items['admin/config/regional/tmgmt/' . $this->pluginType])) {
-          // Make the first item type of this source the default menu tab.
-          $items['admin/config/regional/tmgmt/' . $this->pluginType] = $defaults + array(
-            'title' => t('@type sources', array('@type' => ucfirst($this->pluginInfo['label']))),
-            'page arguments' => array('tmgmt_ui_' . $this->pluginType . '_source_' . $type . '_overview_form', $this->pluginType, $type),
-            'type' => MENU_LOCAL_TASK,
-          );
-          $items['admin/config/regional/tmgmt/' . $this->pluginType . '/' . $type] = array(
-            'title' => check_plain($name),
-            'type' => MENU_DEFAULT_LOCAL_TASK,
-          );
-        }
-        else {
-          $items['admin/config/regional/tmgmt/' . $this->pluginType . '/' . $type] = $defaults + array(
-            'title' => check_plain($name),
-            'page arguments' => array('tmgmt_ui_' . $this->pluginType . '_source_' . $type . '_overview_form', $this->pluginType, $type),
-            'type' => MENU_LOCAL_TASK,
-          );
-        }
-      }
-    }
-    return $items;
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::hook_form().
-   */
-  public function hook_forms() {
-    $info = array();
-    foreach (array_keys($this->pluginInfo['item types']) as $type) {
-      $info['tmgmt_ui_' . $this->pluginType . '_source_' . $type . '_overview_form'] = array(
-        'callback' => 'tmgmt_ui_source_overview_form',
-        'wrapper_callback' => 'tmgmt_ui_source_overview_form_defaults',
-      );
-    }
-    return $info;
   }
 
 }
@@ -202,27 +172,7 @@ abstract class TMGMTDefaultSourcePluginController implements TMGMTSourcePluginCo
  *
  * @ingroup tmgmt_translator
  */
-interface TMGMTTranslatorPluginControllerInterface {
-
-  /**
-   * Constructor.
-   *
-   * @param $plugin
-   *   The machine-readable name of the translator plugin.
-   */
-  public function __construct($plugin);
-
-  /**
-   * Returns the info of the type of the plugin.
-   *
-   * @see tmgmt_translator_plugin_info()
-   */
-  public function pluginInfo();
-
-  /**
-   * Returns the type of the plugin.
-   */
-  public function pluginType();
+interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterface {
 
   /**
    * Checks whether a translator is available.
@@ -303,32 +253,9 @@ interface TMGMTTranslatorPluginControllerInterface {
   public function defaultSettings();
 
   /**
-   * Retrieves information about a translation job.
-   *
-   * @param TMGMTJob $job
-   *   The translation job.
-   */
-  public function checkoutInfo(TMGMTJob $job);
-
-  /**
-   * Plugin settings form.
-   */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE);
-
-  /**
-   * Checkout settings form.
-   */
-  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job);
-
-  /**
    * Returns if the translator has any settings for the passed job.
    */
   public function hasCheckoutSettings(TMGMTJob $job);
-
-  /**
-   * Form callback for reviewing job items.
-   */
-  public function reviewForm($form, &$form_state, TMGMTJobItem $item);
 
 }
 
@@ -337,32 +264,7 @@ interface TMGMTTranslatorPluginControllerInterface {
  *
  * @ingroup tmgmt_translator
  */
-abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorPluginControllerInterface {
-
-  protected $pluginType;
-  protected $pluginInfo;
-
-  /**
-   * Impelements TMGMTTranslatorPluginController::__construct().
-   */
-  public function __construct($plugin) {
-    $this->pluginType = $plugin;
-    $this->pluginInfo = tmgmt_translator_plugin_info($plugin);
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::pluginInfo().
-   */
-  public function pluginInfo() {
-    return $this->pluginInfo;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::pluginType().
-   */
-  public function pluginType() {
-    return $this->pluginType;
-  }
+abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase implements TMGMTTranslatorPluginControllerInterface {
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
@@ -408,8 +310,7 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
    * Implements TMGMTTranslatorPluginControllerInterface::getNotAvailableReason().
    */
   public function getNotAvailableReason(TMGMTTranslator $translator) {
-    $configure_url = url('admin/config/regional/tmgmt/translators/manage/' . $translator->name);
-    return t('@translator is not available. Make sure it is <a href="!configure_url">properly configured</a>.', array('@translator' => $this->pluginInfo['label'], '!configure_url' => $configure_url));
+    return t('@translator is not available. Make sure it is properly !configured.', array('@translator' => $this->pluginInfo['label'], '!configured' => l(t('configured'), 'admin/config/regional/tmgmt/translators/manage/' . $translator->name)));
   }
 
   /**
@@ -425,47 +326,10 @@ abstract class TMGMTDefaultTranslatorPluginController implements TMGMTTranslator
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::pluginSettingsForm().
-   */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
-    if (!element_children($form)) {
-      $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginInfo['label']));
-    }
-    return $form;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::checkoutSettingsForm().
-   */
-  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
-    if (!element_children($form)) {
-      $form['#description'] = t("The @translator translator doesn't provide any checkout settings.", array('@translator' => $job->getTranslator()->label()));
-    }
-    return $form;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
-   */
-  public function checkoutInfo(TMGMTJob $job) {
-    $label = $job->getTranslator()->label();
-    $form['#title'] = t('@translator translation job information', array('@translator' => $label));
-    $form['#description'] = t('There is no relevant information to be displayed.');
-    return $form;
-  }
-
-  /**
    * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
    */
   public function hasCheckoutSettings(TMGMTJob $job) {
     return TRUE;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::reviewForm().
-   */
-  public function reviewForm($form, &$form_state, TMGMTJobItem $item) {
-    return $form;
   }
 
 }

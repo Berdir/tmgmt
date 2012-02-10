@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Provides the node source controller.
+ * Provides the node source plugin controller.
  */
 
 class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController {
@@ -16,7 +16,6 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
   public function getData(TMGMTJobItem $job_item) {
     $node = node_load($job_item->item_id);
     $type = node_type_get_type($node);
-    $job = tmgmt_job_load($job_item->tjid);
     // Get all the fields that can be translated and arrange their values into
     // a specific structure.
     $structure = array();
