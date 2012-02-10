@@ -93,6 +93,10 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
       '#markup' => $wrapper->plugin->label(),
       '#status' => $entity->{$this->statusKey},
     );
+    $controller = $entity->getPluginController();
+    $form['configured'] = array(
+      '#markup' => $controller->isAvailable($entity) ? t('Yes') : t('No'),
+    );
     $form['weight'] = array(
       '#type' => 'weight',
       '#delta' => 30,
@@ -357,6 +361,7 @@ function theme_tmgmt_ui_translator_overview_form($variables) {
   $header = array(
     t('Label'),
     t('Plugin'),
+    t('Configured'),
     t('Status'),
     array('data' => t('Operations'), 'colspan' => $colspan),
     t('Weight'),
@@ -366,6 +371,7 @@ function theme_tmgmt_ui_translator_overview_form($variables) {
     $form[$key]['weight']['#attributes']['class'] = array('tmgmt-ui-translator-weight');
     $row[] = drupal_render($form[$key]['label']);
     $row[] = drupal_render($form[$key]['plugin']);
+    $row[] = drupal_render($form[$key]['configured']);
     $row[] = drupal_render($form[$key]['status']);
     $operations = element_children($form[$key]['operations']);
     foreach ($operations as $op) {
