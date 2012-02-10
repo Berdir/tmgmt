@@ -160,6 +160,12 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    * Implements TMGMTTranslatorPluginControllerInterface::receiveTranslation().
    */
   public function receiveTranslation(TMGMTJob $job, $keys, $data) {
+    if ($this->useSandbox) {
+      $translation = $data->body_src;
+    }
+    else {
+      $translation = $data->body_tgt;
+    }
     $job->addTranslatedData(array('#text' => $data->body_src), $keys);
   }
 
