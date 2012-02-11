@@ -284,7 +284,8 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   // Show a list of translators tagged by availability for the selected source
   // and target language combination.
   $translators = tmgmt_translator_labels_flagged($job->source_language, $job->target_language);
-  $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
+  $preselected_translator = !empty($job->translator) ? $job->translator : key($translators);
+  $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : $preselected_translator;
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
   // Get the job metadata wrapper so we can display the current status nicely.
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
@@ -330,7 +331,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#type' => !empty($preselected['source_language']) || !$job->isUnprocessed() ? 'item' : 'select',
     '#options' => $available['source_language'],
     '#default_value' => $job->source_language,
-    '#markup' => !empty($job->source_language) ? $available['source_language'][$job->source_language] : '',
+    '#markup' => isset($available['source_language'][$job->source_language]) ? $available['source_language'][$job->source_language] : '',
     '#required' => TRUE,
     '#prefix' => '<div id="tmgmt-ui-source-language" class="tmgmt-ui-source-language">',
     '#suffix' => '</div>',
@@ -343,7 +344,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#type' => !empty($preselected['target_language']) || !$job->isUnprocessed() ? 'item' : 'select',
     '#options' => $available['target_language'],
     '#default_value' => $job->target_language,
-    '#markup' => !empty($job->target_language) ? $available['target_language'][$job->target_language] : '',
+    '#markup' => isset($available['target_language'][$job->target_language]) ? $available['target_language'][$job->target_language] : '',
     '#required' => TRUE,
     '#prefix' => '<div id="tmgmt-ui-target-language" class="tmgmt-ui-target-language">',
     '#suffix' => '</div>',

@@ -234,7 +234,7 @@ function tmgmt_ui_job_checkout_multiple(array $jobs) {
       continue;
     }
     // @todo: Add permission checks.
-    if (tmgmt_ui_job_needs_checkout_form($job) || !variable_get('tmgmt_quick_checkout', TRUE)) {
+    if (!variable_get('tmgmt_quick_checkout', TRUE) || tmgmt_ui_job_needs_checkout_form($job)) {
       $uri = $job->uri();
       $redirects[] = $uri['path'] . '/manage';
     }

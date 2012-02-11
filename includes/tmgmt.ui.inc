@@ -208,7 +208,7 @@ interface TMGMTTranslatorUIControllerInterface extends TMGMTPluginBaseInterface 
 class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGMTTranslatorUIControllerInterface {
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::pluginSettingsForm().
+   * Implements TMGMTTranslatorUIControllerInterface::pluginSettingsForm().
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     if (!element_children($form)) {
@@ -218,7 +218,7 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::checkoutSettingsForm().
+   * Implements TMGMTTranslatorUIControllerInterface::checkoutSettingsForm().
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     if (!element_children($form)) {
@@ -228,7 +228,7 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
+   * Implements TMGMTTranslatorUIControllerInterface::checkoutInfo().
    */
   public function checkoutInfo(TMGMTJob $job) {
     $label = $job->getTranslator()->label();
@@ -240,7 +240,7 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::reviewForm().
+   * Implements TMGMTTranslatorUIControllerInterface::reviewForm().
    */
   public function reviewForm($form, &$form_state, TMGMTJobItem $item) {
     return $form;

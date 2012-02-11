@@ -104,7 +104,6 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $edit = array(
       'languages[de]' => TRUE,
       'languages[es]' => TRUE,
-
     );
     $this->drupalPost(NULL, $edit, t('Request translation'));
 
