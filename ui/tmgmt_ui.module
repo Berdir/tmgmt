@@ -122,13 +122,6 @@ function tmgmt_ui_system_info_alter(&$info, $file, $type) {
 }
 
 /**
- * Implements hook_views_api().
- */
-function tmgmt_ui_views_api() {
-  return array('api' => 3);
-}
-
-/**
  * Implements hook_views_default_views().
  */
 function tmgmt_ui_views_default_views() {
@@ -161,7 +154,8 @@ function tmgmt_ui_embed_view($view) {
  * Page callback for the overview page.
  */
 function tmgmt_ui_dashboard_page() {
-  return array();
+  // @todo Implement the dashboard.
+  return '';
 }
 
 /**
@@ -216,10 +210,8 @@ function tmgmt_ui_source_overview_form_submit($form, &$form_state) {
 }
 
 /**
- * Attempts to check out a number of jobs.
- *
- * Performs a number of checks on each job and also allows to alter the behavior
- * through hooks.
+ * Attempts to check out a number of jobs. Performs a number of checks on each
+ * job and also allows to alter the behavior through hooks.
  *
  * @param $jobs
  *   The jobs to be checked out.
@@ -228,23 +220,20 @@ function tmgmt_ui_source_overview_form_submit($form, &$form_state) {
  *   Array of redirect url's if there are any jobs that need manual checkout.
  *
  * @ingroup tmgmt_job
- * @see tmgmt_ui_redirect_queue
+ * @see tmgmt_ui_redirect_queue()
  */
 function tmgmt_ui_job_checkout_multiple(array $jobs) {
   $redirects = array();
   // Allow other modules to jump in and eg. auto-checkout with rules or use a
   // customized checkout form.
   drupal_alter('tmgmt_ui_job_checkout_before', $redirects, $jobs);
-
   foreach ($jobs as $job) {
     if (!$job->isUnprocessed()) {
       // Job is already checked out, just ignore that one. This could happen
       // if jobs have already been submitted in the before hook.
       continue;
     }
-
     // @todo: Add permission checks.
-
     if (tmgmt_ui_job_needs_checkout_form($job) || !variable_get('tmgmt_quick_checkout', TRUE)) {
       $uri = $job->uri();
       $redirects[] = $uri['path'] . '/manage';
@@ -254,12 +243,10 @@ function tmgmt_ui_job_checkout_multiple(array $jobs) {
       // Normally I would expect this to catch all failed requests and
       // afterwards send the user through a multistep form which contains the
       // failed elements.
-
       // No manual checkout required. Request translations now.
       tmgmt_ui_job_request_translation($job);
     }
   }
-
   // Allow other modules to jump in and eg. auto-checkout with rules or use a
   // customized checkout form.
   drupal_alter('tmgmt_ui_job_checkout_after', $redirects, $jobs);
@@ -267,10 +254,12 @@ function tmgmt_ui_job_checkout_multiple(array $jobs) {
 }
 
 /**
- * Check if a job needs a checkout form.
+ * Check if a job needs a checkout form. The current checks include if there is
+ * more than one translator available, if he has settings and if the job has a
+ * fixed target language.
  *
- * The current checks include if there is more than one translator available,
- * if he has settings and if the job has a fixed target language.
+ * @param TMGMTJob $job
+ *   The job item
  *
  * @return
  *   TRUE if the job needs a checkout form.
@@ -371,17 +360,13 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
  */
 function tmgmt_ui_translation_review_form($form, &$form_state, TMGMTJobItem $item) {
   $source = $item->getSourceUIController();
-  if (method_exists($source, 'reviewForm')) {
-    // The basic review form gets built by the source controller.
-    $form = $source->reviewForm($form, $form_state, $item);
-  }
+  // The basic review form gets built by the source controller.
+  $form = $source->reviewForm($form, $form_state, $item);
   $translator = $item->getTranslatorUIController();
-  if (method_exists($translator, 'reviewForm')) {
-    // After that, the translator controller may append additional form fields.
-    // This way, the translator controller can append per-text comment fields for
-    // for example.
-    $form = $translator->reviewForm($form, $form_state, $item);
-  }
+  // After that, the translator controller may append additional form fields.
+  // This way, the translator controller can append per-text comment fields for
+  // for example.
+  $form = $translator->reviewForm($form, $form_state, $item);
   return $form;
 }
 
@@ -392,14 +377,10 @@ function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
   $item = $form_state['item'];
   // First invoke the validation method on the source controller.
   $source = $item->getSourceUIController();
-  if (method_exists($source, 'reviewFormValidate')) {
-    $source->reviewFormValidate($form, $form_state, $item);
-  }
+  $source->reviewFormValidate($form, $form_state, $item);
   // Then invoke the validation method on the source controller.
   $translator = $item->getTranslatorUIController();
-  if (method_exists($translator, 'reviewFormValidate')) {
-    $translator->reviewFormValidate($form, $form_state, $item);
-  }
+  $translator->reviewFormValidate($form, $form_state, $item);
 }
 
 /**
@@ -411,14 +392,10 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   _tmgmt_ui_submit_translation_review_data($form_state['values']['review'], $item->translation);
   // First invoke the validation method on the source controller.
   $source = $item->getSourceUIController();
-  if (method_exists($source, 'reviewFormSubmit')) {
-    $source->reviewFormSubmit($form, $form_state, $item);
-  }
+  $source->reviewFormSubmit($form, $form_state, $item);
   // Then invoke the validation method on the source controller.
   $translator = $item->getTranslatorUIController();
-  if (method_exists($translator, 'reviewFormSubmit')) {
-    $translator->reviewFormSubmit($form, $form_state, $item);
-  }
+  $translator->reviewFormSubmit($form, $form_state, $item);
   // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
   if ($form_state['triggering_element']['#value'] == $form['actions']['accept']['#value']) {
     $item->acceptTranslation();

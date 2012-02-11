@@ -153,14 +153,13 @@ function tmgmt_entity_info() {
     'entity class' => 'TMGMTTranslator',
     'base table' => 'tmgmt_translator',
     'exportable' => TRUE,
-    // @todo: Fix entity api to check if the entitycache module is enabled.
-    // 'entity cache' => TRUE,
+    // @todo: Remove the module_exists() check once http://drupal.org/node/1436920 has been commited.
+    'entity cache' => module_exists('entitycache'),
     'access callback' => 'tmgmt_translator_access',
     'entity keys' => array(
       'id' => 'tid',
       'name' => 'name',
       'label' => 'label',
-      'status' => 'status',
     ),
   );
   return $info;
@@ -170,7 +169,6 @@ function tmgmt_entity_info() {
  * Implements hook_permission().
  */
 function tmgmt_permission() {
-  $perms = array();
   $perms['administer tmgmt'] = array(
     'title' => t('Administer translation management'),
   );
@@ -253,13 +251,15 @@ function tmgmt_available_languages($exclude = array()) {
  * @param $language
  *   A language in ISO format.
  * @return string
- *   The label of the language.
+ *   The label of the language or an empty string if the language or its label
+ *   are not defined.
  */
 function tmgmt_language_label($language) {
   $languages = entity_metadata_language_list();
-  if (isset($languages[$language])) {
+  if (!empty($languages[$language])) {
     return $languages[$language];
   }
+  return '';
 }
 
 /**
@@ -291,7 +291,7 @@ function tmgmt_job_load_multiple(array $tjids = array(), $conditions = array()) 
  * @param $item_id
  *   The source item id.
  *
- * @return
+ * @return array
  *   An array of job entities.
  */
 function tmgmt_job_item_load_latest($plugin, $item_type, $item_id, $source_language) {
@@ -392,6 +392,19 @@ function tmgmt_job_create($source_language, $target_language, $uid = NULL, array
 
 /**
  * Access callback for the job entity.
+ *
+ *
+ * @param $op
+ *   The operation being performed.
+ * @param $item
+ *   (Optional) A TMGMTJob entity to check access for. If no entity is given, it
+ *   will be determined whether access is allowed for all entities.
+ * @param $account
+ *   (Optional) The user to check for. Leave it to NULL to check for the global
+ *   user.
+ *
+ * @return boolean
+ *   TRUE if access is allowed, FALSE otherwise.
  */
 function tmgmt_job_access($op, $job = NULL, $account = NULL) {
   // Return TRUE in all cases for now :)
@@ -400,6 +413,18 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
 
 /**
  * Access callback for the job item entity.
+ *
+ * @param $op
+ *   The operation being performed.
+ * @param $item
+ *   (Optional) A TMGMTJobItem entity to check access for. If no entity is
+ *   given, it will be determined whether access is allowed for all entities.
+ * @param $account
+ *   (Optional) The user to check for. Leave it to NULL to check for the global
+ *   user.
+ *
+ * @return boolean
+ *   TRUE if access is allowed, FALSE otherwise.
  */
 function tmgmt_job_item_access($op, $item = NULL, $account = NULL) {
   // Return TRUE in all cases for now :)
@@ -408,6 +433,15 @@ function tmgmt_job_item_access($op, $item = NULL, $account = NULL) {
 
 /**
  * Access callback wrapper for reviewing a job item entity.
+ *
+ * @param TMGMTJobItem $item
+ *   The job item to check access for.
+ * @param $account
+ *   (Optional) The user to check for. Leave it to NULL to check for the global
+ *   user.
+ *
+ * @return boolean
+ *   TRUE if access is allowed, FALSE otherwise.
  */
 function tmgmt_job_item_review_access(TMGMTJobItem $item, $account = NULL) {
   if ($item->isNeedsReview() && $item->getSourceController() && $item->getTranslatorController()) {
@@ -418,6 +452,18 @@ function tmgmt_job_item_review_access(TMGMTJobItem $item, $account = NULL) {
 
 /**
  * Access callback for the job message entity.
+ *
+ * @param $op
+ *   The operation being performed.
+ * @param $item
+ *   (Optional) A TMGMTJobMessage entity to check access for. If no entity is
+ *   given, it will be determined whether access is allowed for all entities.
+ * @param $account
+ *   (Optional) The user to check for. Leave it to NULL to check for the global
+ *   user.
+ *
+ * @return boolean
+ *   TRUE if access is allowed, FALSE otherwise.
  */
 function tmgmt_message_access($op, $message = NULL, $account = NULL) {
   // Return TRUE in all cases for now :)
@@ -461,7 +507,7 @@ function tmgmt_job_item_states() {
  *   A job item id.
  *
  * @return TMGMTJobItem
- *   The loaded job item.
+ *   The loaded job item or FALSE if the query returned no results.
  */
 function tmgmt_job_item_load($tjiid) {
   $jobs = tmgmt_job_item_load_multiple(array($tjiid), array());
@@ -470,6 +516,15 @@ function tmgmt_job_item_load($tjiid) {
 
 /**
  * Loads translation job items.
+ *
+ * @param $tjiids
+ *   An array of job item ids.
+ * @param $conditions
+ *   An array of additional conditions.
+ *
+ * @return
+ *   An array of job item entities or an empty array if the query returned no
+ *   results.
  */
 function tmgmt_job_item_load_multiple($tjiids = array(), $conditions = array()) {
   return entity_load('tmgmt_job_item', $tjiids, $conditions);
@@ -584,6 +639,9 @@ function tmgmt_translator_exists($name) {
 /**
  * Loads a translator based on the name.
  *
+ * @param $name
+ *   The machine-readable name of the translator entity to load.
+ *
  * @return TMGMTTranslator
  *   A translator entity.
  */
@@ -594,6 +652,10 @@ function tmgmt_translator_load($name) {
 
 /**
  * Loads multiple translators based on their name.
+ *
+ * @param $names
+ *   (Optional) An array of machine-readable names of the translator entities to
+ *   load or FALSE to load all available translator entities.
  *
  * @return array
  *   An array of translators with the machine-readable name of the translators
@@ -691,7 +753,6 @@ function tmgmt_translator_auto_create($plugin) {
       $translator->save();
     }
   }
-  return FALSE;
 }
 
 /**
@@ -986,7 +1047,7 @@ function _tmgmt_plugin_labels($type) {
  *   Internal use only, indicates the current key prefix when recursing into
  *   the data array.
  *
- * @return
+ * @return array
  *   The flattened data array.
  *
  * @see tmgmt_unflatten_data()
@@ -1019,7 +1080,7 @@ function tmgmt_flatten_data($data, $prefix = NULL) {
  * @param $data
  *   The flattened data array.
  *
- * @return
+ * @return array
  *   The nested data array.
  *
  * @see tmgmt_flatten_data()

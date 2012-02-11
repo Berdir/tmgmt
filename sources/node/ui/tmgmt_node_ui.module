@@ -36,13 +36,6 @@ function tmgmt_node_ui_admin_paths() {
 }
 
 /**
- * Implements hook_views_api().
- */
-function tmgmt_node_ui_views_api() {
-  return array('api' => 3);
-}
-
-/**
  * Implements hook_page_alter().
  */
 function tmgmt_node_ui_page_alter(&$page) {

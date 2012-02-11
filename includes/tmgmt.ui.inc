@@ -9,9 +9,19 @@
 interface TMGMTSourceUIControllerInterface extends TMGMTPluginBaseInterface {
 
   /**
-   * Form callback for reviewing job items.
+   * Form callback for the job item review form.
    */
   public function reviewForm($form, &$form_state, TMGMTJobItem $item);
+
+  /**
+   * Validation callback for the job item review form.
+   */
+  public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item);
+
+  /**
+   * Submit callback for the job item review form.
+   */
+  public function reviewFormSubmit($form, &$form_state, TMGMTJobItem $item);
 
   /**
    * Form callback for the source overview form.
@@ -59,23 +69,37 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::overviewForm().
+   * Implements TMGMTSourcePluginControllerInterface::reviewFormValidate().
    */
-  public function overviewForm($form, &$form_state, $item_type) {
-    return $form;
+  public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item) {
+    // Nothing to do here by default.
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::overviewForm().
+   * Implements TMGMTSourcePluginControllerInterface::reviewFormSubmit().
    */
-  public function overviewFormValidate($form, &$form_state, $item_type) {
+  public function reviewFormSubmit($form, &$form_state, TMGMTJobItem $item) {
     // Nothing to do here by default.
   }
 
   /**
    * Implements TMGMTSourcePluginControllerInterface::overviewForm().
    */
-  public function overviewFormSubmit($form, &$form_state, $item_type) {
+  public function overviewForm($form, &$form_state, $type) {
+    return $form;
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::overviewFormValidate().
+   */
+  public function overviewFormValidate($form, &$form_state, $type) {
+    // Nothing to do here by default.
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::overviewFormSubmit().
+   */
+  public function overviewFormSubmit($form, &$form_state, $type) {
     // Nothing to do here by default.
   }
 
@@ -84,8 +108,7 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
    */
   public function hook_menu() {
     $items = array();
-    $plugin = tmgmt_source_plugin_controller($this->pluginType);
-    if ($types = $plugin->getItemTypes()) {
+    if ($types = tmgmt_source_translatable_item_types($this->pluginType)) {
       $defaults = array(
         'file' => isset($this->pluginInfo['file']) ? $this->pluginInfo['file'] : $this->pluginInfo['module'] . '.pages.inc',
         'file path' => isset($this->pluginInfo['file path']) ? $this->pluginInfo['file path'] : drupal_get_path('module', $this->pluginInfo['module']),
@@ -122,12 +145,13 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
    */
   public function hook_forms() {
     $info = array();
-    $plugin = tmgmt_source_plugin_controller($this->pluginType);
-    foreach (array_keys($plugin->getItemTypes()) as $type) {
-      $info['tmgmt_ui_' . $this->pluginType . '_source_' . $type . '_overview_form'] = array(
-        'callback' => 'tmgmt_ui_source_overview_form',
-        'wrapper_callback' => 'tmgmt_ui_source_overview_form_defaults',
-      );
+    if ($types = tmgmt_source_translatable_item_types($this->pluginType)) {
+      foreach (array_keys($types) as $type) {
+        $info['tmgmt_ui_' . $this->pluginType . '_source_' . $type . '_overview_form'] = array(
+          'callback' => 'tmgmt_ui_source_overview_form',
+          'wrapper_callback' => 'tmgmt_ui_source_overview_form_defaults',
+        );
+      }
     }
     return $info;
   }
@@ -142,12 +166,12 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
 interface TMGMTTranslatorUIControllerInterface extends TMGMTPluginBaseInterface {
 
   /**
-   * Plugin settings form.
+   * Form callback for the plugin settings form.
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE);
 
   /**
-   * Checkout settings form.
+   * Form callback for the checkout settings form.
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job);
 
@@ -160,9 +184,19 @@ interface TMGMTTranslatorUIControllerInterface extends TMGMTPluginBaseInterface 
   public function checkoutInfo(TMGMTJob $job);
 
   /**
-   * Form callback for reviewing job items.
+   * Form callback for the job item review form.
    */
   public function reviewForm($form, &$form_state, TMGMTJobItem $item);
+
+  /**
+   * Validation callback for the job item review form.
+   */
+  public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item);
+
+  /**
+   * Submit callback for the job item review form.
+   */
+  public function reviewFormSubmit($form, &$form_state, TMGMTJobItem $item);
 
 }
 
@@ -199,7 +233,9 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
   public function checkoutInfo(TMGMTJob $job) {
     $label = $job->getTranslator()->label();
     $form['#title'] = t('@translator translation job information', array('@translator' => $label));
-    $form['#description'] = t('There is no relevant information to be displayed.');
+    if (!element_children($form)) {
+      $form['#description'] = t('There is no relevant information to be displayed.');
+    }
     return $form;
   }
 
@@ -208,6 +244,20 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
    */
   public function reviewForm($form, &$form_state, TMGMTJobItem $item) {
     return $form;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::reviewFormValidate().
+   */
+  public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item) {
+    // Nothing to do here by default.
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::reviewFormSubmit().
+   */
+  public function reviewFormSubmit($form, &$form_state, TMGMTJobItem $item) {
+    // Nothing to do here by default.
   }
 
 }
