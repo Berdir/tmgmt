@@ -327,26 +327,26 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   // dropdown or the plain string (if preselected).
   $form['languages']['source_language'] = array(
     '#title' => t('From'),
-    '#type' => 'select',
+    '#type' => !empty($preselected['source_language']) || !$job->isUnprocessed() ? 'item' : 'select',
     '#options' => $available['source_language'],
     '#default_value' => $job->source_language,
+    '#markup' => $available['source_language'][$job->source_language],
     '#required' => TRUE,
     '#prefix' => '<div id="tmgmt-ui-source-language" class="tmgmt-ui-source-language">',
     '#suffix' => '</div>',
-    '#disabled' => !empty($preselected['source_language']) || !$job->isUnprocessed(),
     '#ajax' => array(
       'callback' => 'tmgmt_ui_ajax_callback_language_select',
     ),
   );
   $form['languages']['target_language'] = array(
     '#title' => t('To'),
-    '#type' => 'select',
+    '#type' => !empty($preselected['target_language']) || !$job->isUnprocessed() ? 'item' : 'select',
     '#options' => $available['target_language'],
     '#default_value' => $job->target_language,
+    '#markup' => $available['target_language'][$job->target_language],
     '#required' => TRUE,
     '#prefix' => '<div id="tmgmt-ui-target-language" class="tmgmt-ui-target-language">',
     '#suffix' => '</div>',
-    '#disabled' => !empty($preselected['target_language']) || !$job->isUnprocessed(),
     '#ajax' => array(
       'callback' => 'tmgmt_ui_ajax_callback_language_select',
     ),
