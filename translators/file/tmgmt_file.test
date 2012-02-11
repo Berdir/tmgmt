@@ -25,7 +25,9 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_file'));
+    parent::setUp(array('tmgmt_file', 'tmgmt_ui'));
+    $this->drupalLogin($this->admin_user);
+    $this->setEnvironment('de');
   }
 
   /**
@@ -60,7 +62,7 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     $translator = $this->createTranslator();
     $translator->plugin = 'file';
     $translator->settings = array(
-      'export_format' => 'xliff',
+      'export_format' => 'xlf',
     );
     $translator->save();
 
@@ -82,15 +84,52 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
 
     // "Translate" items.
     $xml = simplexml_import_dom($dom);
+    $translated_text = array();
     foreach ($xml->file->body->children() as $group) {
       foreach ($group->children() as $transunit) {
         if ($transunit->getName() == 'trans-unit') {
           $transunit->target = $xml->file['target-language'] . '_' . (string)$transunit->source;
+          // Store the text to allow assertions later on.
+          $translated_text[(string)$group['id']][(string)$transunit['id']] = $transunit->target;
         }
       }
     }
 
-    debug($xml->asXML());
+    $translated_file = 'public://tmgmt_file/translated.xlf';
+    $xml->asXML($translated_file);
 
+    // To test the upload form functionality, navigate to the edit form.
+    $uri = $job->uri();
+    $edit = array(
+      'files[file]' => $translated_file,
+    );
+    $this->drupalPost($uri['path'] . '/manage', $edit, t('Import'));
+
+    // Make sure the translations have been imported correctly.
+    $this->assertNoText(t('In progress'));
+    $this->assertText(t('Needs review'));
+
+    // Review both items.
+    $this->clickLink(t('review'));
+    foreach ($translated_text[1] as $key => $value) {
+      $this->assertRaw($value);
+    }
+    foreach ($translated_text[2] as $key => $value) {
+      $this->assertNoRaw($value);
+    }
+    $this->drupalPost(NULL, array(), t('Accept'));
+    // Review both items.
+    $this->clickLink(t('review'));
+    foreach ($translated_text[1] as $key => $value) {
+      $this->assertNoRaw($value);
+    }
+    foreach ($translated_text[2] as $key => $value) {
+      $this->assertRaw($value);
+    }
+    $this->drupalPost(NULL, array(), t('Accept'));
+
+    $this->assertText(t('Accepted'));
+    $this->assertText(t('Finished'));
+    $this->assertNoText(t('Needs review'));
   }
 }

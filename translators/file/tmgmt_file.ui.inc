@@ -17,10 +17,7 @@ class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController
     $form['export_format'] = array(
       '#type' => 'radios',
       '#title' => t('Export to'),
-      '#options' => array(
-        'xliff' => t('XLIFF'),
-        'html' => t('HTML'),
-      ),
+      '#options' => tmgmt_file_format_plugin_labels(),
       '#default_value' => $translator->getSetting('export_format'),
       '#description' => t('Please select the format you want to export data.'),
     );
@@ -42,15 +39,36 @@ class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController
       $form['export_format'] = array(
         '#type' => 'radios',
         '#title' => t('Export to'),
-        '#options' => array(
-          'xliff' => t('XLIFF'),
-          'html' => t('HTML'),
-        ),
+        '#options' => tmgmt_file_format_plugin_labels(),
         '#default_value' => $job->getTranslator()->getSetting('export_format'),
         '#description' => t('Please select the format you want to export data.'),
       );
     }
     return parent::checkoutSettingsForm($form, $form_state, $job);
+  }
+
+  /**
+   * Implements TMGMTTranslatorUIControllerInterface::checkoutInfo().
+   */
+  public function checkoutInfo(TMGMTJob $job) {
+    $form['import'] = array(
+      //'#type' => 'fieldset',
+      //'#title' => 'Import file',
+    );
+
+    $supported_formats = array_keys(tmgmt_file_format_plugin_info());
+    $form['import']['file'] = array(
+      '#type' => 'file',
+      '#title' => t('Translated file'),
+      '#size' => 50,
+      '#description' => t('Supported formats: @formats.', array('@formats' => implode(', ', $supported_formats))),
+    );
+    $form['import']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Import'),
+      '#submit' => array('tmgmt_file_import_form_submit'),
+    );
+    return $form;
   }
 
 }

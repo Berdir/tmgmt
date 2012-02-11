@@ -3,29 +3,29 @@
 /**
  * Interface for exporting to a given file format.
  */
-interface TMGMTFileExportInterface {
-
-  /**
-   * Return the file extension that should be used.
-   *
-   * @return
-   *   File extension, e.g. xlf or html.
-   */
-  function getFileExtension();
+interface TMGMTFileFormatInterface {
 
   /**
    * Return the file content for the job data.
    *
-   * @param
+   * @return
    *   String with the file content.
    */
   function export(TMGMTJob $job);
+
+  /**
+   * Converts an exported file content back to the translated data.
+   *
+   * @return
+   *   Translated data array.
+   */
+  function import($impored_file);
 }
 
 /**
  * Export to XLIFF format.
  */
-class TMGMTFileExportXLIFF extends XMLWriter implements TMGMTFileExportInterface {
+class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface {
 
   /**
    * Contains a reference to the currently being exported job.
@@ -137,10 +137,19 @@ class TMGMTFileExportXLIFF extends XMLWriter implements TMGMTFileExportInterface
   }
 
   /**
-   * Implements TMGMTFileExportInterface::getFileExtension().
+   * Implements TMGMTFileExportInterface::import().
    */
-  public function getFileExtension() {
-    return 'xlf';
+  public function import($imported_file) {
+    $xml = simplexml_load_file($imported_file);
+
+    // Register the xliff namespace, required for xpath.
+    $xml->registerXPathNamespace('xliff', 'urn:oasis:names:tc:xliff:document:1.2');
+
+    $data = array();
+    foreach ($xml->xpath('//xliff:trans-unit') as $unit) {
+      $data[(string)$unit['id']]['#text'] = (string)$unit->target;
+    }
+    return tmgmt_unflatten_data($data);
   }
 
 }
@@ -148,7 +157,7 @@ class TMGMTFileExportXLIFF extends XMLWriter implements TMGMTFileExportInterface
 /**
  * Export into HTML.
  */
-class TMGMTFileExportHTML implements TMGMTFileExportInterface {
+class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
 
   /**
    * Implements TMGMTFileExportInterface::export().
@@ -167,10 +176,19 @@ class TMGMTFileExportHTML implements TMGMTFileExportInterface {
   }
 
   /**
-   * Implements TMGMTFileExportInterface::getFileExtension().
+   * Implements TMGMTFileExportInterface::import().
    */
-  public function getFileExtension() {
-    return 'html';
-  }
+  public function import($imported_file) {
+    $dom = new DOMDocument();
+    $dom->loadHTMLFile($imported_file);
+    $xml = simplexml_import_dom($dom);
 
+    $data = array();
+    foreach ($xml->xpath("//div[class='atom']") as $atom) {
+      // Assets are our strings (eq fields in nodes).
+      $data[$atom['id']]['#text'] = (string)$atom;
+    }
+    dpm($data);
+    return tmgmt_unflatten_data($data);
+  }
 }

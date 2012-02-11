@@ -32,179 +32,68 @@ function tmgmt_file_theme() {
 }
 
 /**
- * Implements hook_permission().
- */
-function tmgmt_file_permission() {
-  return array(
-    'import translated tmgmt files' => array(
-      'label' => t('Import translated tmgmt files'),
-    ),
-  );
-}
-
-/**
- * Implements hook_menu().
- */
-function tmgmt_file_menu() {
-  $items['admin/config/regional/tmgmt/file'] = array(
-    'type' => MENU_LOCAL_TASK,
-    'title' => 'File Import',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_file_import_form'),
-    'access arguments' => array('import translated tmgmt files'),
-  );
-  return $items;
-}
-
-/**
- * Import form.
- */
-function tmgmt_file_import_form($form) {
-  $form['file'] = array(
-    '#type' => 'file',
-    '#title' => t('HTML or XLIFF'),
-    '#size' => 50,
-    '#description' => t('A translated HTML or XLIFF File'),
-  );
-  $form['import']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Import'),
-  );
-  return $form;
-}
-
-/**
  * Import form submit callback.
  */
 function tmgmt_file_import_form_submit($form, &$form_state) {
-  // Ensure we have the file uploaded
-  if ($file = file_save_upload('file', array('file_validate_extensions' => array('html xlf')))) {
-    if ($file->filemime != 'text/html') {
-      $xliff = new DOMDocument;
-      $xliff->load($file->uri);
+  // Ensure we have the file uploaded.
 
-      $xsl = new DOMDocument;
-      $xsl->load(drupal_get_path('module', 'tmgmt_file') . '/xsl/xliff2xml.xsl');
+  $job = $form_state['tmgmt_job'];
 
-      $proc = new XSLTProcessor();
-      $proc->ImportStyleSheet($xsl);
+  $supported_formats = array_keys(tmgmt_file_format_plugin_info());
+  if ($file = file_save_upload('file', array('file_validate_extensions' => array(implode(' ', $supported_formats))))) {
 
-      $xml = simplexml_import_dom($proc->transformToDoc($xliff));
-      if (!isset($xml)) {
-        drupal_set_message(t('Malformed XLIFF file.'));
+    $extension = pathinfo($file->uri, PATHINFO_EXTENSION);
+    $controller = tmgmt_file_format_controller($extension);
+    if ($controller) {
+      try {
+        $job->addTranslatedData($controller->import($file->uri));
+        $job->addMessage('Sucessfully imported file.');
         return;
+      } catch (Exception $e) {
+        $job->addMessage('File import failed with the following message: @message', array('@message' => $e->getMessage()), 'error');
       }
-
-      $job = (array) $xml->head->meta[1];
-      $source_language = (array) $xml->head->meta[2];
-      $target_language = (array) $xml->head->meta[3];
-      $items = (array) $xml->body->div;
-
-      $html = theme('tmgmt_file_html_template', array(
-        'tjid' => $job['@attributes']['content'],
-        'source_language' => $source_language['@attributes']['content'],
-        'target_language' => $target_language['@attributes']['content'],
-        'items' => $items['div']));
-
-      // @todo RECKECK! $items array does not meet the expected structure.
     }
-    else {
-      $html = file_get_contents($file->uri);
-    }
-
-    $file_obj = new simple_file_dom();
-    $file_obj->load($html);
-
-    $JobID = $file_obj->find('meta[name=JobID]', 0)->content;
-    $source_language = $file_obj->find('meta[name=languageSource]', 0)->content;
-    $target_language = $file_obj->find('meta[name=languageTarget]', 0)->content;
-
-    if (empty($JobID) && !is_numeric($JobID)) {
-      drupal_set_message(t('No JobID found'), 'error');
-      return;
-    }
-    if (empty($source_language)) {
-      drupal_set_message(t('No languageSource found'), 'error');
-      return;
-    }
-    if (empty($target_language)) {
-      drupal_set_message(t('No languageTarget found'), 'error');
-      return;
-    }
-
-    $job = tmgmt_job_load($JobID);
-
-    if ($job->source_language != $source_language) {
-      drupal_set_message(t('Source language of file does not match source language of job'), 'error');
-      return;
-    }
-
-    if ($job->target_language != $target_language) {
-      drupal_set_message(t('Target language of file does not match target language of job'), 'error');
-      return;
-    }
-
-    $items = $job->getItems();
-
-    foreach ($file_obj->find('div.asset') as $asset) {
-      //assets are our jobitem ids
-      if (!isset($items[$asset->id])) {
-        drupal_set_message(t('Job item: @jobitem does not exist', array('@jobitem' => $asset->id)), 'error');
-        continue;
-      }
-      $item = $items[$asset->id];
-      unset($items[$asset->id]);
-      $SourceDataArray = tmgmt_flatten_data($item->getSourceData());
-      foreach ($asset->find('div.atom') as $atom) {
-        //assets are our strings (eq fields in nodes)
-        if (!isset($SourceDataArray[$atom->id])) {
-          drupal_set_message(t('String item: @stringitem does not exist', array('@stringitem' => $atom->id)), 'error');
-          continue;
-        }
-        $SourceDataArray[$atom->id]['#text'] = $atom->innertext;
-      }
-      $item->addTranslatedData(tmgmt_unflatten_data($SourceDataArray));
-    }
-    if (!empty($items)) {
-      drupal_set_message(t('There where missing translations for these Job items: @jobitems', array('@jobitems' => implode(", ", array_keys($items)))), 'error');
-    }
-    drupal_set_message(t("Translation for Job: @jobid imported", array('@jobid' => $JobID)));
-    $job->needsReview('Translation imported');
   }
-}
-
-/**
- * Returns the file export class for this format.
- *
- * @param $format
- *   File format, e.g. xliff or html.
- *
- * @return TMGMTFileExport
- */
-function tmgmt_file_export_factory($format) {
-  $class = 'TMGMTFileExport' . strtoupper($format);
-  if (class_exists($class)) {
-    $export = new $class();
-    if ($export instanceof TMGMTFileExport) {
-      return $export;
+  foreach ($job->getMessagesSince() as $message) {
+    // Ignore debug messages.
+    if ($message->type == 'debug') {
+      continue;
+    }
+    if ($text = $message->getMessage()) {
+      drupal_set_message(filter_xss($text), $message->type);
     }
   }
 }
 
 /**
- * Returns the file export class for this format.
- *
- * @param $format
- *   File format, e.g. xliff or html.
- *
- * @return TMGMTFileExport
+ * Returns information about file format plugins.
+ * @param type $plugin
+ * @return type
  */
-function tmgmt_file_import_factory($format) {
-  $class = 'TMGMTFileImport' . strtoupper($format);
-  if (class_exists($class)) {
-    $export = new $class();
-    if ($export instanceof TMGMTFileExport) {
-      return $export;
-    }
-  }
+function tmgmt_file_format_plugin_info($plugin = NULL) {
+  return _tmgmt_plugin_info('file_format', $plugin);
+}
+
+function tmgmt_file_format_plugin_labels() {
+  return _tmgmt_plugin_labels('file_format');
+}
+
+function tmgmt_file_format_controller($plugin = NULL) {
+  return _tmgmt_plugin_controller('file_format', $plugin);
+}
+
+/**
+ * Implements hook_tmgmt_file_format_info().
+ */
+function tmgmt_file_tmgmt_file_format_plugin_info() {
+  return array(
+    'xlf' => array(
+      'label' => t('XLIFF'),
+      'plugin controller class' => 'TMGMTFileFormatXLIFF',
+    ),
+    'html' => array(
+      'label' => t('HTML'),
+      'plugin controller class' => 'TMGMTFileFormatHTML',
+    ),
+  );
 }
