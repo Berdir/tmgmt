@@ -3,25 +3,48 @@
 /**
  * Interface for exporting to a given file format.
  */
-interface TMGMTFileExport {
+interface TMGMTFileExportInterface {
 
-  function getExtension();
+  /**
+   * Return the file extension that should be used.
+   *
+   * @return
+   *   File extension, e.g. xlf or html.
+   */
+  function getFileExtension();
 
+  /**
+   * Return the file content for the job data.
+   *
+   * @param
+   *   String with the file content.
+   */
   function export(TMGMTJob $job);
 }
 
 /**
  * Export to XLIFF format.
  */
-class TMGMTFileExportXLIFF extends XMLWriter implements TMGMTFileExport {
+class TMGMTFileExportXLIFF extends XMLWriter implements TMGMTFileExportInterface {
 
+  /**
+   * Contains a reference to the currently being exported job.
+   *
+   * @var TMGMTJob
+   */
   protected $job;
 
+  /**
+   * Adds a job item to the xml export.
+   *
+   * @param $item
+   *   The job item entity.
+   */
   protected function addItem(TMGMTJobItem $item) {
     $this->startElement('group');
     $this->writeAttribute('id', $item->tjiid);
 
-    // Add a note.
+    // Add a note for the source label.
     $this->writeElement('note', $item->getSourceLabel());
 
     // @todo: Write in nested groups instead of flattening it.
@@ -32,6 +55,15 @@ class TMGMTFileExportXLIFF extends XMLWriter implements TMGMTFileExport {
     $this->endElement();
   }
 
+  /**
+   * Adds a single translation unit for a data element.
+   *
+   * @param $key
+   *   The unique identifier for this data element.
+   *
+   * @param $element
+   *   Array with the properties #text and optionally #label.
+   */
   protected function addTransUnit($key, $element) {
     $this->startElement('trans-unit');
     $this->writeAttribute('id', $key);
@@ -49,6 +81,9 @@ class TMGMTFileExportXLIFF extends XMLWriter implements TMGMTFileExport {
     $this->endElement();
   }
 
+  /**
+   * Implements TMGMTFileExportInterface::export().
+   */
   public function export(TMGMTJob $job) {
 
     $this->job = $job;
@@ -101,14 +136,23 @@ class TMGMTFileExportXLIFF extends XMLWriter implements TMGMTFileExport {
     return $this->outputMemory();
   }
 
-  public function getExtension() {
+  /**
+   * Implements TMGMTFileExportInterface::getFileExtension().
+   */
+  public function getFileExtension() {
     return 'xlf';
   }
 
 }
 
-class TMGMTFileExportHTML implements TMGMTFileExport {
+/**
+ * Export into HTML.
+ */
+class TMGMTFileExportHTML implements TMGMTFileExportInterface {
 
+  /**
+   * Implements TMGMTFileExportInterface::export().
+   */
   public function export(TMGMTJob $job) {
     $items = array();
     foreach ($job->getItems() as $item) {
@@ -122,7 +166,10 @@ class TMGMTFileExportHTML implements TMGMTFileExport {
       ));
   }
 
-  public function getExtension() {
+  /**
+   * Implements TMGMTFileExportInterface::getFileExtension().
+   */
+  public function getFileExtension() {
     return 'html';
   }
 
