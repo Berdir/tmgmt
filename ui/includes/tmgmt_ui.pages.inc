@@ -284,7 +284,8 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   // Show a list of translators tagged by availability for the selected source
   // and target language combination.
   $translators = tmgmt_translator_labels_flagged($job->source_language, $job->target_language);
-  $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
+  $preselected_translator = !empty($job->translator) ? $job->translator : key($translators);
+  $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : $preselected_translator;
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
   // Get the job metadata wrapper so we can display the current status nicely.
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
