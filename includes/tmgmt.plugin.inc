@@ -163,6 +163,7 @@ abstract class TMGMTDefaultSourcePluginController extends TMGMTPluginBase implem
     if (isset($types[$type])) {
       return $types[$type];
     }
+    return '';
   }
 
 }

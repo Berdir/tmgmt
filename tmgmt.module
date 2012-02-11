@@ -605,7 +605,7 @@ function tmgmt_message_create($message = '', $variables = array(), $values = arr
  * Access callback for the translator entity.
  */
 function tmgmt_translator_access($op, TMGMTTranslator $translator = NULL, $account = NULL) {
-  if (isset($translator) && !$translator->getPluginController()) {
+  if (isset($translator) && !$translator->getController()) {
     return FALSE;
   }
   // Only administrators are allowed to manage translator entities.
@@ -749,7 +749,7 @@ function tmgmt_translator_auto_create($plugin) {
       $label = $info['label'] . ' (auto created)';
       $translator = tmgmt_translator_create($plugin, $plugin, $label, $info['description']);
       // Append some default settings from the translator plugin definition.
-      $translator->settings = $translator->getPluginController()->defaultSettings();
+      $translator->settings = $translator->getController()->defaultSettings();
       $translator->save();
     }
   }

@@ -26,13 +26,6 @@ function tmgmt_node_tmgmt_source_plugin_info() {
 }
 
 /**
- * Implements hook_views_default_views().
- */
-function tmgmt_node_ui_views_default_views() {
-  return _tmgmt_load_exports('tmgmt_node', 'views', 'view.inc', 'view');
-}
-
-/**
  * Updates a node translation.
  *
  * @param object $node

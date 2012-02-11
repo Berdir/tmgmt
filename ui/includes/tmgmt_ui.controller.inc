@@ -93,7 +93,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
       '#markup' => $wrapper->plugin->label(),
       '#status' => $entity->{$this->statusKey},
     );
-    $controller = $entity->getPluginController();
+    $controller = $entity->getController();
     $form['configured'] = array(
       '#markup' => $controller->isAvailable($entity) ? t('Yes') : t('No'),
     );

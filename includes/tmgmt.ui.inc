@@ -1,110 +1,14 @@
 <?php
 
-
-/**
- * Interface for source ui controllers.
- *
- * @ingroup tmgmt_source
- */
-interface TMGMTSourceUIControllerInterface extends TMGMTPluginBaseInterface {
-
-  /**
-   * Form callback for the job item review form.
-   */
-  public function reviewForm($form, &$form_state, TMGMTJobItem $item);
-
-  /**
-   * Validation callback for the job item review form.
-   */
-  public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item);
-
-  /**
-   * Submit callback for the job item review form.
-   */
-  public function reviewFormSubmit($form, &$form_state, TMGMTJobItem $item);
-
-  /**
-   * Form callback for the source overview form.
-   */
-  public function overviewForm($form, &$form_state, $item_type);
-
-  /**
-   * Validation callback for the source overview form.
-   */
-  public function overviewFormValidate($form, &$form_state, $item_type);
-
-  /**
-   * Submit callback for the source overview form.
-   */
-  public function overviewFormSubmit($form, &$form_state, $item_type);
-
-  /**
-   * Implements hook_menu().
-   *
-   * @see tmgmt_ui_menu().
-   */
-  public function hook_menu();
-
-  /**
-   * Implements hook_forms().
-   *
-   * @see tmgmt_ui_forms().
-   */
-  public function hook_forms();
-
-}
-
 /**
  * Default ui controller class for source plugin.
  *
  * @ingroup tmgmt_source
  */
-class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSourceUIControllerInterface {
+class TMGMTDefaultSourceUIController extends TMGMTPluginBase {
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::reviewForm().
-   */
-  public function reviewForm($form, &$form_state, TMGMTJobItem $item) {
-    return $form;
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::reviewFormValidate().
-   */
-  public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item) {
-    // Nothing to do here by default.
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::reviewFormSubmit().
-   */
-  public function reviewFormSubmit($form, &$form_state, TMGMTJobItem $item) {
-    // Nothing to do here by default.
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::overviewForm().
-   */
-  public function overviewForm($form, &$form_state, $type) {
-    return $form;
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::overviewFormValidate().
-   */
-  public function overviewFormValidate($form, &$form_state, $type) {
-    // Nothing to do here by default.
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::overviewFormSubmit().
-   */
-  public function overviewFormSubmit($form, &$form_state, $type) {
-    // Nothing to do here by default.
-  }
-
-  /**
-   * Implements TMGMTSourcePluginControllerInterface::hook_menu().
+   * Implements hook_menu().
    */
   public function hook_menu() {
     $items = array();
@@ -141,7 +45,7 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::hook_form().
+   * Implements hook_forms().
    */
   public function hook_forms() {
     $info = array();
@@ -156,47 +60,14 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
     return $info;
   }
 
-}
-
-/**
- * Interface for translator ui controllers.
- *
- * @ingroup tmgmt_translator
- */
-interface TMGMTTranslatorUIControllerInterface extends TMGMTPluginBaseInterface {
-
   /**
-   * Form callback for the plugin settings form.
+   * Implements hook_views_default_views().
    */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE);
-
-  /**
-   * Form callback for the checkout settings form.
-   */
-  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job);
-
-  /**
-   * Retrieves information about a translation job.
-   *
-   * @param TMGMTJob $job
-   *   The translation job.
-   */
-  public function checkoutInfo(TMGMTJob $job);
-
-  /**
-   * Form callback for the job item review form.
-   */
-  public function reviewForm($form, &$form_state, TMGMTJobItem $item);
-
-  /**
-   * Validation callback for the job item review form.
-   */
-  public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item);
-
-  /**
-   * Submit callback for the job item review form.
-   */
-  public function reviewFormSubmit($form, &$form_state, TMGMTJobItem $item);
+  public function hook_views_default_views() {
+    // Load default views from the /views sub folder of the module that
+    // implements this plugin.
+    return _tmgmt_load_exports($this->pluginInfo['module'], 'views', 'view.inc', 'view');
+  }
 
 }
 
@@ -205,59 +76,6 @@ interface TMGMTTranslatorUIControllerInterface extends TMGMTPluginBaseInterface 
  *
  * @ingroup tmgmt_translator
  */
-class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGMTTranslatorUIControllerInterface {
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::pluginSettingsForm().
-   */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
-    if (!element_children($form)) {
-      $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginInfo['label']));
-    }
-    return $form;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::checkoutSettingsForm().
-   */
-  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
-    if (!element_children($form)) {
-      $form['#description'] = t("The @translator translator doesn't provide any checkout settings.", array('@translator' => $job->getTranslator()->label()));
-    }
-    return $form;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
-   */
-  public function checkoutInfo(TMGMTJob $job) {
-    $label = $job->getTranslator()->label();
-    $form['#title'] = t('@translator translation job information', array('@translator' => $label));
-    if (!element_children($form)) {
-      $form['#description'] = t('There is no relevant information to be displayed.');
-    }
-    return $form;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::reviewForm().
-   */
-  public function reviewForm($form, &$form_state, TMGMTJobItem $item) {
-    return $form;
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::reviewFormValidate().
-   */
-  public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item) {
-    // Nothing to do here by default.
-  }
-
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::reviewFormSubmit().
-   */
-  public function reviewFormSubmit($form, &$form_state, TMGMTJobItem $item) {
-    // Nothing to do here by default.
-  }
+class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase {
 
 }

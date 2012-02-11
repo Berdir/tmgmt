@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Provides page callbacks and form functions for the Translation Management
@@ -263,6 +264,10 @@ function tmgmt_translator_form_submit($form, &$form_state) {
  * Entity API form the job entity.
  */
 function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
+  // Get the job metadata wrapper so we can display the current status nicely.
+  $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
+  // Set the title of the page to the label and the current state of the job
+  drupal_set_title($job->label() . ' (' . $wrapper->state->label() . ')');
   // Check if the translator entity is completely new or not.
   $old = empty($job->is_new) && $op != 'clone';
   // Find pre-selected values.
@@ -283,11 +288,12 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   }
   // Show a list of translators tagged by availability for the selected source
   // and target language combination.
-  $translators = tmgmt_translator_labels_flagged($job->source_language, $job->target_language);
-  $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : key($translators);
+  if (!$translators = tmgmt_translator_labels_flagged($job->source_language, $job->target_language)) {
+    drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => l(t('configure'), 'admin/config/regional/tmgmt/translators'))), 'warning');
+  }
+  $preselected_translator = !empty($job->translator) && isset($translators[$job->translator]) ? $job->translator : key($translators);
+  $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : $preselected_translator;
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
-  // Get the job metadata wrapper so we can display the current status nicely.
-  $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
   // Show the items that are attached to this job if there are not more than 20.
   $form['override_label'] = array(
     '#type' => 'checkbox',
@@ -305,12 +311,6 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       ),
     ),
   );
-  // Show the current state of the job.
-  $form['state'] = array(
-    '#type' => 'item',
-    '#title' => t('Current status'),
-    '#markup' => $wrapper->state->label(),
-  );
   if (module_exists('views') && $view = views_get_view('tmgmt_ui_job_items')) {
     $form['items'] = array(
       '#type' => 'item',
@@ -318,10 +318,11 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       '#markup' => $view->preview('block', array($job->tjid)),
     );
   }
-  // Show the source and target language in a fieldset.
   $form['languages'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Language'),
+    '#title' => t('Languages'),
+    '#description' => t('The source and target language of this translation job.'),
+    '#attributes' => array('class' => array('clearfix')),
   );
   // Make the source and target language flexible by showing either a select
   // dropdown or the plain string (if preselected).
@@ -330,7 +331,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#type' => !empty($preselected['source_language']) || !$job->isUnprocessed() ? 'item' : 'select',
     '#options' => $available['source_language'],
     '#default_value' => $job->source_language,
-    '#markup' => !empty($job->source_language) ? $available['source_language'][$job->source_language] : '',
+    '#markup' => isset($available['source_language'][$job->source_language]) ? $available['source_language'][$job->source_language] : '',
     '#required' => TRUE,
     '#prefix' => '<div id="tmgmt-ui-source-language" class="tmgmt-ui-source-language">',
     '#suffix' => '</div>',
@@ -343,7 +344,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#type' => !empty($preselected['target_language']) || !$job->isUnprocessed() ? 'item' : 'select',
     '#options' => $available['target_language'],
     '#default_value' => $job->target_language,
-    '#markup' => !empty($job->target_language) ? $available['target_language'][$job->target_language] : '',
+    '#markup' => isset($available['target_language'][$job->target_language]) ? $available['target_language'][$job->target_language] : '',
     '#required' => TRUE,
     '#prefix' => '<div id="tmgmt-ui-target-language" class="tmgmt-ui-target-language">',
     '#suffix' => '</div>',
@@ -359,6 +360,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $form['translator_wrapper']['translator'] = array(
     '#type' => 'select',
     '#title' => t('Translator'),
+    '#description' => t('The configured translator plugin that will process of the translation.'),
     '#options' => $translators,
     '#default_value' => $job->translator,
     '#required' => TRUE,
@@ -369,23 +371,23 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     ),
   );
   // Display the checkout settings form if the job can be checked out.
-  if ($job->isUnprocessed()) {
+  if (!empty($job->translator) && $job->isUnprocessed()) {
+    $settings = tmgmt_ui_checkout_settings_form($form_state, $job);
     $form['translator_wrapper']['settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Checkout settings'),
       '#prefix' => '<div id="tmgmt-ui-translator-settings">',
       '#suffix' => '</div>',
       '#tree' => TRUE,
-    );
-    $form['translator_wrapper']['settings'] += tmgmt_ui_checkout_settings_form($form_state, $job);
+    ) + $settings;
   }
-  // Otherwise display the checkout info form.
-  else {
+  // Otherwise display the checkout info.
+  elseif (!empty($job->translator)) {
     $form['translator_wrapper']['info'] = array(
       '#type' => 'fieldset',
       '#title' => t('Checkout information'),
+      '#markup' => tmgmt_ui_checkout_info($job),
     );
-    $form['translator_wrapper']['info'] += $job->getInfo();
   }
   // Add the buttons and action links.
   $form['actions']['#type'] = 'actions';
@@ -397,6 +399,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#type' => 'submit',
     '#value' => tmgmt_ui_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
     '#access' => $job->isUnprocessed(),
+    '#disabled' => empty($job->translator),
   );
   if ($old) {
     $form['actions']['delete'] = array(
@@ -476,46 +479,71 @@ function tmgmt_job_form_validate($form, &$form_state) {
   if (!$translator->isAvailable()) {
     form_set_error('translator', $translator->getNotAvailableReason());
   }
-  elseif (!array_key_exists($job->target_language, $translator->getSupportedTargetLanguages($job->source_language))) {
+  elseif (!$translator->canTranslate($job)) {
     form_set_error('translator', t('@translator can not translate from @source to @target.', array('@translator' => $translator->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())));
-  }
-  if (!$job->isTranslatable()) {
-    form_set_error('translator', t('Something went wrong.'));
   }
 }
 
 /**
  * Helper function for retrieving the job settings form.
+ *
+ * @todo Make use of the response object here.
  */
 function tmgmt_ui_checkout_settings_form(&$form_state, TMGMTJob $job) {
-  // @todo Make use of the response object here.
-  $translator = $job->getTranslator();
-  if (!$translator) {
-    return array(
-      '#description' => t('No translator available.'),
-    );
+  $form = array();
+  if (!$translator = $job->getTranslator()) {
+    $form['#description'] = t('No translator available.');
   }
-  if (!$translator->isAvailable()) {
-    return array(
-      '#description' => filter_xss($job->getTranslator()->getNotAvailableReason()),
-    );
+  elseif (!$translator->isAvailable()) {
+    $form['#description'] = filter_xss($job->getTranslator()->getNotAvailableReason());
   }
-  // @todo: if the target language is not defined, the check will not work if
-  // the first language in the list is not available.
+  // @todo: if the target language is not defined, the check will not work if the first language in the list is not available.
   elseif ($job->target_language && !array_key_exists($job->target_language, $translator->getSupportedTargetLanguages($job->source_language))) {
     $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
-    return array(
-      '#description' => t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label())),
-    );
+    $form['#description'] = t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label()));
   }
-  return $job->checkoutSettingsForm(array(), $form_state);
+  else {
+    $translator = $job->getTranslator();
+    $controller = tmgmt_translator_ui_controller($translator->plugin);
+    if (method_exists($controller, 'checkoutSettingsForm')) {
+      $form = $controller->checkoutSettingsForm($form, $form_state, $job);
+    }
+    if (!element_children($form)) {
+      $form['#description'] = t("The @translator translator doesn't provide any checkout settings.", array('@translator' => $translator->label()));
+    }
+  }
+  return $form;
 }
 
 /**
  * Helper function for retrieving the translator settings form.
  */
 function tmgmt_ui_plugin_settings_form(&$form_state, TMGMTTranslator $translator, $busy = FALSE) {
-  return $translator->pluginSettingsForm(array(), $form_state, $busy);
+  $form = array();
+  $controller = tmgmt_translator_ui_controller($translator->plugin);
+  if (method_exists($controller, 'pluginSettingsForm')) {
+    $form = $controller->pluginSettingsForm($form, $form_state, $translator, $busy);
+  }
+  if (!element_children($form)) {
+    $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginInfo['label']));
+  }
+  return $form;
+}
+
+/**
+ * Helper function for retrieving the rendered job checkout information.
+ */
+function tmgmt_ui_checkout_info(TMGMTJob $job) {
+  $output = array();
+  $translator = $job->getTranslator();
+  $controller = tmgmt_translator_ui_controller($translator->plugin);
+  if (method_exists($controller, 'checkoutInfo')) {
+    $output = $controller->checkoutInfo($job);
+  }
+  if (empty($output)) {
+    $output = t('There is no relevant information to be displayed.');
+  }
+  return render($output);
 }
 
 /**

@@ -16,7 +16,6 @@ class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController
       '#title' => t('Display settings'),
       '#default_value' => TRUE,
     );
-    return parent::pluginSettingsForm($form, $form_state, $translator);
   }
 
   /**
@@ -24,7 +23,7 @@ class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     if ($job->getTranslator()->getSetting('expose_settings')) {
-      $settings['action'] = array(
+      $form['action'] = array(
         '#type' => 'select',
         '#title' => t('Action'),
         '#options' => array(
@@ -35,9 +34,8 @@ class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController
           'not_translatable' => t('Not translatable'),
         ),
       );
-      return $settings;
     }
-    return parent::checkoutSettingsForm($form, $form_state, $job);
+    return $form;
   }
 
 }
@@ -63,24 +61,21 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     switch ($action) {
       case 'submit':
         $job->submitted('Test submit');
-        return;
         break;
 
       case 'reject':
         $job->rejected('This is not supported');
-        return;
         break;
 
       case 'fail':
         // Target not reachable.
         $job->addMessage('Service not reachable', array(), 'error');
-        return;
         break;
 
       case 'translate':
       default:
         // The dummy translation prefixes strings with the target language.
-        $data = tmgmt_flatten_data($job->getSourceData());
+        $data = array_filter(tmgmt_flatten_data($job->getSourceData()), '_tmgmt_filter_data');
         foreach ($data as $key => $value) {
           $data[$key]['#text'] = $job->target_language . '_' . $value['#text'];
         }
@@ -88,7 +83,6 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
         $job->addTranslatedData(tmgmt_unflatten_data($data));
         break;
     }
-    return TRUE;
   }
 
   /**
@@ -129,6 +123,7 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
       'dummy' => array(
         'deep_nesting' => array(
           '#text' => 'Text for job item with type ' . $job_item->item_type . ' and id ' . $job_item->item_id . '.',
+          '#label' => 'Label for job item with type ' . $job_item->item_type . ' and id ' . $job_item->item_id . '.',
         ),
       ),
     );
@@ -140,5 +135,6 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
   public function saveTranslation(TMGMTJobItem $job_item) {
     // Set a variable that can be checked later for a given job item.
     variable_set('tmgmt_test_saved_translation_' . $job_item->item_type . '_' . $job_item->item_id, TRUE);
+    $job_item->accepted();
   }
 }

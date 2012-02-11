@@ -87,21 +87,9 @@ class TMGMTTranslator extends Entity {
    *
    * @return TMGMTTranslatorPluginControllerInterface
    */
-  public function getPluginController() {
+  public function getController() {
     if (!empty($this->plugin)) {
       return tmgmt_translator_plugin_controller($this->plugin);
-    }
-    return FALSE;
-  }
-
-  /**
-   * Returns the translator ui controller of this translator.
-   *
-   * @return TMGMTTranslatorUIControllerInterface
-   */
-  public function getUIController() {
-    if (!empty($this->plugin)) {
-      return tmgmt_translator_ui_controller($this->plugin);
     }
     return FALSE;
   }
@@ -113,7 +101,7 @@ class TMGMTTranslator extends Entity {
    *   An array of supported target languages in ISO format.
    */
   public function getSupportedTargetLanguages($source_language) {
-    if ($controller = $this->getPluginController()) {
+    if ($controller = $this->getController()) {
       if (isset($this->pluginInfo['cache languages']) && empty($this->pluginInfo['cache languages'])) {
         // This plugin doesn't support language caching.
         return $controller->getSupportedTargetLanguages($this, $source_language);
@@ -144,7 +132,7 @@ class TMGMTTranslator extends Entity {
    *   TRUE if the job can be processed and translated, FALSE otherwise.
    */
   public function canTranslate(TMGMTJob $job) {
-    if ($controller = $this->getPluginController()) {
+    if ($controller = $this->getController()) {
       return $controller->canTranslate($job);
     }
     return FALSE;
@@ -157,38 +145,8 @@ class TMGMTTranslator extends Entity {
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
   public function isAvailable() {
-    if ($controller = $this->getPluginController()) {
+    if ($controller = $this->getController()) {
       return $controller->isAvailable($this);
-    }
-    return FALSE;
-  }
-
-  /**
-   * Get the job settings form from the respective translator plugin.
-   */
-  public function checkoutSettingsForm($form, &$form_state, $job) {
-    if ($controller = $this->getUiController()) {
-      return $controller->checkoutSettingsForm($form, $form_state, $job);
-    }
-    return FALSE;
-  }
-
-  /**
-   * Get the settings form from the respective translator plugin.
-   */
-  public function pluginSettingsForm($form, $form_state, $busy = FALSE) {
-    if ($controller = $this->getUiController()) {
-      return $controller->pluginSettingsForm($form, $form_state, $this, $busy);
-    }
-    return FALSE;
-  }
-
-  /**
-   * Get information about a job from the respective translator plugin.
-   */
-  public function checkoutInfo(TMGMTJob $job) {
-    if ($controller = $this->getUiController()) {
-      return $controller->checkoutInfo($job);
     }
     return FALSE;
   }
@@ -197,7 +155,7 @@ class TMGMTTranslator extends Entity {
    * Returns if the plugin has any settings for this job.
    */
   public function hasCheckoutSettings(TMGMTJob $job) {
-    if ($controller = $this->getPluginController()) {
+    if ($controller = $this->getController()) {
       return $controller->hasCheckoutSettings($job);
     }
     return FALSE;
@@ -207,7 +165,7 @@ class TMGMTTranslator extends Entity {
    * @todo Remove this once http://drupal.org/node/1420364 is done.
    */
   public function getNotAvailableReason() {
-    if ($controller = $this->getPluginController()) {
+    if ($controller = $this->getController()) {
       return $controller->getNotAvailableReason($this);
     }
     return FALSE;
@@ -228,7 +186,7 @@ class TMGMTTranslator extends Entity {
     if (isset($this->settings[$name])) {
       return $this->settings[$name];
     }
-    elseif ($controller = $this->getPluginController()) {
+    elseif ($controller = $this->getController()) {
       $defaults = $controller->defaultSettings();
       if (isset($defaults[$name])) {
         return $defaults[$name];
@@ -240,7 +198,7 @@ class TMGMTTranslator extends Entity {
    * Updates the language cache if it has changed.
    */
   public function __destruct() {
-    if ($controller = $this->getPluginController()) {
+    if ($controller = $this->getController()) {
       $info = $controller->pluginInfo();
       if (!isset($info['language cache']) || !empty($info['language cache']) && !empty($this->languageCacheOutdated)) {
         cache_set('languages:' . $this->name, $this->languageCache, 'cache_tmgmt');
@@ -481,19 +439,6 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Returns the translator plugin controller of the translator of this job item.
-   *
-   * @return TMGMTTranslatorPluginControllerInterface
-   *   The controller of the translator plugin or FALSE if there was a problem.
-   */
-  public function getTranslatorUIController() {
-    if ($job = $this->getJob()) {
-      return $job->getTranslatorUIController();
-    }
-    return FALSE;
-  }
-
-  /**
    * Array of the data to be translated.
    *
    * The structure is similar to the form API in the way that it is a possibly
@@ -532,18 +477,6 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public function getSourceController() {
     if (!empty($this->plugin)) {
       return tmgmt_source_plugin_controller($this->plugin);
-    }
-    return FALSE;
-  }
-
-  /**
-   * Returns the ui controller of the configured plugin.
-   *
-   * @return TMGMTSourceUIControllerInterface
-   */
-  public function getSourceUIController() {
-    if (!empty($this->plugin)) {
-      return tmgmt_source_ui_controller($this->plugin);
     }
     return FALSE;
   }
@@ -1096,20 +1029,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Retrieves information about this job from the translator plugin.
-   *
-   * @return array
-   *   A renderable array with job information or FALSE if no information is
-   *   available.
-   */
-  public function getInfo() {
-    if ($translator = $this->getTranslator()) {
-      return $translator->checkoutInfo($this);
-    }
-    return FALSE;
-  }
-
-  /**
    * Retrieves a setting value from the job settings. Pulls the default values
    * (if defined) from the plugin controller.
    *
@@ -1435,20 +1354,7 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    */
   public function getTranslatorController() {
     if ($translator = $this->getTranslator($this)) {
-      return $translator->getPluginController();
-    }
-    return FALSE;
-  }
-
-  /**
-   * Returns the translator ui controller of the translator of this job.
-   *
-   * @return TMGMTTranslatorUIControllerInterface
-   *   The controller of the translator plugin.
-   */
-  public function getTranslatorUIController() {
-    if ($translator = $this->getTranslator($this)) {
-      return $translator->getUIController();
+      return $translator->getController();
     }
     return FALSE;
   }
@@ -1536,16 +1442,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     foreach ($this->getItems() as $item) {
       $item->acceptTranslation();
     }
-  }
-
-  /**
-   * Retrieves the checkout settings form.
-   */
-  public function checkoutSettingsForm($form, &$form_state) {
-    if ($translator = $this->getTranslator()) {
-      return $translator->checkoutSettingsForm($form, $form_state, $this);
-    }
-    return FALSE;
   }
 
 }

@@ -1,25 +1,14 @@
 <?php
-// $Id$
 
 /**
  * @file
- *
  * Provides functions for translation provider nativy.com.
  */
 
-
-/*
+/**
  * Implements hook_menu().
  */
 function tmgmt_nativy_menu() {
-  // @todo Remove this path after finishing development!
-  $items['soaptest'] = array(
-    'title' => 'Testcallback',
-    'type' => MENU_CALLBACK,
-    'page callback' => 'tmgmt_nativy_test_page',
-    'access arguments' => array('access content'),
-  );
-
   // @todo menu callback for order complete callback
   $items['nativy/callback'] = array(
     'title' => 'Nativy Notification',
@@ -85,19 +74,4 @@ function tmgmt_nativy_process_callback() {
     '#items' => $items,
   );
   return $build;
-}
-
-/*
- * Used for development purposes only!
- */
-function tmgmt_nativy_test_page($jobid) {
-  $job = tmgmt_job_load($jobid);
-  $translator_name = 'nativy_test';
-  $translator = tmgmt_translator_load($translator_name);
-  $controller = $translator->getPluginController();
-  $form = $form_state = array();
-  $job->translator = $translator_name;
-  $form = $controller->checkoutSettingsForm($form, $form_state, $job);
-  return $form;
-  return "TESTPAGE Job Id = $jobid";
 }
