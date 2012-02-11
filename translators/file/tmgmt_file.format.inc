@@ -184,11 +184,10 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
     $xml = simplexml_import_dom($dom);
 
     $data = array();
-    foreach ($xml->xpath("//div[class='atom']") as $atom) {
+    foreach ($xml->xpath("//div[@class='atom']") as $atom) {
       // Assets are our strings (eq fields in nodes).
-      $data[$atom['id']]['#text'] = (string)$atom;
+      $data[(string)$atom['id']]['#text'] = (string)$atom;
     }
-    dpm($data);
     return tmgmt_unflatten_data($data);
   }
 }

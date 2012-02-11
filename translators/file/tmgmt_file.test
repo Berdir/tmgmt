@@ -33,7 +33,7 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
   /**
    * Tests basic API methods of the plugin.
    */
-  function dtestHTML() {
+  function testHTML() {
     $translator = $this->createTranslator();
     $translator->plugin = 'file';
     $translator->settings = array(
@@ -51,8 +51,22 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     $message = reset($messages);
 
     $download_url = $message->variables['!link'];
-    $content = file_get_contents($download_url);
-    debug($content);
+
+    // "Translate" items.
+    $xml = simplexml_load_file($download_url);
+    $translated_text = array();
+    foreach ($xml->body->children() as $group) {
+      for ($i = 0; $i < $group->count(); $i++) {
+        // This does not actually override the whole object, just the content.
+        $group->div[$i] = (string)$xml->head->meta[3]['content'] . '_' . (string)$group->div[$i];
+        // Store the text to allow assertions later on.
+        $translated_text[(string)$group['id']][(string)$group->div[$i]['id']] = (string)$group->div[$i];
+      }
+    }
+
+    $translated_file = 'public://tmgmt_file/translated.html';
+    $xml->asXML($translated_file);
+    $this->importFile($translated_file, $translated_text, $job);
   }
 
   /**
@@ -90,14 +104,17 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
         if ($transunit->getName() == 'trans-unit') {
           $transunit->target = $xml->file['target-language'] . '_' . (string)$transunit->source;
           // Store the text to allow assertions later on.
-          $translated_text[(string)$group['id']][(string)$transunit['id']] = $transunit->target;
+          $translated_text[(string)$group['id']][(string)$transunit['id']] = (string)$transunit->target;
         }
       }
     }
 
     $translated_file = 'public://tmgmt_file/translated.xlf';
     $xml->asXML($translated_file);
+    $this->importFile($translated_file, $translated_text, $job);
+  }
 
+  protected function importFile($translated_file, $translated_text, TMGMTJob $job) {
     // To test the upload form functionality, navigate to the edit form.
     $uri = $job->uri();
     $edit = array(
@@ -112,19 +129,19 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     // Review both items.
     $this->clickLink(t('review'));
     foreach ($translated_text[1] as $key => $value) {
-      $this->assertRaw($value);
+      $this->assertText($value);
     }
     foreach ($translated_text[2] as $key => $value) {
-      $this->assertNoRaw($value);
+      $this->assertNoText($value);
     }
     $this->drupalPost(NULL, array(), t('Accept'));
     // Review both items.
     $this->clickLink(t('review'));
     foreach ($translated_text[1] as $key => $value) {
-      $this->assertNoRaw($value);
+      $this->assertNoText($value);
     }
     foreach ($translated_text[2] as $key => $value) {
-      $this->assertRaw($value);
+      $this->assertText($value);
     }
     $this->drupalPost(NULL, array(), t('Accept'));
 
