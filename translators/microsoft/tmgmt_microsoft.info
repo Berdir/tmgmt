@@ -4,4 +4,5 @@ package = Translation Management
 core = 7.x
 dependencies[] = tmgmt
 files[] = tmgmt_microsoft.plugin.inc
+files[] = tmgmt_microsoft.ui.inc
 files[] = tmgmt_microsoft.test
