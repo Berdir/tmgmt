@@ -4,3 +4,4 @@ package = Translation Management
 core = 7.x
 dependencies[] = tmgmt
 files[] = tmgmt_file.plugin.inc
+files[] = tmgmt_file.plugin.inc
