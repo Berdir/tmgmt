@@ -496,7 +496,8 @@ function tmgmt_ui_checkout_settings_form(&$form_state, TMGMTJob $job) {
   if (!$translator->isAvailable()) {
     $form['#description'] = filter_xss($job->getTranslator()->getNotAvailableReason());
   }
-  elseif (!$translator->canTranslate($job)) {
+  // @todo: if the target language is not defined, the check will not work if the first language in the list is not available.
+  elseif ($job->target_language && !$translator->canTranslate($job)) {
     $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
     $form['#description'] = t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label()));
   }
