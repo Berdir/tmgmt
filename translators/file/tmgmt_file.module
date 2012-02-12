@@ -79,17 +79,34 @@ function tmgmt_file_import_form_submit($form, &$form_state) {
 
 /**
  * Returns information about file format plugins.
- * @param type $plugin
- * @return type
+ *
+ * @param $plugin
+ *   (Optional) Name of a plugin/extension.
+ *
+ * @return
+ *   If a plugin name is provided, information about that plugin, an array of
+ *   plugin information otherwise. The information of each plugin consists of
+ *   the label and plugin controller class, keyed by the plugin name which is
+ *   also the extension for that file format.
  */
 function tmgmt_file_format_plugin_info($plugin = NULL) {
   return _tmgmt_plugin_info('file_format', $plugin);
 }
 
+/**
+ * Returns an array of file format plugin labels.
+ */
 function tmgmt_file_format_plugin_labels() {
   return _tmgmt_plugin_labels('file_format');
 }
 
+/**
+ * Returns the file format plugin controller.
+ *
+ * @return
+ *   Either a specific file format plugin controller instance or an array of
+ *   available controllers.
+ */
 function tmgmt_file_format_controller($plugin = NULL) {
   return _tmgmt_plugin_controller('file_format', $plugin);
 }
