@@ -281,6 +281,20 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   public $translation = array();
 
   /**
+   * Flag for collecting messages.
+   *
+   * @var boolean
+   */
+  protected $collectMessages = FALSE;
+
+  /**
+   * Array of collected messages.
+   *
+   * @var array
+   */
+  protected $collectedMessages = array();
+
+  /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
@@ -366,10 +380,42 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
     if (!empty($this->tjiid) || $this->save()) {
       $message = tmgmt_message_create($message, $variables, array('tjid' => $this->tjid, 'tjiid' => $this->tjiid, 'type' => $type));
       if ($message->save()) {
+        if ($this->collectMessages) {
+          debug('collecting message');
+          $this->collectedMessages[$message->mid] = $message;
+        }
         return $message;
       }
     }
     return FALSE;
+  }
+
+  /**
+   * Start collecting messages.
+   *
+   * All messages which are added to this job item after this method call are
+   * kept in memory and can be received with
+   * TMGMTJobItem::getCollectedMessages().
+   */
+  public function collectMessages() {
+    $this->collectMessages = TRUE;
+  }
+
+  /**
+   * Returns collected messages related to this job item.
+   *
+   * All messages that have been added since TMGMTJobItem::collectMessages() has
+   * been called. Disables messages collecting and clears the list of messages
+   * when called.
+   *
+   * @return
+   *   Array of collected message objects.
+   */
+  public function getCollectedMessages() {
+    $this->collectMessages = FALSE;
+    $messages = $this->collectedMessages;
+    $this->collectedMessages = array();
+    return $messages;
   }
 
   /**
@@ -727,23 +773,6 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
     return FALSE;
   }
 
-  /**
-   * Returns all job messages attached to this job item with timestamp newer
-   * than $time.
-   *
-   * @param $timestamp
-   *   (Optional) Messages need to have a newer timestamp than $time. Defaults
-   *   to REQUEST_TIME.
-   *
-   * @return array
-   *   An array of translation job messages.
-   */
-  public function getMessagesSince($time = NULL) {
-    $time = isset($time) ? $time : REQUEST_TIME;
-    $conditions = array('created' => array('value' => $time, 'operator' => '>='));
-    return $this->getMessages($conditions);
-  }
-
 }
 
 /**
@@ -828,6 +857,20 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    * @var integer
    */
   public $uid;
+
+  /**
+   * Flag for collecting messages.
+   *
+   * @var boolean
+   */
+  protected $collectMessages = FALSE;
+
+  /**
+   * Array of collected messages.
+   *
+   * @var array
+   */
+  protected $collectedMessages = array();
 
   /**
    * Overrides Entity::__construct().
@@ -953,10 +996,40 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
     if (!empty($this->tjid) || $this->save()) {
       $message = tmgmt_message_create($message, $variables, array('tjid' => $this->tjid, 'type' => $type));
       if ($message->save()) {
+        if ($this->collectMessages) {
+          $this->collectedMessages[$message->mid] = $message;
+        }
         return $message;
       }
     }
     return FALSE;
+  }
+
+  /**
+   * Start collecting messages.
+   *
+   * All messages which are added to this job after this method call are kept
+   * in memory and can be received with TMGMTJob::getCollectedMessages().
+   */
+  public function collectMessages() {
+    $this->collectMessages = TRUE;
+  }
+
+  /**
+   * Returns collected messages related to this job.
+   *
+   * All messages that have been added since TMGMTJob::collectMessages() has
+   * been called. Disables messages collecting and clears the list of messages
+   * when called.
+   *
+   * @return
+   *   Array of collected message objects.
+   */
+  public function getCollectedMessages() {
+    $messages = $this->collectedMessages;
+    $this->collectMessages = FALSE;
+    $this->collectedMessages = array();
+    return $messages;
   }
 
   /**
@@ -1009,23 +1082,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
       return entity_load('tmgmt_message', array_keys($results['tmgmt_message']));
     }
     return array();
-  }
-
-  /**
-   * Returns all job messages attached to this job with timestamp newer than
-   * $time.
-   *
-   * @param $time
-   *   (Optional) Messages need to have a newer timestamp than $time. Defaults
-   *   to REQUEST_TIME.
-   *
-   * @return array
-   *   An array of translation job messages.
-   */
-  public function getMessagesSince($time = NULL) {
-    $time = isset($time) ? $time : REQUEST_TIME;
-    $conditions = array('created' => array('value' => $time, 'operator' => '>='));
-    return $this->getMessages($conditions);
   }
 
   /**

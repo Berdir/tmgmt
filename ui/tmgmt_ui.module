@@ -309,11 +309,13 @@ function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
  *   means that something did go wrong.
  */
 function tmgmt_ui_job_request_translation(TMGMTJob $job) {
+  $job->collectMessages();
   // Process the translation request.
   $job->requestTranslation();
   // Print all messages that occurred since our request to the screen.
   $errors = FALSE;
-  foreach ($job->getMessagesSince() as $message) {
+  foreach ($job->getCollectedMessages() as $message) {
+    debug($message);
     // Ignore debug messages.
     if ($message->type == 'debug') {
       continue;
@@ -398,6 +400,7 @@ function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
  */
 function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   $item = $form_state['item'];
+  $item->collectMessages();
   // Rewrite the submitted data values to #text.
   _tmgmt_ui_submit_translation_review_data($form_state['values']['review'], $item->translation);
   // First invoke the submit method on the source controller.
@@ -417,7 +420,7 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
     }
     // Print all messages that have been saved while accepting the reviewed
     // translation.
-    foreach ($item->getMessagesSince() as $message) {
+    foreach ($item->getCollectedMessages() as $message) {
       // Ignore debug messages.
       if ($message->type == 'debug') {
         continue;

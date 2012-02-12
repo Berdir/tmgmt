@@ -584,7 +584,7 @@ function tmgmt_message_load_multiple($mids = array(), $conditions = array()) {
  * @param $values
  *   (Optional) An array of additional entity values to be set.
  *
- * @return TMGMTJobItem
+ * @return TMGMTMessage
  *   The created, not yet saved, job item entity.
  */
 function tmgmt_message_create($message = '', $variables = array(), $values = array()) {
