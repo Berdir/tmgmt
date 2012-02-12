@@ -49,7 +49,7 @@ class TMGMTMicrosoftTestCase extends TMGMTBaseTestCase {
     );
     $item->save();
 
-    // The translator should not be available at this poitn because we didn't
+    // The translator should not be available at this point because we didn't
     // define an API key yet.
     $this->assertFalse($job->isTranslatable());
 
