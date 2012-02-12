@@ -135,9 +135,7 @@ function tmgmt_ui_views_default_views() {
   $views = _tmgmt_load_exports('tmgmt_ui', 'views', 'view.inc', 'view');
   // Some source controllers might provide custom views.
   foreach (tmgmt_source_ui_controller() as $controller) {
-    if (method_exists($controller, 'hook_views_default_views')) {
-      $views += $controller->hook_views_default_views();
-    }
+    $views += $controller->hook_views_default_views();
   }
   return $views;
 }
@@ -375,14 +373,10 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
 function tmgmt_ui_translation_review_form($form, &$form_state, TMGMTJobItem $item) {
   // Give the source ui controller a chance to affect the review form.
   $source = tmgmt_source_ui_controller($item->plugin);
-  if (method_exists($source, 'reviewForm')) {
-    $form = $source->reviewForm($form, $form_state, $item);
-  }
+  $form = $source->reviewForm($form, $form_state, $item);
   // Give the translator ui controller a chance to affect the review form.
   $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-  if (method_exists($translator, 'reviewForm')) {
-    $form = $translator->reviewForm($form, $form_state, $item);
-  }
+  $translator->reviewForm($form, $form_state, $item);
   return $form;
 }
 
@@ -393,14 +387,10 @@ function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
   $item = $form_state['item'];
   // First invoke the validation method on the source controller.
   $source = tmgmt_source_ui_controller($item->plugin);
-  if (method_exists($source, 'reviewFormValidate')) {
-    $form = $source->reviewFormValidate($form, $form_state, $item);
-  }
+  $source->reviewFormValidate($form, $form_state, $item);
   // Then invoke the validation method on the source controller.
   $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-  if (method_exists($translator, 'reviewFormValidate')) {
-    $form = $translator->reviewFormValidate($form, $form_state, $item);
-  }
+  $translator->reviewFormValidate($form, $form_state, $item);
 }
 
 /**
@@ -412,14 +402,10 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   _tmgmt_ui_submit_translation_review_data($form_state['values']['review'], $item->translation);
   // First invoke the submit method on the source controller.
   $source = tmgmt_source_ui_controller($item->plugin);
-  if (method_exists($source, 'reviewFormSubmit')) {
-    $form = $source->reviewFormSubmit($form, $form_state, $item);
-  }
+  $source->reviewFormSubmit($form, $form_state, $item);
   // Then invoke the submit method on the source controller.
   $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-  if (method_exists($translator, 'reviewFormSubmit')) {
-    $form = $translator->reviewFormSubmit($form, $form_state, $item);
-  }
+  $translator->reviewFormSubmit($form, $form_state, $item);
   // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
   if ($form_state['triggering_element']['#value'] == $form['actions']['accept']['#value']) {
     $item->acceptTranslation();

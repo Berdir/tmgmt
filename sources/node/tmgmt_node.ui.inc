@@ -25,4 +25,11 @@ class TMGMTNodeSourceUIController extends TMGMTDefaultSourceUIController {
     return array();
   }
 
+  /**
+   * Overrides TMGMTDefaultSourceUIController::hook_views_default_views().
+   */
+  public function hook_views_default_views() {
+    return _tmgmt_load_exports('tmgmt_node', 'views', 'view.inc', 'view');
+  }
+
 }
