@@ -12,7 +12,7 @@
     <?php foreach ($items as $item_key => $item): ?>
       <div class="asset" id="<?php echo $item_key; ?>">
         <?php foreach ($item as $field_key => $field): ?>
-          <div class="atom" id="<?php echo $item_key . '][' . $field_key; ?>"><?php echo $field['#text']; ?></div>
+          <div class="atom" id="<?php echo $field_key; ?>"><?php echo $field['#text']; ?></div>
         <?php endforeach; ?>
       </div>
     <?php endforeach; ?>

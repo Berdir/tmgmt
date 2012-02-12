@@ -147,7 +147,7 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
 
     $data = array();
     foreach ($xml->xpath('//xliff:trans-unit') as $unit) {
-      $data[(string)$unit['id']]['#text'] = (string)$unit->target;
+      $data[(string) $unit['id']]['#text'] = (string) $unit->target;
     }
     return tmgmt_unflatten_data($data);
   }
@@ -160,12 +160,29 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
 class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
 
   /**
+   * Returns base64 encoded data that is safe for use in xml ids.
+   */
+  protected function encodeIdSafeBase64($data) {
+    return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+  }
+
+  /**
+   * Returns decoded id safe base64 data.
+   */
+  protected function decodeIdSafeBase64($data) {
+    return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
+  }
+
+  /**
    * Implements TMGMTFileExportInterface::export().
    */
   public function export(TMGMTJob $job) {
     $items = array();
     foreach ($job->getItems() as $item) {
-      $items[$item->tjiid] = array_filter(tmgmt_flatten_data($item->getSourceData()), '_tmgmt_filter_data');
+      $data = array_filter(tmgmt_flatten_data($item->getSourceData()), '_tmgmt_filter_data');
+      foreach ($data as $key => $value) {
+        $items[$item->tjiid][$this->encodeIdSafeBase64($item->tjiid . '][' . $key)] = $value;
+      }
     }
     return theme("tmgmt_file_html_template", array(
         'tjid' => $job->tjid,
@@ -186,8 +203,10 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
     $data = array();
     foreach ($xml->xpath("//div[@class='atom']") as $atom) {
       // Assets are our strings (eq fields in nodes).
-      $data[(string)$atom['id']]['#text'] = (string)$atom;
+      $key = $this->decodeIdSafeBase64((string) $atom['id']);
+      $data[$key]['#text'] = (string) $atom;
     }
     return tmgmt_unflatten_data($data);
   }
+
 }
