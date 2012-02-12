@@ -51,19 +51,19 @@ class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController
    * Implements TMGMTTranslatorUIControllerInterface::checkoutInfo().
    */
   public function checkoutInfo(TMGMTJob $job) {
-    $form['import'] = array(
-      //'#type' => 'fieldset',
-      //'#title' => 'Import file',
+    $form = array(
+      '#type' => 'fieldset',
+      '#title' => t('Import translated file'),
     );
 
     $supported_formats = array_keys(tmgmt_file_format_plugin_info());
-    $form['import']['file'] = array(
+    $form['file'] = array(
       '#type' => 'file',
-      '#title' => t('Translated file'),
+      '#title' => t('File file'),
       '#size' => 50,
       '#description' => t('Supported formats: @formats.', array('@formats' => implode(', ', $supported_formats))),
     );
-    $form['import']['submit'] = array(
+    $form['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Import'),
       '#submit' => array('tmgmt_file_import_form_submit'),
