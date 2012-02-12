@@ -8,10 +8,25 @@ interface TMGMTFileFormatInterface {
   /**
    * Return the file content for the job data.
    *
+   * @param $job
+   *   The translation job object to be exported.
+   *
    * @return
    *   String with the file content.
    */
   function export(TMGMTJob $job);
+
+  /**
+   * Validates that the given file is valid and can be imported.
+   *
+   * @param $imported_file
+   *   File path to the file to be imported.
+   *
+   * @return TMGMTJob
+   *   Returns the corresponding translation job entity if the import file is
+   *   valid, FALSE otherwise.
+   */
+  function validateImport($imported_file);
 
   /**
    * Converts an exported file content back to the translated data.
@@ -19,7 +34,7 @@ interface TMGMTFileFormatInterface {
    * @return
    *   Translated data array.
    */
-  function import($impored_file);
+  function import($imported_file);
 }
 
 /**
@@ -67,6 +82,8 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
   protected function addTransUnit($key, $element) {
     $this->startElement('trans-unit');
     $this->writeAttribute('id', $key);
+    $this->writeAttribute('refname', $key);
+
     $this->startElement('source');
     $this->writeAttribute('xml:lang', $this->job->source_language);
     $this->text($element['#text']);
@@ -115,6 +132,8 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
     $this->writeAttribute('tool-id', 'tmgmt');
     $this->writeAttribute('phase-name', 'extraction');
     $this->writeAttribute('process-name', 'extraction');
+    $this->writeAttribute('job-id', $job->tjid);
+
     $this->endElement();
     $this->endElement();
     $this->startElement('tool');
@@ -129,6 +148,7 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
       $this->addItem($item);
     }
 
+    // End the body, file and xliff tags.
     $this->endElement();
     $this->endElement();
     $this->endElement();
@@ -150,6 +170,47 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
       $data[(string) $unit['id']]['#text'] = (string) $unit->target;
     }
     return tmgmt_unflatten_data($data);
+  }
+
+  /**
+   * Implements TMGMTFileExportInterface::validateImport().
+   */
+  public function validateImport($imported_file) {
+    $xml = simplexml_load_file($imported_file);
+
+    if (!$xml) {
+      return FALSE;
+    }
+
+    // Register the xliff namespace, required for xpath.
+    $xml->registerXPathNamespace('xliff', 'urn:oasis:names:tc:xliff:document:1.2');
+
+    // Check if our phase information is there.
+    $phase = $xml->xpath("//xliff:phase[@phase-name='extraction']");
+    if ($phase) {
+      $phase = reset($phase);
+    }
+    else {
+      return FALSE;
+    }
+
+    // Check if the job can be loaded.
+    if (!isset($phase['job-id']) || (!$job = tmgmt_job_load((string)$phase['job-id']))) {
+      return FALSE;
+    }
+
+    // Compare source language.
+    if (!isset($xml->file['source-language']) || $job->source_language != $xml->file['source-language']) {
+      return FALSE;
+    }
+
+    // Compare target language.
+    if (!isset($xml->file['target-language']) || $job->target_language != $xml->file['target-language']) {
+      return FALSE;
+    }
+
+    // Validation successful.
+    return $job;
   }
 
 }
@@ -210,6 +271,45 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
       $data[$key]['#text'] = (string) $atom;
     }
     return tmgmt_unflatten_data($data);
+  }
+
+  /**
+   *
+   * @param type $imported_file
+   */
+  public function validateImport($imported_file) {
+    $dom = new DOMDocument();
+    if (!$dom->loadHTMLFile($imported_file)) {
+      return FALSE;
+    }
+    $xml = simplexml_import_dom($dom);
+
+    // Collect meta information.
+    $meta_tags = $xml->xpath('//meta');
+    $meta = array();
+    foreach ($meta_tags as $meta_tag) {
+      $meta[(string)$meta_tag['name']] = (string)$meta_tag['content'];
+    }
+
+    // Check required meta tags.
+    foreach (array('JobID', 'languageSource', 'languageTarget') as $name) {
+      if (!isset($meta[$name])) {
+        return FALSE;
+      }
+    }
+
+    // Attempt to load job.
+    if (!$job = tmgmt_job_load($meta['JobID'])) {
+      return FALSE;
+    }
+
+    // Check language.
+    if ($meta['languageSource'] != $job->source_language || $meta['languageTarget'] != $job->target_language) {
+      return FALSE;
+    }
+
+    // Validation successful.
+    return $job;
   }
 
 }

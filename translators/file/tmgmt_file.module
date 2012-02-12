@@ -45,12 +45,24 @@ function tmgmt_file_import_form_submit($form, &$form_state) {
     $extension = pathinfo($file->uri, PATHINFO_EXTENSION);
     $controller = tmgmt_file_format_controller($extension);
     if ($controller) {
-      try {
-        $job->addTranslatedData($controller->import($file->uri));
-        $job->addMessage('Sucessfully imported file.');
-        return;
-      } catch (Exception $e) {
-        $job->addMessage('File import failed with the following message: @message', array('@message' => $e->getMessage()), 'error');
+      // Validate the file.
+      $validated_job = $controller->validateImport($file->uri);
+      if (!$validated_job) {
+        $job->addMessage('Failed to validate file, import aborted.', array(), 'error');
+      }
+      else if ($validated_job->tjid != $job->tjid) {
+        $uri = $validated_job->uri();
+        $label = $validated_job->label();
+        $this->addMessage('Import file is from job <a href="@url">@label</a>, import aborted.', array('@url' => url($uri['path']), '@label' => $label));
+      }
+      else {
+        try {
+          // Validation successful, start import.
+          $job->addTranslatedData($controller->import($file->uri));
+          $job->addMessage('Sucessfully imported file.');
+        } catch (Exception $e) {
+          $job->addMessage('File import failed with the following message: @message', array('@message' => $e->getMessage()), 'error');
+        }
       }
     }
   }
