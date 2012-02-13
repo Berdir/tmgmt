@@ -195,7 +195,7 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
     }
 
     // Check if the job can be loaded.
-    if (!isset($phase['job-id']) || (!$job = tmgmt_job_load((string)$phase['job-id']))) {
+    if (!isset($phase['job-id']) || (!$job = tmgmt_job_load((string) $phase['job-id']))) {
       return FALSE;
     }
 
@@ -248,7 +248,7 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
         $items[$item->tjiid][$this->encodeIdSafeBase64($item->tjiid . '][' . $key)] = $value;
       }
     }
-    return theme("tmgmt_file_html_template", array(
+    return theme('tmgmt_file_html_template', array(
       'tjid' => $job->tjid,
       'source_language' => $job->source_language,
       'target_language' => $job->target_language,
@@ -288,7 +288,7 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
     $meta_tags = $xml->xpath('//meta');
     $meta = array();
     foreach ($meta_tags as $meta_tag) {
-      $meta[(string)$meta_tag['name']] = (string)$meta_tag['content'];
+      $meta[(string) $meta_tag['name']] = (string) $meta_tag['content'];
     }
 
     // Check required meta tags.

@@ -58,9 +58,9 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     foreach ($xml->body->children() as $group) {
       for ($i = 0; $i < $group->count(); $i++) {
         // This does not actually override the whole object, just the content.
-        $group->div[$i] = (string)$xml->head->meta[3]['content'] . '_' . (string)$group->div[$i];
+        $group->div[$i] = (string) $xml->head->meta[3]['content'] . '_' . (string) $group->div[$i];
         // Store the text to allow assertions later on.
-        $translated_text[(string)$group['id']][(string)$group->div[$i]['id']] = (string)$group->div[$i];
+        $translated_text[(string) $group['id']][(string) $group->div[$i]['id']] = (string) $group->div[$i];
       }
     }
 
@@ -101,9 +101,9 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     foreach ($xml->file->body->children() as $group) {
       foreach ($group->children() as $transunit) {
         if ($transunit->getName() == 'trans-unit') {
-          $transunit->target = $xml->file['target-language'] . '_' . (string)$transunit->source;
+          $transunit->target = $xml->file['target-language'] . '_' . (string) $transunit->source;
           // Store the text to allow assertions later on.
-          $translated_text[(string)$group['id']][(string)$transunit['id']] = (string)$transunit->target;
+          $translated_text[(string) $group['id']][(string) $transunit['id']] = (string) $transunit->target;
         }
       }
     }
