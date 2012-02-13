@@ -186,6 +186,26 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Fail'));
     $job = entity_load_unchanged('tmgmt_job', $job->tjid);
     $this->assertTrue($job->isUnprocessed());
+
+    // Test default settings.
+    $this->default_translator->settings['action'] = 'reject';
+    $this->default_translator->save();
+    $job = tmgmt_job_match_item('en', 'es');
+    $job->addItem('test_source', 'test', 1);
+
+    // Go to checkout form.
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $this->drupalGet(reset($redirects));
+
+     // Check checkout form.
+    $this->assertText('You can provide a label for this job in order to identify it easily later on.');
+    $this->assertText('test_source:test:1');
+
+    // The action should now default to reject.
+    $this->drupalPost(NULL, array(), t('Submit to translator'));
+    $this->assertText(t('This is not supported.'));
+    $job = entity_load_unchanged('tmgmt_job', $job->tjid);
+    $this->assertTrue($job->isRejected());
   }
 
   /**

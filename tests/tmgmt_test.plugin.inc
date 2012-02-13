@@ -16,6 +16,19 @@ class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController
       '#title' => t('Display settings'),
       '#default_value' => TRUE,
     );
+
+    $form['action'] = array(
+      '#type' => 'select',
+      '#title' => t('Default action'),
+      '#options' => array(
+        'translate' => t('Translate'),
+        'submit' => t('Submit'),
+        'reject' => t('Reject'),
+        'fail' => t('Fail'),
+        'not_translatable' => t('Not translatable'),
+      ),
+    );
+    return parent::pluginSettingsForm($form, $form_state, $translator, $busy);
   }
 
   /**
@@ -33,6 +46,7 @@ class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController
           'fail' => t('Fail'),
           'not_translatable' => t('Not translatable'),
         ),
+        '#default_value' => $job->getTranslator()->getSetting('action'),
       );
     }
     return $form;
@@ -54,22 +68,22 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
    */
   function requestTranslation(TMGMTJob $job) {
     // Add a debug message.
-    $job->addMessage('Test translator called', array(), 'debug');
+    $job->addMessage('Test translator called.', array(), 'debug');
 
     // Do something different based on the action, if defined.
     $action = isset($job->settings['action']) ? $job->settings['action'] : '';
     switch ($action) {
       case 'submit':
-        $job->submitted('Test submit');
+        $job->submitted('Test submit.');
         break;
 
       case 'reject':
-        $job->rejected('This is not supported');
+        $job->rejected('This is not supported.');
         break;
 
       case 'fail':
         // Target not reachable.
-        $job->addMessage('Service not reachable', array(), 'error');
+        $job->addMessage('Service not reachable.', array(), 'error');
         break;
 
       case 'translate':
