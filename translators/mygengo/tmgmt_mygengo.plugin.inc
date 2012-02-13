@@ -17,7 +17,6 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    */
   protected $apiURL = 'http://api.mygengo.com/v1.1/';
   protected $sandboxURL = 'http://api.sandbox.mygengo.com/v1.1/';
-  protected $useSandbox = TRUE;
 
   /**
    *  requestFromGengo($endpoint, $data = array())
@@ -36,11 +35,18 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
         'User-Agent' => 'Drupal myGengo Translation Interface v0.1',
         'Accept' => 'application/json'
       ),
-      'method' => $method
+      'method' => $method,
     );
 
     $timestamp = gmdate('U');
-    $url = ($this->useSandbox ? $this->sandboxURL : $this->apiURL) . $endpoint;
+    // Allow to use the internal mocking URL.
+    if ($custom_url = $translator->getSetting('url')) {
+      $url = $custom_url;
+    }
+    else {
+      $url = $translator->getSetting('use_sandbox') ? $this->sandboxURL : $this->apiURL;
+    }
+    $url .= $endpoint;
 
     /**
      *  If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
@@ -66,7 +72,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
 
       $response = drupal_http_request($url, $options);
     }
-
+    debug($response->data);
     $results = json_decode($response->data);
     if ($results->opstat == 'ok' && isset($results->response)) {
       return $results->response;
@@ -118,9 +124,13 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
       'as_group' => 1
       ));
 
-    // Save the translated data through the job.
-    $job->addTranslatedData(tmgmt_unflatten_data($response));
-    //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
+    if (!empty($response)) {
+      $job->submitted('Job has been submitted.');
+    }
+    else {
+      // @todo: Get a error message from mygengo.
+      $job->rejected('Job has been rejected.');
+    }
   }
 
   public function generateMyGengoTranslationJobArray(TMGMTJob $job, $tier = "machine") {
@@ -157,10 +167,11 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::receiveTranslation().
+   * Receives and stores a translation returned by myGengo.
    */
   public function receiveTranslation(TMGMTJob $job, $keys, $data) {
-    if ($this->useSandbox) {
+    // @todo Clean this up once sandbox and production return the same thing.
+    if ($job->getTranslator()->getSetting('use_sandbox')) {
       $translation = $data->body_src;
     }
     else {
@@ -170,7 +181,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   * Implements TMGMTTranslatorPluginControllerInterface::mygengo178().
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $results = array();

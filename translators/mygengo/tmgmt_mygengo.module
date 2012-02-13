@@ -32,7 +32,7 @@ function tmgmt_mygengo_callback() {
   $tjid = array_shift($keys);
 
   $job = tmgmt_job_load($tjid);
-  $mygengo = tmgmt_translator_plugin_controller('mygengo');
+  $mygengo = $job->getTranslator()->getController();
   $mygengo->receiveTranslation($job, $keys, $data);
   echo '';
 }
@@ -43,6 +43,7 @@ function tmgmt_mygengo_callback() {
 function tmgmt_mygengo_access_check() {
   try {
     $job = json_decode($_POST['job']);
+    // @todo Validate signature/key.
     return TRUE;
   } catch (Exception $e) {
 
@@ -60,7 +61,8 @@ function tmgmt_mygengo_tmgmt_translator_plugin_info() {
     'mygengo' => array(
       'label' => t('myGengo translator'),
       'description' => t('A myGengo translator service.'),
-      'controller class' => 'TMGMTMyGengoPluginController',
+      'plugin controller class' => 'TMGMTMyGengoPluginController',
+      'ui controller class' => 'TMGMTMyGengoUIController',
     ),
   );
 }
