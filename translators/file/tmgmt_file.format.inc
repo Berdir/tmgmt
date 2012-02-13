@@ -249,11 +249,11 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
       }
     }
     return theme("tmgmt_file_html_template", array(
-        'tjid' => $job->tjid,
-        'source_language' => $job->source_language,
-        'target_language' => $job->target_language,
-        'items' => $items,
-      ));
+      'tjid' => $job->tjid,
+      'source_language' => $job->source_language,
+      'target_language' => $job->target_language,
+      'items' => $items,
+    ));
   }
 
   /**
