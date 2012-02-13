@@ -255,7 +255,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertTrue($submit_job->isActive());
     $messages = $submit_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual('Test submit', $last_message->message);
+    $this->assertEqual('Test submit.', $last_message->message);
 
     // Translate a job.
     $translate_job = $this->createJob('translate');
@@ -269,7 +269,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $messages = $translate_job->getMessages();
     // array_values() results in numeric keys, which is necessary for list.
     list($debug, $translated, $needs_review) = array_values($messages);
-    $this->assertEqual('Test translator called', $debug->message);
+    $this->assertEqual('Test translator called.', $debug->message);
     $this->assertEqual('debug', $debug->type);
     $this->assertEqual('Test translation created.', $translated->message);
     $this->assertEqual('status', $translated->type);
@@ -319,7 +319,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     $messages = $reject_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual('This is not supported', $last_message->message);
+    $this->assertEqual('This is not supported.', $last_message->message);
     $this->assertEqual('error', $last_message->type);
 
     // A failing job.
@@ -330,7 +330,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     $messages = $failing_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual('Service not reachable', $last_message->message);
+    $this->assertEqual('Service not reachable.', $last_message->message);
     $this->assertEqual('error', $last_message->type);
   }
 }
