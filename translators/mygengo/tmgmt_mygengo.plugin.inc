@@ -72,7 +72,6 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
 
       $response = drupal_http_request($url, $options);
     }
-    debug($response->data);
     $results = json_decode($response->data);
     if ($results->opstat == 'ok' && isset($results->response)) {
       return $results->response;
@@ -181,7 +180,7 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::mygengo178().
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $results = array();
