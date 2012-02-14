@@ -27,6 +27,12 @@ class TMGMTMyGengoTranslatorUIController extends TMGMTDefaultTranslatorUIControl
       '#default_value' => $translator->getSetting('api_private_key'),
       '#description' => t('Please enter your myGengo API Private key.'),
     );
+    $form['use_sandbox'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use the sandbox'),
+      '#default_value' => $translator->getSetting('use_sandbox'),
+      '#description' => t('Check to use the testing environment.'),
+    );
     return parent::pluginSettingsForm($form, $form_state, $translator, $busy);
   }
 

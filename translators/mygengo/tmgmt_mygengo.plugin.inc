@@ -17,7 +17,6 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
    */
   protected $apiURL = 'http://api.mygengo.com/v1.1/';
   protected $sandboxURL = 'http://api.sandbox.mygengo.com/v1.1/';
-  protected $useSandbox = TRUE;
 
   /**
    *  requestFromGengo($endpoint, $data = array())
@@ -36,24 +35,32 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
         'User-Agent' => 'Drupal myGengo Translation Interface v0.1',
         'Accept' => 'application/json'
       ),
-      'method' => $method
+      'method' => $method,
     );
 
     $timestamp = gmdate('U');
-    $url = ($this->useSandbox ? $this->sandboxURL : $this->apiURL) . $endpoint;
+    // Allow to use the internal mocking URL.
+    if ($custom_url = $translator->getSetting('url')) {
+      $url = $custom_url;
+    }
+    else {
+      $url = $translator->getSetting('use_sandbox') ? $this->sandboxURL : $this->apiURL;
+    }
+    $url .= $endpoint;
 
     /**
      *  If it's a GET or DELETE request, just sign it and send it appropriately. PUT/POST
      *  get a little more annoying...
      */
     if ($method == 'GET' || $method == 'DELETE') {
-      $query_data = drupal_http_build_query(array_merge(array(
-          'api_key' => $translator->getSEtting('api_public_key'),
+      $query = array_merge(array(
+          'api_key' => $translator->getSetting('api_public_key'),
           'api_sig' => hash_hmac('sha1', $timestamp, $translator->getSetting('api_private_key')),
           'ts' => $timestamp
-          ), $data));
+        ), $data);
 
-      $response = drupal_http_request($url . '?' . $query_data, $options);
+      $url = url($url, array('query' => $query));
+      $response = drupal_http_request($url, $options);
     }
     else {
       $options['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
@@ -63,10 +70,9 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
         'ts' => $timestamp,
         'data' => json_encode($data)
         ));
-
+      $url = url($url);
       $response = drupal_http_request($url, $options);
     }
-
     $results = json_decode($response->data);
     if ($results->opstat == 'ok' && isset($results->response)) {
       return $results->response;
@@ -118,9 +124,13 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
       'as_group' => 1
       ));
 
-    // Save the translated data through the job.
-    $job->addTranslatedData(tmgmt_unflatten_data($response));
-    //return new TMGMTTranslatorResponse(TMGMT_JOB_STATE_REVIEW, t('Microsoft Translator translation completed.'));
+    if (!empty($response)) {
+      $job->submitted('Job has been submitted.');
+    }
+    else {
+      // @todo: Get a error message from mygengo.
+      $job->rejected('Job has been rejected.');
+    }
   }
 
   public function generateMyGengoTranslationJobArray(TMGMTJob $job, $tier = "machine") {
@@ -157,10 +167,11 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::receiveTranslation().
+   * Receives and stores a translation returned by myGengo.
    */
   public function receiveTranslation(TMGMTJob $job, $keys, $data) {
-    if ($this->useSandbox) {
+    // @todo Clean this up once sandbox and production return the same thing.
+    if ($job->getTranslator()->getSetting('use_sandbox')) {
       $translation = $data->body_src;
     }
     else {
