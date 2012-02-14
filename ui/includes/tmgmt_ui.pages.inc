@@ -383,11 +383,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   }
   // Otherwise display the checkout info.
   elseif (!empty($job->translator)) {
-    $form['translator_wrapper']['info'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Checkout information'),
-      '#markup' => tmgmt_ui_checkout_info($job),
-    );
+    $form['translator_wrapper']['info'] = tmgmt_ui_checkout_info($job);
   }
   // Add the buttons and action links.
   $form['actions']['#type'] = 'actions';

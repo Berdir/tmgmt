@@ -11,9 +11,10 @@
 class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
-   * It can 'translate' any job
+   * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
    */
   function canTranslate(TMGMTJob $job) {
+    // Anything can be exported.
     return TRUE;
   }
 
@@ -21,65 +22,34 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   function requestTranslation(TMGMTJob $job) {
-    $items = array();
-    foreach ($job->getItems() as $item) {
-      $SourceDataArray = tmgmt_flatten_data($item->getSourceData());
-      foreach ($SourceDataArray as $key => $SourceData) {
-        if (isset($SourceData['#translate']) && $SourceData['#translate'] !== TRUE) {
-          unset($SourceDataArray[$key]);
-        }
-      }
-      $items[$item->tjid] = $SourceDataArray;
+    $name = "JobID" . $job->tjid;
+
+    $export = tmgmt_file_format_controller($job->getSetting('export_format'));
+
+    $path = $job->getSetting('scheme') . '://tmgmt_file/' . $name . '.' .  $job->getSetting('export_format');
+    if (file_prepare_directory(dirname($path), FILE_CREATE_DIRECTORY)) {
+      $file = file_save_data($export->export($job), $path);
+      file_usage_add($file, 'tmgmt_file', 'tmgmt_job', $job->tjid);
+      $job->submitted('Exported file can be downloaded <a href="!link">here</a>.', array('!link' => file_create_url($path)));
     }
-
-    $tjid = $job->tjid;
-    $source_language = $job->source_language;
-    $target_language = $job->target_language;
-
-    $name = "JobID" . $tjid;
-    $file_template = theme("file_template", array(
-        'tjid' => $tjid,
-        'source_language' => $source_language,
-        'target_language' => $target_language,
-        'items' => $items));
-
-    if ($job->getTranslator()->getSetting('export_format') == 'xliff') {
-      $html = new DOMDocument();
-      @$html->loadXML($file_template);
-
-      $xsl = new DOMDocument;
-      $xsl->load(drupal_get_path('module', 'tmgmt_file') . '/xsl/xml2xliff.xsl');
-
-      $proc = new XSLTProcessor();
-      $proc->ImportStyleSheet($xsl);
-
-      $file_content = $proc->transformToXML($html);
-
-      drupal_add_http_header('Content-Type', 'text/xml; name="' . $name . '.xlf"');
-      drupal_add_http_header('Content-Length', mb_strlen($file_content));
-      drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $name . '.xlf"');
-      drupal_add_http_header('Cache-Control', 'private');
-
-      print $file_content;
-    }
-    else {
-      drupal_add_http_header('Content-Type', 'text/html; name="' . $name . '.html"');
-      drupal_add_http_header('Content-Length', mb_strlen($file_template));
-      drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $name . '.html"');
-      drupal_add_http_header('Cache-Control', 'private');
-
-      print $file_template;
-    }
-
-    $job->submitted('Translation exported');
-    drupal_exit();
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
+   * Implements TMGMTTranslatorPluginControllerInterface::hasCheckoutSettings().
    */
   public function hasCheckoutSettings(TMGMTJob $job) {
-    return FALSE;
+    return $job->getTranslator()->getSetting('allow_override');
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::defaultSettings().
+   */
+  public function defaultSettings() {
+    return array(
+      'export_format' => 'xlf',
+      'allow_override' => TRUE,
+      'scheme' => 'public',
+    );
   }
 
 }

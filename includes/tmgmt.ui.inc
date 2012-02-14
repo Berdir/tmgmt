@@ -232,6 +232,7 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
   public function checkoutInfo(TMGMTJob $job) {
     $label = $job->getTranslator()->label();
     $form['#title'] = t('@translator translation job information', array('@translator' => $label));
+    $form['#type'] = 'fieldset';
     if (!element_children($form)) {
       $form['#description'] = t('There is no relevant information to be displayed.');
     }
