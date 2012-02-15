@@ -67,6 +67,10 @@ class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController
    * Implements TMGMTTranslatorUIControllerInterface::checkoutInfo().
    */
   public function checkoutInfo(TMGMTJob $job) {
+    // If the job is finished, it's not possible to import translations anymore.
+    if ($job->isFinished()) {
+      return parent::checkoutInfo($job);
+    }
     $form = array(
       '#type' => 'fieldset',
       '#title' => t('Import translated file'),

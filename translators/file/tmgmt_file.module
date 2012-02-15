@@ -36,12 +36,9 @@ function tmgmt_file_theme() {
  */
 function tmgmt_file_import_form_submit($form, &$form_state) {
   // Ensure we have the file uploaded.
-
   $job = $form_state['tmgmt_job'];
-
   $supported_formats = array_keys(tmgmt_file_format_plugin_info());
   if ($file = file_save_upload('file', array('file_validate_extensions' => array(implode(' ', $supported_formats))))) {
-
     $extension = pathinfo($file->uri, PATHINFO_EXTENSION);
     $controller = tmgmt_file_format_controller($extension);
     if ($controller) {
@@ -50,10 +47,10 @@ function tmgmt_file_import_form_submit($form, &$form_state) {
       if (!$validated_job) {
         $job->addMessage('Failed to validate file, import aborted.', array(), 'error');
       }
-      else if ($validated_job->tjid != $job->tjid) {
+      elseif ($validated_job->tjid != $job->tjid) {
         $uri = $validated_job->uri();
         $label = $validated_job->label();
-        $this->addMessage('Import file is from job <a href="@url">@label</a>, import aborted.', array('@url' => url($uri['path']), '@label' => $label));
+        $job->addMessage('Import file is from job <a href="@url">@label</a>, import aborted.', array('@url' => url($uri['path']), '@label' => $label));
       }
       else {
         try {
