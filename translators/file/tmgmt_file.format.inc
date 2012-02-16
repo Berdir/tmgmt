@@ -82,7 +82,7 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
   protected function addTransUnit($key, $element) {
     $this->startElement('trans-unit');
     $this->writeAttribute('id', $key);
-    $this->writeAttribute('refname', $key);
+    $this->writeAttribute('resname', $key);
 
     $this->startElement('source');
     $this->writeAttribute('xml:lang', $this->job->source_language);
