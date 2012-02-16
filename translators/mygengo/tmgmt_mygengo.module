@@ -61,8 +61,8 @@ function tmgmt_mygengo_tmgmt_translator_plugin_info() {
     'mygengo' => array(
       'label' => t('myGengo translator'),
       'description' => t('A myGengo translator service.'),
-      'plugin controller class' => 'TMGMTMyGengoPluginController',
-      'ui controller class' => 'TMGMTMyGengoUIController',
+      'plugin controller class' => 'TMGMTMyGengoTranslatorPluginController',
+      'ui controller class' => 'TMGMTMyGengoTranslatorUIController',
     ),
   );
 }

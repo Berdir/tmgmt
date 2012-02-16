@@ -8,7 +8,7 @@
 /**
  * myGengo translation plugin controller.
  */
-class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginController {
+class TMGMTMyGengoTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
    * Translation service URL.
