@@ -183,8 +183,8 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(200, $response->code);
 
     $this->drupalLogout();
-    // @todo: Enable this check once permission checks for jobs are in place.
-    //$this->assertEqual(403, $response->code);
+    // Verify that access is now protected.
+    $this->assertEqual(403, $response->code);
   }
 
   protected function importFile($translated_file, $translated_text, TMGMTJob $job) {
