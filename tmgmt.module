@@ -153,8 +153,6 @@ function tmgmt_entity_info() {
     'entity class' => 'TMGMTTranslator',
     'base table' => 'tmgmt_translator',
     'exportable' => TRUE,
-    // @todo: Remove the module_exists() check once http://drupal.org/node/1436920 has been commited.
-    'entity cache' => module_exists('entitycache'),
     'access callback' => 'tmgmt_translator_access',
     'entity keys' => array(
       'id' => 'tid',
@@ -162,6 +160,11 @@ function tmgmt_entity_info() {
       'label' => 'label',
     ),
   );
+  // Make use of the entity cache module if it is enabled.
+  if (module_exists('entitycache')) {
+    $info['tmgmt_translator']['entity cache'] = TRUE;
+    $info['tmgmt_translator']['field cache'] = FALSE;
+  }
   return $info;
 }
 
