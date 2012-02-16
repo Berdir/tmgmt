@@ -197,6 +197,7 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
 
     // Make sure the translations have been imported correctly.
     $this->assertNoText(t('In progress'));
+    debug($this->drupalGetContent());
     $this->assertText(t('Needs review'));
 
     // Review both items.
@@ -217,7 +218,7 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
       $this->assertText($value);
     }
     $this->drupalPost(NULL, array(), t('Accept'));
-
+    debug($this->drupalGetContent());
     $this->assertText(t('Accepted'));
     $this->assertText(t('Finished'));
     $this->assertNoText(t('Needs review'));
