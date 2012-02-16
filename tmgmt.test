@@ -26,7 +26,7 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
 
     $this->default_translator = tmgmt_translator_load('test_translator');
 
-    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
+    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy', 'administer tmgmt'));
   }
 
   /**
