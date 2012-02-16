@@ -202,13 +202,15 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
   /**
    * Check whether this service can handle a particular translation job.
    *
+   * @param TMGMTTranslator $translator
+   *   The TMGMTTranslator entity that should handle the translation of the job.
    * @param TMGMTJob $job
    *   The TMGMTJob entity that should be translated.
    *
    * @return boolean
    *   TRUE if the job can be processed and translated, FALSE otherwise.
    */
-  public function canTranslate(TMGMTJob $job);
+  public function canTranslate(TMGMTTranslator $translator, TMGMTJob $job);
 
   /**
    * Returns all available target languages that are supported by this service
@@ -278,14 +280,12 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
    */
-  public function canTranslate(TMGMTJob $job) {
+  public function canTranslate(TMGMTTranslator $translator, TMGMTJob $job) {
     // The job is only translatable if the translator is available too.
-    if ($translator = $job->getTranslator()) {
-      if ($this->isAvailable($translator) && array_key_exists($job->target_language, $translator->getSupportedTargetLanguages($job->source_language))) {
-        // We can only translate this job if the target language of the job is in
-        // one of the supported languages.
-        return TRUE;
-      }
+    if ($this->isAvailable($translator) && array_key_exists($job->target_language, $translator->getSupportedTargetLanguages($job->source_language))) {
+      // We can only translate this job if the target language of the job is in
+      // one of the supported languages.
+      return TRUE;
     }
     return FALSE;
   }

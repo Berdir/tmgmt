@@ -66,7 +66,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   /**
    * Overrides TMGMTDefaultTranslatorPluginController::requestTranslation().
    */
-  function requestTranslation(TMGMTJob $job) {
+  public function requestTranslation(TMGMTJob $job) {
     // Add a debug message.
     $job->addMessage('Test translator called.', array(), 'debug');
 
@@ -102,11 +102,11 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   /**
    * Overrides TMGMTDefaultTranslatorPluginController::canTranslate().
    */
-  function canTranslate(TMGMTJob $job) {
+  public function canTranslate(TMGMTTranslator $translator, TMGMTJob $job) {
     if (isset($job->settings['action']) && $job->settings['action'] == 'not_translatable') {
       return FALSE;
     }
-    return parent::canTranslate($job);
+    return parent::canTranslate($translator, $job);
   }
 
   /**

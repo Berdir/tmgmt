@@ -8,24 +8,16 @@
 class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
-   * It can 'translate' any job
-   */
-  function canTranslate(TMGMTJob $job) {
-    parent::canTranslate($job);
-    return TRUE;
-  }
-
-  /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
-  function requestTranslation(TMGMTJob $job) {
+  public function requestTranslation(TMGMTJob $job) {
     $job->submitted('Job queued for local translation.');
   }
 
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
    */
-  function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $query = db_select('tmgmt_local_user', 'target')
       ->fields('target', array('language'))
       ->distinct();

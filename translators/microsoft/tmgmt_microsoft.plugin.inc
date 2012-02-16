@@ -40,8 +40,8 @@ class TMGMTMicrosoftTranslatorPluginController extends TMGMTDefaultTranslatorPlu
   /**
    * Overrides TMGMTDefaultTranslatorPluginController::canTranslate().
    */
-  public function canTranslate(TMGMTJob $job) {
-    if (!parent::canTranslate($job)) {
+  public function canTranslate(TMGMTTranslator $translator, TMGMTJob $job) {
+    if (!parent::canTranslate($translator, $job)) {
       return FALSE;
     }
     foreach (array_filter(tmgmt_flatten_data($job->getSourceData()), '_tmgmt_filter_data') as $value) {

@@ -666,21 +666,20 @@ function tmgmt_translator_load_multiple($names = array()) {
 }
 
 /**
- * Loads all translators that are available for the given language combination.
+ * Loads all translators that are available and, if a job is given, support the
+ * translation of that job in its current configuration.
  *
- * @param $source_language
- *   The source language.
- * @param $target_language
- *   The target language.
+ * @param TMGMTJob $job
+ *   (Optional) A translation job.
  *
  * @return array
  *   An array of translators with the machine-readable name of the translators
  *   as array keys.
  */
-function tmgmt_translator_load_available($source_language, $target_language) {
+function tmgmt_translator_load_available($job = NULL) {
   $translators = tmgmt_translator_load_multiple(FALSE);
   foreach ($translators as $name => $translator) {
-    if (!$translator->isAvailable() || !array_key_exists($target_language, $translator->getSupportedTargetLanguages($source_language))) {
+    if (!$translator->isAvailable() || (isset($job) && !$translator->canTranslate($job))) {
       unset($translators[$name]);
     }
   }
@@ -826,25 +825,23 @@ function tmgmt_translator_labels() {
 /**
  * Returns a list of flagged translator labels. If a translator is not available
  * it will be suffixed with a short text explaining why it is not available.
- * This can either be because the selected language combination is not supported
- * or because the translator service can't be reached.
+ * This can either be because the selected job configuration is not supported or
+ * because the translator service can't be reached.
  *
- * @param $source_language
- *   The source language.
- * @param $target_language
- *   The target language.
+ * @param TMGMTJob $job
+ *   (Optional) A translation job.
  *
  * @return array
  *   An array of flagged translator labels.
  */
-function tmgmt_translator_labels_flagged($source_language, $target_language) {
+function tmgmt_translator_labels_flagged($job = NULL) {
   $labels = array();
   foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
     if (!$translator->isAvailable()) {
       $labels[$translator->name] = t('@label (not available)', array('@label' => $translator->label()));
     }
-    elseif (!array_key_exists($target_language, $translator->getSupportedTargetLanguages($source_language))) {
-      $labels[$translator->name] = t('@label (not available for this language)', array('@label' => $translator->label()));
+    elseif (isset($job) && !$translator->canTranslate($job)) {
+      $labels[$translator->name] = t('@label (unsupported)', array('@label' => $translator->label()));
     }
     else {
       $labels[$translator->name] = $translator->label();
