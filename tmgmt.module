@@ -407,8 +407,8 @@ function tmgmt_job_create($source_language, $target_language, $uid = NULL, array
  *   TRUE if access is allowed, FALSE otherwise.
  */
 function tmgmt_job_access($op, $job = NULL, $account = NULL) {
-  // Return TRUE in all cases for now :)
-  return TRUE;
+  // @todo: Add fine-grained permissions.
+  return user_access('administer tmgmt');
 }
 
 /**
@@ -427,8 +427,8 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
  *   TRUE if access is allowed, FALSE otherwise.
  */
 function tmgmt_job_item_access($op, $item = NULL, $account = NULL) {
-  // Return TRUE in all cases for now :)
-  return TRUE;
+  // @todo: Add fine-grained permissions.
+  return user_access('administer tmgmt');
 }
 
 /**
@@ -466,8 +466,8 @@ function tmgmt_job_item_review_access(TMGMTJobItem $item, $account = NULL) {
  *   TRUE if access is allowed, FALSE otherwise.
  */
 function tmgmt_message_access($op, $message = NULL, $account = NULL) {
-  // Return TRUE in all cases for now :)
-  return TRUE;
+  // @todo: Add fine-grained permissions.
+  return user_access('administer tmgmt');
 }
 
 /**
