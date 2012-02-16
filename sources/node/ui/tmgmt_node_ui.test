@@ -37,7 +37,8 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
   function testTranslateTabSingleCheckout() {
 
     // Create a user that is allowed to translate nodes.
-    $translater = $this->drupalCreateUser(array('translate content'));
+    // @todo: Use granular permission once available.
+    $translater = $this->drupalCreateUser(array('translate content', 'administer tmgmt'));
     $this->drupalLogin($translater);
 
     // Create an english source node.
@@ -86,7 +87,8 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
    */
   function testTranslateTabMultipeCheckout() {
     // Create a user that is allowed to translate nodes.
-    $translater = $this->drupalCreateUser(array('translate content'));
+    // @todo: Use granular permission once available.
+    $translater = $this->drupalCreateUser(array('translate content', 'administer tmgmt'));
     $this->drupalLogin($translater);
 
     // Create an english source node.
@@ -150,7 +152,8 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $default_translator->save();
 
     // Create a user that is allowed to translate nodes.
-    $translater = $this->drupalCreateUser(array('translate content'));
+    // @todo: Use granular permission once available.
+    $translater = $this->drupalCreateUser(array('translate content', 'administer tmgmt'));
     $this->drupalLogin($translater);
 
     // Create an english source node.
@@ -204,7 +207,8 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $default_translator->save();
 
     // Create a user that is allowed to translate nodes.
-    $translater = $this->drupalCreateUser(array('translate content'));
+    // @todo: Use granular permission once available.
+    $translater = $this->drupalCreateUser(array('translate content', 'administer tmgmt'));
     $this->drupalLogin($translater);
 
     // Create an english source node.

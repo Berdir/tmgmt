@@ -176,15 +176,15 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     $message = reset($messages);
 
     $download_url = $message->variables['!link'];
-    $response = drupal_http_request($download_url);
+    $this->drupalGet($download_url);
     // Verify that the URL is served using the private file system and the
     // access checks work.
     $this->assertTrue(preg_match('|system/files|', $download_url));
-    $this->assertEqual(200, $response->code);
+    $this->assertResponse(200);
 
     $this->drupalLogout();
     // Verify that access is now protected.
-    $this->assertEqual(403, $response->code);
+    $this->assertResponse(403);
   }
 
   protected function importFile($translated_file, $translated_text, TMGMTJob $job) {
