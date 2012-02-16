@@ -13,7 +13,7 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
    */
-  function canTranslate(TMGMTJob $job) {
+  public function canTranslate(TMGMTTranslator $translator, TMGMTJob $job) {
     // Anything can be exported.
     return TRUE;
   }
@@ -21,7 +21,7 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
-  function requestTranslation(TMGMTJob $job) {
+  public function requestTranslation(TMGMTJob $job) {
     $name = "JobID" . $job->tjid;
 
     $export = tmgmt_file_format_controller($job->getSetting('export_format'));

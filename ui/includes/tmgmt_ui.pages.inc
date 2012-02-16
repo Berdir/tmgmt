@@ -288,7 +288,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   }
   // Show a list of translators tagged by availability for the selected source
   // and target language combination.
-  if (!$translators = tmgmt_translator_labels_flagged($job->source_language, $job->target_language)) {
+  if (!$translators = tmgmt_translator_labels_flagged($job)) {
     drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => l(t('configure'), 'admin/config/regional/tmgmt/translators'))), 'warning');
   }
   $preselected_translator = !empty($job->translator) && isset($translators[$job->translator]) ? $job->translator : key($translators);

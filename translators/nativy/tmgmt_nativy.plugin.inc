@@ -21,15 +21,6 @@ class TMGMTNativyTranslatorPluginController extends TMGMTDefaultTranslatorPlugin
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
-   *
-   * We will check are source and target language supported.
-   */
-  public function canTranslate(TMGMTJob $job) {
-    return TRUE;
-  }
-
-  /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    *
    * Here we will acutally query source and get translations.

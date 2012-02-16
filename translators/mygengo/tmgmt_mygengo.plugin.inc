@@ -94,22 +94,6 @@ class TMGMTMyGengoPluginController extends TMGMTDefaultTranslatorPluginControlle
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::canTranslation().
-   *
-   * We will check are source and target language supported.
-   */
-  public function canTranslate(TMGMTJob $job) {
-    $translator = $job->getTranslator();
-    if ($this->isAvailable($translator)) {
-      $targets = $this->getSupportedTargetLanguages($translator, $job->source_language);
-      if (isset($targets[$job->target_language])) {
-        return TRUE;
-      }
-    }
-    return FALSE;
-  }
-
-  /**
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    *
    * Here we will acutally query source and get translations.

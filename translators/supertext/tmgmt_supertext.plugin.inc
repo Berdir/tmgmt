@@ -31,15 +31,6 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
     return FALSE;
   }
 
-  /**
-   * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
-   *
-   * We will check are source and target language supported.
-   */
-  public function canTranslate(TMGMTJob $job) {
-    return TRUE;
-  }
-
   public function generateSupertextOrderObject(TMGMTJob $job){
     $object = new stdClass();
     $object->AccountId = $job->getTranslator()->getSetting('api_account_id');

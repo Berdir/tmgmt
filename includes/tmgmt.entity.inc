@@ -133,7 +133,7 @@ class TMGMTTranslator extends Entity {
    */
   public function canTranslate(TMGMTJob $job) {
     if ($controller = $this->getController()) {
-      return $controller->canTranslate($job);
+      return $controller->canTranslate($this, $job);
     }
     return FALSE;
   }
