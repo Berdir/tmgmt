@@ -142,6 +142,16 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
 
     $this->assertNoText(t('Import translated file'));
 
+    // Create a job, assign to the file translator and delete before attaching
+    // a file.
+    $other_job = $this->createJob();
+    $other_job->translator = $translator->name;
+    $other_job->save();
+    $other_job->delete();
+    // Make sure the file of the other job still exists.
+    $response = drupal_http_request($download_url);
+    $this->assertEqual(200, $response->code);
+
     // Delete the job and then make sure that the file has been deleted.
     $job->delete();
     $response = drupal_http_request($download_url);

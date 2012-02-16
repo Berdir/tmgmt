@@ -142,10 +142,13 @@ function tmgmt_file_tmgmt_job_delete(TMGMTJob $job) {
     ':id' => $job->tjid,
   );
   $result = db_query('SELECT fid FROM {file_usage} WHERE module = :module and type = :type and id = :id', $args);
-  foreach (file_load_multiple($result->fetchCol()) as $file) {
-    file_usage_delete($file, 'tmgmt_file', 'tmgmt_job', $job->tjid);
-    // It is very unlikely that these files are used anywhere else. Delete it.
-    file_delete($file);
+  $fids = $result->fetchCol();
+  if (!empty($fids)) {
+    foreach (file_load_multiple($fids) as $file) {
+      file_usage_delete($file, 'tmgmt_file', 'tmgmt_job', $job->tjid);
+      // It is very unlikely that these files are used anywhere else. Delete it.
+      file_delete($file);
+    }
   }
 }
 
