@@ -184,6 +184,7 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
 
     $this->drupalLogout();
     // Verify that access is now protected.
+    $this->drupalGet($download_url);
     $this->assertResponse(403);
   }
 
