@@ -64,3 +64,55 @@ The first simple translation job using Microsoft's translation service.
 - Check the translated node!
 
 For further options, see the documentation on drupal.org/documentation/modules/tmgmt.
+
+== State of Module ==
+
+This projects consists of many pluggable, independent elements. It is alpha
+quality and not every plugin is in an equal state. The list below aims to give a
+short overview of each translator and source plugin.
+
+The management part itself is working well. It is possible to create and submit
+jobs to various translators, get the translated text back into the system,
+review and approve it. We're still working on the user interfaces, they are
+unfinished and very basic.
+
+==== Sources ====
+
+- Content Translation
+  Plugin and User Interface is working and tested. No User interface to
+  translate multiple content items at once yet.
+
+- Entity Translation
+  The API is working, there is no user interface yet. If you know the entity
+  translation module then we could use your help!
+
+- Internationalization (I18n)
+  Same story, the API works but we're missing a user interface.
+
+=== Translators ===
+
+- Microsoft Translator
+  Machine translation, technically working well but the results are of course of
+  varying quality.
+
+- File translator
+  Allows to export jobs into files and import them once they have been
+  translated. Contains a pluggable system to support various file formats,
+  currently XLIFF and HTML.
+
+- Local Translator
+  Allows to assign translation jobs to local users so that they can translate
+  things in a unified interface with the ability to review it. Currently not
+  working, needs to be adapted.
+
+- myGengo
+  Integrates with http://www.mygengo.com. Initial implementation done, ready for
+  testing.
+
+- Supertext
+  Integrates with http://www.supertext.ch. Development has started, not working
+  yet. Stay tuned!
+
+- Nativy
+  Integrates with http://www.nativy.com/. Initial implementation done but
+  it is currently broken. The integration is also not satisfying yet.
