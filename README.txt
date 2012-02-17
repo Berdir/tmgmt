@@ -67,9 +67,9 @@ For further options, see the documentation on drupal.org/documentation/modules/t
 
 == State of Module ==
 
-This projects consists of many pluggable, independent elements. This project
-is in alpha quality and not every plugin is in an equal state. The list below
-aims to give a short overview of each translator and source plugin.
+This projects consists of many pluggable, independent elements. It is alpha
+quality and not every plugin is in an equal state. The list below aims to give a
+short overview of each translator and source plugin.
 
 The management part itself is working well. It is possible to create and submit
 jobs to various translators, get the translated text back into the system,
@@ -79,7 +79,7 @@ unfinished and very basic.
 ==== Sources ====
 
 - Content Translation
-  Plugin and User Interface is working and is tested. No User interface to
+  Plugin and User Interface is working and tested. No User interface to
   translate multiple content items at once yet.
 
 - Entity Translation
