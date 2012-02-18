@@ -11,8 +11,8 @@ Translation Management Tool was built for Drupal 7. There will be no backport.
 To use Translation Management Tool you need to install and activate the
 following modules:
 
- * Entity API
- * Views
+ * Entity API (latest dev version!)
+ * Views (latest dev version!)
  * Chaos Tools (Required for Views)
  * Views Bulk Operations
  * Content Translation
@@ -24,7 +24,27 @@ following modules:
 Basic concepts
 ------------------
 
-TODO
+With tmgmt installed, the 'translate' tab of a node changes. You can choose 
+one or more languages to translate the node to and 'Request a translation' with 
+the corresponding button. 
+
+A translation job is created for each language chosen. It will run through the 
+following states:
+
+unprocessed     Translation requested in the 'translate' tab of a node.
+                Settings of the job (label set, translator chosen) defined.
+                The job was saved.
+activ           The job is in the process of being translated. Depending on 
+                the chosen translator, the actual translation happens auto-
+                matically or by a human being. 
+                In all cases the job is returned to the job queue for review.
+                When the review is done, the status of the job item goes from
+                'needs review' to 'accepted'. 
+finished        The job has been accepted and the translated node was created
+      
+A job deleted from the list is not visible any more. You can choose to purge 
+jobs automatically from the list after a defined time span. See tmgmt settings.
+				 
 
 Getting started
 ------------------
@@ -52,6 +72,11 @@ The first simple translation job using Microsoft's translation service.
 
   Adjust the label to your liking and get an API key using the provided link in
   the settings. Then save the updated translator.
+  
+- Adjust the Auto Acceptance settings to your liking. To enable it, check the  
+  'Allow translators to automatically accept translations' in the tmgmt settings.
+  You can now choose to accept jobs without review by checking  'Auto accept 
+  finished translations' for each of your tranlators individually.
 
 3) Translate
 
@@ -60,7 +85,9 @@ The first simple translation job using Microsoft's translation service.
 - Once the node has been saved, click on the "Translate" tab.
 - Choose the language you want to translate the node to with the checkbox.
 - Click on 'Request Translation' and the foreign language version of the node
-  will be created immediately.
+  will be created immediately. 
+- If the auto acceptance is not set, find the job in the jobs queue and choose
+  the 'review' link. Accept the translation and the translated node is created.
 - Check the translated node!
 
 For further options, see the documentation on drupal.org/documentation/modules/tmgmt.
