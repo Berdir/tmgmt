@@ -90,7 +90,7 @@ The first simple translation job using Microsoft's translation service.
   the 'review' link. Accept the translation and the translated node is created.
 - Check the translated node!
 
-For further options, see the documentation on drupal.org/documentation/modules/tmgmt.
+For further options, see the documentation on http://drupal.org/node/1445790.
 
 == State of Module ==
 
