@@ -403,6 +403,8 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       '#value' => t('Delete'),
       '#submit' => array('tmgmt_ui_submit_redirect'),
       '#redirect' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/delete',
+      // Don't run validations, so the user can always delete the job.
+      '#limit_validation_errors' => array(),
     );
   }
   // Only show the 'Cancel' button if the job has been submitted to the
