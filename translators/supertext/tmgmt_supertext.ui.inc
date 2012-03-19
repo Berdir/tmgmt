@@ -10,22 +10,52 @@
  */
 class TMGMTSupertextTranslatorUIController extends TMGMTDefaultTranslatorUIController {
 
+	
   /**
    * Overrides TMGMTDefaultTranslatorUIController::settingsForm().
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
-    $form['api_account_id'] = array(
+  watchdog('supertext', 'Job', null);
+  	$plugin = tmgmt_translator_plugin_controller($this->pluginType);
+  	
+    $form['api_username'] = array(
       '#type' => 'textfield',
-      '#title' => t('Supertext API Account Id'),
-      '#default_value' => $translator->getSetting('api_account_id', ''),
-      '#description' => t('Please enter yout supertext API Account Id.'),
+      '#title' => t('Supertext email'),
+      '#default_value' => $translator->getSetting('api_username', ''),
+      '#description' => t('Please enter the email address of your Supertext account. If you don\'t have an account yet, just provide your default email.'),
     );
-    $form['api_password'] = array(
+    $form['api_token'] = array(
       '#type' => 'textfield',
-      '#title' => t('Supertext API password'),
-      '#default_value' => $translator->getSetting('api_password', ''),
-      '#description' => t('Please enter your Supertext API password.'),
+      '#title' => t('Supertext API Token'),
+      '#default_value' => $translator->getSetting('api_token', ''),
+      '#description' => t('Please enter your API Token (You can get it from your !link). Or leave it empty if you just want a quote.', array('!link' => l(t('Supertext Account'),'https://www.supertext.ch/customer/accountsettings.aspx'))),
+    
     );
+    $form['currency'] = array(
+      '#type' => 'select',
+      '#title' => t('Your default currency'),
+      '#options' => array(
+             'EUR' => t('Euro'),
+             'CHF' => t('Swiss Franc'),
+           ),
+      '#default_value' => $translator->getSetting('currency', ''),
+      '#description' => t('In what currency do you wanna see the prices.'),
+    );            
+    //map drupal languages to languages that supertext can translate
+    //e.g. DE -> DE-CH
+    //TODO only make requests if nothing is set and add some caching
+    $languages = language_list();    
+    foreach ($languages as $language) {
+    	//dpm($language);
+    	$mapping = $plugin->getMappedLanguages($language->language);    	
+      $form['language_mapping_'.$language->language] = array(
+        '#type' => 'select',
+        '#title' => t('Select your mapping for '.$language->name),
+        '#options' => $mapping,
+        '#default_value' => $translator->getSetting('language_mapping_'.$language->language, ''),
+        '#description' => t('We need a more exact definition of '.$language->name.'. There are different versions of it.'),
+      );       	
+    }        
     $form['use_sandbox'] = array(
       '#type' => 'checkbox',
       '#title' => t('Use Sandbox'),
@@ -40,13 +70,7 @@ class TMGMTSupertextTranslatorUIController extends TMGMTDefaultTranslatorUIContr
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     $plugin = tmgmt_translator_plugin_controller($this->pluginType);
     $object = $plugin->generateSupertextOrderObject($job);
-    $object->TargetLang = 'de-CH';
-    $options = array(
-      'method' => 'POST',
-      'data' => json_encode($object),
-      'headers' => array('Content-Type' => 'application/json'),
-    );
-    $response = drupal_http_request($this->sandboxURL.'/translation/quote', $options);
+    $response = $plugin->supertextHttpRequest('/translation/quote', $object, $job->getTranslator());
     if ($response->code == "200") {
       $responsedata = json_decode($response->data);
       $settings['supertext-job'] = array(
@@ -85,5 +109,4 @@ class TMGMTSupertextTranslatorUIController extends TMGMTDefaultTranslatorUIContr
       drupal_set_message(t("Could not get quote from Supertext. Error: @error",array('@error' => $response->error)),'error');
     }
   }
-
 }
