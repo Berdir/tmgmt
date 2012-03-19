@@ -27,7 +27,8 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     $export = tmgmt_file_format_controller($job->getSetting('export_format'));
 
     $path = $job->getSetting('scheme') . '://tmgmt_file/' . $name . '.' .  $job->getSetting('export_format');
-    if (file_prepare_directory(dirname($path), FILE_CREATE_DIRECTORY)) {
+    $dirname = dirname($path);
+    if (file_prepare_directory($dirname, FILE_CREATE_DIRECTORY)) {
       $file = file_save_data($export->export($job), $path);
       file_usage_add($file, 'tmgmt_file', 'tmgmt_job', $job->tjid);
       $job->submitted('Exported file can be downloaded <a href="!link">here</a>.', array('!link' => file_create_url($path)));
