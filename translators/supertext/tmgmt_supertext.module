@@ -12,8 +12,9 @@ function tmgmt_supertext_tmgmt_translator_plugin_info() {
   return array(
     'supertext' => array(
       'label' => t('Supertext translator'),
-      'description' => t('A Supertext translator service.'),
+      'description' => t('Supertext translation service.'),
       'plugin controller class' => 'TMGMTSupertextPluginController',
+      'ui controller class' => 'TMGMTSupertextTranslatorUIController',      
     ),
   );
 }
@@ -81,7 +82,7 @@ stdClass Object
 
     [Id] => 14292
     [OrderDate] => 2012-01-22T02:52:12.0000000
-    [OrderTitle] =>
+    [OrderName] =>
     [OrderType] => Adaption
     [OrderTypeId] => 7
     [Password] =>
@@ -107,13 +108,13 @@ if (isset($response['Options'])) {
 function tmgmt_supertext_callback() {
   $input = file_get_contents('php://input');
   $data = json_decode($input);
-  watchdog('supertext', 'DATA.  <br /><pre>!post</pre>', array('!post' => print_r($data, TRUE)));
+  //watchdog('supertext', 'DATA.  <br /><pre>!post</pre>', array('!post' => print_r($data, TRUE)));
 
   $keys = explode(':', $data->ReferenceData);
   $tjid = array_shift($keys);
 
   $job = tmgmt_job_load($tjid);
-  watchdog('supertext', 'JOB.  <br /><pre>!post</pre>', array('!post' => print_r($job, TRUE)));
+  //watchdog('supertext', 'JOB.  <br /><pre>!post</pre>', array('!post' => print_r($job, TRUE)));
 
   $translation = array();
   foreach ($data->Groups as $object_id => $object) {
@@ -127,18 +128,22 @@ function tmgmt_supertext_callback() {
   watchdog('supertext', 'TRANSLATED DATA.  <br /><pre>!post</pre>', array('!post' => print_r($translation, TRUE)));
 
   $job->addTranslatedData($translation);
-  $job->needsReview('Supertext sent us their translation');
+  
+  print t('Job submitted');
+  return NULL; 
 }
 
 /**
  * tmgmt_supertext_callback access check.
  */
 function tmgmt_supertext_access_check() {
+  watchdog('supertext', 'tmgmt_supertext_access_check', null);
+  
   $input = file_get_contents('php://input');
   //watchdog('supertext', 'INPUT.  <br /><pre>!post</pre>', array('!post' => print_r($input, TRUE)));
   try {
     $job = json_decode($input);
-    //watchdog('supertext', 'Job  <br /><pre>!post</pre>', array('!post' => print_r($job, TRUE)));
+    watchdog('supertext', 'Job  <br /><pre>!post</pre>', array('!post' => print_r($job, TRUE)));
     if (isset($job->ReferenceData)) {
       // Check valid hash
       $ref = explode(':', $job->ReferenceData);
