@@ -270,22 +270,32 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   drupal_set_title($job->label() . ' (' . $wrapper->state->label() . ')');
   // Check if the translator entity is completely new or not.
   $old = empty($job->is_new) && $op != 'clone';
-  // Find pre-selected values.
-  foreach (array('source_language', 'target_language') as $key) {
-    // Retrieve a list of available languages per dropdown.
-    $available[$key] = tmgmt_available_languages();
-    // We need this information because we will lock down the language dropdown
-    // fields if these values have been predefined.
-    $preselected[$key] = !empty($job->{$key});
-    $job->{$key} = isset($form_state['values'][$key]) ? $form_state['values'][$key] : $job->{$key};
-  }
-  // Remove impossible combinations so we don't end up with the same source and
+  // Handle source language.
+  $available['source_language'] = tmgmt_available_languages();
+  // We need this information because we will lock down the language dropdown
+  // fields if these values have been predefined.
+  $preselected['source_language'] = !empty($job->source_language);
+  $job->source_language = isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : $job->source_language;
+
+  // Handle target language.
+  $available['target_language'] = tmgmt_available_languages();
+  // We need this information because we will lock down the language dropdown
+  // fields if these values have been predefined.
+  $preselected['target_language'] = $job->isActive();
+  $job->target_language = isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : $job->target_language;
+
+// Remove impossible combinations so we don't end up with the same source and
   // target language in the dropdowns.
   foreach (array('source_language' => 'target_language', 'target_language' => 'source_language') as $key => $opposite) {
     if (!empty($job->{$key})) {
       unset($available[$opposite][$job->{$key}]);
     }
   }
+
+  if (empty($job->target_language)) {
+    $job->target_language = key($available['target_language']);
+  }
+
   // Show a list of translators tagged by availability for the selected source
   // and target language combination.
   if (!$translators = tmgmt_translator_labels_flagged($job)) {

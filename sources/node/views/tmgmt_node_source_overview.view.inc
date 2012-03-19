@@ -163,6 +163,12 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo']['op
     'override_label' => 0,
     'label' => '',
   ),
+  'rules_component::tmgmt_node_ui_request_translation' => array(
+    'selected' => 1,
+    'skip_confirmation' => 1,
+    'override_label' => 0,
+    'label' => '',
+  ),
   'action::node_save_action' => array(
     'selected' => 0,
     'use_queue' => 0,
@@ -193,7 +199,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo']['op
   ),
 );
 $handler->display->display_options['fields']['views_bulk_operations']['vbo']['enable_select_all_pages'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_type'] = '0';
+$handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo']['merge_single_action'] = 0;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo']['force_single'] = 0;
@@ -390,6 +396,28 @@ $handler->display->display_options['filters']['source_translation']['field'] = '
 $handler->display->display_options['filters']['source_translation']['ui_name'] = 'Source translation';
 $handler->display->display_options['filters']['source_translation']['operator'] = '1';
 $handler->display->display_options['filters']['source_translation']['group'] = 1;
+/* Filter criterion: Content translation: Language */
+$handler->display->display_options['filters']['language']['id'] = 'language';
+$handler->display->display_options['filters']['language']['table'] = 'node';
+$handler->display->display_options['filters']['language']['field'] = 'language';
+$handler->display->display_options['filters']['language']['operator'] = 'not in';
+$handler->display->display_options['filters']['language']['value'] = array(
+  'und' => 'und',
+);
+/* Filter criterion: Content translation: Language */
+$handler->display->display_options['filters']['language_1']['id'] = 'language_1';
+$handler->display->display_options['filters']['language_1']['table'] = 'node';
+$handler->display->display_options['filters']['language_1']['field'] = 'language';
+$handler->display->display_options['filters']['language_1']['value'] = array(
+  '***DEFAULT_LANGUAGE***' => '***DEFAULT_LANGUAGE***',
+);
+$handler->display->display_options['filters']['language_1']['exposed'] = TRUE;
+$handler->display->display_options['filters']['language_1']['expose']['operator_id'] = 'language_1_op';
+$handler->display->display_options['filters']['language_1']['expose']['label'] = 'Source Language';
+$handler->display->display_options['filters']['language_1']['expose']['operator'] = 'language_1_op';
+$handler->display->display_options['filters']['language_1']['expose']['identifier'] = 'language_1';
+$handler->display->display_options['filters']['language_1']['expose']['required'] = 1;
+$handler->display->display_options['filters']['language_1']['expose']['reduce'] = 0;
 
 /* Display: Page */
 $handler = $view->new_display('page', 'Page', 'page');
@@ -420,5 +448,6 @@ $translatables['tmgmt_node_source_overview'] = array(
   t('Updated date'),
   t('Published'),
   t('Translatable types'),
+  t('Source Language'),
   t('Page'),
 );

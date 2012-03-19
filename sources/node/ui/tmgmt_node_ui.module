@@ -53,21 +53,6 @@ function tmgmt_node_ui_page_alter(&$page) {
 }
 
 /**
- * Implements hook_node_operations().
- */
-function tmgmt_node_ui_node_operations() {
-  if (module_exists('tmgmt_node')) {
-    $operations = array(
-      'tmgmt_translate' => array(
-        'label' => t('Translate selected content'),
-        'callback' => 'tmgmt_node_ui_translate_node_multiple',
-      ),
-    );
-    return $operations;
-  }
-}
-
-/**
  * Node operations callback for translation multiple nodes.
  */
 function tmgmt_node_ui_translate_node_multiple($nodes) {
