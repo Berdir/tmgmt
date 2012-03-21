@@ -19,10 +19,6 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     // Get all the fields that can be translated and arrange their values into
     // a specific structure.
     $structure = array();
-    debug($node);
-    debug($type);
-    debug(_node_types_build());
-    debug(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));
     $structure['#label'] = node_type_get_name($node);
     $structure['node_title']['#label'] = $type->title_label;
     $structure['node_title']['#text'] = $node->title;
