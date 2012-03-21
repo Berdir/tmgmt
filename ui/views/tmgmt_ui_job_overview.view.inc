@@ -95,39 +95,27 @@ $handler->display->display_options['style_options']['info'] = array(
     'empty_column' => 0,
   ),
 );
-$handler->display->display_options['style_options']['override'] = 1;
-$handler->display->display_options['style_options']['sticky'] = 0;
-$handler->display->display_options['style_options']['empty_table'] = 0;
+/* No results behavior: Global: Text area */
+$handler->display->display_options['empty']['area']['id'] = 'area';
+$handler->display->display_options['empty']['area']['table'] = 'views';
+$handler->display->display_options['empty']['area']['field'] = 'area';
+$handler->display->display_options['empty']['area']['empty'] = FALSE;
+$handler->display->display_options['empty']['area']['content'] = 'There are no translation jobs that match the specified filter criteria.';
+$handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 /* Relationship: Translator */
 $handler->display->display_options['relationships']['translator']['id'] = 'translator';
 $handler->display->display_options['relationships']['translator']['table'] = 'tmgmt_job';
 $handler->display->display_options['relationships']['translator']['field'] = 'translator';
 $handler->display->display_options['relationships']['translator']['ui_name'] = 'Translator';
 $handler->display->display_options['relationships']['translator']['label'] = 'Translator';
-$handler->display->display_options['relationships']['translator']['required'] = 1;
+$handler->display->display_options['relationships']['translator']['required'] = TRUE;
 /* Field: Bulk operations */
 $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
 $handler->display->display_options['fields']['views_bulk_operations']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['views_bulk_operations']['field'] = 'views_bulk_operations';
 $handler->display->display_options['fields']['views_bulk_operations']['ui_name'] = 'Bulk operations';
 $handler->display->display_options['fields']['views_bulk_operations']['label'] = '';
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['external'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['html'] = 0;
 $handler->display->display_options['fields']['views_bulk_operations']['element_label_colon'] = FALSE;
-$handler->display->display_options['fields']['views_bulk_operations']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['hide_empty'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['empty_zero'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['hide_alter_empty'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo']['operations'] = array(
   'action::views_bulk_operations_delete_item' => array(
@@ -191,192 +179,51 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo']['op
 $handler->display->display_options['fields']['views_bulk_operations']['vbo']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_type'] = '0';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_result'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['merge_single_action'] = 0;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo']['force_single'] = 0;
 /* Field: Label */
 $handler->display->display_options['fields']['label']['id'] = 'label';
 $handler->display->display_options['fields']['label']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['label']['field'] = 'label';
 $handler->display->display_options['fields']['label']['ui_name'] = 'Label';
-$handler->display->display_options['fields']['label']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['label']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['label']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['label']['alter']['external'] = 0;
-$handler->display->display_options['fields']['label']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['label']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['label']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['label']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['label']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['label']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['label']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['label']['alter']['html'] = 0;
-$handler->display->display_options['fields']['label']['element_label_colon'] = 1;
-$handler->display->display_options['fields']['label']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['label']['hide_empty'] = 0;
-$handler->display->display_options['fields']['label']['empty_zero'] = 0;
-$handler->display->display_options['fields']['label']['hide_alter_empty'] = 1;
 /* Field: From */
 $handler->display->display_options['fields']['source_language']['id'] = 'source_language';
 $handler->display->display_options['fields']['source_language']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['source_language']['field'] = 'source_language';
 $handler->display->display_options['fields']['source_language']['ui_name'] = 'From';
 $handler->display->display_options['fields']['source_language']['label'] = 'From';
-$handler->display->display_options['fields']['source_language']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['source_language']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['source_language']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['source_language']['alter']['external'] = 0;
-$handler->display->display_options['fields']['source_language']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['source_language']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['source_language']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['source_language']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['source_language']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['source_language']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['source_language']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['source_language']['alter']['html'] = 0;
-$handler->display->display_options['fields']['source_language']['element_label_colon'] = 1;
-$handler->display->display_options['fields']['source_language']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['source_language']['hide_empty'] = 0;
-$handler->display->display_options['fields']['source_language']['empty_zero'] = 0;
-$handler->display->display_options['fields']['source_language']['hide_alter_empty'] = 1;
-$handler->display->display_options['fields']['source_language']['machine_name'] = 0;
 /* Field: To */
 $handler->display->display_options['fields']['target_language']['id'] = 'target_language';
 $handler->display->display_options['fields']['target_language']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['target_language']['field'] = 'target_language';
 $handler->display->display_options['fields']['target_language']['ui_name'] = 'To';
 $handler->display->display_options['fields']['target_language']['label'] = 'To';
-$handler->display->display_options['fields']['target_language']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['target_language']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['target_language']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['target_language']['alter']['external'] = 0;
-$handler->display->display_options['fields']['target_language']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['target_language']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['target_language']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['target_language']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['target_language']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['target_language']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['target_language']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['target_language']['alter']['html'] = 0;
-$handler->display->display_options['fields']['target_language']['element_label_colon'] = 1;
-$handler->display->display_options['fields']['target_language']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['target_language']['hide_empty'] = 0;
-$handler->display->display_options['fields']['target_language']['empty_zero'] = 0;
-$handler->display->display_options['fields']['target_language']['hide_alter_empty'] = 1;
-$handler->display->display_options['fields']['target_language']['machine_name'] = 0;
 /* Field: State */
 $handler->display->display_options['fields']['state']['id'] = 'state';
 $handler->display->display_options['fields']['state']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['state']['field'] = 'state';
 $handler->display->display_options['fields']['state']['ui_name'] = 'State';
-$handler->display->display_options['fields']['state']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['state']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['state']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['state']['alter']['external'] = 0;
-$handler->display->display_options['fields']['state']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['state']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['state']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['state']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['state']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['state']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['state']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['state']['alter']['html'] = 0;
-$handler->display->display_options['fields']['state']['element_label_colon'] = 1;
-$handler->display->display_options['fields']['state']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['state']['hide_empty'] = 0;
-$handler->display->display_options['fields']['state']['empty_zero'] = 0;
-$handler->display->display_options['fields']['state']['hide_alter_empty'] = 1;
 /* Field: Translator */
 $handler->display->display_options['fields']['translator']['id'] = 'translator';
 $handler->display->display_options['fields']['translator']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['translator']['field'] = 'translator';
 $handler->display->display_options['fields']['translator']['ui_name'] = 'Translator';
-$handler->display->display_options['fields']['translator']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['translator']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['translator']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['translator']['alter']['external'] = 0;
-$handler->display->display_options['fields']['translator']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['translator']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['translator']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['translator']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['translator']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['translator']['alter']['more_link'] = 0;
-$handler->display->display_options['fields']['translator']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['translator']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['translator']['alter']['html'] = 0;
-$handler->display->display_options['fields']['translator']['element_label_colon'] = 1;
-$handler->display->display_options['fields']['translator']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['translator']['hide_empty'] = 0;
-$handler->display->display_options['fields']['translator']['empty_zero'] = 0;
-$handler->display->display_options['fields']['translator']['hide_alter_empty'] = 1;
-$handler->display->display_options['fields']['translator']['machine_name'] = 0;
 /* Field: Created */
 $handler->display->display_options['fields']['created']['id'] = 'created';
 $handler->display->display_options['fields']['created']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['created']['field'] = 'created';
 $handler->display->display_options['fields']['created']['ui_name'] = 'Created';
-$handler->display->display_options['fields']['created']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['created']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['created']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['created']['alter']['external'] = 0;
-$handler->display->display_options['fields']['created']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['created']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['created']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['created']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['created']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['created']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['created']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['created']['alter']['html'] = 0;
-$handler->display->display_options['fields']['created']['element_label_colon'] = 1;
-$handler->display->display_options['fields']['created']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['created']['hide_empty'] = 0;
-$handler->display->display_options['fields']['created']['empty_zero'] = 0;
-$handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
 $handler->display->display_options['fields']['created']['date_format'] = 'short';
 /* Field: Changed */
 $handler->display->display_options['fields']['changed']['id'] = 'changed';
 $handler->display->display_options['fields']['changed']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['changed']['field'] = 'changed';
 $handler->display->display_options['fields']['changed']['ui_name'] = 'Changed';
-$handler->display->display_options['fields']['changed']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['external'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['changed']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['changed']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['changed']['alter']['html'] = 0;
-$handler->display->display_options['fields']['changed']['element_label_colon'] = 1;
-$handler->display->display_options['fields']['changed']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['changed']['hide_empty'] = 0;
-$handler->display->display_options['fields']['changed']['empty_zero'] = 0;
-$handler->display->display_options['fields']['changed']['hide_alter_empty'] = 1;
 $handler->display->display_options['fields']['changed']['date_format'] = 'short';
 /* Field: Operations */
 $handler->display->display_options['fields']['operations']['id'] = 'operations';
 $handler->display->display_options['fields']['operations']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['fields']['operations']['ui_name'] = 'Operations';
-$handler->display->display_options['fields']['operations']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['operations']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['operations']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['operations']['alter']['external'] = 0;
-$handler->display->display_options['fields']['operations']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['operations']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['operations']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['operations']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['operations']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['operations']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['operations']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['operations']['alter']['html'] = 0;
-$handler->display->display_options['fields']['operations']['element_label_colon'] = 1;
-$handler->display->display_options['fields']['operations']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['operations']['hide_empty'] = 0;
-$handler->display->display_options['fields']['operations']['empty_zero'] = 0;
-$handler->display->display_options['fields']['operations']['hide_alter_empty'] = 1;
 /* Sort criterion: Changed */
 $handler->display->display_options['sorts']['changed']['id'] = 'changed';
 $handler->display->display_options['sorts']['changed']['table'] = 'tmgmt_job';
@@ -393,7 +240,6 @@ $handler->display->display_options['filters']['state']['expose']['operator_id'] 
 $handler->display->display_options['filters']['state']['expose']['label'] = 'State';
 $handler->display->display_options['filters']['state']['expose']['operator'] = 'state_op';
 $handler->display->display_options['filters']['state']['expose']['identifier'] = 'state';
-$handler->display->display_options['filters']['state']['expose']['reduce'] = 0;
 /* Filter criterion: From */
 $handler->display->display_options['filters']['source_language']['id'] = 'source_language';
 $handler->display->display_options['filters']['source_language']['table'] = 'tmgmt_job';
@@ -404,7 +250,6 @@ $handler->display->display_options['filters']['source_language']['expose']['oper
 $handler->display->display_options['filters']['source_language']['expose']['label'] = 'From';
 $handler->display->display_options['filters']['source_language']['expose']['operator'] = 'source_language_op';
 $handler->display->display_options['filters']['source_language']['expose']['identifier'] = 'from';
-$handler->display->display_options['filters']['source_language']['expose']['reduce'] = 0;
 /* Filter criterion: To */
 $handler->display->display_options['filters']['target_language']['id'] = 'target_language';
 $handler->display->display_options['filters']['target_language']['table'] = 'tmgmt_job';
@@ -415,7 +260,6 @@ $handler->display->display_options['filters']['target_language']['expose']['oper
 $handler->display->display_options['filters']['target_language']['expose']['label'] = 'To';
 $handler->display->display_options['filters']['target_language']['expose']['operator'] = 'target_language_op';
 $handler->display->display_options['filters']['target_language']['expose']['identifier'] = 'to';
-$handler->display->display_options['filters']['target_language']['expose']['reduce'] = 0;
 /* Filter criterion: Translator */
 $handler->display->display_options['filters']['translator']['id'] = 'translator';
 $handler->display->display_options['filters']['translator']['table'] = 'tmgmt_job';
@@ -426,7 +270,6 @@ $handler->display->display_options['filters']['translator']['expose']['operator_
 $handler->display->display_options['filters']['translator']['expose']['label'] = 'Translator';
 $handler->display->display_options['filters']['translator']['expose']['operator'] = 'translator_op';
 $handler->display->display_options['filters']['translator']['expose']['identifier'] = 'translator';
-$handler->display->display_options['filters']['translator']['expose']['reduce'] = 0;
 
 /* Display: Page */
 $handler = $view->new_display('page', 'Page', 'page');
@@ -447,6 +290,7 @@ $translatables['tmgmt_ui_job_overview'] = array(
   t('Items per page'),
   t('- All -'),
   t('Offset'),
+  t('There are no translation jobs that match the specified filter criteria.'),
   t('Translator'),
   t('Label'),
   t('From'),
