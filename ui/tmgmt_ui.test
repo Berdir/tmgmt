@@ -34,7 +34,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
    * @todo This entire test needs to be re-done as add-item is gone.
    */
   function testCheckoutForm() {
-    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
+    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types'));
     $this->drupalLogin($this->admin_user);
     $this->setEnvironment('de');
     $this->setEnvironment('es');
