@@ -22,8 +22,23 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
    */
   function setUp() {
     parent::setUp(array('tmgmt_node', 'translation'));
-    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
+    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types'));
     variable_set('language_content_type_page', TRANSLATION_ENABLED);
+
+    // Copied from standard.install
+    $type = array(
+      'type' => 'page',
+      'name' => st('Basic page'),
+      'base' => 'node_content',
+      'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    );
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+    node_add_body_field($type);
+    node_types_rebuild();
   }
 
   /**
@@ -32,7 +47,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
    * @param string $bundle
    *  The node bundle.
    */
-  function addFields($bundle = 'article') {
+  function addFields($bundle = 'page') {
     $translatables = array(0, 1, 0, 0);
     foreach ($translatables as $value) {
       $field_type = rand(0, 1) ? 'text' : 'text_with_summary';
@@ -60,7 +75,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
   function testNodeSource() {
     $this->drupalLogin($this->admin_user);
     $langcode = 'de';
-    $bundle = 'article';
+    $bundle = 'page';
     $this->setEnvironment($langcode);
     $this->addFields($bundle);
     // Create a node and translate it.

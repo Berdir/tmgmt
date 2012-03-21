@@ -23,8 +23,14 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_entity', 'tmgmt_entity_test'));
+    parent::setUp(array('tmgmt_entity', 'tmgmt_entity_test', 'taxonomy'));
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
+
+    // Create a simple vocabulary.
+    $this->vocabulary = new stdClass();
+    $this->vocabulary->name = $this->randomName();
+    $this->vocabulary->machine_name = strtolower($this->randomName());
+    taxonomy_vocabulary_save($this->vocabulary);
   }
 
   /**
@@ -132,7 +138,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       $term = new stdClass();
       $term->name = $this->randomName();
       $term->description = $this->randomName();
-      $term->vid = 1;
+      $term->vid = $this->vocabulary->vid;
       // Put some values in the new fields.
       foreach ($this->field_names['taxonomy_term'][$bundle] as $field_name) {
         $field_info = field_info_field($field_name);
