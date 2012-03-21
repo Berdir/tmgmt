@@ -6,6 +6,10 @@
  */
 class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
 
+  // @todo: Switch to testing profile.
+  protected $profile = 'standard';
+
+
   /**
    * Implements getInfo().
    */
@@ -21,14 +25,40 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_node', 'translation', 'tmgmt_node_ui'));
+    parent::setUp(array('tmgmt_node', 'translation', 'tmgmt_node_ui', 'block'));
     variable_set('language_content_type_page', TRANSLATION_ENABLED);
 
+    // Create a new admin user with the administer blocks permission.
+    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer tmgmt', 'administer blocks'));
     $this->drupalLogin($this->admin_user);
     $this->setEnvironment('de');
     $this->setEnvironment('fr');
     $this->setEnvironment('es');
     $this->setEnvironment('el');
+
+    /*
+    // @todo Re-enable this when switching to testing profile.
+    // Enable the main page content block for hook_page_alter() to work.
+    $edit = array(
+      'blocks[system_main][region]' => 'content',
+    );
+    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+
+    // Copied from standard.install
+    $type = array(
+      'type' => 'page',
+      'name' => st('Basic page'),
+      'base' => 'node_content',
+      'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    );
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+    node_add_body_field($type);
+    node_types_rebuild();
+    debug(_node_types_build());*/
   }
 
   /**
@@ -282,6 +312,23 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTBaseTestCase {
     $this->setEnvironment('fr');
     $this->setEnvironment('es');
     $this->setEnvironment('el');
+
+    // Copied from standard.install
+    $type = array(
+      'type' => 'page',
+      'name' => st('Basic page'),
+      'base' => 'node_content',
+      'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    );
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+    node_add_body_field($type);
+    node_types_rebuild();
+
+    $this->checkPermissions(array(), TRUE);
 
     variable_set('tmgmt_auto_accept', TRUE);
 
