@@ -161,7 +161,8 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
    */
   public function import($imported_file) {
     // It is not possible to load the file directly with simplexml as it gets
-    // url encoded due to the temporary://. This is a PHP bug.
+    // url encoded due to the temporary://. This is a PHP bug, see
+    // https://bugs.php.net/bug.php?id=61469
     $xml_string = file_get_contents($imported_file);
     $xml = simplexml_load_string($xml_string);
 
@@ -180,7 +181,8 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
    */
   public function validateImport($imported_file) {
     // It is not possible to load the file directly with simplexml as it gets
-    // url encoded due to the temporary://. This is a PHP bug.
+    // url encoded due to the temporary://. This is a PHP bug, see
+    // https://bugs.php.net/bug.php?id=61469
     $xml_string = file_get_contents($imported_file);
     $xml = simplexml_load_string($xml_string);
 
