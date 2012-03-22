@@ -136,7 +136,7 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     $this->assertRaw(t('Import file is from job <a href="@url">@label</a>, import aborted.', array('@url' => url($uri['path']), '@label' => $label)));
 
 
-    $translated_file = 'public://tmgmt_file/translated.xlf';
+    $translated_file = 'public://tmgmt_file/translated file.xlf';
     $xml->asXML($translated_file);
     $this->importFile($translated_file, $translated_text, $job);
 

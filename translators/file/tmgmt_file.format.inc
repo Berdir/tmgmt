@@ -160,7 +160,11 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
    * Implements TMGMTFileExportInterface::import().
    */
   public function import($imported_file) {
-    $xml = simplexml_load_file($imported_file);
+    // It is not possible to load the file directly with simplexml as it gets
+    // url encoded due to the temporary://. This is a PHP bug, see
+    // https://bugs.php.net/bug.php?id=61469
+    $xml_string = file_get_contents($imported_file);
+    $xml = simplexml_load_string($xml_string);
 
     // Register the xliff namespace, required for xpath.
     $xml->registerXPathNamespace('xliff', 'urn:oasis:names:tc:xliff:document:1.2');
@@ -176,7 +180,11 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
    * Implements TMGMTFileExportInterface::validateImport().
    */
   public function validateImport($imported_file) {
-    $xml = simplexml_load_file($imported_file);
+    // It is not possible to load the file directly with simplexml as it gets
+    // url encoded due to the temporary://. This is a PHP bug, see
+    // https://bugs.php.net/bug.php?id=61469
+    $xml_string = file_get_contents($imported_file);
+    $xml = simplexml_load_string($xml_string);
 
     if (!$xml) {
       return FALSE;
