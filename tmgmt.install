@@ -134,13 +134,6 @@ function tmgmt_schema() {
         'size' => 'big',
         'serialize' => TRUE,
       ),
-      'translation' => array(
-        'description' => 'Structured translated data.',
-        'type' => 'text',
-        'not null' => TRUE,
-        'size' => 'big',
-        'serialize' => TRUE,
-      ),
       'changed' => array(
         'description' => 'Changed timestamp.',
         'type' => 'int',
@@ -279,5 +272,45 @@ function tmgmt_schema() {
   $schema['cache_tmgmt'] = drupal_get_schema_unprocessed('system', 'cache');
 
   return $schema;
+}
+
+/**
+ * Merge the content of the 'translation' field into the 'data' field.
+ */
+function tmgmt_update_7000(&$sandbox) {
+  if (!isset($sandbox['progress'])) {
+    $sandbox['progress'] = 0;
+    $sandbox['max'] = db_query('SELECT COUNT(*) FROM {tmgmt_job_item}')->fetchField();
+  }
+
+  $results = db_select('tmgmt_job_item', 'tji')
+    ->fields('tji', array('tjiid', 'data', 'translation'))
+    ->range($sandbox['progress'], 50)
+    ->orderBy('tjiid', 'ASC')
+    ->execute();
+
+  foreach ($results as $item) {
+    foreach (tmgmt_flatten_data($item->translation) as $key => $translation) {
+      if (!empty($item->data)) {
+        $key = explode('][', $key);
+        drupal_array_set_nested_value(unserialize($item->data), array_merge($key, array('#translation')), $translation);
+        db_update('tmgmt_job_item')
+          ->condition('tjiid', $item->tjiid)
+          ->fields(array('data' => serialize($item->data)))
+          ->execute();
+      }
+    }
+
+    $sandbox['progress']++;
+  }
+
+  $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
+}
+
+/**
+ * Remove the 'translation' field from the job item entity.
+ */
+function tmgmt_update_7001() {
+  db_drop_field('tmgmt_job_item', 'translation');
 }
 

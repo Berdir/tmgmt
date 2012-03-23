@@ -108,7 +108,7 @@ function tmgmt_local_translator_job_form_submit($form, &$form_state) {
 function tmgmt_local_translator_job_item_form($form, &$form_state, $job, $item) {
   $form['job'] = array('#type' => 'value', '#value' => $job);
   $form['job_item'] = array('#type' => 'value', '#value' => $item);
-  $data = $item->getSourceData();
+  $data = $item->getData();
   $translation = $item->translation;
   $wrapper_id = 'translate-translate-job-item-' . $item->tjiid;
   $form['text'] = tmgmt_local_translator_job_item_subform($data, $translation);
@@ -177,7 +177,7 @@ function tmgmt_local_translator_job_item_subform($items, $translation) {
  */
 function tmgmt_local_translator_job_item_form_submit($form, &$form_state) {
   $item = $form_state['values']['job_item'];
-  $translation = tmgmt_local_translator_job_item_strings($item->getSourceData(), $form_state['values']['text']);
+  $translation = tmgmt_local_translator_job_item_strings($item->getData(), $form_state['values']['text']);
   if ($translation) {
     $item->addTranslatedData($translation);
     //$job->needsReview();

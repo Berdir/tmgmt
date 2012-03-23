@@ -19,14 +19,12 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
   protected $default_translator;
 
   /**
-   * Overrides SimplenewsTestCase::setUp()
+   * Overrides DrupalWebTestCase::setUp()
    */
   function setUp(array $modules = array()) {
     $modules = array_merge(array('entity', 'tmgmt', 'tmgmt_test'), $modules);
     parent::setUp($modules);
-
     $this->default_translator = tmgmt_translator_load('test_translator');
-
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer tmgmt'));
   }
 
@@ -263,7 +261,6 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $translate_job->requestTranslation();
     $translate_job = tmgmt_job_load($translate_job->tjid);
     foreach ($translate_job->getItems() as $job_item) {
-      /* @var $job_item TMGMTJobItem */
       $this->assertTrue($job_item->isNeedsReview());
     }
 
@@ -290,12 +287,12 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
         // The third item has an explicitly stored data value.
         $expected_text = 'de_Stored data';
       }
-      $this->assertEqual($expected_text, $item->translation['dummy']['deep_nesting']['#text']);
+      $item_data = $item->getData();
+      $this->assertEqual($expected_text, $item_data['dummy']['deep_nesting']['#translation']['#text']);
       $i++;
     }
 
     foreach ($translate_job->getItems() as $job_item) {
-      /* @var $job_item TMGMTJobItem */
       $job_item->acceptTranslation();
     }
 
@@ -341,6 +338,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
  * Test the helper functions in tmgmt.module.
  */
 class TMGMTHelperTestCase extends TMGMTBaseTestCase {
+
   /**
    * Implements getInfo().
    */

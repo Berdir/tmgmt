@@ -44,7 +44,7 @@ class TMGMTMicrosoftTranslatorPluginController extends TMGMTDefaultTranslatorPlu
     if (!parent::canTranslate($translator, $job)) {
       return FALSE;
     }
-    foreach (array_filter(tmgmt_flatten_data($job->getSourceData()), '_tmgmt_filter_data') as $value) {
+    foreach (array_filter(tmgmt_flatten_data($job->getData()), '_tmgmt_filter_data') as $value) {
       // If one of the texts in this job exceeds the max character count the job
       // can't be translated.
       if (drupal_strlen($value['#text']) > $this->maxCharacters) {
@@ -59,7 +59,8 @@ class TMGMTMicrosoftTranslatorPluginController extends TMGMTDefaultTranslatorPlu
    */
   public function requestTranslation(TMGMTJob $job) {
     // Pull the source data array through the job and flatten it.
-    $data = array_filter(tmgmt_flatten_data($job->getSourceData()), '_tmgmt_filter_data');
+    $data = array_filter(tmgmt_flatten_data($job->getData()), '_tmgmt_filter_data');
+    $translation = array();
     foreach ($data as $key => $value) {
       // Query the translator API.
       $result = $this->doRequest($job->getTranslator(), 'Translate', array(
@@ -81,7 +82,7 @@ class TMGMTMicrosoftTranslatorPluginController extends TMGMTDefaultTranslatorPlu
           $dom = new DOMDocument;
           $dom->loadXML($result->data);
           $items = $dom->getElementsByTagName('string');
-          $data[$key]['#text'] = $items->item(0)->nodeValue;
+          $translation[$key]['#text'] = $items->item(0)->nodeValue;
           break;
         case 400:
           $job->rejected('Rejected by Microsoft Translator: !error', array('!error' => $result->data), 'error');
@@ -94,7 +95,7 @@ class TMGMTMicrosoftTranslatorPluginController extends TMGMTDefaultTranslatorPlu
     // The translation job has been successfully submitted.
     $job->submitted('The translation job has been submitted.');
     // Save the translated data through the job.
-    $job->addTranslatedData(tmgmt_unflatten_data($data));
+    $job->addTranslatedData(tmgmt_unflatten_data($translation));
   }
 
   /**

@@ -104,7 +104,7 @@ class TMGMTNativyTranslatorPluginController extends TMGMTDefaultTranslatorPlugin
     $template .= '</description>';
     $template .= "</textblock>\n";
     $data['!langCode'] = $job->source_language;
-    $text = tmgmt_flatten_data($job->getSourceData());
+    $text = tmgmt_flatten_data($job->getData());
     $number = $order = 0;
     foreach ($text as $key => $item) {
       $data['!order'] = $order;

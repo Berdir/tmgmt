@@ -118,7 +118,7 @@ class TMGMTMyGengoTranslatorPluginController extends TMGMTDefaultTranslatorPlugi
   }
 
   public function generateMyGengoTranslationJobArray(TMGMTJob $job, $tier = "machine") {
-    $data = tmgmt_flatten_data($job->getSourceData());
+    $data = tmgmt_flatten_data($job->getData());
 
     $translations = array();
 

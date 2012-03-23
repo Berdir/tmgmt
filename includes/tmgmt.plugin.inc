@@ -79,7 +79,7 @@ interface TMGMTSourcePluginControllerInterface extends TMGMTPluginBaseInterface 
    * @param TMGMTJobItem $job_item
    *   The job item entity.
    *
-   * @see TMGMTJobItem::getSourceData()
+   * @see TMGMTJobItem::getData()
    */
   public function getData(TMGMTJobItem $job_item);
 

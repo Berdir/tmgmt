@@ -28,24 +28,21 @@ function tmgmt_node_tmgmt_source_plugin_info() {
 /**
  * Updates a node translation.
  *
- * @param object $node
+ * @param $node
  *   The translated node object (the target).
- * @param array $translation
+ * @param $data
  *   An array with the structured translated data.
+ * @param $language
+ *   The target language.
  *
  * @see TMGMTNodeSourcePluginController::getData()
  */
-function tmgmt_node_update_node_translation($node, $translation, $language) {
-  foreach ($translation as $name => $values) {
-    // Special case for the node title.
-    if ($name == 'node_title') {
-      $node->title = $values['#text'];
-      continue;
-    }
-    if (!is_array($values)) {
-      continue;
-    }
-    tmgmt_field_populate_object($node, $language, $name, $values);
+function tmgmt_node_update_node_translation($node, $data, $language) {
+  // Special case for the node title.
+  if (isset($data['node_title']['#translation']['#text'])) {
+    $node->title = $data['node_title']['#translation']['#text'];
+    unset($data['node_title']);
   }
+  tmgmt_field_populate_entity($node, $language, $data);
   node_save($node);
 }

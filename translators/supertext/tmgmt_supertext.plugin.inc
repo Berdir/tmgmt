@@ -46,9 +46,9 @@ class TMGMTSupertextPluginController extends TMGMTDefaultTranslatorPluginControl
     $object->Groups = array();
 
     $items = $job->getItems();
-    // @todo check to use $job->getSourceData();
+    // @todo check to use $job->getData();
     foreach ($items as $tjiid => $item) {
-      $itemSourceData = $item->getSourceData();
+      $itemSourceData = $item->getData();
       $fields = tmgmt_flatten_data($itemSourceData);
       $group = new stdClass();
       $group->GroupId = $tjiid;

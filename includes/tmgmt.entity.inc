@@ -213,7 +213,7 @@ class TMGMTTranslator extends Entity {
  *
  * @ingroup tmgmt_job
  */
-class TMGMTJobItem extends Entity implements TMGMTDataProvider {
+class TMGMTJobItem extends Entity {
 
   /**
    * The source plugin that provides the item.
@@ -264,21 +264,12 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    * If additional information is added in the UI, like adding comments, it will
    * also be saved here.
    *
-   * Always use TMGMTJobItem::getSourceData() to load the data, which will use
+   * Always use TMGMTJobItem::getData() to load the data, which will use
    * this property if present and otherwise get it from the source.
    *
    * @var array
    */
   public $data = array();
-
-  /**
-   * The translated data in the same structure.
-   *
-   * Only the parts that actually are translated are present in this array.
-   *
-   * @var array
-   */
-  public $translation = array();
 
   /**
    * Overrides Entity::__construct().
@@ -443,30 +434,36 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *
    * The structure is similar to the form API in the way that it is a possibly
    * nested array with the following properties whose presence indicate that the
-   * current element is a text that might need to be translated.   *
+   * current element is a text that might need to be translated.
+   *
    * - #text: The text to be translated.
-   * - #label: The label that might be shown to the translator.
+   * - #label: (Optional) The label that might be shown to the translator.
    * - #comment: (Optional) A comment with additional information.
-   * - #translate: Either TRUE or FALSE. Only text that has this property set to
-   *   TRUE must be translated.
+   * - #translate: (Optional) If set to FALSE the text will not be translated.
+   * - #translation: The translated data. Set by the translator plugin.
    *
    * The key can be an alphanumeric string.
    *
-   * @param $reset
-   *   (Optional) Whether the data should be regenerated from the source object.
-   *   Defaults to FALSE.
-   *
    * @return array
-   *   A data array structured in the
-   *
-   * @see TMGMTJobItem::getFlattenedData()
+   *   A structured data array.
    */
-  public function getSourceData($reset = FALSE) {
-    if ($reset || empty($this->data)) {
-      $this->data = $this->getSourceController()->getData($this);
+  public function getData() {
+    if (empty($this->data)) {
+      // Load the data from the source if it has not been set yet.
+      $this->data = $this->getSourceData();
       $this->save();
     }
     return $this->data;
+  }
+
+  /**
+   * Loads the structured source data array from the source.
+   */
+  public function getSourceData() {
+    if ($controller = $this->getSourceController()) {
+      return $controller->getData($this);
+    }
+    return FALSE;
   }
 
   /**
@@ -613,10 +610,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
   }
 
   /**
-   * Add translated data to a job item.
-   *
-   * Note: This does not merge existing data which already exists below the
-   * defined key and will replace it.
+   * Recursively writes translated data to the data array of a job item.
    *
    * @param $translation
    *   Nested array of translated data. Can either be a single text entry, the
@@ -625,29 +619,58 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
    *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a nested
    *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
    *   means that it will replace the whole translated data array.
-   *
-   * @return boolean
-   *   TRUE if the translated data could be added, FALSE otherwise.
    */
-  public function addTranslatedData($translation, $key = array()) {
+  protected function addTranslatedDataRecursive($translation, $key = array()) {
     if (empty($key)) {
       $key = array();
     }
     if (!is_array($key)) {
       $key = explode(TMGMT_ARRAY_DELIMITER, $key);
     }
-    if (!is_array($this->translation)) {
-      $this->translation = array();
+    if (isset($translation['#text'])) {
+      $exists = FALSE;
+      drupal_array_get_nested_value($this->data, array_merge($key, array('#text')), $exists);
+      if ($exists) {
+        $translation['#finished'] = TRUE;
+        drupal_array_set_nested_value($this->data, array_merge($key, array('#translation')), $translation);
+      }
+      return;
     }
-    drupal_array_set_nested_value($this->translation, $key, $translation);
+    foreach (element_children($translation) as $item) {
+      $this->addTranslatedDataRecursive($translation[$item], array_merge($key, array($item)));
+    }
+  }
+
+  /**
+   * Adds translated data to a job item.
+   *
+   * @param $translation
+   *   Nested array of translated data. Can either be a single text entry, the
+   *   whole data structure or parts of it.
+   * @param $key
+   *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a nested
+   *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
+   *   means that it will replace the whole translated data array.
+   */
+  public function addTranslatedData($translation, $key = array()) {
+    $this->addTranslatedDataRecursive($translation, $key);
     // Check if the job item has all the translated data that it needs now.
-    if (!array_diff_key(tmgmt_flatten_data($this->getSourceData()), tmgmt_flatten_data($this->translation))) {
+    $data = tmgmt_flatten_data($this->getData());
+    $data = array_filter($data, '_tmgmt_filter_data');
+    $finished = TRUE;
+    foreach ($data as $item) {
+      if (empty($item['#translation']['#finished'])) {
+        $finished = FALSE;
+        break;
+      }
+    }
+    if ($finished) {
       // There are no unfinished elements left.
       $uri = $this->getSourceUri();
       $this->needsReview('The translation for !source is finished and can now be reviewed.', array('!source' => l($this->getSourceLabel(), $uri['path'])));
     }
     else {
-      // We only need to save manually if no no state change was triggered.
+      // We only need to save manually if no state change was triggered.
       $this->save();
     }
   }
@@ -667,20 +690,6 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
     // this point. That means that the plugin has to set the 'accepted' states
     // on its own.
     $controller->saveTranslation($this);
-  }
-
-  /**
-   * Retrieves the translated data from a job item.
-   *
-   * @return
-   *   The array of translated data or FALSE if no translated data has been
-   *   saved yet.
-   */
-  public function getTranslatedData() {
-    if (!empty($this->translation)) {
-      return $this->translation;
-    }
-    return array();
   }
 
   /**
@@ -751,7 +760,7 @@ class TMGMTJobItem extends Entity implements TMGMTDataProvider {
  *
  * @ingroup tmgmt_job
  */
-class TMGMTJob extends Entity implements TMGMTDataProvider {
+class TMGMTJob extends Entity {
 
   /**
    * Translation job identifier.
@@ -1369,10 +1378,10 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
    *   A nested array with the source data where the most upper key is the job
    *   item id.
    */
-  public function getSourceData($reset = FALSE) {
+  public function getData($reset = FALSE) {
     $data = array();
     foreach ($this->getItems() as $key => $item) {
-      $data[$key] = $item->getSourceData($reset);
+      $data[$key] = $item->getData($reset);
     }
     return $data;
   }
@@ -1411,25 +1420,6 @@ class TMGMTJob extends Entity implements TMGMTDataProvider {
         }
       }
     }
-  }
-
-  /**
-   * Retrieves the translated data from a job item.
-   *
-   * @return
-   *   The array of translated data or FALSE if no translated data has been
-   *   saved yet.
-   */
-  public function getTranslatedData() {
-    $data = array();
-    foreach ($this->getItems() as $item) {
-      // Only create an array key if the item actually returned any translated
-      // data.
-      if ($item_data = $item->getTranslatedData()) {
-        $data[$item->tjiid] = $item_data;
-      }
-    }
-    return $data;
   }
 
   /**

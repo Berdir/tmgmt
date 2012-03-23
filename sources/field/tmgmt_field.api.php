@@ -16,6 +16,6 @@
  *
  * @ingroup tmgmt_source
  */
-function hook_tmgmt_source_translation_structure($field_name, $entity, $field_info, $field_instance, $job_item) {
+function hook_tmgmt_source_translation_structure($field_name, $entity_type, $entity, $field_instance) {
 
 }

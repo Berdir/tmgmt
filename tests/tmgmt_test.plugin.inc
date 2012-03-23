@@ -89,12 +89,13 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
       case 'translate':
       default:
         // The dummy translation prefixes strings with the target language.
-        $data = array_filter(tmgmt_flatten_data($job->getSourceData()), '_tmgmt_filter_data');
+        $data = array_filter(tmgmt_flatten_data($job->getData()), '_tmgmt_filter_data');
+        $tdata = array();
         foreach ($data as $key => $value) {
-          $data[$key]['#text'] = $job->target_language . '_' . $value['#text'];
+          $tdata[$key]['#text'] = $job->target_language . '_' . $value['#text'];
         }
         $job->submitted('Test translation created.');
-        $job->addTranslatedData(tmgmt_unflatten_data($data));
+        $job->addTranslatedData(tmgmt_unflatten_data($tdata));
         break;
     }
   }

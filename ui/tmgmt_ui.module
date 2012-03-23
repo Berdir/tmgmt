@@ -343,7 +343,7 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
     '#tree' => TRUE,
   );
   // Recursively build the review form.
-  $form['review'] += _tmgmt_ui_review_form_recursive($form_state, $item->getTranslatedData());
+  $form['review'] += _tmgmt_ui_review_form_recursive($form_state, $item->getData());
   // Add the form actions as well.
   $form['actions']['#type'] = 'actions';
   $form['actions']['accept'] = array(
@@ -399,7 +399,7 @@ function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
 function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   $item = $form_state['item'];
   // Rewrite the submitted data values to #text.
-  _tmgmt_ui_submit_translation_review_data($form_state['values']['review'], $item->translation);
+  _tmgmt_ui_submit_translation_review_data($form_state['values']['review'], $item->getData());
   // First invoke the submit method on the source controller.
   $source = tmgmt_source_ui_controller($item->plugin);
   $source->reviewFormSubmit($form, $form_state, $item);
@@ -434,18 +434,18 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
 /**
  * Helper function for recursively building a review form.
  */
-function _tmgmt_ui_review_form_recursive(&$form_state, $translation) {
+function _tmgmt_ui_review_form_recursive(&$form_state, $data) {
   $form = array();
-  foreach (element_children($translation) as $key) {
-    if (is_array($translation[$key]) && !empty($translation[$key]['#text'])) {
+  foreach (element_children($data) as $key) {
+    if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
       $form[$key] = array(
         '#type' => 'textarea',
-        '#title' => isset($translation[$key]['#label']) ? $translation[$key]['#label'] : t('Unlabelled'),
-        '#default_value' => isset($translation[$key]['#text']) ? $translation[$key]['#text'] : '',
+        '#title' => isset($data[$key]['#label']) ? $data[$key]['#label'] : t('Unlabelled'),
+        '#default_value' => $data[$key]['#translation']['#text'],
       );
     }
-    elseif (is_array($translation[$key])) {
-      $form[$key] = _tmgmt_ui_review_form_recursive($form_state, $translation[$key]);
+    elseif (is_array($data[$key])) {
+      $form[$key] = _tmgmt_ui_review_form_recursive($form_state, $data[$key]);
     }
   }
   return $form;
@@ -464,7 +464,7 @@ function _tmgmt_ui_submit_translation_review_data($values, &$data, $parents = ar
       _tmgmt_ui_submit_translation_review_data($values[$key], $data, array_merge($parents, array($key)));
     }
     else {
-      drupal_array_set_nested_value($data, array_merge($parents, array($key, '#text')), $value);
+      drupal_array_set_nested_value($data, array_merge($parents, array($key, '#translation', '#text')), $value);
     }
   }
 }

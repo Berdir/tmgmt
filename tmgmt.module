@@ -933,11 +933,23 @@ function tmgmt_source_plugin_labels() {
  * @param $plugin
  *   The machine-readable name of a source plugin.
  *
+ * @return array
+ *   The array of translatable item types.
+ *
  * @see TMGMTSourcePluginControllerInterface::getItemTypes()
  */
 function tmgmt_source_translatable_item_types($plugin) {
   $controller = tmgmt_source_plugin_controller($plugin);
   return $controller->getItemTypes();
+}
+
+/**
+ * @param $plugin
+ * @param $item_type
+ * @return bool
+ */
+function tmgmt_source_is_translatable_item_type($plugin, $item_type) {
+  return array_key_exists($item_type, tmgmt_source_translatable_item_types($plugin));
 }
 /**
  * @} End of "addtogroup tmgmt_source".
@@ -1097,7 +1109,7 @@ function tmgmt_unflatten_data($flattened_data) {
  * Array filter callback for filtering untranslatable source data elements.
  */
 function _tmgmt_filter_data($value) {
-  return !(empty($value) || (isset($value['#translate']) && $value['#translate'] === FALSE));
+  return !(empty($value['#text']) || (isset($value['#translate']) && $value['#translate'] === FALSE));
 }
 
 /**

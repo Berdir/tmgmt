@@ -63,7 +63,7 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
     $this->writeElement('note', $item->getSourceLabel());
 
     // @todo: Write in nested groups instead of flattening it.
-    $data = array_filter(tmgmt_flatten_data($item->getSourceData()), '_tmgmt_filter_data');
+    $data = array_filter(tmgmt_flatten_data($item->getData()), '_tmgmt_filter_data');
     foreach ($data as $key => $element) {
       $this->addTransUnit($item->tjiid . '][' . $key, $element);
     }
@@ -251,7 +251,7 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
   public function export(TMGMTJob $job) {
     $items = array();
     foreach ($job->getItems() as $item) {
-      $data = array_filter(tmgmt_flatten_data($item->getSourceData()), '_tmgmt_filter_data');
+      $data = array_filter(tmgmt_flatten_data($item->getData()), '_tmgmt_filter_data');
       foreach ($data as $key => $value) {
         $items[$item->tjiid][$this->encodeIdSafeBase64($item->tjiid . '][' . $key)] = $value;
       }

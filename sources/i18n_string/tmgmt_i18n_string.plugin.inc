@@ -35,8 +35,11 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
    */
   public function saveTranslation(TMGMTJobItem $job_item) {
     $job = tmgmt_job_load($job_item->tjid);
-    foreach ($job_item->translation as $i18n_string => $translation) {
-      i18n_string_translation_update($i18n_string, $translation['#text'], $job->target_language);
+    $data = tmgmt_flatten_data($job_item->getData(), '_tmgmt_filter_data');
+    foreach ($data as $i18n_string => $item) {
+      if (isset($item['#translation']['#text'])) {
+        i18n_string_translation_update($i18n_string, $item['#translation']['#text'], $job->target_language);
+      }
     }
     return TRUE;
   }
