@@ -7,6 +7,14 @@
 
 class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginController {
 
+  public function getLabel(TMGMTJobItem $job_item) {
+    return entity_label($job_item->item_type, entity_load_single($job_item->item_type, $job_item->item_id));
+  }
+
+  public function getUri(TMGMTJobItem $job_item) {
+    $uri = entity_label($job_item->item_type, entity_load_single($job_item->item_type, $job_item->item_id));
+  }
+
   /**
    * Implements TMGMTEntitySourcePluginController::getData().
    *

@@ -40,14 +40,10 @@ function tmgmt_node_ui_admin_paths() {
  */
 function tmgmt_node_ui_page_alter(&$page) {
   // Translation tabs for nodes.
-  if (module_exists('tmgmt_node') && ($node = menu_get_object())) {
+  if ($node = menu_get_object()) {
     if (isset($page['content']['system_main']['translation_node_overview'])) {
       module_load_include('inc', 'tmgmt_node_ui', 'tmgmt_node_ui.pages');
       $page['content']['system_main']['translation_node_overview'] = drupal_get_form('tmgmt_node_ui_node_form', $node, $page['content']['system_main']['translation_node_overview']);
-    }
-    elseif (isset($page['content']['system_main']['entity_translation_overview'])) {
-      module_load_include('inc', 'tmgmt_node_ui', 'tmgmt_node_ui.pages');
-      $page['content']['system_main']['entity_translation_overview'] = drupal_get_form('tmgmt_node_ui_node_form', $node, $page['content']['system_main']['entity_translation_overview']);
     }
   }
 }

@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Main module file for the translation management entity source plugin user
+ * interface.
+ */
+
+/**
+ * Implements hook_page_alter().
+ */
+function tmgmt_entity_ui_page_alter(&$page) {
+  // Translation tabs for nodes.
+  if (isset($page['content']['system_main']['entity_translation_overview'])) {
+    module_load_include('inc', 'tmgmt_entity_ui', 'tmgmt_entity_ui.pages');
+    $page['content']['system_main']['entity_translation_overview'] = drupal_get_form('tmgmt_entity_ui_translate_form', menu_get_object(), $page['content']['system_main']['entity_translation_overview']);
+  }
+}
