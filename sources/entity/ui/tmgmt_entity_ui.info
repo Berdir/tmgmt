@@ -8,8 +8,5 @@ dependencies[] = tmgmt_ui
 dependencies[] = views_bulk_operations
 dependencies[] = entity_translation
 
-;files[] = tmgmt_entity_ui.test
+files[] = tmgmt_entity_ui.test
 
-; Views handlers
-;files[] = views/tmgmt_node_ui_handler_filter_node_translatable_types.inc
-;files[] = views/tmgmt_node_ui_handler_field_jobs.inc

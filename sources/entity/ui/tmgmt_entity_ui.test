@@ -1,0 +1,255 @@
+<?php
+
+/**
+ * Basic Node Source tests.
+ *
+ */
+class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
+
+  // @todo: Switch to testing profile.
+  protected $profile = 'standard';
+
+
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => t('Entity Source UI tests'),
+      'description' => t('Tests the user interface for entity translation sources.'),
+      'group' => t('Translation Management'),
+      'dependencies' => array('entity_translation'),
+    );
+  }
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp() {
+    parent::setUp(array('tmgmt_entity', 'tmgmt_entity_ui', 'block', 'entity_translation'));
+    variable_set('language_content_type_page', ENTITY_TRANSLATION_ENABLED);
+    variable_set('language_content_type_article', ENTITY_TRANSLATION_ENABLED);
+
+
+    // Create a new admin user with the administer blocks permission.
+    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer tmgmt', 'administer blocks', 'administer entity translation', 'toggle field translatability'));
+    $this->drupalLogin($this->admin_user);
+    $this->setEnvironment('de');
+    $this->setEnvironment('fr');
+    $this->setEnvironment('es');
+    $this->setEnvironment('el');
+
+    variable_set('tmgmt_auto_accept', TRUE);
+
+    // Allow auto-accept.
+    $default_translator = tmgmt_translator_load('test_translator');
+    $default_translator->settings = array(
+      'auto_accept' => TRUE,
+    );
+    $default_translator->save();
+
+    // Change body field to be translatable.
+    $body = field_info_field('body');
+    $body['translatable'] = TRUE;
+    field_update_field($body);
+
+    // Enable path locale detection.
+    $edit = array(
+      'language[enabled][locale-url]' => TRUE,
+      'language_content[enabled][locale-interface]' => TRUE,
+    );
+    $this->drupalPost('admin/config/regional/language/configure', $edit, t('Save settings'));
+
+    /*
+    // @todo Re-enable this when switching to testing profile.
+    // Enable the main page content block for hook_page_alter() to work.
+    $edit = array(
+      'blocks[system_main][region]' => 'content',
+    );
+    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+
+    // Copied from standard.install
+    $type = array(
+      'type' => 'page',
+      'name' => st('Basic page'),
+      'base' => 'node_content',
+      'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    );
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+    node_add_body_field($type);
+    node_types_rebuild();
+    debug(_node_types_build());*/
+  }
+
+  /**
+   * Test the translate tab for a single checkout.
+   */
+  function dtestNodeTranslateTabSingleCheckout() {
+
+    // Create a user that is allowed to translate nodes.
+    // @todo: Use granular permission once available.
+    $translater = $this->drupalCreateUser(array('translate node entities', 'administer tmgmt'));
+    $this->drupalLogin($translater);
+
+    // Create an english source node.
+    $node = $this->drupalCreateNode(array('type' => 'page', 'language' => 'en', 'body' => array('en' => array(array()))));
+
+    // Go to the translate tab.
+    $this->drupalGet('node/' . $node->nid);
+    $this->clickLink('Translate');
+
+    // Assert some basic strings on that page.
+    $this->assertText(t('Translations of @title', array('@title' => $node->title)));
+    $this->assertText(t('Pending Translations'));
+
+    // Request a translation for german.
+    $edit = array(
+      'languages[de]' => TRUE,
+    );
+    $this->drupalPost(NULL, $edit, t('Request translation'));
+
+    // Verify that we are on the translate tab.
+    $this->assertText(t('One job needs to be checked out.'));
+    $this->assertText(t('Translation for @title', array('@title' => $node->title)));
+
+    // Submit.
+    $this->drupalPost(NULL, array(), t('Submit to translator'));
+
+    // Make sure that we're back on the translate tab.
+    $this->assertEqual(url('node/' . $node->nid . '/translate', array('absolute' => TRUE)), $this->getUrl());
+    $this->assertText(t('Test translation created.'));
+    $this->assertText(t('The translation for @title is finished and can now be reviewed.', array('@title' => $node->title)));
+
+    // German node should now be listed and be clickable.
+    // @todo Improve detection of the link, e.g. use xpath on the table or the
+    // title module to get a better title.
+    $this->clickLink('view', 1);
+    $this->assertText('de_' . $node->body['en'][0]['value']);
+  }
+
+  /**
+   * Test the translate tab for a single checkout.
+   */
+  function dtestNodeTranslateTabMultipeCheckout() {
+    // Create a user that is allowed to translate nodes.
+    // @todo: Use granular permission once available.
+    $translater = $this->drupalCreateUser(array('translate node entities', 'administer tmgmt'));
+    $this->drupalLogin($translater);
+
+    // Create an english source node.
+    $node = $this->drupalCreateNode(array('type' => 'page', 'language' => 'en', 'body' => array('en' => array(array()))));
+
+    // Go to the translate tab.
+    $this->drupalGet('node/' . $node->nid);
+    $this->clickLink('Translate');
+
+    // Assert some basic strings on that page.
+    $this->assertText(t('Translations of @title', array('@title' => $node->title)));
+    $this->assertText(t('Pending Translations'));
+
+    // Request a translation for german.
+    $edit = array(
+      'languages[de]' => TRUE,
+      'languages[es]' => TRUE,
+    );
+    $this->drupalPost(NULL, $edit, t('Request translation'));
+
+    // Verify that we are on the translate tab.
+    $this->assertText(t('2 jobs need to be checked out.'));
+
+    // Submit all jobs.
+    $this->assertText(t('Translation for @title', array('@title' => $node->title)));
+    $this->drupalPost(NULL, array(), t('Submit to translator and continue'));
+    $this->assertText(t('Translation for @title', array('@title' => $node->title)));
+    $this->drupalPost(NULL, array(), t('Submit to translator'));
+
+    // Make sure that we're back on the translate tab.
+    $this->assertEqual(url('node/' . $node->nid . '/translate', array('absolute' => TRUE)), $this->getUrl());
+    $this->assertText(t('Test translation created.'));
+    $this->assertText(t('The translation for @title is finished and can now be reviewed.', array('@title' => $node->title)));
+
+    // Translated nodes should now be listed and be clickable.
+    // @todo Use links on translate tab.
+    $this->drupalGet('de/node/' . $node->nid);
+    $this->assertText('de_' . $node->body['en'][0]['value']);
+
+    $this->drupalGet('es/node/' . $node->nid);
+    $this->assertText('es_' . $node->body['en'][0]['value']);
+  }
+
+  /**
+   * Test translating comments.
+   */
+  function testCommentTranslateTab() {
+    // Enable comment translation.
+    $edit = array(
+      'entity_translation_entity_types[comment]' => TRUE
+    );
+    $this->drupalPost('admin/config/regional/entity_translation', $edit, t('Save configuration'));
+
+    // Change comment_body field to be translatable.
+    $comment_body = field_info_field('comment_body');
+    $comment_body['translatable'] = TRUE;
+    field_update_field($comment_body);
+
+    // Create a user that is allowed to translate comments.
+    // @todo: Use granular permission once available.
+    $translater = $this->drupalCreateUser(array('translate comment entities', 'administer tmgmt', 'post comments', 'skip comment approval', 'edit own comments'));
+    $this->drupalLogin($translater);
+
+    // Create an english source term.
+    $node = $this->drupalCreateNode(array('type' => 'article', 'language' => 'en', 'body' => array('en' => array(array()))));
+
+    // Add a comment.
+    $this->drupalGet('node/' . $node->nid);
+    $edit = array(
+      'subject' => $this->randomName(),
+      'comment_body[en][0][value]' => $this->randomName(),
+    );
+    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->assertText(t('Your comment has been posted.'));
+
+    // Go to the translate tab.
+    $this->clickLink('edit');
+    $this->assertTrue(preg_match('|comment/(\d+)/edit$|', $this->getUrl(), $matches), 'Comment found');
+    $comment = comment_load($matches[1]);
+    $this->clickLink('Translate');
+
+    // Assert some basic strings on that page.
+    $this->assertText(t('Translations of @title', array('@title' => $comment->subject)));
+    $this->assertText(t('Pending Translations'));
+
+    // Request a translation for german.
+    $edit = array(
+      'languages[de]' => TRUE,
+      'languages[es]' => TRUE,
+    );
+    $this->drupalPost(NULL, $edit, t('Request translation'));
+
+    // Verify that we are on the translate tab.
+    $this->assertText(t('2 jobs need to be checked out.'));
+
+    // Submit all jobs.
+    $this->assertText(t('Translation for @title', array('@title' => $comment->subject)));
+    $this->drupalPost(NULL, array(), t('Submit to translator and continue'));
+    $this->assertText(t('Translation for @title', array('@title' => $comment->subject)));
+    $this->drupalPost(NULL, array(), t('Submit to translator'));
+
+    // Make sure that we're back on the translate tab.
+    $this->assertEqual(url('comment/' . $comment->cid . '/translate', array('absolute' => TRUE)), $this->getUrl());
+    $this->assertText(t('Test translation created.'));
+    $this->assertText(t('The translation for @title is finished and can now be reviewed.', array('@title' => $comment->subject)));
+
+    // @todo Use links on translate tab.
+    $this->drupalGet('de/comment/' . $comment->cid);
+    $this->assertText('de_' . $comment->comment_body['en'][0]['value']);
+
+    // @todo Use links on translate tab.
+    $this->drupalGet('es/node/' . $comment->cid);
+    $this->assertText('es_' . $comment->comment_body['en'][0]['value']);
+  }
+}

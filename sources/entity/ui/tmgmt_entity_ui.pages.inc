@@ -7,24 +7,28 @@
  */
 
 /**
- * Node translation overview form. This form overrides the Drupal core or i18n
- * Content Translation page with a tableselect form.
+ * Entity translation overview form.
  */
-function tmgmt_entity_ui_translate_form($form, &$form_state, $entity, $original) {
-  // Store the node in the form state so we can easily create the job in the
+function tmgmt_entity_ui_translate_form($form, &$form_state, $build) {
+  // Store the entity in the form state so we can easily create the job in the
   // submit handler.
-  $form_state['entity'] = $entity;
+  $form_state['entity_type'] = $build['#entity_type'];
+  $form_state['entity'] = $build['#entity'];
+
+  $overview = $build['entity_translation_overview'];
+
   // Inject our additional column into the header.
-  array_splice($original['#header'], -1, 0, array(t('Pending Translations')));
+  array_splice($overview['#header'], -1, 0, array(t('Pending Translations')));
   // Make this a tableselect form.
   $form['languages'] = array(
     '#type' => 'tableselect',
-    '#header' => $original['#header'],
+    '#header' => $overview['#header'],
     '#options' => array(),
   );
   $languages = language_list();
   // Check if there is a job / job item that references this translation.
-  $items = tmgmt_job_item_load_latest('entity', 'node', $entity->nid, $entity->language);
+  list($id, $vid, $bundle) = entity_extract_ids($form_state['entity_type'], $form_state['entity']);
+  $items = tmgmt_job_item_load_latest('entity', $form_state['entity_type'], $id, $form_state['entity']->language);
   foreach ($languages as $langcode => $language) {
     if ($langcode == LANGUAGE_NONE) {
       // Never show language neutral on the overview.
@@ -32,8 +36,8 @@ function tmgmt_entity_ui_translate_form($form, &$form_state, $entity, $original)
     }
     // Since the keys are numeric and in the same order we can shift one element
     // after the other from the original non-form rows.
-    $option = array_shift($original['#rows']);
-    if ($langcode == $entity->language) {
+    $option = array_shift($overview['#rows']);
+    if ($langcode == $form_state['entity']->language) {
       $additional = '<strong>' . t('Source') . '</strong>';
       // This is the source object so we disable the checkbox for this row.
       $form['languages'][$langcode] = array(
@@ -78,7 +82,7 @@ function tmgmt_entity_ui_translate_form($form, &$form_state, $entity, $original)
 }
 
 /**
- * Validation callback for the node translation overview form.
+ * Validation callback for the entity translation overview form.
  */
 function tmgmt_entity_ui_translate_form_validate($form, &$form_state) {
   $selected = array_filter($form_state['values']['languages']);
@@ -88,17 +92,19 @@ function tmgmt_entity_ui_translate_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit callback for the node translation overview form.
+ * Submit callback for the entity translation overview form.
  */
 function tmgmt_entity_ui_translate_form_submit($form, &$form_state) {
   $entity = $form_state['entity'];
+  $entity_type = $form_state['entity_type'];
+  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
   $values = $form_state['values'];
   $jobs = array();
   foreach (array_keys(array_filter($values['languages'])) as $langcode) {
     // Create the job object.
     $job = tmgmt_job_create($entity->language, $langcode, $GLOBALS['user']->uid);
     // Add the job item.
-    $job->addItem('entity', 'node', $entity->nid);
+    $job->addItem('entity', $entity_type, $id);
     // Append this job to the array of created jobs so we can redirect the user
     // to a multistep checkout form if necessary.
     $jobs[$job->tjid] = $job;
