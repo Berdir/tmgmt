@@ -398,8 +398,6 @@ function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
  */
 function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   $item = $form_state['item'];
-  // Rewrite the submitted data values to #text.
-  _tmgmt_ui_submit_translation_review_data($form_state['values']['review'], $item->getData());
   // First invoke the submit method on the source controller.
   $source = tmgmt_source_ui_controller($item->plugin);
   $source->reviewFormSubmit($form, $form_state, $item);
@@ -449,24 +447,6 @@ function _tmgmt_ui_review_form_recursive(&$form_state, $data) {
     }
   }
   return $form;
-}
-
-/**
- * Helper function for recursively updating the translated data values in a job
- * item when submitted in the review form.
- *
- * This workaround is necessary because we can't use '#text' as an array key in
- * our FAPI structure.
- */
-function _tmgmt_ui_submit_translation_review_data($values, &$data, $parents = array()) {
-  foreach ($values as $key => $value) {
-    if (is_array($value)) {
-      _tmgmt_ui_submit_translation_review_data($values[$key], $data, array_merge($parents, array($key)));
-    }
-    else {
-      drupal_array_set_nested_value($data, array_merge($parents, array($key, '#translation', '#text')), $value);
-    }
-  }
 }
 
 /**
