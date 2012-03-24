@@ -173,7 +173,9 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
       foreach (element_children($data[$field_name]) as $delta) {
         foreach (element_children($data[$field_name][$delta]) as $column) {
           $column_value = $data[$field_name][$delta][$column];
-          $this->assertEqual($node->{$field_name}[$langcode][$delta][$column], $column_value['#translation']['#text'], t('The translatable field %field:%delta has been populated with the proper translated data.', array('%field' => $field_name, 'delta' => $delta)));
+          if (!isset($column_value['#translate']) || $column_value['#translate']) {
+            $this->assertEqual($node->{$field_name}[$langcode][$delta][$column], $column_value['#translation']['#text'], t('The translatable field %field:%delta has been populated with the proper translated data.', array('%field' => $field_name, 'delta' => $delta)));
+          }
         }
       }
     }
