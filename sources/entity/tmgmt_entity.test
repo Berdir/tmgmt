@@ -16,6 +16,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       'name' => t('Entity Source tests'),
       'description' => t('Exporting source data from entities and saving translations back to entities.'),
       'group' => t('Translation Management'),
+      'dependencies' => array('entity_translation'),
     );
   }
 
@@ -23,7 +24,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_entity', 'tmgmt_entity_test', 'taxonomy'));
+    parent::setUp(array('tmgmt_entity', 'tmgmt_entity_test', 'taxonomy', 'entity_translation'));
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy'));
 
     // Create a simple vocabulary.
@@ -127,6 +128,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     // Check the translated job items.
     foreach ($job->getItems() as $item) {
       $item->acceptTranslation();
+      $this->assertTrue($item->isAccepted());
       $entity = entity_load_single($item->item_type, $item->item_id);
       $data = $item->getData();
       $this->checkTranslatedData($entity, $data, 'de');

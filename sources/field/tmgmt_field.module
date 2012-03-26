@@ -23,6 +23,12 @@ function text_tmgmt_source_translation_structure($field_name, $entity_type, $ent
         '#text' => $value['value'],
         '#translate' => TRUE,
       );
+      // Add format.
+      $structure[$delta]['format'] = array(
+        '#label' => '',
+        '#text' => $value['format'],
+        '#translate' => FALSE,
+      );
       if ($field_info['type'] == 'text_with_summary' && !empty($value['summary'])) {
         $structure[$delta]['summary'] = array(
           '#label' => t('Summary'),
@@ -76,6 +82,11 @@ function tmgmt_field_populate_entity($entity, $language, $data) {
         foreach (element_children($data[$field_name][$delta]) as $column) {
           if (isset($data[$field_name][$delta][$column]['#translation']['#text'])) {
             $columns[$column] = $data[$field_name][$delta][$column]['#translation']['#text'];
+          }
+          // For elements which are not translatable, keep using the original
+          // value.
+          elseif (isset($data[$field_name][$delta][$column]['#translate']) && $data[$field_name][$delta][$column]['#translate'] == FALSE) {
+            $columns[$column] = $data[$field_name][$delta][$column]['#text'];
           }
         }
         $langcode = $info['translatable'] ? $language : LANGUAGE_NONE;

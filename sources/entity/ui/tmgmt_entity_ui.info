@@ -1,0 +1,12 @@
+name = Entity Source User Interface
+description = User Interface for the entity translation source plugin.
+package = Translation Management
+core = 7.x
+
+dependencies[] = tmgmt_entity
+dependencies[] = tmgmt_ui
+dependencies[] = views_bulk_operations
+dependencies[] = entity_translation
+
+files[] = tmgmt_entity_ui.test
+
