@@ -18,7 +18,7 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
       'name' => t('Entity Source UI tests'),
       'description' => t('Tests the user interface for entity translation sources.'),
       'group' => t('Translation Management'),
-      'dependencies' => array('entity_translation'),
+      'dependencies' => array('waiting_for_new_release_entity_translation'),
     );
   }
 

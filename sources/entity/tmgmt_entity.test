@@ -16,7 +16,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       'name' => t('Entity Source tests'),
       'description' => t('Exporting source data from entities and saving translations back to entities.'),
       'group' => t('Translation Management'),
-      'dependencies' => array('entity_translation'),
+      'dependencies' => array('waiting_for_new_release_entity_translation'),
     );
   }
 
