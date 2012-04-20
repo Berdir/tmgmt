@@ -35,7 +35,7 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
    */
   function createTranslator() {
     $translator = new TMGMTTranslator();
-    $translator->name = $this->randomName();
+    $translator->name = strtolower($this->randomName());
     $translator->label = $this->randomName();
     $translator->plugin = 'test_translator';
     $translator->settings = array(
