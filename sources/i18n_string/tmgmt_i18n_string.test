@@ -13,9 +13,6 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
       'name' => t('i18n String Source tests'),
       'description' => t('Exporting source data from i18n string and saving translations back'),
       'group' => t('Translation Management'),
-      // @todo Disable these tests until i18n 7.x-1.4 is released or a way
-      // has been found to use 7.x-1.x-dev on the testbot.
-      'dependencies' => array('i18n_needs_new_release'),
     );
   }
 
@@ -47,7 +44,11 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
 
     $item1 = $job->addItem('i18n_string', 'i18n_string', $string_object_name);
     $job->requestTranslation();
-    $job->accepted();
+
+    foreach ($job->getItems() as $item) {
+      /* @var $item TMGMTJobItem */
+      $item->acceptTranslation();
+    }
 
     // Check the structure of the imported data.
     $this->assertEqual($item1->item_id, $string_object_name, t('i18n Strings object correctly saved'));
@@ -77,7 +78,10 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
 
     $item1 = $job->addItem('i18n_string', 'i18n_string', $string_name);
     $job->requestTranslation();
-    $job->accepted();
+    foreach ($job->getItems() as $item) {
+      /* @var $item TMGMTJobItem */
+      $item->acceptTranslation();
+    }
 
     $data = $item1->getData();
     $this->assertEqual($data['menu:menu:' . $menu['menu_name'] . ':title']['#text'], $config['title']);
