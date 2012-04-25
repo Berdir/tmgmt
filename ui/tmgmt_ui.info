@@ -5,7 +5,6 @@ core = 7.x
 
 dependencies[] = tmgmt
 dependencies[] = views_bulk_operations
-dependencies[] = rules
 
 files[] = includes/tmgmt_ui.controller.inc
 files[] = tmgmt_ui.test
