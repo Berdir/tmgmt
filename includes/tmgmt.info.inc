@@ -25,6 +25,11 @@ class TMGMTJobMetadataController extends EntityDefaultMetadataController {
     // Use the defined entity label callback instead of the custom label directly.
     $properties['label']['getter callback'] = 'entity_class_label';
 
+    // Allow to change the properties.
+    foreach (array('target_language', 'source_language', 'translator') as $property) {
+      $properties[$property]['setter callback'] = 'entity_property_verbatim_set';
+    }
+
     // Add the options list for the available languages.
     $properties['target_language']['options list'] = $properties['source_language']['options list'] = 'entity_metadata_language_list';
 
