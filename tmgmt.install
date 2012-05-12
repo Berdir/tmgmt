@@ -271,6 +271,11 @@ function tmgmt_schema() {
   // Clone the schema for our cache table from Drupal core.
   $schema['cache_tmgmt'] = drupal_get_schema_unprocessed('system', 'cache');
 
+  // Clone the schema for the entity cache module if it is enabled.
+  if (module_exists('entitycache')) {
+    $schema['cache_entity_tmgmt_translator'] = drupal_get_schema_unprocessed('system', 'cache');
+  }
+
   return $schema;
 }
 
