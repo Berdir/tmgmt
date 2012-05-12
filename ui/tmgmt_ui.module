@@ -282,16 +282,19 @@ function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
   if (empty($job->target_language) || empty($job->source_language)) {
     return TRUE;
   }
-  // If there is more than a single translator available or if there are no
-  // translators available at all checkout is mandatory.
-  $translators = tmgmt_translator_load_available($job);
-  if (empty($translators) || count($translators) > 1) {
-    return TRUE;
+  // If no translator is pre-selected, try to pick one automatically.
+  if (empty($job->translator)) {
+    // If there is more than a single translator available or if there are no
+    // translators available at all checkout is mandatory.
+    $translators = tmgmt_translator_load_available($job);
+    if (empty($translators) || count($translators) > 1) {
+      return TRUE;
+    }
+    $translator = reset($translators);
+    $job->translator = $translator->name;
   }
-  $translator = reset($translators);
-  $job->translator = $translator->name;
   // If that translator has settings, the checkout is mandatory.
-  if ($translator->hasCheckoutSettings($job)) {
+  if ($job->getTranslator()->hasCheckoutSettings($job)) {
     return TRUE;
   }
   return FALSE;
