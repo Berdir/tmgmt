@@ -162,7 +162,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#description' => t('The description of the translator.'),
     '#default_value' => $translator->description,
     '#size' => 32,
-    '#maxlength' => 64,
+    '#maxlength' => 255,
   );
   $form['settings'] = array(
     '#type' => 'fieldset',
