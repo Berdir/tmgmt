@@ -93,7 +93,7 @@ class TMGMTJobItemController extends EntityAPIController {
     // deletion.
     if ($hook == 'delete' && $job = $entity->getJob()) {
       // We only care for active jobs.
-      if ($job->isActive() && tmgmt_job_check_finished($this->tjid)) {
+      if ($job->isActive() && tmgmt_job_check_finished($job->tjid)) {
         // Mark the job as finished.
         $job->finished();
       }
