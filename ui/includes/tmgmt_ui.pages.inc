@@ -383,6 +383,9 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   // Display the checkout settings form if the job can be checked out.
   if (!empty($job->translator) && $job->isUnprocessed()) {
     $settings = tmgmt_ui_checkout_settings_form($form_state, $job);
+    if(!is_array($settings)){
+      $settings = array();
+    }
     $form['translator_wrapper']['settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Checkout settings'),

@@ -9,12 +9,12 @@
  * Implements hook_menu().
  */
 function tmgmt_nativy_menu() {
-  // @todo menu callback for order complete callback
-  $items['nativy/callback'] = array(
+  $items['tmgmt/nativy/callback/%tmgmt_job'] = array(
     'title' => 'Nativy Notification',
     'description' => 'Callback for the completion notification of a translation job.',
     'type' => MENU_CALLBACK,
     'page callback' => 'tmgmt_nativy_process_callback',
+    'page arguments' => array(3),
     'access callback' => TRUE,
   );
   return $items;
@@ -39,39 +39,53 @@ function tmgmt_nativy_tmgmt_translator_plugin_info() {
  *
  * @TODO Real processing. For now we just log whatever comes in.
  */
-function tmgmt_nativy_process_callback() {
-  $items[] = t('Checking for your translation from Nativy.');
-  watchdog('nativy', 'Callback REQUEST.  <br /><pre>!post</pre>', array('!post' => print_r($_REQUEST, TRUE)));
-  // Get the order id
-  if (isset($_REQUEST['orderid'])) {
-    $orderid = $_REQUEST['orderid'];
-    $items[] = t('Your order id is @orderid', array('@orderid' => $orderid));
-    // @todo tmgmt_job_load_multiple() doesn't seem to work for this.
-    if ($jobs = entity_load('tmgmt_job', FALSE, array('reference' => $orderid))) {
-      $job = reset($jobs);
-      $controller = $job->getTranslatorController();
-      if (!is_a($controller, 'TMGMTNativyTranslatorController')) {
-        $items[] = t('The job was not assigned to Nativy.');
-      }
-      elseif ($controller->retrieveTranslation($job)) {
-        $items[] = t('Your translation has been retrieved successfully.');
-        drupal_set_message(t('Retrieved translation for job @jobid.', array('@jobid' => $job->tjid)));
-      }
-      else {
-        drupal_set_message(t('We cannot retrieve your translation.'), 'warning');
-      }
+function tmgmt_nativy_process_callback(TMGMTJob $job) {
+  $controller = $job->getTranslatorController();
+  if (!($controller instanceof TMGMTNativyTranslatorPluginController)) {
+    $job->addMessage('Job does not belong to nativy.', array(), 'error');
+    return;
+  }
 
-    }
-    else {
-      drupal_set_message(t('Cannot find a translation job matching that order id'), 'warning');
+  // Verify the validity of this request.
+  if (!empty($_GET['timestamp']) && !empty($_GET['api_sign'])) {
+    if (!$controller->verify($job->getTranslator(), $_GET['timestamp'], $_GET['api_sign'])) {
+      $job->addMessage('Callback request has invalid api sign', array(), 'error');
+      return;
     }
   }
   else {
-    drupal_set_message(t('We cannot find your order id.'), 'error');
+    $job->addMessage('Callback request is missing api sign.', array(), 'error');
+    return;
   }
-  $build['steps'] = array(
-    '#theme' => 'item_list',
-    '#items' => $items,
-  );
-  return $build;
+
+  // Record payment success message.
+  if (!empty($_GET['paid']) && $_GET['paid']) {
+    $job->addMessage('Payment successfully recorded.');
+    return;
+  }
+
+  if ($controller->retrieveTranslation($job)) {
+    $job->addMessage('Successfully retrieved translation.');
+  }
+  else {
+    $job->addMessage('Failed to retrieve the translation.', 'warning');
+  }
+}
+
+function tmgmt_nativy_job_fetch_translation_submit($form, &$form_state) {
+  $job = $form_state['tmgmt_job'];
+  if ($job->getTranslatorController()->retrieveTranslation($job)) {
+    drupal_set_message(t('Translation fetched fron Nativy.'));
+  } else {
+   drupal_set_message(t('Translation could not be retreived.'), 'error');
+  }
+}
+
+/**
+ * Save the chosen job settings.
+ */
+function tmgmt_nativy_job_settings_submit($form, &$form_state) {
+  $job = $form_state['tmgmt_job'];
+  $job = entity_ui_form_submit_build_entity($form, $form_state);
+  $job->save();
 }
