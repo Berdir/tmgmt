@@ -91,7 +91,59 @@ function tmgmt_ui_theme() {
       'render element' => 'form',
       'file' => 'includes/tmgmt_ui.controller.inc',
     ),
+    'tmgmt_ui_translator_review_form' => array(
+      'render element' => 'form',
+    ),
   );
+}
+
+function theme_tmgmt_ui_translator_review_form($variables) {
+  $form = $variables['form'];
+  $head  = '<th>' . t('Status') . "</th>\n";
+  $head .= '<th>' . t('Source') . "</th>\n";
+  $head .= '<th>' . t('Translation') . "</th>\n";
+  $head .= '<th>' . t('Actions') . "</th>\n";
+  $head = "<tr>\n" . $head . "</tr>\n";
+  $head = "<thead>\n" . $head . "</thead>\n";
+
+  $elements = array();
+
+  foreach (element_children($form) as $key) {
+    $title = '';
+    if (isset($form[$key]['#label'])) {
+      $data = $form[$key]['#label'];
+      if(is_array($data)) {
+        $data = implode('->', $data);
+      }
+      $cell = array('data' => $data, 'colspan' => 4);
+      $title .= '<tr>' . _theme_table_cell($cell, TRUE) . "</tr>\n";
+    }
+
+    $elements[] = "<tbody>\n" . $title . theme_tmgmt_ui_translator_review_form_element($form[$key]) . "</tbody>\n";
+  }
+
+  return "<table>\n" . $head . "\n" . implode('', $elements) . "</table>\n";
+}
+
+function theme_tmgmt_ui_translator_review_form_element($element) {
+  $result = '';
+
+  foreach (element_children($element) as $key) {
+    if (isset($element[$key]['#label'])) {
+      $cell = array('data' => implode('>>', $element[$key]['#label']), 'colspan' => 4);
+      $result .= '<tr class="tmgmt_review_sublabel">' . _theme_table_cell($cell, TRUE) . "</tr>\n";
+    }
+
+    $row = _theme_table_cell('Status');
+    $row .= _theme_table_cell('Source');
+    $row .= _theme_table_cell('Translation');
+    $row .= _theme_table_cell('Actions');
+
+    $result .= "<tr>" . $row . "</tr>";
+  }
+
+ 
+  return $result;
 }
 
 /**
@@ -344,9 +396,21 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
   $form['review'] = array(
     '#type' => 'container',
     '#tree' => TRUE,
+    '#theme' => 'tmgmt_ui_translator_review_form',
   );
   // Recursively build the review form.
-  $form['review'] += _tmgmt_ui_review_form_recursive($form_state, $item->getData());
+  dpm($item->getData());
+  $data = $item->getData();
+  foreach (element_children($data) as $key) {
+    $element = array(
+      '#type' => 'container',
+      '#label' => $data[$key]['#label'],
+//      '#theme' => 'tmgmt_ui_translator_review_form_item',
+    );
+    $element[] = tmgmt_flatten_data($data[$key]);
+    $form['review'][] = $element;
+  }
+  
   // Add the form actions as well.
   $form['actions']['#type'] = 'actions';
   $form['actions']['accept'] = array(
@@ -435,18 +499,34 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
 /**
  * Helper function for recursively building a review form.
  */
-function _tmgmt_ui_review_form_recursive(&$form_state, $data) {
+function _tmgmt_ui_review_form_recursive(&$form_state, $data, $label = array()) {
   $form = array();
   foreach (element_children($data) as $key) {
     if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
+
       $form[$key] = array(
+        '#type' => 'container',
+        '#tree' => false,
+      );
+
+      $form[$key]['translation'] = array(
         '#type' => 'textarea',
-        '#title' => isset($data[$key]['#label']) ? $data[$key]['#label'] : t('Unlabelled'),
+        '#title' => t('Translation'),
         '#default_value' => $data[$key]['#translation']['#text'],
+      );
+      $form[$key]['source'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Source'),
+        '#default_value' => $data[$key]['#text'],
+        '#disabled' => TRUE,
       );
     }
     elseif (is_array($data[$key])) {
-      $form[$key] = _tmgmt_ui_review_form_recursive($form_state, $data[$key]);
+      if (isset($data[$key]['#label'])) {
+        $label[] = $data[$key]['#label'];
+      }
+      $form[$key] = _tmgmt_ui_review_form_recursive($form_state, $data[$key], $label);
+      $form[$key]['#label'] = $label ;
     }
   }
   return $form;
