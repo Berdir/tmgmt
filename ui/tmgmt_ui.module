@@ -100,6 +100,12 @@ function tmgmt_ui_theme() {
   );
 }
 
+/**
+ * Returns HTML for a review table.
+ *
+ * @param An associative array containing review data.
+ * @return HTML table.
+ */
 function theme_tmgmt_ui_translator_review_form($variables) {
   $form = $variables['form'];
   $head  = '<th>' . t('Status') . "</th>\n";
@@ -115,22 +121,30 @@ function theme_tmgmt_ui_translator_review_form($variables) {
   return "<table class=\"tmgmt_review\">\n" . $head . "\n" . $children . "</table>\n";
 }
 
+/**
+ * Returns HTML for a group of review items.
+ *
+ * @param An associative array containing several review items.
+ * @return HTML table body fragment.
+ */
 function theme_tmgmt_ui_translator_review_form_element($variables) {
   $element = $variables['element'];
   $result = '';
+  $labels = '';
+  $parent_label = '';
   foreach (element_children($element) as $key) {
     $labels = $element[$key]['#parent_label'];
     $parent_label = array_shift($labels);
-    $leav_label = array_pop($labels);
+    $leaf_label = array_pop($labels);
     $result .= '<tr>';
-    $result .= _theme_table_cell('Status');
-    $result .= _theme_table_cell($leav_label, TRUE);
-    $result .= _theme_table_cell($element[$key]['#text']);
-    $result .= _theme_table_cell($element[$key]['#translation']['#text']);
-    $result .= _theme_table_cell('Actions');
+    $result .= _theme_table_cell('');
+    $result .= _theme_table_cell($leaf_label, TRUE);
+    $result .= _theme_table_cell(drupal_render($element[$key]['source']));
+    $result .= _theme_table_cell(drupal_render($element[$key]['translation']));
+    $result .= _theme_table_cell('');
     $result .= "</tr>\n";
   }
-  if (!empty($labels)) {
+  if (!empty($labels) && count($labels) > 1) {
     $cell = array(
       'data' => implode(' > ', $labels),
       'colspan' => 4,
@@ -396,15 +410,12 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
   // Actually build the review form elements...
   $form['review'] = array(
     '#type' => 'container',
-    '#tree' => FALSE,
     '#theme' => 'tmgmt_ui_translator_review_form',
   );
   // Recursively build the review form.
   $data = $item->getData();
   foreach (element_children($data) as $key) {
-    $element = tmgmt_flatten_data($data[$key], $key);
-    $element['#theme'] = 'tmgmt_ui_translator_review_form_element';
-    $form['review'][$key] = $element;
+    $form['review'][$key] = _tmgmt_ui_review_form_element(tmgmt_flatten_data($data[$key], $key));
   }
   
   // Add the form actions as well.
@@ -425,6 +436,34 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
   );
   // The reject functionality has to be implement by the translator plugin as
   // that process is completely unique and custom for each translation service.
+  return $form;
+}
+
+/**
+ * Helper function for recursively building a review form.
+ */
+function _tmgmt_ui_review_form_element($data) {
+  $form = array(
+    '#theme' => 'tmgmt_ui_translator_review_form_element',
+  );
+  foreach (element_children($data) as $key) {
+    if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
+      $form[$key] = array(
+        '#tree' => TRUE,
+        '#parent_label' => $data[$key]['#parent_label']
+      );
+
+      $form[$key]['translation'] = array(
+        '#type' => 'textarea',
+        '#default_value' => $data[$key]['#translation']['#text'],
+      );
+      $form[$key]['source'] = array(
+        '#type' => 'textarea',
+        '#default_value' => $data[$key]['#text'],
+        '#disabled' => TRUE,
+      );
+    }
+  }
   return $form;
 }
 
@@ -490,42 +529,6 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   }
   // Submit the entity.
   $item->save();
-}
-
-/**
- * Helper function for recursively building a review form.
- */
-function _tmgmt_ui_review_form_recursive(&$form_state, $data, $label = array()) {
-  $form = array();
-  foreach (element_children($data) as $key) {
-    if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
-
-      $form[$key] = array(
-        '#type' => 'container',
-        '#tree' => false,
-      );
-
-      $form[$key]['translation'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Translation'),
-        '#default_value' => $data[$key]['#translation']['#text'],
-      );
-      $form[$key]['source'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Source'),
-        '#default_value' => $data[$key]['#text'],
-        '#disabled' => TRUE,
-      );
-    }
-    elseif (is_array($data[$key])) {
-      if (isset($data[$key]['#label'])) {
-        $label[] = $data[$key]['#label'];
-      }
-      $form[$key] = _tmgmt_ui_review_form_recursive($form_state, $data[$key], $label);
-      $form[$key]['#label'] = $label ;
-    }
-  }
-  return $form;
 }
 
 /**
