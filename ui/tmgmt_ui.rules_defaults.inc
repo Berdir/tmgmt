@@ -28,5 +28,6 @@ function tmgmt_ui_default_rules_configuration() {
     }
   }';
   $rule = rules_import($data);
+  $configs[$rule->name] = $rule;
   return $configs;
 }
