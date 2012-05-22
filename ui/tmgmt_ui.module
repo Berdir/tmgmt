@@ -447,17 +447,17 @@ function _tmgmt_ui_review_form_element($data) {
     '#theme' => 'tmgmt_ui_translator_review_form_element',
   );
   foreach (element_children($data) as $key) {
+    $target_key = str_replace('][', '|', $key);
     if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
-      $form[$key] = array(
+      $form[$target_key] = array(
         '#tree' => TRUE,
         '#parent_label' => $data[$key]['#parent_label']
       );
-
-      $form[$key]['translation'] = array(
+      $form[$target_key]['translation'] = array(
         '#type' => 'textarea',
         '#default_value' => $data[$key]['#translation']['#text'],
       );
-      $form[$key]['source'] = array(
+      $form[$target_key]['source'] = array(
         '#type' => 'textarea',
         '#default_value' => $data[$key]['#text'],
         '#disabled' => TRUE,
@@ -506,6 +506,14 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   // Then invoke the submit method on the source controller.
   $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
   $translator->reviewFormSubmit($form, $form_state, $item);
+  // Write changes back to item
+  $values = $form_state['values'];
+  foreach (element_children($values) as $key) {
+    $value = $values[$key];
+    if (isset($value['translation'])) {
+      $item->addTranslatedData( array( '#text' => $value['translation']), str_replace('|', '][', $key));
+    }
+  }
   // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
   if ($form_state['triggering_element']['#value'] == $form['actions']['accept']['#value']) {
     $item->acceptTranslation();
