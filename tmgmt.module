@@ -1092,7 +1092,7 @@ function tmgmt_flatten_data($data, $prefix = NULL, $label = array()) {
     $flattened_data[$prefix]['#parent_label'] = $label;
   }
   else {
-    $prefix = !empty($prefix) ? $prefix . TMGMT_ARRAY_DELIMITER : '';
+    $prefix = isset($prefix) ? $prefix . TMGMT_ARRAY_DELIMITER : '';
     foreach (element_children($data) as $key) {
       $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key, $label);
     }
