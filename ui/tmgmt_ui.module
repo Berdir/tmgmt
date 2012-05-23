@@ -103,29 +103,33 @@ function tmgmt_ui_theme() {
 /**
  * Returns HTML for a review table.
  *
- * @param An associative array containing review data.
- * @return HTML table.
+ * @param $variables
+ *   An associative array containing review data.
+ * @return
+ *   HTML table.
  */
 function theme_tmgmt_ui_translator_review_form($variables) {
   $form = $variables['form'];
-  $head  = '<th>' . t('Status') . "</th>\n";
-  $head .= '<th>' . t('Label') . "</th>\n";
-  $head .= '<th>' . t('Source') . "</th>\n";
-  $head .= '<th>' . t('Translation') . "</th>\n";
-  $head .= '<th>' . t('Actions') . "</th>\n";
-  $head = "<tr>\n" . $head . "</tr>\n";
-  $head = "<thead>\n" . $head . "</thead>\n";
+  $head = '<th>' . t('Status') . '</th>';
+  $head .= '<th>' . t('Label') . '</th>';
+  $head .= '<th>' . t('Source') . '</th>';
+  $head .= '<th>' . t('Translation') . '</th>';
+  $head .= '<th>' . t('Actions') . '</th>';
+  $head = '<tr>' . $head . '</tr>';
+  $head = '<thead>' . $head . '</thead>';
 
   $children = drupal_render_children($form);
-  
-  return "<table class=\"tmgmt_review\">\n" . $head . "\n" . $children . "</table>\n";
+
+  return '<table class="tmgmt_review">' . $head . $children . '</table>';
 }
 
 /**
  * Returns HTML for a group of review items.
  *
- * @param An associative array containing several review items.
- * @return HTML table body fragment.
+ * @param $variables
+ *   An associative array containing several review items.
+ * @return
+ *   HTML table body fragment.
  */
 function theme_tmgmt_ui_translator_review_form_element($variables) {
   $element = $variables['element'];
@@ -142,23 +146,23 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
     $result .= _theme_table_cell(drupal_render($element[$key]['source']));
     $result .= _theme_table_cell(drupal_render($element[$key]['translation']));
     $result .= _theme_table_cell('');
-    $result .= "</tr>\n";
+    $result .= '</tr>';
   }
   if (!empty($labels) && count($labels) > 1) {
     $cell = array(
       'data' => implode(' > ', $labels),
       'colspan' => 4,
     );
-    $result = '<tr>' . _theme_table_cell('') . _theme_table_cell($cell, TRUE) . "</tr>\n" . $result;
+    $result = '<tr>' . _theme_table_cell('') . _theme_table_cell($cell, TRUE) . '</tr>' . $result;
   }
   if (!empty($parent_label)) {
     $cell = array(
       'data' => $parent_label,
       'colspan' => 5,
     );
-    $result = '<tr>' . _theme_table_cell($cell, TRUE) . "</tr>\n" . $result;
+    $result = '<tr>' . _theme_table_cell($cell, TRUE) . '</tr>' . $result;
   }
-  return "<tbody>\n" . $result . "</tbody>\n";
+  return '<tbody>' . $result . '</tbody>';
 }
 
 /**
@@ -417,7 +421,7 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
   foreach (element_children($data) as $key) {
     $form['review'][$key] = _tmgmt_ui_review_form_element(tmgmt_flatten_data($data[$key], $key));
   }
-  
+
   // Add the form actions as well.
   $form['actions']['#type'] = 'actions';
   $form['actions']['accept'] = array(
@@ -441,12 +445,16 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
 
 /**
  * Helper function for recursively building a review form.
+ *
+ * @todo Mention in the user documentation that the char '|' is not allowed in
+ * field names.
  */
 function _tmgmt_ui_review_form_element($data) {
   $form = array(
     '#theme' => 'tmgmt_ui_translator_review_form_element',
   );
   foreach (element_children($data) as $key) {
+    // The char sequence '][' confuses the form API so we need to replace it.
     $target_key = str_replace('][', '|', $key);
     if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
       $form[$target_key] = array(
@@ -506,14 +514,6 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   // Then invoke the submit method on the source controller.
   $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
   $translator->reviewFormSubmit($form, $form_state, $item);
-  // Write changes back to item
-  $values = $form_state['values'];
-  foreach (element_children($values) as $key) {
-    $value = $values[$key];
-    if (isset($value['translation'])) {
-      $item->addTranslatedData( array( '#text' => $value['translation']), str_replace('|', '][', $key));
-    }
-  }
   // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
   if ($form_state['triggering_element']['#value'] == $form['actions']['accept']['#value']) {
     $item->acceptTranslation();
@@ -535,8 +535,19 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
       }
     }
   }
-  // Submit the entity.
-  $item->save();
+  // Write changes back to item.
+  $values = $form_state['values'];
+  $data = array();
+  foreach ($values as $key => $value) {
+    if (is_array($value) && isset($value['translation'])) {
+      // For the char sequence '][' confuses the forms API, it was replaced by
+      // '|' in tmgmt_ui_translation_review_form_defaults(). Now we need to
+      // replace it back.
+      $data[str_replace('|', '][', $key)] = array( '#text' => $value['translation']);
+    }
+  }
+  // Adding translation data will also call the save method.
+  $item->addTranslatedData($data);
 }
 
 /**
