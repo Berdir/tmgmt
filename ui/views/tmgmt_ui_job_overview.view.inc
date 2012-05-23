@@ -207,6 +207,11 @@ $handler->display->display_options['fields']['translator']['id'] = 'translator';
 $handler->display->display_options['fields']['translator']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['translator']['field'] = 'translator';
 $handler->display->display_options['fields']['translator']['ui_name'] = 'Translator';
+/* Field: Progress */
+$handler->display->display_options['fields']['progress']['id'] = 'progress';
+$handler->display->display_options['fields']['progress']['table'] = 'tmgmt_job';
+$handler->display->display_options['fields']['progress']['field'] = 'progress';
+$handler->display->display_options['fields']['progress']['ui_name'] = 'Progress';
 /* Field: Created */
 $handler->display->display_options['fields']['created']['id'] = 'created';
 $handler->display->display_options['fields']['created']['table'] = 'tmgmt_job';

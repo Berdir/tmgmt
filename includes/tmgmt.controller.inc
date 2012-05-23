@@ -60,9 +60,55 @@ class TMGMTJobItemController extends EntityAPIController {
 
   /**
    * Overrides EntityAPIController::save().
+   *
+   * @todo Eliminate the need to flatten and unflatten the JobItem data.
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $entity->changed = REQUEST_TIME;
+    $count_pending = 0;
+    $count_translated = 0;
+    $count_approved = 0;
+
+    $items = tmgmt_flatten_data($entity->data);
+    // Consider everything approved when the job item is accepted.
+    if ($entity->isAccepted()) {
+      $count_approved = count(array_filter($items, '_tmgmt_filter_data'));
+    }
+    // Count the data item states.
+    else {
+      foreach ($items as &$data_item) {
+        if (_tmgmt_filter_data($data_item)) {
+        // Set default states if no state is set.
+        if (!isset($data_item['#status'])) {
+          // Translation is present.
+          if (!empty($data_item['#translation'])) {
+            $data_item['#status'] = TMGMT_DATA_ITEM_STATE_TRANSLATED;
+          }
+          // No translation present.
+          else {
+            $data_item['#status'] = TMGMT_DATA_ITEM_STATE_PENDING;
+          }
+          }
+          switch ($data_item['#status']) {
+            case TMGMT_DATA_ITEM_STATE_APPROVED:
+              $count_approved++;
+              break;
+            case TMGMT_DATA_ITEM_STATE_TRANSLATED:
+              $count_translated++;
+              break;
+            default:
+              $count_pending++;
+              break;
+          }
+        }
+      }
+      // Save changed data item states.
+      $entity->data = tmgmt_unflatten_data($items);
+    }
+    // Set counts on entity.
+    $entity->count_pending = $count_pending;
+    $entity->count_translated = $count_translated;
+    $entity->count_approved = $count_approved;
     return parent::save($entity, $transaction);
   }
 

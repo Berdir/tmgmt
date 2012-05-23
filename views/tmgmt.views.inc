@@ -33,6 +33,14 @@ class TMGMTJobItemViewsController extends EntityDefaultViewsController {
         'handler' => 'tmgmt_handler_field_tmgmt_entity_label',
       ),
     );
+    $data['tmgmt_job_item']['progress'] = array(
+      'title' => t('Progress'),
+      'help' => t('Displays the progress of a job item.'),
+      'real field' => 'tjiid',
+      'field' => array(
+        'handler' => 'tmgmt_handler_field_tmgmt_progress',
+      ),
+    );
     $data['tmgmt_job_item']['operations'] = array(
       'title' => t('Operations'),
       'help' => t('Displays a list of options which are available for a job item.'),
@@ -62,6 +70,14 @@ class TMGMTJobViewsController extends EntityDefaultViewsController {
       'real field' => 'tjid',
       'field' => array(
         'handler' => 'tmgmt_handler_field_tmgmt_job_operations',
+      ),
+    );
+    $data['tmgmt_job']['progress'] = array(
+      'title' => t('Progress'),
+      'help' => t('Displays the progress of a job.'),
+      'real field' => 'tjid',
+      'field' => array(
+        'handler' => 'tmgmt_handler_field_tmgmt_progress',
       ),
     );
     $data['tmgmt_job']['label']['field']['handler'] = 'tmgmt_handler_field_tmgmt_entity_label';

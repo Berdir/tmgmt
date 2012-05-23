@@ -80,6 +80,11 @@ $handler->display->display_options['fields']['state']['id'] = 'state';
 $handler->display->display_options['fields']['state']['table'] = 'tmgmt_job_item';
 $handler->display->display_options['fields']['state']['field'] = 'state';
 $handler->display->display_options['fields']['state']['ui_name'] = 'State';
+/* Field: Progress */
+$handler->display->display_options['fields']['progress']['id'] = 'progress';
+$handler->display->display_options['fields']['progress']['table'] = 'tmgmt_job_item';
+$handler->display->display_options['fields']['progress']['field'] = 'progress';
+$handler->display->display_options['fields']['progress']['ui_name'] = 'Progress';
 /* Field: Changed */
 $handler->display->display_options['fields']['changed']['id'] = 'changed';
 $handler->display->display_options['fields']['changed']['table'] = 'tmgmt_job_item';

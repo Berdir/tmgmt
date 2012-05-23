@@ -140,6 +140,24 @@ function tmgmt_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'count_pending' => array(
+        'description' => 'Counter for all pending data items.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'count_translated' => array(
+        'description' => 'Counter for all translated data items.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'count_approved' => array(
+        'description' => 'Counter for all approved data items.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('tjiid'),
     'indexes' => array(
@@ -319,3 +337,53 @@ function tmgmt_update_7001() {
   db_drop_field('tmgmt_job_item', 'translation');
 }
 
+/**
+ * Add counter columns to {tmgmt_job_item}.
+ */
+function tmgmt_update_7002() {
+  // Defining schema of additional fields.
+  $schema = array(
+    'count_pending' => array(
+      'description' => 'Counter for all pending data items.',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'count_translated' => array(
+      'description' => 'Counter for all translated data items.',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'count_approved' => array(
+      'description' => 'Counter for all approved data items.',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  );
+  // Add aditional fields to db.
+  foreach ($schema as $field => $spec) {
+    db_add_field('{tmgmt_job_item}', $field, $spec);
+  }
+}
+
+/**
+ * Set counters for existing job items.
+ */
+function tmgmt_update_7003(&$sandbox) {
+  if (!isset($sandbox['progress'])) {
+    $sandbox['progress'] = 0;
+    $sandbox['last_tjiid'] = 0;
+    $sandbox['max'] = db_query('SELECT COUNT(DISTINCT tjiid) FROM {tmgmt_job_item}')->fetchField();
+  }
+  $tjiids = db_query('SELECT tjiid FROM {tmgmt_job_item} WHERE tjiid > :last_tjiid ORDER BY tjiid LIMIT 10', array( ':last_tjiid' => $sandbox['last_tjiid']))->fetchCol();
+  foreach (entity_load('tmgmt_job_item', $tjiids) as $job_item) {
+  // Counters are updated when saving a job item.
+    $job_item->save();
+    $sandbox['progress']++;
+  }
+
+  $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
+  $sandbox['last_tjiid'] = $job_item->tjiid;
+}

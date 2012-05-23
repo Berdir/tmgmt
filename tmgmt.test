@@ -202,6 +202,144 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($item2->item_type, $items[$item2->tjiid]->item_type);
     $this->assertEqual($item2->item_id, $items[$item2->tjiid]->item_id);
   }
+
+  /**
+   * Test the calculations of the counters.
+   */
+  function testJobItemsCounters() {
+    $job = $this->createJob();
+
+    // Some test data items.
+    $data1 = array(
+      '#text' => 'The text to be translated.',
+    );
+    $data2 = array(
+      '#text' => 'The text to be translated.',
+      '#translation' => '',
+    );
+    $data3 = array(
+      '#text' => 'The text to be translated.',
+      '#translation' => 'The translated data. Set by the translator plugin.',
+    );
+    $data4 = array(
+      '#text' => 'The text to be translated.',
+      '#translation' => 'The translated data. Set by the translator plugin.',
+      '#status' => TMGMT_DATA_ITEM_STATE_APPROVED,
+    );
+
+    // No data items.
+    $this->assertEqual(0, $job->getCountPending());
+    $this->assertEqual(0, $job->getCountTranslated());
+    $this->assertEqual(0, $job->getCountApproved());
+
+    // Add a test items.
+    $job_item1 = tmgmt_job_item_create('plugin', 'type', 4, array('tjid' => $job->tjid));
+    $job_item1->save();
+
+    // No pending, translated and confirmed data items.
+    $job = entity_load_single('tmgmt_job', $job->tjid);
+    $job_item1 = entity_load_single('tmgmt_job_item', $job_item1->tjiid);
+    $this->assertEqual(0, $job_item1->getCountPending());
+    $this->assertEqual(0, $job_item1->getCountTranslated());
+    $this->assertEqual(0, $job_item1->getCountApproved());
+    $this->assertEqual(0, $job->getCountPending());
+    $this->assertEqual(0, $job->getCountTranslated());
+    $this->assertEqual(0, $job->getCountApproved());
+
+    // Add an untranslated data item.
+    $job_item1->data['data_item1'] = $data1;
+    $job_item1->save();
+
+    // One pending data items.
+    $job = entity_load_single('tmgmt_job', $job->tjid);
+    $job_item1 = entity_load_single('tmgmt_job_item', $job_item1->tjiid);
+    $this->assertEqual(1, $job_item1->getCountPending());
+    $this->assertEqual(0, $job_item1->getCountTranslated());
+    $this->assertEqual(1, $job->getCountPending());
+    $this->assertEqual(0, $job->getCountTranslated());
+
+    // Add another untranslated data item.
+    // Test with an empty translation set.
+    $job_item1->data['data_item1'] = $data2;
+    $job_item1->save();
+
+    // One pending data items.
+    $job = entity_load_single('tmgmt_job', $job->tjid);
+    $job_item1 = entity_load_single('tmgmt_job_item', $job_item1->tjiid);
+    $this->assertEqual(1, $job_item1->getCountPending());
+    $this->assertEqual(0, $job_item1->getCountTranslated());
+    $this->assertEqual(1, $job->getCountPending());
+    $this->assertEqual(0, $job->getCountTranslated());
+
+    // Add a translated data item.
+    $job_item1->data['data_item1'] = $data3;
+    $job_item1->save();
+
+    // One translated data items.
+    $this->assertEqual(0, $job_item1->getCountPending());
+    $this->assertEqual(1, $job_item1->getCountTranslated());
+    $this->assertEqual(0, $job->getCountPending());
+    $this->assertEqual(1, $job->getCountTranslated());
+
+    // Add a confirmed data item.
+    $job_item1->data['data_item1'] = $data4;
+    $job_item1->save();
+
+    // One confirmed data items.
+    $this->assertEqual(1, $job_item1->getCountApproved());
+    $this->assertEqual(1, $job->getCountApproved());
+
+    // Add a translated and an untranslated and a confirmed data item
+    $job = entity_load_single('tmgmt_job', $job->tjid);
+    $job_item1 = entity_load_single('tmgmt_job_item', $job_item1->tjiid);
+    $job_item1->data['data_item1'] = $data1;
+    $job_item1->data['data_item2'] = $data3;
+    $job_item1->data['data_item3'] = $data4;
+    $job_item1->save();
+
+    // One pending and translated data items each.
+    $this->assertEqual(1, $job->getCountPending());
+    $this->assertEqual(1, $job->getCountTranslated());
+    $this->assertEqual(1, $job->getCountApproved());
+
+    // Add a greater number of data items
+    for ($index = 1; $index <= 3; $index++) {
+      $job_item1->data['data_item' . $index] = $data1;
+    }
+    for ($index = 4; $index <= 10; $index++) {
+      $job_item1->data['data_item' . $index] = $data3;
+    }
+    for ($index = 11; $index <= 15; $index++) {
+      $job_item1->data['data_item' . $index] = $data4;
+    }
+    $job_item1->save();
+
+    // 3 pending and 7 translated data items each.
+    $job = entity_load_single('tmgmt_job', $job->tjid);
+    $this->assertEqual(3, $job->getCountPending());
+    $this->assertEqual(7, $job->getCountTranslated());
+    $this->assertEqual(5, $job->getCountApproved());
+
+    // Add several job items
+    $job_item2 = tmgmt_job_item_create('plugin', 'type', 5, array('tjid' => $job->tjid));
+    for ($index = 1; $index <= 4; $index++) {
+      $job_item2->data['data_item' . $index] = $data1;
+    }
+    for ($index = 5; $index <= 12; $index++) {
+      $job_item2->data['data_item' . $index] = $data3;
+    }
+    for ($index = 13; $index <= 16; $index++) {
+      $job_item2->data['data_item' . $index] = $data4;
+    }
+    $job_item2->save();
+
+    // 3 pending and 7 translated data items each.
+    $job = entity_load_single('tmgmt_job', $job->tjid);
+    $this->assertEqual(7, $job->getCountPending());
+    $this->assertEqual(15, $job->getCountTranslated());
+    $this->assertEqual(9, $job->getCountApproved());
+  }
+
 }
 
 /**

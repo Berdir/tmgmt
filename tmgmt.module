@@ -88,6 +88,22 @@ define('TMGMT_JOB_ITEM_STATE_REVIEW', 2);
  * 'accepted' if the translated object could be saved successfully.
  */
 define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
+
+/**
+ * The translation data item has no been been translated.
+ */
+define('TMGMT_DATA_ITEM_STATE_PENDING', 0);
+
+/**
+ * The translation data item has ben been reviewed and approved.
+ */
+define('TMGMT_DATA_ITEM_STATE_APPROVED', 1);
+
+/**
+ * The translation data item has ben been translated.
+ */
+define('TMGMT_DATA_ITEM_STATE_TRANSLATED', 2);
+
 /**
  * @} End of "addtogroup tmgmt_job".
  */

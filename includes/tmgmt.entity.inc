@@ -272,6 +272,27 @@ class TMGMTJobItem extends Entity {
   public $data = array();
 
   /**
+   * Counter for all data items waiting for translation.
+   *
+   * @var integer
+   */
+  public $count_pending;
+
+  /**
+   * Counter for all translated data items.
+   *
+   * @var integer
+   */
+  public $count_translated;
+
+  /**
+   * Counter for all confirmed data items.
+   *
+   * @var integer
+   */
+  public $count_approved;
+
+  /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
@@ -476,6 +497,36 @@ class TMGMTJobItem extends Entity {
       return tmgmt_source_plugin_controller($this->plugin);
     }
     return FALSE;
+  }
+
+  /**
+   * Count of all pending data items
+   *
+   * @return
+   *   Pending counts
+   */
+  public function getCountPending() {
+    return $this->count_pending ? $this->count_pending : 0;
+  }
+
+  /**
+   * Count of all translated data items.
+   *
+   * @return
+   *   Translated count
+   */
+  public function getCountTranslated() {
+    return $this->count_translated ? $this->count_translated : 0;
+  }
+
+  /**
+   * Count of all approved data items.
+   *
+   * @return
+   *   Approved count
+   */
+  public function getCountApproved() {
+    return $this->count_approved ? $this->count_approved : 0;
   }
 
   /**
@@ -1384,6 +1435,36 @@ class TMGMTJob extends Entity {
       $data[$key] = $item->getData($reset);
     }
     return $data;
+  }
+
+  /**
+   * Sums up all pending counts of this jobs job items.
+   *
+   * @return
+   *   The sum of all pending counts
+   */
+  public function getCountPending() {
+    return db_query('SELECT SUM(count_pending) FROM {tmgmt_job_item} WHERE tjid = :tjid', array( ':tjid' => $this->tjid))->fetchField();
+  }
+
+  /**
+   * Sums up all translated counts of this jobs job items.
+   *
+   * @return
+   *   The sum of all translated counts
+   */
+  public function getCountTranslated() {
+    return db_query('SELECT SUM(count_translated) FROM {tmgmt_job_item} WHERE tjid = :tjid', array( ':tjid' => $this->tjid))->fetchField();
+  }
+
+  /**
+   * Sums up all approved counts of this jobs job items.
+   *
+   * @return
+   *   The sum of all approved counts
+   */
+  public function getCountApproved() {
+    return db_query('SELECT SUM(count_approved) FROM {tmgmt_job_item} WHERE tjid = :tjid', array( ':tjid' => $this->tjid))->fetchField();
   }
 
   /**
