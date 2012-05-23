@@ -706,24 +706,23 @@ class TMGMTJobItem extends Entity {
   public function addTranslatedData($translation, $key = array()) {
     $this->addTranslatedDataRecursive($translation, $key);
     // Check if the job item has all the translated data that it needs now.
-    $data = tmgmt_flatten_data($this->getData());
-    $data = array_filter($data, '_tmgmt_filter_data');
-    $finished = TRUE;
-    foreach ($data as $item) {
-      if (empty($item['#translation']['#finished'])) {
-        $finished = FALSE;
-        break;
+    if ($this->isActive()) {
+      $data = tmgmt_flatten_data($this->getData());
+      $data = array_filter($data, '_tmgmt_filter_data');
+      $finished = TRUE;
+      foreach ($data as $item) {
+        if (empty($item['#translation']['#finished'])) {
+          $finished = FALSE;
+          break;
+        }
+      }
+      if ($finished) {
+        // There are no unfinished elements left.
+        $uri = $this->getSourceUri();
+        $this->needsReview('The translation for !source is finished and can now be reviewed.', array('!source' => l($this->getSourceLabel(), $uri['path'])));
       }
     }
-    if ($finished) {
-      // There are no unfinished elements left.
-      $uri = $this->getSourceUri();
-      $this->needsReview('The translation for !source is finished and can now be reviewed.', array('!source' => l($this->getSourceLabel(), $uri['path'])));
-    }
-    else {
-      // We only need to save manually if no state change was triggered.
-      $this->save();
-    }
+    $this->save();
   }
 
   /**

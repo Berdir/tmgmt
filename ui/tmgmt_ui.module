@@ -514,6 +514,18 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   // Then invoke the submit method on the source controller.
   $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
   $translator->reviewFormSubmit($form, $form_state, $item);
+  // Write changes back to item.
+  $values = $form_state['values'];
+  $data = array();
+  foreach ($values as $key => $value) {
+    if (is_array($value) && isset($value['translation'])) {
+      // For the char sequence '][' confuses the forms API, it was replaced by
+      // '|' in tmgmt_ui_translation_review_form_defaults(). Now we need to
+      // replace it back.
+      $data[str_replace('|', '][', $key)] = array( '#text' => $value['translation']);
+    }
+  }
+  $item->addTranslatedData($data);
   // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
   if ($form_state['triggering_element']['#value'] == $form['actions']['accept']['#value']) {
     $item->acceptTranslation();
@@ -535,19 +547,7 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
       }
     }
   }
-  // Write changes back to item.
-  $values = $form_state['values'];
-  $data = array();
-  foreach ($values as $key => $value) {
-    if (is_array($value) && isset($value['translation'])) {
-      // For the char sequence '][' confuses the forms API, it was replaced by
-      // '|' in tmgmt_ui_translation_review_form_defaults(). Now we need to
-      // replace it back.
-      $data[str_replace('|', '][', $key)] = array( '#text' => $value['translation']);
-    }
-  }
-  // Adding translation data will also call the save method.
-  $item->addTranslatedData($data);
+  $item->save();
 }
 
 /**
