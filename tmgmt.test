@@ -226,6 +226,11 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
       '#translation' => 'The translated data. Set by the translator plugin.',
       '#status' => TMGMT_DATA_ITEM_STATE_APPROVED,
     );
+    $data5 = array(
+      '#label' => 'label',
+      'data1' => $data1,
+      'data4' => $data4,
+    );
 
     // No data items.
     $this->assertEqual(0, $job->getCountPending());
@@ -301,6 +306,16 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(1, $job->getCountPending());
     $this->assertEqual(1, $job->getCountTranslated());
     $this->assertEqual(1, $job->getCountApproved());
+
+    // Add nested data items.
+    $job_item1->data['data_item1'] = $data5;
+    $job_item1->save();
+
+    // One pending data items.
+    $job = entity_load_single('tmgmt_job', $job->tjid);
+    $job_item1 = entity_load_single('tmgmt_job_item', $job_item1->tjiid);
+    $this->assertEqual('label', $job_item1->data['data_item1']['#label']);
+    $this->assertEqual(3, count($job_item1->data['data_item1']));
 
     // Add a greater number of data items
     for ($index = 1; $index <= 3; $index++) {

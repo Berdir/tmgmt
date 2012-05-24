@@ -65,51 +65,65 @@ class TMGMTJobItemController extends EntityAPIController {
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $entity->changed = REQUEST_TIME;
-    $count_pending = 0;
-    $count_translated = 0;
-    $count_approved = 0;
 
-    $items = tmgmt_flatten_data($entity->data);
     // Consider everything approved when the job item is accepted.
     if ($entity->isAccepted()) {
-      $count_approved = count(array_filter($items, '_tmgmt_filter_data'));
+      $entity->count_pending = 0;
+      $entity->count_translated = 0;
+      $entity->count_approved = count(array_filter(tmgmt_flatten_data($entity->data), '_tmgmt_filter_data'));
     }
     // Count the data item states.
     else {
-      foreach ($items as &$data_item) {
-        if (_tmgmt_filter_data($data_item)) {
+      // Reset counter values.
+      $entity->count_pending = 0;
+      $entity->count_translated = 0;
+      $entity->count_approved = 0;
+      $this->count($entity->data, $entity);
+    }
+    return parent::save($entity, $transaction);
+  }
+
+  /**
+   * Parse all data items recursively and sums up the counters for
+   * approved, translated and pending items.
+   *
+   * @param $item
+   *   The current data item.
+   * @param $entity
+   *   The job item the count should be calculated.
+   */
+  protected function count(&$item, $entity) {
+    if (!empty($item['#text'])) {
+      if (_tmgmt_filter_data($item)) {
         // Set default states if no state is set.
-        if (!isset($data_item['#status'])) {
+        if (!isset($item['#status'])) {
           // Translation is present.
-          if (!empty($data_item['#translation'])) {
-            $data_item['#status'] = TMGMT_DATA_ITEM_STATE_TRANSLATED;
+          if (!empty($item['#translation'])) {
+            $item['#status'] = TMGMT_DATA_ITEM_STATE_TRANSLATED;
           }
           // No translation present.
           else {
-            $data_item['#status'] = TMGMT_DATA_ITEM_STATE_PENDING;
-          }
-          }
-          switch ($data_item['#status']) {
-            case TMGMT_DATA_ITEM_STATE_APPROVED:
-              $count_approved++;
-              break;
-            case TMGMT_DATA_ITEM_STATE_TRANSLATED:
-              $count_translated++;
-              break;
-            default:
-              $count_pending++;
-              break;
+            $item['#status'] = TMGMT_DATA_ITEM_STATE_PENDING;
           }
         }
+        switch ($item['#status']) {
+          case TMGMT_DATA_ITEM_STATE_APPROVED:
+            $entity->count_approved++;
+            break;
+          case TMGMT_DATA_ITEM_STATE_TRANSLATED:
+            $entity->count_translated++;
+            break;
+          default:
+            $entity->count_pending++;
+            break;
+        }
       }
-      // Save changed data item states.
-      $entity->data = tmgmt_unflatten_data($items);
     }
-    // Set counts on entity.
-    $entity->count_pending = $count_pending;
-    $entity->count_translated = $count_translated;
-    $entity->count_approved = $count_approved;
-    return parent::save($entity, $transaction);
+    else {
+      foreach (element_children($item) as $key) {
+        $this->count($item[$key], $entity);
+      }
+    }
   }
 
   /**
