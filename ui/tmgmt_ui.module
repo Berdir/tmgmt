@@ -139,6 +139,9 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
   foreach (element_children($element) as $key) {
     $parent_label = array_shift($element[$key]['#parent_label']);
     $leaf_label = array_pop($element[$key]['#parent_label']);
+    if ($parent_label == $leaf_label) {
+      $leaf_label = '';
+    }
     if ($labels != $element[$key]['#parent_label']) {
       $labels = $element[$key]['#parent_label'];
       if (!empty($labels)) {
