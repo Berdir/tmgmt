@@ -137,9 +137,18 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
   $labels = '';
   $parent_label = '';
   foreach (element_children($element) as $key) {
-    $labels = $element[$key]['#parent_label'];
-    $parent_label = array_shift($labels);
-    $leaf_label = array_pop($labels);
+    $parent_label = array_shift($element[$key]['#parent_label']);
+    $leaf_label = array_pop($element[$key]['#parent_label']);
+    if ($labels != $element[$key]['#parent_label']) {
+      $labels = $element[$key]['#parent_label'];
+      if (!empty($labels)) {
+        $cell = array(
+          'data' => implode(' > ', $labels),
+          'colspan' => 4,
+        );
+        $result .= '<tr>' . _theme_table_cell('') . _theme_table_cell($cell, TRUE) . '</tr>';
+      }
+    }
     $result .= '<tr>';
     $result .= _theme_table_cell('');
     $result .= _theme_table_cell($leaf_label, TRUE);
@@ -147,13 +156,6 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
     $result .= _theme_table_cell(drupal_render($element[$key]['translation']));
     $result .= _theme_table_cell('');
     $result .= '</tr>';
-  }
-  if (!empty($labels) && count($labels) > 1) {
-    $cell = array(
-      'data' => implode(' > ', $labels),
-      'colspan' => 4,
-    );
-    $result = '<tr>' . _theme_table_cell('') . _theme_table_cell($cell, TRUE) . '</tr>' . $result;
   }
   if (!empty($parent_label)) {
     $cell = array(
@@ -450,6 +452,7 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
  * field names.
  */
 function _tmgmt_ui_review_form_element($data) {
+  dpm($data);
   $form = array(
     '#theme' => 'tmgmt_ui_translator_review_form_element',
   );
