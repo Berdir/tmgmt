@@ -111,7 +111,7 @@ function tmgmt_ui_theme() {
 function theme_tmgmt_ui_translator_review_form($variables) {
   $form = $variables['form'];
   $head = '<th>' . t('Status') . '</th>';
-  $head .= '<th>' . t('Label') . '</th>';
+//  $head .= '<th>' . t('Label') . '</th>';
   $head .= '<th>' . t('Source') . '</th>';
   $head .= '<th>' . t('Translation') . '</th>';
   $head .= '<th>' . t('Actions') . '</th>';
@@ -139,22 +139,27 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
   foreach (element_children($element) as $key) {
     $parent_label = array_shift($element[$key]['#parent_label']);
     $leaf_label = array_pop($element[$key]['#parent_label']);
-    if ($parent_label == $leaf_label) {
-      $leaf_label = '';
-    }
     if ($labels != $element[$key]['#parent_label']) {
       $labels = $element[$key]['#parent_label'];
       if (!empty($labels)) {
         $cell = array(
           'data' => implode(' > ', $labels),
-          'colspan' => 4,
+          'colspan' => 3,
         );
         $result .= '<tr>' . _theme_table_cell('') . _theme_table_cell($cell, TRUE) . '</tr>';
       }
     }
+    if (!empty($leaf_label) && $parent_label != $leaf_label) {
+      $cell = array(
+          'data' => $leaf_label,
+          'colspan' => 3,
+          'class' => 'tmgmt_leaf_label'
+        );
+      $result .= '<tr>' . _theme_table_cell('') . _theme_table_cell($cell, TRUE) . '</tr>';
+    }
     $result .= '<tr>';
     $result .= _theme_table_cell('');
-    $result .= _theme_table_cell($leaf_label, TRUE);
+//    $result .= _theme_table_cell($leaf_label, TRUE);
     $result .= _theme_table_cell(drupal_render($element[$key]['source']));
     $result .= _theme_table_cell(drupal_render($element[$key]['translation']));
     $result .= _theme_table_cell('');
@@ -443,6 +448,7 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
     '#title' => t('Cancel'),
     '#href' => $uri['path'],
   );
+  $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
   // The reject functionality has to be implement by the translator plugin as
   // that process is completely unique and custom for each translation service.
   return $form;
@@ -455,7 +461,6 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
  * field names.
  */
 function _tmgmt_ui_review_form_element($data) {
-  dpm($data);
   $form = array(
     '#theme' => 'tmgmt_ui_translator_review_form_element',
   );

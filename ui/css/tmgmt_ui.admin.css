@@ -12,3 +12,9 @@
 .tmgmt-ui-source-language {
   margin-right: 80px;
 }
+
+.tmgmt_leaf_label {
+    background: none;
+    border: none;
+    font-weight: bold;
+}
