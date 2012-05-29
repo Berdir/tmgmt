@@ -1080,17 +1080,21 @@ function _tmgmt_plugin_labels($type) {
  *
  * @see tmgmt_unflatten_data()
  */
-function tmgmt_flatten_data($data, $prefix = NULL) {
+function tmgmt_flatten_data($data, $prefix = NULL, $label = array()) {
   $flattened_data = array();
+  if (isset($data['#label'])) {
+    $label[] = $data['#label'];
+  }
   // Each element is either a text (has #text property defined) or has children,
   // not both.
   if (!empty($data['#text'])) {
     $flattened_data[$prefix] = $data;
+    $flattened_data[$prefix]['#parent_label'] = $label;
   }
   else {
-    $prefix = !empty($prefix) ? $prefix . TMGMT_ARRAY_DELIMITER : '';
+    $prefix = isset($prefix) ? $prefix . TMGMT_ARRAY_DELIMITER : '';
     foreach (element_children($data) as $key) {
-      $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key);
+      $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key, $label);
     }
   }
   return $flattened_data;

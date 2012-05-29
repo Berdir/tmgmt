@@ -91,7 +91,100 @@ function tmgmt_ui_theme() {
       'render element' => 'form',
       'file' => 'includes/tmgmt_ui.controller.inc',
     ),
+    'tmgmt_ui_translator_review_form' => array(
+      'render element' => 'form',
+    ),
+    'tmgmt_ui_translator_review_form_element' => array(
+      'render element' => 'element',
+    ),
   );
+}
+
+/**
+ * Returns HTML for a group of review items.
+ *
+ * @param $variables
+ *   An associative array containing several review items.
+ * @return
+ *   HTML table body fragment.
+ */
+function theme_tmgmt_ui_translator_review_form_element($variables) {
+  $element = $variables['element'];
+  $result = '';
+  $labels = '';
+  $parent_label = '';
+  $element_groups = array();
+  $element_group = '';
+  $flip = array(
+    'even' => 'odd',
+    'odd' => 'even',
+  );
+  $class = 'even';
+  foreach (element_children($element) as $key) {
+    // Label of all element groups.
+    $parent_label = array_shift($element[$key]['#parent_label']);
+    // Label of the current data item.
+    $leaf_label = array_pop($element[$key]['#parent_label']);
+    // Do not repeat labels inside the same hierarchy.
+    if ($parent_label == $leaf_label) {
+      $leaf_label = '';
+    }
+    // Start a new element group.
+    if ($labels != $element[$key]['#parent_label']) {
+      $labels = $element[$key]['#parent_label'];
+      if (!empty($labels)) {
+        // Append to previous group to the group collection.
+        if (!empty($element_group)) {
+          $element_groups[] = '<tbody>' . $element_group . '</tbody>';
+        }
+        // Header row for the current element group.
+        $cell = array(
+          // @todo: Deal with right to left languages.
+          'data' => check_plain(implode(t(' > '), $labels)),
+          'colspan' => 4,
+        );
+        $element_group = '<tr>' . _theme_table_cell($cell, TRUE) . '</tr>';
+      }
+    }
+    $class = $flip[$class];
+    $element_group .= ' <tr' . drupal_attributes(array('class' => $class)) . '>';
+    $row = array();
+    $leaf_label = '<label>' . $leaf_label . '</label>';
+    $leaf_label = '<div class="form-item form-type-label">' . $leaf_label . '</div>';
+    $row[] = array(
+      'data' =>  $leaf_label . drupal_render($element[$key]['status']),
+      'class' => 'tmgmt-ui-data-item-label',
+    );
+    $row[] = array(
+      'data' => drupal_render($element[$key]['source']),
+      'class' => 'tmgmt-ui-data-item-source',
+    );
+    $row[] = array(
+      'data' => drupal_render($element[$key]['translation']),
+      'class' => 'tmgmt-ui-data-item-translation',
+    );
+    $row[] = array(
+      'data' => drupal_render($element[$key]['actions']),
+      'class' => 'tmgmt-ui-data-item-label',
+    );
+    foreach ($row as $cell) {
+      $element_group .= _theme_table_cell($cell);
+    }
+    $element_group .= '</tr>';
+  }
+
+  // Append the last group to the group collection.
+  $element_groups[] = '<tbody>' . $element_group . '</tbody>';
+
+  // Display the label of all element groups inside a table header.
+  if (!empty($parent_label)) {
+    $cell = array(
+      'data' => $parent_label,
+      'colspan' => 5,
+    );
+    $result = '<thead><tr>' . _theme_table_cell($cell, TRUE) . '</tr></thead>' . implode('', $element_groups);
+  }
+  return '<table class="tmgmt-ui-review"><colgroup width="100" /><colgroup width="*" span="2" /><colgroup width="100" />' . $result . '</table>';
 }
 
 /**
@@ -343,10 +436,15 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
   // Actually build the review form elements...
   $form['review'] = array(
     '#type' => 'container',
-    '#tree' => TRUE,
   );
-  // Recursively build the review form.
-  $form['review'] += _tmgmt_ui_review_form_recursive($form_state, $item->getData());
+  // Build the review form.
+  $data = $item->getData();
+  // Need to keep the first hierarchy. So flatten must take place inside
+  // of the foreach loop.
+  foreach (element_children($data) as $key) {
+    $form['review'][$key] = _tmgmt_ui_review_form_element(tmgmt_flatten_data($data[$key], $key));
+  }
+
   // Add the form actions as well.
   $form['actions']['#type'] = 'actions';
   $form['actions']['accept'] = array(
@@ -363,8 +461,46 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
     '#title' => t('Cancel'),
     '#href' => $uri['path'],
   );
+  $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
   // The reject functionality has to be implement by the translator plugin as
   // that process is completely unique and custom for each translation service.
+  return $form;
+}
+
+/**
+ * Build form elements for the review form using flatened data items.
+ *
+ * @todo Mention in the api documentation that the char '|' is not allowed in
+ * field names.
+ *
+ * @param $data
+ *   Flatened array of translation data items.
+ */
+function _tmgmt_ui_review_form_element($data) {
+  $form = array(
+    '#theme' => 'tmgmt_ui_translator_review_form_element',
+  );
+  foreach (element_children($data) as $key) {
+    // The char sequence '][' confuses the form API so we need to replace it.
+    $target_key = str_replace('][', '|', $key);
+    if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
+      $form[$target_key] = array(
+        '#tree' => TRUE,
+        '#parent_label' => $data[$key]['#parent_label']
+      );
+      $form[$target_key]['translation'] = array(
+        '#type' => 'textarea',
+        '#default_value' => $data[$key]['#translation']['#text'],
+        '#title' => t('Translation'),
+      );
+      $form[$target_key]['source'] = array(
+        '#type' => 'textarea',
+        '#default_value' => $data[$key]['#text'],
+        '#title' => t('Source'),
+        '#disabled' => TRUE,
+      );
+    }
+  }
   return $form;
 }
 
@@ -407,6 +543,18 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   // Then invoke the submit method on the source controller.
   $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
   $translator->reviewFormSubmit($form, $form_state, $item);
+  // Write changes back to item.
+  $values = $form_state['values'];
+  $data = array();
+  foreach ($values as $key => $value) {
+    if (is_array($value) && isset($value['translation'])) {
+      // For the char sequence '][' confuses the forms API, it was replaced by
+      // '|' in tmgmt_ui_translation_review_form_defaults(). Now we need to
+      // replace it back.
+      $data[str_replace('|', '][', $key)] = array( '#text' => $value['translation']);
+    }
+  }
+  $item->addTranslatedData($data);
   // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
   if ($form_state['triggering_element']['#value'] == $form['actions']['accept']['#value']) {
     $item->acceptTranslation();
@@ -428,28 +576,7 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
       }
     }
   }
-  // Submit the entity.
   $item->save();
-}
-
-/**
- * Helper function for recursively building a review form.
- */
-function _tmgmt_ui_review_form_recursive(&$form_state, $data) {
-  $form = array();
-  foreach (element_children($data) as $key) {
-    if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
-      $form[$key] = array(
-        '#type' => 'textarea',
-        '#title' => isset($data[$key]['#label']) ? $data[$key]['#label'] : t('Unlabelled'),
-        '#default_value' => $data[$key]['#translation']['#text'],
-      );
-    }
-    elseif (is_array($data[$key])) {
-      $form[$key] = _tmgmt_ui_review_form_recursive($form_state, $data[$key]);
-    }
-  }
-  return $form;
 }
 
 /**

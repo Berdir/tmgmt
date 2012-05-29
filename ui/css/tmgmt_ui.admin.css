@@ -12,3 +12,12 @@
 .tmgmt-ui-source-language {
   margin-right: 80px;
 }
+
+table.tmgmt-ui-review td {
+  vertical-align: top;
+}
+
+table.tmgmt-ui-review tbody th {
+  background: none;
+  font-weight: bold;
+}
