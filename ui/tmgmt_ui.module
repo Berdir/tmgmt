@@ -93,98 +93,21 @@ function tmgmt_ui_theme() {
     ),
     'tmgmt_ui_translator_review_form' => array(
       'render element' => 'form',
+      'file' => 'includes/tmgmt_ui.theme.inc',
+    ),
+    'tmgmt_ui_translator_review_form' => array(
+      'render element' => 'element',
+      'file' => 'includes/tmgmt_ui.theme.inc',
     ),
     'tmgmt_ui_translator_review_form_element' => array(
       'render element' => 'element',
+      'file' => 'includes/tmgmt_ui.theme.inc',
+    ),
+    'tmgmt_ui_translator_review_form_element_status' => array(
+      'render element' => 'status',
+      'file' => 'includes/tmgmt_ui.theme.inc',
     ),
   );
-}
-
-/**
- * Returns HTML for a group of review items.
- *
- * @param $variables
- *   An associative array containing several review items.
- * @return
- *   HTML table body fragment.
- */
-function theme_tmgmt_ui_translator_review_form_element($variables) {
-  $element = $variables['element'];
-  $result = '';
-  $labels = '';
-  $parent_label = '';
-  $element_groups = array();
-  $element_group = '';
-  $flip = array(
-    'even' => 'odd',
-    'odd' => 'even',
-  );
-  $class = 'even';
-  foreach (element_children($element) as $key) {
-    // Label of all element groups.
-    $parent_label = array_shift($element[$key]['#parent_label']);
-    // Label of the current data item.
-    $leaf_label = array_pop($element[$key]['#parent_label']);
-    // Do not repeat labels inside the same hierarchy.
-    if ($parent_label == $leaf_label) {
-      $leaf_label = '';
-    }
-    // Start a new element group.
-    if ($labels != $element[$key]['#parent_label']) {
-      $labels = $element[$key]['#parent_label'];
-      if (!empty($labels)) {
-        // Append to previous group to the group collection.
-        if (!empty($element_group)) {
-          $element_groups[] = '<tbody>' . $element_group . '</tbody>';
-        }
-        // Header row for the current element group.
-        $cell = array(
-          // @todo: Deal with right to left languages.
-          'data' => check_plain(implode(t(' > '), $labels)),
-          'colspan' => 4,
-        );
-        $element_group = '<tr>' . _theme_table_cell($cell, TRUE) . '</tr>';
-      }
-    }
-    $class = $flip[$class];
-    $element_group .= ' <tr' . drupal_attributes(array('class' => $class)) . '>';
-    $row = array();
-    $leaf_label = '<label>' . $leaf_label . '</label>';
-    $leaf_label = '<div class="form-item form-type-label">' . $leaf_label . '</div>';
-    $row[] = array(
-      'data' =>  $leaf_label . drupal_render($element[$key]['status']),
-      'class' => 'tmgmt-ui-data-item-label',
-    );
-    $row[] = array(
-      'data' => drupal_render($element[$key]['source']),
-      'class' => 'tmgmt-ui-data-item-source',
-    );
-    $row[] = array(
-      'data' => drupal_render($element[$key]['translation']),
-      'class' => 'tmgmt-ui-data-item-translation',
-    );
-    $row[] = array(
-      'data' => drupal_render($element[$key]['actions']),
-      'class' => 'tmgmt-ui-data-item-label',
-    );
-    foreach ($row as $cell) {
-      $element_group .= _theme_table_cell($cell);
-    }
-    $element_group .= '</tr>';
-  }
-
-  // Append the last group to the group collection.
-  $element_groups[] = '<tbody>' . $element_group . '</tbody>';
-
-  // Display the label of all element groups inside a table header.
-  if (!empty($parent_label)) {
-    $cell = array(
-      'data' => $parent_label,
-      'colspan' => 5,
-    );
-    $result = '<thead><tr>' . _theme_table_cell($cell, TRUE) . '</tr></thead>' . implode('', $element_groups);
-  }
-  return '<table class="tmgmt-ui-review"><colgroup width="100" /><colgroup width="*" span="2" /><colgroup width="100" />' . $result . '</table>';
 }
 
 /**
@@ -407,7 +330,19 @@ function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
 function tmgmt_ui_job_request_translation(TMGMTJob $job) {
   // Process the translation request.
   $job->requestTranslation();
-  // Print all messages that occurred since our request to the screen.
+  return tmgmt_ui_write_request_messages($job);
+}
+
+/**
+ * Print all messages that occurred since our request to the screen.
+ *
+ * @param $job
+ *    The translation job for which the message should be written.
+ *
+ * @return
+ *   FALSE if there are message with severity error, TRUE otherwise.
+ */
+function tmgmt_ui_write_request_messages(TMGMTJob $job) {
   $errors = FALSE;
   foreach ($job->getMessagesSince() as $message) {
     // Ignore debug messages.
@@ -441,8 +376,9 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
   $data = $item->getData();
   // Need to keep the first hierarchy. So flatten must take place inside
   // of the foreach loop.
+  $zebra = 'even';
   foreach (element_children($data) as $key) {
-    $form['review'][$key] = _tmgmt_ui_review_form_element(tmgmt_flatten_data($data[$key], $key));
+    $form['review'][$key] = _tmgmt_ui_review_form_element(tmgmt_flatten_data($data[$key], $key), $item, $zebra);
   }
 
   // Add the form actions as well.
@@ -475,19 +411,63 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
  *
  * @param $data
  *   Flatened array of translation data items.
+ * @param $job_item
+ *   The job item related to this data.
+ * @param $zebra
+ *   String containing either odd or even. This is used to style the each
+ *   translation item with alternating colors.
  */
-function _tmgmt_ui_review_form_element($data) {
+function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
+  $flip = array(
+    'even' => 'odd',
+    'odd' => 'even',
+  );
   $form = array(
-    '#theme' => 'tmgmt_ui_translator_review_form_element',
+    '#theme' => 'tmgmt_ui_translator_review_form',
   );
   foreach (element_children($data) as $key) {
     // The char sequence '][' confuses the form API so we need to replace it.
     $target_key = str_replace('][', '|', $key);
     if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
+      $zebra = $flip[$zebra];
       $form[$target_key] = array(
         '#tree' => TRUE,
-        '#parent_label' => $data[$key]['#parent_label']
+        '#theme' => 'tmgmt_ui_translator_review_form_element',
+        '#parent_label' => $data[$key]['#parent_label'],
+        '#ajaxid' => drupal_html_id('tmgmt-ui-element-' . $key),
+        '#zebra' => $zebra,
       );
+      $form[$target_key]['status'] = array(
+        '#theme' => 'tmgmt_ui_translator_review_form_element_status',
+        '#value' => $data[$key]['#status'],
+      );
+      $form[$target_key]['actions'] = array(
+        '#type' => 'container',
+      );
+      if ($data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_APPROVED) {
+      $form[$target_key]['actions']['approve'] = array(
+        '#type' => 'submit',
+        '#value' => t('Approve'),
+        '#name' => 'approve-' . $target_key,
+        '#submit' => array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit'),
+        '#ajax' => array(
+          'callback' => 'tmgmt_ui_translation_review_form_ajax',
+          'wrapper' => $form[$target_key]['#ajaxid'],
+        ),
+      );
+      }
+      if ($job_item->getTranslatorController() instanceof TMGMTTranslatorRejectDataItem && $data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_PENDING) {
+        $form[$target_key]['actions']['reject'] = array(
+          '#type' => 'submit',
+          '#value' => t('Reject'),
+          '#name' => 'reject-' . $target_key,
+          '#submit' => array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit'),
+          '#ajax' => array(
+            'callback' => 'tmgmt_ui_translation_review_form_ajax',
+            'wrapper' => $form[$target_key]['#ajaxid'],
+          ),
+        );
+      }
       $form[$target_key]['translation'] = array(
         '#type' => 'textarea',
         '#default_value' => $data[$key]['#translation']['#text'],
@@ -544,17 +524,14 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
   $translator->reviewFormSubmit($form, $form_state, $item);
   // Write changes back to item.
-  $values = $form_state['values'];
-  $data = array();
-  foreach ($values as $key => $value) {
+  foreach ($form_state['values'] as $key => $value) {
     if (is_array($value) && isset($value['translation'])) {
-      // For the char sequence '][' confuses the forms API, it was replaced by
-      // '|' in tmgmt_ui_translation_review_form_defaults(). Now we need to
-      // replace it back.
-      $data[str_replace('|', '][', $key)] = array( '#text' => $value['translation']);
+      $data['#translation'] = array(
+        '#text' => $value['translation'],
+      );
+      $item->updateData($key, $data);
     }
   }
-  $item->addTranslatedData($data);
   // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
   if ($form_state['triggering_element']['#value'] == $form['actions']['accept']['#value']) {
     $item->acceptTranslation();
@@ -577,6 +554,62 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
     }
   }
   $item->save();
+}
+
+/**
+ * Callback for the action at the job item review form.
+ */
+function tmgmt_ui_translation_review_form_update_state($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+  $matches = array();
+  // We should have an #name element
+  // and the name should beginn with approve-
+  // and the $matches should now kontain an element with with name key.
+  preg_match("/^(?P<action>[^-]+)-(?P<key>.+)/i", $form_state['triggering_element']['#name'], $matches);
+  $values = $form_state['values'];
+  $data = array();
+  $item = $form_state['item'];
+  foreach ($values as $key => $value) {
+    if ($key == $matches['key']) {
+      if (key_exists('translation', $value)) {
+        $data['#tranlsation'] = array(
+          '#text' => $value['translation'],
+        );
+      }
+      $controller = $item->getTranslatorController();
+      $success = TRUE;
+      switch ($matches['action']) {
+        case 'approve':
+          $data['#status'] = TMGMT_DATA_ITEM_STATE_APPROVED;
+          $success = $controller->approveDataItem($item, tmgmt_ensure_keys_array($key));
+          break;
+        case 'reject':
+          if ($controller instanceof TMGMTTranslatorRejectDataItem) {
+            $success = $item->getTranslatorController()->rejectDataItem($item, tmgmt_ensure_keys_array($key));
+          }
+        default:
+          $data['#status'] = TMGMT_DATA_ITEM_STATE_PENDING;
+          break;
+      }
+      if ($success) {
+        $item->updateData($key, $data);
+      }
+      break;
+    }
+  }
+}
+
+/**
+ * Ajax callback for the job item review form.
+ */
+function tmgmt_ui_translation_review_form_ajax($form, &$form_state) {
+  $key = array_slice($form_state['triggering_element']['#array_parents'], 0, 3);
+  $commands = array();
+  $render_data = drupal_array_get_nested_value($form, $key);
+  $commands[] = ajax_command_replace(NULL, drupal_render($render_data));
+  tmgmt_ui_write_request_messages($form_state['item']->getJob());
+  $commands[] = ajax_command_html('#tmgmt-status-messages-' . strtolower($render_data['#parent_label'][0]), theme('status_messages'));
+  return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 /**

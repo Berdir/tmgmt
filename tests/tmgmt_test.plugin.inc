@@ -54,7 +54,7 @@ class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController
 
 }
 
-class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
+class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorRejectDataItem {
 
   /**
    * Overrides TMGMTDefaultTranslatorPluginController::hasCheckoutSettings().
@@ -119,6 +119,14 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
     return $languages;
   }
 
+  /**
+   * Overrides TMGMTTranslatorRejectDataItem::rejectDataItem().
+   */
+  public function rejectDataItem(TMGMTJobItem $job_item, array $key) {
+    $key = '[' . implode('][', $key) . ']';
+    $job_item->addMessage('Rejected data item @key for job item @item in job @job.', array('@key' => $key, '@item' => $job_item->tjiid, '@job' => $job_item->tjid));
+    return TRUE;
+  }
 }
 
 class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController {

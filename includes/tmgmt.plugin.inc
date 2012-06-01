@@ -260,6 +260,54 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    */
   public function hasCheckoutSettings(TMGMTJob $job);
 
+  /**
+   * Approve one single data item.
+   *
+   * @todo Using job item breaks the current convention which uses jobs.
+   *
+   * @param $job_item
+   *   The Job item the approved data item belongs to.
+   * @param $key
+   *   The key of the approved data item.
+   *   The key is an array containing the keys of a nested array hierarchy path.
+   *
+   * @return
+   *   TRUE if the approving was succesfull, FALSE otherwise.
+   *   In case of an error, it is the responsibility of the translator to
+   *   provide informations about the failure by adding a message to the job
+   *   item.
+   */
+  public function approveDataItem(TMGMTJobItem $job_item, array $key);
+
+}
+
+/**
+ * Handle reject on data item level.
+ *
+ * Implement this interface in a translator plugin to signal that this plugin is
+ * capable of handling a reject of single data items.
+ *
+ * @ingroup tmgmt_translator
+ */
+interface TMGMTTranslatorRejectDataItem {
+
+  /**
+   * Reject one single data item.
+   *
+   * @todo Using job item breaks the current convention which uses jobs.
+   *
+   * @param $job_item
+   *   The job item to which the rejected data item belongs.
+   * @param $key
+   *   The key of the approved data item.
+   *   The key is an array containing the keys of a nested array hierarchy path.
+   *
+   * @return
+   *   TRUE if the reject was succesfull, else FALSE.
+   *   In case of an error, it is the responsibility of the translator to
+   *   provide informations about the faliure.
+   */
+  public function rejectDataItem(TMGMTJobItem $job_item, array $key);
 }
 
 /**
@@ -334,4 +382,10 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
     return TRUE;
   }
 
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::approveDataItem().
+   */
+  public function approveDataItem(TMGMTJobItem $job_item, array $key) {
+    return TRUE;
+  }
 }

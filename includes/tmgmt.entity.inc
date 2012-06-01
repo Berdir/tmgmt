@@ -663,6 +663,9 @@ class TMGMTJobItem extends Entity {
   /**
    * Recursively writes translated data to the data array of a job item.
    *
+   * While doing this the #status of each data item is set to
+   * TMGMT_DATA_ITEM_STATE_TRANSLATED.
+   *
    * @param $translation
    *   Nested array of translated data. Can either be a single text entry, the
    *   whole data structure or parts of it.
@@ -672,19 +675,12 @@ class TMGMTJobItem extends Entity {
    *   means that it will replace the whole translated data array.
    */
   protected function addTranslatedDataRecursive($translation, $key = array()) {
-    if (empty($key)) {
-      $key = array();
-    }
-    if (!is_array($key)) {
-      $key = explode(TMGMT_ARRAY_DELIMITER, $key);
-    }
     if (isset($translation['#text'])) {
-      $exists = FALSE;
-      drupal_array_get_nested_value($this->data, array_merge($key, array('#text')), $exists);
-      if ($exists) {
-        $translation['#finished'] = TRUE;
-        drupal_array_set_nested_value($this->data, array_merge($key, array('#translation')), $translation);
-      }
+      $values = array(
+        '#translation' => $translation,
+        '#status' => TMGMT_DATA_ITEM_STATE_TRANSLATED,
+      );
+      $this->updateData($key, $values);
       return;
     }
     foreach (element_children($translation) as $item) {
@@ -693,7 +689,46 @@ class TMGMTJobItem extends Entity {
   }
 
   /**
+   * Updates the values for a specific substructure in the data array.
+   *
+   * The values are either set or updated but never deleted.
+   *
+   * @param $key
+   *   Key pointing to the item the values should be applied.
+   *   The key can be either be an array containing the keys of a nested array
+   *   hierarchy path or a string with '][' or '|' as delimiter.
+   * @param $values
+   *   Nested array of values to set.
+   */
+  public function updateData($key, $values = array()) {
+    foreach ($values as $index => $value) {
+      // In order to preserve existing values, we can not aplly the values array
+      // at once. We need to apply each containing value on its own.
+      // If $value is an array we need to advance the hierarchy level.
+      if (is_array($value)) {
+        $this->updateData(array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+      }
+      // Apply the value.
+      else {
+        drupal_array_set_nested_value($this->data, array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+      }
+    }
+  }
+
+  /**
    * Adds translated data to a job item.
+   *
+   * This function calls for TMGMTJobItem::addTranslatedDataRecursive() which
+   * sets the status of each added data item to TMGMT_DATA_ITEM_STATE_TRANSLATED.
+   *
+   * If all data items are translated, the status of the job item is updated to
+   * needs review.
+   *
+   * @todo
+   * To update the job item status to needs review we could take advantage of
+   * the TMGMTJobItem::getCountPending() and TMGMTJobItem::getCountTranslated().
+   * The catch is, that this counter gets updated while saveing which not yet
+   * hapened.
    *
    * @param $translation
    *   Nested array of translated data. Can either be a single text entry, the
@@ -713,7 +748,7 @@ class TMGMTJobItem extends Entity {
       $data = array_filter($data, '_tmgmt_filter_data');
       $finished = TRUE;
       foreach ($data as $item) {
-        if (empty($item['#translation']['#finished'])) {
+        if (empty($item['#status']) || $item['#status'] == TMGMT_DATA_ITEM_STATE_PENDING) {
           $finished = FALSE;
           break;
         }
