@@ -290,6 +290,17 @@ class TMGMTJobItemUIController extends EntityDefaultUIController {
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],
     );
+    $items[$this->path . '/' . $wildcard . '/review/%/reject'] = array(
+      'title' => 'Reject',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('tmgmt_ui_translation_review_form_reject_confirm', $id_count, $id_count + 2),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'tmgmt_job_item_review_access',
+      'access arguments' => array($id_count),
+      'type' => MENU_VISIBLE_IN_BREADCRUMB,
+      'file' => $this->entityInfo['admin ui']['file'],
+      'file path' => $this->entityInfo['admin ui']['file path'],
+    );
     // Menu item for operations like cancel.
     $items[$this->path . '/' . $wildcard . '/%'] = array(
       'page callback' => 'drupal_get_form',

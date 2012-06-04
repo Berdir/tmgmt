@@ -1099,6 +1099,7 @@ function tmgmt_flatten_data($data, $prefix = NULL, $label = array()) {
   }
   return $flattened_data;
 }
+
 /**
  * Converts string keys to array keys.
  *
@@ -1118,6 +1119,28 @@ function tmgmt_ensure_keys_array($key) {
       $key = str_replace('|', TMGMT_ARRAY_DELIMITER, $key);
     }
     $key = explode(TMGMT_ARRAY_DELIMITER, $key);
+  }
+  return $key;
+}
+
+/**
+ * Converts keys array to string key.
+ *
+ * There are three conventions for data keys in use. This function accepts each
+ * of it an ensures a sting keys.
+ *
+ * @param $key
+ *   The key can be either be an array containing the keys of a nested array
+ *   hierarchy path or a string.
+ * @param
+ *   Delimiter to be use in the keys string. Default is ']['.
+ *
+ * @return
+ *  Keys string.
+ */
+function tmgmt_ensure_keys_string($key, $delimiter = TMGMT_ARRAY_DELIMITER) {
+  if (is_array($key)) {
+    $key = implode($delimiter, $key);
   }
   return $key;
 }

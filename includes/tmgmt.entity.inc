@@ -464,17 +464,21 @@ class TMGMTJobItem extends Entity {
    * - #translation: The translated data. Set by the translator plugin.
    *
    * The key can be an alphanumeric string.
-   *
+   * @param $key
+   *   If present, only the subarray identified by key is returned.
    * @return array
    *   A structured data array.
    */
-  public function getData() {
+  public function getData(array $key = array()) {
     if (empty($this->data)) {
       // Load the data from the source if it has not been set yet.
       $this->data = $this->getSourceData();
       $this->save();
     }
-    return $this->data;
+    if (empty($key)) {
+      return $this->data;
+    }
+    return drupal_array_get_nested_value($this->data, $key);
   }
 
   /**
