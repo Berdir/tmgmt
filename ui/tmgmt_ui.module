@@ -48,18 +48,6 @@ function tmgmt_ui_menu() {
     'page arguments' => array('tmgmt_job_overview'),
     'access arguments' => array('administer tmgmt'),
   );
-  $items['admin/config/regional/tmgmt/overview'] = array(
-    'title' => 'Overview',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'access arguments' => array('administer tmgmt'),
-    'weight' => -10,
-  );
-  $items['admin/config/regional/tmgmt/overview/dashboard'] = array(
-    'title' => 'Dashboard',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'access arguments' => array('administer tmgmt'),
-    'weight' => -10,
-  );
   $items['admin/config/regional/tmgmt/settings'] = array(
     'title' => 'Settings',
     'page callback' => 'drupal_get_form',
@@ -175,14 +163,6 @@ function tmgmt_ui_embed_view($view) {
       return $output;
     }
   }
-  return '';
-}
-
-/**
- * Page callback for the overview page.
- */
-function tmgmt_ui_dashboard_page() {
-  // @todo Implement the dashboard.
   return '';
 }
 

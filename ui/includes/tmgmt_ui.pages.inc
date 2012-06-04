@@ -7,28 +7,6 @@
  */
 
 /**
- * Page callback for the overview page.
- */
-function tmgmt_ui_overview_page() {
-  $output = array();
-  if ($view = tmgmt_ui_embed_view('tmgmt_ui_job_item_review_pending')) {
-    $output['review_pending'] = array(
-      '#type' => 'item',
-      '#title' => t('Reviews pending'),
-      '#markup' => $view,
-    );
-  }
-  if ($view = tmgmt_ui_embed_view('tmgmt_ui_job_active')) {
-    $output['new_jobs'] = array(
-      '#type' => 'item',
-      '#title' => t('New jobs'),
-      '#markup' => $view,
-    );
-  }
-  return $output;
-}
-
-/**
  * Form callback for the settings form.
  *
  * @see system_settings_form()

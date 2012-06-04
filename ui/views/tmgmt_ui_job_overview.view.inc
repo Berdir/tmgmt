@@ -310,11 +310,15 @@ $handler->display->display_options['filters']['translator']['expose']['identifie
 
 /* Display: Page */
 $handler = $view->new_display('page', 'Page', 'page');
-$handler->display->display_options['path'] = 'admin/config/regional/tmgmt/overview/jobs';
-$handler->display->display_options['menu']['type'] = 'tab';
+$handler->display->display_options['path'] = 'admin/config/regional/tmgmt/overview';
+$handler->display->display_options['menu']['type'] = 'default tab';
 $handler->display->display_options['menu']['title'] = 'Jobs';
 $handler->display->display_options['menu']['weight'] = '-1';
 $handler->display->display_options['menu']['context'] = 0;
+$handler->display->display_options['tab_options']['type'] = 'normal';
+$handler->display->display_options['tab_options']['title'] = 'Translation Management';
+$handler->display->display_options['tab_options']['weight'] = '0';
+$handler->display->display_options['tab_options']['name'] = 'management';
 $translatables['tmgmt_ui_job_overview'] = array(
   t('Master'),
   t('Job overview'),

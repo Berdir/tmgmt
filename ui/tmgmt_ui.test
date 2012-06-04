@@ -98,7 +98,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertNoText(t('Test translator called'));
 
     // Test redirection.
-    $this->assertText(t('Translation Management'));
+    $this->assertText(t('Job overview'));
 
     // Another job.
     $previous_tjid = $job->tjid;
