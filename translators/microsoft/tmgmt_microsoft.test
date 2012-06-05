@@ -49,16 +49,30 @@ class TMGMTMicrosoftTestCase extends TMGMTBaseTestCase {
     );
     $item->save();
 
-    // The translator should not be available at this point because we didn't
-    // define an API key yet.
-    $this->assertFalse($job->isTranslatable());
+    $this->assertFalse($job->isTranslatable(), 'Check if the translator is not
+                       available at this point because we did not define the API
+                       parameters.');
 
     // Save a wrong api key.
     $translator->settings['api'] = 'wrong key';
+    $translator->settings['clientid'] = 'wrong clientid';
+    $translator->settings['clientsecret'] = 'wrong secret';
+    $translator->save();
+
+    $t = $job->getTranslator();
+    $languages = $t->getSupportedTargetLanguages('en');
+    $this->assertTrue(empty($languages), t('We can not get the languages using wrong api parameters.'));
+
+    // Save a correct api key.
+    $translator->settings['api'] = 'correct key';
+    $translator->settings['clientid'] = 'correct clientid';
+    $translator->settings['clientsecret'] = 'correct secret';
     $translator->save();
 
     // Make sure the translator returns the correct supported target languages.
-    $languages = $job->getTranslator()->getSupportedTargetLanguages('en');
+    $t = $job->getTranslator();
+    cache_clear_all('languages:' . $t->name, 'cache_tmgmt');
+    $languages = $t->getSupportedTargetLanguages('en');
     $this->assertTrue(isset($languages['de']));
     $this->assertTrue(isset($languages['es']));
     $this->assertTrue(isset($languages['it']));
@@ -68,20 +82,6 @@ class TMGMTMicrosoftTestCase extends TMGMTBaseTestCase {
     $this->assertFalse(isset($languages['zh-CHT']));
     $this->assertFalse(isset($languages['en']));
 
-    // @todo Actually check if the api key is valid.
-    $this->assertTrue($job->isTranslatable());
-    $job->requestTranslation();
-
-    // Should have been rejected due to the wrong api key.
-    $this->assertTrue($job->isRejected());
-    $messages = $job->getMessages();
-    $message = end($messages);
-    $this->assertEqual('error', $message->type);
-    $this->assertEqual('Rejected by Microsoft Translator: Wrong API Key', $message->getMessage());
-
-    // Save a correct api key.
-    $translator->settings['api'] = 'correct key';
-    $translator->save();
     $this->assertTrue($job->isTranslatable());
 
     $job->requestTranslation();

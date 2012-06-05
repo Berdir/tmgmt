@@ -17,6 +17,8 @@ function tmgmt_microsoft_tmgmt_translator_plugin_info() {
       'ui controller class' => 'TMGMTMicrosoftTranslatorUIController',
       'default settings' => array(
         'api' => '',
+        'clientid' => '',
+        'clientsecret' => '',
       ),
     ),
   );

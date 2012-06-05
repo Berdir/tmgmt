@@ -21,6 +21,13 @@ class TMGMTMicrosoftTranslatorPluginController extends TMGMTDefaultTranslatorPlu
   protected $translatorUrl = 'http://api.microsofttranslator.com/v2/Http.svc';
 
   /**
+   * Authentication service URL.
+   *
+   * @var string
+   */
+  protected $authUrl = 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/';
+
+  /**
    * Maximum supported characters.
    *
    * @var int
@@ -31,7 +38,7 @@ class TMGMTMicrosoftTranslatorPluginController extends TMGMTDefaultTranslatorPlu
    * Overrides TMGMTDefaultTranslatorPluginController::isAvailable().
    */
   public function isAvailable(TMGMTTranslator $translator) {
-    if ($translator->getSetting('api')) {
+    if ($translator->getSetting('clientid') && $translator->getSetting('clientsecret')) {
       return TRUE;
     }
     return FALSE;
@@ -158,10 +165,66 @@ class TMGMTMicrosoftTranslatorPluginController extends TMGMTDefaultTranslatorPlu
     // Answer: Okay. Will try to keep my cool :D...
     $custom_url = $translator->getSetting('url');
     $url = ($custom_url ? $custom_url : $this->translatorUrl) . '/' . $path;
-    // Add the appId to the query arguments and build the query string.
-    $query = array('appId' => $translator->getSetting('api')) + $query;
+    if ($custom_url) {
+      $testtokenurl = $custom_url . '/GetToken';
+    }
+    // The new Api uses 2 new parameters and access token.
+    $clientid = $translator->getSetting('clientid');
+    if (!empty($clientid)) {
+      $clientsecret = $translator->getSetting('clientsecret');
+      $tokenRequest = $this->getToken($clientid, $clientsecret, $testtokenurl);
+      $token = json_decode($tokenRequest->data);
+      if (isset($token->error)) {
+        watchdog('tmgmt_microsoft', 'Could not get Microsoft token. Error: @error', array('@error' => $token->error_description), WATCHDOG_ERROR);
+        return $tokenRequest;
+      }
+      $options['headers']['Authorization'] = 'Bearer ' . $token->access_token;
+    }
+    else {
+      // @todo remove this parameter and logic around once it is officially
+      // deprecated.
+      // Legacy api parameter.
+      // Add the appId to the query arguments and build the query string.
+      $query = array('appId' => $translator->getSetting('api')) + $query;
+    }
     $url = url($url, array('query' => $query));
     return drupal_http_request($url, $options);
+  }
+
+  /**
+   * Get the access token.
+   *
+   * @param $clientID
+   *   Application client ID.
+   * @param $clientSecret
+   *   Application client secret string.
+   *
+   * @return
+   *   The response object returned by drupal_http_request().
+   */
+  protected function getToken($clientID, $clientSecret, $testurl = FALSE) {
+    $request = &drupal_static(__FUNCTION__);
+    if (!isset($request[$clientID][$clientSecret])) {
+      // Create the request array.
+      $paramArr = array(
+        'grant_type' => 'client_credentials',
+        'scope' => 'http://api.microsofttranslator.com',
+        'client_id' => $clientID,
+        'client_secret' => $clientSecret,
+      );
+      $headers = array('Content-Type' => 'application/x-www-form-urlencoded');
+      $options = array(
+        'headers' => $headers,
+        'method' => 'POST',
+        'data' => http_build_query($paramArr),
+      );
+      $url = $this->authUrl;
+      if ($testurl) {
+        $url = $testurl;
+      }
+      $request[$clientID][$clientSecret] = drupal_http_request($url, $options);
+    }
+    return $request[$clientID][$clientSecret];
   }
 
 }
