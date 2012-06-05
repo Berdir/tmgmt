@@ -575,15 +575,23 @@ function tmgmt_ui_translation_review_form_update_state($form, &$form_state) {
     case 'approve':
       $form_state['rebuild'] = TRUE;
       $data['#status'] = TMGMT_DATA_ITEM_STATE_APPROVED;
-//          $success = $controller->approveDataItem($item, tmgmt_ensure_keys_array($key));
+      $success = $controller->approveDataItem($item, tmgmt_ensure_keys_array($key));
       break;
     case 'reject':
       if (empty($values['confirm'])) {
-        $form_state['redirect'] = $form['#action'] . '/' . $matches['key'] . '/reject';
+        if (isset($_GET['destination'])) {
+          $destination = $_GET['destination'];
+          unset($_GET['destination']);
+        }
+        else {
+          $destination = '';
+        }
+        tmgmt_ui_redirect_queue_set(array(current_path()), $destination);
+        $form_state['redirect'] = current_path() . '/' . $matches['key'] . '/reject';
         $success = FALSE;
       }
       else {
-        $form_state['redirect'] = $values['path'];
+        $form_state['redirect'] = array(tmgmt_ui_redirect_queue_dequeue(), array( 'query' => array('destination' => tmgmt_ui_redirect_queue_destination())));
         if ($controller instanceof TMGMTTranslatorRejectDataItem) {
             $success = $job_item->getTranslatorController()->rejectDataItem($job_item, tmgmt_ensure_keys_array($matches['key']), $values);
         }
@@ -618,15 +626,14 @@ function tmgmt_ui_translation_review_form_reject_confirm($form, &$form_state, TM
   // Path of job item review form.
   $path = explode('/', current_path());
   $path = implode('/', array_slice($path, 0, count($path) - 2));
-
+  
   $args = array(
-    '@data_item' => $job_item->getData(array_merge(tmgmt_ensure_keys_array($key), array('#label'))),
+    '@data_item' => $job_item->getData(tmgmt_ensure_keys_array($key), '#label'),
     '@job_item' => $job_item->label(),
   );
 
   $form = confirm_form( $form, t('Confirm rejection of @data_item in @job_item', $args), $path, '');
   $form_state['item'] = $job_item;
-  $form['path'] = array('#type' => 'value', '#value' => '/' . $path);
   $form['key'] = array('#type' => 'value', '#value' => $key);
   $form['actions']['submit']['#name'] = 'reject-' . $key;
   $form['actions']['submit']['#submit'] = array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit');
