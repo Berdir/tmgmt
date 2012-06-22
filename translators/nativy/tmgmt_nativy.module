@@ -64,11 +64,21 @@ function tmgmt_nativy_process_callback(TMGMTJob $job) {
     return;
   }
 
-  if ($controller->retrieveTranslation($job)) {
-    $job->addMessage('Successfully retrieved translation.');
+  if (!empty($_GET['text_to_key'])) {
+    if ($success = $controller->nativyRetrieveSingleTranslation($job, tmgmt_ensure_keys_array($_GET['text_to_key']))) {
+      $job->addMessage('Successfully retrieved single translation.');
+    }
+    else {
+      $job->addMessage('Failed to retrieve single translation.', 'warning');
+    }
   }
   else {
-    $job->addMessage('Failed to retrieve the translation.', 'warning');
+    if ($success = $controller->retrieveTranslation($job)) {
+      $job->addMessage('Successfully retrieved translation.');
+    }
+    else {
+      $job->addMessage('Failed to retrieve the translation.', 'warning');
+    }
   }
 }
 

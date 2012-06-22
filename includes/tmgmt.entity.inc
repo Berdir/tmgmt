@@ -464,17 +464,27 @@ class TMGMTJobItem extends Entity {
    * - #translation: The translated data. Set by the translator plugin.
    *
    * The key can be an alphanumeric string.
+   * @param $key
+   *   If present, only the subarray identified by key is returned.
+   * @param $index
+   *   Optional index of an attribute below $key.
    *
    * @return array
    *   A structured data array.
    */
-  public function getData() {
+  public function getData(array $key = array(), $index = null) {
     if (empty($this->data)) {
       // Load the data from the source if it has not been set yet.
       $this->data = $this->getSourceData();
       $this->save();
     }
-    return $this->data;
+    if (empty($key)) {
+      return $this->data;
+    }
+    if ($index) {
+      $key = array_merge($key, array($index));
+    }
+    return drupal_array_get_nested_value($this->data, $key);
   }
 
   /**
@@ -674,13 +684,16 @@ class TMGMTJobItem extends Entity {
    *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
    *   means that it will replace the whole translated data array.
    */
-  protected function addTranslatedDataRecursive($translation, $key = array()) {
+  protected function addTranslatedDataRecursive($translation, array $key = array()) {
     if (isset($translation['#text'])) {
-      $values = array(
-        '#translation' => $translation,
-        '#status' => TMGMT_DATA_ITEM_STATE_TRANSLATED,
-      );
-      $this->updateData($key, $values);
+      $status = $this->getData($key, '#status');
+      if (!$status || $status == TMGMT_DATA_ITEM_STATE_PENDING) {
+        $values = array(
+          '#translation' => $translation,
+          '#status' => TMGMT_DATA_ITEM_STATE_TRANSLATED,
+        );
+        $this->updateData($key, $values);
+      }
       return;
     }
     foreach (element_children($translation) as $item) {
@@ -1458,17 +1471,27 @@ class TMGMTJob extends Entity {
   /**
    * Returns the source data of all job items.
    *
-   * @param $reset
-   *   Whether the source data should be regenerated from the source objects.
-   *
+   * @param $key
+   *   If present, only the subarray identified by key is returned.
+   * @param $index
+   *   Optional index of an attribute below $key.
    * @return array
    *   A nested array with the source data where the most upper key is the job
    *   item id.
    */
-  public function getData($reset = FALSE) {
+  public function getData(array $key = array(), $index = null) {
     $data = array();
-    foreach ($this->getItems() as $key => $item) {
-      $data[$key] = $item->getData($reset);
+    if (!empty($key)) {
+      $tjiid = array_shift($key);
+      $job_item = entity_load_single('tmgmt_job_item', $tjiid);
+      if ($job_item) {
+        $data[$tjiid] = $job_item->getData($key, $index);
+      }
+    }
+    else {
+      foreach ($this->getItems() as $key => $item) {
+        $data[$key] = $item->getData();
+      }
     }
     return $data;
   }
@@ -1516,12 +1539,7 @@ class TMGMTJob extends Entity {
    *   upper key entry needs to be the job id (tjiid).
    */
   public function addTranslatedData($data, $key = NULL) {
-    if (empty($key)) {
-      $key = array();
-    }
-    if (!is_array($key)) {
-      $key = explode(TMGMT_ARRAY_DELIMITER, $key);
-    }
+    $key = tmgmt_ensure_keys_array($key);
     $items = $this->getItems();
     // If there is a key, get the specific item and forward the call.
     if (!empty($key)) {

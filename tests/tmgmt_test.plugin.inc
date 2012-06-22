@@ -122,10 +122,17 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   /**
    * Overrides TMGMTTranslatorRejectDataItem::rejectDataItem().
    */
-  public function rejectDataItem(TMGMTJobItem $job_item, array $key) {
+  public function rejectDataItem(TMGMTJobItem $job_item, array $key, array $values = NULL) {
     $key = '[' . implode('][', $key) . ']';
     $job_item->addMessage('Rejected data item @key for job item @item in job @job.', array('@key' => $key, '@item' => $job_item->tjiid, '@job' => $job_item->tjid));
     return TRUE;
+  }
+
+  /**
+   * Implements TMGMTTranslatorRejectDataItem::rejectForm().
+   */
+  public function rejectForm($form, &$form_state) {
+    return $form;
   }
 }
 

@@ -307,7 +307,28 @@ interface TMGMTTranslatorRejectDataItem {
    *   In case of an error, it is the responsibility of the translator to
    *   provide informations about the faliure.
    */
-  public function rejectDataItem(TMGMTJobItem $job_item, array $key);
+  public function rejectDataItem(TMGMTJobItem $job_item, array $key, array $values = NULL);
+
+  /**
+   * Reject form.
+   *
+   * This method gets call by tmgmt_ui_translation_review_form_reject_confirm
+   * and allows the translator to add aditional form elements in order to
+   * collect data needed for the reject prozess.
+   *
+   * @param $form
+   *   The form array containing a confirm form.
+   *   $form['item'] holds the job item to which the to berejected data item
+   *   belongs to.
+   *   $form['item'] holds key of the approved data item as an array of keys of
+   *   a nested array hierarchy.
+   * @param $form_state
+   *   The form state.
+   *
+   * @return
+   *   The resulting form array.
+   */
+  public function rejectForm($form, &$form_state);
 }
 
 /**
