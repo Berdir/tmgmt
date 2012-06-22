@@ -46,7 +46,8 @@ function tmgmt_ui_menu() {
     'description' => 'Use the Translation Management Tool',
     'page callback' => 'tmgmt_ui_dashboard_page',
     'page arguments' => array('tmgmt_job_overview'),
-    'access arguments' => array('administer tmgmt'),
+    'access callback' => 'tmgmt_job_access',
+    'access arguments' => array('view'),
   );
   $items['admin/config/regional/tmgmt/settings'] = array(
     'title' => 'Settings',
@@ -235,14 +236,23 @@ function tmgmt_ui_job_checkout_multiple(array $jobs) {
   // Allow other modules to jump in and eg. auto-checkout with rules or use a
   // customized checkout form.
   drupal_alter('tmgmt_ui_job_checkout_before', $redirects, $jobs);
+  $denied = 0;
   foreach ($jobs as $job) {
     if (!$job->isUnprocessed()) {
       // Job is already checked out, just ignore that one. This could happen
       // if jobs have already been submitted in the before hook.
       continue;
     }
-    // @todo: Add permission checks.
     if (!variable_get('tmgmt_quick_checkout', TRUE) || tmgmt_ui_job_needs_checkout_form($job)) {
+
+      if (!entity_access('submit', 'tmgmt_job', $job)) {
+        // Ignore jobs if the user is not allowed to submit, ignore.
+        $denied++;
+        // Make sure that the job is saved.
+        $job->save();
+        continue;
+      }
+
       $uri = $job->uri();
       $redirects[] = $uri['path'] . '/manage';
     }
@@ -258,6 +268,12 @@ function tmgmt_ui_job_checkout_multiple(array $jobs) {
   // Allow other modules to jump in and eg. auto-checkout with rules or use a
   // customized checkout form.
   drupal_alter('tmgmt_ui_job_checkout_after', $redirects, $jobs);
+
+  // Display message for created jobs that can not be checked out.
+  if ($denied) {
+    drupal_set_message(format_plural($denied, 'One job has been created.', '@count jobs have been created.'));
+  }
+
   return $redirects;
 }
 

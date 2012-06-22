@@ -61,14 +61,111 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     debug(_node_types_build());*/
   }
 
+    /**
+   * Tests the create, submit and accept permissions.
+   */
+  function testPermissions() {
+
+    $no_permissions = $this->drupalCreateUser();
+    $this->drupalLogin($no_permissions);
+    $this->drupalGet('admin/config/regional/tmgmt');
+    $this->assertResponse(403);
+
+    // Test with a user that is only allowed to create jobs.
+    $create_user = $this->drupalCreateUser(array('access administration pages', 'translate content', 'create translation jobs'));
+    $this->drupalLogin($create_user);
+
+    // Create an english source node.
+    $node = $this->drupalCreateNode(array('type' => 'page', 'language' => 'en', 'body' => array('en' => array(array()))));
+
+    // Go to the translate tab.
+    $this->drupalGet('node/' . $node->nid);
+    $this->clickLink('Translate');
+
+    // Request a translation for german.
+    $edit = array(
+      'languages[de]' => TRUE,
+    );
+    $this->drupalPost(NULL, $edit, t('Request translation'));
+    $this->assertText(t('One job has been created.'));
+    // Verify that we are still on the translate tab.
+    $this->assertText(t('Translations of @title', array('@title' => $node->title)));
+
+    $this->drupalGet('admin/config/regional/tmgmt');
+    $this->assertResponse(200);
+    $this->assertLink(t('view'));
+    $this->assertNoLink(t('checkout'));
+    $this->assertNoLink(t('delete'));
+    $this->assertText(t('From English to German'));
+    $this->clickLink(t('view'));
+    $this->clickLink(t('Manage'));
+    $this->assertResponse(200);
+    $this->assertNoRaw(t('Submit to translator'));
+
+    // Try to access the delete page directly.
+    $this->clickLink('view');
+    $this->drupalGet($this->getUrl() . '/delete');
+    $this->assertResponse(403);
+
+    // Log in as user with only submit permission.
+    $submit_user = $this->drupalCreateUser(array('access administration pages', 'translate content', 'submit translation jobs'));
+    $this->drupalLogin($submit_user);
+
+    // Go to the translate tab, verify that there is no request translation
+    // button.
+    $this->drupalGet('node/' . $node->nid);
+    $this->clickLink('Translate');
+    $this->assertNoRaw(t('Request translation'));
+
+    // Go to the overview and submit the job.
+    $this->drupalGet('admin/config/regional/tmgmt');
+    $this->assertResponse(200);
+    $this->assertLink(t('view'));
+    $this->assertLink(t('checkout'));
+    $this->assertNoLink(t('delete'));
+    $this->assertText(t('From English to German'));
+
+    $this->clickLink('checkout');
+
+    $this->drupalPost(NULL, array(), t('Submit to translator'));
+
+    // Make sure that the job is active now.
+    $this->assertText(t('Active'));
+    $this->assertLink(t('cancel'));
+    $this->clickLink(t('view'));
+    $this->assertText(t('Needs review'));
+    $this->assertNoLink(t('review'));
+    $this->assertTrue(empty($urls));
+
+    // Now log in as user with only accept permission and review the job.
+    $accept_user = $this->drupalCreateUser(array('access administration pages', 'accept translation jobs'));
+    $this->drupalLogin($accept_user);
+
+    $this->drupalGet('admin/config/regional/tmgmt');
+    $this->clickLink('view');
+    $this->clickLink('review');
+
+    $this->drupalPost(NULL, array(), t('Approve'));
+    // Verify that the accepted character is shown.
+    $this->assertText('&#x2611;');
+    $this->drupalPost(NULL, array(), t('Accept'));
+    $this->assertText(t('Accepted'));
+    $this->assertText('1/0/0');
+
+    // Go to the translate tab, verify that there is no request translation
+    // button.
+    //$this->drupalGet('node/' . $node->nid);
+    //$this->clickLink('Translate');
+    //$this->assertNoRaw(t('Request translation'));
+  }
+
   /**
    * Test the translate tab for a single checkout.
    */
   function testTranslateTabSingleCheckout() {
 
     // Create a user that is allowed to translate nodes.
-    // @todo: Use granular permission once available.
-    $translater = $this->drupalCreateUser(array('translate content', 'administer tmgmt'));
+    $translater = $this->drupalCreateUser(array('translate content', 'create translation jobs', 'submit translation jobs', 'accept translation jobs'));
     $this->drupalLogin($translater);
 
     // Create an english source node.
@@ -117,8 +214,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
    */
   function testTranslateTabMultipeCheckout() {
     // Create a user that is allowed to translate nodes.
-    // @todo: Use granular permission once available.
-    $translater = $this->drupalCreateUser(array('translate content', 'administer tmgmt'));
+    $translater = $this->drupalCreateUser(array('translate content', 'create translation jobs', 'submit translation jobs', 'accept translation jobs'));
     $this->drupalLogin($translater);
 
     // Create an english source node.
@@ -182,8 +278,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $default_translator->save();
 
     // Create a user that is allowed to translate nodes.
-    // @todo: Use granular permission once available.
-    $translater = $this->drupalCreateUser(array('translate content', 'administer tmgmt'));
+    $translater = $this->drupalCreateUser(array('translate content', 'create translation jobs', 'submit translation jobs', 'accept translation jobs'));
     $this->drupalLogin($translater);
 
     // Create an english source node.
@@ -237,8 +332,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $default_translator->save();
 
     // Create a user that is allowed to translate nodes.
-    // @todo: Use granular permission once available.
-    $translater = $this->drupalCreateUser(array('translate content', 'administer tmgmt'));
+    $translater = $this->drupalCreateUser(array('translate content', 'create translation jobs', 'submit translation jobs', 'accept translation jobs'));
     $this->drupalLogin($translater);
 
     // Create an english source node.
@@ -345,8 +439,7 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTBaseTestCase {
    */
   function testNodeSourceOverview() {
     // Create a user that is allowed to translate nodes.
-    // @todo: Use granular permission once available.
-    $translater = $this->drupalCreateUser(array('translate content', 'administer tmgmt', 'edit any page content', 'create page content'));
+    $translater = $this->drupalCreateUser(array('translate content', 'create translation jobs', 'submit translation jobs', 'accept translation jobs', 'edit any page content', 'create page content'));
     $this->drupalLogin($translater);
 
     // Create a bunch of english nodes.

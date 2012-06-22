@@ -184,8 +184,8 @@ class TMGMTJobUIController extends EntityDefaultUIController {
       'page callback' => 'tmgmt_ui_job_view',
       'page arguments' => array($id_count),
       'load arguments' => array($this->entityType),
-      'access callback' => 'tmgmt_job_access',
-      'access arguments' => array('view', $id_count),
+      'access callback' => 'entity_access',
+      'access arguments' => array('view', $this->entityType, $id_count),
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],
     );
@@ -200,19 +200,26 @@ class TMGMTJobUIController extends EntityDefaultUIController {
       'page callback' => 'entity_ui_get_form',
       'page arguments' => array($this->entityType, $id_count),
       'load arguments' => array($this->entityType),
-      'access callback' => 'tmgmt_job_access',
-      'access arguments' => array('update', $id_count),
+      'access callback' => 'entity_access',
+      'access arguments' => array('update', $this->entityType, $id_count),
       'type' => MENU_LOCAL_TASK,
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],
     );
-    // Menu item for operations like cancel.
-    $items[$this->path . '/' . $wildcard . '/%'] = array(
+    $items[$this->path . '/' . $wildcard . '/cancel'] = array(
       'page callback' => 'drupal_get_form',
       'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
       'load arguments' => array($this->entityType),
-      'access callback' => 'tmgmt_job_access',
-      'access arguments' => array('update', $this->entityType, $id_count),
+      'access callback' => 'entity_access',
+      'access arguments' => array('submit', $this->entityType, $id_count),
+      'type' => MENU_CALLBACK,
+    );
+    $items[$this->path . '/' . $wildcard . '/delete'] = array(
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'entity_access',
+      'access arguments' => array('delete', $this->entityType, $id_count),
       'type' => MENU_CALLBACK,
     );
     return $items;
@@ -268,8 +275,8 @@ class TMGMTJobItemUIController extends EntityDefaultUIController {
       'page callback' => 'tmgmt_ui_job_item_view',
       'page arguments' => array($id_count),
       'load arguments' => array($this->entityType),
-      'access callback' => 'tmgmt_job_item_access',
-      'access arguments' => array('view', $id_count),
+      'access callback' => 'entity_access',
+      'access arguments' => array('view', 'tmgmt_job_item', $id_count),
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],
     );
@@ -301,13 +308,20 @@ class TMGMTJobItemUIController extends EntityDefaultUIController {
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],
     );
-    // Menu item for operations like cancel.
-    $items[$this->path . '/' . $wildcard . '/%'] = array(
+    $items[$this->path . '/' . $wildcard . '/delete'] = array(
       'page callback' => 'drupal_get_form',
       'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
       'load arguments' => array($this->entityType),
-      'access callback' => 'tmgmt_job_item_access',
-      'access arguments' => array('update', $this->entityType, $id_count),
+      'access callback' => 'entity_access',
+      'access arguments' => array('delete', $this->entityType, $id_count),
+      'type' => MENU_CALLBACK,
+    );
+    $items[$this->path . '/' . $wildcard . '/accept'] = array(
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'entity_access',
+      'access arguments' => array('accept', $this->entityType, $id_count),
       'type' => MENU_CALLBACK,
     );
     return $items;

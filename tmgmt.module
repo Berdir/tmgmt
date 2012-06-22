@@ -191,6 +191,15 @@ function tmgmt_permission() {
   $perms['administer tmgmt'] = array(
     'title' => t('Administer translation management'),
   );
+  $perms['create translation jobs'] = array(
+    'title' => t('Create translation jobs'),
+  );
+  $perms['submit translation jobs'] = array(
+    'title' => t('Submit translation jobs'),
+  );
+  $perms['accept translation jobs'] = array(
+    'title' => t('Accept and reject translation jobs'),
+  );
   return $perms;
 }
 
@@ -426,8 +435,34 @@ function tmgmt_job_create($source_language, $target_language, $uid = NULL, array
  *   TRUE if access is allowed, FALSE otherwise.
  */
 function tmgmt_job_access($op, $job = NULL, $account = NULL) {
-  // @todo: Add fine-grained permissions.
-  return user_access('administer tmgmt');
+  if (user_access('administer tmgmt', $account)) {
+    // Administrators can do everything.
+    return TRUE;
+  }
+
+  switch ($op) {
+    case 'create':
+      return user_access('create translation jobs', $account);
+      break;
+    case 'view':
+    case 'update':
+      return user_access('create translation jobs', $account) || user_access('submit translation jobs', $account) || user_access('accept translation jobs', $account);
+      break;
+
+    case 'delete':
+      // Only administrators can delete jobs.
+      return FALSE;
+      break;
+
+    // Custom operations.
+    case 'submit':
+      return user_access('submit translation jobs');
+      break;
+
+    case 'accept':
+      return user_access('accept translation jobs');
+      break;
+  }
 }
 
 /**
@@ -445,9 +480,9 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
  * @return boolean
  *   TRUE if access is allowed, FALSE otherwise.
  */
-function tmgmt_job_item_access($op, $item = NULL, $account = NULL) {
-  // @todo: Add fine-grained permissions.
-  return user_access('administer tmgmt');
+function tmgmt_job_item_access($op, TMGMTJobItem $item = NULL, $account = NULL) {
+  // There are no item specific permissions yet.
+  return tmgmt_job_access($op, $item ? $item->getJob() : NULL, $account);
 }
 
 /**
@@ -464,7 +499,7 @@ function tmgmt_job_item_access($op, $item = NULL, $account = NULL) {
  */
 function tmgmt_job_item_review_access(TMGMTJobItem $item, $account = NULL) {
   if ($item->isNeedsReview() && $item->getSourceController() && $item->getTranslatorController()) {
-    return tmgmt_job_item_access('review', $item, $account);
+    return tmgmt_job_item_access('accept', $item, $account);
   }
   return FALSE;
 }
@@ -484,8 +519,12 @@ function tmgmt_job_item_review_access(TMGMTJobItem $item, $account = NULL) {
  * @return boolean
  *   TRUE if access is allowed, FALSE otherwise.
  */
-function tmgmt_message_access($op, $message = NULL, $account = NULL) {
-  // @todo: Add fine-grained permissions.
+function tmgmt_message_access($op, TMGMTMessage $message = NULL, $account = NULL) {
+  // All users that can see jobs can see messages as well.
+  if ($op == 'view') {
+    return tmgmt_job_access('view', $message->getJob(), $account);
+  }
+  // Changing or creating messages is only possible for admins.
   return user_access('administer tmgmt');
 }
 
@@ -1210,4 +1249,21 @@ function _tmgmt_load_exports($module, $directory, $extension, $name = NULL) {
     }
   }
   return $return;
+}
+
+/**
+ * Implements hook_views_plugins().
+ */
+function tmgmt_views_plugins() {
+  $plugins = array(
+    'access' => array(
+      'tmgmt_views_job_access' => array(
+        'title' => t('Job view access'),
+        'help' => t('Check if the user is allowed to view jobs'),
+        'handler' => 'tmgmt_views_job_access',
+        'path' => drupal_get_path('module', 'tmgmt') . '/views/plugins',
+      ),
+    ),
+  );
+  return $plugins;
 }

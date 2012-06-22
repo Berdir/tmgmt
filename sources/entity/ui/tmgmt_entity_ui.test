@@ -32,7 +32,7 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
 
 
     // Create a new admin user with the administer blocks permission.
-    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer tmgmt', 'administer blocks', 'administer entity translation', 'toggle field translatability'));
+    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'create translation jobs', 'submit translation jobs', 'accept translation jobs', 'administer blocks', 'administer entity translation', 'toggle field translatability'));
     $this->drupalLogin($this->admin_user);
     $this->setEnvironment('de');
     $this->setEnvironment('fr');
@@ -88,11 +88,10 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
   /**
    * Test the translate tab for a single checkout.
    */
-  function dtestNodeTranslateTabSingleCheckout() {
+  function testNodeTranslateTabSingleCheckout() {
 
     // Create a user that is allowed to translate nodes.
-    // @todo: Use granular permission once available.
-    $translater = $this->drupalCreateUser(array('translate node entities', 'administer tmgmt'));
+    $translater = $this->drupalCreateUser(array('translate node entities', 'create translation jobs', 'submit translation jobs', 'accept translation jobs',));
     $this->drupalLogin($translater);
 
     // Create an english source node.
@@ -134,10 +133,9 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
   /**
    * Test the translate tab for a single checkout.
    */
-  function dtestNodeTranslateTabMultipeCheckout() {
+  function testNodeTranslateTabMultipeCheckout() {
     // Create a user that is allowed to translate nodes.
-    // @todo: Use granular permission once available.
-    $translater = $this->drupalCreateUser(array('translate node entities', 'administer tmgmt'));
+    $translater = $this->drupalCreateUser(array('translate node entities', 'create translation jobs', 'submit translation jobs', 'accept translation jobs'));
     $this->drupalLogin($translater);
 
     // Create an english source node.
@@ -197,8 +195,7 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
     field_update_field($comment_body);
 
     // Create a user that is allowed to translate comments.
-    // @todo: Use granular permission once available.
-    $translater = $this->drupalCreateUser(array('translate comment entities', 'administer tmgmt', 'post comments', 'skip comment approval', 'edit own comments'));
+    $translater = $this->drupalCreateUser(array('translate comment entities', 'create translation jobs', 'submit translation jobs', 'accept translation jobs', 'post comments', 'skip comment approval', 'edit own comments'));
     $this->drupalLogin($translater);
 
     // Create an english source term.

@@ -19,18 +19,20 @@ class tmgmt_handler_field_tmgmt_job_item_operations extends views_handler_field_
       'href' => $uri['path'],
       'title' => t('view'),
     );
-    if ($item->isNeedsReview()) {
+    if ($item->isNeedsReview() && entity_access('accept', 'tmgmt_job_item', $item)) {
       $element['#links']['review'] = array(
         'href' => 'admin/config/regional/tmgmt/items/' . $item->tjiid . '/review',
         'query' => array('destination' => current_path()),
         'title' => t('review'),
       );
     }
-    $element['#links']['delete'] = array(
-      'href' => 'admin/config/regional/tmgmt/items/' . $item->tjiid . '/delete',
-      'query' => array('destination' => current_path()),
-      'title' => t('delete'),
-    );
+    if (user_access('administer tmgmt')) {
+      $element['#links']['delete'] = array(
+        'href' => 'admin/config/regional/tmgmt/items/' . $item->tjiid . '/delete',
+        'query' => array('destination' => current_path()),
+        'title' => t('delete'),
+      );
+    }
     return drupal_render($element);
   }
 

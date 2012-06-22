@@ -105,7 +105,8 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
         'file' => isset($this->pluginInfo['file']) ? $this->pluginInfo['file'] : $this->pluginInfo['module'] . '.pages.inc',
         'file path' => isset($this->pluginInfo['file path']) ? $this->pluginInfo['file path'] : drupal_get_path('module', $this->pluginInfo['module']),
         'page callback' => 'drupal_get_form',
-        'access arguments' => array('administer tmgmt'),
+        'access callback' => 'tmgmt_job_access',
+        'access arguments' => array('create'),
       );
       foreach ($types as $type => $name) {
         if (empty($items['admin/config/regional/tmgmt/' . $this->pluginType])) {

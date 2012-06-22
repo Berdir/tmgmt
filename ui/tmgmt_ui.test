@@ -30,8 +30,6 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
   /**
    * Test the page callbacks to create jobs and check them out.
-   *
-   * @todo This entire test needs to be re-done as add-item is gone.
    */
   function testCheckoutForm() {
     $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types'));
@@ -40,7 +38,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->setEnvironment('es');
     $this->setEnvironment('el');
 
-    $user = $this->drupalCreateUser(array('access administration pages', 'administer tmgmt'));
+    $user = $this->drupalCreateUser(array('access administration pages', 'create translation jobs', 'submit translation jobs'));
     $this->drupalLogin($user);
 
     // Add a first item to the job. This will auto-create the job.

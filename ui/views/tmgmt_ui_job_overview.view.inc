@@ -13,8 +13,7 @@ $view->disabled = FALSE; /* Edit this to true to make a default view disabled in
 /* Display: Master */
 $handler = $view->new_display('default', 'Master', 'default');
 $handler->display->display_options['title'] = 'Job overview';
-$handler->display->display_options['access']['type'] = 'perm';
-$handler->display->display_options['access']['perm'] = 'administer tmgmt';
+$handler->display->display_options['access']['type'] = 'tmgmt_views_job_access';
 $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['query']['type'] = 'views_query';
 $handler->display->display_options['query']['options']['query_comment'] = FALSE;

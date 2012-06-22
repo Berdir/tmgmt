@@ -19,21 +19,21 @@ class tmgmt_handler_field_tmgmt_job_operations extends views_handler_field_entit
       'href' => $uri['path'],
       'title' => t('view'),
     );
-    if ($job->isSubmittable()) {
+    if ($job->isSubmittable() && entity_access('submit', 'tmgmt_job', $job)) {
       $element['#links']['checkout'] = array(
         'href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/manage',
         'query' => array('destination' => current_path()),
         'title' => t('checkout'),
       );
     }
-    if ($job->isCancelable()) {
+    if ($job->isCancelable() && entity_access('submit', 'tmgmt_job', $job)) {
       $element['#links']['cancel'] = array(
         'href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/cancel',
         'query' => array('destination' => current_path()),
         'title' => t('cancel'),
       );
     }
-    if ($job->isDeletable()) {
+    if ($job->isDeletable() && user_access('administer tmgmt')) {
       $element['#links']['delete'] = array(
         'href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/delete',
         'query' => array('destination' => current_path()),

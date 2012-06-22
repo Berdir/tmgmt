@@ -382,12 +382,14 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#type' => 'submit',
     '#value' => t('Save job'),
   );
-  $form['actions']['checkout'] = array(
-    '#type' => 'submit',
-    '#value' => tmgmt_ui_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
-    '#access' => $job->isUnprocessed(),
-    '#disabled' => empty($job->translator),
-  );
+  if (entity_access('submit', 'tmgmt_job', $job)) {
+    $form['actions']['checkout'] = array(
+      '#type' => 'submit',
+      '#value' => tmgmt_ui_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
+      '#access' => $job->isUnprocessed(),
+      '#disabled' => empty($job->translator),
+    );
+  }
   if ($old) {
     $form['actions']['delete'] = array(
       '#type' => 'submit',
