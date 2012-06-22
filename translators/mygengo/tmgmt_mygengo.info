@@ -1,8 +1,0 @@
-name = myGengo Translator
-description = Crowd-sourced translation service. Sign up at http://mygengo.com/!
-package = Translation Management
-core = 7.x
-dependencies[] = tmgmt
-files[] = tmgmt_mygengo.plugin.inc
-files[] = tmgmt_mygengo.ui.inc
-files[] = tmgmt_mygengo.test
