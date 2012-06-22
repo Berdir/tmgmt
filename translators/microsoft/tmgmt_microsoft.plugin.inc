@@ -41,6 +41,10 @@ class TMGMTMicrosoftTranslatorPluginController extends TMGMTDefaultTranslatorPlu
     if ($translator->getSetting('clientid') && $translator->getSetting('clientsecret')) {
       return TRUE;
     }
+    // Backwards compatibility for the old api key.
+    if ($translator->getSetting('api')) {
+      return TRUE;
+    }
     return FALSE;
   }
 
