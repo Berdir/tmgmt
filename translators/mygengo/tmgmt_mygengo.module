@@ -71,6 +71,5 @@ function tmgmt_mygengo_tmgmt_translator_plugin_info() {
  * Ajax callback to fetch the options provided by a translator.
  */
 function tmgmt_mygengo_quote($form, &$form_state) {
-  return $form['translator_wrapper']['options']['settings']['quote'];
+  return $form['translator_wrapper']['settings']['quote'];
 }
-
