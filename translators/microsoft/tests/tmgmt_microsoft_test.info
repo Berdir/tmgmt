@@ -1,6 +1,0 @@
-name = Microsoft Translator Test Service Mocker
-description = Provides a local implementation of the Microsoft Translater API
-package = Translation Management
-core = 7.x
-
-hidden = TRUE
