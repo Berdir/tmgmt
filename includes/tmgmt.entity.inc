@@ -1025,6 +1025,11 @@ class TMGMTJob extends Entity {
       '#title' => t('State'),
       '#markup' => $wrapper->state->label(),
     );
+    $content['word_count'] = array(
+      '#type' => 'item',
+      '#title' => t('Word count'),
+      '#markup' => $this->getWordCount(),
+    );
     if (module_exists('views')) {
       if ($view = views_get_view('tmgmt_ui_job_items')) {
         $content['items'] = array(
