@@ -380,7 +380,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     ),
   );
   // Display the checkout settings form if the job can be checked out.
-  if (!empty($job->translator) && $job->isUnprocessed()) {
+  if (!empty($job->translator) && $job->isSubmittable()) {
     $settings = tmgmt_ui_checkout_settings_form($form_state, $job);
     if(!is_array($settings)){
       $settings = array();
@@ -407,7 +407,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     $form['actions']['checkout'] = array(
       '#type' => 'submit',
       '#value' => tmgmt_ui_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
-      '#access' => $job->isUnprocessed(),
+      '#access' => $job->isSubmittable(),
       '#disabled' => empty($job->translator),
     );
   }
