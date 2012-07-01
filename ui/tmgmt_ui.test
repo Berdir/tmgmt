@@ -141,6 +141,14 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $job = entity_load_unchanged('tmgmt_job', $job->tjid);
     $this->assertTrue($job->isRejected());
 
+    // Make sure that rejected jobs can be re-submitted.
+    $this->assertTrue($job->isSubmittable());
+    $edit = array(
+      'settings[action]' => 'translate',
+    );
+    $this->drupalPost(NULL, $edit, t('Submit to translator'));
+    $this->assertText(t('Test translation created'));
+
     // Another job.
     $job = tmgmt_job_match_item('en', 'es');
     $job->addItem('test_source', 'test', 1);
