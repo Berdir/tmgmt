@@ -78,6 +78,7 @@ class TMGMTJobItemController extends EntityAPIController {
       $entity->count_pending = 0;
       $entity->count_translated = 0;
       $entity->count_approved = 0;
+      $entity->word_count = 0;
       $this->count($entity->data, $entity);
     }
     return parent::save($entity, $transaction);
@@ -95,6 +96,10 @@ class TMGMTJobItemController extends EntityAPIController {
   protected function count(&$item, $entity) {
     if (!empty($item['#text'])) {
       if (_tmgmt_filter_data($item)) {
+
+        // Count words of the data item.
+        $entity->word_count += str_word_count($item['#text']);
+
         // Set default states if no state is set.
         if (!isset($item['#status'])) {
           // Translation is present.

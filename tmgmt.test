@@ -222,7 +222,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
       '#translation' => 'The translated data. Set by the translator plugin.',
     );
     $data4 = array(
-      '#text' => 'The text to be translated.',
+      '#text' => 'Another, longer text to be translated.',
       '#translation' => 'The translated data. Set by the translator plugin.',
       '#status' => TMGMT_DATA_ITEM_STATE_APPROVED,
     );
@@ -236,6 +236,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(0, $job->getCountPending());
     $this->assertEqual(0, $job->getCountTranslated());
     $this->assertEqual(0, $job->getCountApproved());
+    $this->assertEqual(0, $job->getWordCount());
 
     // Add a test items.
     $job_item1 = tmgmt_job_item_create('plugin', 'type', 4, array('tjid' => $job->tjid));
@@ -260,8 +261,10 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $job_item1 = entity_load_single('tmgmt_job_item', $job_item1->tjiid);
     $this->assertEqual(1, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
+    $this->assertEqual(5, $job_item1->getWordCount());
     $this->assertEqual(1, $job->getCountPending());
     $this->assertEqual(0, $job->getCountTranslated());
+    $this->assertEqual(5, $job->getWordCount());
 
     // Add another untranslated data item.
     // Test with an empty translation set.
@@ -273,8 +276,10 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $job_item1 = entity_load_single('tmgmt_job_item', $job_item1->tjiid);
     $this->assertEqual(1, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
+    $this->assertEqual(5, $job_item1->getWordCount());
     $this->assertEqual(1, $job->getCountPending());
     $this->assertEqual(0, $job->getCountTranslated());
+    $this->assertEqual(5, $job->getWordCount());
 
     // Add a translated data item.
     $job_item1->data['data_item1'] = $data3;
@@ -306,6 +311,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(1, $job->getCountPending());
     $this->assertEqual(1, $job->getCountTranslated());
     $this->assertEqual(1, $job->getCountApproved());
+    $this->assertEqual(16, $job->getWordCount());
 
     // Add nested data items.
     $job_item1->data['data_item1'] = $data5;

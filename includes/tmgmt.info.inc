@@ -81,6 +81,8 @@ class TMGMTJobItemMetadataController extends EntityDefaultMetadataController {
     // Add the options list for all available source plugins.
     $properties['plugin']['options list'] = 'tmgmt_source_plugin_labels';
 
+    $properties['word_count']['label'] = t('Word count');
+
     return $info;
   }
 
