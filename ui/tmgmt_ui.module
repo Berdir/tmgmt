@@ -571,7 +571,7 @@ function tmgmt_ui_translation_review_form_update_state($form, &$form_state) {
     case 'approve':
       $form_state['rebuild'] = TRUE;
       $data['#status'] = TMGMT_DATA_ITEM_STATE_APPROVED;
-      $success = $controller->approveDataItem($item, tmgmt_ensure_keys_array($key));
+      $success = $controller->approveDataItem($job_item, tmgmt_ensure_keys_array($matches['key']));
       break;
     case 'reject':
       if (empty($values['confirm'])) {

@@ -145,7 +145,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $this->clickLink('view');
     $this->clickLink('review');
 
-    $this->drupalPost(NULL, array(), t('Approve'));
+    $this->drupalPost(NULL, array(), '✓');
     // Verify that the accepted character is shown.
     $this->assertText('&#x2611;');
     $this->drupalPost(NULL, array(), t('Accept'));
