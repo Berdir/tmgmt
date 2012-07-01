@@ -172,6 +172,16 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
+   * @todo Remove this once http://drupal.org/node/1420364 is done.
+   */
+  public function getNotCanTranslateReason(TMGMTJob $job) {
+    if ($controller = $this->getController()) {
+      return $controller->getNotCanTranslateReason($job);
+    }
+    return FALSE;
+  }
+
+  /**
    * Retrieves a setting value from the translator settings. Pulls the default
    * values (if defined) from the plugin controller.
    *

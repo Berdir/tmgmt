@@ -213,6 +213,19 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
   public function canTranslate(TMGMTTranslator $translator, TMGMTJob $job);
 
   /**
+   * Return a reason why the translator is not able to translate this job.
+   *
+   * @param TMGMTJob $job
+   *   The job entity.
+   *
+   * Might be called when canTranslate() returns FALSE to get a reason that
+   * can be displayed to the user.
+   *
+   * @todo Remove this once http://drupal.org/node/1420364 is done.
+   */
+  public function getNotCanTranslateReason(TMGMTJob $job);
+
+  /**
    * Returns all available target languages that are supported by this service
    * when given a source language.
    *
@@ -375,6 +388,14 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
     $languages = entity_metadata_language_list();
     unset($languages[LANGUAGE_NONE], $languages[$source_language]);
     return drupal_map_assoc(array_keys($languages));
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getNotCanTranslateReason().
+   */
+  public function getNotCanTranslateReason(TMGMTJob $job) {
+    $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
+    return t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => $wrapper->source_language->label(), '@target' => $wrapper->target_language->label()));
   }
 
   /**
