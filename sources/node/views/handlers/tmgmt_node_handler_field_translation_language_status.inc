@@ -53,26 +53,17 @@ class tmgmt_node_handler_field_translation_language_status extends views_handler
       $nids[] = $tnid;
     }
     if ($nodes = node_load_multiple($nids)) {
-      $vids = array();
-      foreach ($nodes as $node) {
-        $vids[] = $node->vid;
-      }
-
-      $select = db_select('node', 'n');
-      $select->leftJoin('tmgmt_job_item', 'tji', "n.vid = tji.item_id AND tji.plugin = 'node' AND tji.item_type = 'node'");
-      $select->leftJoin('tmgmt_job', 'tj', 'tji.tjid = tj.tjid');
-      $select->condition('tji.item_id', $vids);
-      $select->fields('n', array('vid', 'nid'));
-      $select->fields('tj', array('target_language'));
-      $select->addExpression('MAX(tji.item_id)');
-      $select->groupBy('n.vid');
-      $select->groupBy('tj.target_language');
+      $result = db_select('node', 'n')
+        ->fields('n', array('tnid', 'language'))
+        ->condition('tnid', $nids)
+        ->execute()
+        ->fetchAll();
 
       $this->language_items = array();
-      $result = $select->execute();
-      foreach ($result as $row) {
-        $this->language_items[$row->nid][$row->target_language] = 1;
+      foreach ($result as $tnode) {
+          $this->language_items[$tnode->tnid][$tnode->language] = 1;
       }
+
     }
   }
 
