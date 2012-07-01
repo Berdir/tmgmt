@@ -7,13 +7,6 @@
  */
 
 /**
- * Simple page callback for displaying the translation job history for a node.
- */
-function tmgmt_node_ui_translation_history() {
-  return tmgmt_ui_embed_view('tmgmt_node_ui_job_history');
-}
-
-/**
  * Node translation overview form. This form overrides the Drupal core or i18n
  * Content Translation page with a tableselect form.
  */
