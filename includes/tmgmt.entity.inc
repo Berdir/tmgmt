@@ -303,6 +303,13 @@ class TMGMTJobItem extends Entity {
   public $count_approved;
 
   /**
+   * Amount of words in this job item.
+   *
+   * @var integer
+   */
+  public $word_count = 0;
+
+  /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array()) {
@@ -547,6 +554,16 @@ class TMGMTJobItem extends Entity {
    */
   public function getCountApproved() {
     return $this->count_approved ? $this->count_approved : 0;
+  }
+
+  /**
+   * Word count of all data items.
+   *
+   * @return
+   *   Approved count
+   */
+  public function getWordCount() {
+    return (int)$this->word_count;
   }
 
   /**
@@ -1007,6 +1024,11 @@ class TMGMTJob extends Entity {
       '#type' => 'item',
       '#title' => t('State'),
       '#markup' => $wrapper->state->label(),
+    );
+    $content['word_count'] = array(
+      '#type' => 'item',
+      '#title' => t('Word count'),
+      '#markup' => $this->getWordCount(),
     );
     if (module_exists('views')) {
       if ($view = views_get_view('tmgmt_ui_job_items')) {
@@ -1513,7 +1535,7 @@ class TMGMTJob extends Entity {
    *   The sum of all pending counts
    */
   public function getCountPending() {
-    return db_query('SELECT SUM(count_pending) FROM {tmgmt_job_item} WHERE tjid = :tjid', array( ':tjid' => $this->tjid))->fetchField();
+    return db_query('SELECT SUM(count_pending) FROM {tmgmt_job_item} WHERE tjid = :tjid', array(':tjid' => $this->tjid))->fetchField();
   }
 
   /**
@@ -1523,7 +1545,7 @@ class TMGMTJob extends Entity {
    *   The sum of all translated counts
    */
   public function getCountTranslated() {
-    return db_query('SELECT SUM(count_translated) FROM {tmgmt_job_item} WHERE tjid = :tjid', array( ':tjid' => $this->tjid))->fetchField();
+    return db_query('SELECT SUM(count_translated) FROM {tmgmt_job_item} WHERE tjid = :tjid', array(':tjid' => $this->tjid))->fetchField();
   }
 
   /**
@@ -1533,7 +1555,17 @@ class TMGMTJob extends Entity {
    *   The sum of all approved counts
    */
   public function getCountApproved() {
-    return db_query('SELECT SUM(count_approved) FROM {tmgmt_job_item} WHERE tjid = :tjid', array( ':tjid' => $this->tjid))->fetchField();
+    return db_query('SELECT SUM(count_approved) FROM {tmgmt_job_item} WHERE tjid = :tjid', array(':tjid' => $this->tjid))->fetchField();
+  }
+
+  /**
+   * Sums up all word counts of this jobs job items.
+   *
+   * @return
+   *   The sum of all approved counts
+   */
+  public function getWordCount() {
+    return db_query('SELECT SUM(word_count) FROM {tmgmt_job_item} WHERE tjid = :tjid', array(':tjid' => $this->tjid))->fetchField();
   }
 
   /**
