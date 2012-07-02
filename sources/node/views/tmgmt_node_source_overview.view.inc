@@ -202,19 +202,12 @@ $handler->display->display_options['fields']['type']['id'] = 'type';
 $handler->display->display_options['fields']['type']['table'] = 'node';
 $handler->display->display_options['fields']['type']['field'] = 'type';
 $handler->display->display_options['fields']['type']['ui_name'] = 'Type';
-/* Field: Source */
-$handler->display->display_options['fields']['language']['id'] = 'language';
-$handler->display->display_options['fields']['language']['table'] = 'node';
-$handler->display->display_options['fields']['language']['field'] = 'language';
-$handler->display->display_options['fields']['language']['ui_name'] = 'Source';
-$handler->display->display_options['fields']['language']['label'] = 'Source';
 /* Field: All translation languages */
 $handler->display->display_options['fields']['translation_language_status_1']['id'] = 'translation_language_status_1';
 $handler->display->display_options['fields']['translation_language_status_1']['table'] = 'node';
 $handler->display->display_options['fields']['translation_language_status_1']['field'] = 'translation_language_status';
 $handler->display->display_options['fields']['translation_language_status_1']['ui_name'] = 'All translation languages';
 $handler->display->display_options['fields']['translation_language_status_1']['exclude'] = TRUE;
-$handler->display->display_options['fields']['translation_language_status_1']['not'] = 0;
 /* Field: Author */
 $handler->display->display_options['fields']['name']['id'] = 'name';
 $handler->display->display_options['fields']['name']['table'] = 'users';
@@ -312,7 +305,6 @@ $translatables['tmgmt_node_source_overview'] = array(
   t('<!--views-bulk-operations-select-all-->'),
   t('Title (in source language)'),
   t('Type'),
-  t('Source'),
   t('All translation languages'),
   t('Author'),
   t('Updated date'),
