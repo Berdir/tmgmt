@@ -57,7 +57,7 @@ class tmgmt_node_handler_field_translation_language_status extends views_handler
     foreach ($values as $value) {
       $tnid = $this->get_value($value);
       $tnid = !empty($tnid) ? $tnid : $this->get_value($value, 'nid');
-      $this->active_job_items[$tnid] = (tmgmt_job_item_load_latest('node', 'node', $tnid, $value->node_language));
+      $this->active_job_items[$tnid] = tmgmt_job_item_load_latest('node', 'node', $tnid, $value->node_language);
       $nids[] = $tnid;
     }
     if ($nodes = node_load_multiple($nids)) {
