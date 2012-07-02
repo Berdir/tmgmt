@@ -411,13 +411,11 @@ function tmgmt_update_7004(&$sandbox) {
       if (!empty($values['#translation']['#finished'])) {
         $finished = $values['#translation']['#finished'];
         unset($values['#translation']['#finished']);
-        if (!is_array($job_item->data)) {
-          drupal_array_set_nested_value($job_item->data, array_merge($key, array('#translation')), $values['#translation']);
-          if ($finished && (empty($values['#status']) || $values['#status'] == TMGMT_DATA_ITEM_STATE_PENDING)) {
-            $values['#status'] = TMGMT_DATA_ITEM_STATE_TRANSLATED;
-          }
-          $job_item->updateData($key, $values);
+        drupal_array_set_nested_value($job_item->data, array_merge($key, array('#translation')), $values['#translation']);
+        if ($finished && (empty($values['#status']) || $values['#status'] == TMGMT_DATA_ITEM_STATE_PENDING)) {
+          $values['#status'] = TMGMT_DATA_ITEM_STATE_TRANSLATED;
         }
+        $job_item->updateData($key, $values);
       }
     }
     $job_item->save();
@@ -456,7 +454,6 @@ function tmgmt_update_7006(&$sandbox) {
   foreach (entity_load('tmgmt_job_item', $tjiids) as $job_item) {
     // Counters are updated when saving a job item.
     $job_item->save();
-    print 'word count: ' . $job_item->word_count;
     $sandbox['progress']++;
   }
 
