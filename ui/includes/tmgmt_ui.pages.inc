@@ -106,7 +106,7 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
   }
   // Check if the translator is currently in use.
   if ($busy = $old ? tmgmt_translator_busy($translator->name) : FALSE) {
-    drupal_set_message(t("This translator is currently in use and therefore can't be modified or deleted."), 'warning');
+    drupal_set_message(t("This translator is currently in use. It cannot be deleted. The chosen Translation Plugin cannot be changed."), 'warning');
   }
   $available = tmgmt_translator_plugin_labels();
   // If the translator plugin is not set, pick the first available plugin as the
