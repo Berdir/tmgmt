@@ -995,7 +995,18 @@ class TMGMTJob extends Entity {
     if (empty($target)) {
       $target = '?';
     }
-    return t('From @source to @target', array('@source' => $source, '@target' => $target));
+
+    $items = $this->getItems();
+
+    if (count($items) == 1) {
+      return t('@title (@source to @target)', array('@source' => $source, '@target' => $target, '@title' => reset($items)->getSourceLabel()));
+    }
+    elseif (count($items) > 1) {
+      return t('@title and @count more (@source to @target)', array('@source' => $source, '@target' => $target, '@count' => count($items), '@title' => reset($items)->getSourceLabel()));
+    }
+    else {
+      return t('From @source to @target', array('@source' => $source, '@target' => $target));
+    }
   }
 
   /**
