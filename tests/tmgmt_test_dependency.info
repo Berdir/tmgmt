@@ -1,0 +1,6 @@
+name = Translation Management Test Dependencies
+package = Translation Management
+core = 7.x
+hidden = TRUE
+dependencies[] = tmgmt
+dependencies[] = rules
