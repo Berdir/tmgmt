@@ -5,7 +5,7 @@
  *
  * @ingroup views_field_handlers
  */
-class tmgmt_node_handler_field_translation_language_status extends views_handler_field_boolean {
+class tmgmt_node_handler_field_translation_language_status extends views_handler_field {
 
   /**
    * @var views_plugin_query_default
@@ -16,6 +16,13 @@ class tmgmt_node_handler_field_translation_language_status extends views_handler
    * @var array
    */
   public $language_items;
+
+  /**
+   * Array of active job items.
+   *
+   * @var array
+   */
+  public $active_job_items = array();
 
   function init(&$view, &$options) {
     parent::init($view, $options);
@@ -50,22 +57,24 @@ class tmgmt_node_handler_field_translation_language_status extends views_handler
     foreach ($values as $value) {
       $tnid = $this->get_value($value);
       $tnid = !empty($tnid) ? $tnid : $this->get_value($value, 'nid');
+      $this->active_job_items[$tnid] = tmgmt_job_item_load_latest('node', 'node', $tnid, $value->node_language);
       $nids[] = $tnid;
     }
     if ($nodes = node_load_multiple($nids)) {
       $result = db_select('node', 'n')
-        ->fields('n', array('tnid', 'language'))
+        ->fields('n', array('tnid', 'language', 'translate'))
         ->condition('tnid', $nids)
         ->execute()
         ->fetchAll();
 
       $this->language_items = array();
       foreach ($result as $tnode) {
-          $this->language_items[$tnode->tnid][$tnode->language] = 1;
+        // The translate flag is set if the translation node is outdated, revert
+        // to have FALSE for outdated translations.
+        $this->language_items[$tnode->tnid][$tnode->language] = !$tnode->translate;
       }
 
     }
   }
-
 
 }
