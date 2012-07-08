@@ -1254,6 +1254,28 @@ function _tmgmt_load_exports($module, $directory, $extension, $name = NULL) {
 }
 
 /**
+ * Returns a label for a data item.
+ *
+ * @param array $data_item
+ *   The data item array.
+ *
+ * @return string
+ *   A label for the data item.
+ */
+function tmgmt_data_item_label(array $data_item) {
+  if (isset($data_item['#parent_label'])) {
+    return implode(t(' > '), $data_item['#parent_label']);
+  }
+  elseif (isset($data_item['#label'])) {
+    return $data_item['#label'];
+  }
+  else {
+    // As a last resort, fall back to a shortened version of the text.
+    return truncate_utf8($data_item['#text'], 50, TRUE, TRUE);
+  }
+}
+
+/**
  * Implements hook_views_plugins().
  */
 function tmgmt_views_plugins() {
