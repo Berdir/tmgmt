@@ -1263,10 +1263,10 @@ function _tmgmt_load_exports($module, $directory, $extension, $name = NULL) {
  *   A label for the data item.
  */
 function tmgmt_data_item_label(array $data_item) {
-  if (isset($data_item['#parent_label'])) {
+  if (!empty($data_item['#parent_label'])) {
     return implode(t(' > '), $data_item['#parent_label']);
   }
-  elseif (isset($data_item['#label'])) {
+  elseif (!empty($data_item['#label'])) {
     return $data_item['#label'];
   }
   else {
