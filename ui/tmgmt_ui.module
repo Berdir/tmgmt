@@ -81,10 +81,6 @@ function tmgmt_ui_theme() {
       'file' => 'includes/tmgmt_ui.controller.inc',
     ),
     'tmgmt_ui_translator_review_form' => array(
-      'render element' => 'form',
-      'file' => 'includes/tmgmt_ui.theme.inc',
-    ),
-    'tmgmt_ui_translator_review_form' => array(
       'render element' => 'element',
       'file' => 'includes/tmgmt_ui.theme.inc',
     ),
@@ -95,6 +91,10 @@ function tmgmt_ui_theme() {
     'tmgmt_ui_translator_review_form_element_status' => array(
       'render element' => 'status',
       'file' => 'includes/tmgmt_ui.theme.inc',
+    ),
+    'tmgmt_ui_translation_language_status_single' => array(
+      'file' => 'includes/tmgmt_ui.theme.inc',
+      'variables' => array('translation_status' => NULL, 'job_item' => NULL),
     ),
   );
 }

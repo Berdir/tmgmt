@@ -1,6 +1,254 @@
 <?php
 
 /**
+ * Helper TestCase class that contains methods to create a node type and a node.
+ */
+abstract class TMGMTEntitySourceBaseTestCase extends TMGMTBaseTestCase {
+
+  public $field_names = array();
+
+  /**
+   * Creates node type with several text fields with different cardinality.
+   *
+   * @param string $machine_name
+   *   Machine name of the node type.
+   * @param string $human_name
+   *   Human readable name of the node type.
+   * @param int $language_content_type
+   *   Flag of how the translation should be handled.
+   */
+  function createNodeType($machine_name, $human_name, $language_content_type = ENTITY_TRANSLATION_ENABLED) {
+
+    // Create new bundle.
+    $type = array(
+      'type' => $machine_name,
+      'name' => $human_name,
+      'base' => 'node_content',
+      'description' => '',
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    );
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+    node_add_body_field($type);
+    node_types_rebuild();
+
+    // Set content type to be translatable as specified by
+    // $language_content_type.
+    $edit = array();
+    $edit['language_content_type'] = $language_content_type;
+    $this->drupalPost('admin/structure/types/manage/' . $machine_name, $edit, t('Save content type'));
+
+    // Create several text fields.
+    $field_types = array('text', 'text_with_summary');
+    $this->field_names[$machine_name][] = 'body';
+
+    for ($i = 0 ; $i <= 5; $i++) {
+      $field_type = $field_types[array_rand($field_types, 1)];
+      $field_name = drupal_strtolower($this->randomName());
+
+      // Create a field.
+      $field = array(
+        'field_name' => $field_name,
+        'type' => $field_type,
+        'cardinality' => mt_rand(1, 5),
+        // Field can be translatable only if content type is
+        // entity translatable.
+        'translatable' => $language_content_type == ENTITY_TRANSLATION_ENABLED,
+      );
+      field_create_field($field);
+
+      // Create an instance of the previously created field.
+      $instance = array(
+        'field_name' => $field_name,
+        'entity_type' => 'node',
+        'bundle' => $machine_name,
+        'label' => $this->randomName(10),
+        'description' => $this->randomString(30),
+        'widget' => array(
+          'type' => $field_type == 'text' ? 'text_textfield' : 'text_textarea_with_summary',
+          'label' => $this->randomString(10),
+        ),
+      );
+      field_create_instance($instance);
+
+      // Store field names in case there are needed outside this method.
+      $this->field_names[$machine_name][] = $field_name;
+    }
+  }
+
+  /**
+   * Creates a node of a given bundle.
+   *
+   * It uses field_names initialized in createNodeType() and will populate
+   * their content with random strings.
+   *
+   * @param string $bundle
+   *   Node type name.
+   * @param string $sourcelang
+   *   Source lang of the node to be created.
+   *
+   * @return object
+   *   Newly created node object.
+   */
+  function createNode($bundle, $sourcelang = 'en') {
+    $node = array(
+      'type' => $bundle,
+      'language' => $sourcelang,
+    );
+
+    foreach ($this->field_names[$bundle] as $field_name) {
+      $field_info = field_info_field($field_name);
+      $cardinality = $field_info['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? 1 : $field_info['cardinality'];
+
+      // Create two deltas for each field.
+      for ($delta = 0; $delta <= $cardinality; $delta++) {
+        $node[$field_name][$sourcelang][$delta]['value'] = $this->randomName(20);
+        if ($field_info['type'] == 'text_with_summary') {
+          $node[$field_name][$sourcelang][$delta]['summary'] = $this->randomName(10);
+        }
+      }
+    }
+
+    return $this->drupalCreateNode($node);
+  }
+}
+
+class TMGMTEntitySourceListTestCase extends TMGMTEntitySourceBaseTestCase {
+
+  protected $nodes = array();
+
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => t('Entity Source List tests'),
+      'description' => t('Tests the user interface for entity translation lists.'),
+      'group' => t('Translation Management'),
+    );
+  }
+
+  function setUp() {
+    parent::setUp(array('entity_translation', 'tmgmt_entity', 'tmgmt_entity_ui', 'translation', 'comment'));
+    $admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer entity translation', 'administer tmgmt'));
+    $this->drupalLogin($admin_user);
+    $this->setEnvironment('de');
+    $this->setEnvironment('fr');
+
+    // Enable entity translations for nodes and comments.
+    $edit = array();
+    $edit['entity_translation_entity_types[comment]'] = 1;
+    $edit['entity_translation_entity_types[node]'] = 1;
+    $this->drupalPost('admin/config/regional/entity_translation', $edit, t('Save configuration'));
+
+    $this->createNodeType('article', 'Article', ENTITY_TRANSLATION_ENABLED);
+    $this->createNodeType('page', 'Page', TRANSLATION_ENABLED);
+
+    // Create nodes that will be used during tests.
+    $this->nodes['article']['en'][0] = $this->createNode('article', 'en');
+    $this->nodes['article']['en'][1] = $this->createNode('article', 'en');
+    $this->nodes['article']['en'][2] = $this->createNode('article', 'en');
+    $this->nodes['article']['en'][3] = $this->createNode('article', 'en');
+    $this->nodes['article']['fr'][0] = $this->createNode('article', 'fr');
+    $this->nodes['article']['de'][0] = $this->createNode('article', 'de');
+    $this->nodes['page']['en'][] = $this->createNode('page');
+  }
+
+  function testAvailabilityOfEntityLists() {
+
+    $this->drupalGet('admin/config/regional/tmgmt/entity/comment');
+    // Check if we are at comments page.
+    $this->assertText(t('Entity overview (Comment)'));
+    // No comments yet - empty message is expected.
+    $this->assertText(t('No entities matching given criteria have been found.'));
+
+    $this->drupalGet('admin/config/regional/tmgmt/entity/node');
+    // Check if we are at nodes page.
+    $this->assertText(t('Entity overview (Node)'));
+    // We expect article title as article node type is entity translatable.
+    $this->assertText($this->nodes['article']['en'][0]->title);
+    // Page node type should not be listed as it is not entity translatable.
+    $this->assertNoText($this->nodes['page']['en'][0]->title);
+  }
+
+  function testTranslationStatuses() {
+
+    // Test statuses: Source, Missing.
+    $this->drupalGet('admin/config/regional/tmgmt/entity/node');
+    $langstatus_en = array_shift($this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-en"]'));
+    $langstatus_de = array_shift($this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]'));
+
+    $this->assertEqual($langstatus_en->img['title'], t('Source'));
+    $this->assertEqual($langstatus_de->img['title'], t('Missing'));
+
+    // Test status: Active job item.
+    $job = $this->createJob('en', 'de');
+    $job->translator = $this->default_translator->name;
+    $job->settings = array();
+    $job->save();
+
+    $job->addItem('entity', 'node', $this->nodes['article']['en'][0]->nid);
+    $job->requestTranslation();
+
+    $this->drupalGet('admin/config/regional/tmgmt/entity/node');
+    $langstatus_de = array_shift($this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]/a'));
+
+    $wrapper = entity_metadata_wrapper('tmgmt_job_item', array_shift($job->getItems()));
+    $label = t('Active job item: @state', array('@state' => $wrapper->state->label()));
+
+    $this->assertEqual($langstatus_de->img['title'], $label);
+
+    // Test status: Current
+    foreach ($job->getItems() as $job_item) {
+      $job_item->acceptTranslation();
+    }
+
+    $this->drupalGet('admin/config/regional/tmgmt/entity/node');
+    $langstatus_de = array_shift($this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]'));
+
+    $this->assertEqual($langstatus_de->img['title'], t('Current'));
+  }
+
+  function testTranslationSubmissions() {
+
+    // Simple submission.
+    $nid = $this->nodes['article']['en'][0]->nid;
+    $edit = array();
+    $edit["items[$nid]"] = 1;
+    $this->drupalPost('admin/config/regional/tmgmt/entity/node', $edit, t('Request translation'));
+    $this->assertText(t('One job needs to be checked out.'));
+
+    // Submission of two entities of the same source language.
+    $nid1 = $this->nodes['article']['en'][0]->nid;
+    $nid2 = $this->nodes['article']['en'][1]->nid;
+    $edit = array();
+    $edit["items[$nid1]"] = 1;
+    $edit["items[$nid2]"] = 1;
+    $this->drupalPost('admin/config/regional/tmgmt/entity/node', $edit, t('Request translation'));
+    $this->assertText(t('One job needs to be checked out.'));
+
+    // Submission of several entities of different source languages.
+    $nid1 = $this->nodes['article']['en'][0]->nid;
+    $nid2 = $this->nodes['article']['en'][1]->nid;
+    $nid3 = $this->nodes['article']['en'][2]->nid;
+    $nid4 = $this->nodes['article']['en'][3]->nid;
+    $nid5 = $this->nodes['article']['de'][0]->nid;
+    $nid6 = $this->nodes['article']['fr'][0]->nid;
+    $edit = array();
+    $edit["items[$nid1]"] = 1;
+    $edit["items[$nid2]"] = 1;
+    $edit["items[$nid3]"] = 1;
+    $edit["items[$nid4]"] = 1;
+    $edit["items[$nid5]"] = 1;
+    $edit["items[$nid6]"] = 1;
+    $this->drupalPost('admin/config/regional/tmgmt/entity/node', $edit, t('Request translation'));
+    $this->assertText(t('@count jobs need to be checked out.', array('@count' => '3')));
+  }
+}
+
+/**
  * Basic Node Source tests.
  *
  */

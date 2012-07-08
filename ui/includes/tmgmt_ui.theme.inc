@@ -36,6 +36,82 @@ function theme_tmgmt_ui_element($variables) {
 }
 
 /**
+ * Gets translation language status.
+ *
+ * @param array $variables
+ *   - 'translation_status': A flag that determines the status. Possible values:
+ *     original, missing, outofdate.
+ *   - 'job_item': Current job item entity associated with translation.
+ *
+ * @return string
+ *   Icon or a link icon that explains the translation status and possibly
+ *   links to an active translation job.
+ */
+function theme_tmgmt_ui_translation_language_status_single($variables) {
+
+  switch ($variables['translation_status']) {
+    case 'original':
+      $label = t('Source');
+      break;
+
+    case 'missing':
+      $label = t('Missing');
+      break;
+
+    case 'outofdate':
+      $label = t('Outdated');
+      break;
+
+    default:
+      $label = t('Current');
+  }
+
+  // Override the image in case of an active job.
+  if (isset($variables['job_item'])) {
+    $wrapper = entity_metadata_wrapper('tmgmt_job_item', $variables['job_item']);
+
+    $label = t('Active job item: @state', array('@state' => $wrapper->state->label()));
+
+    switch ($variables['job_item']->state) {
+      case TMGMT_JOB_ITEM_STATE_ACTIVE:
+        $variables['translation_status'] = 'active';
+        break;
+
+      case TMGMT_JOB_ITEM_STATE_REVIEW:
+        $variables['translation_status'] = 'translated';
+        break;
+    }
+  }
+
+  $url = drupal_get_path('module', 'tmgmt_ui') . '/images/' . $variables['translation_status'] . '.png';
+
+  // Theme the image.
+  $image_variables = array(
+    'path' => $url,
+    'alt' => $label,
+    'title' => $label,
+    'attributes' => array(
+      'class' => array('tmgmt-translation-status-image', 'tmgmt-translation-status-' . $variables['translation_status']),
+    ),
+  );
+  $status = theme('image', $image_variables);
+
+  // If we have an active job item, wrap it in a link.
+  if (!empty($variables['job_item'])) {
+    $uri = $variables['job_item']->uri();
+    // If the job item needs to be reviewed, point to the review form.
+    // Otherwise just use the plain entity uri.
+    $path = $variables['job_item']->isNeedsReview() ? $uri['path'] . '/review' : $uri['path'];
+    $status = l($status, $path, array(
+      'query' => array('destination' => current_path()),
+      'html' => TRUE,
+      'attributes' => array('title' => $label),
+    ));
+  }
+  return $status;
+}
+
+/**
  * Renders a data item status as an HTML/CSS icon.
  */
 function theme_tmgmt_ui_translator_review_form_element_status($variables) {

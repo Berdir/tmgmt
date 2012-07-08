@@ -318,6 +318,8 @@ function tmgmt_job_load_multiple(array $tjids = array(), $conditions = array()) 
  *   The source item type.
  * @param $item_id
  *   The source item id.
+ * @param string $source_language
+ *   The source language of the item.
  *
  * @return array
  *   An array of job entities.

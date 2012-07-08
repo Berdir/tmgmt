@@ -15,7 +15,14 @@ function tmgmt_entity_tmgmt_source_plugin_info() {
     'plugin controller class' => 'TMGMTEntitySourcePluginController',
     'item types' => array(),
   );
-  // @todo Implement item types.
+
+  $entity_types = array_filter(variable_get('entity_translation_entity_types', array()));
+
+  foreach ($entity_types as $entity_key) {
+    $entity_info = entity_get_info($entity_key);
+    $info['entity']['item types'][$entity_key] = $entity_info['label'];
+  }
+
   return $info;
 }
 
@@ -36,4 +43,32 @@ function tmgmt_entity_tmgmt_source_plugin_info() {
 function tmgmt_entity_update_entity_translation($entity, $entity_type, $data, $language) {
   tmgmt_field_populate_entity($entity, $language, $data);
   entity_save($entity_type, $entity);
+}
+
+/**
+ * Implements hook_tmgmt_entity_type_list_query_alter().
+ *
+ * Adds specific condition to the query to list only node types with
+ * "Multilingual support" -> "Enabled, with field translation"
+ *
+ * @see TMGMTEntitySourceUIController
+ */
+function tmgmt_entity_tmgmt_entity_node_list_query_alter(EntityFieldQuery $query) {
+
+  $node_types = array_keys(node_type_get_types());
+  $entity_translation_types = array();
+
+  foreach ($node_types as $node_type) {
+    if (variable_get('language_content_type_' . $node_type) == ENTITY_TRANSLATION_ENABLED) {
+      $entity_translation_types[] = $node_type;
+    }
+  }
+
+  if (!empty($entity_translation_types)) {
+    $query->propertyCondition('type', $entity_translation_types);
+  }
+  else {
+    // Prevent any nodes to be listed.
+    $query->propertyCondition('type', NULL, 'IS NULL');
+  }
 }
