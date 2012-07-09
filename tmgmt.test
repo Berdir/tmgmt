@@ -531,4 +531,25 @@ class TMGMTHelperTestCase extends TMGMTBaseTestCase {
     $this->assertTrue(tmgmt_job_match_item('fr', 'es'));
   }
 
+  /**
+   * Tests the tmgmt_data_item_label() function.
+   *
+   * @todo: Move into a unit test case once available.
+   */
+  function testDataIemLabel() {
+    $no_label = array(
+      '#text' => 'No label',
+    );
+    $this->assertEqual(tmgmt_data_item_label($no_label), 'No label');
+    $label = array(
+      '#parent_label' => array(),
+      '#label' => 'A label',
+    );
+    $this->assertEqual(tmgmt_data_item_label($label), 'A label');
+    $parent_label = array(
+      '#parent_label' => array('Parent label', 'Sub label'),
+      '#label' => 'A label',
+    );
+    $this->assertEqual(tmgmt_data_item_label($label), 'Parent label > Sub label');
+  }
 }
