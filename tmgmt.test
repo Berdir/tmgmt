@@ -550,6 +550,6 @@ class TMGMTHelperTestCase extends TMGMTBaseTestCase {
       '#parent_label' => array('Parent label', 'Sub label'),
       '#label' => 'A label',
     );
-    $this->assertEqual(tmgmt_data_item_label($label), 'Parent label > Sub label');
+    $this->assertEqual(tmgmt_data_item_label($parent_label), 'Parent label > Sub label');
   }
 }
