@@ -443,7 +443,7 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
     field_update_field($comment_body);
 
     // Create a user that is allowed to translate comments.
-    $translater = $this->drupalCreateUser(array('translate comment entities', 'create translation jobs', 'submit translation jobs', 'accept translation jobs', 'post comments', 'skip comment approval', 'edit own comments'));
+    $translater = $this->drupalCreateUser(array('translate comment entities', 'create translation jobs', 'submit translation jobs', 'accept translation jobs', 'post comments', 'skip comment approval', 'edit own comments', 'edit original values'));
     $this->drupalLogin($translater);
 
     // Create an english source term.
