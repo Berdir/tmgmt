@@ -155,8 +155,8 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($job->reference, $loaded_job->reference);
 
     // Test the job items.
-    $item1 = $job->addItem('plugin', 'type', 5);
-    $item2 = $job->addItem('plugin', 'type', 4);
+    $item1 = $job->addItem('test_source', 'type', 5);
+    $item2 = $job->addItem('test_source', 'type', 4);
 
     // Load and compare the items.
     $items = $job->getItems();
@@ -181,8 +181,8 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $job = $this->createJob();
 
     // Add some test items.
-    $item1 = $job->addItem('plugin', 'type', 5);
-    $item2 = $job->addItem('plugin', 'type', 4);
+    $item1 = $job->addItem('test_source', 'type', 5);
+    $item2 = $job->addItem('test_source', 'type', 4);
 
     // Test single load callback.
     $item = tmgmt_job_item_load($item1->tjiid);

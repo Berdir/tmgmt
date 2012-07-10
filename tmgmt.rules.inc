@@ -180,7 +180,14 @@ function tmgmt_rules_create_job($source_language) {
  * Rules callback to add an item to a job.
  */
 function tmgmt_rules_job_add_item(TMGMTJob $job, $plugin, $item_type, $item_id) {
-  $job->addItem($plugin, $item_type, $item_id);
+  try {
+    $job->addItem($plugin, $item_type, $item_id);
+  }
+  catch (TMGMTException $e) {
+    watchdog_exception('tmgmt', $e);
+    drupal_set_message(t('Unable to add job item of type %type with id %id. Make sure the source content is not empty.',
+      array('%type' => $item_type, '%id' => $item_id)), 'error');
+  }
 }
 
 /**

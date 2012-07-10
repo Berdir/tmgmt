@@ -103,11 +103,20 @@ function tmgmt_entity_ui_translate_form_submit($form, &$form_state) {
   foreach (array_keys(array_filter($values['languages'])) as $langcode) {
     // Create the job object.
     $job = tmgmt_job_create($entity->language, $langcode, $GLOBALS['user']->uid);
-    // Add the job item.
-    $job->addItem('entity', $entity_type, $id);
-    // Append this job to the array of created jobs so we can redirect the user
-    // to a multistep checkout form if necessary.
-    $jobs[$job->tjid] = $job;
+
+    try {
+      // Add the job item.
+      $job->addItem('entity', $entity_type, $id);
+      // Append this job to the array of created jobs so we can redirect the user
+      // to a multistep checkout form if necessary.
+      $jobs[$job->tjid] = $job;
+    }
+    catch (TMGMTException $e) {
+      watchdog_exception('tmgmt', $e);
+      $languages = language_list();
+      $target_lang_name = $languages[$langcode]->language;
+      drupal_set_message(t('Unable to add job item for target language %name. Make sure the source content is not empty.', array('%name' => $target_lang_name)), 'error');
+    }
   }
   $redirects = tmgmt_ui_job_checkout_multiple($jobs);
   // If necessary, do a redirect.
