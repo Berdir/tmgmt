@@ -16,7 +16,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       'name' => t('Entity Source tests'),
       'description' => t('Exporting source data from entities and saving translations back to entities.'),
       'group' => t('Translation Management'),
-      'dependencies' => array('waiting_for_new_release_entity_translation'),
+      'dependencies' => array('entity_translation'),
     );
   }
 
@@ -203,7 +203,12 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       foreach (element_children($data[$field_name]) as $delta) {
         foreach (element_children($data[$field_name][$delta]) as $column) {
           $column_value = $data[$field_name][$delta][$column];
-          $this->assertEqual($tentity->{$field_name}[$langcode][$delta][$column], $column_value['#translation']['#text'], t('The field %field:%delta has been populated with the proper translated data.', array('%field' => $field_name, 'delta' => $delta)));
+          if (!empty($column_value['#translate'])) {
+            $this->assertEqual($tentity->{$field_name}[$langcode][$delta][$column], $column_value['#translation']['#text'], t('The field %field:%delta has been populated with the proper translated data.', array('%field' => $field_name, 'delta' => $delta)));
+          }
+          else {
+            $this->assertEqual($tentity->{$field_name}[$langcode][$delta][$column], $column_value['#text'], t('The field %field:%delta has been populated with the proper untranslated data.', array('%field' => $field_name, 'delta' => $delta)));
+          }
         }
       }
     }
