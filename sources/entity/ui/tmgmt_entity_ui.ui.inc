@@ -69,7 +69,19 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
       '#attributes' => array('id' => 'tmgmt-entities-list'),
     );
 
-    foreach ($this->getEntitiesTranslationData($type) as $data) {
+    // Load search property params which will be passed into
+    $search_property_params = array();
+    $exclude_params = array('q', 'page');
+    foreach ($_GET as $key => $value) {
+      // Skip exclude params, and those that have empty values, as these would
+      // make it into query condition instead of being ignored.
+      if (in_array($key, $exclude_params) || $value === '') {
+        continue;
+      }
+      $search_property_params[$key] = $value;
+    }
+
+    foreach ($this->getEntitiesTranslationData($type, $search_property_params) as $data) {
       $form['items']['#options'][$data['entity_id']] = $this->overviewRow($data);
     }
 
@@ -106,23 +118,32 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
       $source_lang = $handler->getTranslations()->original;
       $entity_id = entity_id($type, $entity);
 
-      // For given source lang no job exists yet.
-      if (!isset($source_lang_registry[$source_lang])) {
-        // Create new job.
-        $job = tmgmt_job_create($source_lang, NULL, $GLOBALS['user']->uid);
-        // Add initial job item.
-        $job->addItem('entity', $type, $entity_id);
-        // Add job identifier into registry
-        $source_lang_registry[$source_lang] = $job->tjid;
-        // Add newly created job into jobs queue.
-        $jobs[$job->tjid] = $job;
+      try {
+
+        // For given source lang no job exists yet.
+        if (!isset($source_lang_registry[$source_lang])) {
+          // Create new job.
+          $job = tmgmt_job_create($source_lang, NULL, $GLOBALS['user']->uid);
+          // Add initial job item.
+          $job->addItem('entity', $type, $entity_id);
+          // Add job identifier into registry
+          $source_lang_registry[$source_lang] = $job->tjid;
+          // Add newly created job into jobs queue.
+          $jobs[$job->tjid] = $job;
+        }
+        // We have a job for given source lang, so just add new job item for the
+        // existing job.
+        else {
+          $jobs[$source_lang_registry[$source_lang]]->addItem('entity', $type, $entity_id);
+        }
       }
-      // We have a job for given source lang, so just add new job item for the
-      // existing job.
-      else {
-        $jobs[$source_lang_registry[$source_lang]]->addItem('entity', $type, $entity_id);
+      catch (TMGMTException $e) {
+        watchdog_exception('tmgmt', $e);
+        $entity_label = entity_label($type, $entity);
+        drupal_set_message(t('Unable to add job item for entity %name. Make sure the source content is not empty.', array('%name' => $entity_label)), 'error');
       }
     }
+
     // If necessary, do a redirect.
     $redirects = tmgmt_ui_job_checkout_multiple($jobs);
     if ($redirects) {

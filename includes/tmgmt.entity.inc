@@ -1061,16 +1061,40 @@ class TMGMTJob extends Entity {
    *
    * @return TMGMTJobItem
    *   The job item that was added to the job or FALSE if it couldn't be saved.
+   * @throws TMGMTException
+   *   On zero item word count.
    */
   public function addItem($plugin, $item_type, $item_id) {
-    // Save the job if it hasn't yet been saved.
-    if (!empty($this->tjid) || $this->save()) {
-      $item = tmgmt_job_item_create($plugin, $item_type, $item_id, array('tjid' => $this->tjid));
-      if ($item->save()) {
-        return $item;
-      }
+
+    $transaction = db_transaction();
+    $is_new = FALSE;
+
+    if (empty($this->tjid)) {
+      $this->save();
+      $is_new = TRUE;
     }
-    return FALSE;
+
+    $item = tmgmt_job_item_create($plugin, $item_type, $item_id, array('tjid' => $this->tjid));
+    // Initialize job item data variable needed to determine word count
+    // in job item getWordCount().
+    $item->getData();
+    $item->save();
+
+    if ($item->getWordCount() == 0) {
+      $transaction->rollback();
+
+      // In case we got word count 0 for the first job item, NULL tjid so that
+      // if there is another addItem() call the rolled back job object will get
+      // persisted.
+      if ($is_new) {
+        $this->tjid = NULL;
+      }
+
+      throw new TMGMTException('Created job item with word count 0. Plugin: @plugin | Item type: @item_type | Item id: @item_id',
+        array('@plugin' => $plugin, '@item_type' => $item_type, '@item_id' => $item_id));
+    }
+
+    return $item;
   }
 
   /**
