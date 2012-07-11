@@ -21,33 +21,17 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
    *
    * @param $type
    *   Entity type for which to get list of entities.
+   * @param array $property_conditions
+   *   Array of key => $value pairs passed into
+   *   tmgmt_entity_get_translatable_entities() as the second parameter.
    *
    * @return array
    *   Array of entities.
    */
-  public function getEntitiesTranslationData($type) {
+  public function getEntitiesTranslationData($type, $property_conditions = array()) {
 
-    // Init query basics.
-    $translation_entity_query = new EntityFieldQuery();
-    $translation_entity_query->entityCondition('entity_type', $type);
-    $translation_entity_query->pager($this->pagerLimit);
-
-    // Collect search params and add query conditions.
-    foreach ($this->getSearchFormSubmittedParams() as $param_name => $param_value) {
-      $translation_entity_query->propertyCondition($param_name, $param_value);
-    }
-
-    // Allow to alter the query for a specific entity type.
-    drupal_alter('tmgmt_entity_' . $type . '_list_query', $translation_entity_query);
-
-    $result = $translation_entity_query->execute();
-    $entities = array();
     $return_value = array();
-
-    if (isset($result[$type])) {
-      $entity_ids = array_keys($result[$type]);
-      $entities = entity_load($type, $entity_ids);
-    }
+    $entities = tmgmt_entity_get_translatable_entities($type, $property_conditions, TRUE);
 
     // For retrieved entities add translation specific data.
     foreach ($entities as $entity) {
@@ -120,12 +104,10 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
     // Add search form specific styling.
     drupal_add_css(drupal_get_path('module', 'tmgmt_entity') . '/css/tmgmt_entity.admin.entity_source_search_form.css');
 
-    $options = array();
-    foreach (language_list() as $langcode => $language) {
-      $options[$langcode] = $language->name;
-    }
-
-    $default_values = $this->getSearchFormSubmittedParams();
+    $form = array();
+    // Add entity type value into form array so that it is available in
+    // the form alter hook.
+    $form_state['entity_type'] = $type;
 
     $form['search_wrapper'] = array(
       '#prefix' => '<div class="tmgmt-entity-sources-wrapper">',
@@ -134,17 +116,50 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
     $form['search_wrapper']['search'] = array(
       '#tree' => TRUE,
     );
-    $form['search_wrapper']['search']['language'] = array(
-      '#type' => 'select',
-      '#title' => t('Source Language'),
-      '#options' => $options,
-      '#empty_option' => t('All'),
-      '#default_value' => isset($default_values['language']) ? $default_values['language'] : NULL,
-    );
+
     $form['search_wrapper']['search_submit'] = array(
       '#type' => 'submit',
       '#value' => t('Search'),
+      '#weight' => 10,
     );
+    $form['search_wrapper']['search_cancel'] = array(
+      '#type' => 'submit',
+      '#value' => t('Cancel'),
+      '#weight' => 11,
+    );
+
+    $language_options = array();
+    foreach (language_list() as $langcode => $language) {
+      $language_options[$langcode] = $language->name;
+    }
+
+    $form['search_wrapper']['search']['language'] = array(
+      '#type' => 'select',
+      '#title' => t('Source Language'),
+      '#options' => $language_options,
+      '#empty_option' => t('All'),
+      '#default_value' => isset($_GET['language']) ? $_GET['language'] : NULL,
+    );
+
+    $entity_info = entity_get_info($type);
+    $bundle_key = $entity_info['entity keys']['bundle'];
+    $bundle_options = tmgmt_entity_get_translatable_bundles($type);
+
+    if (count($bundle_options) > 1) {
+      $form['search_wrapper']['search'][$bundle_key] = array(
+        '#type' => 'select',
+        '#title' => t('@entity_name type', array('@entity_name' => $entity_info['label'])),
+        '#options' => $bundle_options,
+        '#empty_option' => t('All'),
+        '#default_value' => isset($_GET[$bundle_key]) ? $_GET[$bundle_key] : NULL,
+      );
+    }
+    // In case entity translation is not enabled for any of bundles
+    // display appropriate message.
+    elseif (count($bundle_options) == 0) {
+      drupal_set_message(t('Entity translation is not enabled for any of existing content types. To use this functionality go to Content types administration and enable entity translation for desired content types.'), 'warning');
+      unset($form['search_wrapper']);
+    }
 
     return $form;
   }
@@ -164,7 +179,10 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
    *   Entity type.
    */
   public function overviewSearchFormRedirect($form, &$form_state, $type) {
-    if ($form_state['triggering_element']['#id'] == 'edit-search-submit') {
+    if ($form_state['triggering_element']['#id'] == 'edit-search-cancel') {
+      drupal_goto($_GET['q']);
+    }
+    elseif ($form_state['triggering_element']['#id'] == 'edit-search-submit') {
 
       $query = array();
 
@@ -174,20 +192,5 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
 
       drupal_goto($_GET['q'], array('query' => $query));
     }
-  }
-
-  /**
-   * Gets submitted search params.
-   *
-   * @return array
-   */
-  public function getSearchFormSubmittedParams() {
-    $params = array();
-
-    if (isset($_GET['language'])) {
-      $params['language'] = $_GET['language'];
-    }
-
-    return $params;
   }
 }

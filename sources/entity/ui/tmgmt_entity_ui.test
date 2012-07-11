@@ -147,13 +147,15 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntitySourceBaseTestCase {
     $this->createNodeType('page', 'Page', TRANSLATION_ENABLED);
 
     // Create nodes that will be used during tests.
-    $this->nodes['article']['en'][0] = $this->createNode('article', 'en');
-    $this->nodes['article']['en'][1] = $this->createNode('article', 'en');
-    $this->nodes['article']['en'][2] = $this->createNode('article', 'en');
-    $this->nodes['article']['en'][3] = $this->createNode('article', 'en');
-    $this->nodes['article']['fr'][0] = $this->createNode('article', 'fr');
-    $this->nodes['article']['de'][0] = $this->createNode('article', 'de');
+    // NOTE that the order matters as results are read by xpath based on
+    // position in the list.
     $this->nodes['page']['en'][] = $this->createNode('page');
+    $this->nodes['article']['de'][0] = $this->createNode('article', 'de');
+    $this->nodes['article']['fr'][0] = $this->createNode('article', 'fr');
+    $this->nodes['article']['en'][3] = $this->createNode('article', 'en');
+    $this->nodes['article']['en'][2] = $this->createNode('article', 'en');
+    $this->nodes['article']['en'][1] = $this->createNode('article', 'en');
+    $this->nodes['article']['en'][0] = $this->createNode('article', 'en');
   }
 
   function testAvailabilityOfEntityLists() {
@@ -245,6 +247,48 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntitySourceBaseTestCase {
     $edit["items[$nid6]"] = 1;
     $this->drupalPost('admin/config/regional/tmgmt/entity/node', $edit, t('Request translation'));
     $this->assertText(t('@count jobs need to be checked out.', array('@count' => '3')));
+  }
+
+  function testNodeEntityListings() {
+
+    // Turn off the entity translation.
+    $edit = array();
+    $edit['language_content_type'] = TRANSLATION_ENABLED;
+    $this->drupalPost('admin/structure/types/manage/article', $edit, t('Save content type'));
+
+    // Check if we have appropriate message in case there are no entity
+    // translatable content types.
+    $this->drupalGet('admin/config/regional/tmgmt/entity/node');
+    $this->assertText(t('Entity translation is not enabled for any of existing content types. To use this functionality go to Content types administration and enable entity translation for desired content types.'));
+
+    // Turn on the entity translation for both - article and page - to test
+    // search form.
+    $edit = array();
+    $edit['language_content_type'] = ENTITY_TRANSLATION_ENABLED;
+    $this->drupalPost('admin/structure/types/manage/article', $edit, t('Save content type'));
+    $this->drupalPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    // Create page node after entity translation is enabled.
+    $page_node_translatable = $this->createNode('page');
+
+    $this->drupalGet('admin/config/regional/tmgmt/entity/node');
+    // We have both listed - one of articles and page.
+    $this->assertText($this->nodes['article']['en'][0]->title);
+    $this->assertText($page_node_translatable->title);
+
+    // Try the search by content type.
+    $edit = array();
+    $edit['search[type]'] = 'article';
+    $this->drupalPost('admin/config/regional/tmgmt/entity/node', $edit, t('Search'));
+    // There should be article present.
+    $this->assertText($this->nodes['article']['en'][0]->title);
+    // The page node should not be listed.
+    $this->assertNoText($page_node_translatable->title);
+
+    // Try cancel button - despite we do post content type search value
+    // we should get nodes of botch content types.
+    $this->drupalPost('admin/config/regional/tmgmt/entity/node', $edit, t('Cancel'));
+    $this->assertText($this->nodes['article']['en'][0]->title);
+    $this->assertText($page_node_translatable->title);
   }
 }
 

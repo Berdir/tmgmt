@@ -46,29 +46,153 @@ function tmgmt_entity_update_entity_translation($entity, $entity_type, $data, $l
 }
 
 /**
- * Implements hook_tmgmt_entity_type_list_query_alter().
+ * Implements hook_form_ID_alter().
  *
- * Adds specific condition to the query to list only node types with
- * "Multilingual support" -> "Enabled, with field translation"
- *
- * @see TMGMTEntitySourceUIController
+ * Alters comment node type select box to filter out comment types that belongs
+ * to non entity translatable node types.
  */
-function tmgmt_entity_tmgmt_entity_node_list_query_alter(EntityFieldQuery $query) {
+function tmgmt_entity_form_tmgmt_ui_entity_source_comment_overview_form_alter(&$form, &$form_state) {
 
-  $node_types = array_keys(node_type_get_types());
-  $entity_translation_types = array();
+  if (!isset($form['search_wrapper']['search']['node_type'])) {
+    return;
+  }
 
-  foreach ($node_types as $node_type) {
-    if (variable_get('language_content_type_' . $node_type) == ENTITY_TRANSLATION_ENABLED) {
-      $entity_translation_types[] = $node_type;
+  // Change the select name to "type" as in the query submitted value will be
+  // passed into node.type condition.
+  $form['search_wrapper']['search']['type'] = $form['search_wrapper']['search']['node_type'];
+  unset($form['search_wrapper']['search']['node_type']);
+
+  // Set new default value.
+  $form['search_wrapper']['search']['type']['#default_value'] = isset($_GET['type']) ? $_GET['type'] : NULL;
+
+}
+
+/**
+ * Helper function to get entity translatable bundles.
+ *
+ * Note that for comment entity type it will return the same as for node as
+ * comment bundles have no use (i.e. in queries).
+ *
+ * @param string $entity_type
+ *   Drupal entity type.
+ *
+ * @return array
+ *   Array of key => values, where key is type and value its label.
+ */
+function tmgmt_entity_get_translatable_bundles($entity_type) {
+
+  // If given entity type does not have entity translations enabled, no reason
+  // to continue.
+  if (!in_array($entity_type, variable_get('entity_translation_entity_types', array()))) {
+    return array();
+  }
+
+  $entity_info = entity_get_info($entity_type);
+  $translatable_bundle_types = array();
+
+  foreach ($entity_info['bundles'] as $bundle_type => $bundle_definition) {
+
+    if ($entity_type == 'comment') {
+      $bundle_type = str_replace('comment_node_', '', $bundle_type);
+      if (variable_get('language_content_type_' . $bundle_type) == ENTITY_TRANSLATION_ENABLED) {
+        $translatable_bundle_types[$bundle_type] = $bundle_definition['label'];
+      }
+    }
+    elseif ($entity_type == 'node') {
+      if (variable_get('language_content_type_' . $bundle_type) == ENTITY_TRANSLATION_ENABLED) {
+        $translatable_bundle_types[$bundle_type] = $bundle_definition['label'];
+      }
+    }
+    else {
+      $translatable_bundle_types[$bundle_type] = $bundle_definition['label'];
     }
   }
 
-  if (!empty($entity_translation_types)) {
-    $query->propertyCondition('type', $entity_translation_types);
+  return $translatable_bundle_types;
+}
+
+/**
+ * Gets translatable entities of a given type.
+ *
+ * Additionally you can specify entity property conditions, pager and limit.
+ *
+ * @param string $entity_type
+ *   Drupal entity type.
+ * @param array $property_conditions
+ *   Entity properties. There is no value processing so caller must make sure
+ *   the provided entity property exists for given entity type and its value
+ *   is processed.
+ * @param bool $pager
+ *   Flag to determine if pager will be used.
+ * @param int $limit
+ *   Query result limit.
+ *
+ * @return array
+ *   Array of translatable entities.
+ */
+function tmgmt_entity_get_translatable_entities($entity_type, $property_conditions = array(), $pager = FALSE, $limit = 20) {
+
+  if (!in_array($entity_type, variable_get('entity_translation_entity_types', array()))) {
+    return array();
+  }
+
+  $entity_info = entity_get_info($entity_type);
+
+  $query = db_select($entity_info['base table'], 'e');
+  $query->addField('e', $entity_info['entity keys']['id']);
+
+  // Add query conditions based on provided properties.
+  foreach ($property_conditions as $property_name => $property_value) {
+    // Skip type property for comment, as this property does not exists
+    // in the comments table.
+    if ($entity_type == 'comment' && $property_name == 'type') {
+      continue;
+    }
+
+    $query->condition('e.' . $property_name, $property_value);
+  }
+
+  // We have to specifically handle comments and nodes.
+  if (in_array($entity_type, array('comment', 'node'))) {
+    $node_table_alias = 'e';
+
+    // For comments join node table so that we can filter based on type.
+    if ($entity_type == 'comment') {
+      $query->join('node', 'n', 'e.nid = n.nid');
+      $node_table_alias = 'n';
+    }
+
+    // Get translatable node types and check if it is worth to continue.
+    $translatable_node_types = array_keys(tmgmt_entity_get_translatable_bundles('node'));
+    if (empty($translatable_node_types)) {
+      return array();
+    }
+
+    // If we have type property add condition.
+    if (isset($property_conditions['type'])) {
+      $query->condition($node_table_alias . '.type', $property_conditions['type']);
+    }
+    // If not, query db only for translatable node types.
+    else {
+      $query->condition($node_table_alias . '.type', $translatable_node_types);
+    }
+  }
+
+  if ($pager) {
+    $query = $query->extend('PagerDefault')->limit($limit);
   }
   else {
-    // Prevent any nodes to be listed.
-    $query->propertyCondition('type', NULL, 'IS NULL');
+    $query->range(0, $limit);
   }
+
+  $query->orderBy($entity_info['entity keys']['id'], 'DESC');
+
+  $entity_ids = $query->execute()->fetchCol();
+  $entities = array();
+
+  if (!empty($entity_ids)) {
+    $entities = entity_load($entity_type, $entity_ids);
+  }
+
+  return $entities;
 }
