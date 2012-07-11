@@ -62,7 +62,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
       $field = array(
         'field_name' => $field_name,
         'type' => $field_type,
-        'cardinality' => mt_rand(1, 5),
+        'cardinality' => $i,
         'translatable' => TRUE  ,
       );
       field_create_field($field);
