@@ -227,6 +227,19 @@ $handler->display->display_options['sorts']['created']['table'] = 'node';
 $handler->display->display_options['sorts']['created']['field'] = 'created';
 $handler->display->display_options['sorts']['created']['ui_name'] = 'Post date';
 $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+/* Filter criterion: Content: Title */
+$handler->display->display_options['filters']['title']['id'] = 'title';
+$handler->display->display_options['filters']['title']['table'] = 'node';
+$handler->display->display_options['filters']['title']['field'] = 'title';
+$handler->display->display_options['filters']['title']['operator'] = 'word';
+$handler->display->display_options['filters']['title']['group'] = 1;
+$handler->display->display_options['filters']['title']['exposed'] = TRUE;
+$handler->display->display_options['filters']['title']['expose']['operator_id'] = 'title_op';
+$handler->display->display_options['filters']['title']['expose']['label'] = 'Node title';
+$handler->display->display_options['filters']['title']['expose']['operator'] = 'title_op';
+$handler->display->display_options['filters']['title']['expose']['identifier'] = 'title';
+$handler->display->display_options['filters']['title']['expose']['required'] = 0;
+$handler->display->display_options['filters']['title']['expose']['multiple'] = FALSE;
 /* Filter criterion: Published */
 $handler->display->display_options['filters']['status']['id'] = 'status';
 $handler->display->display_options['filters']['status']['table'] = 'node';
@@ -266,6 +279,7 @@ $handler->display->display_options['filters']['language']['operator'] = 'not in'
 $handler->display->display_options['filters']['language']['value'] = array(
   'und' => 'und',
 );
+$handler->display->display_options['filters']['language']['group'] = 1;
 /* Filter criterion: Content translation: Language */
 $handler->display->display_options['filters']['language_1']['id'] = 'language_1';
 $handler->display->display_options['filters']['language_1']['table'] = 'node';
@@ -273,6 +287,7 @@ $handler->display->display_options['filters']['language_1']['field'] = 'language
 $handler->display->display_options['filters']['language_1']['value'] = array(
   '***DEFAULT_LANGUAGE***' => '***DEFAULT_LANGUAGE***',
 );
+$handler->display->display_options['filters']['language_1']['group'] = 1;
 $handler->display->display_options['filters']['language_1']['exposed'] = TRUE;
 $handler->display->display_options['filters']['language_1']['expose']['operator_id'] = 'language_1_op';
 $handler->display->display_options['filters']['language_1']['expose']['label'] = 'Source Language';
@@ -308,6 +323,7 @@ $translatables['tmgmt_node_source_overview'] = array(
   t('All translation languages'),
   t('Author'),
   t('Updated date'),
+  t('Node title'),
   t('Published'),
   t('Translatable types'),
   t('Source Language'),

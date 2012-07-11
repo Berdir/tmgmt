@@ -128,6 +128,19 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
       '#weight' => 11,
     );
 
+    $entity_info = entity_get_info($type);
+
+    $label_key = isset($entity_info['entity keys']['label']) ? $entity_info['entity keys']['label'] : NULL;
+
+    if (!empty($label_key)) {
+      $form['search_wrapper']['search'][$label_key] = array(
+        '#type' => 'textfield',
+        '#title' => t('@entity_name title', array('@entity_name' => $entity_info['label'])),
+        '#size' => 25,
+        '#default_value' => isset($_GET[$label_key]) ? $_GET[$label_key] : NULL,
+      );
+    }
+
     $language_options = array();
     foreach (language_list() as $langcode => $language) {
       $language_options[$langcode] = $language->name;
@@ -141,7 +154,6 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
       '#default_value' => isset($_GET['language']) ? $_GET['language'] : NULL,
     );
 
-    $entity_info = entity_get_info($type);
     $bundle_key = $entity_info['entity keys']['bundle'];
     $bundle_options = tmgmt_entity_get_translatable_bundles($type);
 
