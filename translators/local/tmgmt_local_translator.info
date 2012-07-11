@@ -1,8 +1,0 @@
-name = Local Translator
-description = Get translation from local users.
-package = Translation Management
-core = 7.x
-dependencies[] = tmgmt
-dependencies[] = views
-files[] = tmgmt_local_translator.plugin.inc
-files[] = includes/tmgmt_local_translator_handler_filter_user_can_translate.inc
