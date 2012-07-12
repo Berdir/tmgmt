@@ -319,15 +319,18 @@ function tmgmt_update_7000(&$sandbox) {
     ->execute();
 
   foreach ($results as $item) {
-    foreach (tmgmt_flatten_data($item->translation) as $key => $translation) {
-      if (!empty($item->data)) {
-        $key = explode('][', $key);
-        drupal_array_set_nested_value(unserialize($item->data), array_merge($key, array('#translation')), $translation);
-        db_update('tmgmt_job_item')
-          ->condition('tjiid', $item->tjiid)
-          ->fields(array('data' => serialize($item->data)))
-          ->execute();
+    $data = unserialize($item->data);
+    if (!empty($item->translation)) {
+      foreach (tmgmt_flatten_data(unserialize($item->translation)) as $key => $translation) {
+        if (!empty($item->data)) {
+          $key = explode('][', $key);
+          drupal_array_set_nested_value($data, array_merge($key, array('#translation')), $translation);
+        }
       }
+      db_update('tmgmt_job_item')
+        ->condition('tjiid', $item->tjiid)
+        ->fields(array('data' => serialize($data)))
+        ->execute();
     }
 
     $sandbox['progress']++;
@@ -375,6 +378,51 @@ function tmgmt_update_7002() {
 }
 
 /**
+ * Data parsing helper function for tmgmt_update_7003().
+ *
+ * Copied from TMGMTJobItemController::count().
+ *
+ * @param $item
+ *   The current data item.
+ * @param $entity
+ *   The job item the count should be calculated.
+ */
+ function _tmgmt_data_count_7003(&$item, $entity) {
+  if (!empty($item['#text'])) {
+    if (_tmgmt_filter_data($item)) {
+
+      // Set default states if no state is set.
+      if (!isset($item['#status'])) {
+        // Translation is present.
+        if (!empty($item['#translation'])) {
+          $item['#status'] = TMGMT_DATA_ITEM_STATE_TRANSLATED;
+        }
+        // No translation present.
+        else {
+          $item['#status'] = TMGMT_DATA_ITEM_STATE_PENDING;
+        }
+      }
+      switch ($item['#status']) {
+        case TMGMT_DATA_ITEM_STATE_APPROVED:
+          $entity->count_approved++;
+          break;
+        case TMGMT_DATA_ITEM_STATE_TRANSLATED:
+          $entity->count_translated++;
+          break;
+        default:
+          $entity->count_pending++;
+          break;
+      }
+    }
+  }
+  else {
+    foreach (element_children($item) as $key) {
+      _tmgmt_data_count_7003($item[$key], $entity);
+    }
+  }
+}
+
+/**
  * Set counters for existing job items.
  */
 function tmgmt_update_7003(&$sandbox) {
@@ -383,15 +431,32 @@ function tmgmt_update_7003(&$sandbox) {
     $sandbox['last_tjiid'] = 0;
     $sandbox['max'] = db_query('SELECT COUNT(tjiid) FROM {tmgmt_job_item}')->fetchField();
   }
-  $tjiids = db_query('SELECT tjiid FROM {tmgmt_job_item} WHERE tjiid > :last_tjiid ORDER BY tjiid LIMIT 10', array( ':last_tjiid' => $sandbox['last_tjiid']))->fetchCol();
-  foreach (entity_load('tmgmt_job_item', $tjiids) as $job_item) {
-    // Counters are updated when saving a job item.
-    $job_item->save();
+  $result = db_query('SELECT tjiid, data FROM {tmgmt_job_item} WHERE tjiid > :last_tjiid ORDER BY tjiid LIMIT 10', array( ':last_tjiid' => $sandbox['last_tjiid']));
+  foreach ($result as $row) {
+    // Unseralize data, count it and then save the counters.
+    if (!empty($row->data)) {
+      $fake_job_item = (object)array(
+        'count_approved' => 0,
+        'count_translated' => 0,
+        'count_pending' => 0,
+      );
+      $data = unserialize($row->data);
+      _tmgmt_data_count_7003($data, $fake_job_item);
+      $fields = (array)$fake_job_item + array(
+        'data' => serialize($data),
+      );
+      db_update('tmgmt_job_item')
+        ->condition('tjiid', $row->tjiid)
+        ->fields($fields)
+        ->execute();
+    }
     $sandbox['progress']++;
   }
 
   $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
-  $sandbox['last_tjiid'] = $job_item->tjiid;
+  if ($row) {
+    $sandbox['last_tjiid'] = $row->tjiid;
+  }
 }
 
 /**
@@ -403,27 +468,36 @@ function tmgmt_update_7004(&$sandbox) {
     $sandbox['last_tjiid'] = 0;
     $sandbox['max'] = db_query('SELECT COUNT(tjiid) FROM {tmgmt_job_item}')->fetchField();
   }
-  $tjiids = db_query('SELECT tjiid FROM {tmgmt_job_item} WHERE tjiid > :last_tjiid ORDER BY tjiid LIMIT 10', array(':last_tjiid' => $sandbox['last_tjiid']))->fetchCol();
-  foreach (entity_load('tmgmt_job_item', $tjiids) as $job_item) {
-    $data = tmgmt_flatten_data($job_item->getData());
-    $data = array_filter($data, '_tmgmt_filter_data');
-    foreach ($data as $key => $values) {
-      if (!empty($values['#translation']['#finished'])) {
-        $finished = $values['#translation']['#finished'];
-        unset($values['#translation']['#finished']);
-        drupal_array_set_nested_value($job_item->data, array_merge($key, array('#translation')), $values['#translation']);
-        if ($finished && (empty($values['#status']) || $values['#status'] == TMGMT_DATA_ITEM_STATE_PENDING)) {
-          $values['#status'] = TMGMT_DATA_ITEM_STATE_TRANSLATED;
+  $result = db_query('SELECT tjiid, data FROM {tmgmt_job_item} WHERE tjiid > :last_tjiid ORDER BY tjiid LIMIT 10', array(':last_tjiid' => $sandbox['last_tjiid']));
+  foreach ($result as $row) {
+    if (!empty($row->data)) {
+      $data = unserialize($row->data);
+      $flattened_data = array_filter(tmgmt_flatten_data($data), '_tmgmt_filter_data');
+      // Loop over data, find finished translations, remove the flag and set
+      // the status instead.
+      foreach ($flattened_data as $key => $values) {
+        if (!empty($values['#translation']['#finished'])) {
+          $finished = $values['#translation']['#finished'];
+          unset($values['#translation']['#finished']);
+          drupal_array_set_nested_value($data, array_merge($key, array('#translation')), $values['#translation']);
+          if ($finished && (empty($values['#status']) || $values['#status'] == TMGMT_DATA_ITEM_STATE_PENDING)) {
+            drupal_array_set_nested_value($data, array_merge($key, array('#status')), TMGMT_DATA_ITEM_STATE_TRANSLATED);
+          }
+          // Save the updated data structure.
+          db_update('tmgmt_job_item')
+            ->condition('tjiid', $row->tjiid)
+            ->fields(array('data' => serialize($data)))
+            ->execute();
         }
-        $job_item->updateData($key, $values);
       }
     }
-    $job_item->save();
     $sandbox['progress']++;
   }
 
   $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
-  $sandbox['last_tjiid'] = $job_item->tjiid;
+  if ($row) {
+    $sandbox['last_tjiid'] = $row->tjiid;
+  }
 }
 
 /**
@@ -442,6 +516,30 @@ function tmgmt_update_7005() {
 }
 
 /**
+ * Data parsing helper function for tmgmt_update_7006().
+ *
+ * Copied from TMGMTJobItemController::count().
+ *
+ * @param $item
+ *   The current data item.
+ * @param $entity
+ *   The job item the count should be calculated.
+ */
+ function _tmgmt_data_count_7006(&$item, $entity) {
+  if (!empty($item['#text'])) {
+    if (_tmgmt_filter_data($item)) {
+      // Count words of the data item.
+      $entity->word_count += str_word_count($item['#text']);
+    }
+  }
+  else {
+    foreach (element_children($item) as $key) {
+      _tmgmt_data_count_7006($item[$key], $entity);
+    }
+  }
+}
+
+/**
  * Set word count for existing job items.
  */
 function tmgmt_update_7006(&$sandbox) {
@@ -450,13 +548,25 @@ function tmgmt_update_7006(&$sandbox) {
     $sandbox['last_tjiid'] = 0;
     $sandbox['max'] = db_query('SELECT COUNT(tjiid) FROM {tmgmt_job_item}')->fetchField();
   }
-  $tjiids = db_query('SELECT tjiid FROM {tmgmt_job_item} WHERE tjiid > :last_tjiid ORDER BY tjiid LIMIT 10', array( ':last_tjiid' => $sandbox['last_tjiid']))->fetchCol();
-  foreach (entity_load('tmgmt_job_item', $tjiids) as $job_item) {
-    // Counters are updated when saving a job item.
-    $job_item->save();
+
+  $result = db_query('SELECT tjiid, data FROM {tmgmt_job_item} WHERE tjiid > :last_tjiid ORDER BY tjiid LIMIT 10', array(':last_tjiid' => $sandbox['last_tjiid']));
+  foreach ($result as $row) {
+    // Unseralize data, count it and then save the counters.
+    if (!empty($row->data)) {
+      $fake_job_item = (object)array(
+        'word_count' => 0,
+      );
+      _tmgmt_data_count_7006(unserialize($row->data), $fake_job_item);
+      db_update('tmgmt_job_item')
+        ->condition('tjiid', $row->tjiid)
+        ->fields((array)$fake_job_item)
+        ->execute();
+    }
     $sandbox['progress']++;
   }
 
   $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
-  $sandbox['last_tjiid'] = $job_item->tjiid;
+  if ($row) {
+    $sandbox['last_tjiid'] = $row->tjiid;
+  }
 }
