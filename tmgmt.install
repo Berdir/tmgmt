@@ -11,7 +11,6 @@
 function tmgmt_uninstall() {
   // Remove all variables that we added.
   variable_del('tmgmt_quick_checkout');
-  variable_del('tmgmt_auto_accept');
   variable_del('tmgmt_purge_finished');
 }
 
@@ -569,4 +568,11 @@ function tmgmt_update_7006(&$sandbox) {
   if ($row) {
     $sandbox['last_tjiid'] = $row->tjiid;
   }
+}
+
+/**
+ * Removing the tmgmt_auto_accept variable.
+ */
+function tmgmt_update_7007() {
+  variable_del('tmgmt_auto_accept');
 }

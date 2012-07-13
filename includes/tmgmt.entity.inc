@@ -577,7 +577,7 @@ class TMGMTJobItem extends Entity {
     }
     $return = $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW, $message, $variables, $type);
     // Auto accept the translation if the translator is configured for it.
-    if (variable_get('tmgmt_auto_accept', FALSE) && $this->getTranslator()->getSetting('auto_accept')) {
+    if ($this->getTranslator()->getSetting('auto_accept')) {
       $this->acceptTranslation();
     }
     return $return;

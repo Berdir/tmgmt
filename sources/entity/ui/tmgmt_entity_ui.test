@@ -373,8 +373,6 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
     $this->setEnvironment('es');
     $this->setEnvironment('el');
 
-    variable_set('tmgmt_auto_accept', TRUE);
-
     // Allow auto-accept.
     $default_translator = tmgmt_translator_load('test_translator');
     $default_translator->settings = array(
