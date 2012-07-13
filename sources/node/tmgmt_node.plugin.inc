@@ -44,7 +44,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
       else {
         // We don't have a translation for the source node yet, so create one.
         $tnode = clone $node;
-        unset($tnode->nid, $tnode->vid);
+        unset($tnode->nid, $tnode->vid, $tnode->uuid, $tnode->vuuid);
         $tnode->language = $job->target_language;
         $tnode->translation_source = $node;
       }
