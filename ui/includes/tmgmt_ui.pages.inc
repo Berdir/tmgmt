@@ -22,12 +22,6 @@ function tmgmt_ui_settings_form($form, &$form_state) {
     '#description' => t("Enabling this will skip the checkout form and instead directly process the translation request in cases where there is only one translator available which doesn't provide any additional configuration options."),
     '#default_value' => variable_get('tmgmt_quick_checkout', TRUE),
   );
-  $form['workflow']['tmgmt_auto_accept'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow translators to automatically accept translations'),
-    '#description' => t("This allows translators to optionally skip the reviewing process and automatically accept all translations as soon as they are returned by the translation provider."),
-    '#default_value' => variable_get('tmgmt_auto_accept', FALSE),
-  );
   $form['performance'] = array(
     '#type' => 'fieldset',
     '#title' => t('Performance settings'),

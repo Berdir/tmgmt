@@ -80,10 +80,9 @@ The first simple translation job using Microsoft's translation service.
   Adjust the label to your liking and get a client ID and client secret using
   the provided link in the settings. Then save the updated translator.
 
-- Adjust the Auto Acceptance settings to your liking. To enable it, check the
-  'Allow translators to automatically accept translations' in the tmgmt settings.
-  You can now choose to accept jobs without review by checking  'Auto accept
-  finished translations' for each of your translators individually.
+- Adjust the Auto Acceptance settings to your liking. You can choose to accept
+  jobs without review by checking  'Auto accept finished translations' for each
+  of your translators individually.
 
 3) Translate
 
