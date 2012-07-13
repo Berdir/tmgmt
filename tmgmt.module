@@ -469,6 +469,73 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
 }
 
 /**
+ * Loads an array with the word and status statistics of a job.
+ *
+ * @param $tjids
+ *   An array of job ids.
+ *
+ * @return
+ *   An array of objects with the keys word_count, count_pending, count_approved
+ *   and count_translated.
+ */
+function tmgmt_job_statistics_load(array $tjids) {
+  $statistics = &drupal_static(__FUNCTION__, array());
+
+  // First try to get the values from the cache.
+  $return = array();
+  $tjids_to_load = array();
+  foreach ($tjids as $tjid) {
+    if (isset($statistics[$tjid])) {
+      // Info exists in cache, get it from there.
+      $return[$tjid] = $statistics[$tjid];
+    }
+    else {
+      // Info doesn't exist in cache, add job to the list that needs to be
+      // fetched.
+      $tjids_to_load[] = $tjid;
+    }
+  }
+
+  // If there are remaining jobs, build a query to fetch them.
+  if (!empty($tjids_to_load)) {
+    // Build the query to fetch the statistics.
+    $query = db_select('tmgmt_job_item', 'tji')
+      ->fields('tji', array('tjid'));
+    $query->addExpression('SUM(word_count)', 'word_count');
+    $query->addExpression('SUM(count_approved)', 'count_approved');
+    $query->addExpression('SUM(count_pending)', 'count_pending');
+    $query->addExpression('SUM(count_translated)', 'count_translated');
+    $result = $query->groupBy('tjid')
+      ->condition('tjid', $tjids_to_load)
+      ->execute();
+
+    foreach ($result as $row) {
+      $return[$row->tjid] = $statistics[$row->tjid] = $row;
+    }
+  }
+  return $return;
+}
+
+/**
+ * Returns a specific statistic of a job.
+ *
+ * @param $job
+ *   The translation job entity.
+ * @param $key
+ *   One of word_count, count_pending, count_approved and count_translated.
+ *
+ * @return
+ *   The requested information as an integer.
+ */
+function tmgmt_job_statistic(TMGMTJob $job, $key) {
+  $statistics = tmgmt_job_statistics_load(array($job->tjid));
+  if (isset($statistics[$job->tjid]->$key)) {
+    return $statistics[$job->tjid]->$key;
+  }
+  return 0;
+}
+
+/**
  * Access callback for the job item entity.
  *
  * @param $op

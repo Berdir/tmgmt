@@ -576,7 +576,7 @@ class TMGMTJobItem extends Entity {
       $variables = array('!source' => l($this->getSourceLabel(), $uri['path']));
     }
     $return = $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW, $message, $variables, $type);
-    // Auto accept the translation if the translator is configured for it.
+    // Auto accept the trganslation if the translator is configured for it.
     if ($this->getTranslator()->getSetting('auto_accept')) {
       $this->acceptTranslation();
     }
@@ -1559,7 +1559,7 @@ class TMGMTJob extends Entity {
    *   The sum of all pending counts
    */
   public function getCountPending() {
-    return db_query('SELECT SUM(count_pending) FROM {tmgmt_job_item} WHERE tjid = :tjid', array(':tjid' => $this->tjid))->fetchField();
+    return tmgmt_job_statistic($this, 'count_pending');
   }
 
   /**
@@ -1569,7 +1569,7 @@ class TMGMTJob extends Entity {
    *   The sum of all translated counts
    */
   public function getCountTranslated() {
-    return db_query('SELECT SUM(count_translated) FROM {tmgmt_job_item} WHERE tjid = :tjid', array(':tjid' => $this->tjid))->fetchField();
+    return tmgmt_job_statistic($this, 'count_translated');
   }
 
   /**
@@ -1579,7 +1579,7 @@ class TMGMTJob extends Entity {
    *   The sum of all approved counts
    */
   public function getCountApproved() {
-    return db_query('SELECT SUM(count_approved) FROM {tmgmt_job_item} WHERE tjid = :tjid', array(':tjid' => $this->tjid))->fetchField();
+    return tmgmt_job_statistic($this, 'count_approved');
   }
 
   /**
@@ -1589,7 +1589,7 @@ class TMGMTJob extends Entity {
    *   The sum of all approved counts
    */
   public function getWordCount() {
-    return db_query('SELECT SUM(word_count) FROM {tmgmt_job_item} WHERE tjid = :tjid', array(':tjid' => $this->tjid))->fetchField();
+    return tmgmt_job_statistic($this, 'word_count');
   }
 
   /**
