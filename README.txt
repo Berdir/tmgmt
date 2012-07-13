@@ -122,7 +122,8 @@ continue to work on further improvements.
 
 - Entity Translation
   Plugin and User Interface is working and tested. There is an interface for
-  bulk translation, the translation status is displayed as well.
+  bulk translation, the translation status is displayed as well. Note that the
+  overview requires a current Drupal 7.x-dev snapshot or 7.15 once available.
 
 - Internationalization (I18n)
   The API works but we're missing a user interface.
