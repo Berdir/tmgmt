@@ -339,6 +339,7 @@ function tmgmt_job_item_load_latest($plugin, $item_type, $item_id, $source_langu
     ->fields('tj', array('target_language'))
     ->orderBy('tji.changed', 'DESC')
     ->groupBy('tj.target_language')
+    ->groupBy('tji.tjiid')
     ->execute();
   if ($items = $result->fetchAllKeyed()) {
     $return = array();
