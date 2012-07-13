@@ -53,6 +53,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     $translatables = array(FALSE, TRUE, TRUE, TRUE);
     $field_types = array('text', 'text_with_summary');
 
+    $i = 1;
     foreach ($translatables as $switch) {
       $field_type = $field_types[array_rand($field_types, 1)];
       $field_name = drupal_strtolower($this->randomName());
@@ -61,7 +62,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
       $field = array(
         'field_name' => $field_name,
         'type' => $field_type,
-        'cardinality' => mt_rand(1, 5),
+        'cardinality' => $i++,
         'translatable' => $switch,
       );
       field_create_field($field);
