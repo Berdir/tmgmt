@@ -80,6 +80,14 @@ class TMGMTJobViewsController extends EntityDefaultViewsController {
         'handler' => 'tmgmt_handler_field_tmgmt_progress',
       ),
     );
+    $data['tmgmt_job']['word_count'] = array(
+      'title' => t('Word count'),
+      'help' => t('Displays the word count of a job.'),
+      'real field' => 'tjid',
+      'field' => array(
+        'handler' => 'tmgmt_handler_field_tmgmt_wordcount',
+      ),
+    );
     $data['tmgmt_job']['label']['field']['handler'] = 'tmgmt_handler_field_tmgmt_entity_label';
     $data['tmgmt_job']['job_item'] = array(
       'title' => t('Job items'),

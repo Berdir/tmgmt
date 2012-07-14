@@ -243,12 +243,28 @@ $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
 $handler->display->display_options['fields']['progress']['ui_name'] = 'Progress';
-/* Field: Created */
-$handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_job';
-$handler->display->display_options['fields']['created']['field'] = 'created';
-$handler->display->display_options['fields']['created']['ui_name'] = 'Created';
-$handler->display->display_options['fields']['created']['date_format'] = 'short';
+/* Field: Translation Management Job: Word count */
+$handler->display->display_options['fields']['word_count']['id'] = 'word_count';
+$handler->display->display_options['fields']['word_count']['table'] = 'tmgmt_job';
+$handler->display->display_options['fields']['word_count']['field'] = 'word_count';
+$handler->display->display_options['fields']['word_count']['alter']['alter_text'] = 0;
+$handler->display->display_options['fields']['word_count']['alter']['make_link'] = 0;
+$handler->display->display_options['fields']['word_count']['alter']['absolute'] = 0;
+$handler->display->display_options['fields']['word_count']['alter']['external'] = 0;
+$handler->display->display_options['fields']['word_count']['alter']['replace_spaces'] = 0;
+$handler->display->display_options['fields']['word_count']['alter']['trim_whitespace'] = 0;
+$handler->display->display_options['fields']['word_count']['alter']['nl2br'] = 0;
+$handler->display->display_options['fields']['word_count']['alter']['word_boundary'] = 1;
+$handler->display->display_options['fields']['word_count']['alter']['ellipsis'] = 1;
+$handler->display->display_options['fields']['word_count']['alter']['more_link'] = 0;
+$handler->display->display_options['fields']['word_count']['alter']['strip_tags'] = 0;
+$handler->display->display_options['fields']['word_count']['alter']['trim'] = 0;
+$handler->display->display_options['fields']['word_count']['alter']['html'] = 0;
+$handler->display->display_options['fields']['word_count']['element_label_colon'] = 1;
+$handler->display->display_options['fields']['word_count']['element_default_classes'] = 1;
+$handler->display->display_options['fields']['word_count']['hide_empty'] = 0;
+$handler->display->display_options['fields']['word_count']['empty_zero'] = 0;
+$handler->display->display_options['fields']['word_count']['hide_alter_empty'] = 1;
 /* Field: Changed */
 $handler->display->display_options['fields']['changed']['id'] = 'changed';
 $handler->display->display_options['fields']['changed']['table'] = 'tmgmt_job';
@@ -337,7 +353,7 @@ $translatables['tmgmt_ui_job_overview'] = array(
   t('To'),
   t('State'),
   t('Progress'),
-  t('Created'),
+  t('Word count'),
   t('Changed'),
   t('Operations'),
   t('Page'),

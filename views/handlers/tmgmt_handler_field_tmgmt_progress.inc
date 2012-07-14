@@ -12,12 +12,16 @@ class tmgmt_handler_field_tmgmt_progress extends views_handler_field_entity {
    */
   function pre_render(&$values) {
     parent::pre_render($values);
-    $tjids = array();
-    foreach ($values as $value) {
-      $tjids[] = $value->tjid;
+
+    // In case of jobs, pre-fetch the statistics in a single query and add them
+    // to the static cache.
+    if ($this->entity_type == 'tmgmt_job') {
+      $tjids = array();
+      foreach ($values as $value) {
+        $tjids[] = $value->tjid;
+      }
+      tmgmt_job_statistics_load($tjids);
     }
-    // Pre-fetch the statistics and add them to the static cache.
-    tmgmt_job_statistics_load($tjids);
   }
 
   /**
