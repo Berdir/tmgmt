@@ -8,10 +8,24 @@
 class tmgmt_handler_field_tmgmt_progress extends views_handler_field_entity {
 
   /**
+   * Prefetch statistics for all jobs.
+   */
+  function pre_render(&$values) {
+    parent::pre_render($values);
+
+    // In case of jobs, pre-fetch the statistics in a single query and add them
+    // to the static cache.
+    if ($this->entity_type == 'tmgmt_job') {
+      $tjids = array();
+      foreach ($values as $value) {
+        $tjids[] = $value->tjid;
+      }
+      tmgmt_job_statistics_load($tjids);
+    }
+  }
+
+  /**
    * Overrides views_handler_field_entity::render().
-   *
-   * @todo  Currently there are n * 4 queries sent to the database. This can
-   * surely be optimized.
    */
   function render($values) {
     $object = $this->get_value($values);

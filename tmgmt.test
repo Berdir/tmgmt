@@ -245,6 +245,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     // No pending, translated and confirmed data items.
     $job = entity_load_single('tmgmt_job', $job->tjid);
     $job_item1 = entity_load_single('tmgmt_job_item', $job_item1->tjiid);
+    drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(0, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
     $this->assertEqual(0, $job_item1->getCountApproved());
@@ -259,6 +260,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     // One pending data items.
     $job = entity_load_single('tmgmt_job', $job->tjid);
     $job_item1 = entity_load_single('tmgmt_job_item', $job_item1->tjiid);
+    drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(1, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
     $this->assertEqual(5, $job_item1->getWordCount());
@@ -274,6 +276,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     // One pending data items.
     $job = entity_load_single('tmgmt_job', $job->tjid);
     $job_item1 = entity_load_single('tmgmt_job_item', $job_item1->tjiid);
+    drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(1, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
     $this->assertEqual(5, $job_item1->getWordCount());
@@ -286,6 +289,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $job_item1->save();
 
     // One translated data items.
+    drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(0, $job_item1->getCountPending());
     $this->assertEqual(1, $job_item1->getCountTranslated());
     $this->assertEqual(0, $job->getCountPending());
@@ -296,6 +300,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $job_item1->save();
 
     // One confirmed data items.
+    drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(1, $job_item1->getCountApproved());
     $this->assertEqual(1, $job->getCountApproved());
 
@@ -308,6 +313,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $job_item1->save();
 
     // One pending and translated data items each.
+    drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(1, $job->getCountPending());
     $this->assertEqual(1, $job->getCountTranslated());
     $this->assertEqual(1, $job->getCountApproved());
@@ -337,6 +343,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
 
     // 3 pending and 7 translated data items each.
     $job = entity_load_single('tmgmt_job', $job->tjid);
+    drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(3, $job->getCountPending());
     $this->assertEqual(7, $job->getCountTranslated());
     $this->assertEqual(5, $job->getCountApproved());
@@ -356,6 +363,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
 
     // 3 pending and 7 translated data items each.
     $job = entity_load_single('tmgmt_job', $job->tjid);
+    drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(7, $job->getCountPending());
     $this->assertEqual(15, $job->getCountTranslated());
     $this->assertEqual(9, $job->getCountApproved());
