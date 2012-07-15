@@ -634,7 +634,7 @@ class TMGMTJobItem extends Entity {
       $this->state = $state;
       $this->save();
       // If a message is attached to this state change add it now.
-      if (isset($message)) {
+      if (!empty($message)) {
         $this->addMessage($message, $variables, $type);
       }
     }
@@ -796,7 +796,22 @@ class TMGMTJobItem extends Entity {
       if ($finished) {
         // There are no unfinished elements left.
         $uri = $this->getSourceUri();
-        $this->needsReview('The translation for !source is finished and can now be reviewed.', array('!source' => l($this->getSourceLabel(), $uri['path'])));
+        if ($this->getJob()->getTranslator()->getSetting('auto_accept')) {
+          // If the job item is going to be auto-accepted, set to review without
+          // a message.
+          $this->needsReview(FALSE);
+        }
+        else {
+          // Otherwise, create a message that contains source label, target
+          // language and links to the review form.
+          $uri = $this->uri();
+          $variables = array(
+            '!source' => l($this->getSourceLabel(), $uri['path']),
+            '@language' => entity_metadata_wrapper('tmgmt_job', $this->getJob())->target_language->label(),
+            '!review_url' => url($uri['path'] . '/review', array('query' => array('destination' => current_path()))),
+          );
+          $this->needsReview('The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.', $variables);
+        }
       }
     }
     $this->save();
@@ -1268,7 +1283,7 @@ class TMGMTJob extends Entity {
       $this->state = $state;
       $this->save();
       // If a message is attached to this state change add it now.
-      if (isset($message)) {
+      if (!empty($message)) {
         $this->addMessage($message, $variables, $type);
       }
     }

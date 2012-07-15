@@ -18,15 +18,7 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
     $i18n_object = explode(':', $job_item->item_id);
     $i18n_object_type = array_shift($i18n_object);
     $i18n_object_id = (count($i18n_object) == 1) ? reset($i18n_object) : $i18n_object;
-    // @todo: i18n has introduced a new function and changed the existing one,
-    //        conditionally call the one that exists. Remove once a new stable
-    //        version is out.
-    if (function_exists('i18n_get_object')) {
-      $i18n_strings = i18n_get_object($i18n_object_type, $i18n_object_id)->get_strings();
-    }
-    else {
-      $i18n_strings = i18n_object($i18n_object_type, $i18n_object_id)->get_strings();
-    }
+    $i18n_strings = i18n_object($i18n_object_type, $i18n_object_id)->get_strings();
     $structure = array('#label' => 'i18n Strings: ' . $i18n_object_type);
     foreach ($i18n_strings as $string_id => $string) {
       $structure[$string_id] = array(

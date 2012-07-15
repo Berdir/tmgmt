@@ -441,7 +441,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     // The third message is specific to a job item and has different state
     // constants.
-    $this->assertEqual('The translation for !source is finished and can now be reviewed.', $needs_review->message);
+    $this->assertEqual('The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.', $needs_review->message);
     $this->assertEqual('status', $needs_review->type);
 
     $i = 1;
