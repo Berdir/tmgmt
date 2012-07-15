@@ -254,7 +254,7 @@ function tmgmt_ui_job_checkout_multiple(array $jobs) {
       }
 
       $uri = $job->uri();
-      $redirects[] = $uri['path'] . '/manage';
+      $redirects[] = $uri['path'];
     }
     else {
       // @todo this is dangerous because we don't catch request fails at all.

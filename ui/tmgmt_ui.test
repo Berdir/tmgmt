@@ -229,7 +229,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     // settings, so a checkout is necessary.
     $redirects = tmgmt_ui_job_checkout_multiple(array($job));
     $uri = $job->uri();
-    $this->assertEqual($uri['path'] . '/manage', $redirects[0]);
+    $this->assertEqual($uri['path'], $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
     $job->delete();
 
@@ -248,7 +248,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $job = $this->createJob('en', '');
     $redirects = tmgmt_ui_job_checkout_multiple(array($job));
     $uri = $job->uri();
-    $this->assertEqual($uri['path'] . '/manage', $redirects[0]);
+    $this->assertEqual($uri['path'], $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
 
     // Create a second file translator. This should check
@@ -263,7 +263,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     $redirects = tmgmt_ui_job_checkout_multiple(array($job));
     $uri = $job->uri();
-    $this->assertEqual($uri['path'] . '/manage', $redirects[0]);
+    $this->assertEqual($uri['path'], $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
   }
 }
