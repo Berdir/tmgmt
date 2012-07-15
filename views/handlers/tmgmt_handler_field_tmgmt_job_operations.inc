@@ -15,15 +15,18 @@ class tmgmt_handler_field_tmgmt_job_operations extends views_handler_field_entit
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('inline'));
     $uri = $job->uri();
-    $element['#links']['view'] = array(
-      'href' => $uri['path'],
-      'title' => t('view'),
-    );
+    debug($job->getState());
     if ($job->isSubmittable() && entity_access('submit', 'tmgmt_job', $job)) {
-      $element['#links']['checkout'] = array(
-        'href' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/manage',
+      $element['#links']['submit'] = array(
+        'href' => $uri['path'],
         'query' => array('destination' => current_path()),
-        'title' => t('checkout'),
+        'title' => t('submit'),
+      );
+    }
+    else {
+      $element['#links']['manage'] = array(
+        'href' => $uri['path'],
+        'title' => t('manage'),
       );
     }
     if ($job->isCancelable() && entity_access('submit', 'tmgmt_job', $job)) {
