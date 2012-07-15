@@ -460,7 +460,7 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTBaseTestCase {
       'views_bulk_operations[1]' => TRUE,
       'views_bulk_operations[2]' => TRUE,
     );
-    $this->drupalPost(NULL, $edit, t('Request translation'));
+    $this->drupalPost(NULL, $edit, t('Request translations'));
 
     // Some assertions on the submit form.
     $this->assertText(t('From English to ? (Unprocessed)'));
