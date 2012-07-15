@@ -25,7 +25,9 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
    */
   function setUp() {
     parent::setUp(array('tmgmt_node', 'translation'));
-    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types'));
+
+    $this->loginAsAdmin();
+
     variable_set('language_content_type_page', TRANSLATION_ENABLED);
 
     // Copied from standard.install
@@ -89,7 +91,7 @@ class TMGMTNodeSourceTestCase extends TMGMTBaseTestCase {
    * Tests nodes field translation.
    */
   function testNodeSource() {
-    $this->drupalLogin($this->admin_user);
+
     $this->setEnvironment('de');
 
     foreach (array('article', 'page') as $content_type) {

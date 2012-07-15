@@ -364,10 +364,15 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
     variable_set('language_content_type_page', ENTITY_TRANSLATION_ENABLED);
     variable_set('language_content_type_article', ENTITY_TRANSLATION_ENABLED);
 
+    $this->loginAsAdmin(array(
+      'create translation jobs',
+      'submit translation jobs',
+      'accept translation jobs',
+      'administer blocks',
+      'administer entity translation',
+      'toggle field translatability',
+    ));
 
-    // Create a new admin user with the administer blocks permission.
-    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'create translation jobs', 'submit translation jobs', 'accept translation jobs', 'administer blocks', 'administer entity translation', 'toggle field translatability'));
-    $this->drupalLogin($this->admin_user);
     $this->setEnvironment('de');
     $this->setEnvironment('fr');
     $this->setEnvironment('es');

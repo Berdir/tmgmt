@@ -26,20 +26,25 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
    */
   function setUp() {
     parent::setUp(array('tmgmt_ui'));
+
+    // Login as admin to be able to set environment variables.
+    $this->loginAsAdmin();
+    $this->setEnvironment('de');
+    $this->setEnvironment('es');
+    $this->setEnvironment('el');
+
+    // Login as translator only with limited permissions to run these tests.
+    $this->loginAsTranslator(array(
+      'access administration pages',
+      'create translation jobs',
+      'submit translation jobs',
+    ), TRUE);
   }
 
   /**
    * Test the page callbacks to create jobs and check them out.
    */
   function testCheckoutForm() {
-    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types'));
-    $this->drupalLogin($this->admin_user);
-    $this->setEnvironment('de');
-    $this->setEnvironment('es');
-    $this->setEnvironment('el');
-
-    $user = $this->drupalCreateUser(array('access administration pages', 'create translation jobs', 'submit translation jobs'));
-    $this->drupalLogin($user);
 
     // Add a first item to the job. This will auto-create the job.
     $job = tmgmt_job_match_item('en', '');

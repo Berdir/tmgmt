@@ -28,9 +28,9 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     parent::setUp(array('tmgmt_node', 'translation', 'tmgmt_node_ui', 'block'));
     variable_set('language_content_type_page', TRANSLATION_ENABLED);
 
-    // Create a new admin user with the administer blocks permission.
-    $this->admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer tmgmt', 'administer blocks'));
-    $this->drupalLogin($this->admin_user);
+    // We need the administer blocks permission.
+    $this->loginAsAdmin(array('administer blocks'));
+
     $this->setEnvironment('de');
     $this->setEnvironment('fr');
     $this->setEnvironment('es');
@@ -401,7 +401,8 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTBaseTestCase {
     parent::setUp(array('tmgmt_node', 'translation', 'tmgmt_node_ui', 'rules'));
     variable_set('language_content_type_page', TRANSLATION_ENABLED);
 
-    $this->drupalLogin($this->admin_user);
+    $this->loginAsAdmin();
+
     $this->setEnvironment('de');
     $this->setEnvironment('fr');
     $this->setEnvironment('es');
@@ -436,9 +437,12 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTBaseTestCase {
    * Tests translating through the content source overview.
    */
   function testNodeSourceOverview() {
-    // Create a user that is allowed to translate nodes.
-    $translater = $this->drupalCreateUser(array('translate content', 'create translation jobs', 'submit translation jobs', 'accept translation jobs', 'edit any page content', 'create page content'));
-    $this->drupalLogin($translater);
+
+    // Login as translator to translate nodes.
+    $this->loginAsTranslator(array(
+      'edit any page content',
+      'create page content',
+    ));
 
     // Create a bunch of english nodes.
     $node1 = $this->drupalCreateNode(array('type' => 'page', 'language' => 'en', 'body' => array('en' => array(array()))));

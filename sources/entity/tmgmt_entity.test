@@ -27,8 +27,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     parent::setUp(array('tmgmt_entity', 'tmgmt_entity_test', 'taxonomy', 'entity_translation'));
 
     // Admin user to perform settings on setup.
-    $admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer taxonomy', 'administer entity translation'));
-    $this->drupalLogin($admin_user);
+    $this->loginAsAdmin(array('administer entity translation'));
 
     // Create a simple vocabulary.
     $this->vocabulary = new stdClass();
@@ -92,7 +91,6 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
    * Tests nodes field translation.
    */
   function testEntitySourceNode() {
-    $this->drupalLogin($this->admin_user);
     $this->setEnvironment('de');
 
     // Add some fields.
@@ -151,7 +149,6 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
    * Tests taxonomy terms field translation.
    */
   function testEntitySourceTerm() {
-    $this->drupalLogin($this->admin_user);
     $this->setEnvironment('de');
 
     // Add some fields.
@@ -203,7 +200,6 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
   }
 
   function testAddingJobItemsWithEmptySourceText() {
-    $this->drupalLogin($this->admin_user);
     $this->setEnvironment('de');
 
     // Add some fields.
