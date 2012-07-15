@@ -98,7 +98,6 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $this->assertNoLink(t('delete'));
     $this->assertText(t('From English to German'));
     $this->clickLink(t('view'));
-    $this->clickLink(t('Manage'));
     $this->assertResponse(200);
     $this->assertNoRaw(t('Submit to translator'));
 
