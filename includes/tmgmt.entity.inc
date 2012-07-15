@@ -1026,7 +1026,7 @@ class TMGMTJob extends Entity {
   public function buildContent($view_mode = 'full', $langcode = NULL) {
     $content = array();
     if (module_exists('tmgmt_ui')) {
-      $content = drupal_get_form('tmgmt_job_form', $this);
+      $content = entity_ui_get_form('tmgmt_job', $this);
     }
     return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
   }
