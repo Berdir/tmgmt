@@ -15,7 +15,6 @@ class tmgmt_handler_field_tmgmt_job_operations extends views_handler_field_entit
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('inline'));
     $uri = $job->uri();
-    debug($job->getState());
     if ($job->isSubmittable() && entity_access('submit', 'tmgmt_job', $job)) {
       $element['#links']['submit'] = array(
         'href' => $uri['path'],
