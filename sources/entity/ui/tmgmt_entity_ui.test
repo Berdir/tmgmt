@@ -8,6 +8,45 @@ abstract class TMGMTEntitySourceBaseTestCase extends TMGMTBaseTestCase {
   public $field_names = array();
 
   /**
+   * Creates the page and article node types.
+   */
+  protected function setUpNodeTypes() {
+    // Copied from standard.install
+    $types = array(
+      array(
+        'type' => 'page',
+        'name' => st('Basic page'),
+        'base' => 'node_content',
+        'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
+        'custom' => 1,
+        'modified' => 1,
+        'locked' => 0,
+      ),
+      array(
+        'type' => 'article',
+        'name' => st('Article'),
+        'base' => 'node_content',
+        'description' => st('Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.'),
+        'custom' => 1,
+        'modified' => 1,
+        'locked' => 0,
+      ),
+    );
+
+    foreach ($types as $type) {
+      $type = node_type_set_defaults($type);
+      node_type_save($type);
+      node_add_body_field($type);
+    }
+    node_types_rebuild();
+
+    // Change body field to be translatable.
+    $body = field_info_field('body');
+    $body['translatable'] = TRUE;
+    field_update_field($body);
+  }
+
+  /**
    * Creates node type with several text fields with different cardinality.
    *
    * @param string $machine_name
@@ -131,11 +170,13 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntitySourceBaseTestCase {
   }
 
   function setUp() {
-    parent::setUp(array('entity_translation', 'tmgmt_entity', 'tmgmt_entity_ui', 'translation', 'comment'));
+    parent::setUp(array('tmgmt_entity_ui', 'translation', 'comment'));
     $admin_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer content types', 'administer entity translation', 'administer tmgmt'));
     $this->drupalLogin($admin_user);
     $this->setEnvironment('de');
     $this->setEnvironment('fr');
+
+    $this->setUpNodeTypes();
 
     // Enable entity translations for nodes and comments.
     $edit = array();
@@ -338,11 +379,7 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntitySourceBaseTestCase {
  * Basic Node Source tests.
  *
  */
-class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
-
-  // @todo: Switch to testing profile.
-  protected $profile = 'standard';
-
+class TMGMTEntitySourceUITestCase extends TMGMTEntitySourceBaseTestCase {
 
   /**
    * Implements getInfo().
@@ -360,7 +397,7 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_entity', 'tmgmt_entity_ui', 'block', 'entity_translation'));
+    parent::setUp(array('tmgmt_entity_ui', 'block', 'comment'));
     variable_set('language_content_type_page', ENTITY_TRANSLATION_ENABLED);
     variable_set('language_content_type_article', ENTITY_TRANSLATION_ENABLED);
 
@@ -385,10 +422,7 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
     );
     $default_translator->save();
 
-    // Change body field to be translatable.
-    $body = field_info_field('body');
-    $body['translatable'] = TRUE;
-    field_update_field($body);
+    $this->setUpNodeTypes();
 
     // Enable path locale detection.
     $edit = array(
@@ -397,29 +431,12 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
     );
     $this->drupalPost('admin/config/regional/language/configure', $edit, t('Save settings'));
 
-    /*
     // @todo Re-enable this when switching to testing profile.
     // Enable the main page content block for hook_page_alter() to work.
     $edit = array(
       'blocks[system_main][region]' => 'content',
     );
     $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
-
-    // Copied from standard.install
-    $type = array(
-      'type' => 'page',
-      'name' => st('Basic page'),
-      'base' => 'node_content',
-      'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
-      'custom' => 1,
-      'modified' => 1,
-      'locked' => 0,
-    );
-    $type = node_type_set_defaults($type);
-    node_type_save($type);
-    node_add_body_field($type);
-    node_types_rebuild();
-    debug(_node_types_build());*/
   }
 
   /**
@@ -534,7 +551,7 @@ class TMGMTEntitySourceUITestCase extends TMGMTBaseTestCase {
     field_update_field($comment_body);
 
     // Create a user that is allowed to translate comments.
-    $permissions = array('translate comment entities', 'create translation jobs', 'submit translation jobs', 'accept translation jobs', 'post comments', 'skip comment approval', 'edit own comments');
+    $permissions = array('translate comment entities', 'create translation jobs', 'submit translation jobs', 'accept translation jobs', 'post comments', 'skip comment approval', 'edit own comments', 'access comments');
     $entity_translation_permissions = entity_translation_permission();
     // The new translation edit form of entity_translation requires a new
     // permission that does not yet exist in older versions. Add it
