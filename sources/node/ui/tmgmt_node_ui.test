@@ -93,16 +93,15 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
 
     $this->drupalGet('admin/config/regional/tmgmt');
     $this->assertResponse(200);
-    $this->assertLink(t('view'));
-    $this->assertNoLink(t('checkout'));
+    $this->assertLink(t('manage'));
+    $this->assertNoLink(t('submit'));
     $this->assertNoLink(t('delete'));
     $this->assertText(t('From English to German'));
-    $this->clickLink(t('view'));
+    $this->clickLink(t('manage'));
     $this->assertResponse(200);
     $this->assertNoRaw(t('Submit to translator'));
 
     // Try to access the delete page directly.
-    $this->clickLink('view');
     $this->drupalGet($this->getUrl() . '/delete');
     $this->assertResponse(403);
 
@@ -119,8 +118,8 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     // Go to the overview and submit the job.
     $this->drupalGet('admin/config/regional/tmgmt');
     $this->assertResponse(200);
-    $this->assertLink(t('view'));
-    $this->assertLink(t('checkout'));
+    $this->assertLink(t('submit'));
+    $this->assertNoLink(t('manage'));
     $this->assertNoLink(t('delete'));
     $this->assertText(t('From English to German'));
 
@@ -131,7 +130,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     // Make sure that the job is active now.
     $this->assertText(t('Active'));
     $this->assertLink(t('cancel'));
-    $this->clickLink(t('view'));
+    $this->clickLink(t('manage'));
     $this->assertText(t('Needs review'));
     $this->assertNoLink(t('review'));
     $this->assertTrue(empty($urls));
@@ -141,7 +140,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $this->drupalLogin($accept_user);
 
     $this->drupalGet('admin/config/regional/tmgmt');
-    $this->clickLink('view');
+    $this->clickLink('manage');
     $this->clickLink('review');
 
     $this->drupalPost(NULL, array(), '✓');
