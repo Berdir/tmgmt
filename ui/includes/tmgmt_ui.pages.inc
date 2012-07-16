@@ -300,6 +300,13 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       '#markup' => $view->preview('block', array($job->tjid)),
     );
   }
+
+  $content['word_count'] = array(
+    '#type' => 'item',
+    '#title' => t('Word count'),
+    '#markup' => $job->getWordCount(),
+  );
+
   $form['languages'] = array(
     '#type' => 'fieldset',
     '#title' => t('Languages'),
@@ -391,6 +398,15 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   elseif (!empty($job->translator)) {
     $form['translator_wrapper']['info'] = tmgmt_ui_checkout_info($job);
   }
+
+  if ($view = views_get_view('tmgmt_ui_job_messages')) {
+    $form['messages'] = array(
+      '#type' => 'item',
+      '#title' => $view->get_title(),
+      '#markup' => $view->preview('block', array($job->tjid)),
+    );
+  }
+
   // Add the buttons and action links.
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(

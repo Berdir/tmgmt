@@ -107,7 +107,7 @@ $handler->display->display_options['relationships']['translator']['table'] = 'tm
 $handler->display->display_options['relationships']['translator']['field'] = 'translator';
 $handler->display->display_options['relationships']['translator']['ui_name'] = 'Translator';
 $handler->display->display_options['relationships']['translator']['label'] = 'Translator';
-$handler->display->display_options['relationships']['translator']['required'] = TRUE;
+$handler->display->display_options['relationships']['translator']['required'] = 0;
 /* Field: Bulk operations */
 $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
 $handler->display->display_options['fields']['views_bulk_operations']['table'] = 'tmgmt_job';

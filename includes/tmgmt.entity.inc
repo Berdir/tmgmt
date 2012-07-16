@@ -1024,42 +1024,9 @@ class TMGMTJob extends Entity {
    * Overrides Entity::buildContent().
    */
   public function buildContent($view_mode = 'full', $langcode = NULL) {
-    $wrapper = entity_metadata_wrapper('tmgmt_job', $this);
-    $content['created'] = array(
-      '#type' => 'item',
-      '#title' => t('Created'),
-      '#markup' => format_date($wrapper->created->value()),
-    );
-    $content['changed'] = array(
-      '#type' => 'item',
-      '#title' => t('Last changed'),
-      '#markup' => format_date($wrapper->changed->value()),
-    );
-    $content['state'] = array(
-      '#type' => 'item',
-      '#title' => t('State'),
-      '#markup' => $wrapper->state->label(),
-    );
-    $content['word_count'] = array(
-      '#type' => 'item',
-      '#title' => t('Word count'),
-      '#markup' => $this->getWordCount(),
-    );
-    if (module_exists('views')) {
-      if ($view = views_get_view('tmgmt_ui_job_items')) {
-        $content['items'] = array(
-          '#type' => 'item',
-          '#title' => $view->get_title(),
-          '#markup' => $view->preview('block', array($this->tjid)),
-        );
-      }
-      if ($view = views_get_view('tmgmt_ui_job_messages')) {
-        $content['messages'] = array(
-          '#type' => 'item',
-          '#title' => $view->get_title(),
-          '#markup' => $view->preview('block', array($this->tjid)),
-        );
-      }
+    $content = array();
+    if (module_exists('tmgmt_ui')) {
+      $content = entity_ui_get_form('tmgmt_job', $this);
     }
     return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
   }

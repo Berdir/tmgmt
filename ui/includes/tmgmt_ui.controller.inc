@@ -189,23 +189,6 @@ class TMGMTJobUIController extends EntityDefaultUIController {
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],
     );
-    $items[$this->path . '/' . $wildcard . '/view'] = array(
-      'title' => 'View',
-      'load arguments' => array($this->entityType),
-      'type' => MENU_DEFAULT_LOCAL_TASK,
-      'weight' => -10,
-    );
-    $items[$this->path . '/' . $wildcard . '/manage'] = array(
-      'title' => 'Manage',
-      'page callback' => 'entity_ui_get_form',
-      'page arguments' => array($this->entityType, $id_count),
-      'load arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
-      'access arguments' => array('update', $this->entityType, $id_count),
-      'type' => MENU_LOCAL_TASK,
-      'file' => $this->entityInfo['admin ui']['file'],
-      'file path' => $this->entityInfo['admin ui']['file path'],
-    );
     $items[$this->path . '/' . $wildcard . '/cancel'] = array(
       'page callback' => 'drupal_get_form',
       'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
