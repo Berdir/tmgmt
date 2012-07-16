@@ -6,10 +6,6 @@
  */
 class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
 
-  // @todo: Switch to testing profile.
-  protected $profile = 'standard';
-
-
   /**
    * Implements getInfo().
    */
@@ -25,7 +21,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_node', 'translation', 'tmgmt_node_ui', 'block'));
+    parent::setUp(array('tmgmt_node_ui', 'block'));
     variable_set('language_content_type_page', TRANSLATION_ENABLED);
 
     // We need the administer blocks permission.
@@ -36,7 +32,6 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $this->setEnvironment('es');
     $this->setEnvironment('el');
 
-    /*
     // @todo Re-enable this when switching to testing profile.
     // Enable the main page content block for hook_page_alter() to work.
     $edit = array(
@@ -58,7 +53,6 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     node_type_save($type);
     node_add_body_field($type);
     node_types_rebuild();
-    debug(_node_types_build());*/
   }
 
     /**
@@ -396,7 +390,7 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_node', 'translation', 'tmgmt_node_ui', 'rules'));
+    parent::setUp(array('tmgmt_node_ui'));
     variable_set('language_content_type_page', TRANSLATION_ENABLED);
 
     $this->loginAsAdmin();
