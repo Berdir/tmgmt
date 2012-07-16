@@ -123,7 +123,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $this->assertNoLink(t('delete'));
     $this->assertText(t('From English to German'));
 
-    $this->clickLink('checkout');
+    $this->clickLink('submit');
 
     $this->drupalPost(NULL, array(), t('Submit to translator'));
 
