@@ -307,16 +307,12 @@ $handler->display->display_options['filters']['language']['group'] = 1;
 $handler->display->display_options['filters']['language_1']['id'] = 'language_1';
 $handler->display->display_options['filters']['language_1']['table'] = 'node';
 $handler->display->display_options['filters']['language_1']['field'] = 'language';
-$handler->display->display_options['filters']['language_1']['value'] = array(
-  '***DEFAULT_LANGUAGE***' => '***DEFAULT_LANGUAGE***',
-);
 $handler->display->display_options['filters']['language_1']['group'] = 1;
 $handler->display->display_options['filters']['language_1']['exposed'] = TRUE;
 $handler->display->display_options['filters']['language_1']['expose']['operator_id'] = 'language_1_op';
 $handler->display->display_options['filters']['language_1']['expose']['label'] = 'Source Language';
 $handler->display->display_options['filters']['language_1']['expose']['operator'] = 'language_1_op';
 $handler->display->display_options['filters']['language_1']['expose']['identifier'] = 'language_1';
-$handler->display->display_options['filters']['language_1']['expose']['required'] = 1;
 $handler->display->display_options['filters']['language_1']['expose']['reduce'] = 0;
 
 /* Display: Page */
