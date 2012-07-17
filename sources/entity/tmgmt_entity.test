@@ -6,7 +6,9 @@
  * @todo: Write tests for these cases:
  *  - any generic entity (defined by the tmgmt_entity_test module).
  */
-class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
+class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
+
+  public $vocabulary;
 
   /**
    * Implements getInfo().
@@ -29,62 +31,11 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     // Admin user to perform settings on setup.
     $this->loginAsAdmin(array('administer entity translation'));
 
-    // Create a simple vocabulary.
-    $this->vocabulary = new stdClass();
-    $this->vocabulary->name = $this->randomName();
-    $this->vocabulary->machine_name = strtolower($this->randomName());
-    taxonomy_vocabulary_save($this->vocabulary);
+    $this->vocabulary = $this->createTaxonomyVocab(strtolower($this->randomName()), $this->randomName(), array(FALSE, TRUE, TRUE, TRUE));
 
     // Enable entity translations for taxonomy.
     $edit['entity_translation_entity_types[taxonomy_term]'] = 1;
     $this->drupalPost('admin/config/regional/entity_translation', $edit, t('Save configuration'));
-  }
-
-  /**
-   * Adds some fields to an entity bundle
-   *
-   * @param $entity_type
-   *  The entity type.
-   * @param $bundle
-   *  The entity bundle.
-   */
-  function addFields($entity_type, $bundle) {
-    $translatables = array(FALSE, TRUE, TRUE, TRUE);
-    $field_types = array('text', 'text_with_summary');
-
-    $i = 1;
-    foreach ($translatables as $switch) {
-      $field_type = $field_types[array_rand($field_types, 1)];
-      $field_name = drupal_strtolower($this->randomName());
-
-      // Create a field.
-      $field = array(
-        'field_name' => $field_name,
-        'type' => $field_type,
-        'cardinality' => $i++,
-        'translatable' => $switch,
-      );
-      field_create_field($field);
-
-      // Create an instance of the previously created field.
-      $instance = array(
-        'field_name' => $field_name,
-        'entity_type' => $entity_type,
-        'bundle' => $bundle,
-        'label' => $this->randomString(10),
-        'description' => $this->randomString(30),
-        'widget' => array(
-          'type' => $field_type == 'text' ? 'text_textfield' : 'text_textarea_with_summary',
-          'label' => $this->randomString(10),
-        ),
-      );
-      field_create_instance($instance);
-
-      $this->field_names[$entity_type][$bundle][] = $field_name;
-    }
-
-    // Clear field cache.
-    field_cache_clear();
   }
 
   /**
@@ -93,8 +44,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
   function testEntitySourceNode() {
     $this->setEnvironment('de');
 
-    // Add some fields.
-    $this->addFields('node', 'article');
+    $this->createNodeType('article', st('Article'), ENTITY_TRANSLATION_ENABLED);
 
     // Create a translation job.
     $job = $this->createJob();
@@ -104,29 +54,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
 
     // Create some nodes.
     for ($i = 1; $i <= 5; $i++) {
-      $node = array(
-        'type' => 'article',
-        'language' => 'en',
-        'body' => array('en' => array(array())),
-      );
-
-      // Put some values in the new fields.
-      foreach ($this->field_names['node']['article'] as $field_name) {
-        $field_info = field_info_field($field_name);
-        $field_lang = $field_info['translatable'] ? 'en' : LANGUAGE_NONE;
-        $cardinality = $field_info['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? 1 : $field_info['cardinality'];
-
-        // Create two deltas for each field.
-        for ($delta = 0; $delta <= $cardinality; $delta++) {
-          $node[$field_name][$field_lang][$delta]['value'] = $this->randomName(20);
-          if ($field_info['type'] == 'text_with_summary') {
-            $node[$field_name][$field_lang][$delta]['summary'] = $this->randomName(10);
-          }
-        }
-      }
-
-      $node = $this->drupalCreateNode($node);
-
+      $node = $this->createNode('article');
       // Create a job item for this node and add it to the job.
       $job->addItem('entity', 'node', $node->nid);
     }
@@ -151,9 +79,6 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
   function testEntitySourceTerm() {
     $this->setEnvironment('de');
 
-    // Add some fields.
-    $this->addFields('taxonomy_term', $this->vocabulary->machine_name);
-
     // Create the job.
     $job = $this->createJob();
     $job->translator = $this->default_translator->name;
@@ -164,25 +89,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
 
     //Create some terms.
     for ($i = 1; $i <= 5; $i++) {
-      $term = new stdClass();
-      $term->name = $this->randomName();
-      $term->description = $this->randomName();
-      $term->vid = $this->vocabulary->vid;
-      // Put some values in the new fields.
-      foreach ($this->field_names['taxonomy_term'][$this->vocabulary->machine_name] as $field_name) {
-        $field_info = field_info_field($field_name);
-        $field_lang = 'en';
-        //$field_lang = $field_info['translatable'] ? 'en' : LANGUAGE_NONE;
-        $cardinality = $field_info['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? 1 : $field_info['cardinality'];
-
-        for ($delta = 0; $delta <= $cardinality; $delta++) {
-          $term->{$field_name}[$field_lang][$delta]['value'] = $this->randomName(20);
-          if ($field_info['type'] == 'text_with_summary') {
-            $term->{$field_name}[$field_lang][$delta]['summary'] = $this->randomName(10);
-          }
-        }
-      }
-      taxonomy_term_save($term);
+      $term = $this->createTaxonomyTerm($this->vocabulary);
       // Create the item and assign it to the job.
       $job->addItem('entity', 'taxonomy_term', $term->tid);
     }
@@ -202,8 +109,6 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
   function testAddingJobItemsWithEmptySourceText() {
     $this->setEnvironment('de');
 
-    // Add some fields.
-    $this->addFields('taxonomy_term', $this->vocabulary->machine_name);
 
     // Create term with empty texts.
     $empty_term = new stdClass();
@@ -223,25 +128,7 @@ class TMGMTEntitySourceTestCase extends TMGMTBaseTestCase {
     }
 
     // Create term with populated source content.
-    $populated_content_term = new stdClass();
-    $populated_content_term->name = $this->randomName();
-    $populated_content_term->description = $this->randomName();
-    $populated_content_term->vid = $this->vocabulary->vid;
-    // Put some values in the new fields.
-    foreach ($this->field_names['taxonomy_term'][$this->vocabulary->machine_name] as $field_name) {
-      $field_info = field_info_field($field_name);
-      $field_lang = 'en';
-      //$field_lang = $field_info['translatable'] ? 'en' : LANGUAGE_NONE;
-      $cardinality = $field_info['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? 1 : $field_info['cardinality'];
-
-      for ($delta = 0; $delta <= $cardinality; $delta++) {
-        $populated_content_term->{$field_name}[$field_lang][$delta]['value'] = $this->randomName(20);
-        if ($field_info['type'] == 'text_with_summary') {
-          $populated_content_term->{$field_name}[$field_lang][$delta]['summary'] = $this->randomName(10);
-        }
-      }
-    }
-    taxonomy_term_save($populated_content_term);
+    $populated_content_term = $this->createTaxonomyTerm($this->vocabulary);
 
     // Lets reuse the last created term with populated source content.
     $job->addItem('entity', 'taxonomy_term', $populated_content_term->tid);

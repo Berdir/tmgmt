@@ -432,6 +432,7 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTBaseTestCase {
 
     // Login as translator to translate nodes.
     $this->loginAsTranslator(array(
+      'translate content',
       'edit any page content',
       'create page content',
     ));
