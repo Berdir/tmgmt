@@ -141,15 +141,13 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#title' => t('Translator settings'),
     '#tree' => TRUE,
   );
-  if (variable_get('tmgmt_auto_accept', FALSE)) {
-    $form['settings']['auto_accept'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Auto accept finished translations'),
-      '#description' => t('This skips the reviewing process and automatically accepts all translations as soon as they are returned by the translation provider.'),
-      '#default_value' => $translator->getSetting('auto_accept'),
-      '#weight' => -1,
-    );
-  }
+  $form['settings']['auto_accept'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Auto accept finished translations'),
+    '#description' => t('This skips the reviewing process and automatically accepts all translations as soon as they are returned by the translation provider.'),
+    '#default_value' => $translator->getSetting('auto_accept'),
+    '#weight' => -1,
+  );
   if (!element_children($form['settings'])) {
     unset($form['settings']);
   }
