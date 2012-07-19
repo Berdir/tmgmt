@@ -19,6 +19,7 @@
 define('TMGMT_JOB_STATE_UNPROCESSED', 0);
 
 /**
+ * HI as well
  * A translation job that has been submitted to the translator.
  *
  * Translator plugins are responsible for setting this state in their
