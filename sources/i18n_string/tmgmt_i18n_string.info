@@ -10,3 +10,4 @@ dependencies[] = i18n
 dependencies[] = variable
 files[] = tmgmt_i18n_string.plugin.inc
 files[] = tmgmt_i18n_string.test
+files[] = tmgmt_i18n_string.ui.inc
