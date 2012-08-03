@@ -140,7 +140,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $this->drupalPost(NULL, array(), '✓');
     // Verify that the accepted character is shown.
     $this->assertText('&#x2611;');
-    $this->drupalPost(NULL, array(), t('Accept'));
+    $this->drupalPost(NULL, array(), t('Approve All'));
     $this->assertText(t('Accepted'));
     $this->assertText('1/0/0');
 

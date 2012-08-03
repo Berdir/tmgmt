@@ -381,7 +381,7 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
   $form['actions']['#type'] = 'actions';
   $form['actions']['accept'] = array(
     '#type' => 'submit',
-    '#value' => t('Accept'),
+    '#value' => t('Approve All'),
   );
   $form['actions']['save'] = array(
     '#type' => 'submit',
