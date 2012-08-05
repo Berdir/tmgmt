@@ -146,20 +146,24 @@ function tmgmt_ui_views_default_views() {
 }
 
  /**
- * Embed a view but don't render it if it's empty.
- *
- * @param $view
- *   The machine-readable name of the view.
- *
- * @return
- *   The rendered view or an empty string if the view doesn't exist if it was
- *   empty.
+  * Embed a view but don't render it if it's empty.
+  *
+  * @param string $view
+  *   The machine-readable name of the view.
+  * @param string $display_id
+  *   The display id for the view.
+  * @param array $args
+  *   The arguments that should be passed to the view.
+  *
+  * @return
+  *   The rendered view or an empty string if the view doesn't exist if it was
+  *   empty.
   */
-function tmgmt_ui_embed_view($view) {
+function tmgmt_ui_embed_view($view, $display_id = NULL, array $args = array()) {
   $view = views_get_view($view);
   if (!empty($view)) {
     $view->init_display();
-    $output = $view->preview();
+    $output = $view->preview($display_id, $args);
     if (!empty($view->result)) {
       return $output;
     }

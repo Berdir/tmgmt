@@ -231,12 +231,27 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
    * Implements TMGMTTranslatorUIControllerInterface::checkoutInfo().
    */
   public function checkoutInfo(TMGMTJob $job) {
+    return array();
+  }
+
+  /**
+   * Provides a simple wrapper for the checkout info fieldset.
+   *
+   * @param TMGMTJob $job
+   *   Translation job object.
+   * @param $form
+   *   Partial form structure to be wrapped in the fieldset.
+   *
+   * @return
+   *   The provided form structure wrapped in a collapsed fieldset.
+   */
+  public function checkoutInfoWrapper(TMGMTJob $job, $form) {
     $label = $job->getTranslator()->label();
-    $form['#title'] = t('@translator translation job information', array('@translator' => $label));
-    $form['#type'] = 'fieldset';
-    if (!element_children($form)) {
-      $form['#description'] = t('There is no relevant information to be displayed.');
-    }
+    $form += array(
+      '#title' => t('@translator translation job information', array('@translator' => $label)),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+    );
     return $form;
   }
 

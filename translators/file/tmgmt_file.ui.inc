@@ -88,7 +88,7 @@ class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController
       '#value' => t('Import'),
       '#submit' => array('tmgmt_file_import_form_submit'),
     );
-    return $form;
+    return $this->checkoutInfoWrapper($job, $form);
   }
 
 }

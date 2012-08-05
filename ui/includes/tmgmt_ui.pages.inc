@@ -242,16 +242,10 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $old = empty($job->is_new) && $op != 'clone';
   // Handle source language.
   $available['source_language'] = tmgmt_available_languages();
-  // We need this information because we will lock down the language dropdown
-  // fields if these values have been predefined.
-  $preselected['source_language'] = !empty($job->source_language);
   $job->source_language = isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : $job->source_language;
 
   // Handle target language.
   $available['target_language'] = tmgmt_available_languages();
-  // We need this information because we will lock down the language dropdown
-  // fields if these values have been predefined.
-  $preselected['target_language'] = $job->isActive();
   $job->target_language = isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : $job->target_language;
 
 // Remove impossible combinations so we don't end up with the same source and
@@ -266,21 +260,19 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     $job->target_language = key($available['target_language']);
   }
 
-  // Show a list of translators tagged by availability for the selected source
-  // and target language combination.
-  if (!$translators = tmgmt_translator_labels_flagged($job)) {
-    drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => l(t('configure'), 'admin/config/regional/tmgmt/translators'))), 'warning');
-  }
-  $preselected_translator = !empty($job->translator) && isset($translators[$job->translator]) ? $job->translator : key($translators);
-  $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : $preselected_translator;
+  $form['info'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('tmgmt-ui-job-info', 'clearfix')),
+    '#weight' => 0,
+  );
+
   $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
-  // Show the items that are attached to this job if there are not more than 20.
-  $form['override_label'] = array(
+  $form['info']['override_label'] = array(
     '#type' => 'checkbox',
     '#title' => t('Override the default label (%label)', array('%label' => $job->label())),
     '#default_value' => !empty($job->label),
   );
-  $form['label'] = array(
+  $form['info']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
     '#description' => t('You can provide a label for this job in order to identify it easily later on.'),
@@ -291,68 +283,49 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       ),
     ),
   );
-  if (module_exists('views') && $view = views_get_view('tmgmt_ui_job_items')) {
-    $form['items'] = array(
-      '#type' => 'item',
-      '#title' => $view->get_title(),
-      '#markup' => $view->preview('block', array($job->tjid)),
-    );
-  }
 
-  $content['word_count'] = array(
-    '#type' => 'item',
-    '#title' => t('Word count'),
-    '#markup' => $job->getWordCount(),
-  );
-
-  $form['languages'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Languages'),
-    '#description' => t('The source and target language of this translation job.'),
-    '#attributes' => array('class' => array('clearfix')),
-  );
   // Make the source and target language flexible by showing either a select
   // dropdown or the plain string (if preselected).
-  if (!empty($preselected['source_language']) || !$job->isUnprocessed()) {
-    $form['languages']['source_language'] = array(
-      '#title' => t('From'),
+  if (!empty($job->source_language) || !$job->isSubmittable()) {
+    $form['info']['source_language'] = array(
+      '#title' => t('Source language'),
       '#type' =>  'item',
       '#markup' => isset($available['source_language'][$job->source_language]) ? $available['source_language'][$job->source_language] : '',
-      '#prefix' => '<div id="tmgmt-ui-source-language" class="tmgmt-ui-source-language">',
+      '#prefix' => '<div id="tmgmt-ui-source-language" class="tmgmt-ui-source-language tmgmt-ui-info-item">',
       '#suffix' => '</div>',
     );
   }
   else {
-    $form['languages']['source_language'] = array(
-      '#title' => t('From'),
+    $form['info']['source_language'] = array(
+      '#title' => t('Source language'),
       '#type' => 'select',
       '#options' => $available['source_language'],
       '#default_value' => $job->source_language,
       '#required' => TRUE,
-      '#prefix' => '<div id="tmgmt-ui-source-language" class="tmgmt-ui-source-language">',
+      '#prefix' => '<div id="tmgmt-ui-source-language" class="tmgmt-ui-source-language tmgmt-ui-info-item">',
       '#suffix' => '</div>',
       '#ajax' => array(
         'callback' => 'tmgmt_ui_ajax_callback_language_select',
       ),
     );
   }
-  if (!empty($preselected['target_language']) || !$job->isUnprocessed()) {
-    $form['languages']['target_language'] = array(
-      '#title' => t('To'),
+  if (!$job->isSubmittable()) {
+    $form['info']['target_language'] = array(
+      '#title' => t('Target language'),
       '#type' => 'item',
       '#markup' => isset($available['target_language'][$job->target_language]) ? $available['target_language'][$job->target_language] : '',
-      '#prefix' => '<div id="tmgmt-ui-target-language" class="tmgmt-ui-target-language">',
+      '#prefix' => '<div id="tmgmt-ui-target-language" class="tmgmt-ui-target-language tmgmt-ui-info-item">',
       '#suffix' => '</div>',
     );
   }
   else {
-    $form['languages']['target_language'] = array(
-      '#title' => t('To'),
+    $form['info']['target_language'] = array(
+      '#title' => t('Target language'),
       '#type' => 'select',
       '#options' => $available['target_language'],
       '#default_value' => $job->target_language,
       '#required' => TRUE,
-      '#prefix' => '<div id="tmgmt-ui-target-language" class="tmgmt-ui-target-language">',
+      '#prefix' => '<div id="tmgmt-ui-target-language" class="tmgmt-ui-target-language tmgmt-ui-info-item">',
       '#suffix' => '</div>',
       '#ajax' => array(
         'callback' => 'tmgmt_ui_ajax_callback_language_select',
@@ -360,26 +333,80 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       ),
     );
   }
+
+  // Display selected translator for already submitted jobs.
+  if (!$job->isSubmittable()) {
+    $translators = tmgmt_translator_labels();
+    $form['info']['translator'] = array(
+      '#type' => 'item',
+      '#title' => t('Translator'),
+      '#markup' => check_plain($translators[$job->translator]),
+      '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
+      '#suffix' => '</div>',
+    );
+  }
+
+  $form['info']['word_count'] = array(
+    '#type' => 'item',
+    '#title' => t('Total word count'),
+    '#markup' => number_format($job->getWordCount()),
+    '#prefix' => '<div class="tmgmt-ui-word-count tmgmt-ui-info-item">',
+    '#suffix' => '</div>',
+  );
+
+  // Display created time only for jobs that are not new anymore.
+  if (!$job->isUnprocessed()) {
+    $form['info']['created'] = array(
+      '#type' => 'item',
+      '#title' => t('Created'),
+      '#markup' => format_date($job->created),
+      '#prefix' => '<div class="tmgmt-ui-created tmgmt-ui-info-item">',
+      '#suffix' => '</div>',
+    );
+  }
+
+  if ($view = views_get_view('tmgmt_ui_job_items')) {
+    $form['items'] = array(
+      '#type' => 'item',
+      '#title' => $view->get_title(),
+      '#prefix' => '<div class="' . 'tmgmt-ui-job-items ' . ($job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage') . '">',
+      '#markup' => $view->preview($job->isSubmittable() ? 'submit' : 'block', array($job->tjid)),
+      '#attributes' => array('class' => array('tmgmt-ui-job-items', $job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage')),
+      '#suffix' => '</div>',
+      '#weight' => $job->isSubmittable() ? 30 : 10,
+    );
+  }
+
   $form['translator_wrapper'] = array(
     '#type' => 'container',
     '#prefix' => '<div id="tmgmt-ui-translator-wrapper">',
     '#suffix' => '</div>',
+    '#weight' => 20,
   );
-  $form['translator_wrapper']['translator'] = array(
-    '#type' => 'select',
-    '#title' => t('Translator'),
-    '#description' => t('The configured translator plugin that will process of the translation.'),
-    '#options' => $translators,
-    '#default_value' => $job->translator,
-    '#required' => TRUE,
-    '#disabled' => !$job->isUnprocessed(),
-    '#ajax' => array(
-      'callback' => 'tmgmt_ui_ajax_callback_translator_select',
-      'wrapper' => 'tmgmt-ui-translator-settings',
-    ),
-  );
+
   // Display the checkout settings form if the job can be checked out.
-  if (!empty($job->translator) && $job->isSubmittable()) {
+  if ($job->isSubmittable()) {
+    // Show a list of translators tagged by availability for the selected source
+    // and target language combination.
+    if (!$translators = tmgmt_translator_labels_flagged($job)) {
+      drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => l(t('configure'), 'admin/config/regional/tmgmt/translators'))), 'warning');
+    }
+    $preselected_translator = !empty($job->translator) && isset($translators[$job->translator]) ? $job->translator : key($translators);
+    $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : $preselected_translator;
+
+    $form['translator_wrapper']['translator'] = array(
+      '#type' => 'select',
+      '#title' => t('Translator'),
+      '#description' => t('The configured translator plugin that will process of the translation.'),
+      '#options' => $translators,
+      '#default_value' => $job->translator,
+      '#required' => TRUE,
+      '#ajax' => array(
+        'callback' => 'tmgmt_ui_ajax_callback_translator_select',
+        'wrapper' => 'tmgmt-ui-translator-settings',
+      ),
+    );
+
     $settings = tmgmt_ui_checkout_settings_form($form_state, $job);
     if(!is_array($settings)){
       $settings = array();
@@ -397,11 +424,21 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     $form['translator_wrapper']['info'] = tmgmt_ui_checkout_info($job);
   }
 
-  if ($view = views_get_view('tmgmt_ui_job_messages')) {
+  $form['clearfix'] = array(
+    '#markup' => '<div class="clearfix"></div>',
+    '#weight' => 45,
+  );
+
+  if ($output = tmgmt_ui_embed_view('tmgmt_ui_job_messages', 'block', array($job->tjid))) {
     $form['messages'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Messages'),
+      '#collapsible' => TRUE,
+      '#weight' => 50,
+    );
+    $form['messages']['view'] = array(
       '#type' => 'item',
-      '#title' => $view->get_title(),
-      '#markup' => $view->preview('block', array($job->tjid)),
+      '#markup' => $output,
     );
   }
 
@@ -438,7 +475,6 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#redirect' => 'admin/config/regional/tmgmt/jobs',
     '#access' => $job->isActive(),
   );
-  // We need some CSS for showing the source and target language in one row.
   $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
   return $form;
 }
@@ -569,7 +605,7 @@ function tmgmt_ui_ajax_callback_translator_plugin_select($form, &$form_state) {
 function tmgmt_ui_ajax_callback_language_select($form, &$form_state) {
   $replace = $form_state['input']['_triggering_element_name'] == 'source_language' ? 'target_language' : 'source_language';
   $commands[] = ajax_command_replace('#tmgmt-ui-translator-wrapper', drupal_render($form['translator_wrapper']));
-  $commands[] = ajax_command_replace('#tmgmt-ui-' . str_replace('_', '-', $replace), drupal_render($form['languages'][$replace]));
+  $commands[] = ajax_command_replace('#tmgmt-ui-' . str_replace('_', '-', $replace), drupal_render($form['info'][$replace]));
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 

@@ -3,14 +3,20 @@
  * CSS for the tmgmt admin pages.
  */
 
-.tmgmt-ui-translator-label-wrapper,
-.tmgmt-ui-target-language,
-.tmgmt-ui-source-language {
+.tmgmt-ui-info-item {
+  float: left;
+  margin-right: 80px;
+}
+
+.tmgmt-ui-job-submit.tmgmt-ui-job-items {
+  max-width: 500px;
   float: left;
 }
 
-.tmgmt-ui-source-language {
-  margin-right: 80px;
+#tmgmt-ui-translator-wrapper {
+  width: 500px;
+  margin-right: 20px;
+  float: left;
 }
 
 table.tmgmt-ui-review td {

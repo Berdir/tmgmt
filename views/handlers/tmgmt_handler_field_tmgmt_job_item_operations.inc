@@ -15,10 +15,6 @@ class tmgmt_handler_field_tmgmt_job_item_operations extends views_handler_field_
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('inline'));
     $uri = $item->uri();
-    $element['#links']['view'] = array(
-      'href' => $uri['path'],
-      'title' => t('view'),
-    );
     if ($item->isNeedsReview() && entity_access('accept', 'tmgmt_job_item', $item)) {
       $element['#links']['review'] = array(
         'href' => 'admin/config/regional/tmgmt/items/' . $item->tjiid . '/review',
@@ -26,7 +22,7 @@ class tmgmt_handler_field_tmgmt_job_item_operations extends views_handler_field_
         'title' => t('review'),
       );
     }
-    if (user_access('administer tmgmt')) {
+    if (user_access('administer tmgmt') && !$item->isAccepted()) {
       $element['#links']['delete'] = array(
         'href' => 'admin/config/regional/tmgmt/items/' . $item->tjiid . '/delete',
         'query' => array('destination' => current_path()),
