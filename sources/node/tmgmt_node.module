@@ -12,7 +12,7 @@ function tmgmt_node_tmgmt_source_plugin_info() {
   $info['node'] = array(
     'label' => t('Node'),
     'description' => t('Source handler for nodes.'),
-    'plugin controller class' => 'TMGMTNodeSourcePluginController',
+    'plugin controller class' => 'Drupal\tmgmt_node\NodeSourcePluginController',
     'ui controller class' => 'TMGMTNodeSourceUIController',
     'views controller class' => 'TMGMTNodeSourceViewsController',
     'item types' => array(),

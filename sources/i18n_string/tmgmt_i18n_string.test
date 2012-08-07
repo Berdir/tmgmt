@@ -46,7 +46,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $job->requestTranslation();
 
     foreach ($job->getItems() as $item) {
-      /* @var $item TMGMTJobItem */
+      /* @var $item JobItem */
       $item->acceptTranslation();
     }
 
@@ -79,7 +79,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $item1 = $job->addItem('i18n_string', 'i18n_string', $string_name);
     $job->requestTranslation();
     foreach ($job->getItems() as $item) {
-      /* @var $item TMGMTJobItem */
+      /* @var $item JobItem */
       $item->acceptTranslation();
     }
 

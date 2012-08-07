@@ -13,7 +13,7 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
   /**
    * Overrides TMGMTDefaultSourcePluginController::getData().
    */
-  public function getData(TMGMTJobItem $job_item) {
+  public function getData(JobItem $job_item) {
     // @todo Make use of the item type property.
     $i18n_object = explode(':', $job_item->item_id);
     $i18n_object_type = array_shift($i18n_object);
@@ -41,7 +41,7 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
   /**
    * Overrides TMGMTDefaultSourcePluginController::saveTranslation().
    */
-  public function saveTranslation(TMGMTJobItem $job_item) {
+  public function saveTranslation(JobItem $job_item) {
     $job = tmgmt_job_load($job_item->tjid);
     $data = array_filter(tmgmt_flatten_data($job_item->getData()), '_tmgmt_filter_data');
     foreach ($data as $i18n_string => $item) {

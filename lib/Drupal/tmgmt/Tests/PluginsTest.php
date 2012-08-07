@@ -1,0 +1,176 @@
+<?php
+
+/*
+ * @file
+ * Contains Drupal\tmgmt\Tests\PluginsTest.
+ */
+
+namespace Drupal\tmgmt\Tests;
+
+/**
+ * Tests interaction between core and the plugins.
+ */
+class PluginsTest extends TMGMTUnitTestBase {
+
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => 'Plugin tests',
+      'description' => 'Verifies basic functionality of source and translator plugins',
+      'group' => 'Translation Management',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp();
+    $this->installSchema('language', array('language'));
+  }
+
+  function createJobWithItems($action = 'translate') {
+    $job = parent::createJob();
+
+    for ($i = 1; $i < 3; $i++) {
+      if ($i == 3) {
+        // Explicitly define the data for the third item.
+        $data['data'] = array(
+          'dummy' => array(
+            'deep_nesting' => array(
+              '#text' => 'Stored data',
+            ),
+          ),
+        );
+        $job->addItem('test_source', 'test', $i, array($data));
+      }
+      $job->addItem('test_source', 'test', $i);
+    }
+
+    // Manually specify the translator for now.
+    $job->translator = $this->default_translator->name;
+    $job->settings = array('action' => $action);
+
+    return $job;
+  }
+
+  function testBasicWorkflow() {
+
+    // Submit a translation job.
+    $submit_job = $this->createJobWithItems('submit');
+    $submit_job->requestTranslation();
+    $submit_job = tmgmt_job_load($submit_job->tjid);
+    $this->assertTrue($submit_job->isActive());
+    $messages = $submit_job->getMessages();
+    $last_message = end($messages);
+    $this->assertEqual('Test submit.', $last_message->message);
+
+    // Translate a job.
+    $translate_job = $this->createJobWithItems('translate');
+    $translate_job->requestTranslation();
+    $translate_job = tmgmt_job_load($translate_job->tjid);
+    foreach ($translate_job->getItems() as $job_item) {
+      $this->assertTrue($job_item->isNeedsReview());
+    }
+
+    $messages = $translate_job->getMessages();
+    // array_values() results in numeric keys, which is necessary for list.
+    list($debug, $translated, $needs_review) = array_values($messages);
+    $this->assertEqual('Test translator called.', $debug->message);
+    $this->assertEqual('debug', $debug->type);
+    $this->assertEqual('Test translation created.', $translated->message);
+    $this->assertEqual('status', $translated->type);
+
+    // The third message is specific to a job item and has different state
+    // constants.
+    $this->assertEqual('The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.', $needs_review->message);
+    $this->assertEqual('status', $needs_review->type);
+
+    $i = 1;
+    foreach ($translate_job->getItems() as $item) {
+      // Check the translated text.
+      if ($i != 3) {
+        $expected_text = 'de_Text for job item with type ' . $item->item_type . ' and id ' . $item->item_id . '.';
+      }
+      else {
+        // The third item has an explicitly stored data value.
+        $expected_text = 'de_Stored data';
+      }
+      $item_data = $item->getData();
+      $this->assertEqual($expected_text, $item_data['dummy']['deep_nesting']['#translation']['#text']);
+      $i++;
+    }
+
+    foreach ($translate_job->getItems() as $job_item) {
+      $job_item->acceptTranslation();
+    }
+
+    // @todo Accepting does not result in messages on the job anymore.
+    // Update once there are job item messages.
+    /*
+    $messages = $translate_job->getMessages();
+    $last_message = end($messages);
+    $this->assertEqual('Job accepted', $last_message->message);
+    $this->assertEqual('status', $last_message->type);*/
+
+    // Check if the translations have been "saved".
+    foreach ($translate_job->getItems() as $item) {
+      $this->assertTrue(state()->get('tmgmt_test_saved_translation_' . $item->item_type . '_' . $item->item_id, FALSE));
+    }
+
+    // A rejected job.
+    $reject_job = $this->createJobWithItems('reject');
+    $reject_job->requestTranslation();
+    // Still rejected.
+    $this->assertTrue($reject_job->isRejected());
+
+    $messages = $reject_job->getMessages();
+    $last_message = end($messages);
+    $this->assertEqual('This is not supported.', $last_message->message);
+    $this->assertEqual('error', $last_message->type);
+
+    // A failing job.
+    $failing_job = $this->createJobWithItems('fail');
+    $failing_job->requestTranslation();
+    // Still new.
+    $this->assertTrue($failing_job->isUnprocessed());
+
+    $messages = $failing_job->getMessages();
+    $last_message = end($messages);
+    $this->assertEqual('Service not reachable.', $last_message->message);
+    $this->assertEqual('error', $last_message->type);
+  }
+
+  /**
+   * Tests remote languages mappings support in the tmgmt core.
+   */
+  function testRemoteLanguagesMappings() {
+    $this->addLanguage('en');
+    $this->addLanguage('de');
+    $controller = $this->default_translator->getController();
+
+    $mappings = $controller->getRemoteLanguagesMappings($this->default_translator);
+    $this->assertEqual($mappings, array(
+      'en' => 'en-us',
+      'de' => 'de-ch',
+    ));
+
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en-us');
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de-ch');
+    $this->assertEqual($controller->mapToLocalLanguage($this->default_translator, 'en-us'), 'en');
+    $this->assertEqual($controller->mapToLocalLanguage($this->default_translator, 'de-ch'), 'de');
+
+    $this->default_translator->settings['remote_languages_mappings']['de'] = 'de-de';
+    $this->default_translator->settings['remote_languages_mappings']['en'] = 'en-uk';
+    $this->default_translator->save();
+
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en-uk');
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de-de');
+
+    // Test the fallback.
+    $info = &drupal_static('_tmgmt_plugin_info');
+    $info['translator']['test_translator']['map remote languages'] = FALSE;
+
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en');
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de');
+  }
+}

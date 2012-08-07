@@ -6,6 +6,8 @@
  * Source User Interface module.
  */
 
+use Drupal\tmgmt\TMGMTException;
+
 /**
  * Entity translation overview form.
  */

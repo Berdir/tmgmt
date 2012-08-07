@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\tmgmt\TMGMTException;
+
 /**
  * Generic entity ui controller class for source plugin.
  *
@@ -121,7 +123,7 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
     $this->overviewSearchFormRedirect($form, $form_state, $type);
 
     $jobs = array();
-    $entities = entity_load($type, $form_state['values']['items']);
+    $entities = entity_load_multiple($type, $form_state['values']['items']);
     $source_lang_registry = array();
 
     // Loop through entities and create individual jobs for each source language.

@@ -6,6 +6,8 @@
  * interface.
  */
 
+use Drupal\tmgmt\TMGMTException;
+
 /**
  * Implements hook_page_alter().
  */

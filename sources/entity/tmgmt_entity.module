@@ -12,7 +12,7 @@ function tmgmt_entity_tmgmt_source_plugin_info() {
   $info['entity'] = array(
     'label' => t('Entity'),
     'description' => t('Source handler for entities.'),
-    'plugin controller class' => 'TMGMTEntitySourcePluginController',
+    'plugin controller class' => 'Drupal\tmgmt_entity\EntitySourcePluginController',
     'item types' => array(),
   );
 
@@ -197,7 +197,7 @@ function tmgmt_entity_get_translatable_entities($entity_type, $property_conditio
   $entities = array();
 
   if (!empty($entity_ids)) {
-    $entities = entity_load($entity_type, $entity_ids);
+    $entities = entity_load_multiple($entity_type, $entity_ids);
   }
 
   return $entities;

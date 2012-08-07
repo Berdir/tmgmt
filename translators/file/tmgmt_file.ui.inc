@@ -11,9 +11,9 @@
 class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController {
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::checkoutSettingsForm().
+   * Implements TranslatorUIControllerInterface::checkoutSettingsForm().
    */
-  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
+  public function pluginSettingsForm($form, &$form_state, Translator $translator, $busy = FALSE) {
     $form['export_format'] = array(
       '#type' => 'radios',
       '#title' => t('Export to'),
@@ -48,9 +48,9 @@ class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController
   }
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::checkoutSettingsForm().
+   * Implements TranslatorUIControllerInterface::checkoutSettingsForm().
    */
-  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
+  public function checkoutSettingsForm($form, &$form_state, Job $job) {
     if ($job->getTranslator()->getSetting('allow_override')) {
       $form['export_format'] = array(
         '#type' => 'radios',
@@ -64,9 +64,9 @@ class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController
   }
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::checkoutInfo().
+   * Implements TranslatorUIControllerInterface::checkoutInfo().
    */
-  public function checkoutInfo(TMGMTJob $job) {
+  public function checkoutInfo(Job $job) {
     // If the job is finished, it's not possible to import translations anymore.
     if ($job->isFinished()) {
       return parent::checkoutInfo($job);

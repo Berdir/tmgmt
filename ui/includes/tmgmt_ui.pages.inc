@@ -39,26 +39,26 @@ function tmgmt_ui_settings_form($form, &$form_state) {
 /**
  * Simple page callback for viewing a job.
  *
- * @param TMGMTJob $job
+ * @param Job $job
  *   The viewed job.
  *
  * @return array
  *   A renderable array.
  */
-function tmgmt_ui_job_view(TMGMTJob $job) {
+function tmgmt_ui_job_view(Job $job) {
   return entity_view($job->entityType(), array($job), 'full', NULL, TRUE);
 }
 
 /**
  * Simple page callback for viewing a job item.
  *
- * @param TMGMTJobItem $item
+ * @param JobItem $item
  *   The viewed job item.
  *
  * @return array
  *   A renderable array.
  */
-function tmgmt_ui_job_item_view(TMGMTJobItem $item) {
+function tmgmt_ui_job_item_view(JobItem $item) {
   // Update the breadcrumb to include the job path.
   _tmgmt_ui_breadcrumb($item);
   return entity_view($item->entityType(), array($item), 'full', NULL, TRUE);
@@ -67,13 +67,13 @@ function tmgmt_ui_job_item_view(TMGMTJobItem $item) {
 /**
  * Simple page callback for reviewing a job item.
  *
- * @param TMGMTJobItem $job
+ * @param JobItem $job
  *   The job item to be reviewed
  *
  * @return array
  *   A renderable array.
  */
-function tmgmt_ui_job_item_review(TMGMTJobItem $item) {
+function tmgmt_ui_job_item_review(JobItem $item) {
   if ($controller = $item->getSourceController()) {
     $plugin = $controller->pluginType();
     return drupal_get_form('tmgmt_ui_' . $plugin . '_translation_review_form', $item);
@@ -85,7 +85,7 @@ function tmgmt_ui_job_item_review(TMGMTJobItem $item) {
 /**
  * Entity API form for the translator entity.
  */
-function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator, $op = 'edit') {
+function tmgmt_translator_form($form, &$form_state, Translator $translator, $op = 'edit') {
   // Check if the translator entity is completely new or not.
   $old = empty($translator->is_new) && $op != 'clone';
   // Build up the stored entity from the last (failed) form submit.
@@ -231,7 +231,7 @@ function tmgmt_translator_form_submit($form, &$form_state) {
 /**
  * Entity API form the job entity.
  */
-function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
+function tmgmt_job_form($form, &$form_state, Job $job, $op = 'edit') {
   // Get the job metadata wrapper so we can display the current status nicely.
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
   // Check if the translator entity is completely new or not.
@@ -561,7 +561,7 @@ function tmgmt_job_form_validate($form, &$form_state) {
  *
  * @todo Make use of the response object here.
  */
-function tmgmt_ui_checkout_settings_form(&$form_state, TMGMTJob $job) {
+function tmgmt_ui_checkout_settings_form(&$form_state, Job $job) {
   $form = array();
   $translator = $job->getTranslator();
   if (!$translator) {
@@ -584,7 +584,7 @@ function tmgmt_ui_checkout_settings_form(&$form_state, TMGMTJob $job) {
 /**
  * Helper function for retrieving the translator settings form.
  */
-function tmgmt_ui_plugin_settings_form(&$form_state, TMGMTTranslator $translator, $busy = FALSE) {
+function tmgmt_ui_plugin_settings_form(&$form_state, Translator $translator, $busy = FALSE) {
   $form = array();
   $controller = tmgmt_translator_ui_controller($translator->plugin);
   return $controller->pluginSettingsForm($form, $form_state, $translator, $busy);
@@ -593,7 +593,7 @@ function tmgmt_ui_plugin_settings_form(&$form_state, TMGMTTranslator $translator
 /**
  * Helper function for retrieving the rendered job checkout information.
  */
-function tmgmt_ui_checkout_info(TMGMTJob $job) {
+function tmgmt_ui_checkout_info(Job $job) {
   $translator = $job->getTranslator();
   // The translator might have been disabled or removed.
   if (!$translator) {
@@ -648,7 +648,7 @@ function tmgmt_ui_ajax_callback_translator_select($form, &$form_state) {
  * Helper function for appending the parent job path to the breadcrumb of a job
  * item menu path.
  */
-function _tmgmt_ui_breadcrumb(TMGMTJobItem $item) {
+function _tmgmt_ui_breadcrumb(JobItem $item) {
   $breadcrumb = drupal_get_breadcrumb();
   foreach (array('admin/config/regional/tmgmt/jobs', 'admin/config/regional/tmgmt/jobs/' . $item->tjid) as $path) {
     $menu = menu_get_item($path);

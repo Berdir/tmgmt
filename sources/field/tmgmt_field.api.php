@@ -8,8 +8,6 @@
 /**
  * Extract translatable text elements from a field.
  *
- * @param $entity_type
- *   The type of $entity.
  * @param $entity
  *   The entity being extracted.
  * @param $field
@@ -29,15 +27,13 @@
  *
  * @ingroup tmgmt_source
  */
-function hook_tmgmt_source_translation_structure($entity_type, $entity, $field, $instance, $langcode, $items) {
+function hook_tmgmt_source_translation_structure(EntityInterface $entity, $field, $instance, $langcode, $items) {
 
 }
 
 /**
  * Puts data on the entity of the field type owned by the module.
  *
- * @param $entity_type
- *   The type of $entity.
  * @param $entity
  *   The entity being extracted.
  * @param $field
@@ -54,6 +50,6 @@ function hook_tmgmt_source_translation_structure($entity_type, $entity, $field, 
  *
  * @see tmgmt_field_populate_entity()
  */
-function hook_tmgmt_field_type_populate_entity($entity_type, $entity, $field, $instance, $langcode, $data, $use_translatable) {
+function hook_tmgmt_field_type_populate_entity(EntityInterface $entity, $field, $instance, $langcode, $data, $use_translatable) {
 
 }

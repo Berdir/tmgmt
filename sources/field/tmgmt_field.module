@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\Core\Entity\EntityInterface;
+
 /**
  * @file
  * Main module file for the Translation Management Source Field module.
@@ -10,7 +12,7 @@
  *
  * This hook is implemented on behalf of the core text module.
  */
-function text_tmgmt_source_translation_structure($entity_type, $entity, $field, $instance, $langcode, $items) {
+function text_tmgmt_source_translation_structure($entity, $field, $instance, $langcode, $items) {
   $structure = array();
   if (!empty($items)) {
     $structure['#label'] = check_plain($instance['label']);
@@ -56,21 +58,13 @@ function text_tmgmt_source_translation_structure($entity_type, $entity, $field, 
  * @return array
  *   The structured field data for all translatable fields
  */
-function tmgmt_field_get_source_data($entity_type, $entity, $langcode, $only_translatable = FALSE) {
-  try {
-    list(, , $bundle) = entity_extract_ids($entity_type, $entity);
-  }
-  catch (Exception $e) {
-    watchdog_exception('tmgmt field', $e);
-    return array();
-  }
-
+function tmgmt_field_get_source_data(EntityInterface $entity, $langcode, $only_translatable = FALSE) {
   $fields = array();
-  foreach (field_info_instances($entity_type, $bundle) as $field_name => $instance) {
+  foreach (field_info_instances($entity->entityType(), $entity->bundle()) as $field_name => $instance) {
     $field = field_info_field($field_name);
-    $items = field_get_items($entity_type, $entity, $field_name, $langcode);
+    $items = field_get_items($entity->entityType(), $entity, $field_name, $langcode);
     if ((!$only_translatable || $field['translatable']) && $items) {
-      if ($data = module_invoke($field['module'], 'tmgmt_source_translation_structure', $entity_type, $entity, $field, $instance, $langcode, $items)) {
+      if ($data = module_invoke($field['module'], 'tmgmt_source_translation_structure', $entity, $field, $instance, $langcode, $items)) {
         $fields[$field_name] = $data;
       }
     }
@@ -93,14 +87,13 @@ function tmgmt_field_get_source_data($entity_type, $entity, $langcode, $only_tra
  *   TRUE if the values should be stored language specific when the field is set
  *   to translatable.
  */
-function tmgmt_field_populate_entity($entity_type, $entity, $langcode, $data, $use_translatable = TRUE) {
+function tmgmt_field_populate_entity(EntityInterface $entity, $langcode, $data, $use_translatable = TRUE) {
   foreach (element_children($data) as $field_name) {
     if ($field = field_info_field($field_name)) {
       $function = $field['module'] . '_field_type_tmgmt_populate_entity';
-      list(, , $bundle) = entity_extract_ids($entity_type, $entity);
-      $instance = field_info_instance($entity_type, $field_name, $bundle);
+      $instance = field_info_instance($entity->entityType(), $field_name, $entity->bundle());
       if (function_exists($function)) {
-        $function($entity_type, $entity, $field, $instance, $langcode, $data, $use_translatable);
+        $function($entity, $field, $instance, $langcode, $data, $use_translatable);
       }
       else {
         foreach (element_children($data[$field_name]) as $delta) {

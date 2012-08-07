@@ -1,0 +1,101 @@
+<?php
+
+/*
+ * @file
+ * Contains Drupal\tmgmt\Tests\HelperTestCase.
+ */
+
+namespace Drupal\tmgmt\Tests;
+
+/**
+ * Tests the helper functions in tmgmt.module.
+ */
+class HelperTest extends TMGMTUnitTestBase {
+
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => 'Helper functions',
+      'description' => 'Helper functions for other modules',
+      'group' => 'Translation Management',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp();
+    $this->installSchema('language', array('language'));
+  }
+
+  /**
+   * Tests tmgmt_job_match_item()
+   *
+   * @see tmgmt_job_match_item
+   */
+  function testTMGTJobMatchItem() {
+    $this->addLanguage('fr');
+    $this->addLanguage('es');
+
+    // Add a job from en to fr and en to sp.
+    $job_en_fr = $this->createJob('en', 'fr');
+    $job_en_sp = $this->createJob('en', 'es');
+
+    // Add a job which has existing source-target combinations.
+    $this->assertEqual($job_en_fr->tjid, tmgmt_job_match_item('en', 'fr')->tjid);
+    $this->assertEqual($job_en_sp->tjid, tmgmt_job_match_item('en', 'es')->tjid);
+
+    // Add a job which has no existing source-target combination.
+    $this->assertTrue(tmgmt_job_match_item('fr', 'es'));
+  }
+
+  /**
+   * Tests the tmgmt_data_item_label() function.
+   *
+   * @todo: Move into a unit test case once available.
+   */
+  function testDataIemLabel() {
+    $no_label = array(
+      '#text' => 'No label',
+    );
+    $this->assertEqual(tmgmt_data_item_label($no_label), 'No label');
+    $label = array(
+      '#parent_label' => array(),
+      '#label' => 'A label',
+    );
+    $this->assertEqual(tmgmt_data_item_label($label), 'A label');
+    $parent_label = array(
+      '#parent_label' => array('Parent label', 'Sub label'),
+      '#label' => 'A label',
+    );
+    $this->assertEqual(tmgmt_data_item_label($parent_label), 'Parent label > Sub label');
+  }
+
+  function testWordCount() {
+    $unit_tests = array(
+      'empty' => array(
+        'text' => '',
+        'count' => 0,
+      ),
+      'latin' => array(
+        'text' => 'Drupal is the best!',
+        'count' => 4,
+      ),
+      'non-latin' => array(
+        'text' => 'Друпал лучший!',
+        'count' => 2,
+      ),
+      'complex punctuation' => array(
+        'text' => '<[({-!ReAd@*;: ,?+MoRe...})]>\\|/',
+        'count' => 2,
+      ),
+      'repeat' => array(
+        'text' => 'repeat repeat',
+        'count' => 2,
+      ),
+    );
+    foreach ($unit_tests as $id => $test_data) {
+      $this->assertEqual($real_count = tmgmt_word_count($test_data['text']), $desirable_count = $test_data['count'], t('!test_id: Real count (=!real_count) should be equal to desirable (=!desirable_count)', array('!test_id' => $id, '!real_count' => $real_count, '!desirable_count' => $desirable_count)));
+    }
+  }
+}

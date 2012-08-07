@@ -1,5 +1,9 @@
 <?php
 
+use Drupal\tmgmt\Plugin\Core\Entity\Job;
+use Drupal\tmgmt\Plugin\Core\Entity\JobItem;
+use Drupal\tmgmt\TranslatorRejectDataInterface;
+
 /**
  * @file
  * Common Translation managment UI.
@@ -11,19 +15,19 @@
 function tmgmt_ui_entity_info() {
   $info['tmgmt_translator'] = array(
     'admin ui' => array(
-      'controller class' => 'TMGMTTranslatorUIController',
+      'controller class' => 'TranslatorUIController',
       'path' => 'admin/config/regional/tmgmt/translators',
     ),
   );
   $info['tmgmt_job'] = array(
     'admin ui' => array(
-      'controller class' => 'TMGMTJobUIController',
+      'controller class' => 'JobUIController',
       'path' => 'admin/config/regional/tmgmt/jobs',
     ),
   );
   $info['tmgmt_job_item'] = array(
     'admin ui' => array(
-      'controller class' => 'TMGMTJobItemUIController',
+      'controller class' => 'JobItemUIController',
       'path' => 'admin/config/regional/tmgmt/items',
     ),
   );
@@ -286,13 +290,13 @@ function tmgmt_ui_job_checkout_multiple(array $jobs) {
  * more than one translator available, if he has settings and if the job has a
  * fixed target language.
  *
- * @param TMGMTJob $job
+ * @param \Drupal\tmgmt\Plugin\Core\Entity\Job $job
  *   The job item
  *
  * @return
  *   TRUE if the job needs a checkout form.
  */
-function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
+function tmgmt_ui_job_needs_checkout_form(Job $job) {
   // If the job has no target language (or source language, even though this
   // should never be the case in our use case), checkout is mandatory.
   if (empty($job->target_language) || empty($job->source_language)) {
@@ -320,14 +324,14 @@ function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
  * Requests translations for a job and prints messages which have happened since
  * then.
  *
- * @param TMGMTJob $job
+ * @param \Drupal\tmgmt\Plugin\Core\Entity\Job $job
  *   The job object for which translations should be requested.
  *
  * @return
  *   TRUE if it worked, FALSE if there were any errors of the type error which
  *   means that something did go wrong.
  */
-function tmgmt_ui_job_request_translation(TMGMTJob $job) {
+function tmgmt_ui_job_request_translation(Job $job) {
   // Process the translation request.
   $job->requestTranslation();
   return tmgmt_ui_write_request_messages($job);
@@ -342,7 +346,7 @@ function tmgmt_ui_job_request_translation(TMGMTJob $job) {
  * @return
  *   FALSE if there are message with severity error, TRUE otherwise.
  */
-function tmgmt_ui_write_request_messages(TMGMTJob $job) {
+function tmgmt_ui_write_request_messages(Job $job) {
   $errors = FALSE;
   foreach ($job->getMessagesSince() as $message) {
     // Ignore debug messages.
@@ -364,7 +368,7 @@ function tmgmt_ui_write_request_messages(TMGMTJob $job) {
  *
  * @see tmgmt_ui_forms()
  */
-function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJobItem $item) {
+function tmgmt_ui_translation_review_form_defaults($form, &$form_state, JobItem $item) {
   // We store the item in the root of the form state so we can easily access it
   // in all the form functions.
   $form_state['item'] = $item;
@@ -497,7 +501,7 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
  *   String containing either odd or even. This is used to style the each
  *   translation item with alternating colors.
  */
-function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
+function _tmgmt_ui_review_form_element($data, JobItem $job_item, &$zebra) {
   $flip = array(
     'even' => 'odd',
     'odd' => 'even',
@@ -553,7 +557,7 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
             ),
           );
         }
-        if ($job_item->getTranslatorController() instanceof TMGMTTranslatorRejectDataItem && $data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_PENDING) {
+        if ($job_item->getTranslatorController() instanceof TranslatorRejectDataInterface && $data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_PENDING) {
           $form[$target_key]['actions']['reject'] = array(
             '#type' => 'submit',
             // Unicode character &#x2717 BALLOT X
@@ -586,7 +590,7 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
  *
  * @see tmgmt_ui_forms()
  */
-function tmgmt_ui_translation_review_form($form, &$form_state, TMGMTJobItem $item) {
+function tmgmt_ui_translation_review_form($form, &$form_state, JobItem $item) {
   // Give the source ui controller a chance to affect the review form.
   $source = tmgmt_source_ui_controller($item->plugin);
   $form = $source->reviewForm($form, $form_state, $item);
@@ -698,7 +702,7 @@ function tmgmt_ui_translation_review_form_update_state($form, &$form_state) {
       }
       else {
         $form_state['redirect'] = array(tmgmt_ui_redirect_queue_dequeue(), array( 'query' => array('destination' => tmgmt_ui_redirect_queue_destination())));
-        if ($controller instanceof TMGMTTranslatorRejectDataItem) {
+        if ($controller instanceof TranslatorRejectDataItem) {
             $success = $job_item->getTranslatorController()->rejectDataItem($job_item, tmgmt_ensure_keys_array($matches['key']), $values);
         }
       }
@@ -733,7 +737,7 @@ function tmgmt_ui_translation_review_form_ajax($form, &$form_state) {
 /**
  * Form callback for the reject confirm form.
  */
-function tmgmt_ui_translation_review_form_reject_confirm($form, &$form_state, TMGMTJobItem $job_item, $key) {
+function tmgmt_ui_translation_review_form_reject_confirm($form, &$form_state, JobItem $job_item, $key) {
   // Path of job item review form.
   $path = explode('/', current_path());
   $path = implode('/', array_slice($path, 0, count($path) - 2));

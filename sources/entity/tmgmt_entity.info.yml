@@ -1,0 +1,12 @@
+name: Entity Source
+description: Entity source plugin for the Translation Management system.
+package: Translation Management
+core: 8.x
+type: module
+
+dependencies:
+ - tmgmt
+ - tmgmt_field
+test_dependencies:
+ - pathauto
+

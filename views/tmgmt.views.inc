@@ -19,7 +19,7 @@ function tmgmt_views_data() {
 /**
  * Views controller class for the job item entity.
  */
-class TMGMTJobItemViewsController extends EntityDefaultViewsController {
+class JobItemViewsController extends EntityDefaultViewsController {
 
   /**
    * Overrides EntityDefaultViewsController::views_data().
@@ -57,7 +57,7 @@ class TMGMTJobItemViewsController extends EntityDefaultViewsController {
 /**
  * Views controller class for the job entity.
  */
-class TMGMTJobViewsController extends EntityDefaultViewsController {
+class JobViewsController extends EntityDefaultViewsController {
 
   /**
    * Overrides EntityDefaultViewsController::views_data().
