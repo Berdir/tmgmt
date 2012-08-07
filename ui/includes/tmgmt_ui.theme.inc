@@ -5,6 +5,8 @@
  * Theme file stub for tmgmt.
  */
 
+use Drupal\Core\Template\Attribute;
+
 /**
  * Generic theme function for use with Render API.
  *
@@ -22,7 +24,8 @@ function theme_tmgmt_ui_element($variables) {
   // Use #attributes to customize a wrapper <div>.
   $attributes = '';
   if (!empty($element['#attributes'])) {
-    $attributes = drupal_attributes($element['#attributes']);
+    // @todo: Convert the source.
+    $attributes = new Attribute(($element['#attributes']));
   }
 
   // Render any child items.
@@ -82,9 +85,9 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
   $status = sprintf('<div class="%s" title="%s"><span></span></div>', implode(' ', $classes), $label);
 
   // If we have an active job item, wrap it in a link.
-  if (!empty($variables['job_item'])) {
-    $wrapper = entity_metadata_wrapper('tmgmt_job_item', $variables['job_item']);
-    $label = t('Active job item: @state', array('@state' => $wrapper->state->label()));
+  $states = tmgmt_job_item_states();
+  if (!empty($variables['job_item']) && isset($states[$variables['job_item']->state])) {
+    $label = t('Active job item: @state', array('@state' => $states[$variables['job_item']->state]));
 
     switch ($variables['job_item']->state) {
       case TMGMT_JOB_ITEM_STATE_ACTIVE:
@@ -173,7 +176,7 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
   if ($element['#top_label'] == $element['#leave_label']) {
     $element['#leave_label'] = '';
   }
-  $result = '<tr' . drupal_attributes(array('class' => $element['#zebra'])) . '>';
+  $result = '<tr' . new Attribute(array('class' => $element['#zebra'])) . '>';
   $row = array();
   $leaf_label = '<label>' . $element['#leave_label'] . '</label>';
   $leaf_label = '<div class="form-item form-type-label">' . $leaf_label . '</div>';
@@ -199,7 +202,7 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
   $result .= '</tr>';
 
   if (!empty($element['below'])) {
-    $result .= '<tr' . drupal_attributes(array('class' => $element['#zebra'])) . '>';
+    $result .= '<tr' . new Attribute(array('class' => $element['#zebra'])) . '>';
     $result .= _theme_table_cell(array(
       'data' => drupal_render($element['below']),
       'colspan' => '4',

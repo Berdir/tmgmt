@@ -1,0 +1,9 @@
+name: 'Entity Source User Interface'
+description: 'User Interface for the entity translation source plugin.'
+package: 'Translation Management'
+core: 8.x
+type: module
+
+dependencies:
+  - tmgmt_entity
+  - tmgmt_ui

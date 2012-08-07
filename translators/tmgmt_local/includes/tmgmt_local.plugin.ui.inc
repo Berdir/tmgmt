@@ -13,7 +13,7 @@ class TMGMTLocalTranslatorUIController extends TMGMTDefaultTranslatorUIControlle
   /**
    * {@inheritdoc}
    */
-  public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
+  public function checkoutSettingsForm($form, &$form_state, Job $job) {
     if ($translators = tmgmt_local_translators($job->source_language, array($job->target_language))) {
       $form['translator'] = array(
         '#title' => t('Select translator for this job'),
@@ -34,7 +34,7 @@ class TMGMTLocalTranslatorUIController extends TMGMTDefaultTranslatorUIControlle
   /**
    * {@inheritdoc}
    */
-  public function checkoutInfo(TMGMTJob $job) {
+  public function checkoutInfo(Job $job) {
     $label = $job->getTranslator()->label();
     $form['#title'] = t('@translator translation job information', array('@translator' => $label));
     $form['#type'] = 'fieldset';

@@ -124,7 +124,7 @@ class TMGMTLocalTask extends Entity {
   /**
    * Return the corresponding translation job.
    *
-   * @return TMGMTJob
+   * @return Job
    */
   public function getJob() {
     return tmgmt_job_load($this->tjid);
@@ -137,8 +137,8 @@ class TMGMTLocalTask extends Entity {
    *   User object.
    */
   public function assign($user) {
-    $this->incrementLoopCount(TMGMT_LOCAL_TASK_STATUS_PENDING, $user->uid);
-    $this->tuid = $user->uid;
+    $this->incrementLoopCount(TMGMT_LOCAL_TASK_STATUS_PENDING, $user->id());
+    $this->tuid = $user->id();
     $this->status = TMGMT_LOCAL_TASK_STATUS_PENDING;
   }
 
@@ -181,10 +181,10 @@ class TMGMTLocalTask extends Entity {
   /**
    * Create a task item for this task and the given job item.
    *
-   * @param TMGMTJobItem $job_item
+   * @param \Drupal\tmgmt\Plugin\Core\Entity\JobItem $job_item
    *   The job item.
    */
-  public function addTaskItem(TMGMTJobItem $job_item) {
+  public function addTaskItem(JobItem $job_item) {
     // Save the task to get an id.
     if (empty($this->tltid)) {
       $this->save();
@@ -221,7 +221,7 @@ class TMGMTLocalTask extends Entity {
    * @return int
    *   The updated status of the task if it could be set.
    *
-   * @see TMGMTJob::addMessage()
+   * @see Job::addMessage()
    */
   public function setStatus($status) {
     // Return TRUE if the status could be set. Return FALSE otherwise.
@@ -254,7 +254,7 @@ class TMGMTLocalTask extends Entity {
    */
   public function isAuthor($account = NULL) {
     $account = isset($account) ? $account : $GLOBALS['user'];
-    return $this->uid == $account->uid;
+    return $this->uid == $account->id();
   }
 
   /**

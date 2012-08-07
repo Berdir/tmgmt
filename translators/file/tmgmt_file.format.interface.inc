@@ -22,7 +22,7 @@ interface TMGMTFileFormatInterface {
    * @param $imported_file
    *   File path to the file to be imported.
    *
-   * @return TMGMTJob
+   * @return Job
    *   Returns the corresponding translation job entity if the import file is
    *   valid, FALSE otherwise.
    */

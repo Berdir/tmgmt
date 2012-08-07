@@ -4,13 +4,14 @@
  * @file
  * Provides the I18nString source controller.
  */
+use Drupal\tmgmt\SourcePluginUiBase;
 
 /**
  * Class TMGMTI18nStringDefaultSourceUIController
  *
  * UI Controller fo i18n strings translation jobs.
  */
-class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIController {
+class TMGMTI18nStringSourceUIBaseController extends SourcePluginUiBase {
   /**
    * Gets overview form header.
    *
@@ -217,7 +218,7 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
 
     // Create only single job for all items as the source language is just
     // the same for all.
-    $job = tmgmt_job_create($source_lang, NULL, $GLOBALS['user']->uid);
+    $job = tmgmt_job_create($source_lang, NULL, $GLOBALS['user']->id());
 
     // Loop through entities and create individual jobs for each source language.
     foreach ($items as $item) {

@@ -9,7 +9,7 @@
 /**
  * Metadata controller for the job entity.
  */
-class TMGMTJobMetadataController extends EntityDefaultMetadataController {
+class JobMetadataController extends EntityDefaultMetadataController {
 
   /**
    * {@inheritdoc}
@@ -59,7 +59,7 @@ class TMGMTJobMetadataController extends EntityDefaultMetadataController {
 /**
  * Metadata controller for the job item entity.
  */
-class TMGMTJobItemMetadataController extends EntityDefaultMetadataController {
+class JobItemMetadataController extends EntityDefaultMetadataController {
 
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
@@ -131,7 +131,7 @@ class TMGMTMessageMetadataController extends EntityDefaultMetadataController {
 /**
  * Metadata controller for the translator entity.
  */
-class TMGMTTranslatorMetadataController extends EntityDefaultMetadataController {
+class TranslatorMetadataController extends EntityDefaultMetadataController {
 
   /**
    * {@inheritdoc}

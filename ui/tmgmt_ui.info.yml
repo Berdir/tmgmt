@@ -1,0 +1,9 @@
+name: 'Translation Management UI'
+description: 'User interface'
+package: 'Translation Management'
+core: 8.x
+type: module
+
+dependencies:
+  - tmgmt
+  - views

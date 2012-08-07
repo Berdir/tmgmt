@@ -160,7 +160,7 @@ function tmgmt_i18n_string_translate_form_submit($form, &$form_state) {
     // For given source lang no job exists yet.
     if (!isset($target_lang_registry[$target_lang])) {
       // Create new job.
-      $job = tmgmt_job_create($source_lang, $target_lang, $GLOBALS['user']->uid);
+      $job = tmgmt_job_create($source_lang, $target_lang, $GLOBALS['user']->id());
       // Add initial job item.
       $job->addItem('i18n_string', $type, $key);
       // Add job identifier into registry

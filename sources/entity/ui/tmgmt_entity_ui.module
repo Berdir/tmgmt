@@ -7,21 +7,16 @@
  */
 
 /**
- * Implements hook_page_alter().
+ * @param array $build
+ * @param \Drupal\block\BlockPluginInterface $block
  */
-function tmgmt_entity_ui_page_alter(&$page) {
-  if (entity_access('create', 'tmgmt_job')) {
-    // Translation tabs for nodes.
-    if (isset($page['content']['system_main']['entity_translation_overview'])) {
-      module_load_include('inc', 'tmgmt_entity_ui', 'tmgmt_entity_ui.pages');
-      $page['content']['system_main']['entity_translation_overview'] = drupal_get_form('tmgmt_entity_ui_translate_form', $page['content']['system_main']);
-    }
-    // Support the context module: when context is used for placing the
-    // system_main block, then block contents appear nested one level deeper
-    // under another 'content' key.
-    elseif (isset($page['content']['system_main']['content']['entity_translation_overview'])) {
-      module_load_include('inc', 'tmgmt_entity_ui', 'tmgmt_entity_ui.pages');
-      $page['content']['system_main']['content']['entity_translation_overview'] = drupal_get_form('tmgmt_entity_ui_translate_form', $page['content']['system_main']['content']);
+function tmgmt_entity_block_view_alter(array &$build, \Drupal\block\BlockPluginInterface $block) {
+  if ($block instanceof \Drupal\system\Plugin\Block\SystemMainBlock) {
+    if (isset($build['content'][0]['content_translation_overview'])) {
+      if (Drupal::entityManager()->getAccessController('tmgmt_job')->createAccess()) {
+        module_load_include('inc', 'tmgmt_entity_ui', 'tmgmt_entity_ui.pages');
+        $build['content'][0] = drupal_get_form('tmgmt_entity_ui_translate_form', $build['content'][0]);
+      }
     }
   }
 }
@@ -30,10 +25,6 @@ function tmgmt_entity_ui_page_alter(&$page) {
  * Implements tmgmt_entity_tmgmt_source_plugin_info_alter().
  */
 function tmgmt_entity_ui_tmgmt_source_plugin_info_alter(&$info) {
-
-  // Define ui controller class to handle Drupal entities.
-  $info['entity']['ui controller class'] = 'TMGMTEntitySourceUIController';
-
   // Alter file and file path info so that tmgmt_entity_ui module is targeted
   // for page callback.
   $info['entity']['file'] = 'tmgmt_entity_ui.pages.inc';

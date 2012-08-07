@@ -1,0 +1,34 @@
+tmgmt_settings:
+  pattern: '/admin/config/regional/tmgmt_settings'
+  defaults:
+    _form: 'Drupal\tmgmt_ui\SettingsForm'
+  requirements:
+    _permission: 'administer tmgmt'
+
+tmgmt_translator_list:
+  pattern: '/admin/config/regional/tmgmt_translator'
+  defaults:
+    _entity_list: 'tmgmt_translator'
+  requirements:
+    _permission: 'administer tmgmt'
+
+tmmgt_translator_entity:
+  pattern: '/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}'
+  defaults:
+    _entity_form: tmgmt_translator.edit
+  requirements:
+    _entity_access: tmgmt_translator.update
+
+tmmgt_job_entity:
+  pattern: '/admin/tmgmt/jobs/{tmgmt_job}'
+  defaults:
+    _entity_form: tmgmt_job.edit
+  requirements:
+    _entity_access: tmgmt_job.update
+
+tmmgt_job_item_entity:
+  pattern: '/admin/tmgmt/items/{tmgmt_job_item}'
+  defaults:
+    _entity_form: tmgmt_job_item.edit
+  requirements:
+    _entity_access: tmgmt_job_item.update

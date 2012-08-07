@@ -19,7 +19,7 @@ class tmgmt_local_task_handler_filter_eligible extends views_handler_filter {
     // and target language combinations.
     $this->query->set_where_group('OR', 'eligible');
     // Return all language capabilities for the current user.
-    foreach (tmgmt_local_supported_language_pairs(NULL, array($GLOBALS['user']->uid)) as $key => $capability) {
+    foreach (tmgmt_local_supported_language_pairs(NULL, array($GLOBALS['user']->id())) as $key => $capability) {
       $key = str_replace('-', '_', $key);
       $arguments = array(':source_' . $key => $capability['source_language'], ':target_' . $key => $capability['target_language']);
       $this->query->add_where_expression('eligible', "$source = :source_$key AND $target = :target_$key", $arguments);

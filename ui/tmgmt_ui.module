@@ -1,41 +1,15 @@
 <?php
 
+use Drupal\tmgmt\Plugin\Core\Entity\Job;
+use Drupal\tmgmt\Plugin\Core\Entity\JobItem;
+use Drupal\tmgmt\TranslatorRejectDataInterface;
+
 /**
  * @file
  * Common Translation managment UI.
  */
 
 /**
- * Implements hook_entity_info().
- */
-function tmgmt_ui_entity_info() {
-  $info['tmgmt_translator'] = array(
-    'admin ui' => array(
-      'controller class' => 'TMGMTTranslatorUIController',
-      'path' => 'admin/config/regional/tmgmt_translator',
-    ),
-  );
-  $info['tmgmt_job'] = array(
-    'admin ui' => array(
-      'controller class' => 'TMGMTJobUIController',
-      'path' => 'admin/tmgmt/jobs',
-    ),
-  );
-  $info['tmgmt_job_item'] = array(
-    'admin ui' => array(
-      'controller class' => 'TMGMTJobItemUIController',
-      'path' => 'admin/tmgmt/items',
-    ),
-  );
-  foreach ($info as $key => $item) {
-    // Entity API defaults to the path that implements the entity type, but
-    // since this happens in the TMGMT core module, we need to manually
-    // define the path here.
-    $info[$key]['admin ui']['file path'] = drupal_get_path('module', 'tmgmt_ui');
-    $info[$key]['admin ui']['file'] = 'includes/tmgmt_ui.pages.inc';
-  }
-  return $info;
-}
 
 /**
  * Implements hook_menu().
@@ -49,9 +23,14 @@ function tmgmt_ui_menu() {
     'file' => 'includes/tmgmt_ui.pages.inc',
     'weight' => 10,
   );
+  $items['admin/config/regional/tmgmt_translator'] = array(
+    'route_name' => 'tmgmt_translator_list',
+    'title' => 'Translation Management translators',
+    'weight' => 5,
+  );
   // Some source plugins might provide menu items.
-  foreach (tmgmt_source_ui_controller() as $controller) {
-    $items += $controller->hook_menu();
+  foreach (tmgmt_source_plugin_info() as $plugin => $definition) {
+    $items += tmgmt_source_ui_controller($plugin)->hook_menu();
   }
   return $items;
 }
@@ -145,8 +124,8 @@ function tmgmt_ui_forms() {
     );
   }
   // Some source plugins might provide forms.
-  foreach (tmgmt_source_ui_controller() as $controller) {
-    $forms += $controller->hook_forms();
+  foreach (tmgmt_source_plugin_info() as $plugin => $definition) {
+    $forms += tmgmt_source_ui_controller($plugin)->hook_forms();
   }
   return $forms;
 }
@@ -285,9 +264,9 @@ function tmgmt_ui_job_checkout_multiple(array $jobs) {
       // if jobs have already been submitted in the before hook.
       continue;
     }
-    if (!variable_get('tmgmt_quick_checkout', TRUE) || tmgmt_ui_job_needs_checkout_form($job)) {
+    if (!config('tmgmt.settings')->get('quick_checkout') || tmgmt_ui_job_needs_checkout_form($job)) {
 
-      if (!entity_access('submit', 'tmgmt_job', $job)) {
+      if (!$job->access('submit')) {
         // Ignore jobs if the user is not allowed to submit, ignore.
         $denied++;
         // Make sure that the job is saved.
@@ -324,13 +303,13 @@ function tmgmt_ui_job_checkout_multiple(array $jobs) {
  * more than one translator available, if he has settings and if the job has a
  * fixed target language.
  *
- * @param TMGMTJob $job
+ * @param \Drupal\tmgmt\Plugin\Core\Entity\Job $job
  *   The job item
  *
  * @return
  *   TRUE if the job needs a checkout form.
  */
-function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
+function tmgmt_ui_job_needs_checkout_form(Job $job) {
   // If the job has no target language (or source language, even though this
   // should never be the case in our use case), checkout is mandatory.
   if (empty($job->target_language) || empty($job->source_language)) {
@@ -358,14 +337,14 @@ function tmgmt_ui_job_needs_checkout_form(TMGMTJob $job) {
  * Requests translations for a job and prints messages which have happened since
  * then.
  *
- * @param TMGMTJob $job
+ * @param \Drupal\tmgmt\Plugin\Core\Entity\Job $job
  *   The job object for which translations should be requested.
  *
  * @return
  *   TRUE if it worked, FALSE if there were any errors of the type error which
  *   means that something did go wrong.
  */
-function tmgmt_ui_job_request_translation(TMGMTJob $job) {
+function tmgmt_ui_job_request_translation(Job $job) {
   // Process the translation request.
   $job->requestTranslation();
   return tmgmt_ui_write_request_messages($job);
@@ -380,7 +359,7 @@ function tmgmt_ui_job_request_translation(TMGMTJob $job) {
  * @return
  *   FALSE if there are message with severity error, TRUE otherwise.
  */
-function tmgmt_ui_write_request_messages(TMGMTJob $job) {
+function tmgmt_ui_write_request_messages(Job $job) {
   $errors = FALSE;
   foreach ($job->getMessagesSince() as $message) {
     // Ignore debug messages.
@@ -395,129 +374,6 @@ function tmgmt_ui_write_request_messages(TMGMTJob $job) {
     }
   }
   return !$errors;
-}
-
-/**
- * Form wrapper callback for the job item review form.
- *
- * @see tmgmt_ui_forms()
- */
-function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJobItem $item) {
-  // We store the item in the root of the form state so we can easily access it
-  // in all the form functions.
-  $form_state['item'] = $item;
-
-  $wrapper = entity_metadata_wrapper('tmgmt_job_item', $item);
-
-  $form['info'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('tmgmt-ui-job-info', 'clearfix')),
-    '#weight' => 0,
-  );
-
-  $uri = $item->getSourceUri();
-  $form['info']['source'] = array(
-    '#type' => 'item',
-    '#title' => t('Source'),
-    '#markup' => l($item->getSourceLabel(), $uri['path'], $uri['options']),
-    '#prefix' => '<div class="tmgmt-ui-source tmgmt-ui-info-item">',
-    '#suffix' => '</div>',
-  );
-
-  $form['info']['sourcetype'] = array(
-    '#type' => 'item',
-    '#title' => t('Source type'),
-    '#markup' => $item->getSourceType(),
-    '#prefix' => '<div class="tmgmt-ui-source-type tmgmt-ui-info-item">',
-    '#suffix' => '</div>',
-  );
-
-  $form['info']['changed'] = array(
-    '#type' => 'item',
-    '#title' => t('Last change'),
-    '#markup' => format_date($wrapper->changed->value()),
-    '#prefix' => '<div class="tmgmt-ui-changed tmgmt-ui-info-item">',
-    '#suffix' => '</div>',
-  );
-  $form['info']['state'] = array(
-    '#type' => 'item',
-    '#title' => t('State'),
-    '#markup' => $wrapper->state->label(),
-    '#prefix' => '<div class="tmgmt-ui-item-state tmgmt-ui-info-item">',
-    '#suffix' => '</div>',
-  );
-  $job = $item->getJob();
-  $uri = $job->uri();
-  $form['info']['job'] = array(
-    '#type' => 'item',
-    '#title' => t('Job'),
-    '#markup' => l($job->label(), $uri['path']),
-    '#prefix' => '<div class="tmgmt-ui-job tmgmt-ui-info-item">',
-    '#suffix' => '</div>',
-  );
-
-    // Display selected translator for already submitted jobs.
-  if (!$item->getJob()->isSubmittable()) {
-    $translators = tmgmt_translator_labels();
-    $form['info']['translator'] = array(
-      '#type' => 'item',
-      '#title' => t('Translator'),
-      '#markup' => isset($translators[$item->getJob()->translator]) ? check_plain($translators[$item->getJob()->translator]) : t('Missing translator'),
-      '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
-      '#suffix' => '</div>',
-    );
-  }
-
-  // Actually build the review form elements...
-  $form['review'] = array(
-    '#type' => 'container',
-  );
-  // Build the review form.
-  $data = $item->getData();
-  // Need to keep the first hierarchy. So flatten must take place inside
-  // of the foreach loop.
-  $zebra = 'even';
-  foreach (element_children($data) as $key) {
-    $form['review'][$key] = _tmgmt_ui_review_form_element($form_state, tmgmt_flatten_data($data[$key], $key), $item, $zebra, $key);
-  }
-
-  if ($output = tmgmt_ui_embed_view('tmgmt_ui_job_item_messages', 'block', array($item->tjiid))) {
-    $form['messages'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Messages'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-      '#weight' => 50,
-    );
-    $form['messages']['view'] = array(
-      '#type' => 'item',
-      '#markup' => $output,
-    );
-  }
-
-  // Add the form actions as well.
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['accept'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save as completed'),
-    '#access' => $item->isNeedsReview(),
-  );
-  $form['actions']['save'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-    '#access' => !$item->isAccepted(),
-  );
-  $uri = $item->getJob()->uri();
-  $url = isset($_GET['destination']) ? $_GET['destination'] : $uri['path'];
-  $form['actions']['cancel'] = array(
-    '#type' => 'link',
-    '#title' => t('Cancel'),
-    '#href' => $url,
-  );
-  $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
-  // The reject functionality has to be implement by the translator plugin as
-  // that process is completely unique and custom for each translation service.
-  return $form;
 }
 
 /**
@@ -551,7 +407,7 @@ function tmgmt_ui_review_form_element_ajaxid($parent_key) {
  * @param $parent_key
  *   The key for $data.
  */
-function _tmgmt_ui_review_form_element(&$form_state, $data, TMGMTJobItem $job_item, &$zebra, $parent_key) {
+function _tmgmt_ui_review_form_element(&$form_state, $data, JobItem $job_item, &$zebra, $parent_key) {
   $flip = array(
     'even' => 'odd',
     'odd' => 'even',
@@ -608,7 +464,7 @@ function _tmgmt_ui_review_form_element(&$form_state, $data, TMGMTJobItem $job_it
             ),
           );
         }
-        if ($job_item->getTranslatorController() instanceof TMGMTTranslatorRejectDataItem && $data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_PENDING) {
+        if ($job_item->getTranslatorController() instanceof TranslatorRejectDataInterface && $data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_PENDING) {
           $form[$target_key]['actions']['reject'] = array(
             '#type' => 'submit',
             // Unicode character &#x2717 BALLOT X
@@ -685,7 +541,7 @@ function _tmgmt_ui_review_form_element(&$form_state, $data, TMGMTJobItem $job_it
  */
 function tmgmt_ui_translation_review_form_revert($form, &$form_state) {
 
-  /** @var TMGMTJobItem $item */
+  /** @var JobItem $item */
   $item = $form_state['item'];
 
   $key = tmgmt_ensure_keys_array($form_state['triggering_element']['#data_item_key']);
@@ -701,88 +557,6 @@ function tmgmt_ui_translation_review_form_revert($form, &$form_state) {
     drupal_set_message(t('No past revision found, translation was not reverted.'), 'warning');
   }
   $form_state['rebuild'] = TRUE;
-}
-
-/**
- * Form callback for the job item review form.
- *
- * @see tmgmt_ui_forms()
- */
-function tmgmt_ui_translation_review_form($form, &$form_state, TMGMTJobItem $item) {
-  // Give the source ui controller a chance to affect the review form.
-  $source = tmgmt_source_ui_controller($item->plugin);
-  $form = $source->reviewForm($form, $form_state, $item);
-  // Give the translator ui controller a chance to affect the review form.
-  if ($item->getTranslator()) {
-    $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-    $form = $translator->reviewForm($form, $form_state, $item);
-  }
-  return $form;
-}
-
-/**
- * Validation callback for the job item review form.
- */
-function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
-  $item = $form_state['item'];
-  // First invoke the validation method on the source controller.
-  $source = tmgmt_source_ui_controller($item->plugin);
-  $source->reviewFormValidate($form, $form_state, $item);
-  // Invoke the validation method on the translator controller (if available).
-  if($item->getTranslator()){
-    $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-    $translator->reviewFormValidate($form, $form_state, $item);
-  }
-}
-
-/**
- * Submit callback for the job item review form.
- */
-function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
-  /** @var TMGMTJobItem $item */
-  $item = $form_state['item'];
-  // First invoke the submit method on the source controller.
-  $source = tmgmt_source_ui_controller($item->plugin);
-  $source->reviewFormSubmit($form, $form_state, $item);
-  // Invoke the submit method on the translator controller (if available).
-  if($item->getTranslator()){
-    $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-    $translator->reviewFormSubmit($form, $form_state, $item);
-  }
-  // Write changes back to item.
-  foreach ($form_state['values'] as $key => $value) {
-    if (is_array($value) && isset($value['translation'])) {
-      // Update the translation, this will only update the translation in case
-      // it has changed.
-      $data = array(
-        '#text' => $value['translation'],
-        '#origin' => 'local',
-      );
-      $item->addTranslatedData($data, $key);
-    }
-  }
-  // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
-  if (!empty($form['actions']['accept']) && $form_state['triggering_element']['#value'] == $form['actions']['accept']['#value']) {
-    $item->acceptTranslation();
-    // Check if the item could be saved and accepted successfully and redirect
-    // to the job item view if that is the case.
-    if ($item->isAccepted()) {
-      $uri = $item->uri();
-      $form_state['redirect'] = $uri['path'];
-    }
-    // Print all messages that have been saved while accepting the reviewed
-    // translation.
-    foreach ($item->getMessagesSince() as $message) {
-      // Ignore debug messages.
-      if ($message->type == 'debug') {
-        continue;
-      }
-      if ($text = $message->getMessage()) {
-        drupal_set_message(filter_xss($text), $message->type);
-      }
-    }
-  }
-  $item->save();
 }
 
 /**
@@ -824,7 +598,7 @@ function tmgmt_ui_translation_review_form_update_state($form, &$form_state) {
       }
       else {
         $form_state['redirect'] = array(tmgmt_ui_redirect_queue_dequeue(), array( 'query' => array('destination' => tmgmt_ui_redirect_queue_destination())));
-        if ($controller instanceof TMGMTTranslatorRejectDataItem) {
+        if ($controller instanceof TranslatorRejectDataItem) {
             $success = $job_item->getTranslatorController()->rejectDataItem($job_item, tmgmt_ensure_keys_array($matches['key']), $values);
         }
       }
@@ -856,7 +630,7 @@ function tmgmt_ui_translation_review_form_ajax($form, &$form_state) {
 /**
  * Form callback for the reject confirm form.
  */
-function tmgmt_ui_translation_review_form_reject_confirm($form, &$form_state, TMGMTJobItem $job_item, $key) {
+function tmgmt_ui_translation_review_form_reject_confirm($form, &$form_state, JobItem $job_item, $key) {
   // Path of job item review form.
   $path = explode('/', current_path());
   $path = implode('/', array_slice($path, 0, count($path) - 2));
@@ -1021,4 +795,111 @@ function tmgmt_ui_help($path, $arg) {
   }
 
   return $output;
+}
+
+/**
+ * Set a value in form_state to rebuild the form and fill with data.
+ */
+function tmgmt_ui_ajax_submit_load_suggestions(array $form, array &$form_state) {
+  $form_state['rebuild'] = TRUE;
+  $form_state['rebuild_suggestions'] = TRUE;
+}
+
+/**
+ * Adds selected suggestions to the job.
+ */
+function tmgmt_ui_submit_add_suggestions($form, &$form_state) {
+  // Save all selected suggestion items.
+  if (isset($form_state['values']['suggestions_table']) && is_array($form_state['values']['suggestions_table'])) {
+    $job = $form_state['controller']->getEntity();
+    foreach ($form_state['values']['suggestions_table'] as $id) {
+      $key = (int)$id - 1; // Because in the tableselect we need an idx > 0.
+      if (isset($form_state['tmgmt_suggestions'][$key]['job_item'])) {
+        $item = $form_state['tmgmt_suggestions'][$key]['job_item'];
+        $job->addExistingItem($item);
+      }
+    }
+  }
+
+  // Force a rebuild of the form.
+  $form_state['rebuild'] = TRUE;
+  unset($form_state['tmgmt_suggestions']);
+}
+
+/**
+ * Returns the suggestions table for an AJAX-Call.
+ */
+function tmgmt_ui_ajax_callback_load_suggestions($form, &$form_state) {
+  return $form['translator_wrapper_right']['suggestions']['suggestions_list'];
+}
+
+/**
+ * Fills the tableselect with all translation suggestions.
+ *
+ * Calls hook_tmgmt_source_suggestions(Job) and creates the resulting list
+ * based on the results from all modules.
+ *
+ * @param array $suggestions_table
+ *   Tableselect part for a $form array where the #options should be inserted.
+ * @param array $form_state
+ *   The main form_state.
+ */
+function _tmgmt_ui_translation_suggestions(array &$suggestions_table, array &$form_state) {
+  $options = array();
+  $job = $form_state['controller']->getEntity();
+  if ($job instanceof Job) {
+    // Get all suggestions from all modules which implements
+    // 'hook_tmgmt_source_suggestions' and cache them in $form_state.
+    if (!isset($form_state['tmgmt_suggestions'])) {
+      $form_state['tmgmt_suggestions'] = $job->getSuggestions();
+    }
+
+    // Remove suggestions which are already processed, translated, ...
+    $job->cleanSuggestionsList($form_state['tmgmt_suggestions']);
+
+    // Process all valid entries.
+    foreach ($form_state['tmgmt_suggestions'] as $k => $result) {
+      if (is_array($result) && isset($result['job_item']) && ($result['job_item'] instanceof JobItem)) {
+        $options[$k + 1] = _tmgmt_ui_add_suggestion_item($result);
+      }
+    }
+
+    $suggestions_table['#options'] = $options;
+    $suggestions_table['#empty'] = t('No related suggestions available.');
+    $suggestions_table['#header'] = array(
+      'title' => t('Title'),
+      'type' => t('Type'),
+      'reason' => t('Reason'),
+      'words' => t('Word count'),
+    );
+  }
+}
+
+/**
+ * Create a Suggestion-Table entry based on a Job and a title.
+ *
+ * @param array $result
+ *   Suggestion array with the keys job_item, reason and from_item.
+ *
+ * @return array
+ *   Options-Entry for a tableselect array.
+ */
+function _tmgmt_ui_add_suggestion_item(array $result) {
+  $item = $result['job_item'];
+
+  $reason = isset($result['reason']) ? $result['reason'] : NULL;
+  $option = array(
+    'title' => $item->label(),
+    'type' => $item->getSourceType(),
+    'words' => $item->getWordCount(),
+    'reason' => $reason,
+  );
+
+  if (!empty($result['from_item'])) {
+    $from_item = tmgmt_job_item_load($result['from_item']);
+    if ($from_item) {
+      $option['reason'] = t('%reason in %job', array('%reason' => $option['reason'], '%job' => $from_item->label()));
+    }
+  }
+  return $option;
 }

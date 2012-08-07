@@ -104,7 +104,7 @@ class TMGMTLocalTaskItem extends Entity {
   /**
    * Returns the translation job item.
    *
-   * @return TMGMTJobItem
+   * @return JobItem
    */
   public function getJobItem() {
     return entity_load_single('tmgmt_job_item', $this->tjiid);

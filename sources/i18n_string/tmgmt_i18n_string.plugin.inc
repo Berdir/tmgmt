@@ -32,7 +32,7 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
   /**
    * {@inheritdoc}
    */
-  public function saveTranslation(TMGMTJobItem $job_item) {
+  public function saveTranslation(JobItem $job_item) {
     $job = tmgmt_job_load($job_item->tjid);
     $data = array_filter(tmgmt_flatten_data($job_item->getData()), '_tmgmt_filter_data');
     foreach ($data as $i18n_string => $item) {

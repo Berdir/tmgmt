@@ -8,7 +8,7 @@
 /**
  * Simple page callback for viewing a task.
  *
- * @param TMGMTJob $task
+ * @param \Drupal\tmgmt\Plugin\Core\Entity\Job $task
  *   The viewed task.
  *
  * @return array
@@ -232,7 +232,7 @@ function tmgmt_local_translation_form_save_as_completed_submit($form, &$form_sta
   }
 
   /**
-   * @var TMGMTJobItem $job_item.
+   * @var JobItem $job_item.
    */
   $job_item = $form_state['job_item'];
 
@@ -485,7 +485,7 @@ function tmgmt_local_translation_reassign_form_submit($form, &$form_state) {
   foreach ($form_state['tasks'] as $task_id) {
     $task = tmgmt_local_task_load($task_id);
     if ($task) {
-      if ($translator->uid) {
+      if ($translator->id()) {
         $task->assign($translator);
       }
       else {

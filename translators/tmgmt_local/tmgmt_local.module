@@ -271,8 +271,8 @@ function tmgmt_local_translation_access(TMGMTLocalTask $task, $account = NULL) {
   }
 
   // If we've already checked access for this job and user, return from cache.
-  if (isset($rights[$account->uid][$job->tjid])) {
-    return $rights[$account->uid][$job->tjid];
+  if (isset($rights[$account->id()][$job->tjid])) {
+    return $rights[$account->id()][$job->tjid];
   }
 
   // We grant access to the translation if both of the following conditions are
@@ -283,30 +283,30 @@ function tmgmt_local_translation_access(TMGMTLocalTask $task, $account = NULL) {
   // - At least one module says to grant access.
   // - User has translation capabilities for this task.
   if (!user_access('provide translation services')) {
-    $rights[$account->uid][$job->tjid] = FALSE;
+    $rights[$account->id()][$job->tjid] = FALSE;
     return FALSE;
   }
 
-  if ($task->tuid == $account->uid) {
-    $rights[$account->uid][$job->tjid] = TRUE;
+  if ($task->tuid == $account->id()) {
+    $rights[$account->id()][$job->tjid] = TRUE;
     return TRUE;
   }
 
   $access = module_invoke_all('tmgmt_local_translation_access', $job, $account);
   if (in_array(TMGMT_LOCAL_TRANSLATION_ACCESS_DENY, $access, TRUE)) {
-    $rights[$account->uid][$job->tjid] = FALSE;
+    $rights[$account->id()][$job->tjid] = FALSE;
     return FALSE;
   }
   elseif (in_array(TMGMT_LOCAL_TRANSLATION_ACCESS_ALLOW, $access, TRUE)) {
-    $rights[$account->uid][$job->tjid] = TRUE;
+    $rights[$account->id()][$job->tjid] = TRUE;
     return TRUE;
   }
 
   // Lastly, check for the translation capabilities.
-  $target_languages = tmgmt_local_supported_target_languages($job->source_language, array($account->uid));
-  $rights[$account->uid][$job->tjid] = in_array($job->target_language, $target_languages);
+  $target_languages = tmgmt_local_supported_target_languages($job->source_language, array($account->id()));
+  $rights[$account->id()][$job->tjid] = in_array($job->target_language, $target_languages);
 
-  return $rights[$account->uid][$job->tjid];
+  return $rights[$account->id()][$job->tjid];
 }
 
 /**
@@ -415,7 +415,7 @@ function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
       return user_access('provide translation services', $account);
       break;
     case 'unassign':
-      return !empty($task->tuid) && $task->tuid == $account->uid && user_access('provide translation services', $account);
+      return !empty($task->tuid) && $task->tuid == $account->id() && user_access('provide translation services', $account);
   }
 }
 
@@ -655,7 +655,7 @@ function tmgmt_local_field_access($op, $field, $entity_type, $entity = NULL, $ac
     }
 
     // User can provide transl. services and is dealing with own account.
-    if (!empty($entity) && $entity->uid == $account->uid) {
+    if (!empty($entity) && $entity->uid == $account->id()) {
       return user_access('provide translation services', $entity);
     }
 
@@ -782,7 +782,7 @@ function tmgmt_local_translators($source_language = NULL, array $target_language
   $query = tmgmt_local_capabilities_query($source_language);
   $translators_capabilities = array();
   foreach ($query->execute() as $row) {
-    $translators_capabilities[$row->uid][] = $row->tmgmt_translation_skills_language_to;
+    $translators_capabilities[$row->id()][] = $row->tmgmt_translation_skills_language_to;
   }
 
   // Filter out translator uids who's capabilities are not sufficient for given
@@ -800,7 +800,7 @@ function tmgmt_local_translators($source_language = NULL, array $target_language
   $translators[$key] = array();
   if (!empty($translators_uids)) {
     foreach (user_load_multiple($translators_uids) as $account) {
-      $translators[$key][$account->uid] = entity_label('user', $account);
+      $translators[$key][$account->id()] = entity_label('user', $account);
     }
   }
 

@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\tmgmt\Plugin\Core\Entity\Job;
+
 /**
  * @file
  * Module file of the translation management test module.
@@ -13,7 +15,7 @@ function tmgmt_file_tmgmt_translator_plugin_info() {
     'file' => array(
       'label' => t('File translator'),
       'description' => t('File translator that exports and imports files.'),
-      'plugin controller class' => 'TMGMTFileTranslatorPluginController',
+      'plugin controller class' => 'Drupal\tmgmt_file\FileTranslatorPluginController',
       'ui controller class' => 'TMGMTFileTranslatorUIController',
     ),
   );
@@ -115,11 +117,11 @@ function tmgmt_file_tmgmt_file_format_plugin_info() {
   return array(
     'xlf' => array(
       'label' => t('XLIFF'),
-      'plugin controller class' => 'TMGMTFileFormatXLIFF',
+      'plugin controller class' => 'Drupal\tmgmt_file\Format\Xliff',
     ),
     'html' => array(
       'label' => t('HTML'),
-      'plugin controller class' => 'TMGMTFileFormatHTML',
+      'plugin controller class' => 'Drupal\tmgmt_file\Format\Html',
     ),
   );
 }
@@ -127,7 +129,7 @@ function tmgmt_file_tmgmt_file_format_plugin_info() {
 /**
  * Implements hook_tmgmt_job_delete().
  */
-function tmgmt_file_tmgmt_job_delete(TMGMTJob $job) {
+function tmgmt_file_tmgmt_job_delete(Job $job) {
   $translator = $job->getTranslator();
 
   // Ignore jobs that don't have a file translator.
@@ -145,7 +147,7 @@ function tmgmt_file_tmgmt_job_delete(TMGMTJob $job) {
   $fids = $result->fetchCol();
   if (!empty($fids)) {
     foreach (file_load_multiple($fids) as $file) {
-      file_usage_delete($file, 'tmgmt_file', 'tmgmt_job', $job->tjid);
+      file_usage()->delete($file, 'tmgmt_file', 'tmgmt_job', $job->tjid);
       // It is very unlikely that these files are used anywhere else. Delete it.
       file_delete($file);
     }
