@@ -1,0 +1,8 @@
+name: 'Translation Language capabilities'
+description: 'Provides a field that allows users to select language combinations.'
+package: 'Translation Management'
+core: 8.x
+type: module
+
+dependencies:
+  - language

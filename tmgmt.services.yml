@@ -1,0 +1,14 @@
+services:
+  cache.tmgmt:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    tags:
+      - { name: cache.bin }
+    factory_method: get
+    factory_service: cache_factory
+    arguments: [tmgmt]
+  plugin.manager.tmgmt.translator:
+    class: Drupal\tmgmt\TranslatorManager
+    arguments: ['@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']
+  plugin.manager.tmgmt.source:
+      class: Drupal\tmgmt\SourceManager
+      arguments: ['@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']

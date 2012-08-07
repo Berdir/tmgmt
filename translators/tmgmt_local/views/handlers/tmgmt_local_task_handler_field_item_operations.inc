@@ -18,7 +18,7 @@ class tmgmt_local_task_handler_field_item_operations extends views_handler_field
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('links', 'inline'));
     // Only allow to translate if the job is assigned to this user.
-    if (entity_access('view', 'tmgmt_local_task_item', $item) && $item->getTask()->tuid == $user->uid) {
+    if (entity_access('view', 'tmgmt_local_task_item', $item) && $item->getTask()->tuid == $user->id()) {
       $element['#links']['translate'] = array(
         'href' => 'translate/' . $item->tltid . '/item/' . $item->tltiid,
         'attributes' => array(

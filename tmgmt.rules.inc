@@ -5,6 +5,9 @@
  * Rules integration.
  */
 
+use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\TMGMTException;
+
 /**
  * {@inheritdoc}
  */
@@ -144,8 +147,8 @@ function tmgmt_rules_action_info() {
 /**
  * Rules callback to request a translation of a job.
  */
-function tmgmt_rules_job_request_translation(TMGMTJob $job) {
-  if ($job->isTranslatable()) {
+function tmgmt_rules_job_request_translation(Job $job) {
+  if ($job->canRequestTranslation()) {
     $job->requestTranslation();
   }
 }
@@ -153,7 +156,7 @@ function tmgmt_rules_job_request_translation(TMGMTJob $job) {
 /**
  * Rules callback to accept a translation of a job.
  */
-function tmgmt_rules_job_accept_translation(TMGMTJob $job, $message) {
+function tmgmt_rules_job_accept_translation(Job $job, $message) {
   foreach ($job->getItems() as $item) {
     if ($item->isNeedsReview()) {
       $item->acceptTranslation();
@@ -164,14 +167,14 @@ function tmgmt_rules_job_accept_translation(TMGMTJob $job, $message) {
 /**
  * Rules callback to cancel a translation job.
  */
-function tmgmt_rules_job_abort_translation(TMGMTJob $job) {
+function tmgmt_rules_job_abort_translation(Job $job) {
   $job->abortTranslation();
 }
 
 /**
  * Rules callback to redirect to a translation job.
  */
-function tmgmt_rules_job_checkout(TMGMTJob $job) {
+function tmgmt_rules_job_checkout(Job $job) {
   $redirects = tmgmt_ui_job_checkout_multiple(array($job));
   // If necessary, do a redirect.
   if ($redirects) {
@@ -195,7 +198,7 @@ function tmgmt_rules_create_job($source_language) {
 /**
  * Rules callback to add an item to a job.
  */
-function tmgmt_rules_job_add_item(TMGMTJob $job, $plugin, $item_type, $item_id) {
+function tmgmt_rules_job_add_item(Job $job, $plugin, $item_type, $item_id) {
   try {
     $job->addItem($plugin, $item_type, $item_id);
   }
@@ -218,7 +221,7 @@ function tmgmt_get_first_from_node_list($list) {
 /**
  * Rules action to delete a translation job.
  */
-function tmgmt_rules_job_delete(TMGMTJob $job) {
+function tmgmt_rules_job_delete(Job $job) {
   // Prevent users without job delete permission to be able to delete jobs.
   if (tmgmt_job_access('delete')) {
     $job->delete();

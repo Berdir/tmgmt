@@ -11,27 +11,10 @@
  */
 
 /**
- * Provide information about source plugins.
- *
- * @see TMGMTTestSourcePluginController
- */
-function hook_tmgmt_source_plugin_info() {
-  return array(
-    'test_source' => array(
-      'label' => t('Test source'),
-      'description' => t('Simple source for testing purposes.'),
-      'controller class' => 'TMGMTTestSourcePluginController',
-    ),
-  );
-}
-
-/**
  * Alter source plugins information.
  *
  * @param $info
  *   The defined source plugin information.
- *
- * @see hook_tmgmt_source_plugin_info()
  */
 function hook_tmgmt_source_plugin_info_alter(&$info) {
   $info['test_source']['description'] = t('Updated description');
@@ -41,20 +24,20 @@ function hook_tmgmt_source_plugin_info_alter(&$info) {
  * Return a list of suggested sources for job items.
  *
  * @param array $items
- *   An array with TMGMTJobItem objects which must be checked for suggested
+ *   An array with JobItem objects which must be checked for suggested
  *   translations.
- *   - TMGMTJobItem A JobItem to check for suggestions.
+ *   - JobItem A JobItem to check for suggestions.
  *   - ...
- * @param TMGMTJob $job
+ * @param \Drupal\tmgmt\Entity\Job $job
  *   The current translation job to check for additional translation items.
  *
  * @return array
  *   An array with all additional translation suggestions.
- *   - job_item: A TMGMTJobItem instance.
+ *   - job_item: A JobItem instance.
  *   - referenced: A string which indicates where this suggestion comes from.
- *   - from_job: The main TMGMTJob-ID which suggests this translation.
+ *   - from_job: The main Job-ID which suggests this translation.
  */
-function hook_tmgmt_source_suggestions(array $items, TMGMTJob $job) {
+function hook_tmgmt_source_suggestions(array $items, Job $job) {
   return array(
     array(
       'job_item' => tmgmt_job_item_create('entity', 'node', 0),
@@ -72,34 +55,6 @@ function hook_tmgmt_source_suggestions(array $items, TMGMTJob $job) {
  * @addtogroup tmgmt_translator
  * @{
  */
-
-/**
- * Provide information about translator plugins.
- *
- * @see TMGMTTestTranslatorPluginController
- */
-function hook_tmgmt_translator_plugin_info() {
-  return array(
-    'test_translator' => array(
-      'label' => t('Test translator'),
-      'description' => t('Simple translator for testing purposes.'),
-      'plugin controller class' => 'TMGMTTestTranslatorPluginController',
-      'ui controller class' => 'TMGMTTestTranslatorUIController',
-      'default settings' => array(
-        'expose_settings' => TRUE,
-      ),
-      // By default, a translator is automatically created with the default
-      // settings. Set auto create to FALSE to prevent this.
-      'auto create' => TRUE,
-      // If the translator should provide remote languages mappings feature.
-      // It defaults to TRUE.
-      'map remote languages' => FALSE,
-      // Flag defining if job settings are handled by plugin itself.
-      // Defaults to FALSE.
-      'job settings custom handling' => FALSE,
-    ),
-  );
-}
 
 /**
  * Alter information about translator plugins.

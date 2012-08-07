@@ -1,0 +1,4 @@
+quick_checkout: 1
+purge_finished: _never
+word_count_exclude_tags: true
+source_list_limit: 20

@@ -1,0 +1,393 @@
+base_field: tjid
+base_table: tmgmt_job
+core: 8.x
+description: 'Gives a bulk operation overview of translation jobs in the system.'
+status: '1'
+display:
+  page_1:
+    display_plugin: page
+    id: page_1
+    display_title: Page
+    position: '1'
+    display_options:
+      path: admin/tmgmt/jobs
+      menu:
+        type: 'default tab'
+        title: 'Jobs'
+        description: ''
+        name: admin
+        weight: '0'
+        context: '0'
+      tab_options:
+        type: normal
+        title: Translation
+        description: ''
+        name: admin
+        weight: '0'
+  default:
+    display_plugin: default
+    id: default
+    display_title: Master
+    position: '1'
+    display_options:
+      access:
+        type: none
+        options: {  }
+      cache:
+        type: none
+        options: {  }
+      query:
+        type: views_query
+        options:
+          disable_sql_rewrite: '0'
+          distinct: '0'
+          slave: '0'
+          query_comment: ''
+          query_tags: {  }
+      exposed_form:
+        type: basic
+        options:
+          submit_button: Apply
+          reset_button: '0'
+          reset_button_label: Reset
+          exposed_sorts_label: 'Sort by'
+          expose_sort_order: '1'
+          sort_asc_label: Asc
+          sort_desc_label: Desc
+      pager:
+        type: full
+        options:
+          items_per_page: '20'
+          offset: '0'
+          id: '0'
+          total_pages: ''
+          expose:
+            items_per_page: '0'
+            items_per_page_label: 'Items per page'
+            items_per_page_options: '5, 10, 20, 40, 60'
+            items_per_page_options_all: '0'
+            items_per_page_options_all_label: '- All -'
+            offset: '0'
+            offset_label: Offset
+          tags:
+            previous: '‹ previous'
+            next: 'next ›'
+            first: '« first'
+            last: 'last »'
+          quantity: '9'
+      style:
+        type: table
+      row:
+        type: fields
+      fields:
+        label:
+          id: label
+          table: tmgmt_job
+          field: label
+          exclude: ''
+        source_language:
+          id: source_language
+          table: tmgmt_job
+          field: source_language
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: From
+          exclude: '0'
+          alter:
+            alter_text: '0'
+            text: ''
+            make_link: '0'
+            path: ''
+            absolute: '0'
+            external: '0'
+            replace_spaces: '0'
+            path_case: none
+            trim_whitespace: '0'
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: '0'
+            max_length: ''
+            word_boundary: '1'
+            ellipsis: '1'
+            more_link: '0'
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: '0'
+            trim: '0'
+            preserve_tags: ''
+            html: '0'
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: '1'
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: '1'
+          empty: ''
+          hide_empty: '0'
+          empty_zero: '0'
+          hide_alter_empty: '1'
+          machine_name: '0'
+        state:
+          id: state
+          table: tmgmt_job
+          field: state
+          exclude: ''
+        target_language:
+          id: target_language
+          table: tmgmt_job
+          field: target_language
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: To
+          exclude: '0'
+          alter:
+            alter_text: '0'
+            text: ''
+            make_link: '0'
+            path: ''
+            absolute: '0'
+            external: '0'
+            replace_spaces: '0'
+            path_case: none
+            trim_whitespace: '0'
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: '0'
+            max_length: ''
+            word_boundary: '1'
+            ellipsis: '1'
+            more_link: '0'
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: '0'
+            trim: '0'
+            preserve_tags: ''
+            html: '0'
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: '1'
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: '1'
+          empty: ''
+          hide_empty: '0'
+          empty_zero: '0'
+          hide_alter_empty: '1'
+          machine_name: '0'
+        translator:
+          id: translator
+          table: tmgmt_job
+          field: translator
+          exclude: ''
+        progress:
+          id: progress
+          table: tmgmt_job
+          field: progress
+          exclude: ''
+        word_count:
+          id: word_count
+          table: tmgmt_job
+          field: word_count
+          exclude: ''
+        changed:
+          id: changed
+          table: tmgmt_job
+          field: changed
+          exclude: ''
+        operations:
+          id: operations
+          table: tmgmt_job
+          field: operations
+          plugin_id: tmgmt_handler_field_tmgmt_job_operations
+      filters:
+        state:
+          id: state
+          table: tmgmt_job
+          field: state
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: in
+          value: {  }
+          group: '1'
+          exposed: '1'
+          expose:
+            operator_id: state_op
+            label: State
+            description: ''
+            use_operator: '0'
+            operator: state_op
+            identifier: state
+            required: '0'
+            remember: '0'
+            multiple: '0'
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+            reduce: '0'
+          is_grouped: '0'
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: '1'
+            widget: select
+            multiple: '0'
+            remember: '0'
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          plugin_id: in_operator
+          provider: views
+        source_language:
+          id: source_language
+          table: tmgmt_job
+          field: source_language
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: in
+          value: {  }
+          group: '1'
+          exposed: '1'
+          expose:
+            operator_id: source_language_op
+            label: From
+            description: ''
+            use_operator: '0'
+            operator: source_language_op
+            identifier: source_language
+            required: '0'
+            remember: '0'
+            multiple: '0'
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+            reduce: '0'
+          is_grouped: '0'
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: '1'
+            widget: select
+            multiple: '0'
+            remember: '0'
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          plugin_id: in_operator
+          provider: views
+        target_language:
+          id: target_language
+          table: tmgmt_job
+          field: target_language
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: in
+          value: {  }
+          group: '1'
+          exposed: '1'
+          expose:
+            operator_id: target_language_op
+            label: To
+            description: ''
+            use_operator: '0'
+            operator: target_language_op
+            identifier: target_language
+            required: '0'
+            remember: '0'
+            multiple: '0'
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+            reduce: '0'
+          is_grouped: '0'
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: '1'
+            widget: select
+            multiple: '0'
+            remember: '0'
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          plugin_id: in_operator
+          provider: views
+        translator:
+          id: translator
+          table: tmgmt_job
+          field: translator
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: in
+          value: {  }
+          group: '1'
+          exposed: '1'
+          expose:
+            operator_id: translator_op
+            label: Translator
+            description: ''
+            use_operator: '0'
+            operator: translator_op
+            identifier: translator
+            required: '0'
+            remember: '0'
+            multiple: '0'
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+            reduce: '0'
+          is_grouped: '0'
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: '1'
+            widget: select
+            multiple: '0'
+            remember: '0'
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          plugin_id: in_operator
+          provider: views
+      sorts: {  }
+      title: 'Job overview'
+      header: {  }
+      footer: {  }
+      empty: {  }
+      relationships: {  }
+      arguments: {  }
+      filter_groups:
+        operator: AND
+        groups:
+          1: AND
+label: 'Job overview'
+module: views
+id: tmgmt_ui_job_overview
+tag: ''
+uuid: eb6c9264-4314-462e-aca6-2e1b922faef8
+langcode: en

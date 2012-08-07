@@ -224,164 +224,32 @@ function tmgmt_local_update_7000() {
 }
 
 /**
- * Implements hook_enable().
+ * Implements hook_preinstall().
  */
-function tmgmt_local_enable() {
-  // If our field type is not found rebuild the cache.
-  if (!field_info_field_types('tmgmt_language_combination')) {
-    field_cache_clear();
-  }
-
-  // Create the language combination field if it doesn't exist yet.
-  if (!field_info_field('tmgmt_translation_skills')) {
-    $field = array(
-      'type' => 'tmgmt_language_combination',
-      'field_name' => 'tmgmt_translation_skills',
-      'translatable' => FALSE,
-      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-      'locked' => FALSE,
-    );
-
-    field_create_field($field);
-  }
-
-  // Attach the language skills field collection to the user entity.
-  if (!field_info_instance('user', 'tmgmt_translation_skills', 'user')) {
-    $instance = array(
-      'field_name' => 'tmgmt_translation_skills',
-      'entity_type' => 'user',
-      'bundle' => 'user',
-      'label' => t('Translation skills'),
-    );
-
-    field_create_instance($instance);
+function tmgmt_local_preinstall($module) {
+  $definition = \Drupal::service('plugin.manager.field.field_type')->getDefinition('tmgmt_language_combination');
+  if (!$definition && $module == 'tmgmt_local') {
+    // Make sure that the field type is available before our
+    // default config is installed.
+    \Drupal::service('plugin.manager.field.field_type')->clearCachedDefinitions();
   }
 }
 
 /**
- * Implements hook_uninstall().
+ * Implements hook_install().
  */
-function tmgmt_local_uninstall() {
-  field_delete_field('tmgmt_translation_skills');
+function tmgmt_local_install() {
+  // Assign form settings for the 'default' form mode.
+  $form_display = entity_get_form_display('user', 'user', 'default');
+  $form_display->setComponent('tmgmt_translation_skills', array(
+    'type' => 'tmgmt_language_combination_default',
+  ));
+  $form_display->save();
+  // Assign form settings for the 'register' form mode.
+  $form_display = entity_get_form_display('user', 'user', 'register');
+  $form_display->setComponent('tmgmt_translation_skills', array(
+    'type' => 'tmgmt_language_combination_default',
+  ));
+  $form_display->save();
 }
 
-/**
- * Create local task items.
- */
-function tmgmt_local_update_7001() {
-  $result = db_query('SELECT lt.tltid, ji.tjiid, ji.state, ji.data from {tmgmt_local_task} lt INNER JOIN {tmgmt_job} j ON j.tjid = lt.tjid INNER JOIN {tmgmt_job_item} ji ON ji.tjid = j.tjid');
-  $insert = db_insert('tmgmt_local_task_item')
-    ->fields(array('tltid', 'tjiid', 'status', 'data'));
-  module_load_include('module', 'tmgmt');
-  foreach ($result as $row) {
-    $data = unserialize($row->data);
-    $data_count = count(array_filter(tmgmt_flatten_data($data), '_tmgmt_filter_data'));
-    $translation = (array)_tmgmt_local_translated_data_7001($data);
-    $values =array(
-      'tltid' => $row->tltid,
-      'tjiid' => $row->tjiid,
-      'count_untranslated' => 0,
-      'count_translated' => 0,
-      'count_translated' => 0,
-      'status' => 0,
-      'data' => serialize($translation),
-    );
-    switch ($row->state) {
-      case 2:
-        // Job item state needs review is task item status translated.
-        $values['status'] = 1;
-        $values['count_translated'] = $data_count;
-        break;
-      case 3:
-        // Job item state accepted is task item status completed.
-        $values['status'] = 3;
-        $values['count_completed'] = $data_count;
-        break;
-      case 1:
-      default:
-        // Job item state active is task item status untranslated.
-      $values['status'] = 0;
-      $values['count_untranslated'] = $data_count;
-        break;
-    }
-    $insert->values($values);
-  }
-  $insert->execute();
-}
-
-/**
- * Data parsing helper function for tmgmt_local_update_7001().
- *
- * Copies #translation texts from the source data array to the translation
- * data array.
- *
- * @param array $source
- *   The original source data array of the job item.
- *
- * @return array
- *   The filled translation data array.
- */
-function _tmgmt_local_translated_data_7001($source) {
-  if (!empty($source['#translation']['#text'])) {
-    $translation['#text'] = $source['#translation']['#text'];
-    if ((!empty($source['#status']))) {
-      $translation['#status'] = $source['#status'];
-    }
-    return $translation;
-  }
-  else {
-    $translation = array();
-    foreach (element_children($source) as $key) {
-      if ($return = _tmgmt_local_translated_data_7001($source[$key])) {
-        $translation[$key] = $return;
-      }
-    }
-    if (!empty($translation)) {
-      return $translation;
-    }
-  }
-}
-
-/**
- * Ensures that the tmgmt_language_combination module is enabled.
- */
-function tmgmt_local_update_7002() {
-  // Enable the tmgmt_language_combionation module.
-  module_enable(array('tmgmt_language_combination'));
-
-  // Remove the tmgmt_skills module.
-  db_delete('system')
-    ->condition('name', 'tmgmt_skills')
-    ->condition('type', 'module')
-    ->execute();
-
-  // Create the field if it doesn't exist yet.
-  if (!field_info_field_types('tmgmt_language_combination')) {
-    field_cache_clear();
-  }
-
-  // Create the language combination field if it doesn't exist yet.
-  if (!field_info_field('tmgmt_translation_skills')) {
-    $field = array(
-      'type' => 'tmgmt_language_combination',
-      'field_name' => 'tmgmt_translation_skills',
-      'translatable' => FALSE,
-      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-      'locked' => FALSE,
-    );
-
-    field_create_field($field);
-  }
-
-  // Attach the language skills field collection to the user entity.
-  if (!field_info_instance('user', 'tmgmt_translation_skills', 'user')) {
-    $instance = array(
-      'field_name' => 'tmgmt_translation_skills',
-      'entity_type' => 'user',
-      'bundle' => 'user',
-      'label' => t('Translation skills'),
-    );
-
-    field_create_instance($instance);
-  }
-}

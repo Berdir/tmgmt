@@ -1,0 +1,4 @@
+services:
+  plugin.manager.tmgmt_file.format:
+    class: Drupal\tmgmt_file\Format\FormatManager
+    arguments: ['@container.namespaces', '@cache.cache', '@language_manager', '@module_handler']

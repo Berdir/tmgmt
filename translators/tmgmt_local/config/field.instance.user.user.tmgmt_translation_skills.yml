@@ -1,0 +1,14 @@
+id: user.user.tmgmt_translation_skills
+uuid: 90491e44-5245-4ad1-99a2-98cf3d0d1df6
+status: true
+langcode: en
+field_uuid: 28b5356d-7d95-4a0d-ab1f-38d8bb2d3b63
+entity_type: user
+bundle: user
+label: 'Translation skills'
+description: ''
+required: 0
+default_value: {  }
+default_value_function: ''
+settings: {  }
+field_type: tmgmt_language_combination

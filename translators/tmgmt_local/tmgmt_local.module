@@ -1,4 +1,6 @@
 <?php
+use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt_local\Entity\LocalTask;
 
 /**
  * @file
@@ -84,53 +86,6 @@ define('TMGMT_DATA_ITEM_STATE_UNTRANSLATED', 0);
  */
 
 /**
- * Implements hook_entity_info().
- */
-function tmgmt_local_entity_info() {
-  $info = array(
-    'tmgmt_local_task' => array(
-      'label' => t('Translation Task'),
-      'module' => 'tmgmt_local',
-      'entity class' => 'TMGMTLocalTask',
-      'controller class' => 'TMGMTLocalTaskController',
-      'metadata controller class' => 'TMGMTLocalTaskMetadataController',
-      'views controller class' => 'TMGMTLocalTaskViewsController',
-      'base table' => 'tmgmt_local_task',
-      'uri callback' => 'entity_class_uri',
-      'label callback' => 'entity_class_label',
-      'access callback' => 'tmgmt_local_task_access',
-      'entity keys' => array(
-        'id' => 'tltid',
-      ),
-      'admin ui' => array(
-        'controller class' => 'TMGMTLocalTaskUIController',
-        'path' => 'translate',
-      ),
-    ),
-    'tmgmt_local_task_item' => array(
-      'label' => t('Translation Task Item'),
-      'module' => 'tmgmt_local',
-      'entity class' => 'TMGMTLocalTaskItem',
-      'controller class' => 'TMGMTLocalTaskItemController',
-      'metadata controller class' => 'TMGMTLocalTaskItemMetadataController',
-      'views controller class' => 'TMGMTLocalTaskItemViewsController',
-      'base table' => 'tmgmt_local_task_item',
-      'uri callback' => 'entity_class_uri',
-      'label callback' => 'entity_class_label',
-      'access callback' => 'tmgmt_local_task_item_access',
-      'entity keys' => array(
-        'id' => 'tltiid',
-      ),
-      'admin ui' => array(
-        'controller class' => 'TMGMTLocalTaskItemUIController',
-        'path' => 'translate',
-      ),
-    ),
-  );
-  return $info;
-}
-
-/**
  * Implements hook_theme().
  */
 function tmgmt_local_theme() {
@@ -203,23 +158,6 @@ function tmgmt_local_permission() {
 }
 
 /**
- * Implements hook_views_api().
- */
-function tmgmt_local_views_api() {
-  return array(
-    'api' => 3.0,
-    'path' => drupal_get_path('module', 'tmgmt_local') . '/views',
-  );
-}
-
-/**
- * Implements hook_default_views().
- */
-function tmgmt_local_views_default_views() {
-  return _tmgmt_load_exports('tmgmt_local', 'views', 'view.inc', 'view');
-}
-
-/**
  * Implements hook_tmgmt_translator_plugin_info().
  */
 function tmgmt_local_tmgmt_translator_plugin_info() {
@@ -254,7 +192,7 @@ function tmgmt_local_tmgmt_translator_plugin_info() {
  *   TRUE if the user is allowed to translate the given translation job, FALSE
  *   otherwise.
  */
-function tmgmt_local_translation_access(TMGMTLocalTask $task, $account = NULL) {
+function tmgmt_local_translation_access(LocalTask $task, $account = NULL) {
   $job = $task->getJob();
 
   if (!$job || !$job->isActive()) {
@@ -269,8 +207,8 @@ function tmgmt_local_translation_access(TMGMTLocalTask $task, $account = NULL) {
   }
 
   // If we've already checked access for this job and user, return from cache.
-  if (isset($rights[$account->uid][$job->tjid])) {
-    return $rights[$account->uid][$job->tjid];
+  if (isset($rights[$account->id()][$job->tjid])) {
+    return $rights[$account->id()][$job->tjid];
   }
 
   // We grant access to the translation if both of the following conditions are
@@ -281,30 +219,30 @@ function tmgmt_local_translation_access(TMGMTLocalTask $task, $account = NULL) {
   // - At least one module says to grant access.
   // - User has translation capabilities for this task.
   if (!user_access('provide translation services')) {
-    $rights[$account->uid][$job->tjid] = FALSE;
+    $rights[$account->id()][$job->tjid] = FALSE;
     return FALSE;
   }
 
-  if ($task->tuid == $account->uid) {
-    $rights[$account->uid][$job->tjid] = TRUE;
+  if ($task->tuid == $account->id()) {
+    $rights[$account->id()][$job->tjid] = TRUE;
     return TRUE;
   }
 
   $access = module_invoke_all('tmgmt_local_translation_access', $job, $account);
   if (in_array(TMGMT_LOCAL_TRANSLATION_ACCESS_DENY, $access, TRUE)) {
-    $rights[$account->uid][$job->tjid] = FALSE;
+    $rights[$account->id()][$job->tjid] = FALSE;
     return FALSE;
   }
   elseif (in_array(TMGMT_LOCAL_TRANSLATION_ACCESS_ALLOW, $access, TRUE)) {
-    $rights[$account->uid][$job->tjid] = TRUE;
+    $rights[$account->id()][$job->tjid] = TRUE;
     return TRUE;
   }
 
   // Lastly, check for the translation capabilities.
-  $target_languages = tmgmt_local_supported_target_languages($job->source_language, array($account->uid));
-  $rights[$account->uid][$job->tjid] = in_array($job->target_language, $target_languages);
+  $target_languages = tmgmt_local_supported_target_languages($job->source_language, array($account->id()));
+  $rights[$account->id()][$job->tjid] = in_array($job->target_language, $target_languages);
 
-  return $rights[$account->uid][$job->tjid];
+  return $rights[$account->id()][$job->tjid];
 }
 
 /**
@@ -314,12 +252,11 @@ function tmgmt_local_translation_access(TMGMTLocalTask $task, $account = NULL) {
  * the translation capabilities of an local have changed.
  */
 function tmgmt_local_clear_languages_cache() {
-  $query = new EntityFieldQuery();
-  $query->entityCondition('entity_type', 'tmgmt_translator');
-  $query->propertyCondition('plugin', 'local');
-  $result = $query->execute();
-  if ($result) {
-    foreach (tmgmt_translator_load_multiple(array_keys($result['tmgmt_translator'])) as $translator) {
+  $results = \Drupal::entityQuery('tmgmt_translator')
+    ->condition('plugin', 'local')
+    ->execute();
+  if ($results) {
+    foreach (tmgmt_translator_load_multiple($results) as $translator) {
       $translator->clearLanguageCache();
     }
   }
@@ -331,14 +268,14 @@ function tmgmt_local_clear_languages_cache() {
  * @return TMGMTLocalTask
  */
 function tmgmt_local_task_load($tltid) {
-  return entity_load_single('tmgmt_local_task', $tltid);
+  return entity_load('tmgmt_local_task', $tltid);
 }
 
 /**
  * Loads local translation tasks entity.
  */
-function tmgmt_local_task_load_multiple(array $tltids = array(), $conditions = array()) {
-  return entity_load('tmgmt_local_task', $tltids, $conditions);
+function tmgmt_local_task_load_multiple(array $tltids = array()) {
+  return entity_load_multiple('tmgmt_local_task', $tltids);
 }
 
 /**
@@ -347,14 +284,14 @@ function tmgmt_local_task_load_multiple(array $tltids = array(), $conditions = a
  * @return TMGMTLocalTaskItem
  */
 function tmgmt_local_task_item_load($tltiid) {
-  return entity_load_single('tmgmt_local_task_item', $tltiid);
+  return entity_load('tmgmt_local_task_item', $tltiid);
 }
 
 /**
  * Loads local translation task items entity.
  */
-function tmgmt_local_task_item_load_multiple(array $tltiids = array(), $conditions = array()) {
-  return entity_load('tmgmt_local_task_item', $tltiids, $conditions);
+function tmgmt_local_task_item_load_multiple(array $tltiids = array()) {
+  return entity_load_multiple('tmgmt_local_task_item', $tltiids);
 }
 
 /**
@@ -413,7 +350,7 @@ function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
       return user_access('provide translation services', $account);
       break;
     case 'unassign':
-      return !empty($task->tuid) && $task->tuid == $account->uid && user_access('provide translation services', $account);
+      return !empty($task->tuid) && $task->tuid == $account->id() && user_access('provide translation services', $account);
   }
 }
 
@@ -503,7 +440,7 @@ function tmgmt_local_task_statistics_load(array $tltids) {
  * @return
  *   The requested information as an integer.
  */
-function tmgmt_local_task_statistic(TMGMTLocalTask $task, $key) {
+function tmgmt_local_task_statistic(LocalTask $task, $key) {
   $statistics = tmgmt_local_task_statistics_load(array($task->tltid));
   if (isset($statistics[$task->tltid]->$key)) {
     return $statistics[$task->tltid]->$key;
@@ -604,7 +541,7 @@ function tmgmt_local_get_translators_for_tasks($tasks) {
  *
  * @todo: Move this to the translator plugin API.
  */
-function tmgmt_local_tmgmt_job_item_update(TMGMTJobItem $job_item) {
+function tmgmt_local_tmgmt_job_item_update(JobItem $job_item) {
   if ($job_item->isAccepted() && !$job_item->original->isAccepted()) {
     $tltiid = db_query('SELECT tltiid FROM {tmgmt_local_task_item} ti INNER JOIN {tmgmt_local_task} t ON ti.tltid = t.tltid WHERE t.tjid = :tjid AND ti.tjiid = :tjiid', array(':tjid' => $job_item->tjid, ':tjiid' => $job_item->tjiid))->fetchField();
     if ($tltiid) {
@@ -613,10 +550,9 @@ function tmgmt_local_tmgmt_job_item_update(TMGMTJobItem $job_item) {
       $task_item->save();
 
       // Check if the task can be marked as closed as well.
-      $query = new EntityFieldQuery();
-      $unclosed_tasks = $query->entityCondition('entity_type', 'tmgmt_local_task_item')
-        ->propertyCondition('tltid', $task_item->tltid)
-        ->propertyCondition('status', TMGMT_LOCAL_TASK_ITEM_STATUS_CLOSED, '<>')
+      $unclosed_tasks = \Drupal::entityQuery('tmgmt_local_task_item')
+        ->condition('tltid', $task_item->id())
+        ->condition('status', TMGMT_LOCAL_TASK_ITEM_STATUS_CLOSED, '<>')
         ->count()
         ->execute();
       if ($unclosed_tasks == 0) {
@@ -631,14 +567,12 @@ function tmgmt_local_tmgmt_job_item_update(TMGMTJobItem $job_item) {
 /**
  * Implements hook_tmgmt_job_delete().
  */
-function tmgmt_local_tmgmt_job_delete(TMGMTJob $job) {
-  $query = new EntityFieldQuery();
-  $result = $query
-    ->entityCondition('entity_type', 'tmgmt_local_task')
-    ->propertyCondition('tjid', $job->tjid)
+function tmgmt_local_tmgmt_job_delete(Job $job) {
+  $tltids = \Drupal::entityQuery('tmgmt_local_task')
+    ->conditionCondition('tjid', $job->id())
     ->execute();
-  if (!empty($result['tmgmt_local_task'])) {
-    entity_delete_multiple('tmgmt_local_task', array_keys($result['tmgmt_local_task']));
+  if (!empty($tltids)) {
+    entity_delete_multiple('tmgmt_local_task', $tltids);
   }
 }
 
@@ -656,7 +590,7 @@ function tmgmt_local_field_access($op, $field, $entity_type, $entity = NULL, $ac
     }
 
     // User can provide transl. services and is dealing with own account.
-    if (!empty($entity) && $entity->uid == $account->uid) {
+    if (!empty($entity) && $entity->uid == $account->id()) {
       return user_access('provide translation services', $entity);
     }
 
@@ -799,7 +733,7 @@ function tmgmt_local_translators($source_language = NULL, array $target_language
   $translators[$key] = array();
   if (!empty($translators_uids)) {
     foreach (user_load_multiple($translators_uids) as $account) {
-      $translators[$key][$account->uid] = entity_label('user', $account);
+      $translators[$key][$account->id()] = $account->getUsername();
     }
   }
 
@@ -833,10 +767,9 @@ function tmgmt_local_capabilities($source_language = NULL, $target_language = NU
     return array();
   }
 
-  $query = db_select('field_data_tmgmt_translation_skills', 'ts')
+  $query = db_select('user__tmgmt_translation_skills', 'ts')
     ->fields('ts', array('tmgmt_translation_skills_language_from', 'tmgmt_translation_skills_language_to'))
-    ->condition('ts.deleted', 0)
-    ->condition('ts.entity_type', 'user');
+    ->condition('ts.deleted', 0);
 
   if ($source_language) {
     $query->condition('ts.tmgmt_translation_skills_language_from', $source_language);

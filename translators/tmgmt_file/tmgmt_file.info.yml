@@ -1,0 +1,9 @@
+name: 'Export / Import File'
+description: 'A translator which allows you to export source data into a file and import the translated in return.'
+package: 'Translation Management'
+core: 8.x
+type: module
+dependencies:
+  - tmgmt
+  - file
+configure: admin/config/regional/tmgmt_translator
