@@ -248,7 +248,8 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $available['target_language'] = tmgmt_available_languages();
   $job->target_language = isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : $job->target_language;
 
-// Remove impossible combinations so we don't end up with the same source and
+
+  // Remove impossible combinations so we don't end up with the same source and
   // target language in the dropdowns.
   foreach (array('source_language' => 'target_language', 'target_language' => 'source_language') as $key => $opposite) {
     if (!empty($job->{$key})) {
@@ -266,22 +267,18 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#weight' => 0,
   );
 
-  $job->label = isset($form_state['values']['label']) ? $form_state['values']['label'] : $job->label;
-  $form['info']['override_label'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Override the default label (%label)', array('%label' => $job->label())),
-    '#default_value' => !empty($job->label),
-  );
+  // Check for label value and set for dynamically change.
+  if (isset($form_state['values']['label']) && $form_state['values']['label'] == $job->label()) {
+    $job->label = NULL;
+    $form_state['values']['label'] = $job->label = $job->label();
+  }
   $form['info']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
-    '#description' => t('You can provide a label for this job in order to identify it easily later on.'),
-    '#default_value' => $job->label,
-    '#states' => array(
-      'visible' => array(
-        ':input[name="override_label"]' => array('checked' => TRUE),
-      ),
-    ),
+    '#description' => t('You can provide a label for this job in order to identify it easily later on. Or leave it empty to use default one.'),
+    '#default_value' => $job->label(),
+    '#prefix' => '<div id="tmgmt-ui-label">',
+    '#suffix' => '</div>',
   );
 
   // Make the source and target language flexible by showing either a select
@@ -487,10 +484,6 @@ function tmgmt_job_form_submit($form, &$form_state) {
   // plain 'Submit' case covered. Also, if the translator fails it won't save on
   // its own.
   $job = entity_ui_form_submit_build_entity($form, $form_state);
-  if (!$form_state['values']['override_label']) {
-    // Make sure the job label is empty if the override checkbox isn't checked.
-    $job->label = '';
-  }
   $job->save();
   // Per default we want to redirect the user to the overview.
   $form_state['redirect'] = 'admin/config/regional/tmgmt';
@@ -606,6 +599,12 @@ function tmgmt_ui_ajax_callback_language_select($form, &$form_state) {
   $replace = $form_state['input']['_triggering_element_name'] == 'source_language' ? 'target_language' : 'source_language';
   $commands[] = ajax_command_replace('#tmgmt-ui-translator-wrapper', drupal_render($form['translator_wrapper']));
   $commands[] = ajax_command_replace('#tmgmt-ui-' . str_replace('_', '-', $replace), drupal_render($form['info'][$replace]));
+
+  // Replace value of the label field with ajax on language change.
+  // @todo This manual overwrite is necessary because somehow an old job entity seems to be used.
+  $form['info']['label']['#value'] = $form_state['values']['label'];
+  $commands[] = ajax_command_replace('#tmgmt-ui-label', drupal_render($form['info']['label']));
+
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
