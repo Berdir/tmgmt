@@ -319,7 +319,7 @@ $handler->display->display_options['filters']['language_1']['expose']['reduce'] 
 $handler = $view->new_display('page', 'Page', 'page');
 $handler->display->display_options['path'] = 'admin/config/regional/tmgmt/node';
 $handler->display->display_options['menu']['type'] = 'tab';
-$handler->display->display_options['menu']['title'] = 'Node source';
+$handler->display->display_options['menu']['title'] = 'Node sources';
 $handler->display->display_options['menu']['weight'] = '0';
 $handler->display->display_options['menu']['context'] = 0;
 $translatables['tmgmt_node_source_overview'] = array(
