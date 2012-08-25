@@ -151,9 +151,9 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo']['op
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 1,
     'use_queue' => 0,
-    'skip_confirmation' => 1,
-    'override_label' => 0,
-    'label' => '',
+    'skip_confirmation' => 0,
+    'override_label' => 1,
+    'label' => 'Delete Job',
   ),
   'action::system_message_action' => array(
     'selected' => 0,
