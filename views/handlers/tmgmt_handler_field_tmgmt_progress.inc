@@ -61,38 +61,31 @@ class tmgmt_handler_field_tmgmt_progress extends views_handler_field_entity {
    */
   function build_progressbar_settings($id, $counts, $prefix = 'progress') {
     $settings['chart'][$prefix . $id] = array(
-      'header' => array(t('Progress')),
+      'header' => array(t('Approved'), t('Translated'), t('Pending')),
       'rows' => array(
-        array($counts['@approved']),
-        array($counts['@translated']),
-        array($counts['@pending']),
+        array($counts['@approved'], $counts['@translated'], $counts['@pending']),
       ),
-      'columns' => array(t('Approved'), t('Translated'), t('Pending')),
-      'chartType' => 'BarChart',
+      'columns' => array(''),
+      'chartType' => 'PieChart',
       'containerId' => $prefix . $id,
       'options' => array(
+        'backgroundColor' => 'transparent',
+        'colors' => array('#60ff60', '#ffff00', '#6060ff'),
         'forceIFrame' => FALSE,
-        'hAxis' => array(
-          'textPosition' => 'none',
-          'viewWindowMode' => 'maximized',
-        ),
-        'vAxis' => array(
-          'textPosition' => 'none',
-          'gridlines' => array('count' => 0),
-        ),
         'chartArea' => array(
           'left' => 0,
           'top' => 0,
-          'width' => '100%',
+          'width' => '50%',
           'height' => '100%',
         ),
         'fontSize' => 9,
         'title' => t('Progress'),
         'titlePosition' => 'none',
-        'width' => 80,
-        'height' => 40,
+        'width' => 60,
+        'height' => 50,
         'isStacked' => TRUE,
         'legend' => array('position' => 'none'),
+        'pieSliceText' => 'none',
       )
     );
     return $settings;
