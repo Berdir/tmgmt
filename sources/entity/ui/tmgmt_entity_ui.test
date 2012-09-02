@@ -68,8 +68,8 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntityTestCaseUtility {
     $langstatus_en = array_shift($this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-en"]'));
     $langstatus_de = array_shift($this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]'));
 
-    $this->assertEqual($langstatus_en->img['title'], t('Source'));
-    $this->assertEqual($langstatus_de->img['title'], t('Missing'));
+    $this->assertEqual($langstatus_en->div['title'], t('Source language'));
+    $this->assertEqual($langstatus_de->div['title'], t('Not translated'));
 
     // Test status: Active job item.
     $job = $this->createJob('en', 'de');
@@ -86,7 +86,7 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntityTestCaseUtility {
     $wrapper = entity_metadata_wrapper('tmgmt_job_item', array_shift($job->getItems()));
     $label = t('Active job item: @state', array('@state' => $wrapper->state->label()));
 
-    $this->assertEqual($langstatus_de->img['title'], $label);
+    $this->assertEqual($langstatus_de->div['title'], $label);
 
     // Test status: Current
     foreach ($job->getItems() as $job_item) {
@@ -96,7 +96,7 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntityTestCaseUtility {
     $this->drupalGet('admin/config/regional/tmgmt/entity/node');
     $langstatus_de = array_shift($this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]'));
 
-    $this->assertEqual($langstatus_de->img['title'], t('Current'));
+    $this->assertEqual($langstatus_de->div['title'], t('Translation up to date'));
   }
 
   function testTranslationSubmissions() {
