@@ -23,6 +23,9 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
    */
   public function getData(TMGMTJobItem $job_item) {
     $entity = entity_load_single($job_item->item_type, $job_item->item_id);
+    if (!$entity) {
+      throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->item_type, $job_item->item_id)));
+    }
     return tmgmt_field_get_source_data($job_item->item_type, $entity, TRUE);
   }
 

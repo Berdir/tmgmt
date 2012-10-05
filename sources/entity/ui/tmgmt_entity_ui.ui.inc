@@ -116,7 +116,7 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
        */
       $handler = entity_translation_get_handler($type, $entity);
       $source_lang = $handler->getTranslations()->original;
-      $entity_id = entity_id($type, $entity);
+      list($entity_id, ,) = entity_extract_ids($type, $entity);
 
       try {
 
@@ -140,7 +140,7 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
       catch (TMGMTException $e) {
         watchdog_exception('tmgmt', $e);
         $entity_label = entity_label($type, $entity);
-        drupal_set_message(t('Unable to add job item for entity %name. Make sure the source content is not empty.', array('%name' => $entity_label)), 'error');
+        drupal_set_message(t('Unable to add job item for entity %name: %error.', array('%name' => $entity_label, '%error' => $e->getMessage())), 'error');
       }
     }
 

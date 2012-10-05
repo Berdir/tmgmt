@@ -36,7 +36,7 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
     // For retrieved entities add translation specific data.
     foreach ($entities as $entity) {
 
-      $entity_id = entity_id($type, $entity);
+      list($entity_id, , ,) = entity_extract_ids($type, $entity);
       $entity_uri = entity_uri($type, $entity);
 
       // This occurs on user entity type.
