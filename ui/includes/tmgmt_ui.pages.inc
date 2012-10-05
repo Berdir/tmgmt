@@ -542,6 +542,9 @@ function tmgmt_job_form_validate($form, &$form_state) {
 function tmgmt_ui_checkout_settings_form(&$form_state, TMGMTJob $job) {
   $form = array();
   $translator = $job->getTranslator();
+  if (!$translator) {
+    return $form;
+  }
   if (!$translator->isAvailable()) {
     $form['#description'] = filter_xss($job->getTranslator()->getNotAvailableReason());
   }
