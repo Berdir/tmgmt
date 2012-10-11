@@ -20,8 +20,8 @@ class tmgmt_views_job_access extends views_plugin_access {
   /**
    * Overrides views_plugin_access::access().
    */
-  function access() {
-    return entity_access('view', 'tmgmt_job');
+  function access($account) {
+    return entity_access('view', 'tmgmt_job', NULL, $account);
   }
 
   /**
