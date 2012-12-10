@@ -160,3 +160,20 @@ table.tmgmt-ui-review tbody th {
   -moz-border-radius: 2px;
   margin-left: 20px;
 }
+
+.tmgmt-one-legend{
+  float: left;
+}
+
+.tmgmt-legend-icon{
+  float: left;
+  margin: 4px 4px;
+}
+
+.tmgmt-legend-title{
+  margin: 0 20px 0 10px;
+}
+
+.tmgmt-legend-status{
+  width: 152px;
+}
