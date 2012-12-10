@@ -8,7 +8,7 @@
 /**
  * Implements hook_drush_command().
  */
-function tmgmt_drush_command() {
+function tmgmt_file_drush_command() {
   $items = array();
 
   $items['tmgmt_translate_import'] = array(
@@ -25,7 +25,7 @@ function tmgmt_drush_command() {
 /**
  * Import XLIFF files from a directory.
  */
-function tmgmt_translate_import($dir = NULL) {
+function drush_tmgmt_file_tmgmt_translate_import($dir = NULL) {
   if (!$dir) {
     return drush_set_error(dt('You need to provide a directory path.'));
   }
