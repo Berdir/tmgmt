@@ -64,6 +64,7 @@ function drush_tmgmt_file_tmgmt_translate_import($name = NULL) {
 
     if ($job->isFinished()) {
       drush_log(dt('Skipping @filename for finished job @name (#@id).', array('@filename' => $info->name, '@name' => $job->label(), '@id' => $job->tjid)), 'warning');
+      continue;
     }
 
     try {
