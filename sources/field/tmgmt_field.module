@@ -10,13 +10,11 @@
  *
  * This hook is implemented on behalf of the core text module.
  */
-function text_tmgmt_source_translation_structure($field_name, $entity_type, $entity, $field_instance) {
-  $field_lang = field_language($entity_type, $entity, $field_name);
+function text_tmgmt_source_translation_structure($entity_type, $entity, $field, $instance, $langcode, $items) {
   $structure = array();
-  if (!empty($entity->{$field_name}[$field_lang])) {
-    $field_info = field_info_field($field_name);
-    $structure['#label'] = check_plain($field_instance['label']);
-    foreach ($entity->{$field_name}[$field_lang] as $delta => $value) {
+  if (!empty($items)) {
+    $structure['#label'] = check_plain($instance['label']);
+    foreach ($items as $delta => $value) {
       $structure[$delta]['#label'] = t('Delta #@delta', array('@delta' => $delta));
       $structure[$delta]['value'] = array(
         '#label' => $structure['#label'],
@@ -29,7 +27,7 @@ function text_tmgmt_source_translation_structure($field_name, $entity_type, $ent
         '#text' => $value['format'],
         '#translate' => FALSE,
       );
-      if ($field_info['type'] == 'text_with_summary' && !empty($value['summary'])) {
+      if ($field['type'] == 'text_with_summary' && !empty($value['summary'])) {
         $structure[$delta]['summary'] = array(
           '#label' => t('Summary'),
           '#text' => $value['summary'],
@@ -48,11 +46,17 @@ function text_tmgmt_source_translation_structure($field_name, $entity_type, $ent
  *   The entity type.
  * @param $entity
  *   An entity object.
+ * @param $langcode
+ *   The language of retrieved field values.
+ * @param $only_translatable
+ *   If TRUE, only the fields which are flagged as translatable are returned.
+ *   Defaults to FALSE, which is usually used for node translation, where the
+ *   field translatability does not matter.
  *
  * @return array
  *   The structured field data for all translatable fields
  */
-function tmgmt_field_get_source_data($entity_type, $entity, $field_translation = FALSE) {
+function tmgmt_field_get_source_data($entity_type, $entity, $langcode, $only_translatable = FALSE) {
   try {
     list(, , $bundle) = entity_extract_ids($entity_type, $entity);
   }
@@ -62,10 +66,13 @@ function tmgmt_field_get_source_data($entity_type, $entity, $field_translation =
   }
 
   $fields = array();
-  foreach (field_info_instances($entity_type, $bundle) as $field_name => $field_instance) {
-    $info = field_info_field($field_name);
-    if ((!$field_translation || $info['translatable']) && $data = module_invoke($info['module'], 'tmgmt_source_translation_structure', $field_name, $entity_type, $entity, $field_instance)) {
-      $fields[$field_name] = $data;
+  foreach (field_info_instances($entity_type, $bundle) as $field_name => $instance) {
+    $field = field_info_field($field_name);
+    $items = field_get_items($entity_type, $entity, $field_name, $langcode);
+    if ((!$only_translatable || $field['translatable']) && $items) {
+      if ($data = module_invoke($field['module'], 'tmgmt_source_translation_structure', $entity_type, $entity, $field, $instance, $langcode, $items)) {
+        $fields[$field_name] = $data;
+      }
     }
   }
   return $fields;
