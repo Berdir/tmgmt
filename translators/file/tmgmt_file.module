@@ -100,7 +100,7 @@ function tmgmt_file_format_plugin_labels() {
 /**
  * Returns the file format plugin controller.
  *
- * @return
+ * @return TMGMTFileFormatInterface
  *   Either a specific file format plugin controller instance or an array of
  *   available controllers.
  */
