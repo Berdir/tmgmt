@@ -37,9 +37,10 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
    * @return array
    */
   public function overviewRow($data) {
+    $label = $data['entity_label'] ? $data['entity_label'] : t('@type: @id', array('@type' => $data['entity_type'], '@id' => $data['entity_id']));
     $row = array(
       'id' => $data['entity_id'],
-      'title' => l($data['entity_label'], $data['entity_uri']),
+      'title' => l($label, $data['entity_uri']),
     );
 
     foreach (language_list() as $langcode => $language) {

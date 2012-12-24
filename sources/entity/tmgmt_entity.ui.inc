@@ -57,6 +57,7 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
 
       // Load basic entity data.
       $return_value[$entity_id] = array(
+        'entity_type' => $type,
         'entity_id' => $entity_id,
         // Run check_plain in case entity label is not sanitized.
         'entity_label' => check_plain(entity_label($type, $entity)),
