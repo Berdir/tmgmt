@@ -41,7 +41,7 @@ function tmgmt_entity_tmgmt_source_plugin_info() {
  * @see TMGMTEntitySourcePluginController::getData()
  */
 function tmgmt_entity_update_entity_translation($entity, $entity_type, $data, $language) {
-  tmgmt_field_populate_entity($entity, $language, $data);
+  tmgmt_field_populate_entity($entity_type, $entity, $language, $data);
   entity_save($entity_type, $entity);
 }
 
