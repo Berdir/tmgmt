@@ -36,6 +36,8 @@ function hook_tmgmt_source_translation_structure($entity_type, $entity, $field, 
 /**
  * Puts data on the entity of the field type owned by the module.
  *
+ * tmgmt_field_default_populate_field() can be used for the default behavior.
+ *
  * @param $entity_type
  *   The type of $entity.
  * @param $entity

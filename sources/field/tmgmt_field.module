@@ -40,6 +40,26 @@ function text_tmgmt_source_translation_structure($entity_type, $entity, $field, 
 }
 
 /**
+ * Implements hook_tmgmt_field_type_populate_entity().
+ *
+ * This hook is implemented on behalf of the core text module.
+ */
+function text_tmgmt_field_type_populate_entity($entity_type, $entity, $field, $instance, $langcode, $data) {
+  tmgmt_field_default_populate_field($entity_type, $entity, $field, $instance, $langcode, $data);
+  // Update the safe value and safe summary fields to make sure that modules
+  // relying on these get the correct data. Taken from text_field_load().
+  $field_name = $field['field_name'];
+  foreach ($entity->{$field_name}[$langcode] as &$item) {
+    if (empty($instance['settings']['text_processing']) || filter_format_allowcache($item['format'])) {
+      $items[$id][$delta]['safe_value'] = isset($item['value']) ? _text_sanitize($instance, $langcode, $item, 'value') : '';
+      if ($field['type'] == 'text_with_summary') {
+        $items[$id][$delta]['safe_summary'] = isset($item['summary']) ? _text_sanitize($instance, $langcode, $item, 'summary') : '';
+      }
+    }
+  }
+}
+
+/**
  * Helper function for retrieving all translatable field values from an entity.
  *
  * @param $entity_type
@@ -100,27 +120,47 @@ function tmgmt_field_populate_entity($entity_type, $entity, $langcode, $data) {
         $function($entity_type, $entity, $field, $instance, $langcode, $data);
       }
       else {
-        foreach (element_children($data[$field_name]) as $delta) {
-          $columns = array();
-          foreach (element_children($data[$field_name][$delta]) as $column) {
-            if (isset($data[$field_name][$delta][$column]['#translation']['#text'])) {
-              $columns[$column] = $data[$field_name][$delta][$column]['#translation']['#text'];
-            }
-            // For elements which are not translatable, keep using the original
-            // value.
-            elseif (isset($data[$field_name][$delta][$column]['#translate']) && $data[$field_name][$delta][$column]['#translate'] == FALSE) {
-              $columns[$column] = $data[$field_name][$delta][$column]['#text'];
-            }
-          }
-          $langcode = $field['translatable'] ? $langcode : LANGUAGE_NONE;
-          // Make sure the array_merge() gets an array as a first parameter.
-          if (!isset($entity->{$field_name}[$langcode][$delta])) {
-            $entity->{$field_name}[$langcode][$delta] = array();
-          }
-          $entity->{$field_name}[$langcode][$delta] = array_merge($entity->{$field_name}[$langcode][$delta], $columns);
-        }
+        tmgmt_field_default_populate_field($entity_type, $entity, $field, $instance, $langcode, $data);
       }
     }
   }
 }
 
+/**
+ * Default handling for populating a field with translatable data.
+ *
+ * @param $entity_type
+ *   The type of $entity.
+ * @param $entity
+ *   The entity being extracted.
+ * @param $field
+ *   The field structure.
+ * @param $instance
+ *   The field instance.
+ * @param $langcode
+ *   The language associated with $items.
+ * @param $data
+ *   Translated data array.
+ */
+function tmgmt_field_default_populate_field($entity_type, $entity, $field, $instance, $langcode, $data) {
+  $field_name = $field['field_name'];
+  foreach (element_children($data[$field_name]) as $delta) {
+    $columns = array();
+    foreach (element_children($data[$field_name][$delta]) as $column) {
+      if (isset($data[$field_name][$delta][$column]['#translation']['#text'])) {
+        $columns[$column] = $data[$field_name][$delta][$column]['#translation']['#text'];
+      }
+      // For elements which are not translatable, keep using the original
+      // value.
+      elseif (isset($data[$field_name][$delta][$column]['#translate']) && $data[$field_name][$delta][$column]['#translate'] == FALSE) {
+        $columns[$column] = $data[$field_name][$delta][$column]['#text'];
+      }
+    }
+    $langcode = $field['translatable'] ? $langcode : LANGUAGE_NONE;
+    // Make sure the array_merge() gets an array as a first parameter.
+    if (!isset($entity->{$field_name}[$langcode][$delta])) {
+      $entity->{$field_name}[$langcode][$delta] = array();
+    }
+    $entity->{$field_name}[$langcode][$delta] = array_merge($entity->{$field_name}[$langcode][$delta], $columns);
+  }
+}
