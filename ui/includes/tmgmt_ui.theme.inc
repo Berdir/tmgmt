@@ -48,7 +48,6 @@ function theme_tmgmt_ui_element($variables) {
  *   links to an active translation job.
  */
 function theme_tmgmt_ui_translation_language_status_single($variables) {
-
   switch ($variables['translation_status']) {
     case 'original':
       $label = t('Source language');
@@ -70,26 +69,6 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
       $icon_color = 'tmgmt-ui-icon-green';
   }
 
-  // Override the label and color in case of an active job.
-  if (isset($variables['job_item'])) {
-    $wrapper = entity_metadata_wrapper('tmgmt_job_item', $variables['job_item']);
-
-    $label = t('Active job item: @state', array('@state' => $wrapper->state->label()));
-
-    switch ($variables['job_item']->state) {
-      case TMGMT_JOB_ITEM_STATE_ACTIVE:
-        $variables['translation_status'] = 'active';
-        $icon_color = 'tmgmt-ui-icon-blue';
-        break;
-
-      case TMGMT_JOB_ITEM_STATE_REVIEW:
-        $variables['translation_status'] = 'translated';
-        $icon_color = 'tmgmt-ui-icon-yellow';
-        break;
-    }
-  }
-
-
   // Add classes to show the correct html icon.
   $classes = array();
   $classes[] = 'tmgmt-ui-icon';
@@ -104,11 +83,34 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
 
   // If we have an active job item, wrap it in a link.
   if (!empty($variables['job_item'])) {
+    $wrapper = entity_metadata_wrapper('tmgmt_job_item', $variables['job_item']);
+    $label = t('Active job item: @state', array('@state' => $wrapper->state->label()));
+
+    switch ($variables['job_item']->state) {
+      case TMGMT_JOB_ITEM_STATE_ACTIVE:
+        $icon_color = 'tmgmt-ui-icon-blue';
+        break;
+
+      case TMGMT_JOB_ITEM_STATE_REVIEW:
+        $icon_color = 'tmgmt-ui-icon-yellow';
+        break;
+    }
+
+    // Add classes to show the correct html icon.
+    $classes = array();
+    $classes[] = 'tmgmt-ui-icon';
+    // Icon size 10px square.
+    $classes[] = 'tmgmt-ui-icon-10';
+    $classes[] = $icon_color;
+
+    $job_status = sprintf('<div class="%s" title="%s"><span></span></div>', implode(' ', $classes), $label);
+
     $uri = $variables['job_item']->uri();
     // If the job item needs to be reviewed, point to the review form.
     // Otherwise just use the plain entity uri.
     $path = $variables['job_item']->isNeedsReview() ? $uri['path'] . '/review' : $uri['path'];
-    $status = l($status, $path, array(
+
+    $status .= l($job_status, $path, array(
       'query' => array('destination' => current_path()),
       'html' => TRUE,
       'attributes' => array('title' => $label),
