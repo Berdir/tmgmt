@@ -36,8 +36,21 @@ function hook_tmgmt_source_translation_structure($entity_type, $entity, $field, 
 /**
  * Puts data on the entity of the field type owned by the module.
  *
+ * @param $entity_type
+ *   The type of $entity.
+ * @param $entity
+ *   The entity being extracted.
+ * @param $field
+ *   The field structure.
+ * @param $instance
+ *   The field instance.
+ * @param $langcode
+ *   The language associated with $items.
+ * @param $data
+ *   Translated data array.
+ *
  * @see tmgmt_field_populate_entity()
  */
-function hook_tmgmt_field_type_populate_entity($field_name, $entity, $language, $data) {
+function hook_tmgmt_field_type_populate_entity($entity_type, $entity, $field, $instance, $langcode, $data) {
 
 }

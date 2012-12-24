@@ -43,7 +43,7 @@ function tmgmt_node_update_node_translation($node, $data, $language) {
     $node->title = $data['node_title']['#translation']['#text'];
     unset($data['node_title']);
   }
-  tmgmt_field_populate_entity($node, $language, $data);
+  tmgmt_field_populate_entity('node', $node, $language, $data);
   // Reset translation field, which determines outdated status.
   $node->translation['status'] = 0;
   node_save($node);
