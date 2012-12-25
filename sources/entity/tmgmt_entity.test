@@ -2,9 +2,6 @@
 
 /**
  * Basic Entity Source tests.
- *
- * @todo: Write tests for these cases:
- *  - any generic entity (defined by the tmgmt_entity_test module).
  */
 class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
 
@@ -26,7 +23,7 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_entity', 'tmgmt_entity_test', 'taxonomy', 'entity_translation'));
+    parent::setUp(array('tmgmt_entity', 'taxonomy', 'entity_translation'));
 
     // Admin user to perform settings on setup.
     $this->loginAsAdmin(array('administer entity translation'));
