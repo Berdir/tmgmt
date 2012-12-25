@@ -106,11 +106,7 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
     $job_status = sprintf('<div class="%s" title="%s"><span></span></div>', implode(' ', $classes), $label);
 
     $uri = $variables['job_item']->uri();
-    // If the job item needs to be reviewed, point to the review form.
-    // Otherwise just use the plain entity uri.
-    $path = $variables['job_item']->isNeedsReview() ? $uri['path'] . '/review' : $uri['path'];
-
-    $status .= l($job_status, $path, array(
+    $status .= l($job_status, $uri['path'], array(
       'query' => array('destination' => current_path()),
       'html' => TRUE,
       'attributes' => array('title' => $label),

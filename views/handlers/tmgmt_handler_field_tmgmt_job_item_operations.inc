@@ -15,11 +15,19 @@ class tmgmt_handler_field_tmgmt_job_item_operations extends views_handler_field_
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('inline'));
     $uri = $item->uri();
-    if ($item->isNeedsReview() && entity_access('accept', 'tmgmt_job_item', $item)) {
+    if ($item->getCountTranslated() > 0 && entity_access('accept', 'tmgmt_job_item', $item)) {
       $element['#links']['review'] = array(
-        'href' => 'admin/config/regional/tmgmt/items/' . $item->tjiid . '/review',
+        'href' => $uri['path'],
         'query' => array('destination' => current_path()),
         'title' => t('review'),
+      );
+    }
+    // Do not display view on unprocessed jobs.
+    elseif (!$item->getJob()->isUnprocessed()) {
+      $element['#links']['view'] = array(
+        'href' => $uri['path'],
+        'query' => array('destination' => current_path()),
+        'title' => t('view'),
       );
     }
     if (user_access('administer tmgmt') && !$item->isAccepted()) {

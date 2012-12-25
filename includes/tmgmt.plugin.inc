@@ -145,7 +145,10 @@ abstract class TMGMTDefaultSourcePluginController extends TMGMTPluginBase implem
    * Implements TMGMTSourcePluginControllerInterface::getUri().
    */
   public function getUri(TMGMTJobItem $job_item) {
-    return FALSE;
+    return array(
+      'path' => '',
+      'options' => array(),
+    );
   }
 
   /**

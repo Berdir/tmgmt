@@ -75,8 +75,6 @@ function tmgmt_ui_job_item_view(TMGMTJobItem $item) {
  */
 function tmgmt_ui_job_item_review(TMGMTJobItem $item) {
   if ($controller = $item->getSourceController()) {
-    // Update the breadcrumb to include the job path.
-    _tmgmt_ui_breadcrumb($item);
     $plugin = $controller->pluginType();
     return drupal_get_form('tmgmt_ui_' . $plugin . '_translation_review_form', $item);
   }

@@ -269,24 +269,13 @@ class TMGMTJobItemUIController extends EntityDefaultUIController {
       'type' => MENU_DEFAULT_LOCAL_TASK,
       'weight' => -10,
     );
-    $items[$this->path . '/' . $wildcard . '/review'] = array(
-      'title' => 'Review',
-      'page callback' => 'tmgmt_ui_job_item_review',
-      'page arguments' => array($id_count),
-      'load arguments' => array($this->entityType),
-      'access callback' => 'tmgmt_job_item_review_access',
-      'access arguments' => array($id_count),
-      'type' => MENU_LOCAL_TASK,
-      'file' => $this->entityInfo['admin ui']['file'],
-      'file path' => $this->entityInfo['admin ui']['file path'],
-    );
-    $items[$this->path . '/' . $wildcard . '/review/%/reject'] = array(
+    $items[$this->path . '/' . $wildcard . '/reject/%'] = array(
       'title' => 'Reject',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('tmgmt_ui_translation_review_form_reject_confirm', $id_count, $id_count + 2),
       'load arguments' => array($this->entityType),
-      'access callback' => 'tmgmt_job_item_review_access',
-      'access arguments' => array($id_count),
+      'access callback' => 'entity_access',
+      'access arguments' => array('accept', $this->entityType, $id_count),
       'type' => MENU_VISIBLE_IN_BREADCRUMB,
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],

@@ -48,11 +48,8 @@ function tmgmt_entity_ui_translate_form($form, &$form_state, $build) {
     elseif (isset($items[$langcode])) {
       $item = $items[$langcode];
       $uri = $item->uri();
-      // If the job item needs to be reviewed, point to the review form.
-      // Otherwise just use the plain entity uri.
-      $path = $item->isNeedsReview() ? $uri['path'] . '/review' : $uri['path'];
       $wrapper = entity_metadata_wrapper('tmgmt_job_item', $item);
-      $additional = l($wrapper->state->label(), $path);
+      $additional = l($wrapper->state->label(), $uri['path']);
       // Disable the checkbox for this row since there is already a translation
       // in progress that has not yet been finished. This way we make sure that
       // we don't stack multiple active translations for the same item on top

@@ -346,30 +346,9 @@ class TMGMTJobItem extends Entity {
    * Overrides Entity::buildContent().
    */
   public function buildContent($view_mode = 'full', $langcode = NULL) {
-    $wrapper = entity_metadata_wrapper('tmgmt_job_item', $this);
-    $content['changed'] = array(
-      '#type' => 'item',
-      '#title' => t('Last change'),
-      '#markup' => format_date($wrapper->changed->value()),
-    );
-    $content['state'] = array(
-      '#type' => 'item',
-      '#title' => t('State'),
-      '#markup' => $wrapper->state->label(),
-    );
-    $job = $this->getJob();
-    $uri = $job->uri();
-    $content['job'] = array(
-      '#type' => 'item',
-      '#title' => t('Job'),
-      '#markup' => l($job->label(), $uri['path']),
-    );
-    if (module_exists('views') && $view = views_get_view('tmgmt_ui_job_item_messages')) {
-      $content['messages'] = array(
-        '#type' => 'item',
-        '#title' => $view->get_title(),
-        '#markup' => $view->preview('block', array($this->tjiid)),
-      );
+    $content = array();
+    if (module_exists('tmgmt_ui')) {
+      $content = tmgmt_ui_job_item_review($this);
     }
     return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
   }
@@ -808,7 +787,7 @@ class TMGMTJobItem extends Entity {
           $variables = array(
             '!source' => l($this->getSourceLabel(), $uri['path']),
             '@language' => entity_metadata_wrapper('tmgmt_job', $this->getJob())->target_language->label(),
-            '!review_url' => url($uri['path'] . '/review', array('query' => array('destination' => current_path()))),
+            '!review_url' => url($uri['path'], array('query' => array('destination' => current_path()))),
           );
           $this->needsReview('The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.', $variables);
         }
