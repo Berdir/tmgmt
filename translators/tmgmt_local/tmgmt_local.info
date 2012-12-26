@@ -1,0 +1,25 @@
+name = Local Translator
+description = Allows local users to provide translation services.
+package = Translation Management
+core = 7.x
+
+dependencies[] = tmgmt
+
+files[] = includes/tmgmt_local.controller.inc
+files[] = includes/tmgmt_local.entity.inc
+files[] = includes/tmgmt_local.info.inc
+files[] = includes/tmgmt_local.plugin.inc
+files[] = includes/tmgmt_local_ui.controller.inc
+
+; Views integration and handlers
+files[] = views/tmgmt_local.views.inc
+files[] = views/handlers/tmgmt_local_task_handler_field_view.inc
+files[] = views/handlers/tmgmt_local_task_handler_field_assign.inc
+files[] = views/handlers/tmgmt_local_task_handler_field_assign_to_me.inc
+files[] = views/handlers/tmgmt_local_task_handler_field_job_item_count.inc
+files[] = views/handlers/tmgmt_local_task_handler_field_loop_count.inc
+files[] = views/handlers/tmgmt_local_task_handler_field_operations.inc
+files[] = views/handlers/tmgmt_local_task_handler_field_progress.inc
+files[] = views/handlers/tmgmt_local_task_handler_field_translate.inc
+files[] = views/handlers/tmgmt_local_task_handler_field_translate_task_item.inc
+files[] = views/handlers/tmgmt_local_task_handler_field_wordcount.inc

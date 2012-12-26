@@ -1,0 +1,437 @@
+<?php
+
+/**
+ * Implements hook_enable().
+ */
+function tmgmt_skills_enable() {
+  // If our field type is not found rebuild the cache.
+  if (!field_info_field_types('tmgmt_language_combination')) {
+    field_cache_clear();
+  }
+
+  // Create the language combination field if it doesn't exist yet.
+  if (!field_info_field('tmgmt_language_combination')) {
+    $field = array(
+      'type' => 'tmgmt_language_combination',
+      'field_name' => 'tmgmt_translation_skills',
+      'translatable' => FALSE,
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'locked' => FALSE,
+    );
+
+    field_create_field($field);
+  }
+
+  // Attach the language skills field collection to the user entity.
+  if (!field_info_instance('user', 'tmgmt_translation_skills', 'user')) {
+    $instance = array(
+      'field_name' => 'tmgmt_translation_skills',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => t('Translation skills'),
+    );
+
+    field_create_instance($instance);
+  }
+}
+
+/**
+ * Implements hook_field_info().
+ */
+function tmgmt_skills_field_info() {
+  $info['tmgmt_language_combination'] = array(
+    'label' => t('Language combination'),
+    'description' => t('Allows the definition of language combinations (e.g. "From english to german").'),
+    'default_widget' => 'tmgmt_language_combination_default',
+    'default_formatter' => 'tmgmt_language_combination_default',
+    'settings' => array(
+      'user_register_form' => 1,
+    ),
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_field_schema().
+ */
+function tmgmt_skills_field_schema($field) {
+  $schema = array(
+    'columns' => array(
+      'language_from' => array(
+        'description' => 'The langcode of the language from which the user is able to translate.',
+        'type' => 'varchar',
+        'length' => 10,
+      ),
+      'language_to' => array(
+        'description' => 'The langcode of the language to which the user is able to translate.',
+        'type' => 'varchar',
+        'length' => 10,
+      ),
+    ),
+    'indexes' => array(
+      'language_from' => array('language_from'),
+      'language_to' => array('language_to'),
+      'language_combination' => array('language_from', 'language_to'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function tmgmt_skills_field_widget_info() {
+  $info['tmgmt_language_combination_default'] = array(
+    'label' => t('Select list'),
+    'description' => t('Default widget for allowing users to define translation capabilities.'),
+    'field types' => array('tmgmt_language_combination'),
+    'behaviors' => array(
+      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+      'default value' => FIELD_BEHAVIOR_DEFAULT,
+    ),
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function tmgmt_skills_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  if (isset($form_state['list_all_languages'])) {
+    $languages_options = tmgmt_local_languages_predefined_list();
+  }
+  else {
+    $languages_options = array();
+    foreach (language_list() as $code => $language) {
+      $languages_options[$code] = $language->name;
+    }
+  }
+
+  $options = array('_none' => t('- None -')) + $languages_options;
+
+  $element['language_from'] = array(
+    '#type' => 'select',
+    '#title' => t('From'),
+    '#options' => $options,
+    '#default_value' => isset($items[$delta]) ? $items[$delta]['language_from'] : '',
+    '#attributes' => array('class' => array('from-language')),
+  );
+
+  $element['language_to'] = array(
+    '#type' => 'select',
+    '#title' => t('To'),
+    '#options' => $options,
+    '#default_value' => isset($items[$delta]) ? $items[$delta]['language_to'] : '',
+    '#attributes' => array('class' => array('to-language')),
+  );
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_validate().
+ */
+function tmgmt_skills_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  $existing = array();
+
+  foreach ($items as $delta => $item) {
+    $key = $item['language_from'] . ':' . $item['language_to'];
+
+    if (!tmgmt_skills_field_is_empty($item, 'tmgmt_language_combination')) {
+      if ($item['language_from'] == $item['language_to']) {
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+          'error' => 'tmgmt_language_combination_equal',
+          'message' => t("%name: The 'from' and 'to' language fields can't have the same value.", array('%name' => $instance['label'])),
+        );
+      }
+
+      if (isset($existing[$key])) {
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+          'error' => 'tmgmt_language_combination_equal',
+          'message' => t('%name: The language combination has to be unique.', array('%name' => $instance['label'])),
+        );
+      }
+    }
+
+    $existing[$key] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_field_widget_error().
+ */
+function tmgmt_skills_field_widget_error($element, $error, $form, &$form_state) {
+  form_error($element, $error['message']);
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function tmgmt_skills_field_is_empty($item, $field) {
+  if (empty($item['language_from']) || empty($item['language_to']) || $item['language_from'] == '_none' || $item['language_to'] == '_none') {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function tmgmt_skills_field_formatter_info() {
+  $info['tmgmt_language_combination_default'] = array(
+    'label' => t('Default'),
+    'description' => t('Default formatter for displaying the translation capabilities of a user.'),
+    'field types' => array('tmgmt_language_combination'),
+  );
+
+  $info['tmgmt_language_combination_table'] = array(
+    'label' => t('Table'),
+    'description' => t('Formatter for displaying the translation capabilities of a user in a table.'),
+    'field types' => array('tmgmt_language_combination'),
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function tmgmt_skills_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  switch ($display['type']) {
+    case 'tmgmt_language_combination_default':
+      $element['#theme'] = 'item_list';
+      $element['#items'] = array();
+
+      foreach ($items as $delta => $item) {
+        $from = _tmgmt_language_label($item['language_from']);
+        $to = _tmgmt_language_label($item['language_to']);
+        $element['#items'][$delta]['data'] = t('From @from to @to', array('@from' => $from, '@to' => $to));
+        $element['#items'][$delta]['class'][] = drupal_html_class($from . '-' . $to) . '">';
+      }
+      break;
+
+    case 'tmgmt_language_combination_table':
+      $rows = array();
+
+      foreach ($items as $item) {
+        $to = _tmgmt_language_label($item['language_to']);
+        $from = _tmgmt_language_label($item['language_from']);
+        $row[] = array(
+          'data' => $from,
+          'class' => array('from-language', drupal_html_class('language-' . $from)),
+        );
+
+        $row[] = array(
+          'data' => $to,
+          'class' => array('to-language', drupal_html_class('language-' . $to)),
+        );
+
+        $rows[] = array(
+          'data' => $row,
+          'class' => array(drupal_html_class($from . '-' . $to)),
+        );
+      }
+
+      $element = array(
+        '#theme' => 'table',
+        '#header' => array(t('From'), t('To')),
+        '#rows' => $rows,
+      );
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Validation callback for the user autocompletion form element.
+ */
+function tmgmt_skills_element_validate_user(&$element, $form, &$form_state) {
+  if ((empty($element['#required']) && empty($element['#value'])) && !user_load_by_name($element['#value'])) {
+    form_error($element, t('The selected user does not exist.'));
+  }
+}
+
+/**
+ * Implements hook_field_access().
+ */
+function tmgmt_skills_field_access($op, $field, $entity_type, $entity = NULL, $account = NULL) {
+  if ($field['field_name'] == 'tmgmt_translation_skills' && $entity_type == 'user') {
+    $account = !empty($account) ? $account : $GLOBALS['user'];
+
+    // If the field is just being viewed, grant access.
+    if ($op == 'view') {
+      return TRUE;
+    }
+
+    // User can provide transl. services and is dealing with own account.
+    if (!empty($entity) && $entity->uid == $account->uid) {
+      return user_access('provide translation services', $entity);
+    }
+
+    // Administrators are allowed to deal with others only.
+    if (user_access('administer translation server', $account)) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+}
+
+/**
+ * Implements hook_field_update().
+ */
+function tmgmt_skills_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  if ($entity_type != 'user' || !in_array(variable_get('tmgmt_local_ts_rid'), array_keys($entity->roles))) {
+    return;
+  }
+
+  tmgmt_local_clear_languages_cache();
+
+  $languages = language_list();
+
+  // In case the skill languages is not know to the system, install them.
+  foreach ($items as $item) {
+    if (!isset($languages[$item['language_to']])) {
+      locale_add_language($item['language_to']);
+    }
+    if (!isset($languages[$item['language_from']])) {
+      locale_add_language($item['language_from']);
+    }
+  }
+
+  // Sync languages if set so.
+  if (module_exists('tmgmt_server') && variable_get('tmgmt_server_sync_lc_strategy') == 'sync_all') {
+    foreach ($items as $item) {
+      tmgmt_server_language_capabilities_sync($item['language_from'], $item['language_to'], 'create');
+    }
+  }
+}
+
+/**
+ * Implements hook_field_delete().
+ */
+function tmgmt_skills_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  $del_lcs = &drupal_static('tmgmt_delete_language_capabilities');
+
+  if ($entity_type != 'user' || !in_array(variable_get('tmgmt_local_ts_rid'), array_keys($entity->roles))) {
+    return;
+  }
+
+  tmgmt_local_clear_languages_cache();
+
+  if (module_exists('tmgmt_local') && variable_get('tmgmt_server_sync_lc_strategy') == 'sync_all') {
+    foreach ($items as $item) {
+      $del_lcs[$item['language_from']] = $item['language_to'];
+    }
+  }
+}
+
+/**
+ * Implements hook_field_attach_delete().
+ */
+function tmgmt_skills_field_attach_delete($entity_type, $entity) {
+  $del_lcs = &drupal_static('tmgmt_delete_language_capabilities');
+
+  if ($entity_type != 'user' || !in_array(variable_get('tmgmt_local_ts_rid'), array_keys($entity->roles))) {
+    return;
+  }
+
+  foreach ($del_lcs as $language_from => $language_to) {
+    tmgmt_server_language_capabilities_sync($language_from, $language_to, 'delete');
+  }
+}
+
+/**
+ * Implements hook_tmgmt_local_translation_capabilities().
+ */
+function tmgmt_skills_tmgmt_local_translation_capabilities($language, $account = NULL) {
+  // Only considers users with the 'provide translation services' permission.
+  $roles = user_roles(TRUE, 'provide translation services');
+
+  // Check for all the available languages. We are directly querying the
+  // field values here instead of using an EntityFieldQuery but that is
+  // okay in this case and there is no other way.
+  $query = db_select('field_data_tmgmt_translation_skills', 'ts')
+    ->fields('ts', array('tmgmt_translation_skills_language_from', 'tmgmt_translation_skills_language_to'))
+    ->condition('ts.deleted', 0)
+    ->condition('ts.tmgmt_translation_skills_language_from', $language)
+    ->condition('ts.entity_type', 'user')
+    ->distinct(TRUE);
+
+  // Only consider active users.
+  $query->innerJoin('users', 'u', 'u.uid = ts.entity_id AND u.status = 1');
+
+  if (isset($account)) {
+    $query->condition('u.uid', $account->uid);
+  }
+
+  // Only consider users that have the 'provide translation services'
+  // permission or the admin user.
+  $query->leftJoin('users_roles', 'ur', "ur.uid = u.uid AND ur.rid IN (:roles) OR u.uid = 1", array(':roles' => implode(', ', array_keys($roles))));
+
+  // Add a tag so other modules can alter this query at will.
+  $query->addTag('tmgmt_translation_capabilities');
+
+  // Only return languages that are supported by at least one user.
+  $results = $query->execute();
+
+  $capabilities = array();
+  foreach ($results as $item) {
+    $capabilities[] = $item->tmgmt_translation_skills_language_to;
+  }
+
+  return $capabilities;
+}
+
+/**
+ * Implements hook_tmgmt_server_language_pairs().
+ */
+function tmgmt_skills_tmgmt_server_language_pairs() {
+  $roles = user_roles(TRUE, 'provide translation services');
+
+  $query = db_select('field_data_tmgmt_translation_skills', 'ts');
+
+  $query->join('users', 'u', 'u.uid = ts.entity_id AND u.status = 1');
+  $query->join('users_roles', 'ur', 'ur.uid = u.uid AND ur.rid');
+
+  $query->addField('ts', 'tmgmt_translation_skills_language_from', 'source_language');
+  $query->addField('ts', 'tmgmt_translation_skills_language_to', 'target_language');
+
+  $query->condition('ts.deleted', 0);
+  $query->condition('ts.entity_type', 'user');
+  $or_conditions = db_or()->condition('ur.rid', array_keys($roles))->condition('u.uid', 1);
+  $query->condition($or_conditions);
+
+  $capabilities = array();
+  foreach ($query->execute()->fetchAll() as $item) {
+    $capabilities[$item->source_language][$item->target_language] = $item->target_language;
+  }
+
+  return $capabilities;
+}
+
+
+/**
+ * Returns the label of a language.
+ * @todo Remove this once the core language label function is fixed.
+ *
+ * @param $language
+ *   A language in ISO format.
+ * @return string
+ *   The label of the language or an empty string if the language or its label
+ *   are not defined.
+ */
+function _tmgmt_language_label($language) {
+  $languages = tmgmt_local_languages_predefined_list();
+  if (!empty($languages[$language])) {
+    return $languages[$language];
+  }
+  return '';
+}
