@@ -89,6 +89,7 @@ class TMGMTJobViewsController extends EntityDefaultViewsController {
       ),
     );
     $data['tmgmt_job']['label']['field']['handler'] = 'tmgmt_handler_field_tmgmt_entity_label';
+    $data['tmgmt_job']['translator']['field']['handler'] = 'tmgmt_handler_field_tmgmt_translator';
     $data['tmgmt_job']['job_item'] = array(
       'title' => t('Job items'),
       'help' => t('Get the job items of the job'),
