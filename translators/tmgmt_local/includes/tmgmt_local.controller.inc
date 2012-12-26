@@ -8,7 +8,7 @@
 /**
  * Controller class for the local task entity.
  *
- * @ingroup tmgmt_job
+ * @ingroup tmgmt_local_task
  */
 class TMGMTLocalTaskController extends EntityAPIController {
 
