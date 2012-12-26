@@ -425,7 +425,7 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
     $form['info']['translator'] = array(
       '#type' => 'item',
       '#title' => t('Translator'),
-      '#markup' => check_plain($translators[$item->getJob()->translator]),
+      '#markup' => isset($translators[$item->getJob()->translator]) ? check_plain($translators[$item->getJob()->translator]) : t('Missing translator'),
       '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
       '#suffix' => '</div>',
     );
@@ -575,8 +575,10 @@ function tmgmt_ui_translation_review_form($form, &$form_state, TMGMTJobItem $ite
   $source = tmgmt_source_ui_controller($item->plugin);
   $form = $source->reviewForm($form, $form_state, $item);
   // Give the translator ui controller a chance to affect the review form.
-  $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-  $translator->reviewForm($form, $form_state, $item);
+  if ($item->getTranslator()) {
+    $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
+    $translator->reviewForm($form, $form_state, $item);
+  }
   return $form;
 }
 

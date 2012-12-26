@@ -335,7 +335,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     $form['info']['translator'] = array(
       '#type' => 'item',
       '#title' => t('Translator'),
-      '#markup' => check_plain($translators[$job->translator]),
+      '#markup' => isset($translators[$job->translator]) ? check_plain($translators[$job->translator]) : t('Missing translator'),
       '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
       '#suffix' => '</div>',
     );
@@ -571,6 +571,10 @@ function tmgmt_ui_plugin_settings_form(&$form_state, TMGMTTranslator $translator
  */
 function tmgmt_ui_checkout_info(TMGMTJob $job) {
   $translator = $job->getTranslator();
+  // The translator might have been disabled or removed.
+  if (!$translator) {
+    return array();
+  }
   $controller = tmgmt_translator_ui_controller($translator->plugin);
   return $controller->checkoutInfo($job);
 }
