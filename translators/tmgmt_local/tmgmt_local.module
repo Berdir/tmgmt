@@ -450,8 +450,6 @@ function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
 function tmgmt_local_task_statistics_load(array $tltids) {
   $statistics = &drupal_static(__FUNCTION__, array());
 
-  // @todo - we should use local_task-job_item connector table and then sum them.
-
   // First try to get the values from the cache.
   $return = array();
   $tltids_to_load = array();

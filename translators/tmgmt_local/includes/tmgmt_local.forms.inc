@@ -379,8 +379,7 @@ function tmgmt_local_translation_assign_form_submit($form, &$form_state) {
 
   drupal_set_message(t('Assigned @how_many to translator @translator_name.', array('@how_many' => $how_many, '@translator_name' => $translator->name)));
 
-  // @todo - smarter go back - use destination parameter somehow.
-  drupal_goto('manage-translate');
+  $form_state['redirect'] = 'manage-translate';
 }
 
 /**
@@ -438,6 +437,5 @@ function tmgmt_local_translation_reassign_form_submit($form, &$form_state) {
 
   drupal_set_message(t('Reassigned @how_many to translator @translator_name.', array('@how_many' => $how_many, '@translator_name' => $translator->name)));
 
-  // @todo - smarter go back - use destination parameter somehow.
-  drupal_goto('manage-translate');
+  $form_state['redirect'] = 'manage-translate';
 }

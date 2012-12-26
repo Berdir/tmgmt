@@ -31,8 +31,6 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
       $local_task->status = TMGMT_LOCAL_TASK_STATUS_PENDING;
     }
     $local_task->save();
-
-    // @todo - also connect this task with all job items from this job.
   }
 
   /**

@@ -6,14 +6,6 @@
  */
 
 /**
- * Implements hook_views_data().
- */
-//function tmgmt_local_task_views_data() {
-//  $data = array();
-//  return $data;
-//}
-
-/**
  * Views controller class for the local task entity.
  */
 class TMGMTLocalTaskViewsController extends EntityDefaultViewsController {
@@ -88,17 +80,6 @@ class TMGMTLocalTaskViewsController extends EntityDefaultViewsController {
         'handler' => 'tmgmt_local_task_handler_field_view',
       ),
     );
-    // @todo - we should use task<->job_item mapper table.
-//    $data['tmgmt_local_task']['job_item'] = array(
-//      'title' => t('Job items'),
-//      'help' => t('Get the job items of the task'),
-//      'relationship' => array(
-//        'base' => 'tmgmt_job_item',
-//        'base field' => 'tjid',
-//        'real field' => 'tjid',
-//        'label' => t('Job items'),
-//      ),
-//    );
     $data['tmgmt_job']['task'] = array(
       'title' => t('Translation task'),
       'help' => t('Get the translation task of the job'),
@@ -116,8 +97,6 @@ class TMGMTLocalTaskViewsController extends EntityDefaultViewsController {
       'field' => array(
         'handler' => 'tmgmt_local_task_handler_field_translate_task_item',
       ),
-      // @todo - should we use here relation to new mapper table that is still
-      // not implemented.
     );
 
     return $data;
