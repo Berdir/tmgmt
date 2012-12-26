@@ -12,11 +12,6 @@
  */
 
 /**
- * Local translation role.
- */
-define('TMGMT_LOCAL_TRANSLATION_ROLE', 'local translator');
-
-/**
  * Modules should return this value from hook_tmgmt_local_translation_access()
  * to allow access to a node.
  */
@@ -159,30 +154,9 @@ function tmgmt_local_menu() {
     'description' => 'Translate task item.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tmgmt_local_translation_form', 1, 3),
-    'access callback' => 'tmgmt_local_translation_item_access',
-    'access arguments' => array(1, 3),
+    'access callback' => 'tmgmt_local_translation_access',
+    'access arguments' => array(1),
     'file' => 'includes/tmgmt_local.forms.inc',
-  );
-
-  return $items;
-}
-
-/**
- * Implements hook_menu().
- */
-function module_menu() {
-  $items = array();
-
-  $items['module'] = array(
-    'title' => 'module',
-    'description' => 'module',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('module_settings_form'),
-    'access callback' => 'user_access',
-    'access arguments' => array('administer module'),
-    'weight' => 0,
-    'menu_name' => 'Navigation',
-    'type' => MENU_NORMAL_ITEM
   );
 
   return $items;
@@ -307,85 +281,6 @@ function tmgmt_local_translation_access(TMGMTLocalTask $task, $account = NULL) {
 }
 
 /**
- * Implements hook_form_ID_alter().
- */
-function tmgmt_local_form_user_register_form_alter(&$form, &$form_state) {
-  if (!empty($form['administer_users']['#value']) && $form['#user']->uid == 0) {
-    _tmgmt_local_user_roles_form_alter($form);
-  }
-}
-
-/**
- * Implements hook_form_ID_alter().
- */
-function tmgmt_local_form_user_profile_form_alter(&$form, &$form_state) {
-  // If we have server module alter the roles form part.
-  if (module_exists('tmgmt_server')) {
-    _tmgmt_local_user_roles_form_alter($form);
-  }
-}
-
-/**
- * We alter the roles checkboxes and add JS to control skills form part.
- *
- * @param array $form
- *   User form to be altered.
- */
-function _tmgmt_local_user_roles_form_alter(&$form) {
-  $tc_role = user_role_load(variable_get('tmgmt_server_tc_rid'));
-  $ts_role = user_role_load(variable_get('tmgmt_local_ts_rid'));
-
-  // Check if we have both roles. If not so, return as the logic would not work.
-  if (empty($tc_role) || empty($ts_role)) {
-    return;
-  }
-
-  $form['#attached']['js'][] = array(
-    'data' => drupal_get_path('module', 'tmgmt_local') . '/js/tmgmt_local.js',
-    'type' => 'file',
-  );
-  $form['#attached']['js'][] = array(
-    'data' => array('tmgmt_local' => array(
-      'tmgmt_server_tc_rid' => variable_get('tmgmt_server_tc_rid'),
-      'tmgmt_local_ts_rid' => variable_get('tmgmt_local_ts_rid'),
-    )),
-    'type' => 'setting',
-  );
-
-  $form['account']['roles']['#description'] =
-      t('Note that roles "%ts_role_name" and "%tc_role_name" are mutually exclusive and cannot be added to the same user.', array(
-        '%ts_role_name' => $ts_role->name,
-        '%tc_role_name' => $tc_role->name,
-      ));
-}
-
-/**
- * Determine whether the current user is allowed to translate a given
- * translation task job item.
- *
- * @param $task
- *   The translation task.
- * @param $item
- *   The translation job item to be translated.
- * @param $account
- *   (Optional) A user object representing the user that is trying to obtain
- *   translation access. Determines access for a user other than the current
- *   user.
- * @return bool
- *   TRUE if the user is allowed to translate the given translation job item,
- *   FALSE otherwise.
- */
-function tmgmt_local_translation_item_access(TMGMTLocalTask $task, TMGMTJobItem $item, $account = NULL) {
-  // @todo - Add this back when we are sure based on which conditions the access
-  // should be determined.
-//  if (!$item->isActive() || !tmgmt_local_translation_access($item->getJob(), $account)) {
-//    return FALSE;
-//  }
-
-  return TRUE;
-}
-
-/**
  * Determines the translation capabilities of a specific user or all users.
  *
  * @param $language
@@ -415,11 +310,7 @@ function tmgmt_local_translation_capabilities($language, $account = NULL) {
  * the translation capabilities of an local have changed.
  */
 function tmgmt_local_clear_languages_cache() {
-  foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
-    if ($translator->plugin == 'local') {
-      cache_clear_all('languages::' . $translator->plugin, 'cache_tmgmt');
-    }
-  }
+  cache_clear_all('languages::local', 'cache_tmgmt');
 }
 
 /**
@@ -505,24 +396,7 @@ function tmgmt_local_task_create(array $values = array()) {
 }
 
 /**
- * Saves a local task entity to the database.
- *
- * @param $task
- *   The local task entity object.
- */
-function tmgmt_local_task_save(TMGMTLocalTask $task) {
-  return entity_save('tmgmt_local_task', $task);
-}
-
-/**
- * Deletes a local task entity.
- */
-function tmgmt_local_task_delete(TMGMTLocalTask $task) {
-  entity_delete('tmgmt_local_task', $task->tltid);
-}
-
-/**
- * Delete multiple local tasks entities.
+ * Deletes multiple local tasks entities.
  *
  * @param $tltids
  *   An array of local tasks IDs.
@@ -654,25 +528,28 @@ function tmgmt_local_task_statuses() {
 /**
  * Return users that belongs to local translation role.
  *
+ * @todo: This does not scale when having many translators.
+ *
  * @return array
  *   Array of uid => name translators or empty array if there are no translator
  *   users.
  */
 function tmgmt_local_translators() {
   // Get all local user translators.
-  $role = user_role_load_by_name(TMGMT_LOCAL_TRANSLATION_ROLE);
+  $roles = user_roles(TRUE, 'provide translation services');
   $query = db_select('users_roles', 'ur');
   $query->join('users', 'u', 'u.uid = ur.uid');
-  $users = $query->fields('u', array('uid', 'name'))
-    ->condition('ur.rid', $role->rid)
+  $uids = $query->fields('u', array('uid'))
+    ->condition('ur.rid', array_keys($roles))
     ->condition('u.status', 1)
+    ->distinct()
     ->execute()
-    ->fetchAll();
+    ->fetchCol();
 
   $translators = array();
-  if (!empty($users)) {
-    foreach ($users as $user) {
-      $translators[$user->uid] = check_plain($user->name);
+  if (!empty($uids)) {
+    foreach (user_load_multiple($uids) as $user) {
+      $translators[$user->uid] = entity_label('user', $user);
     }
   }
 

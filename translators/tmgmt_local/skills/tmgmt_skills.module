@@ -1,41 +1,6 @@
 <?php
 
 /**
- * Implements hook_enable().
- */
-function tmgmt_skills_enable() {
-  // If our field type is not found rebuild the cache.
-  if (!field_info_field_types('tmgmt_language_combination')) {
-    field_cache_clear();
-  }
-
-  // Create the language combination field if it doesn't exist yet.
-  if (!field_info_field('tmgmt_language_combination')) {
-    $field = array(
-      'type' => 'tmgmt_language_combination',
-      'field_name' => 'tmgmt_translation_skills',
-      'translatable' => FALSE,
-      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-      'locked' => FALSE,
-    );
-
-    field_create_field($field);
-  }
-
-  // Attach the language skills field collection to the user entity.
-  if (!field_info_instance('user', 'tmgmt_translation_skills', 'user')) {
-    $instance = array(
-      'field_name' => 'tmgmt_translation_skills',
-      'entity_type' => 'user',
-      'bundle' => 'user',
-      'label' => t('Translation skills'),
-    );
-
-    field_create_instance($instance);
-  }
-}
-
-/**
  * Implements hook_field_info().
  */
 function tmgmt_skills_field_info() {
@@ -288,7 +253,7 @@ function tmgmt_skills_field_access($op, $field, $entity_type, $entity = NULL, $a
  * Implements hook_field_update().
  */
 function tmgmt_skills_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  if ($entity_type != 'user' || !in_array(variable_get('tmgmt_local_ts_rid'), array_keys($entity->roles))) {
+  if ($entity_type != 'user' || array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
     return;
   }
 
@@ -305,47 +270,26 @@ function tmgmt_skills_field_update($entity_type, $entity, $field, $instance, $la
       locale_add_language($item['language_from']);
     }
   }
-
-  // Sync languages if set so.
-  if (module_exists('tmgmt_server') && variable_get('tmgmt_server_sync_lc_strategy') == 'sync_all') {
-    foreach ($items as $item) {
-      tmgmt_server_language_capabilities_sync($item['language_from'], $item['language_to'], 'create');
-    }
-  }
 }
 
 /**
  * Implements hook_field_delete().
  */
 function tmgmt_skills_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  $del_lcs = &drupal_static('tmgmt_delete_language_capabilities');
-
-  if ($entity_type != 'user' || !in_array(variable_get('tmgmt_local_ts_rid'), array_keys($entity->roles))) {
+  if ($entity_type != 'user' || array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
     return;
   }
-
   tmgmt_local_clear_languages_cache();
-
-  if (module_exists('tmgmt_local') && variable_get('tmgmt_server_sync_lc_strategy') == 'sync_all') {
-    foreach ($items as $item) {
-      $del_lcs[$item['language_from']] = $item['language_to'];
-    }
-  }
 }
 
 /**
  * Implements hook_field_attach_delete().
  */
 function tmgmt_skills_field_attach_delete($entity_type, $entity) {
-  $del_lcs = &drupal_static('tmgmt_delete_language_capabilities');
-
-  if ($entity_type != 'user' || !in_array(variable_get('tmgmt_local_ts_rid'), array_keys($entity->roles))) {
+  if ($entity_type != 'user' || array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
     return;
   }
-
-  foreach ($del_lcs as $language_from => $language_to) {
-    tmgmt_server_language_capabilities_sync($language_from, $language_to, 'delete');
-  }
+  tmgmt_local_clear_languages_cache();
 }
 
 /**
@@ -420,6 +364,7 @@ function tmgmt_skills_tmgmt_server_language_pairs() {
 
 /**
  * Returns the label of a language.
+ *
  * @todo Remove this once the core language label function is fixed.
  *
  * @param $language

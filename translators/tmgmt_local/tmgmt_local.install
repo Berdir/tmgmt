@@ -1,27 +1,9 @@
 <?php
 
 /**
- * Implements hook_install().
+ * @file
+ * Installation hooks for tmgmt_local module.
  */
-function tmgmt_local_install() {
-  // Create Translator role and assign appropriate permissions to it.
-  module_load_install('tmgmt_local');
-  $translation_role = new stdClass();
-  $translation_role->name = TMGMT_LOCAL_TRANSLATION_ROLE;
-  user_role_save($translation_role);
-  variable_set('tmgmt_local_ts_rid', $translation_role->rid);
-  user_role_grant_permissions($translation_role->rid, array('provide translation services'));
-}
-
-/**
- * Implements hook_uninstall().
- */
-function tmgmt_local_uninstall() {
-  // Remove Translator role.
-  module_load_install('tmgmt_local');
-  user_role_delete(TMGMT_LOCAL_TRANSLATION_ROLE);
-  variable_del('tmgmt_local_ts_rid');
-}
 
 /**
  * Implements hook_schema().

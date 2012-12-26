@@ -70,7 +70,7 @@ class TMGMTLocalTranslatorUIController extends TMGMTDefaultTranslatorUIControlle
     }
     else {
       $form['message'] = array(
-        '#markup' => t('There is no local translator users. Please first add users to %role role.', array('%role' => TMGMT_LOCAL_TRANSLATION_ROLE))
+        '#markup' => t('There are no translators available.'),
       );
     }
 

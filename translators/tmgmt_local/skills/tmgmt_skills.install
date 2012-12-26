@@ -1,0 +1,41 @@
+<?php
+
+/*
+ * @file
+ * Installation hooks for the tmgmt_skills module.
+ */
+
+/**
+ * Implements hook_enable().
+ */
+function tmgmt_skills_enable() {
+  // If our field type is not found rebuild the cache.
+  if (!field_info_field_types('tmgmt_language_combination')) {
+    field_cache_clear();
+  }
+
+  // Create the language combination field if it doesn't exist yet.
+  if (!field_info_field('tmgmt_language_combination')) {
+    $field = array(
+      'type' => 'tmgmt_language_combination',
+      'field_name' => 'tmgmt_translation_skills',
+      'translatable' => FALSE,
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'locked' => FALSE,
+    );
+
+    field_create_field($field);
+  }
+
+  // Attach the language skills field collection to the user entity.
+  if (!field_info_instance('user', 'tmgmt_translation_skills', 'user')) {
+    $instance = array(
+      'field_name' => 'tmgmt_translation_skills',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => t('Translation skills'),
+    );
+
+    field_create_instance($instance);
+  }
+}
