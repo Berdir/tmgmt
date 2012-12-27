@@ -14,9 +14,6 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   public function requestTranslation(TMGMTJob $job) {
-    // The translation job has been successfully submitted.
-    $job->submitted();
-
     $tuid = $job->getSetting('translator');
 
     // Create local task for this job.
@@ -31,6 +28,9 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
       $local_task->status = TMGMT_LOCAL_TASK_STATUS_PENDING;
     }
     $local_task->save();
+
+    // The translation job has been successfully submitted.
+    $job->submitted();
   }
 
   /**
@@ -83,9 +83,9 @@ class TMGMTLocalTranslatorUIController extends TMGMTDefaultTranslatorUIControlle
     $form['#title'] = t('@translator translation job information', array('@translator' => $label));
     $form['#type'] = 'fieldset';
 
-    $uid = $job->getSetting('translator');
-    if ($translator = user_load($uid)) {
-      $form['#description'] = t('Translation job is assigned to %name.', array('%name' => $translator->name));
+    $tuid = $job->getSetting('translator');
+    if ($tuid && $translator = user_load($tuid)) {
+      $form['#description'] = t('Translation job is assigned to %name.', array('%name' => entity_label('user', $translator)));
     }
     else {
       $form['#description'] = t('Translation job is not assigned to any translator.');

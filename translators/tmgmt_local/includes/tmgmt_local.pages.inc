@@ -25,7 +25,7 @@ function tmgmt_local_task_form($form, &$form_state, TMGMTLocalTask $task, $op = 
   $wrapper = entity_metadata_wrapper('tmgmt_local_task', $task);
 
   // Set the title of the page to the label and the current status of the task.
-  drupal_set_title($task->label() . ' (' . $wrapper->status->label() . ')');
+  drupal_set_title(t('@label (@status)', array('@label' => $task->label(), '@status' => $wrapper->status->label())));
 
   // Check if the translator entity is completely new or not.
   $old = empty($task->is_new) && $op != 'clone';
@@ -47,7 +47,8 @@ function tmgmt_local_task_form($form, &$form_state, TMGMTLocalTask $task, $op = 
   $form['tuid'] = array(
     '#title' => t('Assigned'),
     '#type' => 'select',
-    '#options' => array('' => t('Select user')) + $translators,
+    '#options' => $translators,
+    '#empty_option' => t('- Select user -'),
     '#default_value' => $task->tuid,
   );
 
@@ -164,17 +165,23 @@ function tmgmt_local_translation_form_save_as_completed_submit($form, &$form_sta
    */
   $item = $form_state['item'];
 
-  // Set the job item to 'needs review' and tast to finised states.
+  // Set the job item to 'needs review' and task to finised states.
   $item->needsReview();
-  // @todo - this is probably wrong when task has multiple job items.
-  // Need change when we can add multiple job items for task.
-  $task->setStatus(TMGMT_LOCAL_TASK_STATUS_COMPLETED);
+  // Mark the task as completed if all assigned job items are at needs done.
+  $all_done = TRUE;
+  foreach ($task->getItems() as $task_item) {
+    if ($task_item->isActive()) {
+      $all_done = FALSE;
+      break;
+    }
+  }
+  if ($all_done) {
+    $task->setStatus(TMGMT_LOCAL_TASK_STATUS_COMPLETED);
+  }
 
   // Once the job item is set to 'needs review' it is no longer accessible
   // through the translation user interface.
-  if (empty($_GET['destination'])) {
-    $form_state['redirect'] = 'translate';
-  }
+  $form_state['redirect'] = 'translate';
 }
 
 /**
@@ -192,11 +199,10 @@ function tmgmt_local_translation_form_save_submit($form, &$form_state) {
   $values = $form_state['values'];
   foreach ($values as $key => $value) {
     if (isset($value['translation'])) {
-      $target_key = str_replace('][', '|', $key);
       $update['#translation'] = array(
         '#text' => $value['translation'],
       );
-      $item->updateData($target_key, $update);
+      $item->updateData($key, $update);
     }
   }
   $item->save();
@@ -303,14 +309,13 @@ function tmgmt_local_translation_form_update_state_submit($form, &$form_state) {
   $key = $form_state['triggering_element']['#tmgmt_local_key'];
 
   // Write the translated data into the job item.
-  $target_key = str_replace('][', '|', $key);
-  if (isset($values[$target_key]) && is_array($values[$target_key]) && isset($values[$target_key]['translation'])) {
+  if (isset($values[$key]) && is_array($values[$key]) && isset($values[$key]['translation'])) {
     $update['#status'] = $action == 'finish' ? TMGMT_DATA_ITEM_STATE_TRANSLATED : TMGMT_DATA_ITEM_STATE_PENDING;
     $update['#translation'] = array(
-      '#text' => $values[$target_key]['translation'],
+      '#text' => $values[$key]['translation'],
     );
 
-    $item->updateData($target_key, $update);
+    $item->updateData($key, $update);
     $item->save();
 
     // We need to rebuild form so we get updated action button state.
