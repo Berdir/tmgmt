@@ -29,7 +29,7 @@ class TMGMTLocalTaskMetadataController extends EntityDefaultMetadataController {
     $properties['job'] = array(
       'label' => t('Translation Job'),
       'type' => 'tmgmt_job',
-      'description' => t('Corresponding job entity of the translation local task.'),
+      'description' => t('Corresponding job entity of the translation task.'),
       'setter callback' => 'entity_property_verbatim_set',
       'setter permission' => 'administer tmgmt',
       'required' => TRUE,
@@ -40,7 +40,7 @@ class TMGMTLocalTaskMetadataController extends EntityDefaultMetadataController {
     $properties['author'] = array(
       'label' => t('Author'),
       'type' => 'user',
-      'description' => t('The author of the translation local task.'),
+      'description' => t('The author of the translation task.'),
       'setter callback' => 'entity_property_verbatim_set',
       'setter permission' => 'administer tmgmt',
       'required' => TRUE,
@@ -51,7 +51,7 @@ class TMGMTLocalTaskMetadataController extends EntityDefaultMetadataController {
     $properties['translator'] = array(
       'label' => t('Translator'),
       'type' => 'user',
-      'description' => t('The assigned translator for translation local task.'),
+      'description' => t('The assigned translator for translation task.'),
       'setter callback' => 'entity_property_verbatim_set',
       'setter permission' => 'administer tmgmt',
       'required' => TRUE,

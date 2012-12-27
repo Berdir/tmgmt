@@ -47,10 +47,10 @@ class TMGMTLocalTaskUIController extends EntityDefaultUIController {
   public function operationForm($form, &$form_state, $entity, $op) {
     switch ($op) {
       case 'cancel':
-        $confirm_question = t('Are you sure you want to cancel the translation local task %label?', array('%label' => $entity->label()));
+        $confirm_question = t('Are you sure you want to cancel the translation task %label?', array('%label' => $entity->label()));
         return confirm_form($form, $confirm_question, $this->path);
       case 'delete':
-        $confirm_question = t('Are you sure you want to delete the translation local task %label?', array('%label' => $entity->label()));
+        $confirm_question = t('Are you sure you want to delete the translation task %label?', array('%label' => $entity->label()));
         return confirm_form($form, $confirm_question, $this->path);
     }
     drupal_not_found();

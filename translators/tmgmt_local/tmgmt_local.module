@@ -30,27 +30,27 @@ define('TMGMT_LOCAL_TRANSLATION_ACCESS_DENY', 'deny');
 define('TMGMT_LOCAL_TRANSLATION_ACCESS_IGNORE', NULL);
 
 /**
- * Translation local task is not assigned to translator.
+ * Translation task is not assigned to translator.
  */
 define('TMGMT_LOCAL_TASK_STATUS_UNASSIGNED', 0);
 
 /**
- * Translation local task is pending.
+ * Translation task is pending.
  */
 define('TMGMT_LOCAL_TASK_STATUS_PENDING', 1);
 
 /**
- * Translation local task is cokmpleted (all task items are accepted).
+ * Translation task is completed (all job items are translated).
  */
 define('TMGMT_LOCAL_TASK_STATUS_COMPLETED', 2);
 
 /**
- * Translation local task is rejected (at least some task items are rejected).
+ * Translation task is rejected (at least some job items are rejected).
  */
 define('TMGMT_LOCAL_TASK_STATUS_REJECTED', 3);
 
 /**
- * Translation local task is closed.
+ * Translation task is closed.
  *
  */
 define('TMGMT_LOCAL_TASK_STATUS_CLOSED', 4);
@@ -65,7 +65,7 @@ define('TMGMT_LOCAL_TASK_STATUS_CLOSED', 4);
 function tmgmt_local_entity_info() {
   $info = array(
     'tmgmt_local_task' => array(
-      'label' => t('Translation Management Local Task'),
+      'label' => t('Translation Task'),
       'module' => 'tmgmt_local_task',
       'entity class' => 'TMGMTLocalTask',
       'controller class' => 'TMGMTLocalTaskController',
@@ -491,7 +491,7 @@ function tmgmt_local_task_statistics_load(array $tltids) {
  * Returns a specific statistic of a task.
  *
  * @param $task
- *   The translation local task entity.
+ *   The translation task entity.
  * @param $key
  *   One of word_count, loop_count, count_pending, count_approved and
  *   count_translated.

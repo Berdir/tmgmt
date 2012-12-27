@@ -2,7 +2,7 @@
 
 $view = new view();
 $view->name = 'tmgmt_local_task_overview';
-$view->description = 'Gives a bulk operation overview of translation local tasks in the system.';
+$view->description = 'Gives a bulk operation overview of translation tasks in the system.';
 $view->tag = 'default';
 $view->base_table = 'tmgmt_local_task';
 $view->human_name = 'Translation Local Task Overview';
