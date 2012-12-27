@@ -432,7 +432,7 @@ function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
     case 'view':
     case 'edit':
     case 'delete':
-      return user_access('administer tmgmt local tasks', $account);
+      return user_access('administer translation tasks', $account);
       break;
   }
 }
