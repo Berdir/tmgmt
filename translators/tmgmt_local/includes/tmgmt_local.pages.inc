@@ -142,10 +142,13 @@ function tmgmt_local_translation_form_save_as_completed_validate($form, &$form_s
    */
   $item = $form_state['item'];
 
-  // In case the translation is being submitted, validate if all data items
-  // are not in pending state.
-  if ($form_state['values']['op'] == t('Save as completed') && !tmgmt_local_translation_item_completed($item)) {
-    form_set_error('save_as_completed', t('Not all items are translated yet. You cannot submit the translation.'));
+  // Loop over all data items and verify that there is a translation in there.
+  foreach ($form_state['values'] as $key => $value) {
+    if (is_array($value) && isset($value['translation'])) {
+      if (empty($value['translation'])) {
+        form_set_error($key . '[translation]', t('Missing translation.'));
+      }
+    }
   }
 }
 
@@ -269,7 +272,7 @@ function tmgmt_local_translation_form_element($data, TMGMTJobItem $item, &$zebra
             'wrapper' => $form[$target_key]['#ajaxid'],
           ),
           '#tmgmt_local_action' => 'reject',
-          '#tmgmt_local_key' => $key,
+          '#tmgmt_local_key' => str_replace('][', '|', $key),
         );
       }
       else {
@@ -285,7 +288,7 @@ function tmgmt_local_translation_form_element($data, TMGMTJobItem $item, &$zebra
             'wrapper' => $form[$target_key]['#ajaxid'],
           ),
           '#tmgmt_local_action' => 'finish',
-          '#tmgmt_local_key' => $key,
+          '#tmgmt_local_key' => str_replace('][', '|', $key),
         );
       }
     }

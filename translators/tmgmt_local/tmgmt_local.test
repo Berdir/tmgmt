@@ -1,0 +1,148 @@
+<?php
+
+/**
+ * @file
+ * Test cases for the file translator module.
+ */
+
+/**
+ * Basic tests for the file translator.
+ */
+class TMGMTLocalTestCase extends TMGMTBaseTestCase {
+
+  /**
+   * Translator user.
+   *
+   * @var object
+   */
+  protected $local_translator;
+
+  /**
+   * Implements getInfo().
+   */
+  static function getInfo() {
+    return array(
+      'name' => t('Local Translator tests'),
+      'description' => t('Tests the local translator plugin integration.'),
+      'group' => t('Translation Management'),
+    );
+  }
+
+  /**
+   * Overrides SimplenewsTestCase::setUp()
+   */
+  function setUp() {
+    parent::setUp(array('tmgmt_local', 'tmgmt_ui', 'tmgmt_skills'));
+    $this->loginAsAdmin();
+    $this->setEnvironment('de');
+
+    $this->local_translator = $this->drupalCreateUser(array('provide translation services'));
+
+  }
+
+  /**
+   * Tests export and import for the HTML format.
+   */
+  function testHTML() {
+    $translator = tmgmt_translator_load('local');
+
+    // @todo: Allow submitting of jobs even when no user exists yet who can
+    //   translate that job.
+    $this->drupalLogin($this->local_translator);
+    // Configure language capabilities.
+    $edit = array(
+      'tmgmt_translation_skills[und][0][language_from]' => 'en',
+      'tmgmt_translation_skills[und][0][language_to]' => 'de',
+    );
+    $this->drupalPost('user/' . $this->local_translator->uid . '/edit', $edit, t('Save'));
+
+    // Create a job and request a local translation.
+    $this->loginAsTranslator();
+    $job = $this->createJob();
+    $job->translator = $translator->name;
+    $job->addItem('test_source', 'test', '1');
+    $job->addItem('test_source', 'test', '2');
+
+    $job->requestTranslation();
+
+    $this->drupalLogin($this->local_translator);
+    $this->drupalGet('user');
+
+    // Check the translate overview.
+    $this->drupalGet('translate');
+    $this->assertText(t('Task for @job', array('@job' => $job->label())));
+    // @todo: Fails, encoding problem?
+    //$this->assertText(t('@from => @to', array('@from' => 'en', '@to' => 'de')));
+    $this->clickLink(t('assign'));
+
+    // @todo: Assign bulk action missing, permission problem?
+    /*$edit = array(
+      'views_bulk_operations[0]' => $job->tjid,
+    );
+    $this->drupalPost(NULL, $edit, t('Assign to me'));*/
+
+    // Translate the task.
+    $this->clickLink(t('translate'));
+    $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:1')));
+    $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:2')));
+
+    // Translate the first item.
+    $this->clickLink(t('translate'));
+
+    $this->assertText(t('Dummy'));
+    // @todo: Improve title.
+    $this->assertText(t('Translate Task Item'));
+
+    // Try to complete a translation when translations are missing.
+    $this->drupalPost(NULL, array(), t('Save as completed'));
+    $this->assertText(t('Missing translation.'));
+
+    $edit = array(
+      'dummy|deep_nesting[translation]' => $translation1 = 'German translation of source 1',
+    );
+    $this->drupalPost(NULL, $edit, t('Save as completed'));
+
+    // The first item should be accepted now, the second still in progress.
+    $this->assertText(t('Accepted'));
+    $this->assertText(t('In progress'));
+
+    // Translate the second item but do not accept it yet.
+    $this->clickLink(t('translate'));
+    $edit = array(
+      'dummy|deep_nesting[translation]' => $translation2 = 'German translation of source 2',
+    );
+    $this->drupalPost(NULL, $edit, t('Save'));
+    // The first item should be accepted now, the second still in progress.
+    $this->assertText(t('Accepted'));
+    $this->assertText(t('In progress'));
+
+    // Check the overview page, the task should still show in progress.
+    $this->drupalGet('translate');
+    $this->assertText(t('Pending'));
+
+    // Mark the second item as completed now.
+    $this->clickLink(t('translate'));
+    $this->clickLink(t('translate'));
+    $this->drupalPost(NULL, array(), t('Save as completed'));
+    // Both items should be accepted now.
+    $this->assertText(t('Accepted'));
+    $this->assertNoText(t('In progress'));
+
+    // Check the overview, the task should be completed now.
+    $this->drupalGet('translate');
+    // @todo: Should completed task be removed automatically from my tasks?
+    // @todo: Maybe change status to Accepted by client or similar after job has
+    //   been marked as finished.
+    $this->assertText(t('Completed'));
+
+    entity_get_controller('tmgmt_job')->resetCache(array($job->tjid));
+    $job = tmgmt_job_load($job->tjid);
+    list($item1, $item2) = array_values($job->getItems());
+    // Job was approved and finished automatically due to the default approve
+    // setting.
+    $this->assertTrue($job->isFinished());
+    $this->assertEqual($item1->data['dummy']['deep_nesting']['#translation']['#text'], $translation1);
+    $this->assertEqual($item2->data['dummy']['deep_nesting']['#translation']['#text'], $translation2);
+  }
+
+}

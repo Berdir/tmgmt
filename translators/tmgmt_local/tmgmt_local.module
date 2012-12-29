@@ -129,7 +129,7 @@ function tmgmt_local_menu() {
     'page arguments' => array(1),
     'access callback' => 'tmgmt_local_translation_access',
     'access arguments' => array(1),
-    'file' => 'includes/tmgmt_local.forms.inc',
+    'file' => 'includes/tmgmt_local.pages.inc',
   );
   $items['manage-translate/assign-tasks'] = array(
     'title' => 'Assign translation task',
@@ -137,7 +137,7 @@ function tmgmt_local_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tmgmt_local_translation_assign_form', 2),
     'access arguments' => array('administer translation tasks'),
-    'file' => 'includes/tmgmt_local.forms.inc',
+    'file' => 'includes/tmgmt_local.pages.inc',
     'type' => MENU_CALLBACK,
   );
   $items['manage-translate/reassign-tasks'] = array(
@@ -146,7 +146,7 @@ function tmgmt_local_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tmgmt_local_translation_reassign_form', 2),
     'access arguments' => array('administer translation tasks'),
-    'file' => 'includes/tmgmt_local.forms.inc',
+    'file' => 'includes/tmgmt_local.pages.inc',
     'type' => MENU_CALLBACK,
   );
   $items['translate/%tmgmt_local_task/item/%tmgmt_job_item'] = array(
@@ -156,7 +156,7 @@ function tmgmt_local_menu() {
     'page arguments' => array('tmgmt_local_translation_form', 1, 3),
     'access callback' => 'tmgmt_local_translation_access',
     'access arguments' => array(1),
-    'file' => 'includes/tmgmt_local.forms.inc',
+    'file' => 'includes/tmgmt_local.pages.inc',
   );
 
   return $items;
@@ -311,24 +311,6 @@ function tmgmt_local_translation_capabilities($language, $account = NULL) {
  */
 function tmgmt_local_clear_languages_cache() {
   cache_clear_all('languages::local', 'cache_tmgmt');
-}
-
-/**
- * Determines if job item data items are completed - not pending.
- */
-function tmgmt_local_translation_item_completed(TMGMTJobItem $item) {
-  $data = tmgmt_flatten_data($item->getData());
-  $data = array_filter($data, '_tmgmt_filter_data');
-
-  $completed = TRUE;
-  foreach ($data as $item) {
-    if (empty($item['#status']) || $item['#status'] == TMGMT_DATA_ITEM_STATE_PENDING) {
-      $completed = FALSE;
-      break;
-    }
-  }
-
-  return $completed;
 }
 
 /**

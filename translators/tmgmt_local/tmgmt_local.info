@@ -10,6 +10,7 @@ files[] = includes/tmgmt_local.entity.inc
 files[] = includes/tmgmt_local.info.inc
 files[] = includes/tmgmt_local.plugin.inc
 files[] = includes/tmgmt_local_ui.controller.inc
+files[] = tmgmt_local.test
 
 ; Views integration and handlers
 files[] = views/tmgmt_local.views.inc

@@ -9,16 +9,18 @@ class tmgmt_local_task_handler_field_translate_task_item extends views_handler_f
 
   function render($values) {
     /**
-     * @var TMGMTJobItem $job_item
+     * @var TMGMTLocalTask $task
      */
     $task = $this->get_value($values);
 
-    if (tmgmt_local_translation_access($task)) {
+    // @todo- is there a better way to get item id? This way we are
+    // dependent on db values.
+    $tjiid = $values->tjiid;
+    $job_item = tmgmt_job_item_load($tjiid);
+    if (tmgmt_local_translation_access($task) && $job_item->isActive()) {
       $element = array(
         '#theme' => 'link',
-        // @todo- is there a better way to get item id? This way we are
-        // dependent on db values.
-        '#path' => 'translate/' . $task->tltid . '/item/' . $values->tjiid,
+        '#path' => 'translate/' . $task->tltid . '/item/' . $tjiid,
         '#options' => array(
           'query' => array('destination' => current_path()),
           'attributes' => array(),
