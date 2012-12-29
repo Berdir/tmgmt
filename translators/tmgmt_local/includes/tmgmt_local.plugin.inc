@@ -40,13 +40,6 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
     return drupal_map_assoc(tmgmt_local_translation_capabilities($language));
   }
 
-  /**
-   * Overrides TMGMTDefaultTranslatorPluginController::hasCheckoutSettings().
-   */
-  public function hasCheckoutSettings(TMGMTJob $job) {
-    return FALSE;
-  }
-
 }
 
 /**
