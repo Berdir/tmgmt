@@ -10,12 +10,12 @@
  */
 function tmgmt_local_rules_action_info() {
   $info['tmgmt_local_rules_task_assign'] = array(
-    'label' => t('Assign Translation Task'),
+    'label' => t('Assign translation task'),
     'group' => t('Translation Management'),
     'parameter' => array(
       'task' => array(
         'type' => 'tmgmt_local_task',
-        'label' => t('Translation Task'),
+        'label' => t('Translation task'),
         'description' => t('The translation task that should be assigned to the configured user.'),
       ),
       'user' => array(
@@ -26,12 +26,12 @@ function tmgmt_local_rules_action_info() {
     ),
   );
   $info['tmgmt_local_rules_task_unassign'] = array(
-    'label' => t('Unassign Translation Task'),
+    'label' => t('Unassign translation task'),
     'group' => t('Translation Management'),
     'parameter' => array(
       'task' => array(
         'type' => 'tmgmt_local_task',
-        'label' => t('Translation Task'),
+        'label' => t('Translation task'),
         'description' => t('The translation task which will be unassigned.'),
       ),
     ),
