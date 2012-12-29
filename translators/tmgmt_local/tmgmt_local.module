@@ -343,8 +343,7 @@ function tmgmt_local_languages_predefined_list() {
  * Loads a local translation task entity.
  */
 function tmgmt_local_task_load($tltid) {
-  $tasks = tmgmt_local_task_load_multiple(array($tltid), array());
-  return $tasks ? reset($tasks) : FALSE;
+  return entity_load_single('tmgmt_local_task', $tltid);
 }
 
 /**
