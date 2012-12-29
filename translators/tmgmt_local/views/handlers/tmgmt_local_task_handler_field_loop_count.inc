@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Field handler which shows the word count.
+ * Field handler which shows the loop count.
  *
  * @ingroup views_field_handlers
  */
