@@ -9,14 +9,19 @@
  * Implements hook_rules_action_info().
  */
 function tmgmt_local_rules_action_info() {
-  $info['tmgmt_local_rules_task_assign_to_me'] = array(
-    'label' => t('Assign Translation Task To Me'),
+  $info['tmgmt_local_rules_task_assign'] = array(
+    'label' => t('Assign Translation Task'),
     'group' => t('Translation Management'),
     'parameter' => array(
       'task' => array(
         'type' => 'tmgmt_local_task',
         'label' => t('Translation Task'),
-        'description' => t('The translation task which can be assigned to current user.'),
+        'description' => t('The translation task that should be assigned to the configured user.'),
+      ),
+      'user' => array(
+        'type' => 'user',
+        'label' => t('user'),
+        'description' => t('The assigned user.'),
       ),
     ),
   );
@@ -33,16 +38,6 @@ function tmgmt_local_rules_action_info() {
   );
 
   return $info;
-}
-
-
-/**
- * Rules callback to assign a translation task to translator.
- */
-function tmgmt_local_rules_task_assign_to_me(TMGMTLocalTask $task) {
-  global $user;
-  $task->assign($user);
-  $task->save();
 }
 
 /**
