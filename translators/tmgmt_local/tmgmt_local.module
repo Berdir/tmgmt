@@ -84,16 +84,6 @@ function tmgmt_local_entity_info() {
       ),
     ),
   );
-
-  // Make use of the entity cache module if it is enabled.
-  if (module_exists('entitycache')) {
-    $info['tmgmt_local_task']['entity cache'] = TRUE;
-    $info['tmgmt_local_task']['field cache'] = FALSE;
-  }
-
-  // @todo wtf? move this to the core tmgmt module.
-  $info['tmgmt_translator']['views controller class'] = 'EntityDefaultViewsController';
-
   return $info;
 }
 
