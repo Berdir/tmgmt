@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Test cases for the file translator module.
+ * Test cases for the local translator module.
  */
 
 /**
- * Basic tests for the file translator.
+ * Basic tests for the local translator.
  */
 class TMGMTLocalTestCase extends TMGMTBaseTestCase {
 
