@@ -22,14 +22,6 @@ class TMGMTLocalTaskUIController extends EntityDefaultUIController {
       'file' => 'tmgmt_local.forms.inc',
       'file path' => drupal_get_path('module', 'tmgmt_local') . '/includes',
     );
-    $items[$this->path . '/' . $wildcard . '/cancel'] = array(
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
-      'load arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
-      'access arguments' => array('submit', $this->entityType, $id_count),
-      'type' => MENU_CALLBACK,
-    );
     $items[$this->path . '/' . $wildcard . '/delete'] = array(
       'page callback' => 'drupal_get_form',
       'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
@@ -46,9 +38,6 @@ class TMGMTLocalTaskUIController extends EntityDefaultUIController {
    */
   public function operationForm($form, &$form_state, $entity, $op) {
     switch ($op) {
-      case 'cancel':
-        $confirm_question = t('Are you sure you want to cancel the translation task %label?', array('%label' => $entity->label()));
-        return confirm_form($form, $confirm_question, $this->path);
       case 'delete':
         $confirm_question = t('Are you sure you want to delete the translation task %label?', array('%label' => $entity->label()));
         return confirm_form($form, $confirm_question, $this->path);
@@ -65,9 +54,6 @@ class TMGMTLocalTaskUIController extends EntityDefaultUIController {
       case 'delete':
         $entity->delete();
         return t('Deleted the translation local task %label.', array('%label' => $entity->label()));
-      case 'cancel':
-        $entity->cancelTranslation();
-        return t('Cancelled the translation local task %label.', array('%label' => $entity->label()));
     }
     return FALSE;
   }
