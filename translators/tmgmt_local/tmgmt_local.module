@@ -194,9 +194,6 @@ function tmgmt_local_tmgmt_translator_plugin_info() {
     'description' => t('Allows local users to process translation jobs.'),
     'plugin controller class' => 'TMGMTLocalTranslatorPluginController',
     'ui controller class' => 'TMGMTLocalTranslatorUIController',
-    'default settings' => array(
-      'auto_accept' => TRUE,
-    ),
   );
 
   return $info;
