@@ -24,3 +24,4 @@ files[] = views/handlers/tmgmt_local_task_handler_field_progress.inc
 files[] = views/handlers/tmgmt_local_task_handler_field_translate.inc
 files[] = views/handlers/tmgmt_local_task_handler_field_translate_task_item.inc
 files[] = views/handlers/tmgmt_local_task_handler_field_wordcount.inc
+files[] = views/handlers/tmgmt_local_task_handler_filter_eligible.inc

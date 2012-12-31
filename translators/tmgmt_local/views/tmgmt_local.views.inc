@@ -63,6 +63,14 @@ class TMGMTLocalTaskViewsController extends EntityDefaultViewsController {
         'handler' => 'tmgmt_local_task_handler_field_translate',
       ),
     );
+    $data['tmgmt_job']['eligible'] = array(
+      'title' => t('Eligible'),
+      'help' => t('Limit translation tasks to those that the user can translate'),
+      'real field' => 'tltid',
+      'filter' => array(
+        'handler' => 'tmgmt_local_task_handler_filter_eligible',
+      ),
+    );
     // Manager handlers.
     $data['tmgmt_local_task']['assign'] = array(
       'title' => t('Assign'),

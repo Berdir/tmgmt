@@ -1,4 +1,5 @@
 <?php
+
 $view = new view();
 $view->name = 'tmgmt_local_task_overview';
 $view->description = 'Gives a bulk operation overview of translation tasks in the system.';
@@ -520,6 +521,11 @@ $handler->display->display_options['filters']['status']['field'] = 'status';
 $handler->display->display_options['filters']['status']['value'] = array(
   0 => '0',
 );
+/* Filter criterion: Translation Management Job: Eligible */
+$handler->display->display_options['filters']['eligible']['id'] = 'eligible';
+$handler->display->display_options['filters']['eligible']['table'] = 'tmgmt_job';
+$handler->display->display_options['filters']['eligible']['field'] = 'eligible';
+$handler->display->display_options['filters']['eligible']['relationship'] = 'job';
 $handler->display->display_options['path'] = 'translate';
 $handler->display->display_options['menu']['type'] = 'normal';
 $handler->display->display_options['menu']['title'] = 'Translate';
@@ -761,6 +767,11 @@ $handler->display->display_options['filters']['status']['field'] = 'status';
 $handler->display->display_options['filters']['status']['value'] = array(
   0 => '0',
 );
+/* Filter criterion: Translation Management Job: Eligible */
+$handler->display->display_options['filters']['eligible']['id'] = 'eligible';
+$handler->display->display_options['filters']['eligible']['table'] = 'tmgmt_job';
+$handler->display->display_options['filters']['eligible']['field'] = 'eligible';
+$handler->display->display_options['filters']['eligible']['relationship'] = 'job';
 $handler->display->display_options['path'] = 'translate/elegible';
 $handler->display->display_options['menu']['type'] = 'normal';
 $handler->display->display_options['menu']['title'] = 'Eligible';

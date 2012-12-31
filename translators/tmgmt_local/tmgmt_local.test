@@ -17,6 +17,12 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
    */
   protected $local_translator;
 
+  protected $local_translator_permissions = array(
+    'provide translation services',
+    'use Rules component rules_tmgmt_local_task_assign_to_me',
+    'use Rules component rules_tmgmt_local_task_unassign',
+  );
+
   /**
    * Implements getInfo().
    */
@@ -36,7 +42,7 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->loginAsAdmin();
     $this->setEnvironment('de');
 
-    $this->local_translator = $this->drupalCreateUser(array('provide translation services'));
+    $this->local_translator = $this->drupalCreateUser($this->local_translator_permissions);
 
   }
 
@@ -64,6 +70,19 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $job->addItem('test_source', 'test', '2');
 
     $job->requestTranslation();
+
+    // Create a second local translator with different language capabilities,
+    // make sure that he does not see the task.
+    $other_translator = $this->drupalCreateUser($this->local_translator_permissions);
+    $this->drupalLogin($other_translator);
+    // Configure language capabilities.
+    $edit = array(
+      'tmgmt_translation_skills[und][0][language_from]' => 'de',
+      'tmgmt_translation_skills[und][0][language_to]' => 'en',
+    );
+    $this->drupalPost('user/' . $other_translator->uid . '/edit', $edit, t('Save'));
+    $this->drupalGet('translate');
+    $this->assertNoText(t('Task for @job', array('@job' => $job->label())));
 
     $this->drupalLogin($this->local_translator);
     $this->drupalGet('user');
