@@ -166,6 +166,7 @@ function tmgmt_entity_info() {
     'module' => 'tmgmt',
     'controller class' => 'TMGMTTranslatorController',
     'metadata controller class' => 'TMGMTTranslatorMetadataController',
+    'views controller class' => 'EntityDefaultViewsController',
     'entity class' => 'TMGMTTranslator',
     'base table' => 'tmgmt_translator',
     'exportable' => TRUE,

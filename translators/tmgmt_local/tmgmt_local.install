@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @file
+ * Installation hooks for tmgmt_local module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function tmgmt_local_schema() {
+  $schema['tmgmt_local_task'] = array(
+    'description' => 'A tmgmt local task connects translator user with assigned job items and provide additional workflow data.',
+    'fields' => array(
+      'tltid' => array(
+        'description' => 'The identifier of the task.',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "User's {users}.uid for task creator.",
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the task was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the task was most recently saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'title' => array(
+        'description' => 'Task title.',
+        'type' => 'varchar',
+        'length' => 128,
+      ),
+      'tuid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Assigned translator user {users}.uid.',
+      ),
+      'tjid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "Translation job {tmgmt_job}.tjid that belongs to task.",
+      ),
+      'status' => array(
+        'description' => 'The status of the task.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'loop_count' => array(
+        'description' => 'Counter for how many times this task was returned to translator.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('tltid'),
+    'indexes' => array(
+      'tuid' => array('tuid'),
+    ),
+    'foreign keys' => array(
+      'author' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+      'translator' => array(
+        'table' => 'users',
+        'columns' => array('tuid' => 'uid'),
+      ),
+      'job' => array(
+        'table' => 'tmgmt_job',
+        'columns' => array('tjid' => 'tjid'),
+      ),
+    ),
+  );
+
+  return $schema;
+}
