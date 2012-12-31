@@ -295,7 +295,7 @@ function tmgmt_skills_field_attach_delete($entity_type, $entity) {
 /**
  * Implements hook_tmgmt_local_translation_capabilities().
  */
-function tmgmt_skills_tmgmt_local_translation_capabilities($language, $account = NULL) {
+function tmgmt_skills_tmgmt_local_translation_capabilities($source_language = NULL, $account = NULL) {
   // Only considers users with the 'provide translation services' permission.
   $roles = user_roles(TRUE, 'provide translation services');
 
@@ -305,9 +305,12 @@ function tmgmt_skills_tmgmt_local_translation_capabilities($language, $account =
   $query = db_select('field_data_tmgmt_translation_skills', 'ts')
     ->fields('ts', array('tmgmt_translation_skills_language_from', 'tmgmt_translation_skills_language_to'))
     ->condition('ts.deleted', 0)
-    ->condition('ts.tmgmt_translation_skills_language_from', $language)
     ->condition('ts.entity_type', 'user')
     ->distinct(TRUE);
+
+  if ($source_language) {
+    $query->condition('ts.tmgmt_translation_skills_language_from', $source_language);
+  }
 
   // Only consider active users.
   $query->innerJoin('users', 'u', 'u.uid = ts.entity_id AND u.status = 1');
@@ -324,11 +327,14 @@ function tmgmt_skills_tmgmt_local_translation_capabilities($language, $account =
   $query->addTag('tmgmt_translation_capabilities');
 
   // Only return languages that are supported by at least one user.
-  $results = $query->execute();
+  $result = $query->execute();
 
   $capabilities = array();
-  foreach ($results as $item) {
-    $capabilities[] = $item->tmgmt_translation_skills_language_to;
+  foreach ($result as $item) {
+    $capabilities[] = array(
+      'source' => $item->tmgmt_translation_skills_language_from,
+      'target' => $item->tmgmt_translation_skills_language_to,
+    );
   }
 
   return $capabilities;

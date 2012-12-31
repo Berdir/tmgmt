@@ -273,21 +273,32 @@ function tmgmt_local_translation_access(TMGMTLocalTask $task, $account = NULL) {
 /**
  * Determines the translation capabilities of a specific user or all users.
  *
- * @param $language
- *   The source language for which to check the translation capabilities for.
+ * @param $source_language
+ *   (optional) The source language for which to check the translation
+ *   capabilities for.
  * @param $account
- *   (Optional) A user object representing the user for whom to check the
+ *   (optional) A user object representing the user for whom to check the
  *   translation capabilities for.
  *
  * @return array
- *   An array of supported target languages.
+ *   An array of supported target languages if a source language is given, an
+ *   array of language pairs as array with the source and target keys otherwise.
  */
-function tmgmt_local_translation_capabilities($language, $account = NULL) {
+function tmgmt_local_translation_capabilities($source_language = NULL, $account = NULL) {
   $capabilities = &drupal_static(__FUNCTION__);
-  $key = isset($account) ? $account->uid . ':' . $language : $language;
 
+  $key = ($account ? $account->uid : 'all') . ':' . ($source_language ? $source_language : 'all');
   if (!isset($capabilities[$key])) {
-    $capabilities[$key] = module_invoke_all('tmgmt_local_translation_capabilities', $language, $account);
+    $capabilities[$key] = module_invoke_all('tmgmt_local_translation_capabilities', $source_language, $account);
+
+    // If a source key is given, simplify array.
+    // @todo: this is used to ensure backwards compatibility of this hook.
+    //   Possibly rethink this hook completely, use a plugin?
+    if ($source_language) {
+      foreach ($capabilities[$key] as &$capability) {
+        $capability = $capability['target'];
+      }
+    }
   }
 
   return $capabilities[$key];
@@ -300,7 +311,11 @@ function tmgmt_local_translation_capabilities($language, $account = NULL) {
  * the translation capabilities of an local have changed.
  */
 function tmgmt_local_clear_languages_cache() {
-  cache_clear_all('languages::local', 'cache_tmgmt');
+  foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
+    if ($translator->plugin == 'local') {
+      cache_clear_all('languages::' . $translator->name, 'cache_tmgmt');
+    }
+  }
 }
 
 /**
