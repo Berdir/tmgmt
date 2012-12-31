@@ -74,7 +74,7 @@ function tmgmt_local_entity_info() {
       'base table' => 'tmgmt_local_task',
       'uri callback' => 'entity_class_uri',
       'label callback' => 'entity_class_label',
-      'access callback' => 'tmgmt_job_access',
+      'access callback' => 'tmgmt_local_task_access',
       'entity keys' => array(
         'id' => 'tltid',
       ),
@@ -407,18 +407,16 @@ function tmgmt_local_task_delete_multiple(array $tltids) {
  *   TRUE if access is allowed, FALSE otherwise.
  */
 function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
-  if (user_access('administer tmgmt', $account)) {
+  if (user_access('administer tmgmt', $account) || user_access('administer translation tasks', $account)) {
     // Administrators can do everything.
     return TRUE;
   }
 
   // @todo - probably need refinement when we introduce more module permissions.
   switch ($op) {
-    case 'create':
     case 'view':
-    case 'edit':
-    case 'delete':
-      return user_access('administer translation tasks', $account);
+    case 'update':
+      return user_access('provide translation services', $account);
       break;
   }
 }
