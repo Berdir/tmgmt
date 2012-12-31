@@ -1193,7 +1193,7 @@ class TMGMTJob extends Entity {
     if (isset($this->translator)) {
       return tmgmt_translator_load($this->translator);
     }
-    returN FALSE;
+    return FALSE;
   }
 
   /**

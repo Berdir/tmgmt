@@ -590,9 +590,11 @@ function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
   // First invoke the validation method on the source controller.
   $source = tmgmt_source_ui_controller($item->plugin);
   $source->reviewFormValidate($form, $form_state, $item);
-  // Then invoke the validation method on the source controller.
-  $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-  $translator->reviewFormValidate($form, $form_state, $item);
+  // Invoke the validation method on the translator controller (if available).
+  if($item->getTranslator()){
+    $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
+    $translator->reviewFormValidate($form, $form_state, $item);
+  }
 }
 
 /**
@@ -603,9 +605,11 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   // First invoke the submit method on the source controller.
   $source = tmgmt_source_ui_controller($item->plugin);
   $source->reviewFormSubmit($form, $form_state, $item);
-  // Then invoke the submit method on the source controller.
-  $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-  $translator->reviewFormSubmit($form, $form_state, $item);
+  // Invoke the submit method on the translator controller (if available).
+  if($item->getTranslator()){
+    $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
+    $translator->reviewFormSubmit($form, $form_state, $item);
+  }
   // Write changes back to item.
   foreach ($form_state['values'] as $key => $value) {
     if (is_array($value) && isset($value['translation'])) {
