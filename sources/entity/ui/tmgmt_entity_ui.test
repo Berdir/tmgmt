@@ -380,10 +380,8 @@ class TMGMTEntitySourceUITestCase extends TMGMTEntityTestCaseUtility {
 
   /**
    * Test translating comments.
-   *
-   * @todo: Disabled pending resolution of http://drupal.org/node/1760270.
    */
-  function dtestCommentTranslateTab() {
+  function testCommentTranslateTab() {
 
     // Login as admin to be able to submit config page.
     $this->loginAsAdmin(array('administer entity translation'));
@@ -392,6 +390,7 @@ class TMGMTEntitySourceUITestCase extends TMGMTEntityTestCaseUtility {
       'entity_translation_entity_types[comment]' => TRUE
     );
     $this->drupalPost('admin/config/regional/entity_translation', $edit, t('Save configuration'));
+    $this->checkPermissions(array(), TRUE);
 
     // Change comment_body field to be translatable.
     $comment_body = field_info_field('comment_body');
@@ -416,7 +415,7 @@ class TMGMTEntitySourceUITestCase extends TMGMTEntityTestCaseUtility {
     $this->drupalGet('node/' . $node->nid);
     $edit = array(
       'subject' => $this->randomName(),
-      'comment_body[en][0][value]' => $this->randomName(),
+      'comment_body[und][0][value]' => $this->randomName(),
     );
     $this->drupalPost(NULL, $edit, t('Save'));
     $this->assertText(t('Your comment has been posted.'));
