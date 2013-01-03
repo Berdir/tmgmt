@@ -48,8 +48,19 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
         $tnode->language = $job->target_language;
         $tnode->translation_source = $node;
       }
+
       // Time to put the translated data into the node.
-      tmgmt_node_update_node_translation($tnode, $job_item->getData(), $job->target_language);
+      $data = $job_item->getData();
+      // Special case for the node title.
+      if (isset($data['node_title']['#translation']['#text'])) {
+        $tnode->title = $data['node_title']['#translation']['#text'];
+        unset($data['node_title']);
+      }
+      tmgmt_field_populate_entity('node', $tnode, $job->target_language, $data, FALSE);
+      // Reset translation field, which determines outdated status.
+      $tnode->translation['status'] = 0;
+      node_save($tnode);
+
       // We just saved the translation, set the sate of the job item to
       // 'finished'.
       $job_item->accepted();
