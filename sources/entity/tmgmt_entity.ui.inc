@@ -75,7 +75,7 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
         elseif (!isset($translations->data[$langcode])) {
           $translation_status = 'missing';
         }
-        elseif (!$translations->data[$langcode]) {
+        elseif (!empty($translations->data[$langcode]['translate'])) {
           $translation_status = 'outofdate';
         }
 

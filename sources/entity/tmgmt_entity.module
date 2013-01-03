@@ -27,25 +27,6 @@ function tmgmt_entity_tmgmt_source_plugin_info() {
 }
 
 /**
- * Updates an entity translation.
- *
- * @param $entity
- *   The entity object (the target).
- * @param $entity_type
- *   The entity type of the source entity.
- * @param $data
- *   An array with the structured translated data.
- * @param $language
- *   The target language.
- *
- * @see TMGMTEntitySourcePluginController::getData()
- */
-function tmgmt_entity_update_entity_translation($entity, $entity_type, $data, $language) {
-  tmgmt_field_populate_entity($entity_type, $entity, $language, $data);
-  entity_save($entity_type, $entity);
-}
-
-/**
  * Implements hook_form_ID_alter().
  *
  * Alters comment node type select box to filter out comment types that belongs
