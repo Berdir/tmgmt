@@ -234,8 +234,6 @@ function tmgmt_translator_form_submit($form, &$form_state) {
 function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   // Get the job metadata wrapper so we can display the current status nicely.
   $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
-  // Set the title of the page to the label and the current state of the job
-  drupal_set_title($job->label() . ' (' . $wrapper->state->label() . ')');
   // Check if the translator entity is completely new or not.
   $old = empty($job->is_new) && $op != 'clone';
   // Handle source language.
@@ -246,7 +244,6 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   $available['target_language'] = tmgmt_available_languages();
   $job->target_language = isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : $job->target_language;
 
-
   // Remove impossible combinations so we don't end up with the same source and
   // target language in the dropdowns.
   foreach (array('source_language' => 'target_language', 'target_language' => 'source_language') as $key => $opposite) {
@@ -255,9 +252,24 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     }
   }
 
+  $source = $wrapper->source_language->label();
+  if (empty($job->source_language)) {
+    $source = '?';
+  }
+
+  $target = $wrapper->target_language->label();
   if (empty($job->target_language)) {
     $job->target_language = key($available['target_language']);
+    $target = '?';
   }
+
+  // Set the title of the page to the label and the current state of the job.
+  drupal_set_title(t('@title (@source to @target, @state)', array(
+    '@title' => $job->label(),
+    '@source' => $source,
+    '@target' => $target,
+    '@state' => $wrapper->state->label(),
+  )));
 
   $form['info'] = array(
     '#type' => 'container',
@@ -482,6 +494,11 @@ function tmgmt_job_form_submit($form, &$form_state) {
   // plain 'Submit' case covered. Also, if the translator fails it won't save on
   // its own.
   $job = entity_ui_form_submit_build_entity($form, $form_state);
+  // Make sure that we always store a label as it can be a slow operation to
+  // generate the default label.
+  if (empty($job->label)) {
+    $job->label = $job->label();
+  }
   $job->save();
   // Per default we want to redirect the user to the overview.
   $form_state['redirect'] = 'admin/config/regional/tmgmt';

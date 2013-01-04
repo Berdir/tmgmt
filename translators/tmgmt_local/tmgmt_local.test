@@ -155,13 +155,14 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Completed'));
 
     entity_get_controller('tmgmt_job')->resetCache(array($job->tjid));
+    entity_get_controller('tmgmt_job_item')->resetCache();
     $job = tmgmt_job_load($job->tjid);
     list($item1, $item2) = array_values($job->getItems());
     // Job was approved and finished automatically due to the default approve
     // setting.
     $this->assertTrue($job->isFinished());
-    $this->assertEqual($item1->data['dummy']['deep_nesting']['#translation']['#text'], $translation1);
-    $this->assertEqual($item2->data['dummy']['deep_nesting']['#translation']['#text'], $translation2);
+    $this->assertEqual($item1->getData(array('dummy', 'deep_nesting', '#translation', '#text')), $translation1);
+    $this->assertEqual($item2->getData(array('dummy', 'deep_nesting', '#translation', '#text')), $translation2);
   }
 
 }

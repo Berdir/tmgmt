@@ -980,16 +980,25 @@ class TMGMTJob extends Entity {
     if (!empty($this->label)) {
       return $this->label;
     }
-    $wrapper = entity_metadata_wrapper($this->entityType, $this);
-    $source = $wrapper->source_language->label();
-    if (empty($source)) {
-      $source = '?';
+
+    $items = $this->getItems();
+    $count = count($items);
+    if ($count > 0) {
+      $t_args = array('@title' => reset($items)->getSourceLabel(), '@more' => $count - 1);
+      return format_plural($count, '@title', '@title and @more more', $t_args);
     }
-    $target = $wrapper->target_language->label();
-    if (empty($target)) {
-      $target = '?';
+    else {
+      $wrapper = entity_metadata_wrapper($this->entityType, $this);
+      $source = $wrapper->source_language->label();
+      if (empty($source)) {
+        $source = '?';
+      }
+      $target = $wrapper->target_language->label();
+      if (empty($target)) {
+        $target = '?';
+      }
+      return t('From @source to @target', array('@source' => $source, '@target' => $target));
     }
-    return t('From @source to @target', array('@source' => $source, '@target' => $target));
   }
 
   /**

@@ -90,7 +90,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $this->assertLink(t('manage'));
     $this->assertNoLink(t('submit'));
     $this->assertNoLink(t('delete'));
-    $this->assertText(t('From English to German'));
+    $this->assertText(t('@title', array('@title' => $node->title)));
     $this->clickLink(t('manage'));
     $this->assertResponse(200);
     $this->assertNoRaw(t('Submit to translator'));
@@ -115,7 +115,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $this->assertLink(t('submit'));
     $this->assertNoLink(t('manage'));
     $this->assertNoLink(t('delete'));
-    $this->assertText(t('From English to German'));
+    $this->assertText(t('@title', array('@title' => $node->title)));
 
     $this->clickLink('submit');
 
@@ -460,7 +460,7 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTBaseTestCase {
     $this->drupalPost(NULL, $edit, t('Request translations'));
 
     // Some assertions on the submit form.
-    $this->assertText(t('From English to ? (Unprocessed)'));
+    $this->assertText(t('@title and 2 more (English to ?, Unprocessed)', array('@title' => $node1->title)));
     $this->assertText(t('Translation for @title', array('@title' => $node1->title)));
     $this->assertText(t('Translation for @title', array('@title' => $node2->title)));
     $this->assertText(t('Translation for @title', array('@title' => $node3->title)));
