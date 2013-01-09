@@ -593,7 +593,11 @@ function tmgmt_job_item_review_access(TMGMTJobItem $item, $account = NULL) {
 function tmgmt_message_access($op, TMGMTMessage $message = NULL, $account = NULL) {
   // All users that can see jobs can see messages as well.
   if ($op == 'view') {
-    return tmgmt_job_access('view', $message->getJob(), $account);
+    $job = NULL;
+    if ($message) {
+      $job = $message->getJob();
+    }
+    return tmgmt_job_access('view', $job, $account);
   }
   // Changing or creating messages is only possible for admins.
   return user_access('administer tmgmt');
