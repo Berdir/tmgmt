@@ -286,28 +286,28 @@ class TMGMTJobItem extends Entity {
    *
    * @var integer
    */
-  public $count_pending;
+  public $count_pending = 0;
 
   /**
    * Counter for all translated data items.
    *
    * @var integer
    */
-  public $count_translated;
+  public $count_translated = 0;
 
   /**
    * Counter for all accepted data items.
    *
    * @var integer
    */
-  public $count_accepted;
+  public $count_accepted = 0;
 
   /**
    * Counter for all reviewed data items.
    *
    * @var integer
    */
-  public $count_accepted;
+  public $count_reviewed = 0;
 
   /**
    * Amount of words in this job item.
@@ -519,7 +519,7 @@ class TMGMTJobItem extends Entity {
    *   Pending counts
    */
   public function getCountPending() {
-    return $this->count_pending ? $this->count_pending : 0;
+    return $this->count_pending;
   }
 
   /**
@@ -529,7 +529,7 @@ class TMGMTJobItem extends Entity {
    *   Translated count
    */
   public function getCountTranslated() {
-    return $this->count_translated ? $this->count_translated : 0;
+    return $this->count_translated;
   }
 
   /**
@@ -539,7 +539,7 @@ class TMGMTJobItem extends Entity {
    *   Accepted count
    */
   public function getCountAccepted() {
-    return $this->count_accepted ? $this->count_accepted : 0;
+    return $this->count_accepted;
   }
 
   /**
@@ -549,7 +549,7 @@ class TMGMTJobItem extends Entity {
    *   Accepted count
    */
   public function getCountReviewed() {
-    return $this->count_reviewed ? $this->count_reviewed : 0;
+    return $this->count_reviewed;
   }
 
   /**

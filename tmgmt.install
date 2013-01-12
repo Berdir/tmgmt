@@ -610,11 +610,11 @@ function tmgmt_update_7009() {
   // First set count_accepted to the value of count_reviewed.
   db_update('tmgmt_job_item')
     ->expression('count_accepted', 'count_reviewed')
-    ->condition('status', TMGMT_JOB_ITEM_STATE_ACCEPTED)
+    ->condition('state', TMGMT_JOB_ITEM_STATE_ACCEPTED)
     ->execute();
   // Then set count_reviewed to 0.
   db_update('tmgmt_job_item')
     ->fields(array('count_reviewed' => 0))
-    ->condition('status', TMGMT_JOB_ITEM_STATE_ACCEPTED)
+    ->condition('state', TMGMT_JOB_ITEM_STATE_ACCEPTED)
     ->execute();
 }

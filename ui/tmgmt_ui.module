@@ -519,7 +519,7 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
       );
       $form[$target_key]['status'] = array(
         '#theme' => 'tmgmt_ui_translator_review_form_element_status',
-        '#value' => $data[$key]['#status'],
+        '#value' => $job_item->isAccepted() ? TMGMT_DATA_ITEM_STATE_ACCEPTED : $data[$key]['#status'],
       );
       $form[$target_key]['actions'] = array(
         '#type' => 'container',
