@@ -95,14 +95,19 @@ define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
 define('TMGMT_DATA_ITEM_STATE_PENDING', 0);
 
 /**
- * The translation data item has been accepted.
+ * The translation data item has been reviewed.
  */
-define('TMGMT_DATA_ITEM_STATE_ACCEPTED', 1);
+define('TMGMT_DATA_ITEM_STATE_REVIEWED', 1);
 
 /**
  * The translation data item has been translated.
  */
 define('TMGMT_DATA_ITEM_STATE_TRANSLATED', 2);
+
+/**
+ * The translation data item has been reviewed.
+ */
+define('TMGMT_DATA_ITEM_STATE_ACCEPTED', 3);
 
 /**
  * @} End of "addtogroup tmgmt_job".
@@ -477,7 +482,7 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
  *
  * @return
  *   An array of objects with the keys word_count, count_pending,
- *   count_accepted and count_translated.
+ *   count_accepted, count_reviewed and count_translated.
  */
 function tmgmt_job_statistics_load(array $tjids) {
   $statistics = &drupal_static(__FUNCTION__, array());
@@ -504,6 +509,7 @@ function tmgmt_job_statistics_load(array $tjids) {
       ->fields('tji', array('tjid'));
     $query->addExpression('SUM(word_count)', 'word_count');
     $query->addExpression('SUM(count_accepted)', 'count_accepted');
+    $query->addExpression('SUM(count_reviewed)', 'count_reviewed');
     $query->addExpression('SUM(count_pending)', 'count_pending');
     $query->addExpression('SUM(count_translated)', 'count_translated');
     $result = $query->groupBy('tjid')
@@ -523,7 +529,8 @@ function tmgmt_job_statistics_load(array $tjids) {
  * @param $job
  *   The translation job entity.
  * @param $key
- *   One of word_count, count_pending, count_accepted and count_translated.
+ *   One of word_count, count_pending, count_accepted, count_reviewed and
+ *   count_translated.
  *
  * @return
  *   The requested information as an integer.

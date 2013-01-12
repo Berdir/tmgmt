@@ -524,43 +524,45 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
       $form[$target_key]['actions'] = array(
         '#type' => 'container',
       );
-      if ($data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_REVIEWED) {
-        $form[$target_key]['actions']['reviewed'] = array(
-          '#type' => 'submit',
-          // Unicode character &#x2713 CHECK MARK
-          '#value' => '✓',
-          '#attributes' => array('title' => t('Reviewed')),
-          '#name' => 'reviewed-' . $target_key,
-          '#submit' => array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit'),
-          '#ajax' => array(
-            'callback' => 'tmgmt_ui_translation_review_form_ajax',
-            'wrapper' => $form[$target_key]['#ajaxid'],
-          ),
-        );
-      }
-      else {
-        $form[$target_key]['actions']['unreviewed'] = array(
-          '#type' => 'submit',
-          // Unicode character &#x2713 CHECK MARK
-          '#value' => '✓',
-          '#attributes' => array('title' => t('Not reviewed'), 'class' => array('unreviewed')),
-          '#name' => 'unreviewed-' . $target_key,
-          '#submit' => array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit'),
-          '#ajax' => array(
-            'callback' => 'tmgmt_ui_translation_review_form_ajax',
-            'wrapper' => $form[$target_key]['#ajaxid'],
-          ),
-        );
-      }
-      if ($job_item->getTranslatorController() instanceof TMGMTTranslatorRejectDataItem && $data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_PENDING) {
-        $form[$target_key]['actions']['reject'] = array(
-          '#type' => 'submit',
-          // Unicode character &#x2717 BALLOT X
-          '#value' => '✗',
-          '#attributes' => array('title' => t('Reject')),
-          '#name' => 'reject-' . $target_key,
-          '#submit' => array('tmgmt_ui_translation_review_form_update_state'),
-        );
+      if (!$job_item->isAccepted()) {
+        if ($data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_REVIEWED) {
+          $form[$target_key]['actions']['reviewed'] = array(
+            '#type' => 'submit',
+            // Unicode character &#x2713 CHECK MARK
+            '#value' => '✓',
+            '#attributes' => array('title' => t('Reviewed')),
+            '#name' => 'reviewed-' . $target_key,
+            '#submit' => array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit'),
+            '#ajax' => array(
+              'callback' => 'tmgmt_ui_translation_review_form_ajax',
+              'wrapper' => $form[$target_key]['#ajaxid'],
+            ),
+          );
+        }
+        else {
+          $form[$target_key]['actions']['unreviewed'] = array(
+            '#type' => 'submit',
+            // Unicode character &#x2713 CHECK MARK
+            '#value' => '✓',
+            '#attributes' => array('title' => t('Not reviewed'), 'class' => array('unreviewed')),
+            '#name' => 'unreviewed-' . $target_key,
+            '#submit' => array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit'),
+            '#ajax' => array(
+              'callback' => 'tmgmt_ui_translation_review_form_ajax',
+              'wrapper' => $form[$target_key]['#ajaxid'],
+            ),
+          );
+        }
+        if ($job_item->getTranslatorController() instanceof TMGMTTranslatorRejectDataItem && $data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_PENDING) {
+          $form[$target_key]['actions']['reject'] = array(
+            '#type' => 'submit',
+            // Unicode character &#x2717 BALLOT X
+            '#value' => '✗',
+            '#attributes' => array('title' => t('Reject')),
+            '#name' => 'reject-' . $target_key,
+            '#submit' => array('tmgmt_ui_translation_review_form_update_state'),
+          );
+        }
       }
       $form[$target_key]['translation'] = array(
         '#type' => 'textarea',
@@ -676,8 +678,6 @@ function tmgmt_ui_translation_review_form_update_state($form, &$form_state) {
     case 'reviewed':
       $form_state['rebuild'] = TRUE;
       $data['#status'] = TMGMT_DATA_ITEM_STATE_REVIEWED;
-      // @todo: Move this to where the job item is accepted?
-      $success = $controller->approveDataItem($job_item, tmgmt_ensure_keys_array($matches['key']));
       break;
     case 'unreviewed':
       $form_state['rebuild'] = TRUE;

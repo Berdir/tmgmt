@@ -303,6 +303,13 @@ class TMGMTJobItem extends Entity {
   public $count_accepted;
 
   /**
+   * Counter for all reviewed data items.
+   *
+   * @var integer
+   */
+  public $count_accepted;
+
+  /**
    * Amount of words in this job item.
    *
    * @var integer
@@ -533,6 +540,16 @@ class TMGMTJobItem extends Entity {
    */
   public function getCountAccepted() {
     return $this->count_accepted ? $this->count_accepted : 0;
+  }
+
+  /**
+   * Count of all accepted data items.
+   *
+   * @return
+   *   Accepted count
+   */
+  public function getCountReviewed() {
+    return $this->count_reviewed ? $this->count_reviewed : 0;
   }
 
   /**
@@ -1550,6 +1567,16 @@ class TMGMTJob extends Entity {
    */
   public function getCountAccepted() {
     return tmgmt_job_statistic($this, 'count_accepted');
+  }
+
+  /**
+   * Sums up all accepted counts of this jobs job items.
+   *
+   * @return
+   *   The sum of all accepted data items.
+   */
+  public function getCountReviewed() {
+    return tmgmt_job_statistic($this, 'count_reviewed');
   }
 
   /**

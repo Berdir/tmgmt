@@ -70,6 +70,7 @@ class TMGMTJobItemController extends EntityAPIController {
     if ($entity->isAccepted()) {
       $entity->count_pending = 0;
       $entity->count_translated = 0;
+      $entity->count_reviewed = 0;
       $entity->count_accepted = count(array_filter(tmgmt_flatten_data($entity->data), '_tmgmt_filter_data'));
     }
     // Count the data item states.
@@ -77,6 +78,7 @@ class TMGMTJobItemController extends EntityAPIController {
       // Reset counter values.
       $entity->count_pending = 0;
       $entity->count_translated = 0;
+      $entity->count_reviewed = 0;
       $entity->count_accepted = 0;
       $entity->word_count = 0;
       $this->count($entity->data, $entity);
@@ -113,7 +115,7 @@ class TMGMTJobItemController extends EntityAPIController {
         }
         switch ($item['#status']) {
           case TMGMT_DATA_ITEM_STATE_REVIEWED:
-            $entity->count_accepted++;
+            $entity->count_reviewed++;
             break;
           case TMGMT_DATA_ITEM_STATE_TRANSLATED:
             $entity->count_translated++;

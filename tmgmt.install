@@ -157,6 +157,12 @@ function tmgmt_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'count_reviewed' => array(
+        'description' => 'Counter for all reviewed data items.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
       'word_count' => array(
         'description' => 'Word count of all texts contained in this job item.',
         'type' => 'int',
@@ -575,4 +581,40 @@ function tmgmt_update_7006(&$sandbox) {
  */
 function tmgmt_update_7007() {
   variable_del('tmgmt_auto_accept');
+}
+
+/**
+ * Introduce the reviewed counter and rename approved.
+ */
+function tmgmt_update_7008() {
+  // Rename approved to reviewed to simplify the upgrade path.
+  db_change_field('tmgmt_job_item', 'count_approved', 'count_reviewed', array(
+    'description' => 'Counter for all reviewed data items.',
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+  ));
+  // Add the accepted counter.
+  db_add_field('tmgmt_job_item', 'count_accepted', array(
+    'description' => 'Counter for all accepted data items.',
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+  ));
+}
+
+/**
+ * Update data item status of accepted job items to accepted.
+ */
+function tmgmt_update_7009() {
+  // First set count_accepted to the value of count_reviewed.
+  db_update('tmgmt_job_item')
+    ->expression('count_accepted', 'count_reviewed')
+    ->condition('status', TMGMT_JOB_ITEM_STATE_ACCEPTED)
+    ->execute();
+  // Then set count_reviewed to 0.
+  db_update('tmgmt_job_item')
+    ->fields(array('count_reviewed' => 0))
+    ->condition('status', TMGMT_JOB_ITEM_STATE_ACCEPTED)
+    ->execute();
 }

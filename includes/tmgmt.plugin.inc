@@ -293,7 +293,7 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    *   provide informations about the failure by adding a message to the job
    *   item.
    */
-  public function accepptedDataItem(TMGMTJobItem $job_item, array $key);
+  public function acceptetDataItem(TMGMTJobItem $job_item, array $key);
 
 }
 
@@ -430,7 +430,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::acceptedDataItem().
    */
-  public function acceptedDataItem(TMGMTJobItem $job_item, array $key) {
+  public function acceptetDataItem(TMGMTJobItem $job_item, array $key) {
     return TRUE;
   }
 }
