@@ -151,8 +151,8 @@ function tmgmt_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'count_approved' => array(
-        'description' => 'Counter for all approved data items.',
+      'count_accepted' => array(
+        'description' => 'Counter for all accepted data items.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
@@ -363,8 +363,8 @@ function tmgmt_update_7002() {
       'not null' => TRUE,
       'default' => 0,
     ),
-    'count_approved' => array(
-      'description' => 'Counter for all approved data items.',
+    'count_accepted' => array(
+      'description' => 'Counter for all accepted data items.',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
@@ -402,10 +402,10 @@ function tmgmt_update_7002() {
         }
       }
       switch ($item['#status']) {
-        case TMGMT_DATA_ITEM_STATE_APPROVED:
-          $entity->count_approved++;
+        case 1:
+          $entity->count_accepted++;
           break;
-        case TMGMT_DATA_ITEM_STATE_TRANSLATED:
+        case 2:
           $entity->count_translated++;
           break;
         default:
@@ -435,7 +435,7 @@ function tmgmt_update_7003(&$sandbox) {
     // Unseralize data, count it and then save the counters.
     if (!empty($row->data)) {
       $fake_job_item = (object)array(
-        'count_approved' => 0,
+        'count_accepted' => 0,
         'count_translated' => 0,
         'count_pending' => 0,
       );

@@ -23,6 +23,10 @@ table.tmgmt-ui-review td {
   vertical-align: top;
 }
 
+table.tmgmt-ui-review input.unreviewed {
+  text-decoration: line-through;
+}
+
 table.tmgmt-ui-review tbody th {
   background: none;
   font-weight: bold;

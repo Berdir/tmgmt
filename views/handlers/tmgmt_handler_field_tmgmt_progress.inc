@@ -30,7 +30,7 @@ class tmgmt_handler_field_tmgmt_progress extends views_handler_field_entity {
   function render($values) {
     $object = $this->get_value($values);
     $counts = array(
-      '@approved' => $object->getCountApproved(),
+      '@accepted' => $object->getCountAccepted(),
       '@translated' => $object->getCountTranslated(),
       '@pending' => $object->getCountPending(),
     );
@@ -40,7 +40,7 @@ class tmgmt_handler_field_tmgmt_progress extends views_handler_field_entity {
       draw_chart($this->build_progressbar_settings($id, $counts));
       return '<div id="progress' . $id . '"></div>';
     }
-    $title = t('Approved: @approved, translated: @translated, pending: @pending.', $counts);
+    $title = t('Accepted: @accepted, translated: @translated, pending: @pending.', $counts);
     return sprintf('<span title="%s">%s</span>', $title, implode('/', $counts));
   }
 
@@ -53,7 +53,7 @@ class tmgmt_handler_field_tmgmt_progress extends views_handler_field_entity {
    * @param $id
    *   The id of the chart.
    * @param $counts
-   *   Array with the counts for approved, translated and pending.
+   *   Array with the counts for accepted, translated and pending.
    * @param $prefix
    *   Prefix to id.
    * @return
@@ -61,9 +61,9 @@ class tmgmt_handler_field_tmgmt_progress extends views_handler_field_entity {
    */
   function build_progressbar_settings($id, $counts, $prefix = 'progress') {
     $settings['chart'][$prefix . $id] = array(
-      'header' => array(t('Approved'), t('Translated'), t('Pending')),
+      'header' => array(t('Accepted'), t('Translated'), t('Pending')),
       'rows' => array(
-        array($counts['@approved'], $counts['@translated'], $counts['@pending']),
+        array($counts['@accepted'], $counts['@translated'], $counts['@pending']),
       ),
       'columns' => array(''),
       'chartType' => 'PieChart',

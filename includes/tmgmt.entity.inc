@@ -296,11 +296,11 @@ class TMGMTJobItem extends Entity {
   public $count_translated;
 
   /**
-   * Counter for all confirmed data items.
+   * Counter for all accepted data items.
    *
    * @var integer
    */
-  public $count_approved;
+  public $count_accepted;
 
   /**
    * Amount of words in this job item.
@@ -526,20 +526,20 @@ class TMGMTJobItem extends Entity {
   }
 
   /**
-   * Count of all approved data items.
+   * Count of all accepted data items.
    *
    * @return
-   *   Approved count
+   *   Accepted count
    */
-  public function getCountApproved() {
-    return $this->count_approved ? $this->count_approved : 0;
+  public function getCountAccepted() {
+    return $this->count_accepted ? $this->count_accepted : 0;
   }
 
   /**
    * Word count of all data items.
    *
    * @return
-   *   Approved count
+   *   Word count
    */
   public function getWordCount() {
     return (int)$this->word_count;
@@ -1543,20 +1543,20 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Sums up all approved counts of this jobs job items.
+   * Sums up all accepted counts of this jobs job items.
    *
    * @return
-   *   The sum of all approved counts
+   *   The sum of all accepted data items.
    */
-  public function getCountApproved() {
-    return tmgmt_job_statistic($this, 'count_approved');
+  public function getCountAccepted() {
+    return tmgmt_job_statistic($this, 'count_accepted');
   }
 
   /**
    * Sums up all word counts of this jobs job items.
    *
    * @return
-   *   The sum of all approved counts
+   *   The total word count of this job.
    */
   public function getWordCount() {
     return tmgmt_job_statistic($this, 'word_count');

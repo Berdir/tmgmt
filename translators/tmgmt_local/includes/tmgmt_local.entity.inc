@@ -275,20 +275,20 @@ class TMGMTLocalTask extends Entity {
   }
 
   /**
-   * Sums up all approved counts of this task job items.
+   * Sums up all accepted counts of this task job items.
    *
    * @return
-   *   The sum of all approved counts
+   *   The sum of all accepted counts
    */
-  public function getCountApproved() {
-    return tmgmt_local_task_statistic($this, 'count_approved');
+  public function getCountAccepted() {
+    return tmgmt_local_task_statistic($this, 'count_accepted');
   }
 
   /**
    * Sums up all word counts of this task job items.
    *
    * @return
-   *   The sum of all approved counts
+   *   The sum of all accepted counts
    */
   public function getWordCount() {
     return tmgmt_local_task_statistic($this, 'word_count');

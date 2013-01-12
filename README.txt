@@ -109,7 +109,7 @@ IMPORTANT: As of alpha2, the external translators have been moved to a separate
 
 The management part itself is working well. It is possible to create and submit
 jobs to various translators, get the translated text back into the system,
-review and approve it. The user interfaces are already quite usable and we
+review and accept it. The user interfaces are already quite usable and we
 continue to work on further improvements.
 
 ==== Sources ====

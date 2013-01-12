@@ -220,7 +220,7 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     foreach ($translated_text[2] as $key => $value) {
       $this->assertNoText($value);
     }
-    $this->drupalPost(NULL, array(), t('Approve All'));
+    $this->drupalPost(NULL, array(), t('Save as completed'));
     // Review both items.
     $this->clickLink(t('review'));
     foreach ($translated_text[1] as $key => $value) {
@@ -229,7 +229,7 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     foreach ($translated_text[2] as $key => $value) {
       $this->assertText($value);
     }
-    $this->drupalPost(NULL, array(), t('Approve All'));
+    $this->drupalPost(NULL, array(), t('Save as completed'));
     // @todo: Enable this assertion once new releases for views and entity
     // module are out.
     //$this->assertText(t('Accepted'));
