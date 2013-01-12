@@ -369,8 +369,8 @@ function tmgmt_update_7002() {
       'not null' => TRUE,
       'default' => 0,
     ),
-    'count_accepted' => array(
-      'description' => 'Counter for all accepted data items.',
+    'count_approved' => array(
+      'description' => 'Counter for all approved data items.',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
@@ -409,7 +409,7 @@ function tmgmt_update_7002() {
       }
       switch ($item['#status']) {
         case 1:
-          $entity->count_accepted++;
+          $entity->count_approved++;
           break;
         case 2:
           $entity->count_translated++;
@@ -441,7 +441,7 @@ function tmgmt_update_7003(&$sandbox) {
     // Unseralize data, count it and then save the counters.
     if (!empty($row->data)) {
       $fake_job_item = (object)array(
-        'count_accepted' => 0,
+        'count_approved' => 0,
         'count_translated' => 0,
         'count_pending' => 0,
       );
@@ -530,7 +530,7 @@ function tmgmt_update_7005() {
  * @param $entity
  *   The job item the count should be calculated.
  */
- function _tmgmt_data_count_7006(&$item, $entity) {
+ function _tmgmt_data_count_7006($item, $entity) {
   if (!empty($item['#text'])) {
     if (_tmgmt_filter_data($item)) {
       // Count words of the data item.
@@ -609,12 +609,16 @@ function tmgmt_update_7008() {
 function tmgmt_update_7009() {
   // First set count_accepted to the value of count_reviewed.
   db_update('tmgmt_job_item')
-    ->expression('count_accepted', 'count_reviewed')
+    ->expression('count_accepted', 'count_reviewed + count_pending + count_translated')
     ->condition('state', TMGMT_JOB_ITEM_STATE_ACCEPTED)
     ->execute();
   // Then set count_reviewed to 0.
   db_update('tmgmt_job_item')
-    ->fields(array('count_reviewed' => 0))
+    ->fields(array(
+      'count_reviewed' => 0,
+      'count_translated' => 0,
+      'count_pending' => 0,
+      ))
     ->condition('state', TMGMT_JOB_ITEM_STATE_ACCEPTED)
     ->execute();
 }

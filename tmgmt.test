@@ -960,7 +960,7 @@ class TMGMTUpgradeAlpha1TestCase extends DrupalWebTestCase {
     // Go to a job and check the review form.
     $this->drupalGet('admin/config/regional/tmgmt/jobs/1');
     // Make sure the #status values have been set accordingly.
-    $this->assertRaw(t('Accepted: @accepted, translated: @translated, pending: @pending.', array('@accepted' => 0, '@translated' => 2, '@pending' => 0)));
+    $this->assertRaw(t('Accepted: @accepted, reviewed: @reviewed, translated: @translated, pending: @pending.', array('@accepted' => 0, '@reviewed' => 0, '@translated' => 2, '@pending' => 0)));
     // Extract the word count field and make sure it's correct.
     $word_count = $this->xpath('//td[contains(@class, :class)]', array(':class' => 'views-field-word-count-1'));
     $this->assertEqual(6, trim((string)reset($word_count)));
@@ -973,6 +973,13 @@ class TMGMTUpgradeAlpha1TestCase extends DrupalWebTestCase {
     $this->assertRaw('de_This is the body.');
     // Reject button.
     $this->assertRaw('✗');
+
+    // Check that accepted count has been updated correctly.
+    $this->drupalGet('admin/config/regional/tmgmt/jobs/2');
+    // Make sure the #status values have been set accordingly.
+    $this->assertRaw(t('Accepted: @accepted, reviewed: @reviewed, translated: @translated, pending: @pending.', array('@accepted' => 2, '@reviewed' => 0, '@translated' => 0, '@pending' => 0)));
+
+
   }
 
 
