@@ -618,7 +618,7 @@ function tmgmt_update_7009() {
       'count_reviewed' => 0,
       'count_translated' => 0,
       'count_pending' => 0,
-      ))
+    ))
     ->condition('state', TMGMT_JOB_ITEM_STATE_ACCEPTED)
     ->execute();
 }
