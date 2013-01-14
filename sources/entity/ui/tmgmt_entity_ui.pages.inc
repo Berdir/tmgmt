@@ -28,7 +28,8 @@ function tmgmt_entity_ui_translate_form($form, &$form_state, $build) {
   $languages = language_list();
   // Check if there is a job / job item that references this translation.
   list($id, $vid, $bundle) = entity_extract_ids($form_state['entity_type'], $form_state['entity']);
-  $items = tmgmt_job_item_load_latest('entity', $form_state['entity_type'], $id, $form_state['entity']->language);
+  $entity_language = entity_language($bundle, $form_state['entity']);
+  $items = tmgmt_job_item_load_latest('entity', $form_state['entity_type'], $id, $entity_language);
   foreach ($languages as $langcode => $language) {
     if ($langcode == LANGUAGE_NONE) {
       // Never show language neutral on the overview.
@@ -37,7 +38,7 @@ function tmgmt_entity_ui_translate_form($form, &$form_state, $build) {
     // Since the keys are numeric and in the same order we can shift one element
     // after the other from the original non-form rows.
     $option = array_shift($overview['#rows']);
-    if ($langcode == $form_state['entity']->language) {
+    if ($langcode == $entity_language) {
       $additional = '<strong>' . t('Source') . '</strong>';
       // This is the source object so we disable the checkbox for this row.
       $form['languages'][$langcode] = array(
