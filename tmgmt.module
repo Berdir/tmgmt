@@ -90,19 +90,24 @@ define('TMGMT_JOB_ITEM_STATE_REVIEW', 2);
 define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
 
 /**
- * The translation data item has no been been translated.
+ * The translation data item has not been translated.
  */
 define('TMGMT_DATA_ITEM_STATE_PENDING', 0);
 
 /**
- * The translation data item has ben been reviewed and approved.
+ * The translation data item has been reviewed.
  */
-define('TMGMT_DATA_ITEM_STATE_APPROVED', 1);
+define('TMGMT_DATA_ITEM_STATE_REVIEWED', 1);
 
 /**
- * The translation data item has ben been translated.
+ * The translation data item has been translated.
  */
 define('TMGMT_DATA_ITEM_STATE_TRANSLATED', 2);
+
+/**
+ * The translation data item has been reviewed.
+ */
+define('TMGMT_DATA_ITEM_STATE_ACCEPTED', 3);
 
 /**
  * @} End of "addtogroup tmgmt_job".
@@ -476,8 +481,8 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
  *   An array of job ids.
  *
  * @return
- *   An array of objects with the keys word_count, count_pending, count_approved
- *   and count_translated.
+ *   An array of objects with the keys word_count, count_pending,
+ *   count_accepted, count_reviewed and count_translated.
  */
 function tmgmt_job_statistics_load(array $tjids) {
   $statistics = &drupal_static(__FUNCTION__, array());
@@ -503,7 +508,8 @@ function tmgmt_job_statistics_load(array $tjids) {
     $query = db_select('tmgmt_job_item', 'tji')
       ->fields('tji', array('tjid'));
     $query->addExpression('SUM(word_count)', 'word_count');
-    $query->addExpression('SUM(count_approved)', 'count_approved');
+    $query->addExpression('SUM(count_accepted)', 'count_accepted');
+    $query->addExpression('SUM(count_reviewed)', 'count_reviewed');
     $query->addExpression('SUM(count_pending)', 'count_pending');
     $query->addExpression('SUM(count_translated)', 'count_translated');
     $result = $query->groupBy('tjid')
@@ -523,7 +529,8 @@ function tmgmt_job_statistics_load(array $tjids) {
  * @param $job
  *   The translation job entity.
  * @param $key
- *   One of word_count, count_pending, count_approved and count_translated.
+ *   One of word_count, count_pending, count_accepted, count_reviewed and
+ *   count_translated.
  *
  * @return
  *   The requested information as an integer.

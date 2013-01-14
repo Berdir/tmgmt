@@ -123,12 +123,19 @@ function theme_tmgmt_ui_translator_review_form_element_status($variables) {
   $classes[] = 'tmgmt-ui-icon';
   $classes[] = 'tmgmt-ui-icon-32'; // Icon size 32px square.
   switch ($variables['status']['#value']) {
-    case TMGMT_DATA_ITEM_STATE_APPROVED:
-      $title = t('Approved');
+    case TMGMT_DATA_ITEM_STATE_ACCEPTED:
+      $title = t('Accepted');
+      // Unicode character U+2611 BALLOT BOX WITH CHECK.
+      $icon = '&#x2611;';
+      $classes[] = 'tmgmt-ui-icon-darkgreen';
+      $classes[] = 'tmgmt-ui-state-accepted';
+      break;
+    case TMGMT_DATA_ITEM_STATE_REVIEWED:
+      $title = t('Reviewed');
       // Unicode character U+2611 BALLOT BOX WITH CHECK.
       $icon = '&#x2611;';
       $classes[] = 'tmgmt-ui-icon-green';
-      $classes[] = 'tmgmt-ui-state-approved';
+      $classes[] = 'tmgmt-ui-state-reviewed';
       break;
     case TMGMT_DATA_ITEM_STATE_TRANSLATED:
       $title = t('Translated');

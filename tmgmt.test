@@ -536,7 +536,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $data4 = array(
       '#text' => 'Another, longer text to be translated.',
       '#translation' => 'The translated data. Set by the translator plugin.',
-      '#status' => TMGMT_DATA_ITEM_STATE_APPROVED,
+      '#status' => TMGMT_DATA_ITEM_STATE_REVIEWED,
     );
     $data5 = array(
       '#label' => 'label',
@@ -547,7 +547,8 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     // No data items.
     $this->assertEqual(0, $job->getCountPending());
     $this->assertEqual(0, $job->getCountTranslated());
-    $this->assertEqual(0, $job->getCountApproved());
+    $this->assertEqual(0, $job->getCountReviewed());
+    $this->assertEqual(0, $job->getCountAccepted());
     $this->assertEqual(0, $job->getWordCount());
 
     // Add a test items.
@@ -560,10 +561,12 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(0, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
-    $this->assertEqual(0, $job_item1->getCountApproved());
+    $this->assertEqual(0, $job_item1->getCountReviewed());
+    $this->assertEqual(0, $job_item1->getCountAccepted());
     $this->assertEqual(0, $job->getCountPending());
     $this->assertEqual(0, $job->getCountTranslated());
-    $this->assertEqual(0, $job->getCountApproved());
+    $this->assertEqual(0, $job->getCountReviewed());
+    $this->assertEqual(0, $job->getCountAccepted());
 
     // Add an untranslated data item.
     $job_item1->data['data_item1'] = $data1;
@@ -575,10 +578,13 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(1, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
+    $this->assertEqual(0, $job_item1->getCountReviewed());
     $this->assertEqual(5, $job_item1->getWordCount());
     $this->assertEqual(1, $job->getCountPending());
+    $this->assertEqual(0, $job->getCountReviewed());
     $this->assertEqual(0, $job->getCountTranslated());
     $this->assertEqual(5, $job->getWordCount());
+
 
     // Add another untranslated data item.
     // Test with an empty translation set.
@@ -591,9 +597,11 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(1, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
+    $this->assertEqual(0, $job_item1->getCountReviewed());
     $this->assertEqual(5, $job_item1->getWordCount());
     $this->assertEqual(1, $job->getCountPending());
     $this->assertEqual(0, $job->getCountTranslated());
+    $this->assertEqual(0, $job->getCountReviewed());
     $this->assertEqual(5, $job->getWordCount());
 
     // Add a translated data item.
@@ -604,17 +612,19 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(0, $job_item1->getCountPending());
     $this->assertEqual(1, $job_item1->getCountTranslated());
+    $this->assertEqual(0, $job_item1->getCountReviewed());
     $this->assertEqual(0, $job->getCountPending());
+    $this->assertEqual(0, $job->getCountReviewed());
     $this->assertEqual(1, $job->getCountTranslated());
 
     // Add a confirmed data item.
     $job_item1->data['data_item1'] = $data4;
     $job_item1->save();
 
-    // One confirmed data items.
+    // One reviewed data item.
     drupal_static_reset('tmgmt_job_statistics_load');
-    $this->assertEqual(1, $job_item1->getCountApproved());
-    $this->assertEqual(1, $job->getCountApproved());
+    $this->assertEqual(1, $job_item1->getCountReviewed());
+    $this->assertEqual(1, $job->getCountReviewed());
 
     // Add a translated and an untranslated and a confirmed data item
     $job = entity_load_single('tmgmt_job', $job->tjid);
@@ -628,7 +638,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(1, $job->getCountPending());
     $this->assertEqual(1, $job->getCountTranslated());
-    $this->assertEqual(1, $job->getCountApproved());
+    $this->assertEqual(1, $job->getCountReviewed());
     $this->assertEqual(16, $job->getWordCount());
 
     // Add nested data items.
@@ -658,7 +668,7 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(3, $job->getCountPending());
     $this->assertEqual(7, $job->getCountTranslated());
-    $this->assertEqual(5, $job->getCountApproved());
+    $this->assertEqual(5, $job->getCountReviewed());
 
     // Add several job items
     $job_item2 = tmgmt_job_item_create('plugin', 'type', 5, array('tjid' => $job->tjid));
@@ -678,7 +688,20 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(7, $job->getCountPending());
     $this->assertEqual(15, $job->getCountTranslated());
-    $this->assertEqual(9, $job->getCountApproved());
+    $this->assertEqual(9, $job->getCountReviewed());
+
+    // Accept the job items.
+    foreach ($job->getItems() as $item) {
+      // Set the state directly to avoid triggering translator and source
+      // controllers that do not exist.
+      $item->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED);
+      $item->save();
+    }
+    drupal_static_reset('tmgmt_job_statistics_load');
+    $this->assertEqual(0, $job->getCountPending());
+    $this->assertEqual(0, $job->getCountTranslated());
+    $this->assertEqual(0, $job->getCountReviewed());
+    $this->assertEqual(31, $job->getCountAccepted());
   }
 
 }
@@ -937,7 +960,7 @@ class TMGMTUpgradeAlpha1TestCase extends DrupalWebTestCase {
     // Go to a job and check the review form.
     $this->drupalGet('admin/config/regional/tmgmt/jobs/1');
     // Make sure the #status values have been set accordingly.
-    $this->assertRaw(t('Approved: @approved, translated: @translated, pending: @pending.', array('@approved' => 0, '@translated' => 2, '@pending' => 0)));
+    $this->assertRaw(t('Accepted: @accepted, reviewed: @reviewed, translated: @translated, pending: @pending.', array('@accepted' => 0, '@reviewed' => 0, '@translated' => 2, '@pending' => 0)));
     // Extract the word count field and make sure it's correct.
     $word_count = $this->xpath('//td[contains(@class, :class)]', array(':class' => 'views-field-word-count-1'));
     $this->assertEqual(6, trim((string)reset($word_count)));
@@ -950,6 +973,13 @@ class TMGMTUpgradeAlpha1TestCase extends DrupalWebTestCase {
     $this->assertRaw('de_This is the body.');
     // Reject button.
     $this->assertRaw('✗');
+
+    // Check that accepted count has been updated correctly.
+    $this->drupalGet('admin/config/regional/tmgmt/jobs/2');
+    // Make sure the #status values have been set accordingly.
+    $this->assertRaw(t('Accepted: @accepted, reviewed: @reviewed, translated: @translated, pending: @pending.', array('@accepted' => 2, '@reviewed' => 0, '@translated' => 0, '@pending' => 0)));
+
+
   }
 
 

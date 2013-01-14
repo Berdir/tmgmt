@@ -429,7 +429,7 @@ function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
  *
  * @return
  *   An array of objects with the keys word_count, count_pending,
- *   count_approved, count_translated and loop_count.
+ *   count_accepted, count_translated and loop_count.
  */
 function tmgmt_local_task_statistics_load(array $tltids) {
   $statistics = &drupal_static(__FUNCTION__, array());
@@ -456,7 +456,7 @@ function tmgmt_local_task_statistics_load(array $tltids) {
     $query->join('tmgmt_local_task', 'tlt', 'tlt.tjid = tji.tjid');
     $query->fields('tlt', array('tltid'));
     $query->addExpression('SUM(word_count)', 'word_count');
-    $query->addExpression('SUM(count_approved)', 'count_approved');
+    $query->addExpression('SUM(count_accepted)', 'count_accepted');
     $query->addExpression('SUM(count_pending)', 'count_pending');
     $query->addExpression('SUM(count_translated)', 'count_translated');
     $result = $query->groupBy('tlt.tjid')
@@ -477,7 +477,7 @@ function tmgmt_local_task_statistics_load(array $tltids) {
  * @param $task
  *   The translation task entity.
  * @param $key
- *   One of word_count, loop_count, count_pending, count_approved and
+ *   One of word_count, loop_count, count_pending, count_accepted and
  *   count_translated.
  *
  * @return

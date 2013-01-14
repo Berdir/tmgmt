@@ -277,14 +277,14 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
   public function hasCheckoutSettings(TMGMTJob $job);
 
   /**
-   * Approve one single data item.
+   * Accept a single data item.
    *
    * @todo Using job item breaks the current convention which uses jobs.
    *
    * @param $job_item
-   *   The Job item the approved data item belongs to.
+   *   The Job item the accepted data item belongs to.
    * @param $key
-   *   The key of the approved data item.
+   *   The key of the accepted data item.
    *   The key is an array containing the keys of a nested array hierarchy path.
    *
    * @return
@@ -293,7 +293,7 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    *   provide informations about the failure by adding a message to the job
    *   item.
    */
-  public function approveDataItem(TMGMTJobItem $job_item, array $key);
+  public function acceptetDataItem(TMGMTJobItem $job_item, array $key);
 
 }
 
@@ -315,7 +315,7 @@ interface TMGMTTranslatorRejectDataItem {
    * @param $job_item
    *   The job item to which the rejected data item belongs.
    * @param $key
-   *   The key of the approved data item.
+   *   The key of the rejected data item.
    *   The key is an array containing the keys of a nested array hierarchy path.
    *
    * @return
@@ -334,10 +334,10 @@ interface TMGMTTranslatorRejectDataItem {
    *
    * @param $form
    *   The form array containing a confirm form.
-   *   $form['item'] holds the job item to which the to berejected data item
+   *   $form['item'] holds the job item to which the to be rejected data item
    *   belongs to.
-   *   $form['item'] holds key of the approved data item as an array of keys of
-   *   a nested array hierarchy.
+   *   $form['item'] holds key of the to be rejected data item as an array of
+   *   keys of a nested array hierarchy.
    * @param $form_state
    *   The form state.
    *
@@ -428,9 +428,9 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::approveDataItem().
+   * Implements TMGMTTranslatorPluginControllerInterface::acceptedDataItem().
    */
-  public function approveDataItem(TMGMTJobItem $job_item, array $key) {
+  public function acceptetDataItem(TMGMTJobItem $job_item, array $key) {
     return TRUE;
   }
 }

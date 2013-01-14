@@ -19,7 +19,7 @@ class TMGMTLocalTaskUIController extends EntityDefaultUIController {
       'load arguments' => array($this->entityType),
       'access callback' => 'entity_access',
       'access arguments' => array('view', $this->entityType, $id_count),
-      'file' => 'tmgmt_local.forms.inc',
+      'file' => 'tmgmt_local.pages.inc',
       'file path' => drupal_get_path('module', 'tmgmt_local') . '/includes',
     );
     $items[$this->path . '/' . $wildcard . '/delete'] = array(

@@ -66,18 +66,20 @@ class TMGMTJobItemController extends EntityAPIController {
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $entity->changed = REQUEST_TIME;
 
-    // Consider everything approved when the job item is accepted.
+    // Consider everything accepted when the job item is accepted.
     if ($entity->isAccepted()) {
       $entity->count_pending = 0;
       $entity->count_translated = 0;
-      $entity->count_approved = count(array_filter(tmgmt_flatten_data($entity->data), '_tmgmt_filter_data'));
+      $entity->count_reviewed = 0;
+      $entity->count_accepted = count(array_filter(tmgmt_flatten_data($entity->data), '_tmgmt_filter_data'));
     }
     // Count the data item states.
     else {
       // Reset counter values.
       $entity->count_pending = 0;
       $entity->count_translated = 0;
-      $entity->count_approved = 0;
+      $entity->count_reviewed = 0;
+      $entity->count_accepted = 0;
       $entity->word_count = 0;
       $this->count($entity->data, $entity);
     }
@@ -86,7 +88,7 @@ class TMGMTJobItemController extends EntityAPIController {
 
   /**
    * Parse all data items recursively and sums up the counters for
-   * approved, translated and pending items.
+   * accepted, translated and pending items.
    *
    * @param $item
    *   The current data item.
@@ -112,8 +114,8 @@ class TMGMTJobItemController extends EntityAPIController {
           }
         }
         switch ($item['#status']) {
-          case TMGMT_DATA_ITEM_STATE_APPROVED:
-            $entity->count_approved++;
+          case TMGMT_DATA_ITEM_STATE_REVIEWED:
+            $entity->count_reviewed++;
             break;
           case TMGMT_DATA_ITEM_STATE_TRANSLATED:
             $entity->count_translated++;
