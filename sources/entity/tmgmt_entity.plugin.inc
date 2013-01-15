@@ -8,11 +8,15 @@
 class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginController {
 
   public function getLabel(TMGMTJobItem $job_item) {
-    return entity_label($job_item->item_type, entity_load_single($job_item->item_type, $job_item->item_id));
+    if ($entity = entity_load_single($job_item->item_type, $job_item->item_id)) {
+      return entity_label($job_item->item_type, $entity);
+    }
   }
 
   public function getUri(TMGMTJobItem $job_item) {
-    return entity_uri($job_item->item_type, entity_load_single($job_item->item_type, $job_item->item_id));
+    if ($entity = entity_load_single($job_item->item_type, $job_item->item_id)) {
+      return entity_uri($job_item->item_type, $entity);
+    }
   }
 
   /**
