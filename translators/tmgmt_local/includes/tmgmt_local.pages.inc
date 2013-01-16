@@ -43,7 +43,7 @@ function tmgmt_local_task_form($form, &$form_state, TMGMTLocalTask $task, $op = 
     '#default_value' => $wrapper->status->value(),
   );
 
-  $translators = tmgmt_local_translators();
+  $translators = tmgmt_local_translators($task->getJob()->source_language, $task->getJob()->target_language);
   $form['tuid'] = array(
     '#title' => t('Assigned'),
     '#type' => 'select',

@@ -253,7 +253,7 @@ function tmgmt_skills_field_access($op, $field, $entity_type, $entity = NULL, $a
  * Implements hook_field_update().
  */
 function tmgmt_skills_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  if ($entity_type != 'user' || array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
+  if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
     return;
   }
 
@@ -276,7 +276,7 @@ function tmgmt_skills_field_update($entity_type, $entity, $field, $instance, $la
  * Implements hook_field_delete().
  */
 function tmgmt_skills_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  if ($entity_type != 'user' || array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
+  if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
     return;
   }
   tmgmt_local_clear_languages_cache();
@@ -286,7 +286,7 @@ function tmgmt_skills_field_delete($entity_type, $entity, $field, $instance, $la
  * Implements hook_field_attach_delete().
  */
 function tmgmt_skills_field_attach_delete($entity_type, $entity) {
-  if ($entity_type != 'user' || array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
+  if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
     return;
   }
   tmgmt_local_clear_languages_cache();
@@ -295,7 +295,7 @@ function tmgmt_skills_field_attach_delete($entity_type, $entity) {
 /**
  * Implements hook_tmgmt_local_translation_capabilities().
  */
-function tmgmt_skills_tmgmt_local_translation_capabilities($source_language = NULL, $account = NULL) {
+function tmgmt_skills_tmgmt_local_translation_capabilities($source_language = NULL, $account = NULL, $target_language = NULL) {
   // Only considers users with the 'provide translation services' permission.
   $roles = user_roles(TRUE, 'provide translation services');
 
@@ -310,6 +310,10 @@ function tmgmt_skills_tmgmt_local_translation_capabilities($source_language = NU
 
   if ($source_language) {
     $query->condition('ts.tmgmt_translation_skills_language_from', $source_language);
+  }
+
+  if ($target_language) {
+    $query->condition('ts.tmgmt_translation_skills_language_to', $target_language);
   }
 
   // Only consider active users.

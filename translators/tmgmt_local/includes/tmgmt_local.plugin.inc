@@ -36,8 +36,12 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
   /**
    * Overrides TMGMTDefaultTranslatorPluginController::getSupportedTargetLanguages().
    */
-  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $language) {
-    return drupal_map_assoc(tmgmt_local_translation_capabilities($language));
+  public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
+    $languages = drupal_map_assoc(tmgmt_local_translation_capabilities($source_language));
+    if ($translator->getSetting('allow_all')) {
+      $languages += parent::getSupportedTargetLanguages($translator, $source_language);
+    }
+    return $languages;
   }
 
 }
@@ -83,6 +87,15 @@ class TMGMTLocalTranslatorUIController extends TMGMTDefaultTranslatorUIControlle
     else {
       $form['#description'] = t('Translation job is not assigned to any translator.');
     }
+    return $form;
+  }
+
+  public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
+    $form['allow_all'] = array(
+      '#title' => t('Allow translations for enabled languages even if no translator has the necessary capabilities'),
+      '#type' => 'checkbox',
+      '#default_value' => $translator->getSetting('allow_all'),
+    );
     return $form;
   }
 

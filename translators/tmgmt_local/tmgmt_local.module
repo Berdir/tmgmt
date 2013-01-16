@@ -311,8 +311,12 @@ function tmgmt_local_translation_capabilities($source_language = NULL, $account 
  * the translation capabilities of an local have changed.
  */
 function tmgmt_local_clear_languages_cache() {
-  foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
-    if ($translator->plugin == 'local') {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'tmgmt_translator');
+  $query->propertyCondition('plugin', 'local');
+  $result = $query->execute();
+  if ($result) {
+    foreach (tmgmt_translator_load_multiple(array_keys($result['tmgmt_translator'])) as $translator) {
       cache_clear_all('languages::' . $translator->name, 'cache_tmgmt');
     }
   }
@@ -516,7 +520,7 @@ function tmgmt_local_task_statuses() {
  *   Array of uid => name translators or empty array if there are no translator
  *   users.
  */
-function tmgmt_local_translators() {
+function tmgmt_local_translators($source_language = NULL, $target_language = NULL) {
   // Get all local user translators.
   $roles = user_roles(TRUE, 'provide translation services');
   $query = db_select('users_roles', 'ur');
@@ -531,6 +535,12 @@ function tmgmt_local_translators() {
   $translators = array();
   if (!empty($uids)) {
     foreach (user_load_multiple($uids) as $user) {
+      // @todo: There is no capabilities API yet for returning users, so
+      //   re-check every user.
+      $capabilities = tmgmt_local_translation_capabilities($source_language, $user, $target_language);
+      if (empty($capabilities)) {
+        continue;
+      }
       $translators[$user->uid] = entity_label('user', $user);
     }
   }
