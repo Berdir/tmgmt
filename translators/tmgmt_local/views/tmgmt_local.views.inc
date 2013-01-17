@@ -17,7 +17,7 @@ class TMGMTLocalTaskViewsController extends EntityDefaultViewsController {
     $data = parent::views_data();
     $data['tmgmt_local_task']['operations'] = array(
       'title' => t('Operations'),
-      'help' => t('Displays a list of edit operations which are available for a task.'),
+      'help' => t('Displays a list of operations which are available for a task.'),
       'real field' => 'tltid',
       'field' => array(
         'handler' => 'tmgmt_local_task_handler_field_operations',
@@ -47,22 +47,6 @@ class TMGMTLocalTaskViewsController extends EntityDefaultViewsController {
         'handler' => 'tmgmt_local_task_handler_field_job_item_count',
       ),
     );
-    $data['tmgmt_local_task']['assign_to_me'] = array(
-      'title' => t('Assign to me'),
-      'help' => t('Assign translation task to current user link.'),
-      'real field' => 'tltid',
-      'field' => array(
-        'handler' => 'tmgmt_local_task_handler_field_assign_to_me',
-      ),
-    );
-    $data['tmgmt_local_task']['translate'] = array(
-      'title' => t('Translate task items'),
-      'help' => t('Translate task items link.'),
-      'real field' => 'tltid',
-      'field' => array(
-        'handler' => 'tmgmt_local_task_handler_field_translate',
-      ),
-    );
     $data['tmgmt_job']['eligible'] = array(
       'title' => t('Eligible'),
       'help' => t('Limit translation tasks to those that the user can translate'),
@@ -72,22 +56,6 @@ class TMGMTLocalTaskViewsController extends EntityDefaultViewsController {
       ),
     );
     // Manager handlers.
-    $data['tmgmt_local_task']['assign'] = array(
-      'title' => t('Assign'),
-      'help' => t('Assign translation task to specific translator.'),
-      'real field' => 'tltid',
-      'field' => array(
-        'handler' => 'tmgmt_local_task_handler_field_assign',
-      ),
-    );
-    $data['tmgmt_local_task']['view'] = array(
-      'title' => t('Manager View'),
-      'help' => t('Manager view for translation task.'),
-      'real field' => 'tltid',
-      'field' => array(
-        'handler' => 'tmgmt_local_task_handler_field_view',
-      ),
-    );
     $data['tmgmt_job']['task'] = array(
       'title' => t('Translation task'),
       'help' => t('Get the translation task of the job'),

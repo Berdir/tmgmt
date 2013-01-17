@@ -146,6 +146,26 @@ class TMGMTLocalTask extends Entity {
   }
 
   /**
+   * Create a task item for this task and the given job item.
+   *
+   * @param TMGMTJobItem $job_item
+   *   The job item.
+   */
+  public function addTaskItem(TMGMTJobItem $job_item) {
+    // Save the task to get an id.
+    if (empty($this->tltid)) {
+      $this->save();
+    }
+
+    $local_task = entity_create('tmgmt_local_task_item', array(
+      'tltid' => $this->identifier(),
+      'tjiid' => $job_item->identifier(),
+    ));
+    $local_task->save();
+    return $local_task;
+  }
+
+  /**
    * Returns the status of the task. Can be one of the task status constants.
    *
    * @return int
@@ -330,4 +350,89 @@ class TMGMTLocalTask extends Entity {
     }
   }
 
+}
+
+/**
+ * Entity class for the local task item entity.
+ *
+ * @ingroup tmgmt_local_task
+ */
+class TMGMTLocalTaskItem extends Entity {
+
+  /**
+   * Translation local task item identifier.
+   *
+   * @var int
+   */
+  public $tltiid;
+
+  /**
+   * The task identifier.
+   *
+   * @var int
+   */
+  public $tltid;
+
+  /**
+   * Translation job item.
+   *
+   * @var int
+   */
+  public $tjiid;
+
+  /**
+   * Current status of the task.
+   *
+   * @var int
+   */
+  public $status;
+
+  /**
+   * Translated data and data item status.
+   *
+   * @var array
+   */
+  public $data = array();
+
+  /**
+   * Overrides Entity::__construct().
+   */
+  public function __construct(array $values = array(), $entity_type = 'tmgmt_local_task_item') {
+    parent::__construct($values, $entity_type);
+  }
+
+  /*
+   * Overrides Entity::defaultUri().
+   */
+  public function defaultUri() {
+    return array('path' => 'admin/config/regional/tmgmt/local-tasks/' . $this->tltid . '/item/' . $this->tltiid);
+  }
+
+  /**
+   * Overrides Entity::defaultLabel().
+   */
+  protected function defaultLabel() {
+    if ($job_item = $this->getJobItem()) {
+      return $job_item->label();
+    }
+    return t('Missing job item');
+  }
+
+  /**
+   * Returns the translation task.
+   *
+   * @return TMGMTLocalTask
+   */
+  public function getTask() {
+    return entity_load_single('tmgmt_local_task', $this->tltid);
+  }
+
+  /**
+   * Returns the translation job item.
+   *
+   * @return TMGMTJobItem
+   */
+  public function getJobItem() {
+    return entity_load_single('tmgmt_job_item', $this->tjiid);
+  }
 }
