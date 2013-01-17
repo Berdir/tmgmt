@@ -187,6 +187,20 @@ function tmgmt_entity_info() {
     $info['tmgmt_translator']['entity cache'] = TRUE;
     $info['tmgmt_translator']['field cache'] = FALSE;
   }
+
+  $info['tmgmt_remote'] = array(
+    'label' => t('Remote job mapping'),
+    'module' => 'tmgmt',
+    'controller class' => 'TMGMTRemoteController',
+    'entity class' => 'TMGMTRemote',
+    'base table' => 'tmgmt_remote',
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'access callback' => 'tmgmt_remote_access',
+    'entity keys' => array(
+      'id' => 'trid',
+    ),
+  );
   return $info;
 }
 
@@ -472,6 +486,13 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
       return user_access('accept translation jobs');
       break;
   }
+}
+
+/**
+ * Access callback for tmgmt remote entity.
+ */
+function tmgmt_remote_access($op, $tmgmt_remote = NULL, $account = NULL) {
+  return user_access('administer tmgmt', $account);
 }
 
 /**

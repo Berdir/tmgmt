@@ -486,6 +486,73 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $this->assertFalse(tmgmt_job_load($job->tjid));
   }
 
+  function testRemoteMappings() {
+
+    $data_key = '5][test_source][type';
+
+    $translator = $this->createTranslator();
+    $job = $this->createJob();
+    $job->translator = $translator->name;
+    $job->save();
+    $item1 = $job->addItem('test_source', 'type', 5);
+    $item2 = $job->addItem('test_source', 'type', 4);
+
+    $result = $item1->addRemoteMapping($data_key, 'id11', array('remote_identifier_2' => 'id12', 'remote_identifier_3' => 'id13'));
+    $this->assertEqual($result, SAVED_NEW);
+
+    $job_mappings = $job->getRemoteMappings();
+    $item_mappings = $item1->getRemoteMappings();
+
+    $job_mapping = array_shift($job_mappings);
+    $item_mapping = array_shift($item_mappings);
+
+    $_job = $job_mapping->getJob();
+    $this->assertEqual($job->tjid, $_job->tjid);
+
+    $_job = $item_mapping->getJob();
+    $this->assertEqual($job->tjid, $_job->tjid);
+
+    $_item1 = $item_mapping->getJobItem();
+    $this->assertEqual($item1->tjiid, $_item1->tjiid);
+
+    /**
+     * @var TMGMTRemoteController $remote_mapping_controller
+     */
+    $remote_mapping_controller = entity_get_controller('tmgmt_remote');
+    $remote_mappings = $remote_mapping_controller->loadByRemoteIdentifier('id11', 'id12', 'id13');
+    $remote_mapping = array_shift($remote_mappings);
+    $this->assertEqual($item1->tjiid, $remote_mapping->tjiid);
+
+    $this->assertEqual(count($remote_mapping_controller->loadByRemoteIdentifier('id11')), 1);
+    $this->assertEqual(count($remote_mapping_controller->loadByRemoteIdentifier('id11', '')), 0);
+    $this->assertEqual(count($remote_mapping_controller->loadByRemoteIdentifier('id11', NULL, '')), 0);
+    $this->assertEqual(count($remote_mapping_controller->loadByRemoteIdentifier(NULL, NULL, 'id13')), 1);
+
+    // Test remote data.
+    $item_mapping->addRemoteData('test_data', 'test_value');
+    entity_save('tmgmt_remote', $item_mapping);
+    $item_mapping = entity_load_single('tmgmt_remote', $item_mapping->trid);
+    $this->assertEqual($item_mapping->getRemoteData('test_data'), 'test_value');
+
+    // Add mapping to the other job item as well.
+    $item2->addRemoteMapping($data_key, 'id21', array('remote_identifier_2' => 'id22', 'remote_identifier_3' => 'id23'));
+
+    // Test deleting.
+
+    // Delete item1.
+    entity_get_controller('tmgmt_job_item')->delete(array($item1->tjiid));
+    // Test if mapping for item1 has been removed as well.
+
+    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item1->tjiid)), 0);
+
+    // We still should have mapping for item2.
+    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item2->tjiid)), 1);
+
+    // Now delete the job and see if remaining mappings were removed as well.
+    entity_get_controller('tmgmt_job')->delete(array($job->tjid));
+    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item2->tjiid)), 0);
+  }
+
   /**
    * Test crud operations of job items.
    */

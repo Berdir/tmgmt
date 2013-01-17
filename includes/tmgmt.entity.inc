@@ -219,6 +219,141 @@ class TMGMTTranslator extends Entity {
 }
 
 /**
+ * Entity class for the tmgmt_remote entity.
+ *
+ * @ingroup tmgmt_job
+ */
+class TMGMTRemote extends Entity {
+
+  /**
+   * Primary key.
+   *
+   * @var int
+   */
+  public $trid;
+
+  /**
+   * TMGMTJob identifier.
+   *
+   * @var int
+   */
+  public $tjid;
+
+  /**
+   * TMGMTJobItem identifier.
+   *
+   * @var int
+   */
+  public $tjiid;
+
+  /**
+   * Translation job data item key.
+   *
+   * @var string
+   */
+  public $data_item_key;
+
+  /**
+   * Custom remote identifier 1.
+   *
+   * @var string
+   */
+  public $remote_identifier_1;
+
+  /**
+   * Custom remote identifier 2.
+   *
+   * @var string
+   */
+  public $remote_identifier_2;
+
+  /**
+   * Custom remote identifier 3.
+   *
+   * @var string
+   */
+  public $remote_identifier_3;
+
+  /**
+   * Remote job url.
+   *
+   * @var string
+   */
+  public $remote_url;
+
+  /**
+   * Word count provided by the remote service.
+   *
+   * @var int
+   */
+  public $word_count;
+
+  /**
+   * Custom remote data.
+   *
+   * @var array
+   */
+  public $remote_data;
+
+
+  /**
+   * Gets translation job.
+   *
+   * @return TMGMTJob
+   */
+  function getJob() {
+    return tmgmt_job_load($this->tjid);
+  }
+
+  /**
+   * Gets translation job item.
+   *
+   * @return TMGMTJobItem
+   */
+  function getJobItem() {
+    if (!empty($this->tjiid)) {
+      return tmgmt_job_item_load($this->tjiid);
+    }
+    return NULL;
+  }
+
+  /**
+   * Adds data to the remote_data storage.
+   *
+   * @param string $key
+   *   Key through which the data will be accessible.
+   * @param $value
+   *   Value to store.
+   */
+  function addRemoteData($key, $value) {
+    $this->remote_data[$key] = $value;
+  }
+
+  /**
+   * Gets data from remote_data storage.
+   *
+   * @param string $key
+   *   Access key for the data.
+   *
+   * @return mixed
+   *   Stored data.
+   */
+  function getRemoteData($key) {
+    return $this->remote_data[$key];
+  }
+
+  /**
+   * Removes data from remote_data storage.
+   *
+   * @param string $key
+   *   Access key for the data that are to be removed.
+   */
+  function removeRemoteData($key) {
+    unset($this->remote_data[$key]);
+  }
+}
+
+/**
  * Entity class for the tmgmt_job entity.
  *
  * @ingroup tmgmt_job
@@ -891,6 +1026,60 @@ class TMGMTJobItem extends Entity {
     return $this->getMessages($conditions);
   }
 
+  /**
+   * Adds remote mapping entity to this job item.
+   *
+   * @param string $data_item_key
+   *   Job data item key.
+   * @param int $remote_identifier_1
+   *   Array of remote identifiers. In case you need to save
+   *   remote_identifier_2/3 set it into $mapping_data argument.
+   * @param array $mapping_data
+   *   Additional data to be added.
+   *
+   * @return int|bool
+   * @throws TMGMTException
+   */
+  public function addRemoteMapping($data_item_key = NULL, $remote_identifier_1 = NULL, $mapping_data = array()) {
+
+    if (empty($remote_identifier_1) && !isset($mapping_data['remote_identifier_2']) && !isset($remote_mapping['remote_identifier_3'])) {
+      throw new TMGMTException('Cannot create remote mapping without remote identifier.');
+    }
+
+    $data = array(
+      'tjid' => $this->tjid,
+      'tjiid' => $this->tjiid,
+      'data_item_key' => $data_item_key,
+      'remote_identifier_1' => $remote_identifier_1,
+    );
+
+    if (!empty($mapping_data)) {
+      $data += $mapping_data;
+    }
+
+    $remote_mapping = entity_create('tmgmt_remote', $data);
+
+    return entity_get_controller('tmgmt_remote')->save($remote_mapping);
+  }
+
+  /**
+   * Gets remote mappings for current job item.
+   *
+   * @return array
+   *   List of TMGMTRemote entities.
+   */
+  public function getRemoteMappings() {
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'tmgmt_remote');
+    $query->propertyCondition('tjiid', $this->tjiid);
+    $result = $query->execute();
+
+    if (isset($result['tmgmt_remote'])) {
+      return entity_load('tmgmt_remote', array_keys($result['tmgmt_remote']));
+    }
+
+    return array();
+  }
 }
 
 /**
@@ -1630,6 +1819,25 @@ class TMGMTJob extends Entity {
     foreach ($this->getItems() as $item) {
       $item->acceptTranslation();
     }
+  }
+
+  /**
+   * Gets remote mappings for current job.
+   *
+   * @return array
+   *   List of TMGMTRemote entities.
+   */
+  public function getRemoteMappings() {
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'tmgmt_remote');
+    $query->propertyCondition('tjid', $this->tjid);
+    $result = $query->execute();
+
+    if (isset($result['tmgmt_remote'])) {
+      return entity_load('tmgmt_remote', array_keys($result['tmgmt_remote']));
+    }
+
+    return array();
   }
 
 }
