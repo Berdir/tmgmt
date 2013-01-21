@@ -459,7 +459,7 @@ function tmgmt_local_task_statistics_load(array $tltids) {
     $query->addExpression('SUM(count_accepted)', 'count_accepted');
     $query->addExpression('SUM(count_pending)', 'count_pending');
     $query->addExpression('SUM(count_translated)', 'count_translated');
-    $result = $query->groupBy('tlt.tjid')
+    $result = $query->groupBy('tltid')
       ->condition('tltid', $tltids_to_load)
       ->execute();
 
