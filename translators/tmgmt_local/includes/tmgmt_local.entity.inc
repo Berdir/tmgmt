@@ -86,7 +86,7 @@ class TMGMTLocalTask extends Entity {
    * Overrides Entity::defaultUri().
    */
   public function defaultUri() {
-    return array('path' => 'admin/config/regional/tmgmt/local-tasks/' . $this->tltid);
+    return array('path' => 'translate/' . $this->tltid);
   }
 
   /**
@@ -405,7 +405,7 @@ class TMGMTLocalTaskItem extends Entity {
    * Overrides Entity::defaultUri().
    */
   public function defaultUri() {
-    return array('path' => 'admin/config/regional/tmgmt/local-tasks/' . $this->tltid . '/item/' . $this->tltiid);
+    return array('path' => 'translate/' . $this->tltid . '/item/' . $this->tltiid);
   }
 
   /**

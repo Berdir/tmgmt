@@ -80,7 +80,7 @@ function tmgmt_local_entity_info() {
       ),
       'admin ui' => array(
         'controller class' => 'TMGMTLocalTaskUIController',
-        'path' => 'admin/config/regional/tmgmt/local-tasks',
+        'path' => 'translate',
       ),
     ),
     'tmgmt_local_task_item' => array(
@@ -88,8 +88,8 @@ function tmgmt_local_entity_info() {
       'module' => 'tmgmt_local',
       'entity class' => 'TMGMTLocalTaskItem',
       'controller class' => 'EntityAPIController',
-      //'metadata controller class' => 'TMGMTLocalTaskItemMetadataController',
-      //'views controller class' => 'TMGMTLocalTaskItemViewsController',
+      'metadata controller class' => 'TMGMTLocalTaskItemMetadataController',
+      'views controller class' => 'TMGMTLocalTaskItemViewsController',
       'base table' => 'tmgmt_local_task_item',
       'uri callback' => 'entity_class_uri',
       'label callback' => 'entity_class_label',
@@ -99,7 +99,7 @@ function tmgmt_local_entity_info() {
       ),
       'admin ui' => array(
         'controller class' => 'TMGMTLocalTaskItemUIController',
-        'path' => 'admin/config/regional/tmgmt/local-tasks',
+        'path' => 'translate',
       ),
     ),
   );
@@ -449,6 +449,29 @@ function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
       return user_access('provide translation services', $account);
       break;
   }
+}
+
+/**
+ * Access callback for the local task item entity.
+ *
+ * @param $op
+ *   The operation being performed.
+ * @param $item
+ *   (Optional) A TMGMTLocalTaskItem entity to check access for. If no entity is
+ *   given, it will be determined whether access is allowed for all entities.
+ * @param $account
+ *   (Optional) The user to check for. Leave it to NULL to check for the global
+ *   user.
+ *
+ * @return boolean
+ *   TRUE if access is allowed, FALSE otherwise.
+ */
+function tmgmt_local_task_item_access($op, TMGMTLocalTaskItem $item = NULL, $account = NULL) {
+  $task = NULL;
+  if ($item) {
+    $task = $item->getTask();
+  }
+  return entity_access($op, 'tmgmt_local_task', $task);
 }
 
 /**

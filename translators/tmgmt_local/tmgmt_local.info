@@ -14,14 +14,10 @@ files[] = tmgmt_local.test
 
 ; Views integration and handlers
 files[] = views/tmgmt_local.views.inc
-files[] = views/handlers/tmgmt_local_task_handler_field_view.inc
-files[] = views/handlers/tmgmt_local_task_handler_field_assign.inc
-files[] = views/handlers/tmgmt_local_task_handler_field_assign_to_me.inc
 files[] = views/handlers/tmgmt_local_task_handler_field_job_item_count.inc
 files[] = views/handlers/tmgmt_local_task_handler_field_loop_count.inc
 files[] = views/handlers/tmgmt_local_task_handler_field_operations.inc
 files[] = views/handlers/tmgmt_local_task_handler_field_progress.inc
-files[] = views/handlers/tmgmt_local_task_handler_field_translate.inc
-files[] = views/handlers/tmgmt_local_task_handler_field_translate_task_item.inc
+files[] = views/handlers/tmgmt_local_task_handler_field_item_operations.inc
 files[] = views/handlers/tmgmt_local_task_handler_field_wordcount.inc
 files[] = views/handlers/tmgmt_local_task_handler_filter_eligible.inc

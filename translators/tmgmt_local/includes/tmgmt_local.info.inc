@@ -62,3 +62,30 @@ class TMGMTLocalTaskMetadataController extends EntityDefaultMetadataController {
   }
 
 }
+
+
+/**
+ * Metadata controller for the local task entity.
+ */
+class TMGMTLocalTaskItemMetadataController extends EntityDefaultMetadataController {
+
+  /**
+   * Overrides EntityDefaultMetadataController::entityPropertyInfo().
+   */
+  public function entityPropertyInfo() {
+    $info = parent::entityPropertyInfo();
+    $properties = &$info[$this->type]['properties'];
+
+    // Add the options list for the defined status constants.
+    $properties['status']['options list'] = 'tmgmt_local_task_statuses';
+
+    // Link the job property to the corresponding job entity.
+    $properties['tjiid']['type'] = 'tmgmt_job_item';
+
+    // Link the author property to the corresponding user entity.
+    $properties['tltid']['type'] = 'tmgmt_local_task';
+
+    return $info;
+  }
+
+}

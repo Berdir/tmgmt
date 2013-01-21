@@ -79,3 +79,25 @@ class TMGMTLocalTaskViewsController extends EntityDefaultViewsController {
   }
 
 }
+
+/**
+ * Views controller class for the translation task item entity.
+ */
+class TMGMTLocalTaskItemViewsController extends EntityDefaultViewsController {
+
+  /**
+   * Overrides EntityDefaultViewsController::views_data().
+   */
+  public function views_data() {
+    $data = parent::views_data();
+    $data['tmgmt_local_task_item']['operations'] = array(
+      'title' => t('Operations'),
+      'help' => t('Displays a list of operations which are available for a task item.'),
+      'real field' => 'tltiid',
+      'field' => array(
+        'handler' => 'tmgmt_local_task_handler_field_item_operations',
+      ),
+    );
+    return $data;
+  }
+}

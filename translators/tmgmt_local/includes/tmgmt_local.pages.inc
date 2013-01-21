@@ -52,6 +52,18 @@ function tmgmt_local_task_form($form, &$form_state, TMGMTLocalTask $task, $op = 
     '#default_value' => $task->tuid,
   );
 
+  if ($view = views_get_view('translation_task_items')) {
+    $form['items'] = array(
+      '#type' => 'item',
+      '#title' => $view->get_title(),
+      '#prefix' => '<div class="tmgmt-local-task-items">',
+      '#markup' => $view->preview('block'),
+      '#attributes' => array('class' => array('tmgmt-local-task-items')),
+      '#suffix' => '</div>',
+      '#weight' => 10,
+    );
+  }
+
   // Add the buttons and action links.
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
@@ -63,7 +75,7 @@ function tmgmt_local_task_form($form, &$form_state, TMGMTLocalTask $task, $op = 
     $form['actions']['delete'] = array(
       '#type' => 'submit',
       '#value' => t('Delete'),
-      '#redirect' => 'admin/config/regional/tmgmt/local-tasks/' . $task->tltid . '/delete',
+      '#redirect' => 'translate/' . $task->tltid . '/delete',
       // Don't run validations, so the user can always delete the job.
       '#limit_validation_errors' => array(),
     );
