@@ -35,9 +35,7 @@ function tmgmt_skills_field_schema($field) {
       ),
     ),
     'indexes' => array(
-      'language_from' => array('language_from'),
-      'language_to' => array('language_to'),
-      'language_combination' => array('language_from', 'language_to'),
+      'language' => array('language_from', 'language_to'),
     ),
   );
 
