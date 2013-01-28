@@ -311,8 +311,12 @@ function tmgmt_local_translation_capabilities($source_language = NULL, $account 
  * the translation capabilities of an local have changed.
  */
 function tmgmt_local_clear_languages_cache() {
-  foreach (tmgmt_translator_load_multiple(FALSE) as $translator) {
-    if ($translator->plugin == 'local') {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'tmgmt_translator');
+  $query->propertyCondition('plugin', 'local');
+  $result = $query->execute();
+  if ($result) {
+    foreach (tmgmt_translator_load_multiple(array_keys($result['tmgmt_translator'])) as $translator) {
       cache_clear_all('languages::' . $translator->name, 'cache_tmgmt');
     }
   }
@@ -508,6 +512,33 @@ function tmgmt_local_task_statuses() {
 }
 
 /**
+ * Gets all involved language pairs for given tasks.
+ *
+ * @param array $tasks
+ *   Array of tasks ids.
+ *
+ * @return array
+ *   Array of involved languages.
+ */
+function tmgmt_local_tasks_languages($tasks) {
+  $query = db_select('tmgmt_local_task', 't');
+  $query->condition('tltid', $tasks);
+  $query->join('tmgmt_job', 'j', 't.tjid = j.tjid');
+  $query->fields('j', array('source_language', 'target_language'));
+  $query->groupBy('target_language');
+  $result = $query->execute()->fetchAll();
+  $languages = array();
+
+  foreach ($result as $row) {
+    if (empty($languages[$row->source_language]) || !in_array($row->target_language, $languages[$row->source_language])) {
+      $languages[$row->source_language][] = $row->target_language;
+    }
+  }
+
+  return $languages;
+}
+
+/**
  * Return users that belongs to local translation role.
  *
  * @todo: This does not scale when having many translators.
@@ -516,26 +547,68 @@ function tmgmt_local_task_statuses() {
  *   Array of uid => name translators or empty array if there are no translator
  *   users.
  */
-function tmgmt_local_translators() {
+function tmgmt_local_translators($source_language = NULL, $target_language = NULL) {
   // Get all local user translators.
   $roles = user_roles(TRUE, 'provide translation services');
-  $query = db_select('users_roles', 'ur');
-  $query->join('users', 'u', 'u.uid = ur.uid');
-  $uids = $query->fields('u', array('uid'))
-    ->condition('ur.rid', array_keys($roles))
-    ->condition('u.status', 1)
-    ->distinct()
+  $query = db_select('users', 'u');
+  $query->fields('u', array('uid'));
+  $query->condition('u.status', 1);
+
+  // Add role condition only if authenticated user role does not have perms.
+  if (!in_array(DRUPAL_AUTHENTICATED_RID, array_keys($roles))) {
+    $query->leftJoin('users_roles', 'ur', 'u.uid = ur.uid');
+    $query->condition('ur.rid', array_keys($roles));
+  }
+
+  $uids = $query->distinct()
     ->execute()
     ->fetchCol();
+
+  if (!empty($target_language) && !is_array($target_language)) {
+    $target_language = array($target_language);
+  }
 
   $translators = array();
   if (!empty($uids)) {
     foreach (user_load_multiple($uids) as $user) {
+      // @todo: There is no capabilities API yet for returning users, so
+      //   re-check every user.
+      $capabilities = tmgmt_local_translation_capabilities($source_language, $user);
+      if (empty($capabilities)) {
+        continue;
+      }
+      // In case provided target languages exceed users capabilities exclude.
+      if (!empty($target_language) && count(array_diff($target_language, $capabilities)) > 0) {
+        continue;
+      }
       $translators[$user->uid] = entity_label('user', $user);
     }
   }
 
   return $translators;
+}
+
+/**
+ * Gets translators able to translate all given tasks.
+ *
+ * @param array $tasks
+ *   Array of tasks ids.
+ *
+ * @return array
+ *   List of uid => name values.
+ */
+function tmgmt_local_get_translators_for_tasks($tasks) {
+  $translators = array();
+
+  foreach (tmgmt_local_tasks_languages($tasks) as $source_language => $target_languages) {
+    $translators[] = tmgmt_local_translators($source_language, $target_languages);
+  }
+
+  if (count($translators) > 1) {
+    return call_user_func_array('array_intersect', $translators);
+  }
+
+  return array_shift($translators);
 }
 
 /**

@@ -43,7 +43,7 @@ function tmgmt_local_task_form($form, &$form_state, TMGMTLocalTask $task, $op = 
     '#default_value' => $wrapper->status->value(),
   );
 
-  $translators = tmgmt_local_translators();
+  $translators = tmgmt_local_translators($task->getJob()->source_language, $task->getJob()->target_language);
   $form['tuid'] = array(
     '#title' => t('Assigned'),
     '#type' => 'select',
@@ -342,19 +342,22 @@ function tmgmt_local_translation_form_update_state_ajax($form, &$form_state) {
 /**
  * Form for assigning multiple tasks to translator.
  *
- * @param type $form
+ * @param array $form
  * @param array $form_state
  * @param string $tasks
  *  Comma separated tasks ids.
+ *
+ * @return array
+ *   Drupal form definition.
  */
 function tmgmt_local_translation_assign_form($form, &$form_state, $tasks) {
-  $form_state['tasks'] = $tasks;
+  $form_state['tasks'] = explode(',', $tasks);
 
-  $translators = tmgmt_local_translators();
   $form['tuid'] = array(
     '#title' => t('Assign to'),
     '#type' => 'select',
-    '#options' => array('' => t('Select user')) + $translators,
+    '#empty_option' => t('Select user'),
+    '#options' => tmgmt_local_get_translators_for_tasks($form_state['tasks']),
     '#required' => TRUE,
   );
 
@@ -371,12 +374,10 @@ function tmgmt_local_translation_assign_form($form, &$form_state, $tasks) {
  * Submit handler for form for assigning multiple tasks to translator.
  */
 function tmgmt_local_translation_assign_form_submit($form, &$form_state) {
-  $tasks = explode(',', $form_state['tasks']);
-
   $translator = user_load($form_state['values']['tuid']);
 
   $how_many = 0;
-  foreach ($tasks as $task_id) {
+  foreach ($form_state['tasks'] as $task_id) {
     $task = tmgmt_local_task_load($task_id);
     if ($task) {
       $task->assign($translator);
@@ -397,13 +398,13 @@ function tmgmt_local_translation_assign_form_submit($form, &$form_state) {
  * @see tmgmt_local_translation_assign_form().
  */
 function tmgmt_local_translation_reassign_form($form, &$form_state, $tasks) {
-  $form_state['tasks'] = $tasks;
+  $form_state['tasks'] = explode(',', $tasks);
 
-  $translators = tmgmt_local_translators();
   $form['tuid'] = array(
     '#title' => t('Assign to'),
     '#type' => 'select',
-    '#options' => array('' => t('none')) + $translators,
+    '#empty_option' => t('Select user'),
+    '#options' => tmgmt_local_get_translators_for_tasks($form_state['tasks']),
   );
 
   $form['actions']['#type'] = 'actions';
@@ -419,7 +420,6 @@ function tmgmt_local_translation_reassign_form($form, &$form_state, $tasks) {
  * Submit handler for form for reassigning multiple tasks to translator.
  */
 function tmgmt_local_translation_reassign_form_submit($form, &$form_state) {
-  $tasks = explode(',', $form_state['tasks']);
 
   if (!empty($form_state['values']['tuid'])) {
     $translator = user_load($form_state['values']['tuid']);
@@ -429,7 +429,7 @@ function tmgmt_local_translation_reassign_form_submit($form, &$form_state) {
   }
 
   $how_many = 0;
-  foreach ($tasks as $task_id) {
+  foreach ($form_state['tasks'] as $task_id) {
     $task = tmgmt_local_task_load($task_id);
     if ($task) {
       if ($translator->uid) {
