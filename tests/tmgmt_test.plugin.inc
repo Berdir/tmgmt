@@ -57,6 +57,16 @@ class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController
 class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorRejectDataItem {
 
   /**
+   * Overrides TMGMTDefaultTranslatorPluginController::getDefaultRemoteLanguagesMappings().
+   */
+  public function getDefaultRemoteLanguagesMappings() {
+    return array(
+      'en' => 'en-us',
+      'de' => 'de-ch',
+    );
+  }
+
+  /**
    * Overrides TMGMTDefaultTranslatorPluginController::hasCheckoutSettings().
    */
   public function hasCheckoutSettings(TMGMTJob $job) {

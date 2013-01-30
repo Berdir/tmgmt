@@ -1010,6 +1010,24 @@ function tmgmt_translator_labels_flagged($job = NULL) {
   }
   return $labels;
 }
+
+/**
+ * Determines if the translator plugin supports remote language mappings.
+ *
+ * @param TMGMTTranslator $translator
+ *   Translator entity.
+ *
+ * @return bool
+ *   In case translator does not explicitly state that it does not provide the
+ *   mapping feature it will return TRUE.
+ */
+function tmgmt_provide_remote_languages_mappings(TMGMTTranslator $translator) {
+  if (!isset($translator->settings['map_remote_languages'])) {
+    return TRUE;
+  }
+
+  return $translator->settings['map_remote_languages'];
+}
 /**
  * @} End of "addtogroup tmgmt_translator".
  */

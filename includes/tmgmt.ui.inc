@@ -211,6 +211,50 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
    * Implements TMGMTTranslatorUIControllerInterface::pluginSettingsForm().
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
+
+    // If current translator is configured to provide remote language mapping
+    // provide the form to configure mappings.
+    if ($translator->provideRemoteLanguagesMapping()) {
+      $controller = tmgmt_translator_plugin_controller($translator->name);
+
+      $form['remote_languages_mappings'] = array(
+        '#tree' => TRUE,
+        '#type' => 'fieldset',
+        '#title' => t('Remote languages mappings'),
+        '#description' => t('Here you can specify mappings of your local language codes to the translator language codes.'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+
+      $options = array();
+      foreach ($controller->getSupportedRemoteLanguages($translator) as $language) {
+        $options[$language] = $language;
+      }
+
+      foreach ($controller->getRemoteLanguagesMappings($translator) as $local_language => $remote_language) {
+        $form['remote_languages_mappings'][$local_language] = array(
+          '#type' => 'textfield',
+          '#title' => tmgmt_language_label($local_language) . ' (' . $local_language . ')',
+          '#default_value' => $remote_language,
+          '#size' => 6,
+        );
+
+        if (!empty($options)) {
+          $form['remote_languages_mappings'][$local_language]['#type'] = 'select';
+          $form['remote_languages_mappings'][$local_language]['#options'] = $options;
+          $form['remote_languages_mappings'][$local_language]['#empty_option'] = ' - ';
+          unset($form['remote_languages_mappings'][$local_language]['#size']);
+        }
+      }
+    }
+    // Else make sure the FALSE value will be preserved.
+    else {
+      $form['map_remote_languages'] = array(
+        '#type' => 'value',
+        '#value' => FALSE,
+      );
+    }
+
     if (!element_children($form)) {
       $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginInfo['label']));
     }

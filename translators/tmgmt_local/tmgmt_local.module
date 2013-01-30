@@ -196,6 +196,7 @@ function tmgmt_local_tmgmt_translator_plugin_info() {
     'ui controller class' => 'TMGMTLocalTranslatorUIController',
     'default settings' => array(
       'auto_accept' => TRUE,
+      'map_remote_languages' => FALSE,
     ),
   );
 

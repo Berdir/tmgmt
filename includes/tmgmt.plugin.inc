@@ -229,6 +229,63 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
   public function getNotCanTranslateReason(TMGMTJob $job);
 
   /**
+   * Specifies default mappings for local to remote language codes.
+   *
+   * @return array
+   *   An array of local => remote language codes.
+   */
+  public function getDefaultRemoteLanguagesMappings();
+
+  /**
+   * Gets all supported languages of the translator.
+   *
+   * @param TMGMTTranslator $translator
+   *   Translator entity for which to get supported languages.
+   *
+   * @return array
+   *   An array of language codes which are provided by the translator
+   *   (remote language codes).
+   */
+  public function getSupportedRemoteLanguages(TMGMTTranslator $translator);
+
+  /**
+   * Gets existing remote languages mappings.
+   *
+   * @param TMGMTTranslator $translator
+   *   Translator entity for which to get mappings.
+   *
+   * @return array
+   *   An array of local => remote language codes.
+   */
+  public function getRemoteLanguagesMappings(TMGMTTranslator $translator);
+
+  /**
+   * Maps local language to remote language.
+   *
+   * @param TMGMTTranslator $translator
+   *   Translator entity for which to get remote language.
+   * @param $language
+   *   Local language code.
+   *
+   * @return string
+   *   Remote language code.
+   */
+  public function mapToRemoteLanguage(TMGMTTranslator $translator, $language);
+
+  /**
+   * Maps remote language to local language.
+   *
+   * @param TMGMTTranslator $translator
+   *   Translator entity for which to get local language.
+   * @param $language
+   *   Remote language code.
+   *
+   * @return string
+   *   Local language code.
+   */
+  public function mapToLocalLanguage(TMGMTTranslator $translator, $language);
+
+  /**
    * Returns all available target languages that are supported by this service
    * when given a source language.
    *
@@ -238,7 +295,7 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    *   The source language.
    *
    * @return array
-   *   An array of languages in ISO format.
+   *   An array of remote languages in ISO format.
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language);
 
@@ -354,6 +411,9 @@ interface TMGMTTranslatorRejectDataItem {
  */
 abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase implements TMGMTTranslatorPluginControllerInterface {
 
+  protected $supportedRemoteLanguages = array();
+  protected $remoteLanguagesMappings = array();
+
   /**
    * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
    */
@@ -382,6 +442,78 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
     // Assume that we can cancel a translation job at any time.
     $job->setState(TMGMT_JOB_STATE_CANCELLED);
     return TRUE;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getDefaultRemoteLanguagesMappings().
+   */
+  public function getDefaultRemoteLanguagesMappings() {
+    return array();
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
+   */
+  public function getSupportedRemoteLanguages(TMGMTTranslator $translator) {
+    return array();
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getRemoteLanguagesMappings().
+   */
+  public function getRemoteLanguagesMappings(TMGMTTranslator $translator) {
+    if (!empty($this->remoteLanguagesMappings)) {
+      return $this->remoteLanguagesMappings;
+    }
+
+    foreach (language_list() as $language => $info) {
+      $this->remoteLanguagesMappings[$language] = $this->mapToRemoteLanguage($translator, $language);
+    }
+
+    return $this->remoteLanguagesMappings;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::mapToRemoteLanguage().
+   */
+  public function mapToRemoteLanguage(TMGMTTranslator $translator, $language) {
+    if (!$translator->provideRemoteLanguagesMapping()) {
+      return $language;
+    }
+
+    if (isset($translator->settings['remote_languages_mappings'][$language])) {
+      return $translator->settings['remote_languages_mappings'][$language];
+    }
+
+    $default_mappings = $this->getDefaultRemoteLanguagesMappings();
+
+    if (isset($default_mappings[$language])) {
+      return $default_mappings[$language];
+    }
+
+    return $language;
+  }
+
+  /**
+   * Implements TMGMTTranslatorPluginControllerInterface::mapToLocalLanguage().
+   */
+  public function mapToLocalLanguage(TMGMTTranslator $translator, $language) {
+    if (!$translator->provideRemoteLanguagesMapping()) {
+      return $language;
+    }
+
+    if (isset($translator->settings['remote_languages_mappings']) && is_array($translator->settings['remote_languages_mappings'])) {
+      $mappings = $translator->settings['remote_languages_mappings'];
+    }
+    else {
+      $mappings = $this->getDefaultRemoteLanguagesMappings();
+    }
+
+    if ($remote_language = array_search($language, $mappings)) {
+      return $remote_language;
+    }
+
+    return $language;
   }
 
   /**

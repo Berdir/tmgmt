@@ -893,6 +893,40 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertEqual('Service not reachable.', $last_message->message);
     $this->assertEqual('error', $last_message->type);
   }
+
+  /**
+   * Tests remote languages mappings support in the tmgmt core.
+   */
+  function testRemoteLanguagesMappings() {
+    $this->loginAsAdmin();
+    $this->setEnvironment('de');
+    $controller = $this->default_translator->getController();
+
+    $mappings = $controller->getRemoteLanguagesMappings($this->default_translator);
+    $this->assertEqual($mappings, array(
+      'en' => 'en-us',
+      'de' => 'de-ch',
+    ));
+
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en-us');
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de-ch');
+    $this->assertEqual($controller->mapToLocalLanguage($this->default_translator, 'en-us'), 'en');
+    $this->assertEqual($controller->mapToLocalLanguage($this->default_translator, 'de-ch'), 'de');
+
+    $this->default_translator->settings['remote_languages_mappings']['de'] = 'de-de';
+    $this->default_translator->settings['remote_languages_mappings']['en'] = 'en-uk';
+    $this->default_translator->save();
+
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en-uk');
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de-de');
+
+    // Test the fallback.
+    $this->default_translator->settings['map_remote_languages'] = FALSE;
+    $this->default_translator->save();
+
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en');
+    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de');
+  }
 }
 
 

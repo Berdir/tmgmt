@@ -123,6 +123,8 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     // Change the job id to a wrong one and try to import it.
     $wrong_xml = clone $xml;
     $second_job = $this->createJob();
+    $second_job->translator = $translator->name;
+    $second_job->save();
     $wrong_xml->file->header->{'phase-group'}->phase['job-id'] = $second_job->tjid;
     $wrong_file = 'public://tmgmt_file/wrong_file.xlf';
     $wrong_xml->asXML($wrong_file);

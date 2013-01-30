@@ -80,16 +80,17 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
    *   Array with the properties #text and optionally #label.
    */
   protected function addTransUnit($key, $element) {
+
     $this->startElement('trans-unit');
     $this->writeAttribute('id', $key);
     $this->writeAttribute('resname', $key);
 
     $this->startElement('source');
-    $this->writeAttribute('xml:lang', $this->job->source_language);
+    $this->writeAttribute('xml:lang', $this->job->getTranslator()->mapToRemoteLanguage($this->job->source_language));
     $this->text($element['#text']);
     $this->endElement();
     $this->startElement('target');
-    $this->writeAttribute('xml:lang', $this->job->target_language);
+    $this->writeAttribute('xml:lang', $this->job->getTranslator()->mapToRemoteLanguage($this->job->target_language));
     $this->text($element['#text']);
     $this->endElement();
     if (isset($element['#label'])) {
@@ -120,8 +121,8 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
     // File element.
     $this->startElement('file');
     $this->writeAttribute('original', 'xliff-core-1.2-strict.xsd');
-    $this->writeAttribute('source-language', $job->source_language);
-    $this->writeAttribute('target-language', $job->target_language);
+    $this->writeAttribute('source-language', $job->getTranslator()->mapToRemoteLanguage($job->source_language));
+    $this->writeAttribute('target-language', $job->getTranslator()->mapToRemoteLanguage($job->target_language));
     $this->writeAttribute('datatype', 'plaintext');
     // Date needs to be in ISO-8601 UTC
     $this->writeAttribute('date', date('Y-m-d\Th:m:i\Z'));
@@ -208,12 +209,12 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
     }
 
     // Compare source language.
-    if (!isset($xml->file['source-language']) || $job->source_language != $xml->file['source-language']) {
+    if (!isset($xml->file['source-language']) || $job->getTranslator()->mapToRemoteLanguage($job->source_language) != $xml->file['source-language']) {
       return FALSE;
     }
 
     // Compare target language.
-    if (!isset($xml->file['target-language']) || $job->target_language != $xml->file['target-language']) {
+    if (!isset($xml->file['target-language']) || $job->getTranslator()->mapToRemoteLanguage($job->target_language) != $xml->file['target-language']) {
       return FALSE;
     }
 
@@ -249,6 +250,7 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
    * Implements TMGMTFileExportInterface::export().
    */
   public function export(TMGMTJob $job) {
+
     $items = array();
     foreach ($job->getItems() as $item) {
       $data = array_filter(tmgmt_flatten_data($item->getData()), '_tmgmt_filter_data');
@@ -258,8 +260,8 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
     }
     return theme('tmgmt_file_html_template', array(
       'tjid' => $job->tjid,
-      'source_language' => $job->source_language,
-      'target_language' => $job->target_language,
+      'source_language' => $job->getTranslator()->mapToRemoteLanguage($job->source_language),
+      'target_language' => $job->getTranslator()->mapToRemoteLanguage($job->target_language),
       'items' => $items,
     ));
   }
@@ -311,8 +313,10 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
       return FALSE;
     }
 
+
     // Check language.
-    if ($meta['languageSource'] != $job->source_language || $meta['languageTarget'] != $job->target_language) {
+    if ($meta['languageSource'] != $job->getTranslator()->mapToRemoteLanguage($job->source_language) ||
+        $meta['languageTarget'] != $job->getTranslator()->mapToRemoteLanguage($job->target_language)) {
       return FALSE;
     }
 
