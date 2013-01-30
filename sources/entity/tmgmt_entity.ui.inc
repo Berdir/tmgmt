@@ -52,7 +52,7 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
       // Get existing translations and current job items for the entity
       // to determine translation statuses
       $translations = $handler->getTranslations();
-      $source_lang = $translations->original;
+      $source_lang = entity_language($type, $entity);
       $current_job_items = tmgmt_job_item_load_latest('entity', $type, $entity_id, $source_lang);
 
       // Load basic entity data.

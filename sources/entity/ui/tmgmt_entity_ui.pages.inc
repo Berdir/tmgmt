@@ -28,7 +28,7 @@ function tmgmt_entity_ui_translate_form($form, &$form_state, $build) {
   $languages = language_list();
   // Check if there is a job / job item that references this translation.
   list($id, $vid, $bundle) = entity_extract_ids($form_state['entity_type'], $form_state['entity']);
-  $entity_language = entity_language($bundle, $form_state['entity']);
+  $entity_language = entity_language($form_state['entity_type'], $form_state['entity']);
   $items = tmgmt_job_item_load_latest('entity', $form_state['entity_type'], $id, $entity_language);
   foreach ($languages as $langcode => $language) {
     if ($langcode == LANGUAGE_NONE) {
@@ -50,7 +50,7 @@ function tmgmt_entity_ui_translate_form($form, &$form_state, $build) {
       $item = $items[$langcode];
       $uri = $item->uri();
       $wrapper = entity_metadata_wrapper('tmgmt_job_item', $item);
-      $additional = l($wrapper->state->label(), $uri['path']);
+      $additional = l($wrapper->state->label(), $uri['path'], array('query' => array('destination' => current_path())));
       // Disable the checkbox for this row since there is already a translation
       // in progress that has not yet been finished. This way we make sure that
       // we don't stack multiple active translations for the same item on top
@@ -100,7 +100,7 @@ function tmgmt_entity_ui_translate_form_submit($form, &$form_state) {
   $jobs = array();
   foreach (array_keys(array_filter($values['languages'])) as $langcode) {
     // Create the job object.
-    $job = tmgmt_job_create($entity->language, $langcode, $GLOBALS['user']->uid);
+    $job = tmgmt_job_create(entity_language($entity_type, $entity->language), $langcode, $GLOBALS['user']->uid);
 
     try {
       // Add the job item.

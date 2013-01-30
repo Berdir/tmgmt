@@ -260,13 +260,6 @@ class TMGMTEntitySourceUITestCase extends TMGMTEntityTestCaseUtility {
     $this->setEnvironment('es');
     $this->setEnvironment('el');
 
-    // Allow auto-accept.
-    $default_translator = tmgmt_translator_load('test_translator');
-    $default_translator->settings = array(
-      'auto_accept' => TRUE,
-    );
-    $default_translator->save();
-
     $this->createNodeType('page', st('Page'), ENTITY_TRANSLATION_ENABLED);
     $this->createNodeType('article', st('Article'), ENTITY_TRANSLATION_ENABLED);
 
@@ -319,7 +312,12 @@ class TMGMTEntitySourceUITestCase extends TMGMTEntityTestCaseUtility {
     // Make sure that we're back on the translate tab.
     $this->assertEqual(url('node/' . $node->nid . '/translate', array('absolute' => TRUE)), $this->getUrl());
     $this->assertText(t('Test translation created.'));
-    $this->assertNoText(t('The translation of @title to @language is finished and can now be reviewed.', array('@title' => $node->title, '@language' => t('German'))));
+    $this->assertText(t('The translation of @title to @language is finished and can now be reviewed.', array('@title' => $node->title, '@language' => t('German'))));
+
+    // Verify that the pending translation is shown.
+    $this->clickLink(t('Needs review'));
+    $this->drupalPost(NULL, array(), t('Save as completed'));
+
     $this->assertText(t('The translation for @title has been accepted.', array('@title' => $node->title)));
 
     // German node should now be listed and be clickable.
@@ -333,6 +331,12 @@ class TMGMTEntitySourceUITestCase extends TMGMTEntityTestCaseUtility {
    * Test the translate tab for a single checkout.
    */
   function testNodeTranslateTabMultipeCheckout() {
+    // Allow auto-accept.
+    $default_translator = tmgmt_translator_load('test_translator');
+    $default_translator->settings = array(
+      'auto_accept' => TRUE,
+    );
+    $default_translator->save();
 
     $this->loginAsTranslator(array('translate node entities'));
 

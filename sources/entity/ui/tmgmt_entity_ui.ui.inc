@@ -116,7 +116,7 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
        * @var EntityTranslationDefaultHandler $handler
        */
       $handler = entity_translation_get_handler($type, $entity);
-      $source_lang = $handler->getTranslations()->original;
+      $source_lang = entity_language($type, $entity);
       list($entity_id, ,) = entity_extract_ids($type, $entity);
 
       try {
