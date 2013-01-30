@@ -170,14 +170,7 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
    */
   function setEnvironment($langcode) {
     // Add the language.
-    $edit = array(
-      'langcode' => $langcode,
-    );
-    $this->drupalPost('admin/config/regional/language/add', $edit, t('Add language'));
-    $this->assertText($langcode, t('Language added successfully.'));
-    // This is needed to refresh the static cache of the language list.
-    $languages = &drupal_static('language_list');
-    $languages = NULL;
+    locale_add_language($langcode);
   }
 
 }
