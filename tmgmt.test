@@ -49,7 +49,11 @@ class TMGMTBaseTestCase extends DrupalWebTestCase {
   /**
    * Overrides DrupalWebTestCase::setUp()
    */
-  function setUp(array $modules = array()) {
+  function setUp() {
+    $modules = func_get_args();
+    if (isset($modules[0]) && is_array($modules[0])) {
+      $modules = $modules[0];
+    }
     $modules = array_merge(array('entity', 'tmgmt', 'tmgmt_test'), $modules);
     parent::setUp($modules);
     $this->default_translator = tmgmt_translator_load('test_translator');
@@ -782,7 +786,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     );
   }
 
-  function createJob($action = 'translate') {
+  function createJob($source = 'en', $target = 'de', $uid = 1) {
     $job = parent::createJob();
 
     for ($i = 1; $i < 3; $i++) {
@@ -802,15 +806,14 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
     // Manually specify the translator for now.
     $job->translator = $this->default_translator->name;
-    $job->settings = array('action' => $action);
 
     return $job;
   }
 
   function testBasicWorkflow() {
-
     // Submit a translation job.
-    $submit_job = $this->createJob('submit');
+    $submit_job = $this->createJob();
+    $submit_job->settings = array('action' => 'submit');
     $submit_job->requestTranslation();
     $submit_job = tmgmt_job_load($submit_job->tjid);
     $this->assertTrue($submit_job->isActive());
@@ -819,7 +822,8 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertEqual('Test submit.', $last_message->message);
 
     // Translate a job.
-    $translate_job = $this->createJob('translate');
+    $translate_job = $this->createJob();
+    $translate_job->settings = array('action' => 'translate');
     $translate_job->requestTranslation();
     $translate_job = tmgmt_job_load($translate_job->tjid);
     foreach ($translate_job->getItems() as $job_item) {
@@ -872,7 +876,8 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     }
 
     // A rejected job.
-    $reject_job = $this->createJob('reject');
+    $reject_job = $this->createJob();
+    $reject_job->settings = array('action' => 'reject');
     $reject_job->requestTranslation();
     // Still rejected.
     $this->assertTrue($reject_job->isRejected());
@@ -883,7 +888,8 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertEqual('error', $last_message->type);
 
     // A failing job.
-    $failing_job = $this->createJob('fail');
+    $failing_job = $this->createJob();
+    $failing_job->settings = array('action' => 'fail');
     $failing_job->requestTranslation();
     // Still new.
     $this->assertTrue($failing_job->isUnprocessed());
