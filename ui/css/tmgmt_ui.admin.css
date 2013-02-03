@@ -172,6 +172,12 @@ table.tmgmt-ui-review tbody th {
   margin-left: 5px;
 }
 
+.tmgmt-color-legend{
+  float: right;
+  width: 310px;
+  padding-bottom: 10px;
+}
+
 .tmgmt-one-legend{
   float: left;
 }
@@ -179,10 +185,6 @@ table.tmgmt-ui-review tbody th {
 .tmgmt-legend-icon{
   float: left;
   margin: 4px 4px;
-}
-
-.tmgmt-legend-title{
-  margin: 0 20px 0 10px;
 }
 
 .tmgmt-legend-status{

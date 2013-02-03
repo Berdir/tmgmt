@@ -35,43 +35,6 @@ $handler->display->display_options['style_options']['info'] = array(
     'empty_column' => 0,
   ),
 );
-/* Footer: Global: Text area */
-$handler->display->display_options['footer']['area']['id'] = 'area';
-$handler->display->display_options['footer']['area']['table'] = 'views';
-$handler->display->display_options['footer']['area']['field'] = 'area';
-$handler->display->display_options['footer']['area']['label'] = 'Color Legend';
-$handler->display->display_options['footer']['area']['empty'] = FALSE;
-$handler->display->display_options['footer']['area']['content'] = '<div class="tmgmt-color-legend">
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-title">Color Legend:</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-white" title="Source language"><span></span></div>
-      <div class="tmgmt-legend-status">Source language</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-grey" title="Not translated"><span></span></div>
-      <div class="tmgmt-legend-status">Not translated</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-blue" title="Active job item: In progress"><span></span></div>
-      <div class="tmgmt-legend-status">In Progress</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-yellow" title="Active job item: Translated"><span></span></div>
-      <div class="tmgmt-legend-status">Ready for review</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-green" title="Translated"><span></span></div>
-      <div class="tmgmt-legend-status">Translated</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-orange" title="Translation outdated"><span></span></div>
-      <div class="tmgmt-legend-status">Translation outdated</div>
-  </div>
-</div>';
-$handler->display->display_options['footer']['area']['format'] = 'full_html';
-$handler->display->display_options['footer']['area']['tokenize'] = 0;
 /* No results behavior: Global: Text area */
 $handler->display->display_options['empty']['area']['id'] = 'area';
 $handler->display->display_options['empty']['area']['table'] = 'views';
@@ -371,36 +334,6 @@ $translatables['tmgmt_node_source_overview'] = array(
   t('Items per page'),
   t('- All -'),
   t('Offset'),
-  t('Color Legend'),
-  t('<div class="tmgmt-color-legend">
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-title">Color Legend:</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-white" title="Source language"><span></span></div>
-      <div class="tmgmt-legend-status">Source language</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-grey" title="Not translated"><span></span></div>
-      <div class="tmgmt-legend-status">Not translated</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-blue" title="Active job item: In progress"><span></span></div>
-      <div class="tmgmt-legend-status">In Progress</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-yellow" title="Active job item: Translated"><span></span></div>
-      <div class="tmgmt-legend-status">Ready for review</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-green" title="Translated"><span></span></div>
-      <div class="tmgmt-legend-status">Translated</div>
-  </div>
-  <div class="tmgmt-one-legend">
-      <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 tmgmt-ui-icon-orange" title="Translation outdated"><span></span></div>
-      <div class="tmgmt-legend-status">Translation outdated</div>
-  </div>
-</div>'),
   t('There are no nodes that match the specified filter criteria.'),
   t('User'),
   t('<!--views-bulk-operations-select-all-->'),

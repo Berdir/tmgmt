@@ -820,3 +820,31 @@ function tmgmt_ui_redirect_queue_dequeue() {
 /**
  * @} End of "addtogroup tmgmt_ui_redirect_queue".
  */
+
+/**
+ * Provides color legends for source statuses.
+ */
+function tmgmt_ui_color_legend(){
+  $legends = array();
+  $legends[] = array('legend' => t('Source Language'), 'color' => 'tmgmt-ui-icon-white');
+  $legends[] = array('legend' => t('Not translated'), 'color' => 'tmgmt-ui-icon-grey');
+  $legends[] = array('legend' => t('In progress'), 'color' => 'tmgmt-ui-icon-blue');
+  $legends[] = array('legend' => t('Ready for review'), 'color' => 'tmgmt-ui-icon-yellow');
+  $legends[] = array('legend' => t('Translated'), 'color' => 'tmgmt-ui-icon-green');
+  $legends[] = array('legend' => t('Translation Outdated'), 'color' => 'tmgmt-ui-icon-orange');
+
+  $output = '<div class="tmgmt-color-legend clearfix">
+        <div class="tmgmt-legend-title">' . t('Color Legend:') . '</div>';
+
+  foreach($legends as $legend){
+    $output .= '<div class="tmgmt-one-legend">
+        <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 ' .
+        $legend['color'] . '"><span></span></div>
+        <div class="tmgmt-legend-status">' .$legend['legend'] . '</div>
+        </div>';
+  }
+
+  $output .= '</div>';
+
+  return $output;
+}

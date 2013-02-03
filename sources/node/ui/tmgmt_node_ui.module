@@ -89,3 +89,18 @@ function tmgmt_node_ui_checkout_multiple_action($nodes, $info) {
     drupal_goto(tmgmt_ui_redirect_queue_dequeue());
   }
 }
+
+/**
+ * Implements hook_help.
+ */
+function tmgmt_node_ui_help($path, $arg){
+  $output = '';
+
+  switch($path){
+    case 'admin/config/regional/tmgmt/node':
+      $output = tmgmt_ui_color_legend();
+      break;
+  }
+
+  return $output;
+}
