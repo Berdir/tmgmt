@@ -934,10 +934,12 @@ function tmgmt_translator_plugin_info($plugin = NULL) {
  * @param $plugin
  *   (Optional) The machine-readable name of a service plugin.
  *
- * @return TMGMTTranslatorPluginControllerInterface
- *   The controller object for the given source plugin or an array containing
- *   all available translator plugin controller objects if no plugin name was
- *   given.
+ * @return array|TMGMTTranslatorPluginControllerInterface
+ *   - If the translator exists the controller object for the given source plugin
+ *     or an array containing all available translator plugin controller objects
+ *     if no plugin name was given.
+ *   - Array of existing Translators if a translator with given name does not
+ *     exists.
  */
 function tmgmt_translator_plugin_controller($plugin = NULL) {
   return _tmgmt_plugin_controller('translator', $plugin);
@@ -1022,11 +1024,13 @@ function tmgmt_translator_labels_flagged($job = NULL) {
  *   mapping feature it will return TRUE.
  */
 function tmgmt_provide_remote_languages_mappings(TMGMTTranslator $translator) {
-  if (!isset($translator->settings['map_remote_languages'])) {
+  $info = tmgmt_translator_plugin_info($translator->name);
+
+  if (!isset($info['map remote languages'])) {
     return TRUE;
   }
 
-  return $translator->settings['map_remote_languages'];
+  return $info['map remote languages'];
 }
 /**
  * @} End of "addtogroup tmgmt_translator".

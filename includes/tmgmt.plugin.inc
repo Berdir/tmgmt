@@ -477,7 +477,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
    * Implements TMGMTTranslatorPluginControllerInterface::mapToRemoteLanguage().
    */
   public function mapToRemoteLanguage(TMGMTTranslator $translator, $language) {
-    if (!$translator->provideRemoteLanguagesMapping()) {
+    if (!tmgmt_provide_remote_languages_mappings($translator)) {
       return $language;
     }
 
@@ -498,7 +498,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
    * Implements TMGMTTranslatorPluginControllerInterface::mapToLocalLanguage().
    */
   public function mapToLocalLanguage(TMGMTTranslator $translator, $language) {
-    if (!$translator->provideRemoteLanguagesMapping()) {
+    if (!tmgmt_provide_remote_languages_mappings($translator)) {
       return $language;
     }
 

@@ -212,10 +212,13 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
 
+    if (!empty($translator->plugin)) {
+      $controller = tmgmt_translator_plugin_controller($translator->plugin);
+    }
+
     // If current translator is configured to provide remote language mapping
-    // provide the form to configure mappings.
-    if ($translator->provideRemoteLanguagesMapping()) {
-      $controller = tmgmt_translator_plugin_controller($translator->name);
+    // provide the form to configure mappings, unless it does not exists yet.
+    if (!empty($controller) && tmgmt_provide_remote_languages_mappings($translator)) {
 
       $form['remote_languages_mappings'] = array(
         '#tree' => TRUE,
@@ -246,13 +249,6 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
           unset($form['remote_languages_mappings'][$local_language]['#size']);
         }
       }
-    }
-    // Else make sure the FALSE value will be preserved.
-    else {
-      $form['map_remote_languages'] = array(
-        '#type' => 'value',
-        '#value' => FALSE,
-      );
     }
 
     if (!element_children($form)) {

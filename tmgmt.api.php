@@ -60,13 +60,13 @@ function hook_tmgmt_translator_plugin_info() {
       'ui controller class' => 'TMGMTTestTranslatorUIController',
       'default settings' => array(
         'expose_settings' => TRUE,
-        // If the translator should provide remote languages mappings feature.
-        // It defaults to TRUE.
-        'map_remote_languages' => FALSE,
       ),
       // By default, a translator is automatically created with the default
       // settings. Set auto create to FALSE to prevent this.
       'auto create' => TRUE,
+      // If the translator should provide remote languages mappings feature.
+      // It defaults to TRUE.
+      'map remote languages' => FALSE,
     ),
   );
 }

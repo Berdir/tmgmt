@@ -205,21 +205,6 @@ class TMGMTTranslator extends Entity {
   }
 
   /**
-   * Determines if the translator plugin supports remote language mappings.
-   *
-   * @return bool
-   *   In case translator does not explicitly state that it does not provide the
-   *   mapping feature it will return TRUE.
-   */
-  public function provideRemoteLanguagesMapping() {
-    if (!isset($this->settings['map_remote_languages'])) {
-      return TRUE;
-    }
-
-    return $this->settings['map_remote_languages'];
-  }
-
-  /**
    * Maps local language to remote language.
    *
    * @param $language

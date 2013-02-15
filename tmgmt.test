@@ -927,8 +927,8 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de-de');
 
     // Test the fallback.
-    $this->default_translator->settings['map_remote_languages'] = FALSE;
-    $this->default_translator->save();
+    $info = &drupal_static('_tmgmt_plugin_info');
+    $info['translator']['test_translator']['map remote languages'] = FALSE;
 
     $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en');
     $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de');
