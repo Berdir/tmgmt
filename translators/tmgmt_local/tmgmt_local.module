@@ -243,6 +243,7 @@ function tmgmt_local_translation_access(TMGMTLocalTask $task, $account = NULL) {
 
   // We grant access to the translation if both of the following conditions are
   // met:
+  // - User is assigned as a translator to the given task.
   // - User has 'provide translation services' permission.
   // - No modules say to deny access.
   // - At least one module says to grant access.
@@ -250,6 +251,11 @@ function tmgmt_local_translation_access(TMGMTLocalTask $task, $account = NULL) {
   if (!user_access('provide translation services')) {
     $rights[$account->uid][$job->tjid] = FALSE;
     return FALSE;
+  }
+
+  if ($task->tuid == $account->uid) {
+    $rights[$account->uid][$job->tjid] = TRUE;
+    return TRUE;
   }
 
   $access = module_invoke_all('tmgmt_local_translation_access', $job, $account);
