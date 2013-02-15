@@ -100,8 +100,7 @@ function tmgmt_entity_ui_translate_form_submit($form, &$form_state) {
   $jobs = array();
   foreach (array_keys(array_filter($values['languages'])) as $langcode) {
     // Create the job object.
-    $job = tmgmt_job_create(entity_language($entity_type, $entity->language), $langcode, $GLOBALS['user']->uid);
-
+    $job = tmgmt_job_create(entity_language($entity_type, $entity), $langcode, $GLOBALS['user']->uid);
     try {
       // Add the job item.
       $job->addItem('entity', $entity_type, $id);
