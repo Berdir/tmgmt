@@ -1414,3 +1414,25 @@ function tmgmt_views_plugins() {
   );
   return $plugins;
 }
+
+/**
+ * Calculates number of words, which a text consists of.
+ * Is placed as a separately function to be coverable by unit tests.
+ * @see TMGMTWordCountUnitTestCase
+ *
+ * @param string $text
+ * @return int
+ *   Returns count of words of text.
+ */
+function tmgmt_word_count($text) {
+  // Replace each punctuation mark with space.
+  $text = str_replace(array('`', '~', '!', '@', '"', '#', '$', ';', '%', '^', ':', '?', '&', '*', '(', ')', '-', '_', '+', '=', '{', '}', '[', ']', '\\', '|', '/', '\'', '<', '>', ',', '.'), ' ', $text);
+  // Remove duplicate spaces.
+  $text =  trim(preg_replace('/ {2,}/', ' ', $text));
+  // Turn into an array.
+  $array = ($text) ? explode(' ', $text) : array();
+  // How many are they?
+  $count = count($array);
+  // That is what we need.
+  return $count;
+}

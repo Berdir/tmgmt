@@ -609,8 +609,9 @@ function tmgmt_update_7005() {
  function _tmgmt_data_count_7006($item, $entity) {
   if (!empty($item['#text'])) {
     if (_tmgmt_filter_data($item)) {
+      module_load_include('module', 'tmgmt');
       // Count words of the data item.
-      $entity->word_count += str_word_count($item['#text']);
+      $entity->word_count += tmgmt_word_count($item['#text']);
     }
   }
   else {

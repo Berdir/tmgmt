@@ -199,7 +199,7 @@ class TMGMTJobItemController extends EntityAPIController {
       if (_tmgmt_filter_data($item)) {
 
         // Count words of the data item.
-        $entity->word_count += str_word_count($item['#text']);
+        $entity->word_count += tmgmt_word_count($item['#text']);
 
         // Set default states if no state is set.
         if (!isset($item['#status'])) {
