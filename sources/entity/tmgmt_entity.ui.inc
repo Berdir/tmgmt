@@ -14,7 +14,7 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
    *
    * @var int
    */
-  public $pagerLimit = 20;
+  public $pagerLimit = 25;
 
   /**
    * Gets entities data of provided type needed to build overview form list.
