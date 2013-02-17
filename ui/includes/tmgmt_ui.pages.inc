@@ -494,6 +494,13 @@ function tmgmt_job_form_submit($form, &$form_state) {
   // plain 'Submit' case covered. Also, if the translator fails it won't save on
   // its own.
   $job = entity_ui_form_submit_build_entity($form, $form_state);
+
+  // If requested custom job settings handling, copy values from original job.
+  if (tmgmt_job_settings_custom_handling($job->getTranslator())) {
+    $original_job = entity_load_unchanged('tmgmt_job', $job->tjid);
+    $job->settings = $original_job->settings;
+  }
+
   // Make sure that we always store a label as it can be a slow operation to
   // generate the default label.
   if (empty($job->label)) {

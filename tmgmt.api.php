@@ -67,6 +67,9 @@ function hook_tmgmt_translator_plugin_info() {
       // If the translator should provide remote languages mappings feature.
       // It defaults to TRUE.
       'map remote languages' => FALSE,
+      // Flag defining if job settings are handled by plugin itself.
+      // Defaults to FALSE.
+      'job settings custom handling' => FALSE,
     ),
   );
 }

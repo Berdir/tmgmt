@@ -1024,13 +1024,32 @@ function tmgmt_translator_labels_flagged($job = NULL) {
  *   mapping feature it will return TRUE.
  */
 function tmgmt_provide_remote_languages_mappings(TMGMTTranslator $translator) {
-  $info = tmgmt_translator_plugin_info($translator->name);
+  $info = tmgmt_translator_plugin_info($translator->plugin);
 
   if (!isset($info['map remote languages'])) {
     return TRUE;
   }
 
   return $info['map remote languages'];
+}
+
+/**
+ * Determines if job settings of the translator will be handled by its plugin.
+ *
+ * @param TMGMTTranslator $translator
+ *   Translator entity.
+ *
+ * @return bool
+ *   If job settings are to be handled by the plugin.
+ */
+function tmgmt_job_settings_custom_handling(TMGMTTranslator $translator) {
+  $info = tmgmt_translator_plugin_info($translator->plugin);
+
+  if (isset($info['job settings custom handling'])) {
+    return $info['job settings custom handling'];
+  }
+
+  return FALSE;
 }
 /**
  * @} End of "addtogroup tmgmt_translator".
