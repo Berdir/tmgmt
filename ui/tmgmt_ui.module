@@ -824,7 +824,14 @@ function tmgmt_ui_redirect_queue_dequeue() {
 /**
  * Provides color legends for source statuses.
  */
-function tmgmt_ui_color_legend(){
+function tmgmt_ui_color_legend() {
+  global $theme;
+
+  drupal_add_css(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css');
+  if ($theme == 'seven') {
+    drupal_add_css(drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.seven.css');
+  }
+
   $legends = array();
   $legends[] = array('legend' => t('Source Language'), 'color' => 'tmgmt-ui-icon-white');
   $legends[] = array('legend' => t('Not translated'), 'color' => 'tmgmt-ui-icon-grey');
@@ -833,14 +840,13 @@ function tmgmt_ui_color_legend(){
   $legends[] = array('legend' => t('Translated'), 'color' => 'tmgmt-ui-icon-green');
   $legends[] = array('legend' => t('Translation Outdated'), 'color' => 'tmgmt-ui-icon-orange');
 
-  $output = '<div class="tmgmt-color-legend clearfix">
-        <div class="tmgmt-legend-title">' . t('Color Legend:') . '</div>';
+  $output = '<div class="tmgmt-color-legend clearfix">';
 
-  foreach($legends as $legend){
+  foreach ($legends as $legend){
     $output .= '<div class="tmgmt-one-legend">
         <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 ' .
         $legend['color'] . '"><span></span></div>
-        <div class="tmgmt-legend-status">' .$legend['legend'] . '</div>
+        <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
         </div>';
   }
 
