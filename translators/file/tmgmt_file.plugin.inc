@@ -22,7 +22,7 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
    * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
    */
   public function requestTranslation(TMGMTJob $job) {
-    $name = "JobID" . $job->tjid;
+    $name = "JobID" . $job->tjid . '_' . $job->source_language . '_' . $job->target_language;
 
     $export = tmgmt_file_format_controller($job->getSetting('export_format'));
 
