@@ -191,21 +191,15 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
  */
 class TMGMTEntitySourcePathAutoTestCase extends TMGMTEntityTestCaseUtility {
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Entity Source Pathauto tests'),
-      'description' => t('Verifies that the correct aliases are generated for entity transations'),
-      'group' => t('Translation Management'),
+      'name' => 'Entity Source Pathauto tests',
+      'description' => 'Verifies that the correct aliases are generated for entity transations',
+      'group' => 'Translation Management',
       'dependencies' => array('entity_translation', 'pathauto'),
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
   function setUp() {
     parent::setUp(array('tmgmt_entity', 'entity_translation', 'pathauto'));
     $this->loginAsAdmin();
