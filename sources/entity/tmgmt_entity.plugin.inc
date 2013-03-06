@@ -41,9 +41,12 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
     $job = tmgmt_job_load($job_item->tjid);
 
     tmgmt_field_populate_entity($job_item->item_type, $entity, $job->target_language, $job_item->getData());
-    entity_save($job_item->item_type, $entity);
 
+    // Change the active language of the entity to the target language.
     $handler = entity_translation_get_handler($job_item->item_type, $entity);
+    $handler->setFormLanguage($job_item->getJob()->target_language);
+
+    entity_save($job_item->item_type, $entity);
 
     $translation = array(
       // @todo Improve hardcoded values.
@@ -52,7 +55,6 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
       'language' => $job_item->getJob()->target_language,
       'source' => $job_item->getJob()->source_language,
     );
-
     $handler->setTranslation($translation);
     $handler->saveTranslations();
     $job_item->accepted();
