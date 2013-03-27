@@ -162,6 +162,7 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->loginAsTranslator();
     $job = $this->createJob();
     $job->translator = $translator->name;
+    $job->settings['job_comment'] = $job_comment = 'Dummy job comment';
     $job->addItem('test_source', 'test', '1');
     $job->addItem('test_source', 'test', '2');
 
@@ -197,6 +198,11 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertText($this->local_translator->name);
 
     $job->requestTranslation();
+
+    // Test for job comment in the job checkout info pane.
+    $uri = $job->uri();
+    $this->drupalGet($uri['path']);
+    $this->assertText($job_comment);
 
     $this->drupalLogin($this->local_translator);
 
@@ -246,6 +252,8 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->clickLink(t('translate'));
 
     $this->assertText(t('Dummy'));
+    // Job comment is present in the translate tool as well.
+    $this->assertText($job_comment);
     // @todo: Improve title.
     $this->assertText(t('Translate Task Item'));
 

@@ -82,11 +82,28 @@ class TMGMTLocalTranslatorUIController extends TMGMTDefaultTranslatorUIControlle
 
     $tuid = $job->getSetting('translator');
     if ($tuid && $translator = user_load($tuid)) {
-      $form['#description'] = t('Translation job is assigned to %name.', array('%name' => entity_label('user', $translator)));
+      $form['job_status'] = array(
+        '#type' => 'item',
+        '#title' => t('Job status'),
+        '#markup' => t('Translation job is assigned to %name.', array('%name' => entity_label('user', $translator))),
+      );
     }
     else {
-      $form['#description'] = t('Translation job is not assigned to any translator.');
+      $form['job_status'] = array(
+        '#type' => 'item',
+        '#title' => t('Job status'),
+        '#markup' => t('Translation job is not assigned to any translator.'),
+      );
     }
+
+    if ($job->getSetting('job_comment')) {
+      $form['job_comment'] = array(
+        '#type' => 'item',
+        '#title' => t('Job comment'),
+        '#markup' => check_plain($job->getSetting('job_comment')),
+      );
+    }
+
     return $form;
   }
 

@@ -98,6 +98,14 @@ function tmgmt_local_translation_form($form, &$form_state, TMGMTLocalTask $task,
   $form_state['task'] = $task;
   $form_state['item'] = $item;
 
+  if ($item->getJob()->getSetting('job_comment')) {
+    $form['job_comment'] = array(
+      '#type' => 'item',
+      '#title' => t('Job comment'),
+      '#markup' => $item->getJob()->getSetting('job_comment'),
+    );
+  }
+
   $form['translation'] = array(
     '#type' => 'container',
   );
