@@ -77,7 +77,7 @@ class TMGMTLocalTaskItemMetadataController extends EntityDefaultMetadataControll
     $properties = &$info[$this->type]['properties'];
 
     // Add the options list for the defined status constants.
-    $properties['status']['options list'] = 'tmgmt_local_task_statuses';
+    $properties['status']['options list'] = 'tmgmt_local_task_item_statuses';
 
     // Link the job property to the corresponding job entity.
     $properties['tjiid']['type'] = 'tmgmt_job_item';

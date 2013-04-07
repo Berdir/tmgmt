@@ -36,9 +36,9 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
     if (user_access('administer translation tasks') && tmgmt_local_translation_access($task) && empty($task->tuid)) {
       $element['#links']['assign'] = array(
         'href' => 'manage-translate/assign-tasks/' . $task->tltid,
-        'options' => array(
-          'query' => array('destination' => current_path()),
-          'title' => t('assign'),
+        'query' => array('destination' => current_path()),
+        'attributes' => array(
+          'title' => t('Assign'),
         ),
         'title' => t('assign'),
       );
@@ -46,8 +46,8 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
     elseif (tmgmt_local_translation_access($task) && empty($task->tuid)) {
       $element['#links']['assign_to_me'] = array(
         'href' => 'translate/' . $task->tltid . '/assign-to-me',
-        'options' => array(
-          'query' => array('destination' => current_path()),
+        'query' => array('destination' => current_path()),
+        'attributes' => array(
           'title' => t('Assign to me'),
         ),
         'title' => t('assign'),
@@ -56,8 +56,8 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
     elseif (tmgmt_local_translation_access($task) && empty($task->tuid)) {
       $element['#links']['assign_to_me'] = array(
         'href' => 'translate/' . $task->tltid . '/assign-to-me',
-        'options' => array(
-          'query' => array('destination' => current_path()),
+        'query' => array('destination' => current_path()),
+        'attributes' => array(
           'title' => t('Assign to me'),
         ),
         'title' => t('assign'),
@@ -66,8 +66,8 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
     if (tmgmt_local_translation_access($task) && !empty($task->tuid)) {
       $element['#links']['unassign'] = array(
         'href' => 'translate/' . $task->tltid . '/unassign',
-        'options' => array(
-          'query' => array('destination' => current_path()),
+        'query' => array('destination' => current_path()),
+        'attributes' => array(
           'title' => t('Unassign'),
         ),
         'title' => t('unassign'),

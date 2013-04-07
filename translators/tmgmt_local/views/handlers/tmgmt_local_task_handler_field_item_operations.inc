@@ -16,11 +16,11 @@ class tmgmt_local_task_handler_field_item_operations extends views_handler_field
     $element = array();
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('inline'));
-    if (entity_access('translate', 'tmgmt_local_task_item', $item)) {
+    if (entity_access('view', 'tmgmt_local_task_item', $item)) {
       $element['#links']['translate'] = array(
         'href' => 'translate/' . $item->tltid . '/item/' . $item->tltiid,
-        'options' => array(
-          'query' => array('destination' => current_path()),
+        'query' => array('destination' => current_path()),
+        'attributes' => array(
           'title' => t('Translate'),
         ),
         'title' => t('translate'),

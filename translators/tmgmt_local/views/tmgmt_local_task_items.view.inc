@@ -29,10 +29,11 @@ $handler->display->display_options['relationships']['tltid']['field'] = 'tltid';
 $handler->display->display_options['relationships']['tjiid']['id'] = 'tjiid';
 $handler->display->display_options['relationships']['tjiid']['table'] = 'tmgmt_local_task_item';
 $handler->display->display_options['relationships']['tjiid']['field'] = 'tjiid';
-/* Field: Translation Task Item: Translation task item ID */
-$handler->display->display_options['fields']['tltiid']['id'] = 'tltiid';
-$handler->display->display_options['fields']['tltiid']['table'] = 'tmgmt_local_task_item';
-$handler->display->display_options['fields']['tltiid']['field'] = 'tltiid';
+/* Field: Translation Management Job Item: Label */
+$handler->display->display_options['fields']['label']['id'] = 'label';
+$handler->display->display_options['fields']['label']['table'] = 'tmgmt_job_item';
+$handler->display->display_options['fields']['label']['field'] = 'label';
+$handler->display->display_options['fields']['label']['relationship'] = 'tjiid';
 /* Field: Translation Task Item: Status */
 $handler->display->display_options['fields']['status']['id'] = 'status';
 $handler->display->display_options['fields']['status']['table'] = 'tmgmt_local_task_item';
@@ -45,7 +46,7 @@ $handler->display->display_options['fields']['operations']['field'] = 'operation
 /* Display: Block */
 $handler = $view->new_display('block', 'Block', 'block');
 $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
-$translatables['translation_task_items'] = array(
+$translatables['tmgmt_local_task_items'] = array(
   t('Master'),
   t('Translation Task Items'),
   t('more'),
@@ -68,5 +69,6 @@ $translatables['translation_task_items'] = array(
   t(','),
   t('Status'),
   t('Operations'),
+  t('Label'),
   t('Block'),
 );

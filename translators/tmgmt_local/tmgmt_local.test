@@ -247,6 +247,7 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->clickLink(t('view'));
     $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:1')));
     $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:2')));
+    $this->assertText(t('Untranslated'));
 
     // Translate the first item.
     $this->clickLink(t('translate'));
@@ -267,8 +268,8 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->drupalPost(NULL, $edit, t('Save as completed'));
 
     // The first item should be accepted now, the second still in progress.
-    $this->assertText(t('Accepted'));
-    $this->assertText(t('In progress'));
+    $this->assertText(t('Completed'));
+    $this->assertText(t('Untranslated'));
 
     // Translate the second item but do not accept it yet.
     $this->clickLink(t('translate'));
@@ -277,20 +278,20 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     );
     $this->drupalPost(NULL, $edit, t('Save'));
     // The first item should be accepted now, the second still in progress.
-    $this->assertText(t('Accepted'));
-    $this->assertText(t('In progress'));
+    $this->assertText(t('Completed'));
+    $this->assertText(t('Untranslated'));
 
     // Check the overview page, the task should still show in progress.
     $this->drupalGet('translate');
     $this->assertText(t('Pending'));
 
     // Mark the second item as completed now.
-    $this->clickLink(t('translate'));
+    $this->clickLink(t('view'));
     $this->clickLink(t('translate'));
     $this->drupalPost(NULL, array(), t('Save as completed'));
     // Both items should be accepted now.
-    $this->assertText(t('Accepted'));
-    $this->assertNoText(t('In progress'));
+    $this->assertText(t('Completed'));
+    $this->assertNoText(t('Untranslated'));
 
     // Check the overview, the task should be completed now.
     $this->drupalGet('translate');

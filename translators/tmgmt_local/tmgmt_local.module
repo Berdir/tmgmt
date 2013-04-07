@@ -51,9 +51,33 @@ define('TMGMT_LOCAL_TASK_STATUS_REJECTED', 3);
 
 /**
  * Translation task is closed.
- *
  */
 define('TMGMT_LOCAL_TASK_STATUS_CLOSED', 4);
+
+/**
+ * Translation task item is untranslated.
+ */
+define('TMGMT_LOCAL_TASK_ITEM_STATUS_UNTRANSLATED', 0);
+
+/**
+ * Translation task item is translated.
+ */
+define('TMGMT_LOCAL_TASK_ITEM_STATUS_TRANSLATED', 1);
+
+/**
+ * Translation task item is waiting for a review of the job item.
+ */
+define('TMGMT_LOCAL_TASK_ITEM_STATUS_PENDING_REVIEW', 2);
+
+/**
+ * Translation job item has been rejected and the task needs to be updated.
+ */
+define('TMGMT_LOCAL_TASK_ITEM_STATUS_REJECTED', 3);
+
+/**
+ * The translation task item has been completed and closed.
+ */
+define('TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED', 4);
 
 /**
  * @} End of "tmgmt_local_task".
@@ -158,7 +182,7 @@ function tmgmt_local_menu() {
     'file' => 'includes/tmgmt_local.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['translate/%tmgmt_local_task/item/%tmgmt_job_item'] = array(
+  $items['translate/%tmgmt_local_task/item/%tmgmt_local_task_item'] = array(
     'title' => 'Translate Task Item',
     'description' => 'Translate task item.',
     'page callback' => 'drupal_get_form',
@@ -399,6 +423,20 @@ function tmgmt_local_task_load_multiple(array $tltids = array(), $conditions = a
 }
 
 /**
+ * Loads a local translation task items entity.
+ */
+function tmgmt_local_task_item_load($tltiid) {
+  return entity_load_single('tmgmt_local_task_item', $tltiid);
+}
+
+/**
+ * Loads local translation task items entity.
+ */
+function tmgmt_local_task_item_load_multiple(array $tltiids = array(), $conditions = array()) {
+  return entity_load('tmgmt_local_task_item', $tltiids, $conditions);
+}
+
+/**
  * Creates a translation task entity.
  *
  * @param $values
@@ -471,7 +509,7 @@ function tmgmt_local_task_item_access($op, TMGMTLocalTaskItem $item = NULL, $acc
   if ($item) {
     $task = $item->getTask();
   }
-  return entity_access($op, 'tmgmt_local_task', $task);
+  return entity_access($op, 'tmgmt_local_task', $task, $account);
 }
 
 /**
@@ -557,6 +595,22 @@ function tmgmt_local_task_statuses() {
     TMGMT_LOCAL_TASK_STATUS_COMPLETED => t('Completed'),
     TMGMT_LOCAL_TASK_STATUS_REJECTED => t('Rejected'),
     TMGMT_LOCAL_TASK_STATUS_CLOSED => t('Closed'),
+  );
+}
+
+/**
+ * Retrieve a labeled list of all available statuses for task items.
+ *
+ * @return array
+ *   A list of all available statuses.
+ */
+function tmgmt_local_task_item_statuses() {
+  return $statuses = array(
+    TMGMT_LOCAL_TASK_ITEM_STATUS_UNTRANSLATED => t('Untranslated'),
+    TMGMT_LOCAL_TASK_ITEM_STATUS_TRANSLATED => t('Translated'),
+    TMGMT_LOCAL_TASK_ITEM_STATUS_PENDING_REVIEW => t('Pending review'),
+    TMGMT_LOCAL_TASK_ITEM_STATUS_REJECTED => t('Rejected'),
+    TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED => t('Completed'),
   );
 }
 
