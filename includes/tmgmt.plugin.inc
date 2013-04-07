@@ -481,7 +481,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
       return $language;
     }
 
-    if (isset($translator->settings['remote_languages_mappings'][$language])) {
+    if (!empty($translator->settings['remote_languages_mappings'][$language])) {
       return $translator->settings['remote_languages_mappings'][$language];
     }
 
