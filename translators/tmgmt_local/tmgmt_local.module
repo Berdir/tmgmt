@@ -95,7 +95,7 @@ function tmgmt_local_entity_info() {
       'label callback' => 'entity_class_label',
       'access callback' => 'tmgmt_local_task_item_access',
       'entity keys' => array(
-        'id' => 'tltid',
+        'id' => 'tltiid',
       ),
       'admin ui' => array(
         'controller class' => 'TMGMTLocalTaskItemUIController',

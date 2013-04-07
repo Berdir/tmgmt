@@ -218,7 +218,7 @@ function tmgmt_local_translation_form_save_submit($form, &$form_state) {
    */
   $item = $form_state['item'];
 
-  // Write the translated data into the job item.
+  // Write the translated data into the task item.
   $values = $form_state['values'];
   foreach ($values as $key => $value) {
     if (isset($value['translation'])) {
