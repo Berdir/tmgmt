@@ -66,14 +66,14 @@ class TMGMTLocalTaskViewsController extends EntityDefaultViewsController {
         'label' => t('Job'),
       ),
     );
-    $data['tmgmt_local_task']['translate_task_item'] = array(
+    /*$data['tmgmt_local_task']['translate_task_item'] = array(
       'title' => t('Translate Task Item'),
       'help' => t('Display a link for translating translation task item.'),
       'real field' => 'tltid',
       'field' => array(
         'handler' => 'tmgmt_local_task_handler_field_translate_task_item',
       ),
-    );
+    );*/
 
     return $data;
   }

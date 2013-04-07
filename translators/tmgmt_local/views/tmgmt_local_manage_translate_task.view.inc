@@ -771,11 +771,10 @@ $handler->display->display_options['fields']['loop_count']['id'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['loop_count']['field'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['label'] = 'Loop count';
-/* Field: Broken/missing handler */
-$handler->display->display_options['fields']['view']['id'] = 'view';
-$handler->display->display_options['fields']['view']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['view']['field'] = 'view';
-$handler->display->display_options['fields']['view']['label'] = 'Action';
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
 /* Filter criterion: Translation Task: Status */
@@ -1312,11 +1311,10 @@ $handler->display->display_options['fields']['loop_count']['id'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['loop_count']['field'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['label'] = 'Loop count';
-/* Field: Broken/missing handler */
-$handler->display->display_options['fields']['view']['id'] = 'view';
-$handler->display->display_options['fields']['view']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['view']['field'] = 'view';
-$handler->display->display_options['fields']['view']['label'] = 'Action';
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
 /* Filter criterion: Translation Task: Status */
@@ -1543,11 +1541,10 @@ $handler->display->display_options['fields']['loop_count']['id'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['loop_count']['field'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['label'] = 'Loop count';
-/* Field: Broken/missing handler */
-$handler->display->display_options['fields']['view']['id'] = 'view';
-$handler->display->display_options['fields']['view']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['view']['field'] = 'view';
-$handler->display->display_options['fields']['view']['label'] = 'Action';
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
 /* Filter criterion: Translation Task: Status */
@@ -1678,7 +1675,6 @@ $translatables['tmgmt_local_manage_translate_task'] = array(
   t('There are no rejected tasks.'),
   t('Translator User'),
   t('Date'),
-  t('Action'),
   t('Pending'),
   t('Pending Tasks'),
   t('Shows asigned tasks with pending status.'),

@@ -52,7 +52,7 @@ function tmgmt_local_task_form($form, &$form_state, TMGMTLocalTask $task, $op = 
     '#default_value' => $task->tuid,
   );
 
-  if ($view = views_get_view('translation_task_items')) {
+  if ($view = views_get_view('tmgmt_local_task_items')) {
     $form['items'] = array(
       '#type' => 'item',
       '#title' => $view->get_title(),

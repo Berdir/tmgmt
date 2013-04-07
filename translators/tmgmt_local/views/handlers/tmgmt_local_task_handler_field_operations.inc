@@ -33,7 +33,7 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
         'title' => t('delete'),
       );
     }
-    if (tmgmt_local_translation_access($task) && empty($task->tuid)) {
+    if (user_access('administer translation tasks') && tmgmt_local_translation_access($task) && empty($task->tuid)) {
       $element['#links']['assign'] = array(
         'href' => 'manage-translate/assign-tasks/' . $task->tltid,
         'options' => array(

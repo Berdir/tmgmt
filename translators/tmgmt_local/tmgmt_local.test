@@ -244,7 +244,7 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
 
     // Translate the task.
     $this->drupalGet('translate');
-    $this->clickLink(t('translate'));
+    $this->clickLink(t('view'));
     $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:1')));
     $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:2')));
 
