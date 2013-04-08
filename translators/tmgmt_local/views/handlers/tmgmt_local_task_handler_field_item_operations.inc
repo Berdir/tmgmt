@@ -16,7 +16,7 @@ class tmgmt_local_task_handler_field_item_operations extends views_handler_field
     $element = array();
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('inline'));
-    if (entity_access('view', 'tmgmt_local_task_item', $item)) {
+    if ($item->isUntranslated() &&  entity_access('view', 'tmgmt_local_task_item', $item)) {
       $element['#links']['translate'] = array(
         'href' => 'translate/' . $item->tltid . '/item/' . $item->tltiid,
         'query' => array('destination' => current_path()),

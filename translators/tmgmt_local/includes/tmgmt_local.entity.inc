@@ -435,4 +435,30 @@ class TMGMTLocalTaskItem extends Entity {
   public function getJobItem() {
     return entity_load_single('tmgmt_job_item', $this->tjiid);
   }
+
+  /**
+   * Overrides Entity::buildContent().
+   */
+  public function buildContent($view_mode = 'full', $langcode = NULL) {
+    $content = drupal_get_form('tmgmt_local_translation_form', $this);
+    return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
+  }
+
+  public function isUntranslated() {
+    return $this->status == TMGMT_LOCAL_TASK_ITEM_STATUS_UNTRANSLATED;
+  }
+
+  /**
+   * Sets the task item status to translated.
+   */
+  public function translated() {
+    $this->status = TMGMT_LOCAL_TASK_ITEM_STATUS_TRANSLATED;
+  }
+
+  /**
+   * Sets the task item status to completed.
+   */
+  public function completed() {
+    $this->status = TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED;
+  }
 }

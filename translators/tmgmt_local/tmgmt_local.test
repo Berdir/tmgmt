@@ -255,8 +255,7 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Dummy'));
     // Job comment is present in the translate tool as well.
     $this->assertText($job_comment);
-    // @todo: Improve title.
-    $this->assertText(t('Translate Task Item'));
+    $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:1')));
 
     // Try to complete a translation when translations are missing.
     $this->drupalPost(NULL, array(), t('Save as completed'));

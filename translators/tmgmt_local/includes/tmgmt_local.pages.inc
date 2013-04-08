@@ -92,6 +92,21 @@ function tmgmt_local_task_form_submit($form, &$form_state) {
   $task->save();
 }
 
+
+
+/**
+ * Simple page callback for viewing a task.
+ *
+ * @param TMGMTLocalTaskItem $item
+ *   The viewed task item
+ *
+ * @return array
+ *   A renderable array.
+ */
+function tmgmt_local_task_item_view(TMGMTLocalTaskItem $item) {
+  return entity_view($item->entityType(), array($item), 'full', NULL, TRUE);
+}
+
 /**
  * Assign task to current user.
  *
@@ -106,15 +121,18 @@ function tmgmt_local_translation_assign_to_me(TMGMTLocalTask $task) {
 /**
  * Form callback for translating a job item.
  */
-function tmgmt_local_translation_form($form, &$form_state, TMGMTLocalTask $task, TMGMTJobItem $item) {
-  $form_state['task'] = $task;
-  $form_state['item'] = $item;
+function tmgmt_local_translation_form($form, &$form_state, TMGMTLocalTaskItem $task_item) {
+  $form_state['task'] = $task_item->getTask();
+  $form_state['task_item'] = $task_item;
+  $form_state['job_item'] = $job_item = $task_item->getJobItem();
 
-  if ($item->getJob()->getSetting('job_comment')) {
+  $job = $job_item->getJob();
+
+  if ($job->getSetting('job_comment')) {
     $form['job_comment'] = array(
       '#type' => 'item',
       '#title' => t('Job comment'),
-      '#markup' => $item->getJob()->getSetting('job_comment'),
+      '#markup' => $job->getSetting('job_comment'),
     );
   }
 
@@ -123,7 +141,7 @@ function tmgmt_local_translation_form($form, &$form_state, TMGMTLocalTask $task,
   );
 
   // Build the translation form.
-  $data = $item->getData();
+  $data = $job_item->getData();
 
   // Need to keep the first hierarchy. So flatten must take place inside
   // of the foreach loop.
@@ -131,7 +149,7 @@ function tmgmt_local_translation_form($form, &$form_state, TMGMTLocalTask $task,
   // Reverse the order to get the correct order.
   foreach (array_reverse(element_children($data)) as $key) {
     $flattened = tmgmt_flatten_data($data[$key], $key);
-    $form['translation'][$key] = tmgmt_local_translation_form_element($flattened, $item, $zebra);
+    $form['translation'][$key] = tmgmt_local_translation_form_element($flattened, $job_item, $zebra);
   }
 
   // Add the form actions as well.
@@ -157,11 +175,6 @@ function tmgmt_local_translation_form($form, &$form_state, TMGMTLocalTask $task,
  * Verify that all items are translated.
  */
 function tmgmt_local_translation_form_save_as_completed_validate($form, &$form_state) {
-  /**
-   * @var TMGMTJobItem $item.
-   */
-  $item = $form_state['item'];
-
   // Loop over all data items and verify that there is a translation in there.
   foreach ($form_state['values'] as $key => $value) {
     if (is_array($value) && isset($value['translation'])) {
@@ -184,16 +197,24 @@ function tmgmt_local_translation_form_save_as_completed_submit($form, &$form_sta
   $task = $form_state['task'];
 
   /**
+   * @var TMGMTLocalTaskItem $item.
+   */
+  $task_item = $form_state['task_item'];
+  $task_item->translated();
+  $task_item->save();
+
+  /**
    * @var TMGMTJobItem $item.
    */
-  $item = $form_state['item'];
+  $job_item = $form_state['job_item'];
 
-  // Set the job item to 'needs review' and task to finised states.
-  $item->needsReview();
+  // Set the job item to 'needs review' and task to finished states.
+  $job_item->needsReview();
+
   // Mark the task as completed if all assigned job items are at needs done.
   $all_done = TRUE;
-  foreach ($task->getItems() as $task_item) {
-    if ($task_item->isActive()) {
+  foreach ($job_item->getJob()->getItems() as $item) {
+    if ($item->isActive()) {
       $all_done = FALSE;
       break;
     }
@@ -216,7 +237,7 @@ function tmgmt_local_translation_form_save_submit($form, &$form_state) {
   /**
    * @var TMGMTJobItem $item.
    */
-  $item = $form_state['item'];
+  $job_item = $form_state['job_item'];
 
   // Write the translated data into the task item.
   $values = $form_state['values'];
@@ -225,10 +246,10 @@ function tmgmt_local_translation_form_save_submit($form, &$form_state) {
       $update['#translation'] = array(
         '#text' => $value['translation'],
       );
-      $item->updateData($key, $update);
+      $job_item->updateData($key, $update);
     }
   }
-  $item->save();
+  $job_item->save();
 }
 
 /**
