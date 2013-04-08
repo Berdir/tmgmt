@@ -383,6 +383,7 @@ $handler->display->display_options['menu']['context'] = 0;
 $handler->display->display_options['tab_options']['type'] = 'normal';
 $handler->display->display_options['tab_options']['title'] = 'Manage translation tasks';
 $handler->display->display_options['tab_options']['weight'] = '0';
+$handler->display->display_options['tab_options']['name'] = 'user-menu';
 
 /* Display: Assigned */
 $handler = $view->new_display('page', 'Assigned', 'assigned');
@@ -630,6 +631,7 @@ $handler->display->display_options['path'] = 'manage-translate/assigned';
 $handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Assigned';
 $handler->display->display_options['menu']['weight'] = '10';
+$handler->display->display_options['menu']['name'] = 'user-menu';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: Rejected */
@@ -856,6 +858,7 @@ $handler->display->display_options['path'] = 'manage-translate/rejected';
 $handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Rejected';
 $handler->display->display_options['menu']['weight'] = '20';
+$handler->display->display_options['menu']['name'] = 'user-menu';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: Pending */
@@ -1166,6 +1169,7 @@ $handler->display->display_options['path'] = 'manage-translate/pending';
 $handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Pending';
 $handler->display->display_options['menu']['weight'] = '30';
+$handler->display->display_options['menu']['name'] = 'user-menu';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: Completed */
@@ -1396,6 +1400,7 @@ $handler->display->display_options['path'] = 'manage-translate/completed';
 $handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Completed';
 $handler->display->display_options['menu']['weight'] = '40';
+$handler->display->display_options['menu']['name'] = 'user-menu';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: Closed */
@@ -1626,6 +1631,7 @@ $handler->display->display_options['path'] = 'manage-translate/closed';
 $handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Closed';
 $handler->display->display_options['menu']['weight'] = '50';
+$handler->display->display_options['menu']['name'] = 'user-menu';
 $handler->display->display_options['menu']['context'] = 0;
 $translatables['tmgmt_local_manage_translate_task'] = array(
   t('Master'),
