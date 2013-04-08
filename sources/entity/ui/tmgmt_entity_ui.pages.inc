@@ -65,9 +65,20 @@ function tmgmt_entity_ui_translate_form($form, &$form_state, $build) {
       $additional = t('None');
     }
     // Inject the additional column into the array.
-    array_splice($option, -1, 0, array($additional));
-    // Append the current option array to the form.
-    $form['languages']['#options'][$langcode] = $option;
+
+    // The generated form structure has changed, support both an additional
+    // 'data' key (that is not supported by tableselect) and the old version
+    // without.
+    if (isset($option['data'])) {
+      array_splice($option['data'], -1, 0, array($additional));
+      // Append the current option array to the form.
+      $form['languages']['#options'][$langcode] = $option['data'];
+    }
+    else {
+      array_splice($option, -1, 0, array($additional));
+      // Append the current option array to the form.
+      $form['languages']['#options'][$langcode] = $option;
+    }
   }
   $form['actions']['#type'] = 'actions';
   $form['actions']['request'] = array(
