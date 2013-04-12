@@ -85,7 +85,7 @@ function tmgmt_local_schema() {
   );
 
   $schema['tmgmt_local_task_item'] = array(
-    'description' => 'A tmgmt local task contains additional workflow data for a job item.',
+    'description' => 'A tmgmt local task item contains additional workflow data for a job item.',
     'fields' => array(
       'tltiid' => array(
         'description' => 'The identifier of the task item.',
@@ -139,7 +139,7 @@ function tmgmt_local_schema() {
  */
 function tmgmt_local_update_7000() {
   $schema = array(
-    'description' => 'A tmgmt local task contains additional workflow data for a job item.',
+    'description' => 'A tmgmt local task item contains additional workflow data for a job item.',
     'fields' => array(
       'tltiid' => array(
         'description' => 'The identifier of the task item.',
@@ -185,4 +185,37 @@ function tmgmt_local_update_7000() {
     ),
   );
   db_create_table('tmgmt_local_task_item', $schema);
+}
+
+/**
+ * Create local task items.
+ */
+function tmgmt_local_update_7001() {
+  $result = db_query('SELECT lt.tltid, ji.tjiid, ji.state from {tmgmt_local_task} lt INNER JOIN {tmgmt_job} j ON j.tjid = lt.tjid INNER JOIN {tmgmt_job_item} ji ON ji.tjid = j.tjid');
+  $insert = db_insert('tmgmt_local_task_item')
+    ->fields(array('tltid', 'tjiid', 'status', 'data'));
+  foreach ($result as $row) {
+    switch ($row->state) {
+      case 2:
+        // Job item state needs review is task item status translated.
+        $status = 1;
+        break;
+      case 3:
+        // Job item state accepted is task item status completed.
+        $status = 3;
+        break;
+      case 1:
+      default:
+        // Job item state active is task item status untranslated.
+        $status = 0;
+        break;
+    }
+    $insert->values(array(
+      'tltid' => $row->tltid,
+      'tjiid' => $row->tjiid,
+      'status' => $status,
+      'data' => serialize(array()),
+    ));
+  }
+  $insert->execute();
 }
