@@ -17,20 +17,13 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
 
     $element = array();
     $element['#theme'] = 'links';
-    $element['#attributes'] = array('class' => array('inline'));
+    $element['#attributes'] = array('class' => array('links', 'inline'));
     $uri = $task->uri();
     if (entity_access('view', 'tmgmt_local_task', $task)) {
       $element['#links']['view'] = array(
         'href' => $uri['path'],
         'query' => array('destination' => current_path()),
         'title' => t('view'),
-      );
-    }
-    if (entity_access('delete', 'tmgmt_local_task', $task)) {
-      $element['#links']['delete'] = array(
-        'href' => $uri['path'] . '/delete',
-        'query' => array('destination' => current_path()),
-        'title' => t('delete'),
       );
     }
     if (user_access('administer translation tasks') && tmgmt_local_translation_access($task) && empty($task->tuid)) {
@@ -63,7 +56,7 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
         'title' => t('assign'),
       );
     }
-    if (tmgmt_local_translation_access($task) && !empty($task->tuid)) {
+    if (!empty($task->tuid) && entity_access('unassign', 'tmgmt_local_task', $task)) {
       $element['#links']['unassign'] = array(
         'href' => 'translate/' . $task->tltid . '/unassign',
         'query' => array('destination' => current_path()),
@@ -71,6 +64,13 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
           'title' => t('Unassign'),
         ),
         'title' => t('unassign'),
+      );
+    }
+    if (entity_access('delete', 'tmgmt_local_task', $task)) {
+      $element['#links']['delete'] = array(
+        'href' => $uri['path'] . '/delete',
+        'query' => array('destination' => current_path()),
+        'title' => t('delete'),
       );
     }
     return drupal_render($element);

@@ -191,7 +191,7 @@ function tmgmt_local_update_7000() {
  * Create local task items.
  */
 function tmgmt_local_update_7001() {
-  $result = db_query('SELECT lt.tltid, ji.tjiid, ji.state from {tmgmt_local_task} lt INNER JOIN {tmgmt_job} j ON j.tjid = lt.tjid INNER JOIN {tmgmt_job_item} ji ON ji.tjid = j.tjid');
+  $result = db_query('SELECT lt.tltid, ji.tjiid, ji.state, ji.data from {tmgmt_local_task} lt INNER JOIN {tmgmt_job} j ON j.tjid = lt.tjid INNER JOIN {tmgmt_job_item} ji ON ji.tjid = j.tjid');
   $insert = db_insert('tmgmt_local_task_item')
     ->fields(array('tltid', 'tjiid', 'status', 'data'));
   foreach ($result as $row) {
@@ -210,12 +210,54 @@ function tmgmt_local_update_7001() {
         $status = 0;
         break;
     }
+    var_dump(unserialize($row->data));
+    $translation = (array)_tmgmt_local_translated_data_7001(unserialize($row->data));
+
+    var_dump(array(
+      'tltid' => $row->tltid,
+      'tjiid' => $row->tjiid,
+      'status' => $status,
+      'data' => serialize($translation),
+    ));
     $insert->values(array(
       'tltid' => $row->tltid,
       'tjiid' => $row->tjiid,
       'status' => $status,
-      'data' => serialize(array()),
+      'data' => serialize($translation),
     ));
   }
   $insert->execute();
+}
+
+/**
+ * Data parsing helper function for tmgmt_local_update_7001().
+ *
+ * Copies #translation texts from the source data array to the translation
+ * data array.
+ *
+ * @param array $source
+ *   The original source data array of the job item.
+ *
+ * @return array
+ *   The filled translation data array.
+ */
+function _tmgmt_local_translated_data_7001($source) {
+  if (!empty($source['#translation']['#text'])) {
+    $translation['#text'] = $source['#translation']['#text'];
+    if ((!empty($source['#status']))) {
+      $translation['#status'] = $source['#status'];
+    }
+    return $translation;
+  }
+  else {
+    $translation = array();
+    foreach (element_children($source) as $key) {
+      if ($return = _tmgmt_local_translated_data_7001($source[$key])) {
+        $translation[$key] = $return;
+      }
+    }
+    if (!empty($translation)) {
+      return $translation;
+    }
+  }
 }

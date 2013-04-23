@@ -93,7 +93,24 @@ class TMGMTLocalTask extends Entity {
    * Overrides Entity::defaultLabel().
    */
   protected function defaultLabel() {
-    return t('Task for @job assigned to @translator', array('@job' => $this->getJob()->label(), '@translator' =>  entity_label('user', user_load($this->tuid))));
+    if (empty($this->tuid)) {
+      if (empty($this->title)) {
+        return t('Task for @job', array('@job' => $this->getJob()->label()));
+      }
+      else {
+        return $this->title;
+      }
+    }
+    else {
+      if (empty($this->title)) {
+        return t('Task for @job assigned to @translator', array('@job' => $this->getJob()->label(), '@translator' =>  entity_label('user', user_load($this->tuid))));
+      }
+      else {
+        return t('@title assigned to @translator', array('@title' => $this->title, '@translator' =>  entity_label('user', user_load($this->tuid))));
+      }
+    }
+
+
   }
 
   /**
@@ -461,4 +478,62 @@ class TMGMTLocalTaskItem extends Entity {
   public function completed() {
     $this->status = TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED;
   }
+
+  /**
+   * Updates the values for a specific substructure in the data array.
+   *
+   * The values are either set or updated but never deleted.
+   *
+   * @param $key
+   *   Key pointing to the item the values should be applied.
+   *   The key can be either be an array containing the keys of a nested array
+   *   hierarchy path or a string with '][' or '|' as delimiter.
+   * @param $values
+   *   Nested array of values to set.
+   */
+  public function updateData($key, $values = array()) {
+    foreach ($values as $index => $value) {
+      // In order to preserve existing values, we can not aplly the values array
+      // at once. We need to apply each containing value on its own.
+      // If $value is an array we need to advance the hierarchy level.
+      if (is_array($value)) {
+        $this->updateData(array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+      }
+      // Apply the value.
+      else {
+        drupal_array_set_nested_value($this->data, array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+      }
+    }
+  }
+
+  /**
+   * Array of translations.
+   *
+   * The structure is similar to the form API in the way that it is a possibly
+   * nested array with the following properties whose presence indicate that the
+   * current element is a text that might need to be translated.
+   *
+   * - #text: The translated text of the corresponding entry in the job item.
+   * - #status: The status of the translation.
+   *
+   * The key can be an alphanumeric string.
+   *
+   * @param array $key
+   *   If present, only the subarray identified by key is returned.
+   * @param string $index
+   *   Optional index of an attribute below $key.
+   *
+   * @return array
+   *   A structured data array.
+   */
+  public function getData(array $key = array(), $index = null) {
+    if (empty($key)) {
+      return $this->data;
+    }
+    if ($index) {
+      $key = array_merge($key, array($index));
+    }
+    return drupal_array_get_nested_value($this->data, $key);
+  }
+
 }

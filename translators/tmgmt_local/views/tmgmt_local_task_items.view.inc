@@ -42,6 +42,15 @@ $handler->display->display_options['fields']['status']['field'] = 'status';
 $handler->display->display_options['fields']['operations']['id'] = 'operations';
 $handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task_item';
 $handler->display->display_options['fields']['operations']['field'] = 'operations';
+/* Contextual filter: Translation Task Item: Tltid */
+$handler->display->display_options['arguments']['tltid']['id'] = 'tltid';
+$handler->display->display_options['arguments']['tltid']['table'] = 'tmgmt_local_task_item';
+$handler->display->display_options['arguments']['tltid']['field'] = 'tltid';
+$handler->display->display_options['arguments']['tltid']['default_action'] = 'empty';
+$handler->display->display_options['arguments']['tltid']['default_argument_type'] = 'fixed';
+$handler->display->display_options['arguments']['tltid']['summary']['number_of_records'] = '0';
+$handler->display->display_options['arguments']['tltid']['summary']['format'] = 'default_summary';
+$handler->display->display_options['arguments']['tltid']['summary_options']['items_per_page'] = '25';
 
 /* Display: Block */
 $handler = $view->new_display('block', 'Block', 'block');
@@ -64,11 +73,10 @@ $translatables['tmgmt_local_task_items'] = array(
   t('last »'),
   t('Translation Task'),
   t('Translation Management Job Item'),
-  t('Translation task item ID'),
-  t('.'),
-  t(','),
+  t('Label'),
   t('Status'),
   t('Operations'),
-  t('Label'),
+  t('All'),
   t('Block'),
 );
+

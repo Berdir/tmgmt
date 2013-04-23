@@ -30,6 +30,14 @@ class TMGMTLocalTaskUIController extends EntityDefaultUIController {
       'access arguments' => array('delete', $this->entityType, $id_count),
       'type' => MENU_CALLBACK,
     );
+    $items[$this->path . '/' . $wildcard . '/unassign'] = array(
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'entity_access',
+      'access arguments' => array('unassign', $this->entityType, $id_count),
+      'type' => MENU_CALLBACK,
+    );
     return $items;
   }
 
@@ -40,6 +48,9 @@ class TMGMTLocalTaskUIController extends EntityDefaultUIController {
     switch ($op) {
       case 'delete':
         $confirm_question = t('Are you sure you want to delete the translation task %label?', array('%label' => $entity->label()));
+        return confirm_form($form, $confirm_question, $this->path);
+      case 'unassign':
+        $confirm_question = t('Are you sure you want to unassign from the translation task %label?', array('%label' => $entity->label()));
         return confirm_form($form, $confirm_question, $this->path);
     }
     drupal_not_found();
@@ -54,6 +65,10 @@ class TMGMTLocalTaskUIController extends EntityDefaultUIController {
       case 'delete':
         $entity->delete();
         return t('Deleted the translation local task %label.', array('%label' => $entity->label()));
+      case 'unassign':
+        $entity->unassign();
+        $entity->save();
+        return t('Unassigned from translation local task %label.', array('%label' => $entity->label()));
     }
     return FALSE;
   }

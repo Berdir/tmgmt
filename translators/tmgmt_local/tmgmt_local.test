@@ -280,6 +280,16 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Completed'));
     $this->assertText(t('Untranslated'));
 
+    // Check the job data, which should not yet contain the translation.
+    entity_get_controller('tmgmt_job')->resetCache(array($job->tjid));
+    entity_get_controller('tmgmt_job_item')->resetCache();
+    $job = tmgmt_job_load($job->tjid);
+    list($item1, $item2) = array_values($job->getItems());
+    // The text in the first item should be available for review, the
+    // translation of the second item not.
+    $this->assertEqual($item1->getData(array('dummy', 'deep_nesting', '#translation', '#text')), $translation1);
+    $this->assertEqual($item2->getData(array('dummy', 'deep_nesting', '#translation', '#text')), '');
+
     // Check the overview page, the task should still show in progress.
     $this->drupalGet('translate');
     $this->assertText(t('Pending'));

@@ -466,12 +466,19 @@ function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
     return TRUE;
   }
 
+  if (!$account) {
+    global $user;
+    $account = $user;
+  }
+
   // @todo - probably need refinement when we introduce more module permissions.
   switch ($op) {
     case 'view':
     case 'update':
       return user_access('provide translation services', $account);
       break;
+    case 'unassign':
+      return !empty($task->tuid) && $task->tuid == $account->uid && user_access('provide translation services', $account);
   }
 }
 
