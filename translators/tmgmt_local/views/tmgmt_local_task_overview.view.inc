@@ -163,11 +163,11 @@ $handler->display->display_options['filters']['status']['expose']['remember_role
   6 => 0,
 );
 
-/* Display: Unassigned and mine */
-$handler = $view->new_display('page', 'Unassigned and mine', 'unassigned');
+/* Display: Eligible and mine */
+$handler = $view->new_display('page', 'Eligible and mine', 'unassigned');
 $handler->display->display_options['defaults']['title'] = FALSE;
 $handler->display->display_options['title'] = 'Translate';
-$handler->display->display_options['display_description'] = 'Shows elegible (unasigned) and mine tasks.';
+$handler->display->display_options['display_description'] = 'Shows elegible (unassigned) and mine tasks.';
 $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
 $handler->display->display_options['defaults']['style_plugin'] = FALSE;
 $handler->display->display_options['style_plugin'] = 'table';
@@ -250,7 +250,7 @@ $handler->display->display_options['empty']['area']['id'] = 'area';
 $handler->display->display_options['empty']['area']['table'] = 'views';
 $handler->display->display_options['empty']['area']['field'] = 'area';
 $handler->display->display_options['empty']['area']['empty'] = TRUE;
-$handler->display->display_options['empty']['area']['content'] = 'You do not have eligible tasks.';
+$handler->display->display_options['empty']['area']['content'] = 'There are no eligible tasks.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 $handler->display->display_options['defaults']['relationships'] = FALSE;
 /* Relationship: Translation Task: Translation Job tjid */
@@ -410,6 +410,7 @@ $handler->display->display_options['menu']['context'] = 0;
 $handler->display->display_options['tab_options']['type'] = 'normal';
 $handler->display->display_options['tab_options']['title'] = 'Translate';
 $handler->display->display_options['tab_options']['weight'] = '0';
+$handler->display->display_options['tab_options']['name'] = 'user-menu';
 
 /* Display: Elegible */
 $handler = $view->new_display('page', 'Elegible', 'eligible');
@@ -2321,11 +2322,11 @@ $translatables['tmgmt_local_task_overview'] = array(
   t('Job item count'),
   t('Progress'),
   t('Status'),
-  t('Unassigned and mine'),
+  t('Eligible and mine'),
   t('Translate'),
-  t('Shows elegible (unasigned) and mine tasks.'),
+  t('Shows elegible (unassigned) and mine tasks.'),
   t('<h2>My Tasks</h2>'),
-  t('You do not have eligible tasks.'),
+  t('There are no eligible tasks.'),
   t('Language'),
   t('Target language'),
   t('Item count'),
@@ -2334,6 +2335,7 @@ $translatables['tmgmt_local_task_overview'] = array(
   t('Unassigned Eligible Tasks'),
   t('Shows elegible (unasigned) tasks.'),
   t('Message'),
+  t('You do not have eligible tasks.'),
   t('My'),
   t('My Tasks'),
   t('Shows tasks for current user (translator).'),
