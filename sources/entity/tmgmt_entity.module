@@ -143,10 +143,16 @@ function tmgmt_entity_get_translatable_entities($entity_type, $property_conditio
 
   // Add query conditions based on provided properties.
   foreach ($property_conditions as $property_name => $property_value) {
-    // Skip type property for comment, as this property does not exists
-    // in the comments table.
+    // The comment bundle filter is handled below.
     if ($entity_type == 'comment' && $property_name == 'type') {
       continue;
+    }
+
+    // Switch to vid for taxonomy terms.
+    if ($entity_type == 'taxonomy_term' && $property_name == 'vocabulary_machine_name') {
+      $property_name = 'vid';
+      $vocabulary = taxonomy_vocabulary_machine_name_load($property_value);
+      $property_value = $vocabulary->vid;
     }
 
     $query->condition('e.' . $property_name, $property_value);
