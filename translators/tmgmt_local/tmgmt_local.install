@@ -210,15 +210,7 @@ function tmgmt_local_update_7001() {
         $status = 0;
         break;
     }
-    var_dump(unserialize($row->data));
     $translation = (array)_tmgmt_local_translated_data_7001(unserialize($row->data));
-
-    var_dump(array(
-      'tltid' => $row->tltid,
-      'tjiid' => $row->tjiid,
-      'status' => $status,
-      'data' => serialize($translation),
-    ));
     $insert->values(array(
       'tltid' => $row->tltid,
       'tjiid' => $row->tjiid,
