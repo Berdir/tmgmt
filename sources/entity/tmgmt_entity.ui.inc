@@ -33,10 +33,13 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
     $return_value = array();
     $entities = tmgmt_entity_get_translatable_entities($type, $property_conditions, TRUE);
 
+    $entity_info = entity_get_info($type);
+    $bundles = tmgmt_entity_get_translatable_bundles($type);
+
     // For retrieved entities add translation specific data.
     foreach ($entities as $entity) {
 
-      list($entity_id, , ,) = entity_extract_ids($type, $entity);
+      list($entity_id, , $bundle) = entity_extract_ids($type, $entity);
       $entity_uri = entity_uri($type, $entity);
 
       // This occurs on user entity type.
@@ -62,6 +65,10 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
         'entity_label' => entity_label($type, $entity),
         'entity_uri' => $entity_uri['path'],
       );
+
+      if (count($bundles) > 1) {
+        $return_value[$entity_id]['bundle'] = isset($bundles[$bundle]) ? $bundles[$bundle] : t('Unknown');
+      }
 
       // Load entity translation specific data.
       foreach (language_list() as $langcode => $language) {
