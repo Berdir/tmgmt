@@ -86,14 +86,31 @@ class TMGMTLocalTask extends Entity {
    * Overrides Entity::defaultUri().
    */
   public function defaultUri() {
-    return array('path' => 'admin/config/regional/tmgmt/local-tasks/' . $this->tltid);
+    return array('path' => 'translate/' . $this->tltid);
   }
 
   /**
    * Overrides Entity::defaultLabel().
    */
   protected function defaultLabel() {
-    return t('Task for @job assigned to @translator', array('@job' => $this->getJob()->label(), '@translator' =>  entity_label('user', user_load($this->tuid))));
+    if (empty($this->tuid)) {
+      if (empty($this->title)) {
+        return t('Task for @job', array('@job' => $this->getJob()->label()));
+      }
+      else {
+        return $this->title;
+      }
+    }
+    else {
+      if (empty($this->title)) {
+        return t('Task for @job assigned to @translator', array('@job' => $this->getJob()->label(), '@translator' =>  entity_label('user', user_load($this->tuid))));
+      }
+      else {
+        return t('@title assigned to @translator', array('@title' => $this->title, '@translator' =>  entity_label('user', user_load($this->tuid))));
+      }
+    }
+
+
   }
 
   /**
@@ -143,6 +160,26 @@ class TMGMTLocalTask extends Entity {
    */
   public function getItems($conditions = array()) {
     return $this->getJob()->getItems($conditions);
+  }
+
+  /**
+   * Create a task item for this task and the given job item.
+   *
+   * @param TMGMTJobItem $job_item
+   *   The job item.
+   */
+  public function addTaskItem(TMGMTJobItem $job_item) {
+    // Save the task to get an id.
+    if (empty($this->tltid)) {
+      $this->save();
+    }
+
+    $local_task = entity_create('tmgmt_local_task_item', array(
+      'tltid' => $this->identifier(),
+      'tjiid' => $job_item->identifier(),
+    ));
+    $local_task->save();
+    return $local_task;
   }
 
   /**
@@ -328,6 +365,175 @@ class TMGMTLocalTask extends Entity {
              && $newStatus == TMGMT_LOCAL_TASK_STATUS_PENDING) {
       ++$this->loop_count;
     }
+  }
+
+}
+
+/**
+ * Entity class for the local task item entity.
+ *
+ * @ingroup tmgmt_local_task
+ */
+class TMGMTLocalTaskItem extends Entity {
+
+  /**
+   * Translation local task item identifier.
+   *
+   * @var int
+   */
+  public $tltiid;
+
+  /**
+   * The task identifier.
+   *
+   * @var int
+   */
+  public $tltid;
+
+  /**
+   * Translation job item.
+   *
+   * @var int
+   */
+  public $tjiid;
+
+  /**
+   * Current status of the task.
+   *
+   * @var int
+   */
+  public $status;
+
+  /**
+   * Translated data and data item status.
+   *
+   * @var array
+   */
+  public $data = array();
+
+  /**
+   * Overrides Entity::__construct().
+   */
+  public function __construct(array $values = array(), $entity_type = 'tmgmt_local_task_item') {
+    parent::__construct($values, $entity_type);
+  }
+
+  /*
+   * Overrides Entity::defaultUri().
+   */
+  public function defaultUri() {
+    return array('path' => 'translate/' . $this->tltid . '/item/' . $this->tltiid);
+  }
+
+  /**
+   * Overrides Entity::defaultLabel().
+   */
+  protected function defaultLabel() {
+    if ($job_item = $this->getJobItem()) {
+      return $job_item->label();
+    }
+    return t('Missing job item');
+  }
+
+  /**
+   * Returns the translation task.
+   *
+   * @return TMGMTLocalTask
+   */
+  public function getTask() {
+    return entity_load_single('tmgmt_local_task', $this->tltid);
+  }
+
+  /**
+   * Returns the translation job item.
+   *
+   * @return TMGMTJobItem
+   */
+  public function getJobItem() {
+    return entity_load_single('tmgmt_job_item', $this->tjiid);
+  }
+
+  /**
+   * Overrides Entity::buildContent().
+   */
+  public function buildContent($view_mode = 'full', $langcode = NULL) {
+    $content = drupal_get_form('tmgmt_local_translation_form', $this);
+    return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
+  }
+
+  public function isUntranslated() {
+    return $this->status == TMGMT_LOCAL_TASK_ITEM_STATUS_UNTRANSLATED;
+  }
+
+  /**
+   * Sets the task item status to translated.
+   */
+  public function translated() {
+    $this->status = TMGMT_LOCAL_TASK_ITEM_STATUS_TRANSLATED;
+  }
+
+  /**
+   * Sets the task item status to completed.
+   */
+  public function completed() {
+    $this->status = TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED;
+  }
+
+  /**
+   * Updates the values for a specific substructure in the data array.
+   *
+   * The values are either set or updated but never deleted.
+   *
+   * @param $key
+   *   Key pointing to the item the values should be applied.
+   *   The key can be either be an array containing the keys of a nested array
+   *   hierarchy path or a string with '][' or '|' as delimiter.
+   * @param $values
+   *   Nested array of values to set.
+   */
+  public function updateData($key, $values = array()) {
+    foreach ($values as $index => $value) {
+      // In order to preserve existing values, we can not aplly the values array
+      // at once. We need to apply each containing value on its own.
+      // If $value is an array we need to advance the hierarchy level.
+      if (is_array($value)) {
+        $this->updateData(array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+      }
+      // Apply the value.
+      else {
+        drupal_array_set_nested_value($this->data, array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+      }
+    }
+  }
+
+  /**
+   * Array of translations.
+   *
+   * The structure is similar to the form API in the way that it is a possibly
+   * nested array with the following properties whose presence indicate that the
+   * current element is a text that might need to be translated.
+   *
+   * - #text: The translated text of the corresponding entry in the job item.
+   * - #status: The status of the translation.
+   *
+   * The key can be an alphanumeric string.
+   *
+   * @param array $key
+   *   If present, only the subarray identified by key is returned.
+   * @param string $index
+   *   Optional index of an attribute below $key.
+   *
+   * @return array
+   *   A structured data array.
+   */
+  public function getData(array $key = array(), $index = null) {
+    if (empty($key)) {
+      return $this->data;
+    }
+    if ($index) {
+      $key = array_merge($key, array($index));
+    }
+    return drupal_array_get_nested_value($this->data, $key);
   }
 
 }

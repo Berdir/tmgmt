@@ -244,9 +244,10 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
 
     // Translate the task.
     $this->drupalGet('translate');
-    $this->clickLink(t('translate'));
+    $this->clickLink(t('view'));
     $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:1')));
     $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:2')));
+    $this->assertText(t('Untranslated'));
 
     // Translate the first item.
     $this->clickLink(t('translate'));
@@ -254,8 +255,7 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Dummy'));
     // Job comment is present in the translate tool as well.
     $this->assertText($job_comment);
-    // @todo: Improve title.
-    $this->assertText(t('Translate Task Item'));
+    $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:1')));
 
     // Try to complete a translation when translations are missing.
     $this->drupalPost(NULL, array(), t('Save as completed'));
@@ -267,8 +267,8 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->drupalPost(NULL, $edit, t('Save as completed'));
 
     // The first item should be accepted now, the second still in progress.
-    $this->assertText(t('Accepted'));
-    $this->assertText(t('In progress'));
+    $this->assertText(t('Completed'));
+    $this->assertText(t('Untranslated'));
 
     // Translate the second item but do not accept it yet.
     $this->clickLink(t('translate'));
@@ -277,20 +277,30 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     );
     $this->drupalPost(NULL, $edit, t('Save'));
     // The first item should be accepted now, the second still in progress.
-    $this->assertText(t('Accepted'));
-    $this->assertText(t('In progress'));
+    $this->assertText(t('Completed'));
+    $this->assertText(t('Untranslated'));
+
+    // Check the job data, which should not yet contain the translation.
+    entity_get_controller('tmgmt_job')->resetCache(array($job->tjid));
+    entity_get_controller('tmgmt_job_item')->resetCache();
+    $job = tmgmt_job_load($job->tjid);
+    list($item1, $item2) = array_values($job->getItems());
+    // The text in the first item should be available for review, the
+    // translation of the second item not.
+    $this->assertEqual($item1->getData(array('dummy', 'deep_nesting', '#translation', '#text')), $translation1);
+    $this->assertEqual($item2->getData(array('dummy', 'deep_nesting', '#translation', '#text')), '');
 
     // Check the overview page, the task should still show in progress.
     $this->drupalGet('translate');
     $this->assertText(t('Pending'));
 
     // Mark the second item as completed now.
-    $this->clickLink(t('translate'));
+    $this->clickLink(t('view'));
     $this->clickLink(t('translate'));
     $this->drupalPost(NULL, array(), t('Save as completed'));
     // Both items should be accepted now.
-    $this->assertText(t('Accepted'));
-    $this->assertNoText(t('In progress'));
+    $this->assertText(t('Completed'));
+    $this->assertNoText(t('Untranslated'));
 
     // Check the overview, the task should be completed now.
     $this->drupalGet('translate');

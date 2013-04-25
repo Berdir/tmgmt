@@ -51,9 +51,28 @@ define('TMGMT_LOCAL_TASK_STATUS_REJECTED', 3);
 
 /**
  * Translation task is closed.
- *
  */
 define('TMGMT_LOCAL_TASK_STATUS_CLOSED', 4);
+
+/**
+ * Translation task item is untranslated.
+ */
+define('TMGMT_LOCAL_TASK_ITEM_STATUS_UNTRANSLATED', 0);
+
+/**
+ * Translation task item is translated and pending review of the job item.
+ */
+define('TMGMT_LOCAL_TASK_ITEM_STATUS_TRANSLATED', 1);
+
+/**
+ * Translation job item has been rejected and the task needs to be updated.
+ */
+define('TMGMT_LOCAL_TASK_ITEM_STATUS_REJECTED', 2);
+
+/**
+ * The translation task item has been completed and closed.
+ */
+define('TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED', 3);
 
 /**
  * @} End of "tmgmt_local_task".
@@ -66,7 +85,7 @@ function tmgmt_local_entity_info() {
   $info = array(
     'tmgmt_local_task' => array(
       'label' => t('Translation Task'),
-      'module' => 'tmgmt_local_task',
+      'module' => 'tmgmt_local',
       'entity class' => 'TMGMTLocalTask',
       'controller class' => 'TMGMTLocalTaskController',
       'metadata controller class' => 'TMGMTLocalTaskMetadataController',
@@ -80,7 +99,26 @@ function tmgmt_local_entity_info() {
       ),
       'admin ui' => array(
         'controller class' => 'TMGMTLocalTaskUIController',
-        'path' => 'admin/config/regional/tmgmt/local-tasks',
+        'path' => 'translate',
+      ),
+    ),
+    'tmgmt_local_task_item' => array(
+      'label' => t('Translation Task Item'),
+      'module' => 'tmgmt_local',
+      'entity class' => 'TMGMTLocalTaskItem',
+      'controller class' => 'EntityAPIController',
+      'metadata controller class' => 'TMGMTLocalTaskItemMetadataController',
+      'views controller class' => 'TMGMTLocalTaskItemViewsController',
+      'base table' => 'tmgmt_local_task_item',
+      'uri callback' => 'entity_class_uri',
+      'label callback' => 'entity_class_label',
+      'access callback' => 'tmgmt_local_task_item_access',
+      'entity keys' => array(
+        'id' => 'tltiid',
+      ),
+      'admin ui' => array(
+        'controller class' => 'TMGMTLocalTaskItemUIController',
+        'path' => 'translate',
       ),
     ),
   );
@@ -138,15 +176,6 @@ function tmgmt_local_menu() {
     'access arguments' => array('administer translation tasks'),
     'file' => 'includes/tmgmt_local.pages.inc',
     'type' => MENU_CALLBACK,
-  );
-  $items['translate/%tmgmt_local_task/item/%tmgmt_job_item'] = array(
-    'title' => 'Translate Task Item',
-    'description' => 'Translate task item.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_local_translation_form', 1, 3),
-    'access callback' => 'tmgmt_local_translation_access',
-    'access arguments' => array(1),
-    'file' => 'includes/tmgmt_local.pages.inc',
   );
 
   return $items;
@@ -225,7 +254,7 @@ function tmgmt_local_tmgmt_translator_plugin_info() {
 function tmgmt_local_translation_access(TMGMTLocalTask $task, $account = NULL) {
   $job = $task->getJob();
 
-  if (!$job->isActive()) {
+  if (!$job || !$job->isActive()) {
     return FALSE;
   }
 
@@ -380,6 +409,20 @@ function tmgmt_local_task_load_multiple(array $tltids = array(), $conditions = a
 }
 
 /**
+ * Loads a local translation task items entity.
+ */
+function tmgmt_local_task_item_load($tltiid) {
+  return entity_load_single('tmgmt_local_task_item', $tltiid);
+}
+
+/**
+ * Loads local translation task items entity.
+ */
+function tmgmt_local_task_item_load_multiple(array $tltiids = array(), $conditions = array()) {
+  return entity_load('tmgmt_local_task_item', $tltiids, $conditions);
+}
+
+/**
  * Creates a translation task entity.
  *
  * @param $values
@@ -423,13 +466,43 @@ function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
     return TRUE;
   }
 
+  if (!$account) {
+    global $user;
+    $account = $user;
+  }
+
   // @todo - probably need refinement when we introduce more module permissions.
   switch ($op) {
     case 'view':
     case 'update':
       return user_access('provide translation services', $account);
       break;
+    case 'unassign':
+      return !empty($task->tuid) && $task->tuid == $account->uid && user_access('provide translation services', $account);
   }
+}
+
+/**
+ * Access callback for the local task item entity.
+ *
+ * @param $op
+ *   The operation being performed.
+ * @param $item
+ *   (Optional) A TMGMTLocalTaskItem entity to check access for. If no entity is
+ *   given, it will be determined whether access is allowed for all entities.
+ * @param $account
+ *   (Optional) The user to check for. Leave it to NULL to check for the global
+ *   user.
+ *
+ * @return boolean
+ *   TRUE if access is allowed, FALSE otherwise.
+ */
+function tmgmt_local_task_item_access($op, TMGMTLocalTaskItem $item = NULL, $account = NULL) {
+  $task = NULL;
+  if ($item) {
+    $task = $item->getTask();
+  }
+  return entity_access($op, 'tmgmt_local_task', $task, $account);
 }
 
 /**
@@ -515,6 +588,21 @@ function tmgmt_local_task_statuses() {
     TMGMT_LOCAL_TASK_STATUS_COMPLETED => t('Completed'),
     TMGMT_LOCAL_TASK_STATUS_REJECTED => t('Rejected'),
     TMGMT_LOCAL_TASK_STATUS_CLOSED => t('Closed'),
+  );
+}
+
+/**
+ * Retrieve a labeled list of all available statuses for task items.
+ *
+ * @return array
+ *   A list of all available statuses.
+ */
+function tmgmt_local_task_item_statuses() {
+  return $statuses = array(
+    TMGMT_LOCAL_TASK_ITEM_STATUS_UNTRANSLATED => t('Untranslated'),
+    TMGMT_LOCAL_TASK_ITEM_STATUS_TRANSLATED => t('Translated'),
+    TMGMT_LOCAL_TASK_ITEM_STATUS_REJECTED => t('Rejected'),
+    TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED => t('Completed'),
   );
 }
 
@@ -621,3 +709,19 @@ function tmgmt_local_get_translators_for_tasks($tasks) {
 /**
  * @} End of "addtogroup tmgmt_local_task".
  */
+
+/**
+ * Implements hook_tmgmt_job_item_update().
+ *
+ * @todo: Move this to the translator plugin API.
+ */
+function tmgmt_local_tmgmt_job_item_update(TMGMTJobItem $job_item) {
+  if ($job_item->isAccepted() && !$job_item->original->isAccepted()) {
+    $tltiid = db_query('SELECT tltiid FROM {tmgmt_local_task_item} ti INNER JOIN {tmgmt_local_task} t ON ti.tltid = t.tltid WHERE t.tjid = :tjid AND ti.tjiid = :tjiid', array(':tjid' => $job_item->tjid, ':tjiid' => $job_item->tjiid))->fetchField();
+    if ($tltiid) {
+      $task_item = tmgmt_local_task_item_load($tltiid);
+      $task_item->completed();
+      $task_item->save();
+    }
+  }
+}

@@ -29,6 +29,11 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
     }
     $local_task->save();
 
+    // Create task items.
+    foreach ($job->getItems() as $item) {
+      $local_task->addTaskItem($item);
+    }
+
     // The translation job has been successfully submitted.
     $job->submitted();
   }
