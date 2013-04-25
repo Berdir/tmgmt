@@ -167,7 +167,7 @@ $handler->display->display_options['filters']['status']['expose']['remember_role
 $handler = $view->new_display('page', 'Eligible and mine', 'unassigned');
 $handler->display->display_options['defaults']['title'] = FALSE;
 $handler->display->display_options['title'] = 'Translate';
-$handler->display->display_options['display_description'] = 'Shows elegible (unassigned) and mine tasks.';
+$handler->display->display_options['display_description'] = 'Shows eligible (unassigned) and my tasks.';
 $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
 $handler->display->display_options['defaults']['style_plugin'] = FALSE;
 $handler->display->display_options['style_plugin'] = 'table';
@@ -416,7 +416,7 @@ $handler->display->display_options['tab_options']['name'] = 'user-menu';
 $handler = $view->new_display('page', 'Elegible', 'eligible');
 $handler->display->display_options['defaults']['title'] = FALSE;
 $handler->display->display_options['title'] = 'Unassigned Eligible Tasks';
-$handler->display->display_options['display_description'] = 'Shows elegible (unasigned) tasks.';
+$handler->display->display_options['display_description'] = 'Shows eligible (unassigned) tasks.';
 $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
 $handler->display->display_options['defaults']['style_plugin'] = FALSE;
 $handler->display->display_options['style_plugin'] = 'table';
@@ -650,7 +650,7 @@ $handler->display->display_options['menu']['context'] = 0;
 $handler = $view->new_display('page', 'My', 'my_tasks');
 $handler->display->display_options['defaults']['title'] = FALSE;
 $handler->display->display_options['title'] = 'My Tasks';
-$handler->display->display_options['display_description'] = 'Shows tasks for current user (translator).';
+$handler->display->display_options['display_description'] = 'Shows tasks assigned to the current user (translator).';
 $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
 $handler->display->display_options['defaults']['style_plugin'] = FALSE;
 $handler->display->display_options['style_plugin'] = 'table';
@@ -2324,7 +2324,7 @@ $translatables['tmgmt_local_task_overview'] = array(
   t('Status'),
   t('Eligible and mine'),
   t('Translate'),
-  t('Shows elegible (unassigned) and mine tasks.'),
+  t('Shows eligible (unassigned) and my tasks.'),
   t('<h2>My Tasks</h2>'),
   t('There are no eligible tasks.'),
   t('Language'),
@@ -2333,12 +2333,12 @@ $translatables['tmgmt_local_task_overview'] = array(
   t('Operations'),
   t('Elegible'),
   t('Unassigned Eligible Tasks'),
-  t('Shows elegible (unasigned) tasks.'),
+  t('Shows eligible (unassigned) tasks.'),
   t('Message'),
   t('You do not have eligible tasks.'),
   t('My'),
   t('My Tasks'),
-  t('Shows tasks for current user (translator).'),
+  t('Shows tasks assigned to the current user (translator).'),
   t('Translator'),
   t('Language From'),
   t('Language To'),
