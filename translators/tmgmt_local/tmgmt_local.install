@@ -114,6 +114,24 @@ function tmgmt_local_schema() {
         'size' => 'big',
         'serialize' => TRUE,
       ),
+      'count_untranslated' => array(
+        'description' => 'Counter for all untranslated data items.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'count_translated' => array(
+        'description' => 'Counter for all translated data items.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'count_completed' => array(
+        'description' => 'Counter for all completed data items.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('tltiid'),
     'indexes' => array(
@@ -168,6 +186,24 @@ function tmgmt_local_update_7000() {
         'size' => 'big',
         'serialize' => TRUE,
       ),
+      'count_untranslated' => array(
+        'description' => 'Counter for all untranslated data items.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'count_translated' => array(
+        'description' => 'Counter for all translated data items.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'count_completed' => array(
+        'description' => 'Counter for all completed data items.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('tltiid'),
     'indexes' => array(
@@ -194,29 +230,39 @@ function tmgmt_local_update_7001() {
   $result = db_query('SELECT lt.tltid, ji.tjiid, ji.state, ji.data from {tmgmt_local_task} lt INNER JOIN {tmgmt_job} j ON j.tjid = lt.tjid INNER JOIN {tmgmt_job_item} ji ON ji.tjid = j.tjid');
   $insert = db_insert('tmgmt_local_task_item')
     ->fields(array('tltid', 'tjiid', 'status', 'data'));
+  module_load_include('module', 'tmgmt');
   foreach ($result as $row) {
+    $data = unserialize($row->data);
+    $data_count = count(array_filter(tmgmt_flatten_data($data), '_tmgmt_filter_data'));
+    $translation = (array)_tmgmt_local_translated_data_7001($data);
+    $values =array(
+      'tltid' => $row->tltid,
+      'tjiid' => $row->tjiid,
+      'count_untranslated' => 0,
+      'count_translated' => 0,
+      'count_translated' => 0,
+      'status' => 0,
+      'data' => serialize($translation),
+    );
     switch ($row->state) {
       case 2:
         // Job item state needs review is task item status translated.
-        $status = 1;
+        $values['status'] = 1;
+        $values['count_translated'] = $data_count;
         break;
       case 3:
         // Job item state accepted is task item status completed.
-        $status = 3;
+        $values['status'] = 3;
+        $values['count_completed'] = $data_count;
         break;
       case 1:
       default:
         // Job item state active is task item status untranslated.
-        $status = 0;
+      $values['status'] = 0;
+      $values['count_untranslated'] = $data_count;
         break;
     }
-    $translation = (array)_tmgmt_local_translated_data_7001(unserialize($row->data));
-    $insert->values(array(
-      'tltid' => $row->tltid,
-      'tjiid' => $row->tjiid,
-      'status' => $status,
-      'data' => serialize($translation),
-    ));
+    $insert->values($values);
   }
   $insert->execute();
 }

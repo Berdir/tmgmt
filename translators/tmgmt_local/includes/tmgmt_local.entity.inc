@@ -159,7 +159,23 @@ class TMGMTLocalTask extends Entity {
    *   An array of translation job items.
    */
   public function getItems($conditions = array()) {
-    return $this->getJob()->getItems($conditions);
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'tmgmt_local_task_item');
+    $query->propertyCondition('tltid', $this->tltid);
+    foreach ($conditions as $key => $condition) {
+      if (is_array($condition)) {
+        $operator = isset($condition['operator']) ? $condition['operator'] : '=';
+        $query->propertyCondition($key, $condition['value'], $operator);
+      }
+      else {
+        $query->propertyCondition($key, $condition);
+      }
+    }
+    $results = $query->execute();
+    if (!empty($results['tmgmt_local_task_item'])) {
+      return entity_load('tmgmt_local_task_item', array_keys($results['tmgmt_local_task_item']));
+    }
+    return array();
   }
 
   /**
@@ -292,33 +308,33 @@ class TMGMTLocalTask extends Entity {
   }
 
   /**
-   * Sums up all pending counts of this task job items.
+   * Count of all translated data items.
    *
    * @return
-   *   The sum of all pending counts
-   */
-  public function getCountPending() {
-    return tmgmt_local_task_statistic($this, 'count_pending');
-  }
-
-  /**
-   * Sums up all translated counts of this task job items.
-   *
-   * @return
-   *   The sum of all translated counts
+   *   Translated count
    */
   public function getCountTranslated() {
     return tmgmt_local_task_statistic($this, 'count_translated');
   }
 
   /**
-   * Sums up all accepted counts of this task job items.
+   * Count of all untranslated data items.
    *
    * @return
-   *   The sum of all accepted counts
+   *   Translated count
    */
-  public function getCountAccepted() {
-    return tmgmt_local_task_statistic($this, 'count_accepted');
+  public function getCountUntranslated() {
+    return tmgmt_local_task_statistic($this, 'count_untranslated');
+  }
+
+  /**
+   * Count of all completed data items.
+   *
+   * @return
+   *   Translated count
+   */
+  public function getCountCompleted() {
+    return tmgmt_local_task_statistic($this, 'count_completed');
   }
 
   /**
@@ -330,6 +346,7 @@ class TMGMTLocalTask extends Entity {
   public function getWordCount() {
     return tmgmt_local_task_statistic($this, 'word_count');
   }
+
 
   /**
    * Returns loop count of a task.
@@ -412,6 +429,27 @@ class TMGMTLocalTaskItem extends Entity {
   public $data = array();
 
   /**
+   * Counter for all untranslated data items.
+   *
+   * @var integer
+   */
+  public $count_untranslated = 0;
+
+  /**
+   * Counter for all translated data items.
+   *
+   * @var integer
+   */
+  public $count_translated = 0;
+
+  /**
+   * Counter for all completed data items.
+   *
+   * @var integer
+   */
+  public $count_completed = 0;
+
+  /**
    * Overrides Entity::__construct().
    */
   public function __construct(array $values = array(), $entity_type = 'tmgmt_local_task_item') {
@@ -461,8 +499,34 @@ class TMGMTLocalTaskItem extends Entity {
     return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
   }
 
+  /**
+   * Rreturns TRUE if the local task is untranslated.
+   *
+   * @return bool
+   *   TRUE if the local task item is untranslated.
+   */
   public function isUntranslated() {
     return $this->status == TMGMT_LOCAL_TASK_ITEM_STATUS_UNTRANSLATED;
+  }
+
+  /**
+   * Rreturns TRUE if the local task is translated.
+   *
+   * @return bool
+   *   TRUE if the local task item is translated.
+   */
+  public function isTranslated() {
+    return $this->status == TMGMT_LOCAL_TASK_ITEM_STATUS_TRANSLATED;
+  }
+
+  /**
+   * Rreturns TRUE if the local task is completed.
+   *
+   * @return bool
+   *   TRUE if the local task item is translated and accepted.
+   */
+  public function isCompleted() {
+    return $this->status == TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED;
   }
 
   /**
@@ -526,7 +590,7 @@ class TMGMTLocalTaskItem extends Entity {
    * @return array
    *   A structured data array.
    */
-  public function getData(array $key = array(), $index = null) {
+  public function getData(array $key = array(), $index = NULL) {
     if (empty($key)) {
       return $this->data;
     }
@@ -534,6 +598,36 @@ class TMGMTLocalTaskItem extends Entity {
       $key = array_merge($key, array($index));
     }
     return drupal_array_get_nested_value($this->data, $key);
+  }
+
+  /**
+   * Count of all translated data items.
+   *
+   * @return
+   *   Translated count
+   */
+  public function getCountTranslated() {
+    return $this->count_translated;
+  }
+
+  /**
+   * Count of all untranslated data items.
+   *
+   * @return
+   *   Translated count
+   */
+  public function getCountUntranslated() {
+    return $this->count_untranslated;
+  }
+
+  /**
+   * Count of all completed data items.
+   *
+   * @return
+   *   Translated count
+   */
+  public function getCountCompleted() {
+    return $this->count_completed;
   }
 
 }

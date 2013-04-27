@@ -75,6 +75,11 @@ define('TMGMT_LOCAL_TASK_ITEM_STATUS_REJECTED', 2);
 define('TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED', 3);
 
 /**
+ * Untranslated translation data item.
+ */
+define('TMGMT_DATA_ITEM_STATE_UNTRANSLATED', 0);
+
+/**
  * @} End of "tmgmt_local_task".
  */
 
@@ -106,7 +111,7 @@ function tmgmt_local_entity_info() {
       'label' => t('Translation Task Item'),
       'module' => 'tmgmt_local',
       'entity class' => 'TMGMTLocalTaskItem',
-      'controller class' => 'EntityAPIController',
+      'controller class' => 'TMGMTLocalTaskItemController',
       'metadata controller class' => 'TMGMTLocalTaskItemMetadataController',
       'views controller class' => 'TMGMTLocalTaskItemViewsController',
       'base table' => 'tmgmt_local_task_item',
@@ -396,6 +401,8 @@ function tmgmt_local_languages_predefined_list() {
 
 /**
  * Loads a local translation task entity.
+ *
+ * @return TMGMTLocalTask
  */
 function tmgmt_local_task_load($tltid) {
   return entity_load_single('tmgmt_local_task', $tltid);
@@ -410,6 +417,8 @@ function tmgmt_local_task_load_multiple(array $tltids = array(), $conditions = a
 
 /**
  * Loads a local translation task items entity.
+ *
+ * @return TMGMTLocalTaskItem
  */
 function tmgmt_local_task_item_load($tltiid) {
   return entity_load_single('tmgmt_local_task_item', $tltiid);
@@ -536,15 +545,16 @@ function tmgmt_local_task_statistics_load(array $tltids) {
   // If there are remaining jobs, build a query to fetch them.
   if (!empty($tltids_to_load)) {
     // Build the query to fetch the statistics.
-    $query = db_select('tmgmt_job_item', 'tji');
-    $query->join('tmgmt_local_task', 'tlt', 'tlt.tjid = tji.tjid');
+    $query = db_select('tmgmt_local_task_item', 'tlti');
+    $query->join('tmgmt_local_task', 'tlt', 'tlt.tltid = tlti.tltid');
+    $query->join('tmgmt_job_item', 'tji', 'tji.tjiid = tlti.tjiid');
     $query->fields('tlt', array('tltid'));
-    $query->addExpression('SUM(word_count)', 'word_count');
-    $query->addExpression('SUM(count_accepted)', 'count_accepted');
-    $query->addExpression('SUM(count_pending)', 'count_pending');
-    $query->addExpression('SUM(count_translated)', 'count_translated');
-    $result = $query->groupBy('tltid')
-      ->condition('tltid', $tltids_to_load)
+    $query->addExpression('SUM(tji.word_count)', 'word_count');
+    $query->addExpression('SUM(tlti.count_untranslated)', 'count_untranslated');
+    $query->addExpression('SUM(tlti.count_translated)', 'count_translated');
+    $query->addExpression('SUM(tlti.count_completed)', 'count_completed');
+    $result = $query->groupBy('tlt.tltid')
+      ->condition('tlt.tltid', $tltids_to_load)
       ->execute();
 
     foreach ($result as $row) {
