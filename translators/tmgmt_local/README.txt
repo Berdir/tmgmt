@@ -21,12 +21,12 @@ The local translator adds two permissions:
 - Provide translation services
 
   The user can assign jobs to himself (assuming he has the right skills) and
-  execute the translation. Adds a 'Translate' link to the Navigation menu.
+  execute the translation. Adds a 'Translate' link to the User menu.
 
 - Administer translation tasks
 
   Assign jobs to other users for translation. Adds a 'Manage Translate Tasks'
-  to the Navigation menu.
+  to the User Menu.
 
 
 Getting started
@@ -38,7 +38,7 @@ Only users with the required language skills are listed at this moment. If no
 person is selected, the job will be moved to the 'unassigned' task list for later
 treatment.
 
-Following the 'Translate' link in the Navigation menu, the user finds a listing
+Following the 'Translate' link in the User Menu, the user finds a listing
 of the tasks assigned to him as well as eligible tasks to assign to himself,
 depending on his skills. Assigned tasks will show a 'translate' link in the
 action column. Follow it to get a list of the task items to be translated.
