@@ -17,7 +17,7 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntityTestCaseUtility {
   }
 
   function setUp() {
-    parent::setUp(array('tmgmt_entity_ui', 'translation', 'comment'));
+    parent::setUp(array('tmgmt_entity_ui', 'translation', 'comment', 'taxonomy'));
     $this->loginAsAdmin(array('administer entity translation'));
 
     $this->setEnvironment('de');
@@ -27,6 +27,7 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntityTestCaseUtility {
     $edit = array();
     $edit['entity_translation_entity_types[comment]'] = 1;
     $edit['entity_translation_entity_types[node]'] = 1;
+    $edit['entity_translation_entity_types[taxonomy_term]'] = 1;
     $this->drupalPost('admin/config/regional/entity_translation', $edit, t('Save configuration'));
 
     $this->createNodeType('article', 'Article', ENTITY_TRANSLATION_ENABLED);
@@ -42,6 +43,54 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntityTestCaseUtility {
     $this->nodes['article']['en'][2] = $this->createNode('article', 'en');
     $this->nodes['article']['en'][1] = $this->createNode('article', 'en');
     $this->nodes['article']['en'][0] = $this->createNode('article', 'en');
+  }
+
+  /**
+   * Tests that the term bundle filter works.
+   */
+  function testTermBundleFilter() {
+
+    $vocabulary1 = entity_create('taxonomy_vocabulary', array(
+      'machine_name' => 'vocab1',
+      'name' => $this->randomName(),
+    ));
+    taxonomy_vocabulary_save($vocabulary1);
+
+    $term1 = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'vid' => $vocabulary1->vid,
+    ));
+    taxonomy_term_save($term1);
+
+    $vocabulary2 = (object) array(
+      'machine_name' => 'vocab2',
+      'name' => $this->randomName(),
+    );
+    taxonomy_vocabulary_save($vocabulary2);
+
+    $term2 = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'vid' => $vocabulary2->vid,
+    ));
+    taxonomy_term_save($term2);
+
+    $this->drupalGet('admin/config/regional/tmgmt/entity/taxonomy_term');
+    // Both terms should be displayed with their bundle.
+    $this->assertText($term1->name);
+    $this->assertText($term2->name);
+    $this->assertTrue($this->xpath('//td[text()=@vocabulary]', array('@vocabulary' => $vocabulary1->name)));
+    $this->assertTrue($this->xpath('//td[text()=@vocabulary]', array('@vocabulary' => $vocabulary2->name)));
+
+    // Limit to the first vocabulary.
+    $edit = array();
+    $edit['search[vocabulary_machine_name]'] = $vocabulary1->machine_name;
+    $this->drupalPost(NULL, $edit, t('Search'));
+    // Only term 1 should be displayed now.
+    $this->assertText($term1->name);
+    $this->assertNoText($term2->name);
+    $this->assertTrue($this->xpath('//td[text()=@vocabulary]', array('@vocabulary' => $vocabulary1->name)));
+    $this->assertFalse($this->xpath('//td[text()=@vocabulary]', array('@vocabulary' => $vocabulary2->name)));
+
   }
 
   function testAvailabilityOfEntityLists() {
