@@ -13,7 +13,7 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
    * @return array
    *   Header array definition as expected by theme_tablesort().
    */
-  public function overviewFormHeader() {
+  public function overviewFormHeader($type) {
     $languages = array();
     foreach (language_list() as $langcode => $language) {
       $languages['langcode-' . $langcode] = array(
@@ -21,9 +21,18 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
       );
     }
 
+    $entity_info = entity_get_info($type);
+
     $header = array(
       'title' => array('data' => t('Title (in source language)')),
-    ) + $languages;
+    );
+
+    // Show the bundle if there is more than one for this entity type.
+    if (count(tmgmt_entity_get_translatable_bundles($type)) > 1) {
+      $header['bundle'] = array('data' => t('@entity_name type', array('@entity_name' => $entity_info['label'])));
+    }
+
+    $header += $languages;
 
     return $header;
   }
@@ -38,10 +47,15 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
    */
   public function overviewRow($data) {
     $label = $data['entity_label'] ? $data['entity_label'] : t('@type: @id', array('@type' => $data['entity_type'], '@id' => $data['entity_id']));
+
     $row = array(
       'id' => $data['entity_id'],
       'title' => l($label, $data['entity_uri']),
     );
+
+    if (isset($data['bundle'])) {
+      $row['bundle'] = $data['bundle'];
+    }
 
     foreach (language_list() as $langcode => $language) {
       $row['langcode-' . $langcode] = array(
