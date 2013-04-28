@@ -8,6 +8,7 @@ dependencies[] = tmgmt_ui
 dependencies[] = views_bulk_operations
 
 files[] = tmgmt_node_ui.test
+files[] = tmgmt_node_ui.overview.test
 
 ; Views handlers
 files[] = views/tmgmt_node_ui_handler_filter_node_translatable_types.inc

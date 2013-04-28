@@ -3,4 +3,6 @@ package = Translation Management
 core = 7.x
 hidden = TRUE
 dependencies[] = tmgmt
-files[] = tmgmt_test.plugin.inc
+files[] = tmgmt_test.plugin.source.inc
+files[] = tmgmt_test.plugin.translator.inc
+files[] = tmgmt_test.ui.translator.inc

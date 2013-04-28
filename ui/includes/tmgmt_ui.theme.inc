@@ -248,3 +248,50 @@ function theme_tmgmt_ui_translator_review_form($variables) {
   }
   return '<div id="tmgmt-status-messages-' . strtolower($parent_label) . '"></div><table class="tmgmt-ui-review"><colgroup width="100" /><colgroup width="*" span="2" /><colgroup width="100" />' . $result . '</table>';
 }
+
+/**
+ * Adds a description to the translator entity on the entity overview form.
+ *
+ * @see theme_entity_ui_overview_item()
+ */
+function theme_tmgmt_ui_translator_overview_item($variables) {
+  $output = theme('entity_ui_overview_item', $variables);
+  if (!empty($variables['description'])) {
+    $output = '<div class="tmgmt-ui-translator-label-wrapper">' . $output . '<div class="description">' . $variables['description'] . '</div></div>';
+  }
+  return $output;
+}
+
+/**
+ * Theme callback for adding the tabledrag to the translator entity overview
+ * form.
+ */
+function theme_tmgmt_ui_translator_overview_form($variables) {
+  $form = $variables['form'];
+  $colspan = !empty($form['#entity_info']['exportable']) ? 4 : 3;
+  $rows = array();
+  $header = array(
+    t('Label'),
+    t('Plugin'),
+    t('Configured'),
+    t('Status'),
+    array('data' => t('Operations'), 'colspan' => $colspan),
+    t('Weight'),
+  );
+  foreach (element_children($form) as $key) {
+    $row = array();
+    $form[$key]['weight']['#attributes']['class'] = array('tmgmt-ui-translator-weight');
+    $row[] = drupal_render($form[$key]['label']);
+    $row[] = drupal_render($form[$key]['plugin']);
+    $row[] = drupal_render($form[$key]['configured']);
+    $row[] = drupal_render($form[$key]['status']);
+    $operations = element_children($form[$key]['operations']);
+    foreach ($operations as $op) {
+      $row[] = array('data' => $form[$key]['operations'][$op]);
+    }
+    $row[] = drupal_render($form[$key]['weight']);
+    $rows[] = array('data' => $row, 'class' => array('draggable'));
+  }
+  drupal_add_tabledrag('tmgmt-ui-translator-overview', 'order', 'sibling', 'tmgmt-ui-translator-weight');
+  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('None.'), 'attributes' => array('id' => 'tmgmt-ui-translator-overview')));
+}
