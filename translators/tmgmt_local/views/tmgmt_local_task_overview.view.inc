@@ -26,6 +26,11 @@ $handler->display->display_options['style_plugin'] = 'table';
 $handler->display->display_options['relationships']['job']['id'] = 'job';
 $handler->display->display_options['relationships']['job']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['job']['field'] = 'job';
+/* Relationship: Translation Task: Translator tuid */
+$handler->display->display_options['relationships']['translator']['id'] = 'translator';
+$handler->display->display_options['relationships']['translator']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['relationships']['translator']['field'] = 'translator';
+$handler->display->display_options['relationships']['translator']['label'] = 'Assigned Translator';
 /* Field: Bulk operations: Translation Task */
 $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
 $handler->display->display_options['fields']['views_bulk_operations']['table'] = 'tmgmt_local_task';
@@ -35,47 +40,45 @@ $handler->display->display_options['fields']['views_bulk_operations']['element_l
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_local_task_assign1' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 1,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -85,6 +88,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 0,
@@ -97,31 +101,31 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_test' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Assign to me',
+    'postpone_processing' => 0,
   ),
 );
 /* Field: Translation Task: Title */
@@ -141,144 +145,29 @@ $handler->display->display_options['fields']['item_count']['field'] = 'item_coun
 $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
-
-/* Display: Admin Overview */
-$handler = $view->new_display('page', 'Admin Overview', 'admin_overview');
-$handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
-$handler->display->display_options['defaults']['fields'] = FALSE;
-/* Field: Bulk operations: Translation Task */
-$handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
-$handler->display->display_options['fields']['views_bulk_operations']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['views_bulk_operations']['field'] = 'views_bulk_operations';
-$handler->display->display_options['fields']['views_bulk_operations']['label'] = '';
-$handler->display->display_options['fields']['views_bulk_operations']['element_label_colon'] = FALSE;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
-  'rules_component::rules_tmgmt_local_task_assign1' => array(
-    'selected' => 0,
-    'use_queue' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-  ),
-  'rules_component::rules_tmgmt_local_task_assign' => array(
-    'selected' => 0,
-    'use_queue' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-  ),
-  'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
-    'selected' => 0,
-    'use_queue' => 0,
-    'skip_confirmation' => 1,
-    'override_label' => 1,
-    'label' => 'Assign to me',
-  ),
-  'action::views_bulk_operations_delete_item' => array(
-    'selected' => 1,
-    'use_queue' => 0,
-    'skip_confirmation' => 1,
-    'override_label' => 0,
-    'label' => '',
-  ),
-  'action::system_message_action' => array(
-    'selected' => 0,
-    'use_queue' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-  ),
-  'action::views_bulk_operations_script_action' => array(
-    'selected' => 0,
-    'use_queue' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-  ),
-  'action::views_bulk_operations_modify_action' => array(
-    'selected' => 0,
-    'use_queue' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-    'settings' => array(
-      'show_all_tokens' => 1,
-      'display_values' => array(
-        '_all_' => '_all_',
-      ),
-    ),
-  ),
-  'action::views_bulk_operations_argument_selector_action' => array(
-    'selected' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-    'settings' => array(
-      'url' => '',
-    ),
-  ),
-  'action::system_goto_action' => array(
-    'selected' => 0,
-    'use_queue' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-  ),
-  'action::system_send_email_action' => array(
-    'selected' => 0,
-    'use_queue' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-  ),
-  'rules_component::rules_test' => array(
-    'selected' => 0,
-    'use_queue' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-  ),
-  'rules_component::rules_tmgmt_local_task_unassign' => array(
-    'selected' => 0,
-    'use_queue' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-  ),
+/* Filter criterion: Translation Task: Status */
+$handler->display->display_options['filters']['status']['id'] = 'status';
+$handler->display->display_options['filters']['status']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['filters']['status']['field'] = 'status';
+$handler->display->display_options['filters']['status']['exposed'] = TRUE;
+$handler->display->display_options['filters']['status']['expose']['operator_id'] = 'status_op';
+$handler->display->display_options['filters']['status']['expose']['label'] = 'Status';
+$handler->display->display_options['filters']['status']['expose']['operator'] = 'status_op';
+$handler->display->display_options['filters']['status']['expose']['identifier'] = 'status';
+$handler->display->display_options['filters']['status']['expose']['remember_roles'] = array(
+  2 => '2',
+  1 => 0,
+  3 => 0,
+  4 => 0,
+  5 => 0,
+  6 => 0,
 );
-/* Field: Translation Task: Title */
-$handler->display->display_options['fields']['title']['id'] = 'title';
-$handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['title']['field'] = 'title';
-/* Field: Translation Task: Word count */
-$handler->display->display_options['fields']['word_count']['id'] = 'word_count';
-$handler->display->display_options['fields']['word_count']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['word_count']['field'] = 'word_count';
-$handler->display->display_options['fields']['word_count']['element_label_colon'] = FALSE;
-/* Field: Translation Task: Job item count */
-$handler->display->display_options['fields']['item_count']['id'] = 'item_count';
-$handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['item_count']['field'] = 'item_count';
-/* Field: Translation Task: Progress */
-$handler->display->display_options['fields']['progress']['id'] = 'progress';
-$handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['progress']['field'] = 'progress';
-$handler->display->display_options['path'] = 'admin/config/regional/tmgmt/local-tasks';
-$handler->display->display_options['menu']['type'] = 'tab';
-$handler->display->display_options['menu']['title'] = 'Local Tasks';
-$handler->display->display_options['menu']['weight'] = '0';
-$handler->display->display_options['menu']['context'] = 0;
 
-/* Display: Unassigned and mine */
-$handler = $view->new_display('page', 'Unassigned and mine', 'unassigned');
+/* Display: Eligible and mine */
+$handler = $view->new_display('page', 'Eligible and mine', 'unassigned');
 $handler->display->display_options['defaults']['title'] = FALSE;
-$handler->display->display_options['title'] = 'Unassigned Eligible Tasks';
-$handler->display->display_options['display_description'] = 'Shows elegible (unasigned) and mine tasks.';
+$handler->display->display_options['title'] = 'Translate';
+$handler->display->display_options['display_description'] = 'Shows elegible (unassigned) and mine tasks.';
 $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
 $handler->display->display_options['defaults']['style_plugin'] = FALSE;
 $handler->display->display_options['style_plugin'] = 'table';
@@ -361,7 +250,7 @@ $handler->display->display_options['empty']['area']['id'] = 'area';
 $handler->display->display_options['empty']['area']['table'] = 'views';
 $handler->display->display_options['empty']['area']['field'] = 'area';
 $handler->display->display_options['empty']['area']['empty'] = TRUE;
-$handler->display->display_options['empty']['area']['content'] = 'You do not have eligible tasks.';
+$handler->display->display_options['empty']['area']['content'] = 'There are no eligible tasks.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 $handler->display->display_options['defaults']['relationships'] = FALSE;
 /* Relationship: Translation Task: Translation Job tjid */
@@ -379,47 +268,45 @@ $handler->display->display_options['fields']['views_bulk_operations']['element_l
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_local_task_assign1' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -429,6 +316,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 0,
@@ -441,39 +329,33 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_test' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
     'selected' => 1,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Assign to me',
+    'postpone_processing' => 0,
   ),
 );
-/* Field: Translation Task: Created */
-$handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['created']['field'] = 'created';
-$handler->display->display_options['fields']['created']['label'] = 'Date';
-$handler->display->display_options['fields']['created']['date_format'] = 'short';
 /* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
@@ -502,16 +384,10 @@ $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Task: Assign to me */
-$handler->display->display_options['fields']['assign_to_me']['id'] = 'assign_to_me';
-$handler->display->display_options['fields']['assign_to_me']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['assign_to_me']['field'] = 'assign_to_me';
-$handler->display->display_options['fields']['assign_to_me']['label'] = 'Action';
-$handler->display->display_options['fields']['assign_to_me']['alter']['word_boundary'] = FALSE;
-$handler->display->display_options['fields']['assign_to_me']['alter']['ellipsis'] = FALSE;
-$handler->display->display_options['fields']['assign_to_me']['element_label_colon'] = FALSE;
-$handler->display->display_options['fields']['assign_to_me']['element_default_classes'] = FALSE;
-$handler->display->display_options['fields']['assign_to_me']['hide_alter_empty'] = FALSE;
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
 /* Filter criterion: Translation Task: Status */
@@ -526,11 +402,15 @@ $handler->display->display_options['filters']['eligible']['id'] = 'eligible';
 $handler->display->display_options['filters']['eligible']['table'] = 'tmgmt_job';
 $handler->display->display_options['filters']['eligible']['field'] = 'eligible';
 $handler->display->display_options['filters']['eligible']['relationship'] = 'job';
-$handler->display->display_options['path'] = 'translate';
-$handler->display->display_options['menu']['type'] = 'normal';
-$handler->display->display_options['menu']['title'] = 'Translate';
+$handler->display->display_options['path'] = 'translate/default';
+$handler->display->display_options['menu']['type'] = 'default tab';
+$handler->display->display_options['menu']['title'] = 'Unassigned and mine';
 $handler->display->display_options['menu']['weight'] = '0';
 $handler->display->display_options['menu']['context'] = 0;
+$handler->display->display_options['tab_options']['type'] = 'normal';
+$handler->display->display_options['tab_options']['title'] = 'Translate';
+$handler->display->display_options['tab_options']['weight'] = '0';
+$handler->display->display_options['tab_options']['name'] = 'user-menu';
 
 /* Display: Elegible */
 $handler = $view->new_display('page', 'Elegible', 'eligible');
@@ -625,47 +505,45 @@ $handler->display->display_options['fields']['views_bulk_operations']['element_l
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_local_task_assign1' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -675,6 +553,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 0,
@@ -687,39 +566,33 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_test' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
     'selected' => 1,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Assign to me',
+    'postpone_processing' => 0,
   ),
 );
-/* Field: Translation Task: Created */
-$handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['created']['field'] = 'created';
-$handler->display->display_options['fields']['created']['label'] = 'Date';
-$handler->display->display_options['fields']['created']['date_format'] = 'short';
 /* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
@@ -748,16 +621,10 @@ $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Task: Assign to me */
-$handler->display->display_options['fields']['assign_to_me']['id'] = 'assign_to_me';
-$handler->display->display_options['fields']['assign_to_me']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['assign_to_me']['field'] = 'assign_to_me';
-$handler->display->display_options['fields']['assign_to_me']['label'] = 'Action';
-$handler->display->display_options['fields']['assign_to_me']['alter']['word_boundary'] = FALSE;
-$handler->display->display_options['fields']['assign_to_me']['alter']['ellipsis'] = FALSE;
-$handler->display->display_options['fields']['assign_to_me']['element_label_colon'] = FALSE;
-$handler->display->display_options['fields']['assign_to_me']['element_default_classes'] = FALSE;
-$handler->display->display_options['fields']['assign_to_me']['hide_alter_empty'] = FALSE;
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
 /* Filter criterion: Translation Task: Status */
@@ -773,10 +640,10 @@ $handler->display->display_options['filters']['eligible']['table'] = 'tmgmt_job'
 $handler->display->display_options['filters']['eligible']['field'] = 'eligible';
 $handler->display->display_options['filters']['eligible']['relationship'] = 'job';
 $handler->display->display_options['path'] = 'translate/elegible';
-$handler->display->display_options['menu']['type'] = 'normal';
+$handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Eligible';
 $handler->display->display_options['menu']['description'] = 'List of eligible tasks';
-$handler->display->display_options['menu']['weight'] = '0';
+$handler->display->display_options['menu']['weight'] = '10';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: My */
@@ -882,54 +749,52 @@ $handler->display->display_options['fields']['views_bulk_operations']['element_l
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_local_task_assign1' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Assign to me',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -939,6 +804,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 0,
@@ -951,31 +817,31 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_test' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_unassign' => array(
     'selected' => 1,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Unassign',
+    'postpone_processing' => 0,
   ),
 );
 /* Field: Translation Task: Status */
@@ -986,12 +852,6 @@ $handler->display->display_options['fields']['status']['field'] = 'status';
 $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
-/* Field: Translation Task: Created */
-$handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['created']['field'] = 'created';
-$handler->display->display_options['fields']['created']['label'] = 'Date';
-$handler->display->display_options['fields']['created']['date_format'] = 'short';
 /* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
@@ -1020,12 +880,10 @@ $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Task: Translate task items */
-$handler->display->display_options['fields']['translate']['id'] = 'translate';
-$handler->display->display_options['fields']['translate']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['translate']['field'] = 'translate';
-$handler->display->display_options['fields']['translate']['label'] = 'Action';
-$handler->display->display_options['fields']['translate']['element_label_colon'] = FALSE;
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
 /* Filter criterion: User: Current */
@@ -1039,6 +897,11 @@ $handler->display->display_options['filters']['uid_current']['group'] = 1;
 $handler->display->display_options['filters']['status']['id'] = 'status';
 $handler->display->display_options['filters']['status']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['status']['field'] = 'status';
+$handler->display->display_options['filters']['status']['value'] = array(
+  1 => '1',
+  2 => '2',
+  3 => '3',
+);
 $handler->display->display_options['filters']['status']['group'] = 1;
 $handler->display->display_options['filters']['status']['exposed'] = TRUE;
 $handler->display->display_options['filters']['status']['expose']['operator_id'] = 'status_op';
@@ -1049,9 +912,11 @@ $handler->display->display_options['filters']['status']['expose']['remember_role
   2 => '2',
   1 => 0,
   3 => 0,
-  8 => 0,
-  10 => 0,
+  4 => 0,
+  5 => 0,
+  6 => 0,
 );
+$handler->display->display_options['filters']['status']['expose']['reduce'] = TRUE;
 /* Filter criterion: Translation Management Job: Source_language */
 $handler->display->display_options['filters']['source_language']['id'] = 'source_language';
 $handler->display->display_options['filters']['source_language']['table'] = 'tmgmt_job';
@@ -1105,6 +970,15 @@ $handler->display->display_options['filters']['title']['expose']['remember_roles
   3 => 0,
   8 => 0,
   10 => 0,
+);
+/* Filter criterion: Translation Task: Status */
+$handler->display->display_options['filters']['status_1']['id'] = 'status_1';
+$handler->display->display_options['filters']['status_1']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['filters']['status_1']['field'] = 'status';
+$handler->display->display_options['filters']['status_1']['value'] = array(
+  1 => '1',
+  2 => '2',
+  3 => '3',
 );
 $handler->display->display_options['path'] = 'translate/mine';
 
@@ -1220,54 +1094,52 @@ $handler->display->display_options['fields']['views_bulk_operations']['element_l
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_local_task_assign1' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Assign to me',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -1277,6 +1149,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 0,
@@ -1289,31 +1162,31 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_test' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_unassign' => array(
     'selected' => 1,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Unassign',
+    'postpone_processing' => 0,
   ),
 );
 /* Field: Translation Task: Status */
@@ -1324,12 +1197,6 @@ $handler->display->display_options['fields']['status']['field'] = 'status';
 $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
-/* Field: Translation Task: Created */
-$handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['created']['field'] = 'created';
-$handler->display->display_options['fields']['created']['label'] = 'Date';
-$handler->display->display_options['fields']['created']['date_format'] = 'long';
 /* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
@@ -1358,12 +1225,10 @@ $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Task: Translate task items */
-$handler->display->display_options['fields']['translate']['id'] = 'translate';
-$handler->display->display_options['fields']['translate']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['translate']['field'] = 'translate';
-$handler->display->display_options['fields']['translate']['label'] = 'Action';
-$handler->display->display_options['fields']['translate']['element_label_colon'] = FALSE;
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
 /* Filter criterion: User: Current */
@@ -1447,10 +1312,10 @@ $handler->display->display_options['filters']['title']['expose']['remember_roles
   10 => 0,
 );
 $handler->display->display_options['path'] = 'translate/pending';
-$handler->display->display_options['menu']['type'] = 'normal';
+$handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Pending';
 $handler->display->display_options['menu']['description'] = 'List of pending tasks';
-$handler->display->display_options['menu']['weight'] = '2';
+$handler->display->display_options['menu']['weight'] = '20';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: Completed */
@@ -1565,54 +1430,52 @@ $handler->display->display_options['fields']['views_bulk_operations']['element_l
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_local_task_assign1' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Assign to me',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -1622,6 +1485,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 0,
@@ -1634,47 +1498,37 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_test' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_unassign' => array(
     'selected' => 1,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Unassign',
+    'postpone_processing' => 0,
   ),
 );
-/* Field: Translation Task: Status */
-$handler->display->display_options['fields']['status']['id'] = 'status';
-$handler->display->display_options['fields']['status']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['status']['field'] = 'status';
 /* Field: Translation Task: Progress */
 $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
-/* Field: Translation Task: Created */
-$handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['created']['field'] = 'created';
-$handler->display->display_options['fields']['created']['label'] = 'Date';
-$handler->display->display_options['fields']['created']['date_format'] = 'long';
 /* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
@@ -1698,17 +1552,10 @@ $handler->display->display_options['fields']['word_count']['id'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['word_count']['field'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['element_label_colon'] = FALSE;
-/* Field: Translation Task: Job item count */
-$handler->display->display_options['fields']['item_count']['id'] = 'item_count';
-$handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['item_count']['field'] = 'item_count';
-$handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Task: Translate task items */
-$handler->display->display_options['fields']['translate']['id'] = 'translate';
-$handler->display->display_options['fields']['translate']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['translate']['field'] = 'translate';
-$handler->display->display_options['fields']['translate']['label'] = 'Action';
-$handler->display->display_options['fields']['translate']['element_label_colon'] = FALSE;
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
 /* Filter criterion: User: Current */
@@ -1792,10 +1639,10 @@ $handler->display->display_options['filters']['title']['expose']['remember_roles
   10 => 0,
 );
 $handler->display->display_options['path'] = 'translate/completed';
-$handler->display->display_options['menu']['type'] = 'normal';
+$handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Completed';
 $handler->display->display_options['menu']['description'] = 'List of completed tasks';
-$handler->display->display_options['menu']['weight'] = '3';
+$handler->display->display_options['menu']['weight'] = '30';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: Rejected */
@@ -1910,54 +1757,52 @@ $handler->display->display_options['fields']['views_bulk_operations']['element_l
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_local_task_assign1' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Assign to me',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -1967,6 +1812,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 0,
@@ -1979,47 +1825,37 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_test' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_unassign' => array(
     'selected' => 1,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Unassign',
+    'postpone_processing' => 0,
   ),
 );
-/* Field: Translation Task: Status */
-$handler->display->display_options['fields']['status']['id'] = 'status';
-$handler->display->display_options['fields']['status']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['status']['field'] = 'status';
 /* Field: Translation Task: Progress */
 $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
-/* Field: Translation Task: Created */
-$handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['created']['field'] = 'created';
-$handler->display->display_options['fields']['created']['label'] = 'Date';
-$handler->display->display_options['fields']['created']['date_format'] = 'long';
 /* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
@@ -2048,12 +1884,10 @@ $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Task: Translate task items */
-$handler->display->display_options['fields']['translate']['id'] = 'translate';
-$handler->display->display_options['fields']['translate']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['translate']['field'] = 'translate';
-$handler->display->display_options['fields']['translate']['label'] = 'Action';
-$handler->display->display_options['fields']['translate']['element_label_colon'] = FALSE;
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
 /* Filter criterion: User: Current */
@@ -2137,10 +1971,10 @@ $handler->display->display_options['filters']['title']['expose']['remember_roles
   10 => 0,
 );
 $handler->display->display_options['path'] = 'translate/rejected';
-$handler->display->display_options['menu']['type'] = 'normal';
+$handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Rejected';
 $handler->display->display_options['menu']['description'] = 'List of rejected tasks';
-$handler->display->display_options['menu']['weight'] = '1';
+$handler->display->display_options['menu']['weight'] = '40';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: Closed */
@@ -2255,54 +2089,52 @@ $handler->display->display_options['fields']['views_bulk_operations']['element_l
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_local_task_assign1' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Assign to me',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -2312,6 +2144,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 0,
@@ -2324,47 +2157,37 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_test' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_unassign' => array(
     'selected' => 1,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Unassign',
+    'postpone_processing' => 0,
   ),
 );
-/* Field: Translation Task: Status */
-$handler->display->display_options['fields']['status']['id'] = 'status';
-$handler->display->display_options['fields']['status']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['status']['field'] = 'status';
 /* Field: Translation Task: Progress */
 $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
-/* Field: Translation Task: Created */
-$handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['created']['field'] = 'created';
-$handler->display->display_options['fields']['created']['label'] = 'Date';
-$handler->display->display_options['fields']['created']['date_format'] = 'long';
 /* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
@@ -2393,12 +2216,10 @@ $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Task: Translate task items */
-$handler->display->display_options['fields']['translate']['id'] = 'translate';
-$handler->display->display_options['fields']['translate']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['translate']['field'] = 'translate';
-$handler->display->display_options['fields']['translate']['label'] = 'Action';
-$handler->display->display_options['fields']['translate']['element_label_colon'] = FALSE;
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
 /* Filter criterion: User: Current */
@@ -2482,10 +2303,10 @@ $handler->display->display_options['filters']['title']['expose']['remember_roles
   10 => 0,
 );
 $handler->display->display_options['path'] = 'translate/closed';
-$handler->display->display_options['menu']['type'] = 'normal';
+$handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Closed';
 $handler->display->display_options['menu']['description'] = 'List of closed tasks';
-$handler->display->display_options['menu']['weight'] = '4';
+$handler->display->display_options['menu']['weight'] = '50';
 $handler->display->display_options['menu']['context'] = 0;
 $translatables['tmgmt_local_task_overview'] = array(
   t('Master'),
@@ -2504,29 +2325,30 @@ $translatables['tmgmt_local_task_overview'] = array(
   t('next ›'),
   t('last »'),
   t('Translation Management Job'),
+  t('Assigned Translator'),
   t('Title'),
   t('Word count'),
   t('Job item count'),
   t('Progress'),
-  t('Admin Overview'),
-  t('Unassigned and mine'),
-  t('Unassigned Eligible Tasks'),
-  t('Shows elegible (unasigned) and mine tasks.'),
+  t('Status'),
+  t('Eligible and mine'),
+  t('Translate'),
+  t('Shows elegible (unassigned) and mine tasks.'),
   t('<h2>My Tasks</h2>'),
-  t('You do not have eligible tasks.'),
-  t('Date'),
+  t('There are no eligible tasks.'),
   t('Language'),
   t('Target language'),
   t('Item count'),
-  t('Action'),
+  t('Operations'),
   t('Elegible'),
+  t('Unassigned Eligible Tasks'),
   t('Shows elegible (unasigned) tasks.'),
   t('Message'),
+  t('You do not have eligible tasks.'),
   t('My'),
   t('My Tasks'),
   t('Shows tasks for current user (translator).'),
   t('Translator'),
-  t('Status'),
   t('Language From'),
   t('Language To'),
   t('Pending'),

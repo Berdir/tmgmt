@@ -3,4 +3,4 @@ description = Allows local users to define translation skills.
 package = Translation Management
 core = 7.x
 
-dependencies[] = tmgmt_local
+;dependencies[] = tmgmt_local

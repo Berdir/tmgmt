@@ -86,14 +86,31 @@ class TMGMTLocalTask extends Entity {
    * Overrides Entity::defaultUri().
    */
   public function defaultUri() {
-    return array('path' => 'admin/config/regional/tmgmt/local-tasks/' . $this->tltid);
+    return array('path' => 'translate/' . $this->tltid);
   }
 
   /**
    * Overrides Entity::defaultLabel().
    */
   protected function defaultLabel() {
-    return t('Task for @job assigned to @translator', array('@job' => $this->getJob()->label(), '@translator' =>  entity_label('user', user_load($this->tuid))));
+    if (empty($this->tuid)) {
+      if (empty($this->title)) {
+        return t('Task for @job', array('@job' => $this->getJob()->label()));
+      }
+      else {
+        return $this->title;
+      }
+    }
+    else {
+      if (empty($this->title)) {
+        return t('Task for @job assigned to @translator', array('@job' => $this->getJob()->label(), '@translator' =>  entity_label('user', user_load($this->tuid))));
+      }
+      else {
+        return t('@title assigned to @translator', array('@title' => $this->title, '@translator' =>  entity_label('user', user_load($this->tuid))));
+      }
+    }
+
+
   }
 
   /**
@@ -142,7 +159,43 @@ class TMGMTLocalTask extends Entity {
    *   An array of translation job items.
    */
   public function getItems($conditions = array()) {
-    return $this->getJob()->getItems($conditions);
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'tmgmt_local_task_item');
+    $query->propertyCondition('tltid', $this->tltid);
+    foreach ($conditions as $key => $condition) {
+      if (is_array($condition)) {
+        $operator = isset($condition['operator']) ? $condition['operator'] : '=';
+        $query->propertyCondition($key, $condition['value'], $operator);
+      }
+      else {
+        $query->propertyCondition($key, $condition);
+      }
+    }
+    $results = $query->execute();
+    if (!empty($results['tmgmt_local_task_item'])) {
+      return entity_load('tmgmt_local_task_item', array_keys($results['tmgmt_local_task_item']));
+    }
+    return array();
+  }
+
+  /**
+   * Create a task item for this task and the given job item.
+   *
+   * @param TMGMTJobItem $job_item
+   *   The job item.
+   */
+  public function addTaskItem(TMGMTJobItem $job_item) {
+    // Save the task to get an id.
+    if (empty($this->tltid)) {
+      $this->save();
+    }
+
+    $local_task = entity_create('tmgmt_local_task_item', array(
+      'tltid' => $this->identifier(),
+      'tjiid' => $job_item->identifier(),
+    ));
+    $local_task->save();
+    return $local_task;
   }
 
   /**
@@ -255,33 +308,33 @@ class TMGMTLocalTask extends Entity {
   }
 
   /**
-   * Sums up all pending counts of this task job items.
+   * Count of all translated data items.
    *
    * @return
-   *   The sum of all pending counts
-   */
-  public function getCountPending() {
-    return tmgmt_local_task_statistic($this, 'count_pending');
-  }
-
-  /**
-   * Sums up all translated counts of this task job items.
-   *
-   * @return
-   *   The sum of all translated counts
+   *   Translated count
    */
   public function getCountTranslated() {
     return tmgmt_local_task_statistic($this, 'count_translated');
   }
 
   /**
-   * Sums up all accepted counts of this task job items.
+   * Count of all untranslated data items.
    *
    * @return
-   *   The sum of all accepted counts
+   *   Translated count
    */
-  public function getCountAccepted() {
-    return tmgmt_local_task_statistic($this, 'count_accepted');
+  public function getCountUntranslated() {
+    return tmgmt_local_task_statistic($this, 'count_untranslated');
+  }
+
+  /**
+   * Count of all completed data items.
+   *
+   * @return
+   *   Translated count
+   */
+  public function getCountCompleted() {
+    return tmgmt_local_task_statistic($this, 'count_completed');
   }
 
   /**
@@ -293,6 +346,7 @@ class TMGMTLocalTask extends Entity {
   public function getWordCount() {
     return tmgmt_local_task_statistic($this, 'word_count');
   }
+
 
   /**
    * Returns loop count of a task.
@@ -328,6 +382,252 @@ class TMGMTLocalTask extends Entity {
              && $newStatus == TMGMT_LOCAL_TASK_STATUS_PENDING) {
       ++$this->loop_count;
     }
+  }
+
+}
+
+/**
+ * Entity class for the local task item entity.
+ *
+ * @ingroup tmgmt_local_task
+ */
+class TMGMTLocalTaskItem extends Entity {
+
+  /**
+   * Translation local task item identifier.
+   *
+   * @var int
+   */
+  public $tltiid;
+
+  /**
+   * The task identifier.
+   *
+   * @var int
+   */
+  public $tltid;
+
+  /**
+   * Translation job item.
+   *
+   * @var int
+   */
+  public $tjiid;
+
+  /**
+   * Current status of the task.
+   *
+   * @var int
+   */
+  public $status;
+
+  /**
+   * Translated data and data item status.
+   *
+   * @var array
+   */
+  public $data = array();
+
+  /**
+   * Counter for all untranslated data items.
+   *
+   * @var integer
+   */
+  public $count_untranslated = 0;
+
+  /**
+   * Counter for all translated data items.
+   *
+   * @var integer
+   */
+  public $count_translated = 0;
+
+  /**
+   * Counter for all completed data items.
+   *
+   * @var integer
+   */
+  public $count_completed = 0;
+
+  /**
+   * Overrides Entity::__construct().
+   */
+  public function __construct(array $values = array(), $entity_type = 'tmgmt_local_task_item') {
+    parent::__construct($values, $entity_type);
+  }
+
+  /*
+   * Overrides Entity::defaultUri().
+   */
+  public function defaultUri() {
+    return array('path' => 'translate/' . $this->tltid . '/item/' . $this->tltiid);
+  }
+
+  /**
+   * Overrides Entity::defaultLabel().
+   */
+  protected function defaultLabel() {
+    if ($job_item = $this->getJobItem()) {
+      return $job_item->label();
+    }
+    return t('Missing job item');
+  }
+
+  /**
+   * Returns the translation task.
+   *
+   * @return TMGMTLocalTask
+   */
+  public function getTask() {
+    return entity_load_single('tmgmt_local_task', $this->tltid);
+  }
+
+  /**
+   * Returns the translation job item.
+   *
+   * @return TMGMTJobItem
+   */
+  public function getJobItem() {
+    return entity_load_single('tmgmt_job_item', $this->tjiid);
+  }
+
+  /**
+   * Overrides Entity::buildContent().
+   */
+  public function buildContent($view_mode = 'full', $langcode = NULL) {
+    $content = drupal_get_form('tmgmt_local_translation_form', $this);
+    return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
+  }
+
+  /**
+   * Returns TRUE if the local task is pending.
+   *
+   * @return bool
+   *   TRUE if the local task item is untranslated.
+   */
+  public function isPending() {
+    return $this->status == TMGMT_LOCAL_TASK_ITEM_STATUS_PENDING;
+  }
+
+  /**
+   * Returns TRUE if the local task is translated (fully translated).
+   *
+   * @return bool
+   *   TRUE if the local task item is translated.
+   */
+  public function isCompleted() {
+    return $this->status == TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED;
+  }
+
+  /**
+   * Rreturns TRUE if the local task is closed (translated and accepted).
+   *
+   * @return bool
+   *   TRUE if the local task item is translated and accepted.
+   */
+  public function isClosed() {
+    return $this->status == TMGMT_LOCAL_TASK_ITEM_STATUS_CLOSED;
+  }
+
+  /**
+   * Sets the task item status to completed.
+   */
+  public function completed() {
+    $this->status = TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED;
+  }
+
+  /**
+   * Sets the task item status to closed.
+   */
+  public function closed() {
+    $this->status = TMGMT_LOCAL_TASK_ITEM_STATUS_CLOSED;
+  }
+
+  /**
+   * Updates the values for a specific substructure in the data array.
+   *
+   * The values are either set or updated but never deleted.
+   *
+   * @param $key
+   *   Key pointing to the item the values should be applied.
+   *   The key can be either be an array containing the keys of a nested array
+   *   hierarchy path or a string with '][' or '|' as delimiter.
+   * @param $values
+   *   Nested array of values to set.
+   */
+  public function updateData($key, $values = array()) {
+    foreach ($values as $index => $value) {
+      // In order to preserve existing values, we can not aplly the values array
+      // at once. We need to apply each containing value on its own.
+      // If $value is an array we need to advance the hierarchy level.
+      if (is_array($value)) {
+        $this->updateData(array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+      }
+      // Apply the value.
+      else {
+        drupal_array_set_nested_value($this->data, array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+      }
+    }
+  }
+
+  /**
+   * Array of translations.
+   *
+   * The structure is similar to the form API in the way that it is a possibly
+   * nested array with the following properties whose presence indicate that the
+   * current element is a text that might need to be translated.
+   *
+   * - #text: The translated text of the corresponding entry in the job item.
+   * - #status: The status of the translation.
+   *
+   * The key can be an alphanumeric string.
+   *
+   * @param array $key
+   *   If present, only the subarray identified by key is returned.
+   * @param string $index
+   *   Optional index of an attribute below $key.
+   *
+   * @return array
+   *   A structured data array.
+   */
+  public function getData(array $key = array(), $index = NULL) {
+    if (empty($key)) {
+      return $this->data;
+    }
+    if ($index) {
+      $key = array_merge($key, array($index));
+    }
+    return drupal_array_get_nested_value($this->data, $key);
+  }
+
+  /**
+   * Count of all translated data items.
+   *
+   * @return
+   *   Translated count
+   */
+  public function getCountTranslated() {
+    return $this->count_translated;
+  }
+
+  /**
+   * Count of all untranslated data items.
+   *
+   * @return
+   *   Translated count
+   */
+  public function getCountUntranslated() {
+    return $this->count_untranslated;
+  }
+
+  /**
+   * Count of all completed data items.
+   *
+   * @return
+   *   Translated count
+   */
+  public function getCountCompleted() {
+    return $this->count_completed;
   }
 
 }

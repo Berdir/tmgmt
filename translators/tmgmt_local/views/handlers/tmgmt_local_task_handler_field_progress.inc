@@ -30,9 +30,9 @@ class tmgmt_local_task_handler_field_progress extends tmgmt_handler_field_tmgmt_
   function render($values) {
     $object = $this->get_value($values);
     $counts = array(
-      '@accepted' => $object->getCountAccepted(),
+      '@untranslated' => $object->getCountUntranslated(),
       '@translated' => $object->getCountTranslated(),
-      '@pending' => $object->getCountPending(),
+      '@completed' => $object->getCountCompleted(),
     );
     $id = $object->internalIdentifier();
 
@@ -40,7 +40,7 @@ class tmgmt_local_task_handler_field_progress extends tmgmt_handler_field_tmgmt_
       draw_chart($this->build_progressbar_settings($id, $counts));
       return '<div id="progress' . $id . '"></div>';
     }
-    $title = t('Accepted: @accepted, translated: @translated, pending: @pending.', $counts);
+    $title = t('Untranslated: @untranslated, translated: @translated, completed: @completed.', $counts);
     return sprintf('<span title="%s">%s</span>', $title, implode('/', $counts));
   }
 
@@ -49,9 +49,9 @@ class tmgmt_local_task_handler_field_progress extends tmgmt_handler_field_tmgmt_
    */
   function build_progressbar_settings($id, $counts, $prefix = 'progress') {
     $settings['chart'][$prefix . $id] = array(
-      'header' => array(t('Accepted'), t('Translated'), t('Pending')),
+      'header' => array(t('Untranslated'), t('Translated'), t('Completed')),
       'rows' => array(
-        array($counts['@accepted'], $counts['@translated'], $counts['@pending']),
+        array($counts['@untranslated'], $counts['@translated'], $counts['@completed']),
       ),
       'columns' => array(''),
       'chartType' => 'PieChart',

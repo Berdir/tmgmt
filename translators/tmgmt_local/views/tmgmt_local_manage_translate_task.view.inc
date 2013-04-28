@@ -5,7 +5,7 @@ $view->name = 'tmgmt_local_manage_translate_task';
 $view->description = 'Gives a bulk operation overview of translation tasks in the system.';
 $view->tag = 'default';
 $view->base_table = 'tmgmt_local_task';
-$view->human_name = 'Manage Translate Tasks';
+$view->human_name = 'Manage Translation Tasks';
 $view->core = 7;
 $view->api_version = '3.0';
 $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
@@ -20,13 +20,22 @@ $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['query']['type'] = 'views_query';
 $handler->display->display_options['exposed_form']['type'] = 'basic';
 $handler->display->display_options['pager']['type'] = 'full';
-$handler->display->display_options['pager']['options']['items_per_page'] = '10';
+$handler->display->display_options['pager']['options']['items_per_page'] = '25';
+$handler->display->display_options['pager']['options']['offset'] = '0';
+$handler->display->display_options['pager']['options']['id'] = '0';
+$handler->display->display_options['pager']['options']['quantity'] = '9';
 $handler->display->display_options['style_plugin'] = 'table';
-/* Relationship: Translation Management Local Task: Translation Job tjid */
+/* Header: Global: Text area */
+$handler->display->display_options['header']['area']['id'] = 'area';
+$handler->display->display_options['header']['area']['table'] = 'views';
+$handler->display->display_options['header']['area']['field'] = 'area';
+$handler->display->display_options['header']['area']['empty'] = TRUE;
+$handler->display->display_options['header']['area']['format'] = 'filtered_html';
+/* Relationship: Translation Task: Translation Job tjid */
 $handler->display->display_options['relationships']['job']['id'] = 'job';
 $handler->display->display_options['relationships']['job']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['job']['field'] = 'job';
-/* Field: Bulk operations: Translation Management Local Task */
+/* Field: Bulk operations: Translation Task */
 $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
 $handler->display->display_options['fields']['views_bulk_operations']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['views_bulk_operations']['field'] = 'views_bulk_operations';
@@ -35,47 +44,45 @@ $handler->display->display_options['fields']['views_bulk_operations']['element_l
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_local_task_assign1' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 1,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -85,6 +92,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 0,
@@ -97,47 +105,47 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_test' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Assign to me',
+    'postpone_processing' => 0,
   ),
 );
-/* Field: Translation Management Local Task: Title */
+/* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['title']['field'] = 'title';
-/* Field: Translation Management Local Task: Word count */
+/* Field: Translation Task: Word count */
 $handler->display->display_options['fields']['word_count']['id'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['word_count']['field'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['element_label_colon'] = FALSE;
-/* Field: Translation Management Local Task: Job item count */
+/* Field: Translation Task: Job item count */
 $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
-/* Field: Translation Management Local Task: Progress */
+/* Field: Translation Task: Progress */
 $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
@@ -145,7 +153,7 @@ $handler->display->display_options['fields']['progress']['field'] = 'progress';
 /* Display: Main */
 $handler = $view->new_display('page', 'Main', 'unassigned');
 $handler->display->display_options['defaults']['title'] = FALSE;
-$handler->display->display_options['title'] = 'Unassigned Tasks';
+$handler->display->display_options['title'] = 'Manage Translation Tasks';
 $handler->display->display_options['display_description'] = 'Shows main view elegible (unasigned) tasks and assigned.';
 $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
 $handler->display->display_options['defaults']['style_plugin'] = FALSE;
@@ -214,7 +222,7 @@ $handler->display->display_options['defaults']['footer'] = FALSE;
 $handler->display->display_options['footer']['view']['id'] = 'view';
 $handler->display->display_options['footer']['view']['table'] = 'views';
 $handler->display->display_options['footer']['view']['field'] = 'view';
-$handler->display->display_options['footer']['view']['view_to_insert'] = 'tmgmt_local_manage_translate_task:assigned';
+$handler->display->display_options['footer']['view']['view_to_insert'] = 'tmgmt_local_manage_translate_task:pending';
 $handler->display->display_options['defaults']['empty'] = FALSE;
 /* No results behavior: Global: Text area */
 $handler->display->display_options['empty']['area']['id'] = 'area';
@@ -225,13 +233,13 @@ $handler->display->display_options['empty']['area']['empty'] = TRUE;
 $handler->display->display_options['empty']['area']['content'] = 'There are no unassigned tasks.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 $handler->display->display_options['defaults']['relationships'] = FALSE;
-/* Relationship: Translation Management Local Task: Translation Job tjid */
+/* Relationship: Translation Task: Translation Job tjid */
 $handler->display->display_options['relationships']['job']['id'] = 'job';
 $handler->display->display_options['relationships']['job']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['job']['field'] = 'job';
 $handler->display->display_options['relationships']['job']['required'] = TRUE;
 $handler->display->display_options['defaults']['fields'] = FALSE;
-/* Field: Bulk operations: Translation Management Local Task */
+/* Field: Bulk operations: Translation Task */
 $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
 $handler->display->display_options['fields']['views_bulk_operations']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['views_bulk_operations']['field'] = 'views_bulk_operations';
@@ -240,47 +248,45 @@ $handler->display->display_options['fields']['views_bulk_operations']['element_l
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_local_task_assign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Assign to me',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -290,6 +296,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 1,
@@ -302,33 +309,27 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_unassign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
 );
-/* Field: Translation Management Local Task: Created */
-$handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['created']['field'] = 'created';
-$handler->display->display_options['fields']['created']['label'] = 'Date';
-$handler->display->display_options['fields']['created']['date_format'] = 'short';
-/* Field: Translation Management Local Task: Title */
+/* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -346,40 +347,43 @@ $handler->display->display_options['fields']['target_language']['field'] = 'targ
 $handler->display->display_options['fields']['target_language']['relationship'] = 'job';
 $handler->display->display_options['fields']['target_language']['label'] = 'Target language';
 $handler->display->display_options['fields']['target_language']['machine_name'] = TRUE;
-/* Field: Translation Management Local Task: Word count */
+/* Field: Translation Task: Word count */
 $handler->display->display_options['fields']['word_count']['id'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['word_count']['field'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['element_label_colon'] = FALSE;
-/* Field: Translation Management Local Task: Job item count */
+/* Field: Translation Task: Job item count */
 $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Management Local Task: Loop_count */
+/* Field: Translation Task: Loop_count */
 $handler->display->display_options['fields']['loop_count']['id'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['loop_count']['field'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['label'] = 'Loop count';
-/* Field: Translation Management Local Task: Assign */
-$handler->display->display_options['fields']['assign']['id'] = 'assign';
-$handler->display->display_options['fields']['assign']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['assign']['field'] = 'assign';
-$handler->display->display_options['fields']['assign']['label'] = 'Action';
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
-/* Filter criterion: Translation Management Local Task: Status */
+/* Filter criterion: Translation Task: Status */
 $handler->display->display_options['filters']['status']['id'] = 'status';
 $handler->display->display_options['filters']['status']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['status']['field'] = 'status';
 $handler->display->display_options['filters']['status']['value'] = array(
   0 => '0',
 );
-$handler->display->display_options['path'] = 'manage-translate';
-$handler->display->display_options['menu']['type'] = 'normal';
-$handler->display->display_options['menu']['title'] = 'Manage Translate Tasks';
+$handler->display->display_options['path'] = 'manage-translate/default';
+$handler->display->display_options['menu']['type'] = 'default tab';
+$handler->display->display_options['menu']['title'] = 'Unassigned';
 $handler->display->display_options['menu']['weight'] = '0';
 $handler->display->display_options['menu']['context'] = 0;
+$handler->display->display_options['tab_options']['type'] = 'normal';
+$handler->display->display_options['tab_options']['title'] = 'Manage translation tasks';
+$handler->display->display_options['tab_options']['weight'] = '0';
+$handler->display->display_options['tab_options']['name'] = 'user-menu';
 
 /* Display: Assigned */
 $handler = $view->new_display('page', 'Assigned', 'assigned');
@@ -459,39 +463,33 @@ $handler->display->display_options['empty']['area']['empty'] = TRUE;
 $handler->display->display_options['empty']['area']['content'] = 'There are no unassigned tasks.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 $handler->display->display_options['defaults']['relationships'] = FALSE;
-/* Relationship: Translation Management Local Task: Translation Job tjid */
+/* Relationship: Translation Task: Translation Job tjid */
 $handler->display->display_options['relationships']['job']['id'] = 'job';
 $handler->display->display_options['relationships']['job']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['job']['field'] = 'job';
 $handler->display->display_options['relationships']['job']['required'] = TRUE;
-/* Relationship: Translation Management Local Task: Translator tuid */
+/* Relationship: Translation Task: Translator tuid */
 $handler->display->display_options['relationships']['translator']['id'] = 'translator';
 $handler->display->display_options['relationships']['translator']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['translator']['field'] = 'translator';
-$handler->display->display_options['relationships']['translator']['label'] = 'Translator User';
+$handler->display->display_options['relationships']['translator']['label'] = 'Translator';
 $handler->display->display_options['relationships']['translator']['required'] = TRUE;
 $handler->display->display_options['defaults']['fields'] = FALSE;
-/* Field: Translation Management Local Task: Status */
+/* Field: Translation Task: Status */
 $handler->display->display_options['fields']['status']['id'] = 'status';
 $handler->display->display_options['fields']['status']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['status']['field'] = 'status';
-/* Field: Translation Management Local Task: Progress */
+/* Field: Translation Task: Progress */
 $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
-/* Field: Translation Management Local Task: Created */
-$handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['created']['field'] = 'created';
-$handler->display->display_options['fields']['created']['label'] = 'Date';
-$handler->display->display_options['fields']['created']['date_format'] = 'short';
 /* Field: User: Name */
 $handler->display->display_options['fields']['name']['id'] = 'name';
 $handler->display->display_options['fields']['name']['table'] = 'users';
 $handler->display->display_options['fields']['name']['field'] = 'name';
 $handler->display->display_options['fields']['name']['relationship'] = 'translator';
 $handler->display->display_options['fields']['name']['label'] = 'Assignee';
-/* Field: Translation Management Local Task: Title */
+/* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -509,29 +507,28 @@ $handler->display->display_options['fields']['target_language']['field'] = 'targ
 $handler->display->display_options['fields']['target_language']['relationship'] = 'job';
 $handler->display->display_options['fields']['target_language']['label'] = 'Target language';
 $handler->display->display_options['fields']['target_language']['machine_name'] = TRUE;
-/* Field: Translation Management Local Task: Word count */
+/* Field: Translation Task: Word count */
 $handler->display->display_options['fields']['word_count']['id'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['word_count']['field'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['element_label_colon'] = FALSE;
-/* Field: Translation Management Local Task: Job item count */
+/* Field: Translation Task: Job item count */
 $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Management Local Task: Loop_count */
+/* Field: Translation Task: Loop_count */
 $handler->display->display_options['fields']['loop_count']['id'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['loop_count']['field'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['label'] = 'Loop count';
-/* Field: Translation Management Local Task: Manager View */
-$handler->display->display_options['fields']['view']['id'] = 'view';
-$handler->display->display_options['fields']['view']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['view']['field'] = 'view';
-$handler->display->display_options['fields']['view']['label'] = 'Action';
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
-/* Filter criterion: Translation Management Local Task: Status */
+/* Filter criterion: Translation Task: Status */
 $handler->display->display_options['filters']['status']['id'] = 'status';
 $handler->display->display_options['filters']['status']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['status']['field'] = 'status';
@@ -539,7 +536,7 @@ $handler->display->display_options['filters']['status']['operator'] = 'not in';
 $handler->display->display_options['filters']['status']['value'] = array(
   0 => '0',
 );
-/* Filter criterion: Translation Management Local Task: Status */
+/* Filter criterion: Translation Task: Status */
 $handler->display->display_options['filters']['status_1']['id'] = 'status_1';
 $handler->display->display_options['filters']['status_1']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['status_1']['field'] = 'status';
@@ -614,7 +611,7 @@ $handler->display->display_options['filters']['uid']['expose']['remember_roles']
   8 => 0,
   10 => 0,
 );
-/* Filter criterion: Translation Management Local Task: Title */
+/* Filter criterion: Translation Task: Title */
 $handler->display->display_options['filters']['title']['id'] = 'title';
 $handler->display->display_options['filters']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['title']['field'] = 'title';
@@ -631,9 +628,10 @@ $handler->display->display_options['filters']['title']['expose']['remember_roles
   10 => 0,
 );
 $handler->display->display_options['path'] = 'manage-translate/assigned';
-$handler->display->display_options['menu']['type'] = 'normal';
+$handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Assigned';
-$handler->display->display_options['menu']['weight'] = '0';
+$handler->display->display_options['menu']['weight'] = '10';
+$handler->display->display_options['menu']['name'] = 'user-menu';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: Rejected */
@@ -714,27 +712,23 @@ $handler->display->display_options['empty']['area']['empty'] = TRUE;
 $handler->display->display_options['empty']['area']['content'] = 'There are no rejected tasks.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 $handler->display->display_options['defaults']['relationships'] = FALSE;
-/* Relationship: Translation Management Local Task: Translation Job tjid */
+/* Relationship: Translation Task: Translation Job tjid */
 $handler->display->display_options['relationships']['job']['id'] = 'job';
 $handler->display->display_options['relationships']['job']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['job']['field'] = 'job';
 $handler->display->display_options['relationships']['job']['required'] = TRUE;
-/* Relationship: Translation Management Local Task: Translator tuid */
+/* Relationship: Translation Task: Translator tuid */
 $handler->display->display_options['relationships']['translator']['id'] = 'translator';
 $handler->display->display_options['relationships']['translator']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['translator']['field'] = 'translator';
 $handler->display->display_options['relationships']['translator']['label'] = 'Translator User';
 $handler->display->display_options['relationships']['translator']['required'] = TRUE;
 $handler->display->display_options['defaults']['fields'] = FALSE;
-/* Field: Translation Management Local Task: Status */
-$handler->display->display_options['fields']['status']['id'] = 'status';
-$handler->display->display_options['fields']['status']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['status']['field'] = 'status';
-/* Field: Translation Management Local Task: Progress */
+/* Field: Translation Task: Progress */
 $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
-/* Field: Translation Management Local Task: Created */
+/* Field: Translation Task: Created */
 $handler->display->display_options['fields']['created']['id'] = 'created';
 $handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['created']['field'] = 'created';
@@ -746,7 +740,7 @@ $handler->display->display_options['fields']['name']['table'] = 'users';
 $handler->display->display_options['fields']['name']['field'] = 'name';
 $handler->display->display_options['fields']['name']['relationship'] = 'translator';
 $handler->display->display_options['fields']['name']['label'] = 'Assignee';
-/* Field: Translation Management Local Task: Title */
+/* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -764,29 +758,28 @@ $handler->display->display_options['fields']['target_language']['field'] = 'targ
 $handler->display->display_options['fields']['target_language']['relationship'] = 'job';
 $handler->display->display_options['fields']['target_language']['label'] = 'Target language';
 $handler->display->display_options['fields']['target_language']['machine_name'] = TRUE;
-/* Field: Translation Management Local Task: Word count */
+/* Field: Translation Task: Word count */
 $handler->display->display_options['fields']['word_count']['id'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['word_count']['field'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['element_label_colon'] = FALSE;
-/* Field: Translation Management Local Task: Job item count */
+/* Field: Translation Task: Job item count */
 $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Management Local Task: Loop_count */
+/* Field: Translation Task: Loop_count */
 $handler->display->display_options['fields']['loop_count']['id'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['loop_count']['field'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['label'] = 'Loop count';
-/* Field: Translation Management Local Task: Manager View */
-$handler->display->display_options['fields']['view']['id'] = 'view';
-$handler->display->display_options['fields']['view']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['view']['field'] = 'view';
-$handler->display->display_options['fields']['view']['label'] = 'Action';
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
-/* Filter criterion: Translation Management Local Task: Status */
+/* Filter criterion: Translation Task: Status */
 $handler->display->display_options['filters']['status']['id'] = 'status';
 $handler->display->display_options['filters']['status']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['status']['field'] = 'status';
@@ -845,7 +838,7 @@ $handler->display->display_options['filters']['uid']['expose']['remember_roles']
   8 => 0,
   10 => 0,
 );
-/* Filter criterion: Translation Management Local Task: Title */
+/* Filter criterion: Translation Task: Title */
 $handler->display->display_options['filters']['title']['id'] = 'title';
 $handler->display->display_options['filters']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['title']['field'] = 'title';
@@ -862,9 +855,10 @@ $handler->display->display_options['filters']['title']['expose']['remember_roles
   10 => 0,
 );
 $handler->display->display_options['path'] = 'manage-translate/rejected';
-$handler->display->display_options['menu']['type'] = 'normal';
+$handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Rejected';
-$handler->display->display_options['menu']['weight'] = '1';
+$handler->display->display_options['menu']['weight'] = '20';
+$handler->display->display_options['menu']['name'] = 'user-menu';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: Pending */
@@ -945,19 +939,19 @@ $handler->display->display_options['empty']['area']['empty'] = TRUE;
 $handler->display->display_options['empty']['area']['content'] = 'There are no pending tasks.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 $handler->display->display_options['defaults']['relationships'] = FALSE;
-/* Relationship: Translation Management Local Task: Translation Job tjid */
+/* Relationship: Translation Task: Translation Job tjid */
 $handler->display->display_options['relationships']['job']['id'] = 'job';
 $handler->display->display_options['relationships']['job']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['job']['field'] = 'job';
 $handler->display->display_options['relationships']['job']['required'] = TRUE;
-/* Relationship: Translation Management Local Task: Translator tuid */
+/* Relationship: Translation Task: Translator tuid */
 $handler->display->display_options['relationships']['translator']['id'] = 'translator';
 $handler->display->display_options['relationships']['translator']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['translator']['field'] = 'translator';
 $handler->display->display_options['relationships']['translator']['label'] = 'Translator User';
 $handler->display->display_options['relationships']['translator']['required'] = TRUE;
 $handler->display->display_options['defaults']['fields'] = FALSE;
-/* Field: Bulk operations: Translation Management Local Task */
+/* Field: Bulk operations: Translation Task */
 $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
 $handler->display->display_options['fields']['views_bulk_operations']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['views_bulk_operations']['field'] = 'views_bulk_operations';
@@ -966,47 +960,45 @@ $handler->display->display_options['fields']['views_bulk_operations']['element_l
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_result'] = 1;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_local_task_assign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_assign_to_me' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 1,
     'override_label' => 1,
     'label' => 'Assign to me',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -1016,6 +1008,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 1,
@@ -1028,50 +1021,40 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::rules_tmgmt_local_task_unassign' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
 );
-/* Field: Translation Management Local Task: Status */
-$handler->display->display_options['fields']['status']['id'] = 'status';
-$handler->display->display_options['fields']['status']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['status']['field'] = 'status';
-/* Field: Translation Management Local Task: Progress */
-$handler->display->display_options['fields']['progress']['id'] = 'progress';
-$handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['progress']['field'] = 'progress';
-/* Field: Translation Management Local Task: Created */
-$handler->display->display_options['fields']['created']['id'] = 'created';
-$handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['created']['field'] = 'created';
-$handler->display->display_options['fields']['created']['label'] = 'Date';
-$handler->display->display_options['fields']['created']['date_format'] = 'short';
 /* Field: User: Name */
 $handler->display->display_options['fields']['name']['id'] = 'name';
 $handler->display->display_options['fields']['name']['table'] = 'users';
 $handler->display->display_options['fields']['name']['field'] = 'name';
 $handler->display->display_options['fields']['name']['relationship'] = 'translator';
 $handler->display->display_options['fields']['name']['label'] = 'Assignee';
-/* Field: Translation Management Local Task: Title */
+/* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['title']['field'] = 'title';
+/* Field: Translation Task: Progress */
+$handler->display->display_options['fields']['progress']['id'] = 'progress';
+$handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['progress']['field'] = 'progress';
 /* Field: Translation Management Job: Source_language */
 $handler->display->display_options['fields']['source_language']['id'] = 'source_language';
 $handler->display->display_options['fields']['source_language']['table'] = 'tmgmt_job';
@@ -1086,29 +1069,28 @@ $handler->display->display_options['fields']['target_language']['field'] = 'targ
 $handler->display->display_options['fields']['target_language']['relationship'] = 'job';
 $handler->display->display_options['fields']['target_language']['label'] = 'Target language';
 $handler->display->display_options['fields']['target_language']['machine_name'] = TRUE;
-/* Field: Translation Management Local Task: Word count */
+/* Field: Translation Task: Word count */
 $handler->display->display_options['fields']['word_count']['id'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['word_count']['field'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['element_label_colon'] = FALSE;
-/* Field: Translation Management Local Task: Job item count */
+/* Field: Translation Task: Job item count */
 $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Management Local Task: Loop_count */
+/* Field: Translation Task: Loop_count */
 $handler->display->display_options['fields']['loop_count']['id'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['loop_count']['field'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['label'] = 'Loop count';
-/* Field: Translation Management Local Task: Manager View */
-$handler->display->display_options['fields']['view']['id'] = 'view';
-$handler->display->display_options['fields']['view']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['view']['field'] = 'view';
-$handler->display->display_options['fields']['view']['label'] = 'Action';
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
-/* Filter criterion: Translation Management Local Task: Status */
+/* Filter criterion: Translation Task: Status */
 $handler->display->display_options['filters']['status']['id'] = 'status';
 $handler->display->display_options['filters']['status']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['status']['field'] = 'status';
@@ -1167,7 +1149,7 @@ $handler->display->display_options['filters']['uid']['expose']['remember_roles']
   8 => 0,
   10 => 0,
 );
-/* Filter criterion: Translation Management Local Task: Title */
+/* Filter criterion: Translation Task: Title */
 $handler->display->display_options['filters']['title']['id'] = 'title';
 $handler->display->display_options['filters']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['title']['field'] = 'title';
@@ -1184,9 +1166,10 @@ $handler->display->display_options['filters']['title']['expose']['remember_roles
   10 => 0,
 );
 $handler->display->display_options['path'] = 'manage-translate/pending';
-$handler->display->display_options['menu']['type'] = 'normal';
+$handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Pending';
-$handler->display->display_options['menu']['weight'] = '2';
+$handler->display->display_options['menu']['weight'] = '30';
+$handler->display->display_options['menu']['name'] = 'user-menu';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: Completed */
@@ -1267,27 +1250,27 @@ $handler->display->display_options['empty']['area']['empty'] = TRUE;
 $handler->display->display_options['empty']['area']['content'] = 'There are no completed tasks.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 $handler->display->display_options['defaults']['relationships'] = FALSE;
-/* Relationship: Translation Management Local Task: Translation Job tjid */
+/* Relationship: Translation Task: Translation Job tjid */
 $handler->display->display_options['relationships']['job']['id'] = 'job';
 $handler->display->display_options['relationships']['job']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['job']['field'] = 'job';
 $handler->display->display_options['relationships']['job']['required'] = TRUE;
-/* Relationship: Translation Management Local Task: Translator tuid */
+/* Relationship: Translation Task: Translator tuid */
 $handler->display->display_options['relationships']['translator']['id'] = 'translator';
 $handler->display->display_options['relationships']['translator']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['translator']['field'] = 'translator';
 $handler->display->display_options['relationships']['translator']['label'] = 'Translator User';
 $handler->display->display_options['relationships']['translator']['required'] = TRUE;
 $handler->display->display_options['defaults']['fields'] = FALSE;
-/* Field: Translation Management Local Task: Status */
+/* Field: Translation Task: Status */
 $handler->display->display_options['fields']['status']['id'] = 'status';
 $handler->display->display_options['fields']['status']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['status']['field'] = 'status';
-/* Field: Translation Management Local Task: Progress */
+/* Field: Translation Task: Progress */
 $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
-/* Field: Translation Management Local Task: Created */
+/* Field: Translation Task: Created */
 $handler->display->display_options['fields']['created']['id'] = 'created';
 $handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['created']['field'] = 'created';
@@ -1299,7 +1282,7 @@ $handler->display->display_options['fields']['name']['table'] = 'users';
 $handler->display->display_options['fields']['name']['field'] = 'name';
 $handler->display->display_options['fields']['name']['relationship'] = 'translator';
 $handler->display->display_options['fields']['name']['label'] = 'Assignee';
-/* Field: Translation Management Local Task: Title */
+/* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -1317,29 +1300,28 @@ $handler->display->display_options['fields']['target_language']['field'] = 'targ
 $handler->display->display_options['fields']['target_language']['relationship'] = 'job';
 $handler->display->display_options['fields']['target_language']['label'] = 'Target language';
 $handler->display->display_options['fields']['target_language']['machine_name'] = TRUE;
-/* Field: Translation Management Local Task: Word count */
+/* Field: Translation Task: Word count */
 $handler->display->display_options['fields']['word_count']['id'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['word_count']['field'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['element_label_colon'] = FALSE;
-/* Field: Translation Management Local Task: Job item count */
+/* Field: Translation Task: Job item count */
 $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Management Local Task: Loop_count */
+/* Field: Translation Task: Loop_count */
 $handler->display->display_options['fields']['loop_count']['id'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['loop_count']['field'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['label'] = 'Loop count';
-/* Field: Translation Management Local Task: Manager View */
-$handler->display->display_options['fields']['view']['id'] = 'view';
-$handler->display->display_options['fields']['view']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['view']['field'] = 'view';
-$handler->display->display_options['fields']['view']['label'] = 'Action';
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
-/* Filter criterion: Translation Management Local Task: Status */
+/* Filter criterion: Translation Task: Status */
 $handler->display->display_options['filters']['status']['id'] = 'status';
 $handler->display->display_options['filters']['status']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['status']['field'] = 'status';
@@ -1398,7 +1380,7 @@ $handler->display->display_options['filters']['uid']['expose']['remember_roles']
   8 => 0,
   10 => 0,
 );
-/* Filter criterion: Translation Management Local Task: Title */
+/* Filter criterion: Translation Task: Title */
 $handler->display->display_options['filters']['title']['id'] = 'title';
 $handler->display->display_options['filters']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['title']['field'] = 'title';
@@ -1415,9 +1397,10 @@ $handler->display->display_options['filters']['title']['expose']['remember_roles
   10 => 0,
 );
 $handler->display->display_options['path'] = 'manage-translate/completed';
-$handler->display->display_options['menu']['type'] = 'normal';
+$handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Completed';
-$handler->display->display_options['menu']['weight'] = '3';
+$handler->display->display_options['menu']['weight'] = '40';
+$handler->display->display_options['menu']['name'] = 'user-menu';
 $handler->display->display_options['menu']['context'] = 0;
 
 /* Display: Closed */
@@ -1498,27 +1481,27 @@ $handler->display->display_options['empty']['area']['empty'] = TRUE;
 $handler->display->display_options['empty']['area']['content'] = 'There are no closed tasks.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 $handler->display->display_options['defaults']['relationships'] = FALSE;
-/* Relationship: Translation Management Local Task: Translation Job tjid */
+/* Relationship: Translation Task: Translation Job tjid */
 $handler->display->display_options['relationships']['job']['id'] = 'job';
 $handler->display->display_options['relationships']['job']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['job']['field'] = 'job';
 $handler->display->display_options['relationships']['job']['required'] = TRUE;
-/* Relationship: Translation Management Local Task: Translator tuid */
+/* Relationship: Translation Task: Translator tuid */
 $handler->display->display_options['relationships']['translator']['id'] = 'translator';
 $handler->display->display_options['relationships']['translator']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['relationships']['translator']['field'] = 'translator';
 $handler->display->display_options['relationships']['translator']['label'] = 'Translator User';
 $handler->display->display_options['relationships']['translator']['required'] = TRUE;
 $handler->display->display_options['defaults']['fields'] = FALSE;
-/* Field: Translation Management Local Task: Status */
+/* Field: Translation Task: Status */
 $handler->display->display_options['fields']['status']['id'] = 'status';
 $handler->display->display_options['fields']['status']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['status']['field'] = 'status';
-/* Field: Translation Management Local Task: Progress */
+/* Field: Translation Task: Progress */
 $handler->display->display_options['fields']['progress']['id'] = 'progress';
 $handler->display->display_options['fields']['progress']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['progress']['field'] = 'progress';
-/* Field: Translation Management Local Task: Created */
+/* Field: Translation Task: Created */
 $handler->display->display_options['fields']['created']['id'] = 'created';
 $handler->display->display_options['fields']['created']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['created']['field'] = 'created';
@@ -1530,7 +1513,7 @@ $handler->display->display_options['fields']['name']['table'] = 'users';
 $handler->display->display_options['fields']['name']['field'] = 'name';
 $handler->display->display_options['fields']['name']['relationship'] = 'translator';
 $handler->display->display_options['fields']['name']['label'] = 'Assignee';
-/* Field: Translation Management Local Task: Title */
+/* Field: Translation Task: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -1548,29 +1531,28 @@ $handler->display->display_options['fields']['target_language']['field'] = 'targ
 $handler->display->display_options['fields']['target_language']['relationship'] = 'job';
 $handler->display->display_options['fields']['target_language']['label'] = 'Target language';
 $handler->display->display_options['fields']['target_language']['machine_name'] = TRUE;
-/* Field: Translation Management Local Task: Word count */
+/* Field: Translation Task: Word count */
 $handler->display->display_options['fields']['word_count']['id'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['word_count']['field'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['element_label_colon'] = FALSE;
-/* Field: Translation Management Local Task: Job item count */
+/* Field: Translation Task: Job item count */
 $handler->display->display_options['fields']['item_count']['id'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['item_count']['field'] = 'item_count';
 $handler->display->display_options['fields']['item_count']['label'] = 'Item count';
-/* Field: Translation Management Local Task: Loop_count */
+/* Field: Translation Task: Loop_count */
 $handler->display->display_options['fields']['loop_count']['id'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['fields']['loop_count']['field'] = 'loop_count';
 $handler->display->display_options['fields']['loop_count']['label'] = 'Loop count';
-/* Field: Translation Management Local Task: Manager View */
-$handler->display->display_options['fields']['view']['id'] = 'view';
-$handler->display->display_options['fields']['view']['table'] = 'tmgmt_local_task';
-$handler->display->display_options['fields']['view']['field'] = 'view';
-$handler->display->display_options['fields']['view']['label'] = 'Action';
+/* Field: Translation Task: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_local_task';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['defaults']['filter_groups'] = FALSE;
 $handler->display->display_options['defaults']['filters'] = FALSE;
-/* Filter criterion: Translation Management Local Task: Status */
+/* Filter criterion: Translation Task: Status */
 $handler->display->display_options['filters']['status']['id'] = 'status';
 $handler->display->display_options['filters']['status']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['status']['field'] = 'status';
@@ -1629,7 +1611,7 @@ $handler->display->display_options['filters']['uid']['expose']['remember_roles']
   8 => 0,
   10 => 0,
 );
-/* Filter criterion: Translation Management Local Task: Title */
+/* Filter criterion: Translation Task: Title */
 $handler->display->display_options['filters']['title']['id'] = 'title';
 $handler->display->display_options['filters']['title']['table'] = 'tmgmt_local_task';
 $handler->display->display_options['filters']['title']['field'] = 'title';
@@ -1646,9 +1628,10 @@ $handler->display->display_options['filters']['title']['expose']['remember_roles
   10 => 0,
 );
 $handler->display->display_options['path'] = 'manage-translate/closed';
-$handler->display->display_options['menu']['type'] = 'normal';
+$handler->display->display_options['menu']['type'] = 'tab';
 $handler->display->display_options['menu']['title'] = 'Closed';
-$handler->display->display_options['menu']['weight'] = '4';
+$handler->display->display_options['menu']['weight'] = '50';
+$handler->display->display_options['menu']['name'] = 'user-menu';
 $handler->display->display_options['menu']['context'] = 0;
 $translatables['tmgmt_local_manage_translate_task'] = array(
   t('Master'),
@@ -1672,22 +1655,21 @@ $translatables['tmgmt_local_manage_translate_task'] = array(
   t('Job item count'),
   t('Progress'),
   t('Main'),
-  t('Unassigned Tasks'),
+  t('Manage Translation Tasks'),
   t('Shows main view elegible (unasigned) tasks and assigned.'),
   t('Empty message'),
   t('There are no unassigned tasks.'),
-  t('Date'),
   t('Language'),
   t('Target language'),
   t('Item count'),
   t('Loop count'),
   t('.'),
   t(','),
-  t('Action'),
+  t('Operations'),
   t('Assigned'),
   t('Assigned Tasks'),
   t('Shows asigned tasks.'),
-  t('Translator User'),
+  t('Translator'),
   t('Status'),
   t('Assignee'),
   t('Language from'),
@@ -1697,6 +1679,8 @@ $translatables['tmgmt_local_manage_translate_task'] = array(
   t('Rejected Tasks'),
   t('Shows asigned tasks with rejected status.'),
   t('There are no rejected tasks.'),
+  t('Translator User'),
+  t('Date'),
   t('Pending'),
   t('Pending Tasks'),
   t('Shows asigned tasks with pending status.'),

@@ -242,11 +242,27 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     );
     $this->drupalPost(NULL, $edit, t('Assign to me'));*/
 
+
     // Translate the task.
     $this->drupalGet('translate');
-    $this->clickLink(t('translate'));
+    $this->clickLink(t('view'));
+
+    // Assert created local task and task items.
+    $this->assertTrue(preg_match('|translate/(\d+)|', $this->getUrl(), $matches), 'Task found');
+    $task = tmgmt_local_task_load($matches[1]);
+    $this->assertTrue($task->isPending());
+    $this->assertEqual($task->getCountCompleted(), 0);
+    $this->assertEqual($task->getCountTranslated(), 0);
+    $this->assertEqual($task->getCountUntranslated(), 2);
+    list($first_task_item, $second_task_item) = array_values($task->getItems());
+    $this->assertTrue($first_task_item->isPending());
+    $this->assertEqual($first_task_item->getCountCompleted(), 0);
+    $this->assertEqual($first_task_item->getCountTranslated(), 0);
+    $this->assertEqual($first_task_item->getCountUntranslated(), 1);
+
     $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:1')));
     $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:2')));
+    $this->assertText(t('Untranslated'));
 
     // Translate the first item.
     $this->clickLink(t('translate'));
@@ -254,8 +270,7 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Dummy'));
     // Job comment is present in the translate tool as well.
     $this->assertText($job_comment);
-    // @todo: Improve title.
-    $this->assertText(t('Translate Task Item'));
+    $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:1')));
 
     // Try to complete a translation when translations are missing.
     $this->drupalPost(NULL, array(), t('Save as completed'));
@@ -267,36 +282,120 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->drupalPost(NULL, $edit, t('Save as completed'));
 
     // The first item should be accepted now, the second still in progress.
-    $this->assertText(t('Accepted'));
-    $this->assertText(t('In progress'));
+    $this->assertText(t('Completed'));
+    $this->assertText(t('Untranslated'));
 
-    // Translate the second item but do not accept it yet.
+    entity_get_controller('tmgmt_local_task')->resetCache();
+    entity_get_controller('tmgmt_local_task_item')->resetCache();
+    drupal_static_reset('tmgmt_local_task_statistics_load');
+    $task = tmgmt_local_task_load($task->tltid);
+    $this->assertTrue($task->isPending());
+    $this->assertEqual($task->getCountCompleted(), 1);
+    $this->assertEqual($task->getCountTranslated(), 0);
+    $this->assertEqual($task->getCountUntranslated(), 1);
+    list($first_task_item, $second_task_item) = array_values($task->getItems());
+    $this->assertTrue($first_task_item->isClosed());
+    $this->assertEqual($first_task_item->getCountCompleted(), 1);
+    $this->assertEqual($first_task_item->getCountTranslated(), 0);
+    $this->assertEqual($first_task_item->getCountUntranslated(), 0);
+    $this->assertTrue($second_task_item->isPending());
+    $this->assertEqual($second_task_item->getCountCompleted(), 0);
+    $this->assertEqual($second_task_item->getCountTranslated(), 0);
+    $this->assertEqual($second_task_item->getCountUntranslated(), 1);
+
+    // Translate the second item but do not mark as translated it yet.
     $this->clickLink(t('translate'));
     $edit = array(
       'dummy|deep_nesting[translation]' => $translation2 = 'German translation of source 2',
     );
     $this->drupalPost(NULL, $edit, t('Save'));
-    // The first item should be accepted now, the second still in progress.
-    $this->assertText(t('Accepted'));
-    $this->assertText(t('In progress'));
+    // The first item is still completed, the second still untranslated.
+    $this->assertText(t('Completed'));
+    $this->assertText(t('Untranslated'));
+
+    entity_get_controller('tmgmt_local_task')->resetCache();
+    entity_get_controller('tmgmt_local_task_item')->resetCache();
+    drupal_static_reset('tmgmt_local_task_statistics_load');
+    $task = tmgmt_local_task_load($task->tltid);
+    $this->assertTrue($task->isPending());
+    $this->assertEqual($task->getCountCompleted(), 1);
+    $this->assertEqual($task->getCountTranslated(), 0);
+    $this->assertEqual($task->getCountUntranslated(), 1);
+    list($first_task_item, $second_task_item) = array_values($task->getItems());
+    $this->assertTrue($first_task_item->isClosed());
+    $this->assertEqual($first_task_item->getCountCompleted(), 1);
+    $this->assertEqual($first_task_item->getCountTranslated(), 0);
+    $this->assertEqual($first_task_item->getCountUntranslated(), 0);
+    $this->assertTrue($second_task_item->isPending());
+    $this->assertEqual($second_task_item->getCountCompleted(), 0);
+    $this->assertEqual($second_task_item->getCountTranslated(), 0);
+    $this->assertEqual($second_task_item->getCountUntranslated(), 1);
+
+    // Mark the data item as translated but don't save the task item as
+    // completed.
+    $this->clickLink(t('translate'));
+    $this->drupalPost(NULL, array(), t('✓'));
+
+    entity_get_controller('tmgmt_local_task')->resetCache();
+    entity_get_controller('tmgmt_local_task_item')->resetCache();
+    drupal_static_reset('tmgmt_local_task_statistics_load');
+    $task = tmgmt_local_task_load($task->tltid);
+    $this->assertTrue($task->isPending());
+    $this->assertEqual($task->getCountCompleted(), 1);
+    $this->assertEqual($task->getCountTranslated(), 1);
+    $this->assertEqual($task->getCountUntranslated(), 0);
+    list($first_task_item, $second_task_item) = array_values($task->getItems());
+    $this->assertTrue($first_task_item->isClosed());
+    $this->assertEqual($first_task_item->getCountCompleted(), 1);
+    $this->assertEqual($first_task_item->getCountTranslated(), 0);
+    $this->assertEqual($first_task_item->getCountUntranslated(), 0);
+    $this->assertTrue($second_task_item->isPending());
+    $this->assertEqual($second_task_item->getCountCompleted(), 0);
+    $this->assertEqual($second_task_item->getCountTranslated(), 1);
+    $this->assertEqual($second_task_item->getCountUntranslated(), 0);
+
+    // Check the job data.
+    entity_get_controller('tmgmt_job')->resetCache(array($job->tjid));
+    entity_get_controller('tmgmt_job_item')->resetCache();
+    $job = tmgmt_job_load($job->tjid);
+    list($item1, $item2) = array_values($job->getItems());
+    // The text in the first item should be available for review, the
+    // translation of the second item not.
+    $this->assertEqual($item1->getData(array('dummy', 'deep_nesting', '#translation', '#text')), $translation1);
+    $this->assertEqual($item2->getData(array('dummy', 'deep_nesting', '#translation', '#text')), '');
 
     // Check the overview page, the task should still show in progress.
     $this->drupalGet('translate');
     $this->assertText(t('Pending'));
 
     // Mark the second item as completed now.
-    $this->clickLink(t('translate'));
+    $this->clickLink(t('view'));
     $this->clickLink(t('translate'));
     $this->drupalPost(NULL, array(), t('Save as completed'));
-    // Both items should be accepted now.
-    $this->assertText(t('Accepted'));
-    $this->assertNoText(t('In progress'));
 
-    // Check the overview, the task should be completed now.
-    $this->drupalGet('translate');
-    // @todo: Should completed task be removed automatically from my tasks?
-    // @todo: Maybe change status to Accepted by client or similar after job has
-    //   been marked as finished.
+    entity_get_controller('tmgmt_local_task')->resetCache();
+    entity_get_controller('tmgmt_local_task_item')->resetCache();
+    drupal_static_reset('tmgmt_local_task_statistics_load');
+    $task = tmgmt_local_task_load($task->tltid);
+    $this->assertTrue($task->isClosed());
+    $this->assertEqual($task->getCountCompleted(), 2);
+    $this->assertEqual($task->getCountTranslated(), 0);
+    $this->assertEqual($task->getCountUntranslated(), 0);
+    list($first_task_item, $second_task_item) = array_values($task->getItems());
+    $this->assertTrue($first_task_item->isClosed());
+    $this->assertEqual($first_task_item->getCountCompleted(), 1);
+    $this->assertEqual($first_task_item->getCountTranslated(), 0);
+    $this->assertEqual($first_task_item->getCountUntranslated(), 0);
+    $this->assertTrue($second_task_item->isClosed());
+    $this->assertEqual($second_task_item->getCountCompleted(), 1);
+    $this->assertEqual($second_task_item->getCountTranslated(), 0);
+    $this->assertEqual($second_task_item->getCountUntranslated(), 0);
+
+    // We should have been redirect back to the overview, the task should be
+    // completed now.
+    $this->assertNoText($task->getJob()->label());
+    $this->clickLink(t('Closed'));
+    $this->assertText($task->getJob()->label());
     $this->assertText(t('Completed'));
 
     entity_get_controller('tmgmt_job')->resetCache(array($job->tjid));
@@ -308,6 +407,12 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertTrue($job->isFinished());
     $this->assertEqual($item1->getData(array('dummy', 'deep_nesting', '#translation', '#text')), $translation1);
     $this->assertEqual($item2->getData(array('dummy', 'deep_nesting', '#translation', '#text')), $translation2);
+
+    // Delete the job, make sure that the corresponding task and task items were
+    // deleted.
+    $job->delete();
+    $this->assertFalse(tmgmt_local_task_item_load($task->tltid));
+    $this->assertFalse($task->getItems());
   }
 
   /**
