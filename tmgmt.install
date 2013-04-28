@@ -342,6 +342,12 @@ function tmgmt_schema() {
         'type' => 'int',
         'unsigned' => TRUE,
       ),
+      'uid' => array(
+        'description' => 'The identifier of the user who performed the action.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
       'message' => array(
         'description' => 'The language into the data should be translated.',
         'type' => 'text',
@@ -779,5 +785,17 @@ function tmgmt_update_7010() {
       'tjiid' => array('tjiid'),
       'remote_identifiers' => array('remote_identifier_1', 'remote_identifier_2', 'remote_identifier_3'),
     ),
+  ));
+}
+
+/**
+ * Add uid field for {tmgmt_message} table.
+ */
+function tmgmt_update_7011() {
+  db_add_field('tmgmt_message', 'uid', array(
+    'description' => 'The identifier of the user who performed the action.',
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
   ));
 }

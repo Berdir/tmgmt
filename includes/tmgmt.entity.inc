@@ -540,7 +540,12 @@ class TMGMTJobItem extends Entity {
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job item if it hasn't yet been saved.
     if (!empty($this->tjiid) || $this->save()) {
-      $message = tmgmt_message_create($message, $variables, array('tjid' => $this->tjid, 'tjiid' => $this->tjiid, 'type' => $type));
+      $message = tmgmt_message_create($message, $variables, array(
+        'tjid' => $this->tjid,
+        'tjiid' => $this->tjiid,
+        'uid' => $GLOBALS['user']->uid,
+        'type' => $type,
+      ));
       if ($message->save()) {
         return $message;
       }
@@ -1318,7 +1323,11 @@ class TMGMTJob extends Entity {
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job if it hasn't yet been saved.
     if (!empty($this->tjid) || $this->save()) {
-      $message = tmgmt_message_create($message, $variables, array('tjid' => $this->tjid, 'type' => $type));
+      $message = tmgmt_message_create($message, $variables, array(
+        'tjid' => $this->tjid,
+        'type' => $type,
+        'uid' => $GLOBALS['user']->uid,
+      ));
       if ($message->save()) {
         return $message;
       }
@@ -1895,6 +1904,13 @@ class TMGMTMessage extends Entity {
    * @var integer
    */
   public $tjiid;
+
+  /**
+   * User uid.
+   *
+   * @var integer
+   */
+  public $uid;
 
   /**
    * The message text.

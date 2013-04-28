@@ -116,6 +116,13 @@ class TMGMTMessageMetadataController extends EntityDefaultMetadataController {
       'type' => 'tmgmt_job_item',
     ) + $properties['tjiid'];
 
+    // Link user, was added in an update so make sure that it doesn't explode
+    // if the schema cache was not cleared.
+    $properties['uid'] = array(
+      'type' => 'user',
+      'description' => t('User associated with TMGMT Job Message entity.'),
+    ) + (isset($properties['uid']) ? $properties['uid'] : array());
+
     return $info;
   }
 

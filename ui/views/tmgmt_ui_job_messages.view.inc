@@ -1,6 +1,6 @@
 <?php
 
-$view = new view;
+$view = new view();
 $view->name = 'tmgmt_ui_job_messages';
 $view->description = 'Lists the messages that are related to a job.';
 $view->tag = 'Translation Management';
@@ -13,6 +13,7 @@ $view->disabled = FALSE; /* Edit this to true to make a default view disabled in
 /* Display: Master */
 $handler = $view->new_display('default', 'Master', 'default');
 $handler->display->display_options['title'] = 'Messages';
+$handler->display->display_options['use_more_always'] = FALSE;
 $handler->display->display_options['access']['type'] = 'none';
 $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['query']['type'] = 'views_query';
@@ -47,7 +48,6 @@ $handler->display->display_options['style_options']['info'] = array(
 $handler->display->display_options['empty']['area']['id'] = 'area';
 $handler->display->display_options['empty']['area']['table'] = 'views';
 $handler->display->display_options['empty']['area']['field'] = 'area';
-$handler->display->display_options['empty']['area']['empty'] = FALSE;
 $handler->display->display_options['empty']['area']['content'] = 'There are no messages attached to this translation job.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 /* Relationship: Job Item */
@@ -56,6 +56,10 @@ $handler->display->display_options['relationships']['tjiid']['table'] = 'tmgmt_m
 $handler->display->display_options['relationships']['tjiid']['field'] = 'tjiid';
 $handler->display->display_options['relationships']['tjiid']['ui_name'] = 'Job Item';
 $handler->display->display_options['relationships']['tjiid']['label'] = 'Job Item';
+/* Relationship: Translation Management Message: Uid */
+$handler->display->display_options['relationships']['uid']['id'] = 'uid';
+$handler->display->display_options['relationships']['uid']['table'] = 'tmgmt_message';
+$handler->display->display_options['relationships']['uid']['field'] = 'uid';
 /* Field: Created */
 $handler->display->display_options['fields']['created']['id'] = 'created';
 $handler->display->display_options['fields']['created']['table'] = 'tmgmt_message';
@@ -77,6 +81,11 @@ $handler->display->display_options['fields']['rendered_entity']['label'] = 'Rela
 $handler->display->display_options['fields']['rendered_entity']['empty'] = 'None';
 $handler->display->display_options['fields']['rendered_entity']['hide_alter_empty'] = FALSE;
 $handler->display->display_options['fields']['rendered_entity']['link_to_entity'] = 1;
+/* Field: User: Name */
+$handler->display->display_options['fields']['name']['id'] = 'name';
+$handler->display->display_options['fields']['name']['table'] = 'users';
+$handler->display->display_options['fields']['name']['field'] = 'name';
+$handler->display->display_options['fields']['name']['relationship'] = 'uid';
 /* Sort criterion: Created */
 $handler->display->display_options['sorts']['created']['id'] = 'created';
 $handler->display->display_options['sorts']['created']['table'] = 'tmgmt_message';
@@ -104,6 +113,7 @@ $handler->display->display_options['arguments']['tjiid']['summary_options']['ite
 
 /* Display: Block */
 $handler = $view->new_display('block', 'Block', 'block');
+$handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
 $translatables['tmgmt_ui_job_messages'] = array(
   t('Master'),
   t('Messages'),
@@ -116,13 +126,18 @@ $translatables['tmgmt_ui_job_messages'] = array(
   t('Items per page'),
   t('- All -'),
   t('Offset'),
+  t('« first'),
+  t('‹ previous'),
+  t('next ›'),
+  t('last »'),
   t('There are no messages attached to this translation job.'),
   t('Job Item'),
+  t('User'),
   t('Created'),
   t('Message'),
   t('Related item'),
   t('None'),
+  t('Name'),
   t('All'),
   t('Block'),
 );
-

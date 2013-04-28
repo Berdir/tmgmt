@@ -146,6 +146,17 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $job = entity_load_unchanged('tmgmt_job', $job->tjid);
     $this->assertTrue($job->isRejected());
 
+    // Check displayed job messages.
+    $args = array('@view' => 'view-tmgmt-ui-job-messages');
+    $this->assertEqual(2, count($this->xpath('//div[contains(@class, @view)]//tbody/tr', $args)));
+
+    // Check that the author for each is the current user.
+    $message_authors = $this->xpath('////div[contains(@class, @view)]//td[contains(@class, @field)]/span', $args + array('@field' => 'views-field-name'));
+    $this->assertEqual(2, count($message_authors));
+    foreach ($message_authors as $message_author) {
+      $this->assertEqual((string)$message_author, $this->translator_user->name);
+    }
+
     // Make sure that rejected jobs can be re-submitted.
     $this->assertTrue($job->isSubmittable());
     $edit = array(
