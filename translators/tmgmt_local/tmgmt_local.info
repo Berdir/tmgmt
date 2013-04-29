@@ -5,11 +5,15 @@ core = 7.x
 
 dependencies[] = tmgmt
 
-files[] = includes/tmgmt_local.controller.inc
-files[] = includes/tmgmt_local.entity.inc
+files[] = controller/tmgmt_local.controller.task.inc
+files[] = controller/tmgmt_local.controller.task_item.inc
+files[] = entity/tmgmt_local.entity.task.inc
+files[] = entity/tmgmt_local.entity.task_item.inc
 files[] = includes/tmgmt_local.info.inc
 files[] = includes/tmgmt_local.plugin.inc
-files[] = includes/tmgmt_local_ui.controller.inc
+files[] = includes/tmgmt_local.plugin.ui.inc
+files[] = controller/tmgmt_local.ui_controller.task.inc
+files[] = controller/tmgmt_local.ui_controller.task_item.inc
 files[] = tmgmt_local.test
 
 ; Views integration and handlers

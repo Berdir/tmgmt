@@ -74,11 +74,11 @@ function tmgmt_ui_theme() {
       // We also have the entity_type here because we are still populating the
       // defaults via the entity api so we just need to add the description.
       'variables' => array('label' => NULL, 'entity_type' => NULL, 'url' => FALSE, 'name' => FALSE, 'description' => FALSE),
-      'file' => 'includes/tmgmt_ui.controller.inc',
+      'file' => 'includes/tmgmt_ui.theme.inc',
     ),
     'tmgmt_ui_translator_overview_form' => array(
       'render element' => 'form',
-      'file' => 'includes/tmgmt_ui.controller.inc',
+      'file' => 'includes/tmgmt_ui.theme.inc',
     ),
     'tmgmt_ui_translator_review_form' => array(
       'render element' => 'element',
