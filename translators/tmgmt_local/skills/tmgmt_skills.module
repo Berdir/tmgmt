@@ -258,14 +258,17 @@ function tmgmt_skills_field_update($entity_type, $entity, $field, $instance, $la
   tmgmt_local_clear_languages_cache();
 
   $languages = language_list();
+  $added_languages = array();
 
   // In case the skill languages is not know to the system, install them.
   foreach ($items as $item) {
-    if (!isset($languages[$item['language_to']])) {
+    if (!isset($languages[$item['language_to']]) && !isset($added_languages[$item['language_to']])) {
       locale_add_language($item['language_to']);
+      $added_languages[$item['language_to']] = $item['language_to'];
     }
-    if (!isset($languages[$item['language_from']])) {
+    if (!isset($languages[$item['language_from']]) && !isset($added_languages[$item['language_from']])) {
       locale_add_language($item['language_from']);
+      $added_languages[$item['language_from']] = $item['language_from'];
     }
   }
 }
