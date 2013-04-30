@@ -38,7 +38,7 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_local', 'tmgmt_ui', 'tmgmt_skills'));
+    parent::setUp(array('tmgmt_language_combination', 'tmgmt_local', 'tmgmt_ui'));
     $this->loginAsAdmin();
     $this->setEnvironment('de');
 
