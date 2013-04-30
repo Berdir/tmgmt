@@ -226,14 +226,14 @@ function tmgmt_local_update_7000() {
 /**
  * Implements hook_enable().
  */
-function tmgmt_language_capabilities_enable() {
+function tmgmt_local_enable() {
   // If our field type is not found rebuild the cache.
   if (!field_info_field_types('tmgmt_language_combination')) {
     field_cache_clear();
   }
 
   // Create the language combination field if it doesn't exist yet.
-  if (!field_info_field('tmgmt_language_combination')) {
+  if (!field_info_field('tmgmt_translation_skills')) {
     $field = array(
       'type' => 'tmgmt_language_combination',
       'field_name' => 'tmgmt_translation_skills',
@@ -332,5 +332,49 @@ function _tmgmt_local_translated_data_7001($source) {
     if (!empty($translation)) {
       return $translation;
     }
+  }
+}
+
+/**
+ * Ensures that the tmgmt_language_combination module is enabled.
+ */
+function tmgmt_local_update_7002() {
+  // Enable the tmgmt_language_combionation module.
+  module_enable(array('tmgmt_language_combination'));
+
+  // Remove the tmgmt_skills module.
+  db_delete('system')
+    ->condition('name', 'tmgmt_skills')
+    ->condition('type', 'module')
+    ->execute();
+
+  // Create the field if it doesn't exist yet.
+  if (!field_info_field_types('tmgmt_language_combination')) {
+    field_cache_clear();
+  }
+
+  // Create the language combination field if it doesn't exist yet.
+  if (!field_info_field('tmgmt_translation_skills')) {
+    $field = array(
+      'type' => 'tmgmt_language_combination',
+      'field_name' => 'tmgmt_translation_skills',
+      'translatable' => FALSE,
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'locked' => FALSE,
+    );
+
+    field_create_field($field);
+  }
+
+  // Attach the language skills field collection to the user entity.
+  if (!field_info_instance('user', 'tmgmt_translation_skills', 'user')) {
+    $instance = array(
+      'field_name' => 'tmgmt_translation_skills',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => t('Translation skills'),
+    );
+
+    field_create_instance($instance);
   }
 }
