@@ -3,7 +3,7 @@
 /**
  * Implements hook_field_info().
  */
-function tmgmt_skills_field_info() {
+function tmgmt_language_combination_field_info() {
   $info['tmgmt_language_combination'] = array(
     'label' => t('Language combination'),
     'description' => t('Allows the definition of language combinations (e.g. "From english to german").'),
@@ -20,7 +20,7 @@ function tmgmt_skills_field_info() {
 /**
  * Implements hook_field_schema().
  */
-function tmgmt_skills_field_schema($field) {
+function tmgmt_language_combination_field_schema($field) {
   $schema = array(
     'columns' => array(
       'language_from' => array(
@@ -45,10 +45,10 @@ function tmgmt_skills_field_schema($field) {
 /**
  * Implements hook_field_widget_info().
  */
-function tmgmt_skills_field_widget_info() {
+function tmgmt_language_combination_field_widget_info() {
   $info['tmgmt_language_combination_default'] = array(
     'label' => t('Select list'),
-    'description' => t('Default widget for allowing users to define translation capabilities.'),
+    'description' => t('Default widget for allowing users to define translation combination.'),
     'field types' => array('tmgmt_language_combination'),
     'behaviors' => array(
       'multiple values' => FIELD_BEHAVIOR_DEFAULT,
@@ -62,7 +62,7 @@ function tmgmt_skills_field_widget_info() {
 /**
  * Implements hook_field_widget_form().
  */
-function tmgmt_skills_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+function tmgmt_language_combination_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   if (isset($form_state['list_all_languages'])) {
     $languages_options = tmgmt_local_languages_predefined_list();
   }
@@ -97,13 +97,13 @@ function tmgmt_skills_field_widget_form(&$form, &$form_state, $field, $instance,
 /**
  * Implements hook_field_validate().
  */
-function tmgmt_skills_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+function tmgmt_language_combination_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   $existing = array();
 
   foreach ($items as $delta => $item) {
     $key = $item['language_from'] . ':' . $item['language_to'];
 
-    if (!tmgmt_skills_field_is_empty($item, 'tmgmt_language_combination')) {
+    if (!tmgmt_language_combination_field_is_empty($item, 'tmgmt_language_combination')) {
       if ($item['language_from'] == $item['language_to']) {
         $errors[$field['field_name']][$langcode][$delta][] = array(
           'error' => 'tmgmt_language_combination_equal',
@@ -126,14 +126,14 @@ function tmgmt_skills_field_validate($entity_type, $entity, $field, $instance, $
 /**
  * Implements hook_field_widget_error().
  */
-function tmgmt_skills_field_widget_error($element, $error, $form, &$form_state) {
+function tmgmt_language_combination_field_widget_error($element, $error, $form, &$form_state) {
   form_error($element, $error['message']);
 }
 
 /**
  * Implements hook_field_is_empty().
  */
-function tmgmt_skills_field_is_empty($item, $field) {
+function tmgmt_language_combination_field_is_empty($item, $field) {
   if (empty($item['language_from']) || empty($item['language_to']) || $item['language_from'] == '_none' || $item['language_to'] == '_none') {
     return TRUE;
   }
@@ -144,16 +144,16 @@ function tmgmt_skills_field_is_empty($item, $field) {
 /**
  * Implements hook_field_formatter_info().
  */
-function tmgmt_skills_field_formatter_info() {
+function tmgmt_language_combination_field_formatter_info() {
   $info['tmgmt_language_combination_default'] = array(
     'label' => t('Default'),
-    'description' => t('Default formatter for displaying the translation capabilities of a user.'),
+    'description' => t('Default formatter for displaying the translation combination of a user.'),
     'field types' => array('tmgmt_language_combination'),
   );
 
   $info['tmgmt_language_combination_table'] = array(
     'label' => t('Table'),
-    'description' => t('Formatter for displaying the translation capabilities of a user in a table.'),
+    'description' => t('Formatter for displaying the translation combination of a user in a table.'),
     'field types' => array('tmgmt_language_combination'),
   );
 
@@ -163,7 +163,7 @@ function tmgmt_skills_field_formatter_info() {
 /**
  * Implements hook_field_formatter_view().
  */
-function tmgmt_skills_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+function tmgmt_language_combination_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
   switch ($display['type']) {
@@ -172,8 +172,8 @@ function tmgmt_skills_field_formatter_view($entity_type, $entity, $field, $insta
       $element['#items'] = array();
 
       foreach ($items as $delta => $item) {
-        $from = _tmgmt_language_label($item['language_from']);
-        $to = _tmgmt_language_label($item['language_to']);
+        $from = tmgmt_language_combination_language_label($item['language_from']);
+        $to = tmgmt_language_combination_language_label($item['language_to']);
         $element['#items'][$delta]['data'] = t('From @from to @to', array('@from' => $from, '@to' => $to));
         $element['#items'][$delta]['class'][] = drupal_html_class($from . '-' . $to) . '">';
       }
@@ -183,8 +183,8 @@ function tmgmt_skills_field_formatter_view($entity_type, $entity, $field, $insta
       $rows = array();
 
       foreach ($items as $item) {
-        $to = _tmgmt_language_label($item['language_to']);
-        $from = _tmgmt_language_label($item['language_from']);
+        $to = tmgmt_language_combination_language_label($item['language_to']);
+        $from = tmgmt_language_combination_language_label($item['language_from']);
         $row[] = array(
           'data' => $from,
           'class' => array('from-language', drupal_html_class('language-' . $from)),
@@ -215,7 +215,7 @@ function tmgmt_skills_field_formatter_view($entity_type, $entity, $field, $insta
 /**
  * Validation callback for the user autocompletion form element.
  */
-function tmgmt_skills_element_validate_user(&$element, $form, &$form_state) {
+function tmgmt_language_combination_element_validate_user(&$element, $form, &$form_state) {
   if ((empty($element['#required']) && empty($element['#value'])) && !user_load_by_name($element['#value'])) {
     form_error($element, t('The selected user does not exist.'));
   }
@@ -224,7 +224,7 @@ function tmgmt_skills_element_validate_user(&$element, $form, &$form_state) {
 /**
  * Implements hook_field_access().
  */
-function tmgmt_skills_field_access($op, $field, $entity_type, $entity = NULL, $account = NULL) {
+function tmgmt_language_combination_field_access($op, $field, $entity_type, $entity = NULL, $account = NULL) {
   if ($field['field_name'] == 'tmgmt_translation_skills' && $entity_type == 'user') {
     $account = !empty($account) ? $account : $GLOBALS['user'];
 
@@ -250,7 +250,7 @@ function tmgmt_skills_field_access($op, $field, $entity_type, $entity = NULL, $a
 /**
  * Implements hook_field_update().
  */
-function tmgmt_skills_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+function tmgmt_language_combination_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
   if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
     return;
   }
@@ -276,7 +276,7 @@ function tmgmt_skills_field_update($entity_type, $entity, $field, $instance, $la
 /**
  * Implements hook_field_delete().
  */
-function tmgmt_skills_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
+function tmgmt_language_combination_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
   if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
     return;
   }
@@ -286,7 +286,7 @@ function tmgmt_skills_field_delete($entity_type, $entity, $field, $instance, $la
 /**
  * Implements hook_field_attach_delete().
  */
-function tmgmt_skills_field_attach_delete($entity_type, $entity) {
+function tmgmt_language_combination_field_attach_delete($entity_type, $entity) {
   if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
     return;
   }
@@ -294,9 +294,9 @@ function tmgmt_skills_field_attach_delete($entity_type, $entity) {
 }
 
 /**
- * Implements hook_tmgmt_local_translation_capabilities().
+ * Implements hook_tmgmt_local_translation_combination().
  */
-function tmgmt_skills_tmgmt_local_translation_capabilities($source_language = NULL, $account = NULL, $target_language = NULL) {
+function tmgmt_language_combination_tmgmt_local_translation_combination($source_language = NULL, $account = NULL, $target_language = NULL) {
   // Only considers users with the 'provide translation services' permission.
   $roles = user_roles(TRUE, 'provide translation services');
 
@@ -329,26 +329,26 @@ function tmgmt_skills_tmgmt_local_translation_capabilities($source_language = NU
   $query->leftJoin('users_roles', 'ur', "ur.uid = u.uid AND ur.rid IN (:roles) OR u.uid = 1", array(':roles' => implode(', ', array_keys($roles))));
 
   // Add a tag so other modules can alter this query at will.
-  $query->addTag('tmgmt_translation_capabilities');
+  $query->addTag('tmgmt_translation_combination');
 
   // Only return languages that are supported by at least one user.
   $result = $query->execute();
 
-  $capabilities = array();
+  $combination = array();
   foreach ($result as $item) {
-    $capabilities[] = array(
+    $combination[] = array(
       'source' => $item->tmgmt_translation_skills_language_from,
       'target' => $item->tmgmt_translation_skills_language_to,
     );
   }
 
-  return $capabilities;
+  return $combination;
 }
 
 /**
  * Implements hook_tmgmt_server_language_pairs().
  */
-function tmgmt_skills_tmgmt_server_language_pairs() {
+function tmgmt_language_combination_tmgmt_server_language_pairs() {
   $roles = user_roles(TRUE, 'provide translation services');
 
   $query = db_select('field_data_tmgmt_translation_skills', 'ts');
@@ -367,12 +367,12 @@ function tmgmt_skills_tmgmt_server_language_pairs() {
     $query->condition($or_conditions);
   }
 
-  $capabilities = array();
+  $combination = array();
   foreach ($query->execute()->fetchAll() as $item) {
-    $capabilities[$item->source_language][$item->target_language] = $item->target_language;
+    $combination[$item->source_language][$item->target_language] = $item->target_language;
   }
 
-  return $capabilities;
+  return $combination;
 }
 
 
@@ -387,10 +387,46 @@ function tmgmt_skills_tmgmt_server_language_pairs() {
  *   The label of the language or an empty string if the language or its label
  *   are not defined.
  */
-function _tmgmt_language_label($language) {
-  $languages = tmgmt_local_languages_predefined_list();
+function tmgmt_language_combination_language_label($language) {
+  $languages = tmgmt_language_combination_languages_predefined_list();
   if (!empty($languages[$language])) {
     return $languages[$language];
   }
   return '';
+}
+
+/**
+ * Prepares a language code list for a select form item with all languages.
+ */
+function tmgmt_language_combination_languages_predefined_list() {
+  $predefined = &drupal_static(__FUNCTION__);
+
+  if (!isset($predefined)) {
+    include_once DRUPAL_ROOT . '/includes/iso.inc';
+    $predefined = _locale_get_predefined_list();
+
+    foreach ($predefined as $key => $value) {
+
+      // Include native name in output, if possible
+      if (count($value) > 1) {
+        $tname = t($value[0]);
+        $predefined[$key] = ($tname == $value[1]) ? $tname : "$tname ($value[1])";
+      }
+      else {
+        $predefined[$key] = t($value[0]);
+      }
+    }
+
+    // Add custom languages that are not part of the iso.inc definition.
+    $installed_languages = language_list();
+    foreach ($installed_languages as $lang => $info) {
+      if (!isset($predefined[$lang])) {
+        $predefined[$lang] = $info->name;
+      }
+    }
+
+    asort($predefined);
+  }
+
+  return $predefined;
 }

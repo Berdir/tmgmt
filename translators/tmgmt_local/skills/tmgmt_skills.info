@@ -1,6 +1,0 @@
-name = Translation Skills
-description = Allows local users to define translation skills.
-package = Translation Management
-core = 7.x
-
-;dependencies[] = tmgmt_local

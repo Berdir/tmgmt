@@ -364,42 +364,6 @@ function tmgmt_local_clear_languages_cache() {
 }
 
 /**
- * Prepares a language code list for a select form item with all languages.
- */
-function tmgmt_local_languages_predefined_list() {
-  $predefined = &drupal_static(__FUNCTION__);
-
-  if (!isset($predefined)) {
-    include_once DRUPAL_ROOT . '/includes/iso.inc';
-    $predefined = _locale_get_predefined_list();
-
-    foreach ($predefined as $key => $value) {
-
-      // Include native name in output, if possible
-      if (count($value) > 1) {
-        $tname = t($value[0]);
-        $predefined[$key] = ($tname == $value[1]) ? $tname : "$tname ($value[1])";
-      }
-      else {
-        $predefined[$key] = t($value[0]);
-      }
-    }
-
-    // Add custom languages that are not part of the iso.inc definition.
-    $installed_languages = language_list();
-    foreach ($installed_languages as $lang => $info) {
-      if (!isset($predefined[$lang])) {
-        $predefined[$lang] = $info->name;
-      }
-    }
-
-    asort($predefined);
-  }
-
-  return $predefined;
-}
-
-/**
  * Loads a local translation task entity.
  *
  * @return TMGMTLocalTask
