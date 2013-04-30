@@ -259,6 +259,13 @@ function tmgmt_local_enable() {
 }
 
 /**
+ * Implements hook_uninstall().
+ */
+function tmgmt_local_uninstall() {
+  field_delete_field('tmgmt_translation_skills');
+}
+
+/**
  * Create local task items.
  */
 function tmgmt_local_update_7001() {
