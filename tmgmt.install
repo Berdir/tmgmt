@@ -119,14 +119,14 @@ function tmgmt_schema() {
       ),
       'remote_identifier_1' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 127,
         'not null' => TRUE,
         'default' => '',
         'description' => 'Custom remote identifier data.',
       ),
       'remote_identifier_2' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 127,
         'not null' => TRUE,
         'default' => '',
         'description' => 'Custom remote identifier data.',
@@ -162,7 +162,7 @@ function tmgmt_schema() {
     'indexes' => array(
       'tjid' => array('tjid'),
       'tjiid' => array('tjiid'),
-      'remote_identifiers' => array('remote_identifier_1', 'remote_identifier_2', 'remote_identifier_3'),
+      'remote_identifiers' => array('remote_identifier_1', 'remote_identifier_2'),
     ),
   );
 
