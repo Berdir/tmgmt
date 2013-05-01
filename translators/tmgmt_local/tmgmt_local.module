@@ -364,42 +364,6 @@ function tmgmt_local_clear_languages_cache() {
 }
 
 /**
- * Prepares a language code list for a select form item with all languages.
- */
-function tmgmt_local_languages_predefined_list() {
-  $predefined = &drupal_static(__FUNCTION__);
-
-  if (!isset($predefined)) {
-    include_once DRUPAL_ROOT . '/includes/iso.inc';
-    $predefined = _locale_get_predefined_list();
-
-    foreach ($predefined as $key => $value) {
-
-      // Include native name in output, if possible
-      if (count($value) > 1) {
-        $tname = t($value[0]);
-        $predefined[$key] = ($tname == $value[1]) ? $tname : "$tname ($value[1])";
-      }
-      else {
-        $predefined[$key] = t($value[0]);
-      }
-    }
-
-    // Add custom languages that are not part of the iso.inc definition.
-    $installed_languages = language_list();
-    foreach ($installed_languages as $lang => $info) {
-      if (!isset($predefined[$lang])) {
-        $predefined[$lang] = $info->name;
-      }
-    }
-
-    asort($predefined);
-  }
-
-  return $predefined;
-}
-
-/**
  * Loads a local translation task entity.
  *
  * @return TMGMTLocalTask
@@ -761,4 +725,145 @@ function tmgmt_local_tmgmt_job_delete(TMGMTJob $job) {
   if (!empty($result['tmgmt_local_task'])) {
     entity_delete_multiple('tmgmt_local_task', array_keys($result['tmgmt_local_task']));
   }
+}
+
+
+/**
+ * Implements hook_field_access().
+ */
+function tmgmt_local_field_access($op, $field, $entity_type, $entity = NULL, $account = NULL) {
+  if ($field['field_name'] == 'tmgmt_translation_skills' && $entity_type == 'user') {
+    $account = !empty($account) ? $account : $GLOBALS['user'];
+
+    // If the field is just being viewed, grant access.
+    if ($op == 'view') {
+      return TRUE;
+    }
+
+    // User can provide transl. services and is dealing with own account.
+    if (!empty($entity) && $entity->uid == $account->uid) {
+      return user_access('provide translation services', $entity);
+    }
+
+    // Administrators are allowed to deal with others only.
+    if (user_access('administer translation server', $account)) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+}
+
+/**
+ * Implements hook_field_attach_insert().
+ */
+function tmgmt_local_field_attach_insert($entity_type, $entity) {
+  if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
+    return;
+  }
+
+  tmgmt_local_clear_languages_cache();
+}
+
+/**
+ * Implements hook_field_attach_update().
+ */
+function tmgmt_local_field_attach_update($entity_type, $entity) {
+  if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
+    return;
+  }
+
+  tmgmt_local_clear_languages_cache();
+}
+
+/**
+ * Implements hook_field_attach_delete().
+ */
+function tmgmt_local_field_attach_delete($entity_type, $entity) {
+  if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
+    return;
+  }
+  tmgmt_local_clear_languages_cache();
+}
+
+/**
+ * Implements hook_tmgmt_local_translation_capabilities().
+ */
+function tmgmt_local_tmgmt_local_translation_capabilities($source_language = NULL, $account = NULL, $target_language = NULL) {
+  // Only considers users with the 'provide translation services' permission.
+  $roles = user_roles(TRUE, 'provide translation services');
+
+  // Check for all the available languages. We are directly querying the
+  // field values here instead of using an EntityFieldQuery but that is
+  // okay in this case and there is no other way.
+  $query = db_select('field_data_tmgmt_translation_skills', 'ts')
+    ->fields('ts', array('tmgmt_translation_skills_language_from', 'tmgmt_translation_skills_language_to'))
+    ->condition('ts.deleted', 0)
+    ->condition('ts.entity_type', 'user')
+    ->distinct(TRUE);
+
+  if ($source_language) {
+    $query->condition('ts.tmgmt_translation_skills_language_from', $source_language);
+  }
+
+  if ($target_language) {
+    $query->condition('ts.tmgmt_translation_skills_language_to', $target_language);
+  }
+
+  // Only consider active users.
+  $query->innerJoin('users', 'u', 'u.uid = ts.entity_id AND u.status = 1');
+
+  if (isset($account)) {
+    $query->condition('u.uid', $account->uid);
+  }
+
+  // Only consider users that have the 'provide translation services'
+  // permission or the admin user.
+  $query->leftJoin('users_roles', 'ur', "ur.uid = u.uid AND ur.rid IN (:roles) OR u.uid = 1", array(':roles' => implode(', ', array_keys($roles))));
+
+  // Add a tag so other modules can alter this query at will.
+  $query->addTag('tmgmt_translation_combination');
+
+  // Only return languages that are supported by at least one user.
+  $result = $query->execute();
+
+  $combination = array();
+  foreach ($result as $item) {
+    $combination[] = array(
+      'source' => $item->tmgmt_translation_skills_language_from,
+      'target' => $item->tmgmt_translation_skills_language_to,
+    );
+  }
+
+  return $combination;
+}
+
+/**
+ * Implements hook_tmgmt_server_language_pairs().
+ */
+function tmgmt_local_tmgmt_server_language_pairs() {
+  $roles = user_roles(TRUE, 'provide translation services');
+
+  $query = db_select('field_data_tmgmt_translation_skills', 'ts');
+
+  $query->join('users', 'u', 'u.uid = ts.entity_id AND u.status = 1');
+
+  $query->addField('ts', 'tmgmt_translation_skills_language_from', 'source_language');
+  $query->addField('ts', 'tmgmt_translation_skills_language_to', 'target_language');
+
+  $query->condition('ts.deleted', 0);
+  $query->condition('ts.entity_type', 'user');
+
+  if (!in_array(DRUPAL_AUTHENTICATED_RID, array_keys($roles))) {
+    $query->join('users_roles', 'ur', 'ur.uid = u.uid AND ur.rid');
+    $or_conditions = db_or()->condition('ur.rid', array_keys($roles))->condition('u.uid', 1);
+    $query->condition($or_conditions);
+  }
+
+  $combination = array();
+  foreach ($query->execute()->fetchAll() as $item) {
+    $combination[$item->source_language][$item->target_language] = $item->target_language;
+  }
+
+  return $combination;
 }

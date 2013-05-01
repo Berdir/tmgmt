@@ -4,6 +4,7 @@ package = Translation Management
 core = 7.x
 
 dependencies[] = tmgmt
+dependencies[] = tmgmt_language_combination
 
 files[] = controller/tmgmt_local.controller.task.inc
 files[] = controller/tmgmt_local.controller.task_item.inc

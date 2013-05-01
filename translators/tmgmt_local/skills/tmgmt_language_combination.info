@@ -1,0 +1,4 @@
+name = Translation Language capabilities
+description = Provides a field that allows users to select language combinations.
+package = Translation Management
+core = 7.x
