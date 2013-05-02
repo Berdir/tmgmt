@@ -134,6 +134,26 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language);
 
   /**
+   * Returns supported language pairs.
+   *
+   * This info may be used by other plugins to find out what language pairs
+   * can handle the translator.
+   *
+   * @param TMGMTTranslator $translator
+   *   The translator entity.
+   *
+   * @return array
+   *   List of language pairs where a pair is an associative array of
+   *   source_language and target_language.
+   *   Example:
+   *   array(
+   *     array('source_language' => 'en-US', 'target_language' => 'de-DE'),
+   *     array('source_language' => 'en-US', 'target_language' => 'de-CH'),
+   *   )
+   */
+  public function getSupportedLanguagePairs(TMGMTTranslator $translator);
+
+  /**
    * @abstract
    *
    * Submits the translation request and sends it to the translation provider.

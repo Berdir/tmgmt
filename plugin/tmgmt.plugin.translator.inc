@@ -127,6 +127,25 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
+   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguagePairs().
+   *
+   * Default implementation that gets target languages for each remote language.
+   * This approach is ineffective and therefore it is advised that a plugin
+   * should provide own implementation.
+   */
+  public function getSupportedLanguagePairs(TMGMTTranslator $translator) {
+    $language_pairs = array();
+
+    foreach ($this->getSupportedRemoteLanguages($translator) as $source_language) {
+      foreach ($this->getSupportedTargetLanguages($translator, $source_language) as $target_language) {
+        $language_pairs[] = array('source_language' => $source_language, 'target_language' => $target_language);
+      }
+    }
+
+    return $language_pairs;
+  }
+
+  /**
    * Implements TMGMTTranslatorPluginControllerInterface::getNotCanTranslateReason().
    */
   public function getNotCanTranslateReason(TMGMTJob $job) {

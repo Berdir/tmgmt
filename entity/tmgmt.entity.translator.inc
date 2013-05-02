@@ -69,6 +69,13 @@ class TMGMTTranslator extends Entity {
   protected $languageCache;
 
   /**
+   * The supported language pairs caches.
+   *
+   * @var array
+   */
+  protected $languagePairsCache;
+
+  /**
    * Whether the language cache in the database is outdated.
    *
    * @var boolean
@@ -120,6 +127,48 @@ class TMGMTTranslator extends Entity {
       }
       return $this->languageCache[$source_language];
     }
+  }
+
+  /**
+   * Gets the supported language pairs for this translator.
+   *
+   * @return array
+   *   List of language pairs where a pair is an associative array of
+   *   source_language and target_language.
+   *   Example:
+   *   array(
+   *     array('source_language' => 'en-US', 'target_language' => 'de-DE'),
+   *     array('source_language' => 'en-US', 'target_language' => 'de-CH'),
+   *   )
+   */
+  public function getSupportedLanguagePairs() {
+    if ($controller = $this->getController()) {
+      if (isset($this->pluginInfo['cache languages']) && empty($this->pluginInfo['cache languages'])) {
+        // This plugin doesn't support language caching.
+        return $controller->getSupportedLanguagePairs($this);
+      }
+      else {
+        // Retrieve the supported languages from the cache.
+        if (empty($this->languagePairsCache) && $cache = cache_get('language_pairs:' . $this->name, 'cache_tmgmt')) {
+          $this->languagePairsCache = $cache->data;
+        }
+        // Even if we successfully queried the cache data might not be yet
+        // available.
+        if (empty($this->languagePairsCache)) {
+          $this->languagePairsCache = $controller->getSupportedLanguagePairs($this);
+          $this->languageCacheOutdated = TRUE;
+        }
+      }
+      return $this->languagePairsCache;
+    }
+  }
+
+  /**
+   * Clears the language cache for this translator.
+   */
+  public function clearLanguageCache() {
+    cache_clear_all('languages:' . $this->name, 'cache_tmgmt');
+    cache_clear_all('language_pairs:' . $this->name, 'cache_tmgmt');
   }
 
   /**
@@ -238,6 +287,7 @@ class TMGMTTranslator extends Entity {
       $info = $controller->pluginInfo();
       if (!isset($info['language cache']) || !empty($info['language cache']) && !empty($this->languageCacheOutdated)) {
         cache_set('languages:' . $this->name, $this->languageCache, 'cache_tmgmt');
+        cache_set('language_pairs:' . $this->name, $this->languagePairsCache, 'cache_tmgmt');
       }
     }
   }
