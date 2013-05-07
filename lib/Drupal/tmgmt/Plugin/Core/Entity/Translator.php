@@ -95,6 +95,13 @@ class Translator extends ConfigEntityBase {
   protected $languageCache;
 
   /**
+   * The supported language pairs caches.
+   *
+   * @var array
+   */
+  protected $languagePairsCache;
+
+  /**
    * Whether the language cache in the database is outdated.
    *
    * @var boolean
