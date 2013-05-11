@@ -441,7 +441,7 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
   // of the foreach loop.
   $zebra = 'even';
   foreach (element_children($data) as $key) {
-    $form['review'][$key] = _tmgmt_ui_review_form_element(tmgmt_flatten_data($data[$key], $key), $item, $zebra);
+    $form['review'][$key] = _tmgmt_ui_review_form_element(tmgmt_flatten_data($data[$key], $key), $item, $zebra, $key);
   }
 
   if ($output = tmgmt_ui_embed_view('tmgmt_ui_job_item_messages', 'block', array($item->tjiid))) {
@@ -496,14 +496,17 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
  * @param $zebra
  *   String containing either odd or even. This is used to style the each
  *   translation item with alternating colors.
+ * @param $parent_key
+ *   The key for $data.
  */
-function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
+function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra, $parent_key) {
   $flip = array(
     'even' => 'odd',
     'odd' => 'even',
   );
   $form = array(
     '#theme' => 'tmgmt_ui_translator_review_form',
+    '#ajaxid' => 'tmgmt-ui-element-' . drupal_clean_css_identifier($parent_key) . '-wrapper',
   );
   foreach (element_children($data) as $key) {
     // The char sequence '][' confuses the form API so we need to replace it.
@@ -514,7 +517,6 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
         '#tree' => TRUE,
         '#theme' => 'tmgmt_ui_translator_review_form_element',
         '#parent_label' => $data[$key]['#parent_label'],
-        '#ajaxid' => drupal_html_id('tmgmt-ui-element-' . $key),
         '#zebra' => $zebra,
       );
       $form[$target_key]['status'] = array(
@@ -535,7 +537,7 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
             '#submit' => array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit'),
             '#ajax' => array(
               'callback' => 'tmgmt_ui_translation_review_form_ajax',
-              'wrapper' => $form[$target_key]['#ajaxid'],
+              'wrapper' => $form['#ajaxid'],
             ),
           );
         }
@@ -549,7 +551,7 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
             '#submit' => array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit'),
             '#ajax' => array(
               'callback' => 'tmgmt_ui_translation_review_form_ajax',
-              'wrapper' => $form[$target_key]['#ajaxid'],
+              'wrapper' => $form['#ajaxid'],
             ),
           );
         }
@@ -569,36 +571,37 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
             '#type' => 'submit',
             // Unicode character U+21B6 ANTICLOCKWISE TOP SEMICIRCLE ARROW
             '#value' => '↶',
-            '#attributes' => array('title' => t('Revert')),
+            '#attributes' => array('title' => t('Revert to previous revision')),
             '#name' => 'revert-' . $target_key,
             '#data_item_key' => $key,
             '#submit' => array('tmgmt_ui_translation_review_form_revert'),
             '#ajax' => array(
               'callback' => 'tmgmt_ui_translation_review_form_ajax',
-              'wrapper' => $form[$target_key]['#ajaxid'],
+              'wrapper' => $form['#ajaxid'],
             ),
           );
-
-          $revisions = array();
-
-          foreach ($data[$key]['#translation']['#text_revisions'] as $revision) {
-            $revisions[] = t('Origin: %origin, Created: %created</br>%text', array(
-              '%origin' => $revision['#origin'],
-              '%created' => format_date($revision['#timestamp']),
-              '%text' => filter_xss($revision['#text']),
-            ));
-          }
-          $form[$target_key]['below']['revisions_wrapper'] = array(
-            '#type' => 'fieldset',
-            '#title' => t('Translation revisions'),
-            '#collapsed' => TRUE,
-            '#collapsible' => TRUE,
-          );
-          $form[$target_key]['below']['revisions_wrapper']['revisions'] = array(
-            '#type' => 'markup',
-            '#markup' => theme('item_list', array('items' => $revisions)),
-          );
         }
+      }
+      if (!empty($data[$key]['#translation']['#text_revisions'])) {
+        $revisions = array();
+
+        foreach ($data[$key]['#translation']['#text_revisions'] as $revision) {
+          $revisions[] = t('Origin: %origin, Created: %created</br>%text', array(
+            '%origin' => $revision['#origin'],
+            '%created' => format_date($revision['#timestamp']),
+            '%text' => filter_xss($revision['#text']),
+          ));
+        }
+        $form[$target_key]['below']['revisions_wrapper'] = array(
+          '#type' => 'fieldset',
+          '#title' => t('Translation revisions'),
+          '#collapsed' => TRUE,
+          '#collapsible' => TRUE,
+        );
+        $form[$target_key]['below']['revisions_wrapper']['revisions'] = array(
+          '#theme' => 'item_list',
+          '#items' => $revisions,
+        );
       }
       $form[$target_key]['translation'] = array(
         '#type' => 'textarea',
@@ -628,12 +631,15 @@ function tmgmt_ui_translation_review_form_revert($form, &$form_state) {
   $key = tmgmt_ensure_keys_array($form_state['triggering_element']['#data_item_key']);
 
   if ($item->dataItemRevert($key)) {
-    drupal_set_message(t('Translation reverted to the latest version.'));
+    // Update the form_state input values so that the new default vale will be
+    // shown.
+    unset($form_state['input'][$form_state['triggering_element']['#data_item_key']]['translation']);
     $item->save();
   }
   else {
-    drupal_set_message(t('No past revision found, translation was not reverted.'));
+    drupal_set_message(t('No past revision found, translation was not reverted.'), 'warning');
   }
+  $form_state['rebuild'] = TRUE;
 }
 
 /**
@@ -685,13 +691,13 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   // Write changes back to item.
   foreach ($form_state['values'] as $key => $value) {
     if (is_array($value) && isset($value['translation'])) {
-
-      $data['#translation'] = array(
+      // Update the translation, this will only update the translation in case
+      // it has changed.
+      $data = array(
         '#text' => $value['translation'],
         '#origin' => 'local',
       );
-
-      $item->updateData($key, $data);
+      $item->addTranslatedData($data, $key);
     }
   }
   // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
@@ -780,13 +786,10 @@ function tmgmt_ui_translation_review_form_update_state($form, &$form_state) {
  * Ajax callback for the job item review form.
  */
 function tmgmt_ui_translation_review_form_ajax($form, &$form_state) {
-  $key = array_slice($form_state['triggering_element']['#array_parents'], 0, 3);
-  $commands = array();
+  $key = array_slice($form_state['triggering_element']['#array_parents'], 0, 2);
   $render_data = drupal_array_get_nested_value($form, $key);
-  $commands[] = ajax_command_replace(NULL, drupal_render($render_data));
   tmgmt_ui_write_request_messages($form_state['item']->getJob());
-  $commands[] = ajax_command_html('#tmgmt-status-messages-' . strtolower($render_data['#parent_label'][0]), theme('status_messages'));
-  return array('#type' => 'ajax', '#commands' => $commands);
+  return drupal_render($render_data);
 }
 
 /**

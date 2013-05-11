@@ -189,7 +189,10 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($item2->item_id, $items[$item2->tjiid]->item_id);
   }
 
-  function testDataItems() {
+  /**
+   * Tests adding translated data and revision handling.
+   */
+  function testAddingTranslatedData() {
     $translator = $this->createTranslator();
     $job = $this->createJob();
     $job->translator = $translator->name;
@@ -203,39 +206,64 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $item1->addTranslatedData($translation);
     $data = $item1->getData($key);
 
+    // Check job messages.
+    $messages = $job->getMessages();
+    $this->assertEqual(count($messages), 1);
+    $last_message = end($messages);
+    $this->assertEqual($last_message->message, 'The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.');
+
     // Initial state - translation has been received for the first time.
     $this->assertEqual($data['#translation']['#text'], 'translated 1');
     $this->assertTrue(empty($data['#translation']['#text_revisions']));
     $this->assertEqual($data['#translation']['#origin'], 'remote');
+    $this->assertEqual($data['#translation']['#timestamp'], REQUEST_TIME);
+
 
     // Add translation, however locally customized.
     $translation['dummy']['deep_nesting']['#text'] = 'translated 2';
     $translation['dummy']['deep_nesting']['#origin'] = 'local';
+    $translation['dummy']['deep_nesting']['#timestamp'] = REQUEST_TIME - 5;
     $item1->addTranslatedData($translation);
     $data = $item1->getData($key);
 
     // The translation text is updated.
     $this->assertEqual($data['#translation']['#text'], 'translated 2');
+    $this->assertEqual($data['#translation']['#timestamp'], REQUEST_TIME - 5);
+
     // Previous translation is among text_revisions.
     $this->assertEqual($data['#translation']['#text_revisions'][0]['#text'], 'translated 1');
     $this->assertEqual($data['#translation']['#text_revisions'][0]['#origin'], 'remote');
+    $this->assertEqual($data['#translation']['#text_revisions'][0]['#timestamp'], REQUEST_TIME);
     // Current translation origin is local.
     $this->assertEqual($data['#translation']['#origin'], 'local');
+
+    // Check job messages.
+    $messages = $job->getMessages();
+    $this->assertEqual(count($messages), 1);
 
     // Add translation - not local.
     $translation['dummy']['deep_nesting']['#text'] = 'translated 3';
     unset($translation['dummy']['deep_nesting']['#origin']);
+    unset($translation['dummy']['deep_nesting']['#timestamp']);
     $item1->addTranslatedData($translation);
     $data = $item1->getData($key);
 
     // The translation text is NOT updated.
     $this->assertEqual($data['#translation']['#text'], 'translated 2');
+    $this->assertEqual($data['#translation']['#timestamp'], REQUEST_TIME - 5);
     // Received translation is the latest revision.
     $last_revision = end($data['#translation']['#text_revisions']);
     $this->assertEqual($last_revision['#text'], 'translated 3');
     $this->assertEqual($last_revision['#origin'], 'remote');
+    $this->assertEqual($last_revision['#timestamp'], REQUEST_TIME);
     // Current translation origin is local.
     $this->assertEqual($data['#translation']['#origin'], 'local');
+
+    // Check job messages.
+    $messages = $job->getMessages();
+    $this->assertEqual(count($messages), 2);
+    $last_message = end($messages);
+    $this->assertEqual($last_message->message, 'Translation for customized @key received. Revert your changes if you wish to use it.');
 
     // Revert to previous revision which is the latest received translation.
     $item1->dataItemRevert($key);
@@ -244,11 +272,54 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     // The translation text is updated.
     $this->assertEqual($data['#translation']['#text'], 'translated 3');
     $this->assertEqual($data['#translation']['#origin'], 'remote');
+    $this->assertEqual($data['#translation']['#timestamp'], REQUEST_TIME);
     // Latest revision is now the formerly added local translation.
     $last_revision = end($data['#translation']['#text_revisions']);
     $this->assertTrue($last_revision['#text'], 'translated 2');
     $this->assertTrue($last_revision['#origin'], 'remote');
+    $this->assertEqual($last_revision['#timestamp'], REQUEST_TIME - 5);
+
+    // Check job messages.
+    $messages = $job->getMessages();
+    $this->assertEqual(count($messages), 3);
+    $last_message = end($messages);
+    $this->assertEqual($last_message->message, 'Translation for @key reverted to the latest version.');
+
+    // There should be three revisions now.
+    $this->assertEqual(count($data['#translation']['#text_revisions']), 3);
+
+    // Attempt to update the translation with the same text, this should not
+    // lead to a new revision.
+    $translation['dummy']['deep_nesting']['#text'] = 'translated 3';
+    //unset($translation['dummy']['deep_nesting']['#origin']);
+    //unset($translation['dummy']['deep_nesting']['#timestamp']);
+    $item1->addTranslatedData($translation);
+    $data = $item1->getData($key);
+    $this->assertEqual(count($data['#translation']['#text_revisions']), 3);
+
+    // Mark the translation as reviewed, a new translation should not update the
+    // existing one but create a new translation.
+    $item1->updateData($key, array('#status' => TMGMT_DATA_ITEM_STATE_REVIEWED));
+    $translation['dummy']['deep_nesting']['#text'] = 'translated 4';
+    $item1->addTranslatedData($translation);
+    $data = $item1->getData($key);
+
+    // The translation text is NOT updated.
+    $this->assertEqual($data['#translation']['#text'], 'translated 3');
+    // Received translation is the latest revision.
+    $this->assertEqual(count($data['#translation']['#text_revisions']), 4);
+    $last_revision = end($data['#translation']['#text_revisions']);
+    $this->assertEqual($last_revision['#text'], 'translated 4');
+    $this->assertEqual($last_revision['#origin'], 'remote');
+    $this->assertEqual($last_revision['#timestamp'], REQUEST_TIME);
+
+    // Check job messages.
+    $messages = $job->getMessages();
+    $this->assertEqual(count($messages), 4);
+    $last_message = end($messages);
+    $this->assertEqual($last_message->message, 'Translation for already reviewed @key received and stored as a new revision. Revert to it if you wish to use it.');
   }
+
 
   /**
    * Test the calculations of the counters.
