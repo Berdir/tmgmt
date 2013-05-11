@@ -197,6 +197,16 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
     $result .= _theme_table_cell($cell);
   }
   $result .= '</tr>';
+
+  if (!empty($element['below'])) {
+    $result .= '<tr' . drupal_attributes(array('class' => $element['#zebra'])) . '>';
+    $result .= _theme_table_cell(array(
+      'data' => drupal_render($element['below']),
+      'colspan' => '4',
+    ));
+    $result .= '</tr>';
+  }
+
   return $result;
 }
 

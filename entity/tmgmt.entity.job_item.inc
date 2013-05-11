@@ -501,8 +501,47 @@ class TMGMTJobItem extends Entity {
    */
   protected function addTranslatedDataRecursive($translation, array $key = array()) {
     if (isset($translation['#text'])) {
-      $status = $this->getData($key, '#status');
-      if (!$status || $status == TMGMT_DATA_ITEM_STATE_PENDING) {
+      $data = $this->getData($key);
+      if (!$data['#status'] || $data['#status'] == TMGMT_DATA_ITEM_STATE_PENDING || $data['#status'] == TMGMT_DATA_ITEM_STATE_TRANSLATED) {
+
+        // In case the origin is not set consider it to be remote.
+        if (!isset($translation['#origin'])) {
+          $translation['#origin'] = 'remote';
+        }
+
+        // If we have a translation text and is different from new one create
+        // revision.
+        if (!empty($data['#translation']['#text']) && $data['#translation']['#text'] != $translation['#text']) {
+
+          // Copy into $translation existing revisions.
+          if (!empty($data['#translation']['#text_revisions'])) {
+            $translation['#text_revisions'] = $data['#translation']['#text_revisions'];
+          }
+
+          // If current translation was created locally and the incoming one is
+          // remote, do not override the local, just create a new revision.
+          if (isset($data['#translation']['#origin']) && $data['#translation']['#origin'] == 'local' && $translation['#origin'] == 'remote') {
+            $translation['#text_revisions'][] = array(
+              '#text' => $translation['#text'],
+              '#origin' => $translation['#origin'],
+              '#timestamp' => $this->changed,
+            );
+            // Unset text and origin so that the current translation does not
+            // get overridden.
+            unset($translation['#text'], $translation['#origin']);
+            $this->addMessage('Translation for @key received. Revert your changes if you wish to use it.', array('@key' => tmgmt_ensure_keys_string($key)));
+          }
+          else {
+            $translation['#text_revisions'][] = array(
+              '#text' => $data['#translation']['#text'],
+              '#origin' => isset($data['#translation']['#origin']) ? $data['#translation']['#origin'] : 'remote',
+              '#timestamp' => $this->changed,
+            );
+            $diff = drupal_strlen($translation['#text']) - drupal_strlen($data['#translation']['#text']);
+            $this->addMessage('Updated translation for key @key, size difference: @diff characters.', array('@key' => tmgmt_ensure_keys_string($key), '@diff' => $diff));
+          }
+        }
+
         $values = array(
           '#translation' => $translation,
           '#status' => TMGMT_DATA_ITEM_STATE_TRANSLATED,
@@ -511,9 +550,39 @@ class TMGMTJobItem extends Entity {
       }
       return;
     }
+
     foreach (element_children($translation) as $item) {
       $this->addTranslatedDataRecursive($translation[$item], array_merge($key, array($item)));
     }
+  }
+
+  /**
+   * Reverts data item translation to the latest existing revision.
+   *
+   * @param array $key
+   *   Data item key that should be reverted.
+   *
+   * @return bool
+   *   Result of the revert action.
+   */
+  public function dataItemRevert(array $key) {
+    $data = $this->getData($key);
+    if (!empty($data['#translation']['#text_revisions'])) {
+
+      $prev_revision = end($data['#translation']['#text_revisions']);
+      $data['#translation']['#text_revisions'][] = array(
+        '#text' => $data['#translation']['#text'],
+        '#timestamp' => $this->changed,
+        '#origin' => $data['#translation']['#origin'],
+      );
+      $data['#translation']['#text'] = $prev_revision['#text'];
+      $data['#translation']['#origin'] = $prev_revision['#origin'];
+
+      $this->updateData($key, $data);
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
   /**

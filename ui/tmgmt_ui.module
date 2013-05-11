@@ -563,6 +563,42 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
             '#submit' => array('tmgmt_ui_translation_review_form_update_state'),
           );
         }
+
+        if (!empty($data[$key]['#translation']['#text_revisions'])) {
+          $form[$target_key]['actions']['revert'] = array(
+            '#type' => 'submit',
+            // Unicode character U+21B6 ANTICLOCKWISE TOP SEMICIRCLE ARROW
+            '#value' => '↶',
+            '#attributes' => array('title' => t('Revert')),
+            '#name' => 'revert-' . $target_key,
+            '#data_item_key' => $key,
+            '#submit' => array('tmgmt_ui_translation_review_form_revert'),
+            '#ajax' => array(
+              'callback' => 'tmgmt_ui_translation_review_form_ajax',
+              'wrapper' => $form[$target_key]['#ajaxid'],
+            ),
+          );
+
+          $revisions = array();
+
+          foreach ($data[$key]['#translation']['#text_revisions'] as $revision) {
+            $revisions[] = t('Origin: %origin, Created: %created</br>%text', array(
+              '%origin' => $revision['#origin'],
+              '%created' => format_date($revision['#timestamp']),
+              '%text' => filter_xss($revision['#text']),
+            ));
+          }
+          $form[$target_key]['below']['revisions_wrapper'] = array(
+            '#type' => 'fieldset',
+            '#title' => t('Translation revisions'),
+            '#collapsed' => TRUE,
+            '#collapsible' => TRUE,
+          );
+          $form[$target_key]['below']['revisions_wrapper']['revisions'] = array(
+            '#type' => 'markup',
+            '#markup' => theme('item_list', array('items' => $revisions)),
+          );
+        }
       }
       $form[$target_key]['translation'] = array(
         '#type' => 'textarea',
@@ -579,6 +615,25 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra) {
     }
   }
   return $form;
+}
+
+/**
+ * Review form revert action callback.
+ */
+function tmgmt_ui_translation_review_form_revert($form, &$form_state) {
+
+  /** @var TMGMTJobItem $item */
+  $item = $form_state['item'];
+
+  $key = tmgmt_ensure_keys_array($form_state['triggering_element']['#data_item_key']);
+
+  if ($item->dataItemRevert($key)) {
+    drupal_set_message(t('Translation reverted to the latest version.'));
+    $item->save();
+  }
+  else {
+    drupal_set_message(t('No past revision found, translation was not reverted.'));
+  }
 }
 
 /**
@@ -617,6 +672,7 @@ function tmgmt_ui_translation_review_form_validate($form, &$form_state) {
  * Submit callback for the job item review form.
  */
 function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
+  /** @var TMGMTJobItem $item */
   $item = $form_state['item'];
   // First invoke the submit method on the source controller.
   $source = tmgmt_source_ui_controller($item->plugin);
@@ -629,9 +685,12 @@ function tmgmt_ui_translation_review_form_submit($form, &$form_state) {
   // Write changes back to item.
   foreach ($form_state['values'] as $key => $value) {
     if (is_array($value) && isset($value['translation'])) {
+
       $data['#translation'] = array(
         '#text' => $value['translation'],
+        '#origin' => 'local',
       );
+
       $item->updateData($key, $data);
     }
   }

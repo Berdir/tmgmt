@@ -189,6 +189,67 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($item2->item_id, $items[$item2->tjiid]->item_id);
   }
 
+  function testDataItems() {
+    $translator = $this->createTranslator();
+    $job = $this->createJob();
+    $job->translator = $translator->name;
+    $job->save();
+
+    // Add some test items.
+    $item1 = $job->addItem('test_source', 'type', 5);
+    $key = array('dummy', 'deep_nesting');
+
+    $translation['dummy']['deep_nesting']['#text'] = 'translated 1';
+    $item1->addTranslatedData($translation);
+    $data = $item1->getData($key);
+
+    // Initial state - translation has been received for the first time.
+    $this->assertEqual($data['#translation']['#text'], 'translated 1');
+    $this->assertTrue(empty($data['#translation']['#text_revisions']));
+    $this->assertEqual($data['#translation']['#origin'], 'remote');
+
+    // Add translation, however locally customized.
+    $translation['dummy']['deep_nesting']['#text'] = 'translated 2';
+    $translation['dummy']['deep_nesting']['#origin'] = 'local';
+    $item1->addTranslatedData($translation);
+    $data = $item1->getData($key);
+
+    // The translation text is updated.
+    $this->assertEqual($data['#translation']['#text'], 'translated 2');
+    // Previous translation is among text_revisions.
+    $this->assertEqual($data['#translation']['#text_revisions'][0]['#text'], 'translated 1');
+    $this->assertEqual($data['#translation']['#text_revisions'][0]['#origin'], 'remote');
+    // Current translation origin is local.
+    $this->assertEqual($data['#translation']['#origin'], 'local');
+
+    // Add translation - not local.
+    $translation['dummy']['deep_nesting']['#text'] = 'translated 3';
+    unset($translation['dummy']['deep_nesting']['#origin']);
+    $item1->addTranslatedData($translation);
+    $data = $item1->getData($key);
+
+    // The translation text is NOT updated.
+    $this->assertEqual($data['#translation']['#text'], 'translated 2');
+    // Received translation is the latest revision.
+    $last_revision = end($data['#translation']['#text_revisions']);
+    $this->assertEqual($last_revision['#text'], 'translated 3');
+    $this->assertEqual($last_revision['#origin'], 'remote');
+    // Current translation origin is local.
+    $this->assertEqual($data['#translation']['#origin'], 'local');
+
+    // Revert to previous revision which is the latest received translation.
+    $item1->dataItemRevert($key);
+    $data = $item1->getData($key);
+
+    // The translation text is updated.
+    $this->assertEqual($data['#translation']['#text'], 'translated 3');
+    $this->assertEqual($data['#translation']['#origin'], 'remote');
+    // Latest revision is now the formerly added local translation.
+    $last_revision = end($data['#translation']['#text_revisions']);
+    $this->assertTrue($last_revision['#text'], 'translated 2');
+    $this->assertTrue($last_revision['#origin'], 'remote');
+  }
+
   /**
    * Test the calculations of the counters.
    */
