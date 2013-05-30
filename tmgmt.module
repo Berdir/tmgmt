@@ -330,7 +330,7 @@ function tmgmt_job_load_multiple(array $tjids = array(), $conditions = array()) 
 }
 
 /**
- * Loads job entities that have a job item with the identifiers.
+ * Loads active job entities that have a job item with the identifiers.
  *
  * @param $plugin
  *   The source plugin.
@@ -351,6 +351,45 @@ function tmgmt_job_item_load_latest($plugin, $item_type, $item_id, $source_langu
     // Only query for jobs that are currently active.
     ->condition('tj.state', TMGMT_JOB_STATE_ACTIVE)
     // And only query for job items that are not yet finished.
+    ->condition('tji.state', TMGMT_JOB_ITEM_STATE_ACCEPTED, '<>')
+    ->condition('tji.plugin', $plugin)
+    ->condition('tji.item_type', $item_type)
+    ->condition('tji.item_id', $item_id)
+    ->fields('tji', array('tjiid'))
+    ->fields('tj', array('target_language'))
+    ->orderBy('tji.changed', 'DESC')
+    ->groupBy('tj.target_language')
+    ->groupBy('tji.tjiid')
+    ->execute();
+  if ($items = $result->fetchAllKeyed()) {
+    $return = array();
+    foreach (tmgmt_job_item_load_multiple(array_keys($items)) as $key => $item) {
+      $return[$items[$key]] = $item;
+    }
+    return $return;
+  }
+  return FALSE;
+}
+
+/**
+ * Loads all latest job entities that have a job item with the identifiers.
+ *
+ * @param $plugin
+ *   The source plugin.
+ * @param $item_type
+ *   The source item type.
+ * @param $item_id
+ *   The source item id.
+ * @param string $source_language
+ *   The source language of the item.
+ *
+ * @return array
+ *   An array of job entities.
+ */
+function tmgmt_job_item_load_all_latest($plugin, $item_type, $item_id, $source_language) {
+  $query = db_select('tmgmt_job_item', 'tji');
+  $query->innerJoin('tmgmt_job', 'tj', 'tj.tjid = tji.tjid');
+  $result = $query->condition('tj.source_language', $source_language)
     ->condition('tji.state', TMGMT_JOB_ITEM_STATE_ACCEPTED, '<>')
     ->condition('tji.plugin', $plugin)
     ->condition('tji.item_type', $item_type)

@@ -202,3 +202,67 @@ function tmgmt_entity_get_translatable_entities($entity_type, $property_conditio
 
   return $entities;
 }
+
+/**
+ * Implements hook_tmgmt_source_suggestions()
+ */
+function tmgmt_entity_tmgmt_source_suggestions(array $items, TMGMTJob $job) {
+  $suggestions = array();
+
+  foreach ($items as $item) {
+    if (($item instanceof TMGMTJobItem) && ($item->plugin == 'entity') || ($item->plugin == 'node')) {
+      // Load the entity and extract the bundle name to get all fields from the
+      // current entity.
+      $entity = entity_load_single($item->item_type, $item->item_id);
+      list(, , $bundle) = entity_extract_ids($item->item_type, $entity);
+      $field_instances = field_info_instances($item->item_type, $bundle);
+
+      // Get all translatable entity types.
+      $entity_types = array_filter(variable_get('entity_translation_entity_types', array()));
+
+      // Loop over all fields, check if they are NOT translatable. Only if a
+      // field is not translatable we may suggest a referenced entity. If so,
+      // check for a supported field type (image and file currently here).
+      foreach ($field_instances as $instance) {
+        $field = field_info_field($instance['field_name']);
+        if (isset($field['translatable']) && !$field['translatable']) {
+          $field_type = $field['type'];
+          switch ($field_type) {
+            case 'file':
+            case 'image':
+              // 'File' (and images) must be translatable entity types.
+              // Other files we not suggest here. Get all field items from the
+              // current field and suggest them as translatable.
+              $field_name = $field['field_name'];
+              if (isset($entity_types['file']) && ($field_items = field_get_items($item->item_type, $entity, $field_name))) {
+                // Add all files as a suggestion.
+                foreach ($field_items as $field_item) {
+                  $file_entity = entity_load_single('file', $field_item['fid']);
+
+                  // Check if there is already a translation available for this
+                  // file. If so, just continue with the next file.
+                  $handler = entity_translation_get_handler('file', $file_entity);
+                  if ($handler instanceof EntityTranslationHandlerInterface) {
+                    $translations = $handler->getTranslations();
+                    if (isset($translations->data[$job->target_language])) {
+                      continue;
+                    }
+                  }
+
+                  // Add the translation as a suggestion.
+                  $suggestions[] = array(
+                    'job_item' => tmgmt_job_item_create('entity', 'file', $file_entity->fid),
+                    'referenced' => t('Referenced @type of field @label', array('@type' => $field_type, '@label' => $instance['label'])),
+                    'from_job' => $item->tjid,
+                  );
+                }
+              }
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  return $suggestions;
+}

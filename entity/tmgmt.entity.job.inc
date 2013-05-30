@@ -197,6 +197,17 @@ class TMGMTJob extends Entity {
   }
 
   /**
+   * Add a given TMGMTJobItem to this job.
+   *
+   * @param TMGMTJobItem $job
+   *   The job item to add.
+   */
+  function addExistingItem(TMGMTJobItem &$item) {
+    $item->tjid = $this->tjid;
+    $item->save();
+  }
+
+  /**
    * Add a log message for this job.
    *
    * @param $message
@@ -638,7 +649,7 @@ class TMGMTJob extends Entity {
    *   A nested array with the source data where the most upper key is the job
    *   item id.
    */
-  public function getData(array $key = array(), $index = null) {
+  public function getData(array $key = array(), $index = NULL) {
     $data = array();
     if (!empty($key)) {
       $tjiid = array_shift($key);
@@ -765,6 +776,67 @@ class TMGMTJob extends Entity {
     }
 
     return array();
+  }
+
+  /**
+   * Invoke the hook 'hook_tmgmt_source_suggestions' to get all suggestions.
+   *
+   * @param arary $conditions
+   *   Conditions to pass only some and not all items to the hook.
+   *
+   * @return array
+   *   An array with all additional translation suggestions.
+   *   - job_item: A TMGMTJobItem instance.
+   *   - referenced: A string which indicates where this suggestion comes from.
+   *   - from_job: The main TMGMTJob-ID which suggests this translation.
+   */
+  public function getSuggestions(array $conditions = array()) {
+    $suggestions = module_invoke_all('tmgmt_source_suggestions', $this->getItems($conditions), $this);
+
+    // Each TMGMTJob needs a job id to be able to count the words, because the
+    // source-language is stored in the job and not the item.
+    foreach ($suggestions as &$suggestion) {
+      $jobItem = $suggestion['job_item'];
+      $jobItem->tjid = $this->tjid;
+      $jobItem->recalculateStatistics();
+    }
+    return $suggestions;
+  }
+
+  /**
+   * Removes all suggestions from the given list which should not be processed.
+   *
+   * This function removes all suggestions from the given list which are already
+   * assigned to a translation job or which should not be processed because
+   * there are no words, no translation is needed, ...
+   *
+   * @param array &$suggestions
+   *   Associative array of translation suggestions. It must contain at least:
+   *   - tmgmt_job: An instance of a TMGMTJobItem.
+   */
+  public function cleanSuggestionsList(array &$suggestions) {
+    foreach ($suggestions as $k => $suggestion) {
+      if (is_array($suggestion) && isset($suggestion['job_item']) && ($suggestion['job_item'] instanceof TMGMTJobItem)) {
+        $jobItem = $suggestion['job_item'];
+
+        // Items with no words to translate should not be presented.
+        if ($jobItem->getWordCount() <= 0) {
+          unset($suggestions[$k]);
+          continue;
+        }
+
+        // Check if there already exists a translation job for this item in the
+        // current language.
+        $items = tmgmt_job_item_load_all_latest($jobItem->plugin, $jobItem->item_type, $jobItem->item_id, $this->source_language);
+        if ($items && isset($items[$this->target_language])) {
+          unset($suggestions[$k]);
+          continue;
+        }
+      } else {
+        unset($suggestions[$k]);
+        continue;
+      }
+    }
   }
 
 }

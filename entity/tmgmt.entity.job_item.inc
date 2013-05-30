@@ -289,7 +289,7 @@ class TMGMTJobItem extends Entity {
     if ($controller = $this->getSourceController()) {
       return $controller->getData($this);
     }
-    return FALSE;
+    return array();
   }
 
   /**
@@ -737,4 +737,78 @@ class TMGMTJobItem extends Entity {
 
     return array();
   }
+
+  /**
+   * Recalculate statistical word-data: pending, translated, reviewed, accepted.
+   */
+  public function recalculateStatistics() {
+    // Set translatable data from the current entity to calculate words.
+    if (empty($this->data)) {
+      $this->data = $this->getSourceData();
+    }
+
+    // Consider everything accepted when the job item is accepted.
+    if ($this->isAccepted()) {
+      $this->count_pending = 0;
+      $this->count_translated = 0;
+      $this->count_reviewed = 0;
+      $this->count_accepted = count(array_filter(tmgmt_flatten_data($this->data), '_tmgmt_filter_data'));
+    }
+    // Count the data item states.
+    else {
+      // Reset counter values.
+      $this->count_pending = 0;
+      $this->count_translated = 0;
+      $this->count_reviewed = 0;
+      $this->count_accepted = 0;
+      $this->word_count = 0;
+      $this->count($this->data);
+    }
+  }
+
+  /**
+   * Parse all data items recursively and sums up the counters for
+   * accepted, translated and pending items.
+   *
+   * @param $item
+   *   The current data item.
+   */
+  protected function count(&$item) {
+    if (!empty($item['#text'])) {
+      if (_tmgmt_filter_data($item)) {
+
+        // Count words of the data item.
+        $this->word_count += tmgmt_word_count($item['#text']);
+
+        // Set default states if no state is set.
+        if (!isset($item['#status'])) {
+          // Translation is present.
+          if (!empty($item['#translation'])) {
+            $item['#status'] = TMGMT_DATA_ITEM_STATE_TRANSLATED;
+          }
+          // No translation present.
+          else {
+            $item['#status'] = TMGMT_DATA_ITEM_STATE_PENDING;
+          }
+        }
+        switch ($item['#status']) {
+          case TMGMT_DATA_ITEM_STATE_REVIEWED:
+            $this->count_reviewed++;
+            break;
+          case TMGMT_DATA_ITEM_STATE_TRANSLATED:
+            $this->count_translated++;
+            break;
+          default:
+            $this->count_pending++;
+            break;
+        }
+      }
+    }
+    else {
+      foreach (element_children($item) as $key) {
+        $this->count($item[$key]);
+      }
+    }
+  }
+
 }
