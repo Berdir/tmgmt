@@ -373,7 +373,16 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   }
 
   if ($view = views_get_view('tmgmt_ui_job_items')) {
-    $form['items'] = array(
+    // Wrapper on the right side which holds the jobs and the suggestions.
+    $form['translator_wrapper_right'] = array(
+      '#type' => 'container',
+      '#prefix' => '<div class="tmgmt-ui-translator-wrapper-right">',
+      '#suffix' => '</div>',
+      '#weight' => 25,
+    );
+
+    // Translation jobs.
+    $form['translator_wrapper_right']['items'] = array(
       '#type' => 'item',
       '#title' => $view->get_title(),
       '#prefix' => '<div class="' . 'tmgmt-ui-job-items ' . ($job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage') . '">',
@@ -382,11 +391,73 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       '#suffix' => '</div>',
       '#weight' => $job->isSubmittable() ? 30 : 10,
     );
+
+    // A Wrapper for a button and a table with all suggestions.
+    $form['translator_wrapper_right']['suggestions'] = array(
+      '#type' => 'fieldset',
+      '#title' => '',
+      '#prefix' => '<div class="tmgmt-ui-job-items-suggestions ' . ($job->isSubmittable() ? 'tmgmt-ui-job-suggestions-submit' : 'tmgmt-ui-job-suggestions-manage') . '">',
+      '#suffix' => '</div>',
+      '#weight' => $job->isSubmittable() ? 35 : 15,
+    );
+
+    // Button to load all translation suggestions with AJAX.
+    $form['translator_wrapper_right']['suggestions']['load'] = array(
+      '#type' => 'submit',
+      '#value' => t('Load suggestions'),
+      '#submit' => array('tmgmt_ui_ajax_submit_load_suggestions'),
+      '#limit_validation_errors' => array(),
+      '#attributes' => array(
+        'class' => array('tmgmt-ui-job-suggestions-load')
+      ),
+      '#ajax' => array(
+        'callback' => 'tmgmt_ui_ajax_callback_load_suggestions',
+        'wrapper' => 'tmgmt-ui-job-items-suggestions',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#weight' => 10,
+    );
+
+    // Create the suggestions table.
+    $suggestions_table = array(
+      '#type' => 'tableselect',
+      '#header' => array(),
+      '#options' => array(),
+      '#multiple' => TRUE,
+      '#weight' => 30,
+    );
+
+    // If this is an AJAX-Request, load all related nodes and fill the table.
+    if ($form_state['rebuild'] && $form_state['rebuild_suggestions']) {
+      _tmgmt_ui_translation_suggestions($suggestions_table, $form_state);
+
+      // A save button on bottom of the table is needed.
+      $suggestions_table = array(
+        'suggestions_table' => $suggestions_table,
+        'suggestions_add' => array(
+          '#type' => 'submit',
+          '#value' => t('Add suggestions'),
+          '#submit' => array('tmgmt_ui_submit_add_suggestions'),
+          '#limit_validation_errors' => array(array('suggestions_table')),
+          '#attributes' => array(
+            'class' => array('tmgmt-ui-job-suggestions-add')
+          ),
+          '#weight' => 40,
+        ),
+      );
+    }
+    $form['translator_wrapper_right']['suggestions']['suggestions_list'] = array(
+      '#type' => 'container',
+      '#prefix' => '<div id="tmgmt-ui-job-items-suggestions" class="tmgmt-ui-job-items-suggestions">',
+      '#suffix' => '</div>',
+      '#weight' => 20,
+    ) + $suggestions_table;
   }
 
   $form['translator_wrapper'] = array(
     '#type' => 'container',
-    '#prefix' => '<div id="tmgmt-ui-translator-wrapper">',
+    '#prefix' => '<div class="tmgmt-ui-translator-wrapper">',
     '#suffix' => '</div>',
     '#weight' => 20,
   );
@@ -484,6 +555,113 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   );
   $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
   return $form;
+}
+
+/**
+ * Set a value in form_state to rebuild the form and fill with data.
+ */
+function tmgmt_ui_ajax_submit_load_suggestions(array $form, array &$form_state) {
+  $form_state['rebuild'] = TRUE;
+  $form_state['rebuild_suggestions'] = TRUE;
+}
+
+/**
+ * Adds selected suggestions to the job.
+ */
+function tmgmt_ui_submit_add_suggestions($form, &$form_state) {
+  // Save all selected suggestion items.
+  if (isset($form_state['values']['suggestions_table']) && is_array($form_state['values']['suggestions_table'])) {
+    foreach ($form_state['values']['suggestions_table'] as $id) {
+      $key = (int)$id - 1; // Because in the tableselect we need an idx > 0.
+      if (isset($form_state['tmgmt_suggestions'][$key]['job_item'])) {
+        $item = $form_state['tmgmt_suggestions'][$key]['job_item'];
+        $form_state['tmgmt_job']->addExistingItem($item);
+      }
+    }
+  }
+
+  // Force a rebuild of the form.
+  $form_state['rebuild'] = TRUE;
+  unset($form_state['tmgmt_suggestions']);
+}
+
+/**
+ * Returns the suggestions table for an AJAX-Call.
+ */
+function tmgmt_ui_ajax_callback_load_suggestions($form, &$form_state) {
+  return $form['translator_wrapper_right']['suggestions']['suggestions_list'];
+}
+
+/**
+ * Fills the tableselect with all translation suggestions.
+ *
+ * Calls hook_tmgmt_source_suggestions(TMGMTJob) and creates the resulting list
+ * based on the results from all modules.
+ *
+ * @param array $suggestions_table
+ *   Tableselect part for a $form array where the #options should be inserted.
+ * @param array $form_state
+ *   The main form_state.
+ */
+function _tmgmt_ui_translation_suggestions(array &$suggestions_table, array &$form_state) {
+  $options = array();
+  $job = $form_state['tmgmt_job'];
+  if ($job instanceof TMGMTJob) {
+    // Get all suggestions from all modules which implements
+    // 'hook_tmgmt_source_suggestions' and cache them in $form_state.
+    if (!isset($form_state['tmgmt_suggestions'])) {
+      $form_state['tmgmt_suggestions'] = $job->getSuggestions();
+    }
+
+    // Remove suggestions which are already processed, translated, ...
+    $job->cleanSuggestionsList($form_state['tmgmt_suggestions']);
+
+    // Process all valid entries.
+    foreach ($form_state['tmgmt_suggestions'] as $k => $result) {
+      if (is_array($result) && isset($result['job_item']) && ($result['job_item'] instanceof TMGMTJobItem)) {
+        $options[$k + 1] = _tmgmt_ui_add_suggestion_item($result);
+      }
+    }
+
+    $suggestions_table['#options'] = $options;
+    $suggestions_table['#empty'] = t('No related suggestions available.');
+    $suggestions_table['#header'] = array(
+      'title' => t('Title'),
+      'plugin' => t('Plugin'),
+      'reason' => t('Reason'),
+      'words' => t('Word count'),
+    );
+  }
+}
+
+/**
+ * Create a Suggestion-Table entry based on a TMGMTJob and a title.
+ *
+ * @param array $result
+ *   Suggestion array with the keys job_item, reason and from_item.
+ *
+ * @return array
+ *   Options-Entry for a tableselect array.
+ */
+function _tmgmt_ui_add_suggestion_item(array $result) {
+  $item = $result['job_item'];
+
+  $reason = isset($result['reason']) ? $result['reason'] : NULL;
+  $labels = _tmgmt_plugin_labels('source');
+  $option = array(
+    'title' => $item->label(),
+    'plugin' => isset($labels[$item->plugin]) ? $labels[$item->plugin] : '',
+    'words' => $item->getWordCount(),
+    'reason' => $reason,
+  );
+
+  if (!empty($result['from_item'])) {
+    $from_item = tmgmt_job_item_load($result['from_item']);
+    if ($from_item) {
+      $option['reason'] = t('%reason in %job', array('%reason' => $option['reason'], '%job' => $from_item->label()));
+    }
+  }
+  return $option;
 }
 
 /**

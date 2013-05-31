@@ -8,15 +8,19 @@
   margin-right: 80px;
 }
 
-.tmgmt-ui-job-submit.tmgmt-ui-job-items {
-  max-width: 500px;
-  float: left;
-}
-
-#tmgmt-ui-translator-wrapper {
+.tmgmt-ui-translator-wrapper {
   width: 500px;
   margin-right: 20px;
   float: left;
+}
+
+.tmgmt-ui-translator-wrapper-right {
+  max-width: 700px;
+  float: left;
+}
+
+.tmgmt-ui-job-items-suggestions fieldset {
+  padding-top: 13px;
 }
 
 table.tmgmt-ui-review td {
