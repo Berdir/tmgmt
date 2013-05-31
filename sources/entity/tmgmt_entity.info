@@ -3,14 +3,14 @@ description = Entity source plugin for the Translation Management system.
 package = Translation Management
 core = 7.x
 
-dependencies[] = entity
 dependencies[] = tmgmt
 dependencies[] = tmgmt_field
+dependencies[] = entity
+dependencies[] = entity_translation
 
 test_dependencies[] = pathauto
 test_dependencies[] = file_entity
 
-files[] = ../tests/tmgmt.base.test
 files[] = tmgmt_entity.source.test
 files[] = tmgmt_entity.pathauto.test
 files[] = tmgmt_entity.suggestions.test

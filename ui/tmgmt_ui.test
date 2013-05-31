@@ -277,4 +277,74 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertEqual($uri['path'], $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
   }
+
+  /**
+   * Tests the UI of suggestions.
+   */
+  public function testSuggestions() {
+    // Prepare a job and a node for testing.
+    $job = $this->createJob();
+    $job->addItem('test_source', 'test', 1);
+    $job->addItem('test_source', 'test', 7);
+
+    // Go to checkout form.
+    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $this->drupalGet(reset($redirects));
+
+    $this->assertRaw('20');
+
+    // Load all suggestions.
+    $commands = $this->drupalPostAJAX(NULL, array(), array('op' => t('Load suggestions')));
+    $this->assertEqual(count($commands), 4, 'Found 4 commands in AJAX-Request.');
+
+    // Check each command for success.
+    foreach ($commands as $command) {
+      // No checks against the settings because we not use ajax to save.
+      if ($command['command'] == 'settings') {
+      }
+      // Other commands must be from type "insert".
+      else if ($command['command'] == 'insert') {
+        // This should be the tableselect javascript file for the header.
+        if (($command['method'] == 'prepend') && ($command['selector'] == 'head')) {
+          $this->assertTrue(substr_count($command['data'], 'misc/tableselect.js'), 'Javascript for Tableselect found.');
+        }
+        // Check for the main content, the tableselect with the suggestions.
+        else if (($command['method'] == NULL) && ($command['selector'] == NULL)) {
+          $this->assertTrue(substr_count($command['data'], '</th>') == 5, 'Found five table header.');
+          $this->assertTrue(substr_count($command['data'], '</tr>') == 3, 'Found two suggestion and one table header.');
+          $this->assertTrue(substr_count($command['data'], '<td>11</td>') == 2, 'Found 10 words to translate per suggestion.');
+          $this->assertTrue(substr_count($command['data'], 'value="Add suggestions"'), 'Found add button.');
+        }
+        // Nothing to prepend...
+        else if (($command['method'] == 'prepend') && ($command['selector'] == NULL)) {
+          $this->assertTrue(empty($command['data']), 'No content will be prepended.');
+        }
+        else {
+          $this->fail('Unknown method/selector combination.');
+          debug($command);
+        }
+      }
+      else {
+        $this->fail('Unknown command.');
+        debug($command);
+      }
+    }
+
+    $this->assertText('test_source:test_suggestion:1');
+    $this->assertText('test_source:test_suggestion:7');
+    $this->assertText('Test suggestion for test source 1');
+    $this->assertText('Test suggestion for test source 7');
+
+    // Add the second suggestion.
+    $edit = array('suggestions_table[2]' => TRUE);
+    $this->drupalPost(NULL, $edit, t('Add suggestions'));
+
+    // Total word count should now include the added job.
+    $this->assertRaw('31');
+    // The suggestion for 7 was added, so there should now be a suggestion
+    // or the suggestion instead.
+    $this->assertNoText('Test suggestion for test source 7');
+    $this->assertText('test_source:test_suggestion_suggestion:7');
+
+  }
 }

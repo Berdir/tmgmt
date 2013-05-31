@@ -435,13 +435,13 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       // A save button on bottom of the table is needed.
       $suggestions_table = array(
         'suggestions_table' => $suggestions_table,
-        'suggestions_save' => array(
+        'suggestions_add' => array(
           '#type' => 'submit',
-          '#value' => t('Save suggestions'),
-          '#submit' => array('tmgmt_ui_submit_save_suggestions'),
+          '#value' => t('Add suggestions'),
+          '#submit' => array('tmgmt_ui_submit_add_suggestions'),
           '#limit_validation_errors' => array(array('suggestions_table')),
           '#attributes' => array(
-            'class' => array('tmgmt-ui-job-suggestions-save')
+            'class' => array('tmgmt-ui-job-suggestions-add')
           ),
           '#weight' => 40,
         ),
@@ -566,14 +566,14 @@ function tmgmt_ui_ajax_submit_load_suggestions(array $form, array &$form_state) 
 }
 
 /**
- * Saves selected suggestions as jobs and returns the outstanding suggestions.
+ * Adds selected suggestions to the job.
  */
-function tmgmt_ui_submit_save_suggestions($form, &$form_state) {
-  // Save all selected suggestion jobs.
+function tmgmt_ui_submit_add_suggestions($form, &$form_state) {
+  // Save all selected suggestion items.
   if (isset($form_state['values']['suggestions_table']) && is_array($form_state['values']['suggestions_table'])) {
     foreach ($form_state['values']['suggestions_table'] as $id) {
       $key = (int)$id - 1; // Because in the tableselect we need an idx > 0.
-      if ($id && isset($form_state['tmgmt_suggestions'][$key]['job_item'])) {
+      if (isset($form_state['tmgmt_suggestions'][$key]['job_item'])) {
         $item = $form_state['tmgmt_suggestions'][$key]['job_item'];
         $form_state['tmgmt_job']->addExistingItem($item);
       }
@@ -582,7 +582,7 @@ function tmgmt_ui_submit_save_suggestions($form, &$form_state) {
 
   // Force a rebuild of the form.
   $form_state['rebuild'] = TRUE;
-  $form_state['rebuild_suggestions'] = TRUE;
+  unset($form_state['tmgmt_suggestions']);
 }
 
 /**
@@ -609,7 +609,7 @@ function _tmgmt_ui_translation_suggestions(array &$suggestions_table, array &$fo
   if ($job instanceof TMGMTJob) {
     // Get all suggestions from all modules which implements
     // 'hook_tmgmt_source_suggestions' and cache them in $form_state.
-    if (!isset($form_state['tmgmt_suggestions']) || (count($form_state['tmgmt_suggestions']) <= 0)) {
+    if (!isset($form_state['tmgmt_suggestions'])) {
       $form_state['tmgmt_suggestions'] = $job->getSuggestions();
     }
 
@@ -619,9 +619,7 @@ function _tmgmt_ui_translation_suggestions(array &$suggestions_table, array &$fo
     // Process all valid entries.
     foreach ($form_state['tmgmt_suggestions'] as $k => $result) {
       if (is_array($result) && isset($result['job_item']) && ($result['job_item'] instanceof TMGMTJobItem)) {
-        $entity = $result['job_item'];
-        $suggested = isset($result['suggested']) ? $result['suggested'] : NULL;
-        $options[$k + 1] = _tmgmt_ui_add_suggestion_job($entity, $suggested);
+        $options[$k + 1] = _tmgmt_ui_add_suggestion_item($result);
       }
     }
 
@@ -629,7 +627,8 @@ function _tmgmt_ui_translation_suggestions(array &$suggestions_table, array &$fo
     $suggestions_table['#empty'] = t('No related suggestions available.');
     $suggestions_table['#header'] = array(
       'title' => t('Title'),
-      'referenced' => t('Reference'),
+      'plugin' => t('Plugin'),
+      'reason' => t('Reason'),
       'words' => t('Word count'),
     );
   }
@@ -638,21 +637,31 @@ function _tmgmt_ui_translation_suggestions(array &$suggestions_table, array &$fo
 /**
  * Create a Suggestion-Table entry based on a TMGMTJob and a title.
  *
- * @param TMGMTJobItem $entity
- *   A translation jobitem created by a module which is a suggestion.
- * @param string $suggested = NULL
- *   (Optional) Text which indicates what type of translation this is.
+ * @param array $result
+ *   Suggestion array with the keys job_item, reason and from_item.
  *
  * @return array
  *   Options-Entry for a tableselect array.
  */
-function _tmgmt_ui_add_suggestion_job(TMGMTJobItem $entity, $suggested = '') {
-  $uri = $entity->getSourceUri();
-  return array(
-    'title' => $entity->label(),
-    'words' => $entity->getWordCount(),
-    'referenced' => isset($uri) ? l($suggested, $uri['path'], array('attributes' => array('target' => '_blank')) + $uri['options']) : $suggested,
+function _tmgmt_ui_add_suggestion_item(array $result) {
+  $item = $result['job_item'];
+
+  $reason = isset($result['reason']) ? $result['reason'] : NULL;
+  $labels = _tmgmt_plugin_labels('source');
+  $option = array(
+    'title' => $item->label(),
+    'plugin' => isset($labels[$item->plugin]) ? $labels[$item->plugin] : '',
+    'words' => $item->getWordCount(),
+    'reason' => $reason,
   );
+
+  if (!empty($result['from_item'])) {
+    $from_item = tmgmt_job_item_load($result['from_item']);
+    if ($from_item) {
+      $option['reason'] = t('%reason in %job', array('%reason' => $option['reason'], '%job' => $from_item->label()));
+    }
+  }
+  return $option;
 }
 
 /**

@@ -58,8 +58,8 @@ function hook_tmgmt_source_suggestions(array $items, TMGMTJob $job) {
   return array(
     array(
       'job_item' => tmgmt_job_item_create('entity', 'node', 0),
-      'referenced' => t('Referenced @type of field @label', array('@type' => 'entity', '@label' => 'label')),
-      'from_job' => $job->tjid,
+      'reason' => t('Referenced @type of field @label', array('@type' => 'entity', '@label' => 'label')),
+      'from_item' => $items[1]->tjiid,
     )
   );
 }

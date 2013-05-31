@@ -252,8 +252,8 @@ function tmgmt_entity_tmgmt_source_suggestions(array $items, TMGMTJob $job) {
                   // Add the translation as a suggestion.
                   $suggestions[] = array(
                     'job_item' => tmgmt_job_item_create('entity', 'file', $file_entity->fid),
-                    'referenced' => t('Referenced @type of field @label', array('@type' => $field_type, '@label' => $instance['label'])),
-                    'from_job' => $item->tjid,
+                    'reason' => t('Field @label', array('@label' => $instance['label'])),
+                    'from_item' => $item->tjiid,
                   );
                 }
               }
@@ -263,6 +263,5 @@ function tmgmt_entity_tmgmt_source_suggestions(array $items, TMGMTJob $job) {
       }
     }
   }
-
   return $suggestions;
 }

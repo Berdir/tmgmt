@@ -11,15 +11,15 @@ class TMGMTSuggestionsTestCase extends TMGMTBaseTestCase {
 
   static function getInfo() {
     return array(
-      'name' => t('Suggestions tests'),
-      'description' => t('Basic suggestion operations for jobs and job-items'),
+      'name' => t('Entity Suggestions tests'),
+      'description' => t('Tests suggestion implementation for the entity source plugin'),
       'group' => t('Translation Management'),
       'dependencies' => array('file_entity'),
     );
   }
 
   public function setUp() {
-    parent::setUp(array('file_entity', 'tmgmt_entity', 'entity_translation', 'tmgmt_ui'));
+    parent::setUp(array('file_entity', 'tmgmt_entity', 'tmgmt_ui'));
     $this->loginAsAdmin(array('administer entity translation'));
 
     $this->setEnvironment('de');
@@ -174,6 +174,8 @@ class TMGMTSuggestionsTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($suggestion['job_item']->plugin, 'entity', 'Got an entity as plugin in the suggestion.');
     $this->assertEqual($suggestion['job_item']->item_type, 'file', 'Got a file in the suggestion.');
     $this->assertEqual($suggestion['job_item']->item_id, $node->field1[LANGUAGE_NONE][1]['fid'], 'File id match between node and suggestion.');
+    $this->assertEqual($suggestion['reason'], 'Field Field 1');
+    $this->assertEqual($suggestion['from_item'], $item->tjiid);
 
     // Add the suggestion to the job and re-get all suggestions.
     $job->addExistingItem($suggestion['job_item']);
@@ -183,59 +185,5 @@ class TMGMTSuggestionsTestCase extends TMGMTBaseTestCase {
     // Check for no more suggestions.
     $this->assertEqual(count($suggestions), 0, 'Found no more suggestion.');
   }
-
-  /**
-   * Frontend-Test to check the loading and adding functions.
-   */
-  public function testLoadSuggestions() {
-    // Prepare a job and a node for testing.
-    $job = $this->createJob();
-    $node = $this->prepareTranslationSuggestions();
-    $item = $job->addItem('entity', 'node', $node->nid);
-
-    // Go to the job details page.
-    $this->drupalGet('admin/config/regional/tmgmt/jobs/' . $job->tjid);
-
-    // Load all suggestions.
-    $commands = $this->drupalPostAJAX(NULL, array(), array('op' => t('Load suggestions')));
-    $this->assertEqual(count($commands), 4, 'Found 4 commands in AJAX-Request.');
-
-    // Check each command for success.
-    foreach ($commands as $command) {
-      // No checks against the settings because we not use ajax to save.
-      if ($command['command'] == 'settings') {
-      }
-      // Other commands must be from type "insert".
-      else if ($command['command'] == 'insert') {
-        // This should be the tableselect javascript file for the header.
-        if (($command['method'] == 'prepend') && ($command['selector'] == 'head')) {
-          $this->assertTrue(substr_count($command['data'], 'misc/tableselect.js'), 'Javascript for Tableselect found.');
-        }
-        // Check for the main content, the tableselect with the suggestions.
-        else if (($command['method'] == NULL) && ($command['selector'] == NULL)) {
-          $this->assertTrue(substr_count($command['data'], '</th>') == 4, 'Found four table header.');
-          $this->assertTrue(substr_count($command['data'], '</tr>') == 2, 'Found one suggestion and one table header.');
-          $this->assertTrue(substr_count($command['data'], '<td>3</td>'), 'Found 3 words to translate.');
-          $this->assertTrue(substr_count($command['data'], 'value="Save suggestions"'), 'Found save button.');
-        }
-        // Nothing to prepend...
-        else if (($command['method'] == 'prepend') && ($command['selector'] == NULL)) {
-          $this->assertTrue(empty($command['data']), 'No content will pe prepended.');
-        }
-        else {
-          $this->assert(FALSE, 'Unknown method/selector combination.');
-          debug($command);
-        }
-
-      }
-      else {
-        $this->assert(FALSE, 'Unknown command.');
-        debug($command);
-      }
-    }
-
-  }
-
-
 
 }
