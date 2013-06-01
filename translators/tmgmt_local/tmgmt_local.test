@@ -260,8 +260,8 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($first_task_item->getCountTranslated(), 0);
     $this->assertEqual($first_task_item->getCountUntranslated(), 1);
 
-    $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:1')));
-    $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:2')));
+    $this->assertText('test_source:test:1');
+    $this->assertText('test_source:test:2');
     $this->assertText(t('Untranslated'));
 
     // Translate the first item.
@@ -270,7 +270,7 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Dummy'));
     // Job comment is present in the translate tool as well.
     $this->assertText($job_comment);
-    $this->assertText(t('Translation for @source', array('@source' => 'test_source:test:1')));
+    $this->assertText('test_source:test:1');
 
     // Try to complete a translation when translations are missing.
     $this->drupalPost(NULL, array(), t('Save as completed'));
