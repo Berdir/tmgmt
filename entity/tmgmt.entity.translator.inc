@@ -261,6 +261,8 @@ class TMGMTTranslator extends Entity {
    *
    * @return string
    *   Remote language code.
+   *
+   * @ingroup tmgmt_remote_languages_mapping
    */
   public function mapToRemoteLanguage($language) {
     return $this->getController()->mapToRemoteLanguage($this, $language);
@@ -274,6 +276,8 @@ class TMGMTTranslator extends Entity {
    *
    * @return string
    *   Local language code.
+   *
+   * @ingroup tmgmt_remote_languages_mapping
    */
   public function mapToLocalLanguage($language) {
     return $this->getController()->mapToLocalLanguage($this, $language);

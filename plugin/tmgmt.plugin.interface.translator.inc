@@ -65,8 +65,14 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
   /**
    * Specifies default mappings for local to remote language codes.
    *
+   * This is the place to return information about different default language
+   * codes, e.g. map the local de language code to de-DE.
+   *
+   *
    * @return array
    *   An array of local => remote language codes.
+   *
+   * @ingroup tmgmt_remote_languages_mapping
    */
   public function getDefaultRemoteLanguagesMappings();
 
@@ -79,6 +85,8 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    * @return array
    *   An array of language codes which are provided by the translator
    *   (remote language codes).
+   *
+   * @ingroup tmgmt_remote_languages_mapping
    */
   public function getSupportedRemoteLanguages(TMGMTTranslator $translator);
 
@@ -90,6 +98,8 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    *
    * @return array
    *   An array of local => remote language codes.
+   *
+   * @ingroup tmgmt_remote_languages_mapping
    */
   public function getRemoteLanguagesMappings(TMGMTTranslator $translator);
 
@@ -103,6 +113,8 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    *
    * @return string
    *   Remote language code.
+   *
+   * @ingroup tmgmt_remote_languages_mapping
    */
   public function mapToRemoteLanguage(TMGMTTranslator $translator, $language);
 
@@ -116,20 +128,26 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    *
    * @return string
    *   Local language code.
+   *
+   * @ingroup tmgmt_remote_languages_mapping
    */
   public function mapToLocalLanguage(TMGMTTranslator $translator, $language);
 
   /**
-   * Returns all available target languages that are supported by this service
-   * when given a source language.
+   * Returns all available target languages for a given source languages.
+   *
+   * Implementations of this method need to apply correct mappings as as local
+   * language codes are passed in and expected to be returned.
    *
    * @param TMGMTTranslator $translator
    *   The translator entity.
    * @param $source_language
-   *   The source language.
+   *   The local source language code.
    *
    * @return array
-   *   An array of remote languages in ISO format.
+   *   An array of language codes mapped to the local language names.
+   *
+   * @ingroup tmgmt_remote_languages_mapping
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language);
 
@@ -137,7 +155,7 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    * Returns supported language pairs.
    *
    * This info may be used by other plugins to find out what language pairs
-   * can handle the translator.
+   * can be handle the translator.
    *
    * @param TMGMTTranslator $translator
    *   The translator entity.
@@ -150,6 +168,8 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    *     array('source_language' => 'en-US', 'target_language' => 'de-DE'),
    *     array('source_language' => 'en-US', 'target_language' => 'de-CH'),
    *   )
+   *
+   * @ingroup tmgmt_remote_languages_mapping
    */
   public function getSupportedLanguagePairs(TMGMTTranslator $translator);
 
@@ -160,6 +180,8 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    *
    * @param TMGMTJob $job
    *   The job that should be submitted.
+   *
+   * @ingroup tmgmt_remote_languages_mapping
    */
   public function requestTranslation(TMGMTJob $job);
 
