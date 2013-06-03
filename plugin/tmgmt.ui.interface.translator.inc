@@ -20,6 +20,9 @@ interface TMGMTTranslatorUIControllerInterface extends TMGMTPluginBaseInterface 
   /**
    * Retrieves information about a translation job.
    *
+   * Services based translators with remote states should place a Poll button
+   * here to sync the job state.
+   *
    * @param TMGMTJob $job
    *   The translation job.
    */
