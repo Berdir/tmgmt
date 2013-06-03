@@ -173,7 +173,7 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
   if ($element['#top_label'] == $element['#leave_label']) {
     $element['#leave_label'] = '';
   }
-  $result = '<tr' . drupal_attributes(array('class' => $element['#zebra'], 'id' => $element['#ajaxid'])) . '>';
+  $result = '<tr' . drupal_attributes(array('class' => $element['#zebra'])) . '>';
   $row = array();
   $leaf_label = '<label>' . $element['#leave_label'] . '</label>';
   $leaf_label = '<div class="form-item form-type-label">' . $leaf_label . '</div>';
@@ -191,12 +191,22 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
   );
   $row[] = array(
     'data' => drupal_render($element['actions']),
-    'class' => 'tmgmt-ui-data-item-label',
+    'class' => 'tmgmt-ui-data-item-actions',
   );
   foreach ($row as $cell) {
     $result .= _theme_table_cell($cell);
   }
   $result .= '</tr>';
+
+  if (!empty($element['below'])) {
+    $result .= '<tr' . drupal_attributes(array('class' => $element['#zebra'])) . '>';
+    $result .= _theme_table_cell(array(
+      'data' => drupal_render($element['below']),
+      'colspan' => '4',
+    ));
+    $result .= '</tr>';
+  }
+
   return $result;
 }
 
@@ -246,7 +256,8 @@ function theme_tmgmt_ui_translator_review_form($variables) {
     );
     $result = '<thead><tr>' . _theme_table_cell($cell, TRUE) . '</tr></thead>' . implode('', $element_groups);
   }
-  return '<div id="tmgmt-status-messages-' . strtolower($parent_label) . '"></div><table class="tmgmt-ui-review"><colgroup width="100" /><colgroup width="*" span="2" /><colgroup width="100" />' . $result . '</table>';
+  $table = '<table class="tmgmt-ui-review"><colgroup width="100" /><colgroup width="*" span="2" /><colgroup width="100" />' . $result . '</table>';
+  return '<div id="' . $element['#ajaxid'] . '">' . $table . '</div>';
 }
 
 /**
