@@ -13,44 +13,206 @@ function tmgmt_i18n_string_tmgmt_source_plugin_info() {
     'label' => t('i18n String'),
     'description' => t('Source handler for i18n strings.'),
     'plugin controller class' => 'TMGMTI18nStringSourcePluginController',
-    'item types' => array(),
+    'ui controller class' => 'TMGMTI18nStringDefaultSourceUIController',
   );
-  // @todo Implement item types.
+  foreach (i18n_object_info() as $object_type => $object_info) {
+    // @todo. Exclude objects that don't have a type: block, fields.
+    //   Currently not supported as they don't follow the standard pattern.
+    if (isset($object_info['string translation']['type'])) {
+      $info['i18n_string']['item types'][$object_type] = $object_info['title'];
+    }
+  }
   return $info;
 }
 
-function tmgmt_i18n_string_select_query($i18n_object_type, $languages = NULL) {
+/**
+ * Gets i18n strings for given type and label.
+ *
+ * @param string $type
+ *   i18n object type.
+ * @param string $search_label
+ *   Label to search for.
+ * @param int $limit
+ *   Pager query limit.
+ *
+ * @return array
+ *   List of i18n strings data.
+ */
+function tmgmt_i18n_string_get_strings($type, $search_label = NULL, $limit = 20) {
+  $info = i18n_object_info($type);
+
   $languages = drupal_map_assoc(array_keys(language_list()));
   $select = db_select('i18n_string', 'i18n_s');
 
-  $i = 0;
+  $select->condition('i18n_s.type', $info['string translation']['type']);
+  $select->condition('i18n_s.textgroup', $info['string translation']['textgroup']);
+
+  $select->join('locales_source', 'ls', 'ls.lid = i18n_s.lid');
+  $select->addField('ls', 'source');
+  if (!empty($search_label)) {
+    $select->condition('ls.source', "%$search_label%", 'LIKE');
+  }
+
   foreach ($languages as $langcode) {
+    $langcode = str_replace('-', '', $langcode);
     $select->leftJoin('locales_target', "lt_$langcode", "i18n_s.lid = %alias.lid AND %alias.language = '$langcode'");
     $select->addField("lt_$langcode", 'language', "lang_$langcode");
-    $select->fields("i18n_s", array("lid", "textgroup", "context"));
-    /*
-    $select->leftjoin('tmgmt_job_item', "tmgmt_ji_$langcode", "%alias.item_id = concat('$i18n_object_type:', i18n_s.objectid)");
-    $select->leftjoin('tmgmt_job', "tmgmt_job_$langcode", "tmgmt_job_$langcode.tjid = tmgmt_ji_$langcode.tjid AND tmgmt_job_$langcode.target_language = '$langcode'");
-    $select->addField("tmgmt_job_$langcode", 'state', "state_$langcode");
-    $select->addExpression("max(tmgmt_job_$langcode.tjid)", "tmgmt_job_{$langcode}_tjid");
-    */
-    $i++;
+    $select->fields("i18n_s", array('lid', 'textgroup', 'context', 'type', 'objectid'));
   }
 
   $select->addExpression("concat(i18n_s.textgroup, ':', i18n_s.context)", 'i18n_string_name');
-  $select->addExpression("concat(i18n_s.textgroup, ':', i18n_s.context)", 'tmgmt_job_item_item_id');
-  // $select->groupBy('tmgmt_job_item_item_id');
 
-  /*
-    $select->condition('tmgmt_job_item', 'soruce_plugin', 'i18n_string');
-    $select->condition('tmgmt_job_item', 'item_type', 'i18n_string');
-  */
-
-  // language filter.
-  // $select->isNotNull("lt_$langcode.language");
-
-  $select->orderBy('i18n_s.textgroup');
   $select->orderBy('i18n_s.context');
 
-  return array('languages' => $languages, 'query' => $select);
+  $select = $select->extend('PagerDefault')->limit($limit);
+
+  return $select->execute()->fetchAll();
+}
+
+/**
+ * Gets wrapper class name for given textgoup and type.
+ *
+ * This does not work for block as it does not provide the
+ * $object_info['string translation']['type'] property.
+ *
+ * @param string $textgroup
+ * @param string $type
+ *
+ * @return string
+ */
+function tmgmt_i18n_string_source_get_object_wrapper($textgroup, $type) {
+  foreach (i18n_object_info() as $object_type => $object_info) {
+    if (isset($object_info['string translation']['textgroup']) && $object_info['string translation']['textgroup'] == $textgroup) {
+      if ((isset($object_info['string translation']['type']) && $object_info['string translation']['type'] == $type) || (!isset($object_info['string translation']['type']) && $object_type == $type)) {
+        return $object_type;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_ID_alter().
+ *
+ * Adds request translation capabilities into i18n translate tab.
+ */
+function tmgmt_i18n_string_form_i18n_string_translate_page_overview_form_alter(&$form, &$form_state) {
+  $object = $form['object']['#value'];
+
+  // Provide request translation UI only for supported types.
+  $plugin_info = tmgmt_source_plugin_info('i18n_string');
+  if (!isset($plugin_info['item types'][$object->get_type()])) {
+    return;
+  }
+
+  // Build the id. This might be little risky as not sure if we can trust
+  // object properties, but for now the only way that I could come up with.
+  $textgroup = array_keys($object->get_properties());
+  $id = array_shift($textgroup) . ':' . implode(':', $object->get_string_context());
+  $source_language = variable_get_value('i18n_string_source_language');
+
+  $existing_items = tmgmt_job_item_load_latest('i18n_string', 'i18n_string', $id, $source_language);
+
+  $form['languages']['#type'] = 'tableselect';
+
+  // Append lang code so that we can use it
+  foreach ($form['languages']['#rows'] as $lang => $row) {
+
+    if (isset($existing_items[$lang])) {
+
+      $states = tmgmt_job_item_states();
+      $row['status'] = $states[$existing_items[$lang]->state];
+
+      if ($existing_items[$lang]->isNeedsReview()) {
+        $row['operations'] .= ' | ' . l(t('review'), 'admin/config/regional/tmgmt/items/' . $existing_items[$lang]->tjiid, array('query' => array('destination' => $_GET['q'])));
+      }
+    }
+
+    $form['languages']['#options'][$id . ':' . $lang] = $row;
+
+    if ($lang == $source_language || isset($existing_items[$lang])) {
+      $form['languages'][$id . ':' . $lang] = array(
+        '#type' => 'checkbox',
+        '#disabled' => TRUE,
+      );
+    }
+  }
+
+  unset($form['languages']['#rows'], $form['languages']['#theme']);
+
+  $form['actions']['request_translation'] = array(
+    '#type' => 'submit',
+    '#value' => t('Request translation'),
+    '#submit' => array('tmgmt_i18n_string_translate_form_validate'),
+    '#validate' => array('tmgmt_i18n_string_translate_form_submit'),
+  );
+}
+
+/**
+ * Validation callback for the entity translation overview form.
+ */
+function tmgmt_i18n_string_translate_form_validate($form, &$form_state) {
+  $selected = array_filter($form_state['values']['languages']);
+  if (empty($selected)) {
+    form_set_error('languages', t('You have to select at least one language for requesting a translation.'));
+  }
+}
+
+function tmgmt_i18n_string_translate_form_submit($form, &$form_state) {
+
+  $items = array_filter($form_state['values']['languages']);
+  $type = 'i18n_string';
+  $source_lang = variable_get_value('i18n_string_source_language');
+
+  $jobs = array();
+  $target_lang_registry = array();
+
+  // Loop through entities and create individual jobs for each source language.
+  foreach ($items as $item) {
+
+    $item_parts = explode(':', $item);
+    $target_lang = array_pop($item_parts);
+    $key = implode(':', $item_parts);
+
+    // For given source lang no job exists yet.
+    if (!isset($target_lang_registry[$target_lang])) {
+      // Create new job.
+      $job = tmgmt_job_create($source_lang, $target_lang, $GLOBALS['user']->uid);
+      // Add initial job item.
+      $job->addItem('i18n_string', $type, $key);
+      // Add job identifier into registry
+      $target_lang_registry[$target_lang] = $job->tjid;
+      // Add newly created job into jobs queue.
+      $jobs[$job->tjid] = $job;
+    }
+    // We have a job for given source lang, so just add new job item for the
+    // existing job.
+    else {
+      $jobs[$target_lang_registry[$target_lang]]->addItem('i18n_string', $type, $key);
+    }
+  }
+
+  $redirects = tmgmt_ui_job_checkout_multiple($jobs);
+  // If necessary, do a redirect.
+  if ($redirects) {
+    tmgmt_ui_redirect_queue_set($redirects, current_path());
+    $form_state['redirect'] = tmgmt_ui_redirect_queue_dequeue();
+
+    // Count of the job messages is one less due to the final redirect.
+    drupal_set_message(format_plural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
+  }
+}
+
+/**
+ * Implements hook_i18n_object_info_alter().
+ */
+function tmgmt_i18n_string_i18n_object_info_alter(&$info) {
+  $entity_info = entity_get_info();
+  // Add a entity key to the object info if neither load callback nor entity
+  // keys are set and the object is an entity_type.
+  // @todo: Add this as default in EntityDefaultI18nStringController.
+  foreach ($info as $name => &$object) {
+    if (!isset($object['load callback']) && !isset($object['entity']) && isset($entity_info[$name])) {
+      $object['entity'] = $name;
+    }
+  }
 }

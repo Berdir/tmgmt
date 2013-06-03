@@ -20,20 +20,23 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_i18n_string', 'i18n_menu', 'i18n_taxonomy'));
+    parent::setUp(array('tmgmt_ui', 'tmgmt_i18n_string', 'taxonomy', 'i18n_taxonomy'));
+    $this->setEnvironment('de');
     $this->translator = $this->createTranslator();
   }
 
   function testI18nStringSourceTaxonomy() {
-    // Create a vocabulary to be translated.
+    // Test translation of a vocabulary.
+    /////////////////////////////////////
     $config = array(
       'name' => $this->randomName(),
-      'i18n_mode' => I18N_MODE_TRANSLATE,
+      'machine_name' => 'test_vocab',
+      'i18n_mode' => I18N_MODE_LOCALIZE,
     );
     $vocabulary = entity_create('taxonomy_vocabulary', $config);
     taxonomy_vocabulary_save($vocabulary);
 
-    $string_object_name = "taxonomy_vocabulary:" . $vocabulary->vid;
+    $string_object_name = "taxonomy:vocabulary:" . $vocabulary->vid;
     $source_text = $vocabulary->name;
 
     // Create the new job and job item.
@@ -55,21 +58,63 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
 
     // Check string translation.
     $this->assertEqual(i18n_string_translate('taxonomy:vocabulary:' . $vocabulary->vid . ':name', $source_text, array('langcode' => $job->target_language)), $job->target_language . '_' . $source_text);
+
+    // Test translation of a taxonomy term.
+    /////////////////////////////////////
+    $term = entity_create('taxonomy_term', array(
+      'vid' => $vocabulary->vid,
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+    ));
+    taxonomy_term_save($term);
+
+    $string_object_name = "taxonomy:term:" . $term->tid;
+    $source_text_name = $term->name;
+    $source_text_description = $term->description;
+
+    // Create the new job and job item.
+    $job = $this->createJob();
+    $job->translator = $this->translator->name;
+    $job->settings = array();
+    $job->save();
+
+    $item1 = $job->addItem('i18n_string', 'i18n_string', $string_object_name);
+    $job->requestTranslation();
+
+    foreach ($job->getItems() as $item) {
+      /* @var $item TMGMTJobItem */
+      $item->acceptTranslation();
+    }
+
+    // Check the structure of the imported data.
+    $this->assertEqual($item1->item_id, $string_object_name);
+
+    // Check string translation.
+    $this->assertEqual(i18n_string_translate('taxonomy:term:' . $term->tid . ':name', $source_text_name,
+      array('langcode' => $job->target_language)), $job->target_language . '_' . $source_text_name);
+    $this->assertEqual(i18n_string_translate('taxonomy:term:' . $term->tid . ':description', $source_text_description,
+      array('langcode' => $job->target_language)), $job->target_language . '_' . $source_text_description);
+
   }
 
-  function testI18nStringSourceMenu() {
-    // Create a menu to be translated.
+  function NtestI18nStringSourceMenu() {
+    // Enabling this here as enabling it with tmgmt_ui results in missing views
+    // handlers errors. Not sure why, but this way it at least works.
+    module_enable(array('i18n_menu'));
+
+    // Test translation of a menu.
+    /////////////////////////////////////
     $config = array(
       'menu_name' => $this->randomName(),
       'title' => $this->randomName(),
       'description' => $this->randomName(),
-      'i18n_mode' => I18N_MODE_TRANSLATE,
+      'i18n_mode' => I18N_MODE_MULTIPLE,
     );
     menu_save($config);
     $menu = menu_load($config['menu_name']);
 
     $source_text = $menu['title'];
-    $string_name = 'menu:' . $menu['menu_name'];
+    $string_name = 'menu:menu:' . $menu['menu_name'];
 
     // Create the new job and job item.
     $job = $this->createJob();
@@ -91,6 +136,86 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($item1->item_id, $string_name, t('String is correctly saved'));
 
     // Check string translation.
-    $this->assertEqual(i18n_string_translate('menu:menu:' . $menu['menu_name'] . ':title', $source_text, array('langcode' => $job->target_language)), $job->target_language . '_' . $source_text);
+    $this->assertEqual(i18n_string_translate($string_name . ':title', $source_text, array('langcode' => $job->target_language)), $job->target_language . '_' . $source_text);
+
+    // Test translation of a menu item.
+    /////////////////////////////////////
+    $menu_link = array(
+      'link_path' => '<front>',
+      'link_title' => 'home',
+      'menu_name' => $menu['menu_name'],
+      'customized' => TRUE,
+    );
+    menu_link_save($menu_link);
+
+    $source_text = $menu_link['link_title'];
+    $string_name = 'menu:item:' . $menu_link['mlid'];
+
+    // Create the new job and job item.
+    $job = $this->createJob();
+    $job->translator = $this->translator->name;
+    $job->settings = array();
+
+    $item1 = $job->addItem('i18n_string', 'i18n_string', $string_name);
+    $job->requestTranslation();
+    foreach ($job->getItems() as $item) {
+      /* @var $item TMGMTJobItem */
+      $item->acceptTranslation();
+    }
+
+    $data = $item1->getData();
+    $this->assertEqual($data[$string_name . ':title']['#text'], $source_text);
+
+    // Check the structure of the imported data.
+    $this->assertEqual($item1->item_id, $string_name);
+
+    // Check string translation.
+    $this->assertEqual(i18n_string_translate($string_name . ':title', $source_text, array('langcode' => $job->target_language)), $job->target_language . '_' . $source_text);
+
+  }
+
+  function testI18nStringPluginUI() {
+
+    $this->loginAsAdmin(array('administer taxonomy', 'translate interface', 'translate user-defined strings'));
+
+    $vocab_data = array(
+      'name' => $this->randomName(),
+      'machine_name' => 'test_vocab',
+      'i18n_mode' => I18N_MODE_LOCALIZE,
+    );
+    $term_data = array(
+      'name' => $this->randomName(),
+    );
+
+    // Configure taxonomy and create vocab + term.
+    $this->drupalPost('admin/structure/taxonomy/add', $vocab_data, t('Save'));
+    $this->drupalGet('admin/structure/taxonomy');
+    $this->clickLink(t('add terms'));
+    $this->drupalPost(NULL, $term_data, t('Save'));
+
+    $this->drupalGet('admin/config/regional/tmgmt/i18n_string/taxonomy_vocabulary');
+    $this->assertText($vocab_data['name']);
+
+    // Request translation via i18n source tab
+    $this->drupalPost(NULL, array('items[taxonomy:vocabulary:1]' => 1), t('Request translation'));
+    // Test for the job checkout url.
+    $this->assertTrue(strpos($this->getUrl(), 'admin/config/regional/tmgmt/jobs') !== FALSE);
+    entity_get_controller('tmgmt_job')->resetCache();
+    $jobs = entity_load('tmgmt_job', FALSE);
+    /** @var TMGMTJob $job */
+    $job = array_pop($jobs);
+    $this->assertFieldByName('label', $job->label());
+
+    // Request translation via translate tab of i18n.
+    $this->drupalPost('admin/structure/taxonomy/test_vocab/translate', array('languages[taxonomy:vocabulary:1:de]' => 1), t('Request translation'));
+    // Test for the job checkout url.
+    $this->assertTrue(strpos($this->getUrl(), 'admin/config/regional/tmgmt/jobs') !== FALSE);
+    entity_get_controller('tmgmt_job')->resetCache();
+    $jobs = entity_load('tmgmt_job', FALSE);
+    /** @var TMGMTJob $job */
+    $job = array_pop($jobs);
+    $this->assertFieldByName('label', $job->label());
+
+
   }
 }

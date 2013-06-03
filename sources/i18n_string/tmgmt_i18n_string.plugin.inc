@@ -14,20 +14,11 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
    * Overrides TMGMTDefaultSourcePluginController::getData().
    */
   public function getData(TMGMTJobItem $job_item) {
-    // @todo Make use of the item type property.
-    $i18n_object = explode(':', $job_item->item_id);
-    $i18n_object_type = array_shift($i18n_object);
-    $i18n_object_id = (count($i18n_object) == 1) ? reset($i18n_object) : $i18n_object;
-    // @todo: i18n has introduced a new function and changed the existing one,
-    //        conditionally call the one that exists. Remove once a new stable
-    //        version is out.
-    if (function_exists('i18n_get_object')) {
-      $i18n_strings = i18n_get_object($i18n_object_type, $i18n_object_id)->get_strings();
-    }
-    else {
-      $i18n_strings = i18n_object($i18n_object_type, $i18n_object_id)->get_strings();
-    }
-    $structure = array('#label' => 'i18n Strings: ' . $i18n_object_type);
+
+    $identifiers = $this->getI18nObjectIdentifiers($job_item);
+    $i18n_strings = $this->getI18nObjectWrapper($job_item)->get_strings();
+
+    $structure = array('#label' => 'i18n Strings: ' . $identifiers['type']);
     foreach ($i18n_strings as $string_id => $string) {
       $structure[$string_id] = array(
         '#label' => $string->title,
@@ -49,7 +40,71 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
         i18n_string_translation_update($i18n_string, $item['#translation']['#text'], $job->target_language);
       }
     }
-    return TRUE;
+
+    // We just saved the translation, set the state of the job item to
+    // 'finished'.
+    $job_item->accepted();
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::getLabel().
+   */
+  public function getLabel(TMGMTJobItem $job_item) {
+    $data = $job_item->getData();
+
+    if (!empty($data) && $keys = element_children($data)) {
+      $key = reset($keys);
+      $item = $data[$key];
+      return strip_tags(drupal_substr($item['#text'], 0, 64)) . ' (' . $job_item->item_id . ')';
+    }
+    return parent::getLabel($job_item);
+  }
+
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::getUri().
+   */
+  public function getUri(TMGMTJobItem $job_item) {
+    $wrapper = $this->getI18nObjectWrapper($job_item);
+    return array(
+      'path' => $wrapper->get_path(),
+      'options' => array(),
+    );
+  }
+
+  /**
+   * Helper function to get i18n_object_wrapper for given job item.
+   *
+   * This is critical part that does not work for all i18n string types.
+   * For example this will give fatal error for rules_config.
+   *
+   * @param TMGMTJobItem $job_item
+   *
+   * @return i18n_string_object_wrapper
+   */
+  protected function getI18nObjectWrapper(TMGMTJobItem $job_item) {
+    $identifiers = $this->getI18nObjectIdentifiers($job_item);
+    $type = tmgmt_i18n_string_source_get_object_wrapper($identifiers['textgroup'], $identifiers['type']);
+    return i18n_get_object($type, $identifiers['id']);
+  }
+
+  /**
+   * Parses TMGMTJobItem::item_id for i18n string identifiers.
+   *
+   * @param TMGMTJobItem $job_item
+   *
+   * @return array
+   *   Associative array of identifiers:
+   *   - textgroup
+   *   - type
+   *   - id
+   */
+  protected function getI18nObjectIdentifiers(TMGMTJobItem $job_item) {
+    $identifiers = explode(':', $job_item->item_id);
+    return array(
+      'textgroup' => array_shift($identifiers),
+      'type' => array_shift($identifiers),
+      'id' => (count($identifiers) == 1) ? reset($identifiers) : $identifiers,
+    );
   }
 
 }
