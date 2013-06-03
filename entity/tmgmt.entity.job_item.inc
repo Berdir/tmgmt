@@ -118,7 +118,7 @@ class TMGMTJobItem extends Entity {
    */
   public function defaultLabel() {
     if ($controller = $this->getSourceController()) {
-      return t('Translation for @label', array('@label' => $controller->getLabel($this)));
+      return $controller->getLabel($this);
     }
     return parent::defaultLabel();
   }

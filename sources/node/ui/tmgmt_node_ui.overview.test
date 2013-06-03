@@ -92,10 +92,10 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTBaseTestCase {
 
     // Some assertions on the submit form.
     $this->assertText(t('@title and 2 more (English to ?, Unprocessed)', array('@title' => $node1->title)));
-    $this->assertText(t('Translation for @title', array('@title' => $node1->title)));
-    $this->assertText(t('Translation for @title', array('@title' => $node2->title)));
-    $this->assertText(t('Translation for @title', array('@title' => $node3->title)));
-    $this->assertNoText(t('Translation for @title', array('@title' => $node4->title)));
+    $this->assertText($node1->title);
+    $this->assertText($node2->title);
+    $this->assertText($node3->title);
+    $this->assertNoText($node4->title);
 
     // Translate
     $edit = array(
