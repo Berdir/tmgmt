@@ -396,9 +396,10 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     $form['translator_wrapper_right']['suggestions'] = array(
       '#type' => 'fieldset',
       '#title' => '',
-      '#prefix' => '<div class="tmgmt-ui-job-items-suggestions ' . ($job->isSubmittable() ? 'tmgmt-ui-job-suggestions-submit' : 'tmgmt-ui-job-suggestions-manage') . '">',
+      '#prefix' => '<div class="tmgmt-ui-job-items-suggestions">',
       '#suffix' => '</div>',
-      '#weight' => $job->isSubmittable() ? 35 : 15,
+      '#weight' => 35,
+      '#access' => $job->isSubmittable(),
     );
 
     // Button to load all translation suggestions with AJAX.
