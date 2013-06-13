@@ -2,6 +2,7 @@ name = Translation Management Core
 description = Core functionality for the Translation Management Suite.
 package = Translation Management
 core = 7.x
+configure = admin/config/regional/tmgmt
 
 dependencies[] = entity
 dependencies[] = locale
