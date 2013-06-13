@@ -429,7 +429,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     );
 
     // If this is an AJAX-Request, load all related nodes and fill the table.
-    if ($form_state['rebuild'] && $form_state['rebuild_suggestions']) {
+    if ($form_state['rebuild'] && !empty($form_state['rebuild_suggestions'])) {
       _tmgmt_ui_translation_suggestions($suggestions_table, $form_state);
 
       // A save button on bottom of the table is needed.
