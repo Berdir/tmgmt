@@ -216,3 +216,16 @@ function tmgmt_i18n_string_i18n_object_info_alter(&$info) {
     }
   }
 }
+
+/**
+ * Implements hook_help().
+ */
+function tmgmt_i18n_string_help($path, $arg) {
+  $output = '';
+
+  if (strpos($path, 'admin/config/regional/tmgmt/i18n_string') !== false) {
+    $output = tmgmt_ui_color_legend();
+  }
+
+  return $output;
+}
