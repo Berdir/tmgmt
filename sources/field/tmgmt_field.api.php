@@ -48,12 +48,11 @@ function hook_tmgmt_source_translation_structure($entity_type, $entity, $field, 
  *   The language associated with $items.
  * @param $data
  *   Translated data array.
- * @param $use_translatable
- *   TRUE if the values should be stored language specific when the field is set
- *   to translatable.
+ * @param $use_field_translation
+ *   TRUE if field translation is being used.
  *
  * @see tmgmt_field_populate_entity()
  */
-function hook_tmgmt_field_type_populate_entity($entity_type, $entity, $field, $instance, $langcode, $data, $use_translatable) {
+function hook_tmgmt_field_type_populate_entity($entity_type, $entity, $field, $instance, $langcode, $data, $use_field_translation) {
 
 }
