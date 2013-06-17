@@ -64,4 +64,15 @@ interface TMGMTSourcePluginControllerInterface extends TMGMTPluginBaseInterface 
    */
   public function getItemTypeLabel($type);
 
+  /**
+   * Returns the type of a job item.
+   *
+   * @param TMGMTJobItem $job_item
+   *   The job item.
+   *
+   * @return string
+   *   A type that describes the job item.
+   */
+  public function getType(TMGMTJobItem $job_item);
+
 }

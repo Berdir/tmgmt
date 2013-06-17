@@ -87,4 +87,15 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     return parent::getUri($job_item);
   }
 
+  /**
+   * Implements TMGMTEntitySourcePluginControllerInterface::getType().
+   */
+  public function getType(TMGMTJobItem $job_item) {
+    if ($node = node_load($job_item->item_id)) {
+      return node_type_get_name($node);
+    }
+    return parent::getType($job_item);
+  }
+
+
 }

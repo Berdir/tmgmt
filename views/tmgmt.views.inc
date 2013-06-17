@@ -33,6 +33,13 @@ class TMGMTJobItemViewsController extends EntityDefaultViewsController {
         'handler' => 'tmgmt_handler_field_tmgmt_entity_label',
       ),
     );
+    $data['tmgmt_job_item']['type'] = array(
+      'title' => t('Type'),
+      'help' => t('Displays a type of the job item.'),
+      'field' => array(
+        'handler' => 'tmgmt_handler_field_tmgmt_job_item_type',
+      ),
+    );
     $data['tmgmt_job_item']['progress'] = array(
       'title' => t('Progress'),
       'help' => t('Displays the progress of a job item.'),

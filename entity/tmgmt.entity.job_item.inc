@@ -206,6 +206,19 @@ class TMGMTJobItem extends Entity {
   }
 
   /**
+   * Returns the user readable type of job item.
+   *
+   * @param string
+   *   A type that describes the job item.
+   */
+  public function getSourceType() {
+    if ($controller = $this->getSourceController()) {
+      return $controller->getType($this);
+    }
+    return ucfirst($this->item_type);
+  }
+
+  /**
    * Loads the job entity that this job item is attached to.
    *
    * @return TMGMTJob
@@ -267,7 +280,7 @@ class TMGMTJobItem extends Entity {
    * @return array
    *   A structured data array.
    */
-  public function getData(array $key = array(), $index = null) {
+  public function getData(array $key = array(), $index = NULL) {
     if (empty($this->data)) {
       // Load the data from the source if it has not been set yet.
       $this->data = $this->getSourceData();
