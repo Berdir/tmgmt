@@ -89,20 +89,26 @@ function tmgmt_field_get_source_data($entity_type, $entity, $langcode, $only_tra
  *   The field language.
  * @param $data
  *   An array of values.
- * @param $use_translatable
- *   TRUE if the values should be stored language specific when the field is set
- *   to translatable.
+ * @param $use_field_translation
+ *   TRUE if field translation is being used.
  */
-function tmgmt_field_populate_entity($entity_type, $entity, $langcode, $data, $use_translatable = TRUE) {
+function tmgmt_field_populate_entity($entity_type, $entity, $langcode, $data, $use_field_translation = TRUE) {
   foreach (element_children($data) as $field_name) {
     if ($field = field_info_field($field_name)) {
       $function = $field['module'] . '_field_type_tmgmt_populate_entity';
       list(, , $bundle) = entity_extract_ids($entity_type, $entity);
       $instance = field_info_instance($entity_type, $field_name, $bundle);
       if (function_exists($function)) {
-        $function($entity_type, $entity, $field, $instance, $langcode, $data, $use_translatable);
+        $function($entity_type, $entity, $field, $instance, $langcode, $data, $use_field_translation);
       }
       else {
+        $field_langcode = $field['translatable'] ? $langcode : LANGUAGE_NONE;
+        // When not using field translation, make sure we're not storing
+        // multiple languages.
+        if (!$use_field_translation) {
+          $entity->{$field_name} = array($field_langcode => array());
+        }
+
         foreach (element_children($data[$field_name]) as $delta) {
           $columns = array();
           foreach (element_children($data[$field_name][$delta]) as $column) {
@@ -111,16 +117,15 @@ function tmgmt_field_populate_entity($entity_type, $entity, $langcode, $data, $u
             }
             // For elements which are not translatable, keep using the original
             // value.
-            elseif (isset($data[$field_name][$delta][$column]['#translate']) && $data[$field_name][$delta][$column]['#translate'] == FALSE) {
+          elseif (isset($data[$field_name][$delta][$column]['#translate']) && $data[$field_name][$delta][$column]['#translate'] == FALSE) {
               $columns[$column] = $data[$field_name][$delta][$column]['#text'];
             }
           }
-          $langcode = $use_translatable && $field['translatable'] ? $langcode : LANGUAGE_NONE;
           // Make sure the array_merge() gets an array as a first parameter.
-          if (!isset($entity->{$field_name}[$langcode][$delta])) {
-            $entity->{$field_name}[$langcode][$delta] = array();
+          if (!isset($entity->{$field_name}[$field_langcode][$delta])) {
+            $entity->{$field_name}[$field_langcode][$delta] = array();
           }
-          $entity->{$field_name}[$langcode][$delta] = array_merge($entity->{$field_name}[$langcode][$delta], $columns);
+          $entity->{$field_name}[$field_langcode][$delta] = array_merge($entity->{$field_name}[$field_langcode][$delta], $columns);
         }
       }
     }

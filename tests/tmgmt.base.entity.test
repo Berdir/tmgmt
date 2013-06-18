@@ -27,8 +27,11 @@ abstract class TMGMTEntityTestCaseUtility extends TMGMTBaseTestCase {
    *   Human readable name of the node type.
    * @param int $language_content_type
    *   Flag of how the translation should be handled.
+   * pparam bool $attach_fields
+   *   (optional) If fields with the same translatability should automatically
+   *   be attached to the node type.
    */
-  function createNodeType($machine_name, $human_name, $language_content_type = 0) {
+  function createNodeType($machine_name, $human_name, $language_content_type = 0, $attach_fields = TRUE) {
 
     // Create new bundle.
     $type = array(
@@ -59,7 +62,9 @@ abstract class TMGMTEntityTestCaseUtility extends TMGMTBaseTestCase {
     // Push in also the body field.
     $this->field_names['node'][$machine_name][] = 'body';
 
-    $this->attachFields('node', $machine_name, $translatable);
+    if ($attach_fields) {
+      $this->attachFields('node', $machine_name, $translatable);
+    }
 
     // Change body field to be translatable.
     $body = field_info_field('body');
@@ -165,17 +170,20 @@ abstract class TMGMTEntityTestCaseUtility extends TMGMTBaseTestCase {
     $node = array(
       'type' => $bundle,
       'language' => $sourcelang,
+      // Ensure that the body field is defined for the node language.
+      'body' => array($sourcelang => array(0 => array())),
     );
 
     foreach ($this->field_names['node'][$bundle] as $field_name) {
       $field_info = field_info_field($field_name);
       $cardinality = $field_info['cardinality'] == FIELD_CARDINALITY_UNLIMITED ? 1 : $field_info['cardinality'];
+      $field_langcode = field_is_translatable('node', $field_info) ? $sourcelang : LANGUAGE_NONE;
 
       // Create two deltas for each field.
       for ($delta = 0; $delta <= $cardinality; $delta++) {
-        $node[$field_name][$sourcelang][$delta]['value'] = $this->randomName(20);
+        $node[$field_name][$field_langcode][$delta]['value'] = $this->randomName(20);
         if ($field_info['type'] == 'text_with_summary') {
-          $node[$field_name][$sourcelang][$delta]['summary'] = $this->randomName(10);
+          $node[$field_name][$field_langcode][$delta]['summary'] = $this->randomName(10);
         }
       }
     }
