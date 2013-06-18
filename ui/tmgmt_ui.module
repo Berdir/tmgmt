@@ -441,7 +441,7 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
   // of the foreach loop.
   $zebra = 'even';
   foreach (element_children($data) as $key) {
-    $form['review'][$key] = _tmgmt_ui_review_form_element(tmgmt_flatten_data($data[$key], $key), $item, $zebra, $key);
+    $form['review'][$key] = _tmgmt_ui_review_form_element($form_state, tmgmt_flatten_data($data[$key], $key), $item, $zebra, $key);
   }
 
   if ($output = tmgmt_ui_embed_view('tmgmt_ui_job_item_messages', 'block', array($item->tjiid))) {
@@ -489,6 +489,8 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
  * @todo Mention in the api documentation that the char '|' is not allowed in
  * field names.
  *
+ * @param array $form_state
+ *   Drupal form form_state object.
  * @param $data
  *   Flatened array of translation data items.
  * @param $job_item
@@ -499,7 +501,7 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
  * @param $parent_key
  *   The key for $data.
  */
-function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra, $parent_key) {
+function _tmgmt_ui_review_form_element(&$form_state, $data, TMGMTJobItem $job_item, &$zebra, $parent_key) {
   $flip = array(
     'even' => 'odd',
     'odd' => 'even',
@@ -508,6 +510,7 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra, $
     '#theme' => 'tmgmt_ui_translator_review_form',
     '#ajaxid' => 'tmgmt-ui-element-' . drupal_clean_css_identifier($parent_key) . '-wrapper',
   );
+
   foreach (element_children($data) as $key) {
     // The char sequence '][' confuses the form API so we need to replace it.
     $target_key = str_replace('][', '|', $key);
@@ -615,6 +618,13 @@ function _tmgmt_ui_review_form_element($data, TMGMTJobItem $job_item, &$zebra, $
         '#title' => t('Source'),
         '#disabled' => TRUE,
       );
+
+      // Give the translator ui controller a chance to affect the data item element.
+      $form[$target_key] = tmgmt_translator_ui_controller($job_item->getTranslator()->plugin)
+          ->reviewDataItemElement($form[$target_key], $form_state, $key, $data[$key], $job_item);
+      // Give the source ui controller a chance to affect the data item element.
+      $form[$target_key] = tmgmt_source_ui_controller($job_item->plugin)
+          ->reviewDataItemElement($form[$target_key], $form_state, $key, $data[$key], $job_item);
     }
   }
   return $form;

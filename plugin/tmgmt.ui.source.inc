@@ -16,6 +16,13 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
   }
 
   /**
+   * Implements TMGMTSourceUIControllerInterface::reviewDataItemElement().
+   */
+  public function reviewDataItemElement($form, &$form_state, $data_item_key, array $data_item, TMGMTJobItem $item) {
+    return $form;
+  }
+
+  /**
    * Implements TMGMTSourceUIControllerInterface::reviewFormValidate().
    */
   public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item) {

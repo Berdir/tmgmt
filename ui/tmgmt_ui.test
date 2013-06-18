@@ -279,6 +279,35 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
   }
 
   /**
+   * Tests of the job item review process.
+   */
+  public function testReview() {
+    $job = $this->createJob();
+    $job->translator = $this->default_translator->name;
+    $job->settings = array();
+    $job->save();
+    $item = $job->addItem('test_source', 'test', 1);
+
+    $data = tmgmt_flatten_data($item->getData());
+    $keys = array_keys($data);
+    $key = $keys[0];
+
+    $this->drupalGet('admin/config/regional/tmgmt/items/' . $item->tjiid);
+    // Testing the result of the
+    // TMGMTTranslatorUIControllerInterface::reviewDataItemElement()
+    $this->assertText(t('Testing output of review data item element @key from the testing translator.', array('@key' => $key)));
+
+    // Test the review tool source textarea.
+    $this->assertFieldByName('dummy|deep_nesting[source]', $data[$key]['#text']);
+
+    // Save translation.
+    $this->drupalPost(NULL, array('dummy|deep_nesting[translation]' => $data[$key]['#text'] . 'translated'), t('Save'));
+    $this->drupalGet('admin/config/regional/tmgmt/items/' . $item->tjiid);
+    // Check if translation has been saved.
+    $this->assertFieldByName('dummy|deep_nesting[translation]', $data[$key]['#text'] . 'translated');
+  }
+
+  /**
    * Tests the UI of suggestions.
    */
   public function testSuggestions() {

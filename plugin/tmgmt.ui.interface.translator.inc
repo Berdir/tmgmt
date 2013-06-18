@@ -34,6 +34,11 @@ interface TMGMTTranslatorUIControllerInterface extends TMGMTPluginBaseInterface 
   public function reviewForm($form, &$form_state, TMGMTJobItem $item);
 
   /**
+   * Form callback for the data item element form.
+   */
+  public function reviewDataItemElement($form, &$form_state, $data_item_key, array $data_item, TMGMTJobItem $item);
+
+  /**
    * Validation callback for the job item review form.
    */
   public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item);
