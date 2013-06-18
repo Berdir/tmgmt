@@ -70,11 +70,10 @@ $handler->display->display_options['fields']['label']['id'] = 'label';
 $handler->display->display_options['fields']['label']['table'] = 'tmgmt_job_item';
 $handler->display->display_options['fields']['label']['field'] = 'label';
 $handler->display->display_options['fields']['label']['ui_name'] = 'Label';
-/* Field: Plugin */
-$handler->display->display_options['fields']['plugin']['id'] = 'plugin';
-$handler->display->display_options['fields']['plugin']['table'] = 'tmgmt_job_item';
-$handler->display->display_options['fields']['plugin']['field'] = 'plugin';
-$handler->display->display_options['fields']['plugin']['ui_name'] = 'Plugin';
+/* Field: Translation Management Job Item: Type */
+$handler->display->display_options['fields']['type']['id'] = 'type';
+$handler->display->display_options['fields']['type']['table'] = 'tmgmt_job_item';
+$handler->display->display_options['fields']['type']['field'] = 'type';
 /* Field: State */
 $handler->display->display_options['fields']['state']['id'] = 'state';
 $handler->display->display_options['fields']['state']['table'] = 'tmgmt_job_item';
@@ -133,6 +132,9 @@ $handler->display->display_options['fields']['operations']['table'] = 'tmgmt_job
 $handler->display->display_options['fields']['operations']['field'] = 'operations';
 $handler->display->display_options['fields']['operations']['ui_name'] = 'Operations';
 $handler->display->display_options['fields']['operations']['element_label_colon'] = FALSE;
+
+/* Display: Block */
+$handler = $view->new_display('block', 'Block', 'block');
 $translatables['tmgmt_ui_job_items'] = array(
   t('Master'),
   t('Job Items'),
@@ -151,7 +153,7 @@ $translatables['tmgmt_ui_job_items'] = array(
   t('last »'),
   t('There are no items attached to this translation job.'),
   t('Label'),
-  t('Plugin'),
+  t('Type'),
   t('State'),
   t('Progress'),
   t('Word count'),
@@ -161,5 +163,5 @@ $translatables['tmgmt_ui_job_items'] = array(
   t('Operations'),
   t('All'),
   t('Submit list'),
-  t('Type'),
+  t('Block'),
 );
