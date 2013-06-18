@@ -27,7 +27,7 @@ class TMGMTNodeSourceTestCase extends TMGMTEntityTestCaseUtility {
     parent::setUp(array('tmgmt_node', 'translation'));
     $this->loginAsAdmin();
     $this->setEnvironment('de');
-    $this->createNodeType('page', st('Basic page'), TRANSLATION_ENABLED, FALSE);
+    $this->createNodeType('page', 'Basic page', TRANSLATION_ENABLED, FALSE);
     $this->attachFields('node', 'page', array(TRUE, TRUE, FALSE, FALSE));
   }
 
@@ -45,7 +45,8 @@ class TMGMTNodeSourceTestCase extends TMGMTEntityTestCaseUtility {
     for ($i = 0; $i < 2; $i++) {
       $node = $this->createNode('page');
       // Create a job item for this node and add it to the job.
-      $job->addItem('node', 'node', $node->nid);
+      $item = $job->addItem('node', 'node', $node->nid);
+      $this->assertEqual('Basic page', $item->getSourceType());
     }
 
     // Translate the job.

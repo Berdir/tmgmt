@@ -68,9 +68,12 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
       $bundles = tmgmt_entity_get_translatable_bundles($job_item->item_type);
       $info = entity_get_info($job_item->item_type);
       list(, , $bundle) = entity_extract_ids($job_item->item_type, $entity);
-      if (isset($bundles[$bundle])) {
+      // Display entity type and label if we have one and the bundle isn't
+      // the same as the entity type.
+      if (isset($bundles[$bundle]) && $bundle != $job_item->item_type) {
         return t('@type (@bundle)', array('@type' => $info['label'], '@bundle' => $bundles[$bundle]));
       }
+      // Otherwise just display the entity type label.
       elseif (isset($info['label'])) {
         return $info['label'];
       }

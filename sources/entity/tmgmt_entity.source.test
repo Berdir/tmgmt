@@ -41,7 +41,7 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
   function testEntitySourceNode() {
     $this->setEnvironment('de');
 
-    $this->createNodeType('article', st('Article'), ENTITY_TRANSLATION_ENABLED);
+    $this->createNodeType('article', 'Article', ENTITY_TRANSLATION_ENABLED);
 
     // Create a translation job.
     $job = $this->createJob();
@@ -53,7 +53,8 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
     for ($i = 1; $i <= 5; $i++) {
       $node = $this->createNode('article');
       // Create a job item for this node and add it to the job.
-      $job->addItem('entity', 'node', $node->nid);
+      $item = $job->addItem('entity', 'node', $node->nid);
+      $this->assertEqual(t('@type (@bundle)', array('@type' => t('Content'), '@bundle' => 'Article')), $item->getSourceType());
     }
 
     // Translate the job.
@@ -88,7 +89,8 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
     for ($i = 1; $i <= 5; $i++) {
       $term = $this->createTaxonomyTerm($this->vocabulary);
       // Create the item and assign it to the job.
-      $job->addItem('entity', 'taxonomy_term', $term->tid);
+      $item = $job->addItem('entity', 'taxonomy_term', $term->tid);
+      $this->assertEqual(t('@type (@bundle)', array('@type' => t('Term'), '@bundle' => $this->vocabulary->name)), $item->getSourceType());
     }
     // Request the translation and accept it.
     $job->requestTranslation();
