@@ -102,11 +102,11 @@ function tmgmt_field_populate_entity($entity_type, $entity, $langcode, $data, $u
         $function($entity_type, $entity, $field, $instance, $langcode, $data, $use_field_translation);
       }
       else {
-        $langcode = $field['translatable'] ? $langcode : LANGUAGE_NONE;
+        $field_langcode = $field['translatable'] ? $langcode : LANGUAGE_NONE;
         // When not using field translation, make sure we're not storing
         // multiple languages.
         if (!$use_field_translation) {
-          $entity->{$field_name} = array($langcode => array());
+          $entity->{$field_name} = array($field_langcode => array());
         }
 
         foreach (element_children($data[$field_name]) as $delta) {
@@ -122,10 +122,10 @@ function tmgmt_field_populate_entity($entity_type, $entity, $langcode, $data, $u
             }
           }
           // Make sure the array_merge() gets an array as a first parameter.
-          if (!isset($entity->{$field_name}[$langcode][$delta])) {
-            $entity->{$field_name}[$langcode][$delta] = array();
+          if (!isset($entity->{$field_name}[$field_langcode][$delta])) {
+            $entity->{$field_name}[$field_langcode][$delta] = array();
           }
-          $entity->{$field_name}[$langcode][$delta] = array_merge($entity->{$field_name}[$langcode][$delta], $columns);
+          $entity->{$field_name}[$field_langcode][$delta] = array_merge($entity->{$field_name}[$field_langcode][$delta], $columns);
         }
       }
     }
