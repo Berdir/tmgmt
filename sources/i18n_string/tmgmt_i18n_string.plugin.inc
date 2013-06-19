@@ -72,6 +72,25 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
   }
 
   /**
+   * Implements TMGMTEntitySourcePluginControllerInterface::getType().
+   */
+  public function getType(TMGMTJobItem $job_item) {
+    $identifiers = $this->getI18nObjectIdentifiers($job_item);
+    // @todo: Improve this, use item_type?
+    if ($label = $this->getItemTypeLabel($identifiers['textgroup'])) {
+      return $label;
+    }
+    if ($label = $this->getItemTypeLabel($identifiers['textgroup'] . '_' . $identifiers['type'])) {
+      return $label;
+    }
+    if ($label = $this->getItemTypeLabel($identifiers['type'])) {
+      return $label;
+    }
+    return parent::getType($job_item);
+  }
+
+
+  /**
    * Helper function to get i18n_object_wrapper for given job item.
    *
    * This is critical part that does not work for all i18n string types.

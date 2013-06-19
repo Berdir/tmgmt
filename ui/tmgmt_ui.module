@@ -386,11 +386,10 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
     '#suffix' => '</div>',
   );
 
-  $source_labels = tmgmt_source_plugin_labels();
   $form['info']['sourcetype'] = array(
     '#type' => 'item',
     '#title' => t('Source type'),
-    '#markup' => $source_labels[$item->plugin],
+    '#markup' => $item->getSourceType(),
     '#prefix' => '<div class="tmgmt-ui-source-type tmgmt-ui-info-item">',
     '#suffix' => '</div>',
   );

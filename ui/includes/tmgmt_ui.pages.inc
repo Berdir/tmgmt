@@ -628,7 +628,7 @@ function _tmgmt_ui_translation_suggestions(array &$suggestions_table, array &$fo
     $suggestions_table['#empty'] = t('No related suggestions available.');
     $suggestions_table['#header'] = array(
       'title' => t('Title'),
-      'plugin' => t('Plugin'),
+      'plugin' => t('Type'),
       'reason' => t('Reason'),
       'words' => t('Word count'),
     );
@@ -648,10 +648,9 @@ function _tmgmt_ui_add_suggestion_item(array $result) {
   $item = $result['job_item'];
 
   $reason = isset($result['reason']) ? $result['reason'] : NULL;
-  $labels = _tmgmt_plugin_labels('source');
   $option = array(
     'title' => $item->label(),
-    'plugin' => isset($labels[$item->plugin]) ? $labels[$item->plugin] : '',
+    'plugin' => $item->getSourceType(),
     'words' => $item->getWordCount(),
     'reason' => $reason,
   );

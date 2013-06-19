@@ -47,4 +47,12 @@ abstract class TMGMTDefaultSourcePluginController extends TMGMTPluginBase implem
     return '';
   }
 
+  /**
+   * Implements TMGMTSourcePluginControllerInterface::getType().
+   */
+  public function getType(TMGMTJobItem $job_item) {
+    return ucfirst($job_item->item_type);
+  }
+
+
 }

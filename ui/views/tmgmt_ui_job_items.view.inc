@@ -1,6 +1,6 @@
 <?php
 
-$view = new view;
+$view = new view();
 $view->name = 'tmgmt_ui_job_items';
 $view->description = 'Displays all job items that belong to a job.';
 $view->tag = 'Translation Management';
@@ -13,6 +13,7 @@ $view->disabled = FALSE; /* Edit this to true to make a default view disabled in
 /* Display: Master */
 $handler = $view->new_display('default', 'Master', 'default');
 $handler->display->display_options['title'] = 'Job Items';
+$handler->display->display_options['use_more_always'] = FALSE;
 $handler->display->display_options['access']['type'] = 'none';
 $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['query']['type'] = 'views_query';
@@ -62,7 +63,6 @@ $handler->display->display_options['style_options']['info'] = array(
 $handler->display->display_options['empty']['area']['id'] = 'area';
 $handler->display->display_options['empty']['area']['table'] = 'views';
 $handler->display->display_options['empty']['area']['field'] = 'area';
-$handler->display->display_options['empty']['area']['empty'] = FALSE;
 $handler->display->display_options['empty']['area']['content'] = 'There are no items attached to this translation job.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 /* Field: Label */
@@ -70,11 +70,10 @@ $handler->display->display_options['fields']['label']['id'] = 'label';
 $handler->display->display_options['fields']['label']['table'] = 'tmgmt_job_item';
 $handler->display->display_options['fields']['label']['field'] = 'label';
 $handler->display->display_options['fields']['label']['ui_name'] = 'Label';
-/* Field: Plugin */
-$handler->display->display_options['fields']['plugin']['id'] = 'plugin';
-$handler->display->display_options['fields']['plugin']['table'] = 'tmgmt_job_item';
-$handler->display->display_options['fields']['plugin']['field'] = 'plugin';
-$handler->display->display_options['fields']['plugin']['ui_name'] = 'Plugin';
+/* Field: Translation Management Job Item: Type */
+$handler->display->display_options['fields']['type']['id'] = 'type';
+$handler->display->display_options['fields']['type']['table'] = 'tmgmt_job_item';
+$handler->display->display_options['fields']['type']['field'] = 'type';
 /* Field: State */
 $handler->display->display_options['fields']['state']['id'] = 'state';
 $handler->display->display_options['fields']['state']['table'] = 'tmgmt_job_item';
@@ -89,25 +88,6 @@ $handler->display->display_options['fields']['progress']['ui_name'] = 'Progress'
 $handler->display->display_options['fields']['word_count_1']['id'] = 'word_count_1';
 $handler->display->display_options['fields']['word_count_1']['table'] = 'tmgmt_job_item';
 $handler->display->display_options['fields']['word_count_1']['field'] = 'word_count';
-$handler->display->display_options['fields']['word_count_1']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['word_count_1']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['word_count_1']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['word_count_1']['alter']['external'] = 0;
-$handler->display->display_options['fields']['word_count_1']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['word_count_1']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['word_count_1']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['word_count_1']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['word_count_1']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['word_count_1']['alter']['more_link'] = 0;
-$handler->display->display_options['fields']['word_count_1']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['word_count_1']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['word_count_1']['alter']['html'] = 0;
-$handler->display->display_options['fields']['word_count_1']['element_label_colon'] = 1;
-$handler->display->display_options['fields']['word_count_1']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['word_count_1']['hide_empty'] = 0;
-$handler->display->display_options['fields']['word_count_1']['empty_zero'] = 0;
-$handler->display->display_options['fields']['word_count_1']['hide_alter_empty'] = 1;
-$handler->display->display_options['fields']['word_count_1']['format_plural'] = 0;
 /* Field: Changed */
 $handler->display->display_options['fields']['changed']['id'] = 'changed';
 $handler->display->display_options['fields']['changed']['table'] = 'tmgmt_job_item';
@@ -129,6 +109,32 @@ $handler->display->display_options['arguments']['tjid']['default_argument_type']
 $handler->display->display_options['arguments']['tjid']['summary']['number_of_records'] = '0';
 $handler->display->display_options['arguments']['tjid']['summary']['format'] = 'default_summary';
 $handler->display->display_options['arguments']['tjid']['summary_options']['items_per_page'] = '25';
+
+/* Display: Submit list */
+$handler = $view->new_display('block', 'Submit list', 'submit');
+$handler->display->display_options['defaults']['fields'] = FALSE;
+/* Field: Label */
+$handler->display->display_options['fields']['label']['id'] = 'label';
+$handler->display->display_options['fields']['label']['table'] = 'tmgmt_job_item';
+$handler->display->display_options['fields']['label']['field'] = 'label';
+$handler->display->display_options['fields']['label']['ui_name'] = 'Label';
+/* Field: Translation Management Job Item: Type */
+$handler->display->display_options['fields']['type']['id'] = 'type';
+$handler->display->display_options['fields']['type']['table'] = 'tmgmt_job_item';
+$handler->display->display_options['fields']['type']['field'] = 'type';
+/* Field: Translation Management Job Item: Word count */
+$handler->display->display_options['fields']['word_count_1']['id'] = 'word_count_1';
+$handler->display->display_options['fields']['word_count_1']['table'] = 'tmgmt_job_item';
+$handler->display->display_options['fields']['word_count_1']['field'] = 'word_count';
+/* Field: Operations */
+$handler->display->display_options['fields']['operations']['id'] = 'operations';
+$handler->display->display_options['fields']['operations']['table'] = 'tmgmt_job_item';
+$handler->display->display_options['fields']['operations']['field'] = 'operations';
+$handler->display->display_options['fields']['operations']['ui_name'] = 'Operations';
+$handler->display->display_options['fields']['operations']['element_label_colon'] = FALSE;
+
+/* Display: Block */
+$handler = $view->new_display('block', 'Block', 'block');
 $translatables['tmgmt_ui_job_items'] = array(
   t('Master'),
   t('Job Items'),
@@ -141,9 +147,13 @@ $translatables['tmgmt_ui_job_items'] = array(
   t('Items per page'),
   t('- All -'),
   t('Offset'),
+  t('« first'),
+  t('‹ previous'),
+  t('next ›'),
+  t('last »'),
   t('There are no items attached to this translation job.'),
   t('Label'),
-  t('Plugin'),
+  t('Type'),
   t('State'),
   t('Progress'),
   t('Word count'),
@@ -152,4 +162,6 @@ $translatables['tmgmt_ui_job_items'] = array(
   t('Changed'),
   t('Operations'),
   t('All'),
+  t('Submit list'),
+  t('Block'),
 );

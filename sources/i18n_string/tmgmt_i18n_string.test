@@ -46,6 +46,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $job->save();
 
     $item1 = $job->addItem('i18n_string', 'i18n_string', $string_object_name);
+    $this->assertEqual(t('Vocabulary'), $item1->getSourceType());
     $job->requestTranslation();
 
     foreach ($job->getItems() as $item) {
@@ -79,6 +80,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $job->save();
 
     $item1 = $job->addItem('i18n_string', 'i18n_string', $string_object_name);
+    $this->assertEqual(t('Term'), $item1->getSourceType());
     $job->requestTranslation();
 
     foreach ($job->getItems() as $item) {
@@ -97,7 +99,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
 
   }
 
-  function NtestI18nStringSourceMenu() {
+  function testI18nStringSourceMenu() {
     // Enabling this here as enabling it with tmgmt_ui results in missing views
     // handlers errors. Not sure why, but this way it at least works.
     module_enable(array('i18n_menu'));
@@ -122,6 +124,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $job->settings = array();
 
     $item1 = $job->addItem('i18n_string', 'i18n_string', $string_name);
+    $this->assertEqual(t('Menu'), $item1->getSourceType());
     $job->requestTranslation();
     foreach ($job->getItems() as $item) {
       /* @var $item TMGMTJobItem */
@@ -157,6 +160,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $job->settings = array();
 
     $item1 = $job->addItem('i18n_string', 'i18n_string', $string_name);
+    $this->assertEqual(t('Menu link'), $item1->getSourceType());
     $job->requestTranslation();
     foreach ($job->getItems() as $item) {
       /* @var $item TMGMTJobItem */

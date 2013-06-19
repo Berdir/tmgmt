@@ -60,4 +60,26 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
     $job_item->accepted();
   }
 
+  /**
+   * Implements TMGMTEntitySourcePluginControllerInterface::getType().
+   */
+  public function getType(TMGMTJobItem $job_item) {
+    if ($entity = entity_load_single($job_item->item_type, $job_item->item_id)) {
+      $bundles = tmgmt_entity_get_translatable_bundles($job_item->item_type);
+      $info = entity_get_info($job_item->item_type);
+      list(, , $bundle) = entity_extract_ids($job_item->item_type, $entity);
+      // Display entity type and label if we have one and the bundle isn't
+      // the same as the entity type.
+      if (isset($bundles[$bundle]) && $bundle != $job_item->item_type) {
+        return t('@type (@bundle)', array('@type' => $info['label'], '@bundle' => $bundles[$bundle]));
+      }
+      // Otherwise just display the entity type label.
+      elseif (isset($info['label'])) {
+        return $info['label'];
+      }
+      return parent::getType($job_item);
+    }
+  }
+
+
 }
