@@ -105,7 +105,7 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
   /**
    * Implements TMGMTTranslatorUIControllerInterface::reviewDataItemElement().
    */
-  public function reviewDataItemElement($form, &$form_state, $data_item_key, array $data_item, TMGMTJobItem $item) {
+  public function reviewDataItemElement($form, &$form_state, $data_item_key, $parent_key, array $data_item, TMGMTJobItem $item) {
     return $form;
   }
 

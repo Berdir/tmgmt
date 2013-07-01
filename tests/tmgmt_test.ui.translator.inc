@@ -55,7 +55,7 @@ class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController
   /**
    * Implements TMGMTTranslatorUIControllerInterface::reviewDataItemElement().
    */
-  public function reviewDataItemElement($form, &$form_state, $data_item_key, array $data_item, TMGMTJobItem $item) {
+  public function reviewDataItemElement($form, &$form_state, $data_item_key, $parent_key, array $data_item, TMGMTJobItem $item) {
     $form['below'] = array(
       '#markup' => t('Testing output of review data item element @key from the testing translator.', array('@key' => $data_item_key))
     );

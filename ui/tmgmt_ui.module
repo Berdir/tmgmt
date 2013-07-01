@@ -485,6 +485,19 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
 }
 
 /**
+ * Helper function to output ajaxid.
+ *
+ * @param string $parent_key
+ *   Parent element key.
+ *
+ * @return string
+ *   The ajax id.
+ */
+function tmgmt_ui_review_form_element_ajaxid($parent_key) {
+  return 'tmgmt-ui-element-' . drupal_clean_css_identifier($parent_key) . '-wrapper';
+}
+
+/**
  * Build form elements for the review form using flatened data items.
  *
  * @todo Mention in the api documentation that the char '|' is not allowed in
@@ -509,7 +522,7 @@ function _tmgmt_ui_review_form_element(&$form_state, $data, TMGMTJobItem $job_it
   );
   $form = array(
     '#theme' => 'tmgmt_ui_translator_review_form',
-    '#ajaxid' => 'tmgmt-ui-element-' . drupal_clean_css_identifier($parent_key) . '-wrapper',
+    '#ajaxid' => tmgmt_ui_review_form_element_ajaxid($parent_key),
   );
 
   foreach (element_children($data) as $key) {
@@ -622,10 +635,10 @@ function _tmgmt_ui_review_form_element(&$form_state, $data, TMGMTJobItem $job_it
 
       // Give the translator ui controller a chance to affect the data item element.
       $form[$target_key] = tmgmt_translator_ui_controller($job_item->getTranslator()->plugin)
-          ->reviewDataItemElement($form[$target_key], $form_state, $key, $data[$key], $job_item);
+          ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
       // Give the source ui controller a chance to affect the data item element.
       $form[$target_key] = tmgmt_source_ui_controller($job_item->plugin)
-          ->reviewDataItemElement($form[$target_key], $form_state, $key, $data[$key], $job_item);
+          ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
     }
   }
   return $form;
@@ -644,7 +657,8 @@ function tmgmt_ui_translation_review_form_revert($form, &$form_state) {
   if ($item->dataItemRevert($key)) {
     // Update the form_state input values so that the new default vale will be
     // shown.
-    unset($form_state['input'][$form_state['triggering_element']['#data_item_key']]['translation']);
+    $form_key = str_replace('][', '|', $form_state['triggering_element']['#data_item_key']);
+    unset($form_state['input'][$form_key]['translation']);
     $item->save();
   }
   else {

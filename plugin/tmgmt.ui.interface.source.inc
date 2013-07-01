@@ -16,7 +16,7 @@ interface TMGMTSourceUIControllerInterface extends TMGMTPluginBaseInterface {
   /**
    * Form callback for the data item element form.
    */
-  public function reviewDataItemElement($form, &$form_state, $data_item_key, array $data_item, TMGMTJobItem $item);
+  public function reviewDataItemElement($form, &$form_state, $data_item_key, $parent_key, array $data_item, TMGMTJobItem $item);
 
   /**
    * Validation callback for the job item review form.
