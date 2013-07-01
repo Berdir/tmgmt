@@ -70,27 +70,6 @@ function tmgmt_i18n_string_get_strings($type, $search_label = NULL, $limit = 20)
 }
 
 /**
- * Gets wrapper class name for given textgoup and type.
- *
- * This does not work for block as it does not provide the
- * $object_info['string translation']['type'] property.
- *
- * @param string $textgroup
- * @param string $type
- *
- * @return string
- */
-function tmgmt_i18n_string_source_get_object_wrapper($textgroup, $type) {
-  foreach (i18n_object_info() as $object_type => $object_info) {
-    if (isset($object_info['string translation']['textgroup']) && $object_info['string translation']['textgroup'] == $textgroup) {
-      if ((isset($object_info['string translation']['type']) && $object_info['string translation']['type'] == $type) || (!isset($object_info['string translation']['type']) && $object_type == $type)) {
-        return $object_type;
-      }
-    }
-  }
-}
-
-/**
  * Implements hook_form_ID_alter().
  *
  * Adds request translation capabilities into i18n translate tab.
@@ -160,7 +139,7 @@ function tmgmt_i18n_string_translate_form_validate($form, &$form_state) {
 function tmgmt_i18n_string_translate_form_submit($form, &$form_state) {
 
   $items = array_filter($form_state['values']['languages']);
-  $type = 'i18n_string';
+  $type = $form_state['values']['object']->get_type();
   $source_lang = variable_get_value('i18n_string_source_language');
 
   $jobs = array();

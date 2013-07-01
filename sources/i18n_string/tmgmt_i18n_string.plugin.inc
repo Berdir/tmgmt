@@ -14,17 +14,17 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
    * Overrides TMGMTDefaultSourcePluginController::getData().
    */
   public function getData(TMGMTJobItem $job_item) {
-
-    $identifiers = $this->getI18nObjectIdentifiers($job_item);
-    $i18n_strings = $this->getI18nObjectWrapper($job_item)->get_strings();
-
-    $structure = array('#label' => 'i18n Strings: ' . $identifiers['type']);
-    foreach ($i18n_strings as $string_id => $string) {
-      $structure[$string_id] = array(
-        '#label' => $string->title,
-        '#text' => $string->string,
-        '#translate' => TRUE
-      );
+    $i18n_object = $this->getI18nObjectWrapper($job_item);
+    $structure = array('#label' => t('i18n Strings: @title', array('@title' => $i18n_object->get_title())));
+    if ($i18n_object instanceof i18n_string_object_wrapper) {
+      $i18n_strings = $i18n_object->get_strings();
+      foreach ($i18n_strings as $string_id => $string) {
+        $structure[$string_id] = array(
+          '#label' => $string->title,
+          '#text' => $string->string,
+          '#translate' => TRUE
+        );
+      }
     }
     return $structure;
   }
@@ -50,12 +50,8 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
    * Implements TMGMTSourcePluginControllerInterface::getLabel().
    */
   public function getLabel(TMGMTJobItem $job_item) {
-    $data = $job_item->getData();
-
-    if (!empty($data) && $keys = element_children($data)) {
-      $key = reset($keys);
-      $item = $data[$key];
-      return strip_tags(drupal_substr($item['#text'], 0, 64)) . ' (' . $job_item->item_id . ')';
+    if ($i18n_object = $this->getI18nObjectWrapper($job_item)) {
+      return strip_tags(drupal_substr($i18n_object->get_title(), 0, 64)) . ' (' . $job_item->item_id . ')';
     }
     return parent::getLabel($job_item);
   }
@@ -64,26 +60,19 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
    * Implements TMGMTSourcePluginControllerInterface::getUri().
    */
   public function getUri(TMGMTJobItem $job_item) {
-    $wrapper = $this->getI18nObjectWrapper($job_item);
-    return array(
-      'path' => $wrapper->get_path(),
-      'options' => array(),
-    );
+    if ($wrapper = $this->getI18nObjectWrapper($job_item)) {
+      return array(
+        'path' => $wrapper->get_path(),
+        'options' => array(),
+      );
+    }
   }
 
   /**
    * Implements TMGMTEntitySourcePluginControllerInterface::getType().
    */
   public function getType(TMGMTJobItem $job_item) {
-    $identifiers = $this->getI18nObjectIdentifiers($job_item);
-    // @todo: Improve this, use item_type?
-    if ($label = $this->getItemTypeLabel($identifiers['textgroup'])) {
-      return $label;
-    }
-    if ($label = $this->getItemTypeLabel($identifiers['textgroup'] . '_' . $identifiers['type'])) {
-      return $label;
-    }
-    if ($label = $this->getItemTypeLabel($identifiers['type'])) {
+    if ($label = $this->getItemTypeLabel($job_item->item_type)) {
       return $label;
     }
     return parent::getType($job_item);
@@ -93,17 +82,13 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
   /**
    * Helper function to get i18n_object_wrapper for given job item.
    *
-   * This is critical part that does not work for all i18n string types.
-   * For example this will give fatal error for rules_config.
-   *
    * @param TMGMTJobItem $job_item
    *
    * @return i18n_string_object_wrapper
    */
   protected function getI18nObjectWrapper(TMGMTJobItem $job_item) {
     $identifiers = $this->getI18nObjectIdentifiers($job_item);
-    $type = tmgmt_i18n_string_source_get_object_wrapper($identifiers['textgroup'], $identifiers['type']);
-    return i18n_get_object($type, $identifiers['id']);
+    return i18n_get_object($job_item->item_type, $identifiers['id']);
   }
 
   /**

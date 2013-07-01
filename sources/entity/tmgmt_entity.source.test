@@ -54,7 +54,7 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
       $node = $this->createNode('article');
       // Create a job item for this node and add it to the job.
       $item = $job->addItem('entity', 'node', $node->nid);
-      $this->assertEqual(t('@type (@bundle)', array('@type' => t('Content'), '@bundle' => 'Article')), $item->getSourceType());
+      $this->assertEqual(t('@type (@bundle)', array('@type' => t('Node'), '@bundle' => 'Article')), $item->getSourceType());
     }
 
     // Translate the job.
@@ -90,7 +90,7 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
       $term = $this->createTaxonomyTerm($this->vocabulary);
       // Create the item and assign it to the job.
       $item = $job->addItem('entity', 'taxonomy_term', $term->tid);
-      $this->assertEqual(t('@type (@bundle)', array('@type' => t('Term'), '@bundle' => $this->vocabulary->name)), $item->getSourceType());
+      $this->assertEqual(t('@type (@bundle)', array('@type' => t('Taxonomy term'), '@bundle' => $this->vocabulary->name)), $item->getSourceType());
     }
     // Request the translation and accept it.
     $job->requestTranslation();

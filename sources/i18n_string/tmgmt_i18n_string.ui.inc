@@ -50,7 +50,7 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
 
     $i18n_strings = tmgmt_i18n_string_get_strings($type, $search_data['label']);
 
-    foreach ($this->getTranslationData($i18n_strings) as $id => $data) {
+    foreach ($this->getTranslationData($i18n_strings, $form_state['item_type']) as $id => $data) {
       $form['items']['#options'][$id] = $this->overviewRow($type, $data);
     }
 
@@ -64,16 +64,17 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
    *
    * @param array $i18n_strings
    *   Result of the search query returned by tmgmt_i18n_string_get_strings().
+   * @param string $type
+   *   I18n object type.
    *
    * @return array
    *   Structured array with translation data.
    */
-  protected function getTranslationData($i18n_strings) {
+  protected function getTranslationData($i18n_strings, $type) {
     $objects = array();
     $source_language = variable_get_value('i18n_string_source_language');
 
     foreach ($i18n_strings as $object) {
-      $type = tmgmt_i18n_string_source_get_object_wrapper($object->textgroup, $object->type);
       $wrapper = i18n_get_object($type, $object->objectid);
 
       if ($wrapper instanceof i18n_string_object_wrapper) {
@@ -209,7 +210,7 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
     // Handle search redirect.
     $this->overviewSearchFormRedirect($form, $form_state, $type);
     $items = array_filter($form_state['values']['items']);
-    $type = 'i18n_string';
+    $type = $form_state['item_type'];
 
     $source_lang = variable_get_value('i18n_string_source_language');
 

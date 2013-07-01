@@ -176,6 +176,8 @@ function tmgmt_ui_embed_view($view, $display_id = NULL, array $args = array()) {
  */
 function tmgmt_ui_source_overview_form($form, &$form_state, $plugin, $item_type = NULL) {
   $controller = tmgmt_source_ui_controller($plugin);
+  $form_state['plugin'] = $plugin;
+  $form_state['item_type'] = $item_type;
   return $controller->overviewForm($form, $form_state, $item_type);
 }
 
