@@ -60,7 +60,7 @@ function tmgmt_local_task_form($form, &$form_state, TMGMTLocalTask $task, $op = 
       '#type' => 'item',
       '#title' => $view->get_title(),
       '#prefix' => '<div class="tmgmt-local-task-items">',
-      '#markup' => $view->preview('block', $task->tltid),
+      '#markup' => $view->preview('block', array($task->tltid)),
       '#attributes' => array('class' => array('tmgmt-local-task-items')),
       '#suffix' => '</div>',
       '#weight' => 10,
