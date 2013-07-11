@@ -437,4 +437,119 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertIdentical(NULL, $job->requestTranslation(), 'Translation request was successfull');
     $this->assertTrue($job->isActive());
   }
+
+  function testCapabilitiesAPI() {
+
+    $this->setEnvironment('fr');
+    $this->setEnvironment('ru');
+    $this->setEnvironment('it');
+
+    $all_translators = array();
+
+    $translator1 = $this->drupalCreateUser($this->local_translator_permissions);
+    $all_translators[$translator1->uid] = $translator1->name;
+    $this->drupalLogin($translator1);
+    $edit = array(
+      'tmgmt_translation_skills[und][0][language_from]' => 'en',
+      'tmgmt_translation_skills[und][0][language_to]' => 'de',
+    );
+    $this->drupalPost('user/' . $translator1->uid . '/edit', $edit, t('Save'));
+
+    $translator2 = $this->drupalCreateUser($this->local_translator_permissions);
+    $all_translators[$translator2->uid] = $translator2->name;
+    $this->drupalLogin($translator2);
+    $edit = array(
+      'tmgmt_translation_skills[und][0][language_from]' => 'en',
+      'tmgmt_translation_skills[und][0][language_to]' => 'ru',
+    );
+    $this->drupalPost('user/' . $translator2->uid . '/edit', $edit, t('Save'));
+    $edit = array(
+      'tmgmt_translation_skills[und][1][language_from]' => 'en',
+      'tmgmt_translation_skills[und][1][language_to]' => 'fr',
+    );
+    $this->drupalPost('user/' . $translator2->uid . '/edit', $edit, t('Save'));
+    $edit = array(
+      'tmgmt_translation_skills[und][2][language_from]' => 'fr',
+      'tmgmt_translation_skills[und][2][language_to]' => 'it',
+    );
+    $this->drupalPost('user/' . $translator2->uid . '/edit', $edit, t('Save'));
+
+    $translator3 = $this->drupalCreateUser($this->local_translator_permissions);
+    $all_translators[$translator3->uid] = $translator3->name;
+    $this->drupalLogin($translator3);
+    $edit = array(
+      'tmgmt_translation_skills[und][0][language_from]' => 'fr',
+      'tmgmt_translation_skills[und][0][language_to]' => 'ru',
+    );
+    $this->drupalPost('user/' . $translator3->uid . '/edit', $edit, t('Save'));
+    $edit = array(
+      'tmgmt_translation_skills[und][1][language_from]' => 'it',
+      'tmgmt_translation_skills[und][1][language_to]' => 'en',
+    );
+    $this->drupalPost('user/' . $translator3->uid . '/edit', $edit, t('Save'));
+
+    // Test target languages.
+    $target_languages = tmgmt_local_supported_target_languages('fr');
+    $this->assertTrue(isset($target_languages['it']));
+    $this->assertTrue(isset($target_languages['ru']));
+    $target_languages = tmgmt_local_supported_target_languages('en');
+    $this->assertTrue(isset($target_languages['fr']));
+    $this->assertTrue(isset($target_languages['ru']));
+
+    // Test language pairs.
+    $this->assertEqual(tmgmt_local_supported_language_pairs(), array (
+      'en__de' =>
+      array (
+        'source_language' => 'en',
+        'target_language' => 'de',
+      ),
+      'en__ru' =>
+      array (
+        'source_language' => 'en',
+        'target_language' => 'ru',
+      ),
+      'en__fr' =>
+      array (
+        'source_language' => 'en',
+        'target_language' => 'fr',
+      ),
+      'fr__it' =>
+      array (
+        'source_language' => 'fr',
+        'target_language' => 'it',
+      ),
+      'fr__ru' =>
+      array (
+        'source_language' => 'fr',
+        'target_language' => 'ru',
+      ),
+      'it__en' =>
+      array (
+        'source_language' => 'it',
+        'target_language' => 'en',
+      ),
+    ));
+    $this->assertEqual(tmgmt_local_supported_language_pairs('fr', array($translator2->uid)), array (
+      'fr__it' =>
+      array (
+        'source_language' => 'fr',
+        'target_language' => 'it',
+      ),
+    ));
+
+    // Test if we got all translators.
+    $translators = tmgmt_local_translators();
+    foreach ($all_translators as $uid => $name) {
+      if (!isset($translators[$uid])) {
+        $this->fail('Expected translator not present');
+      }
+      if (!in_array($name, $all_translators)) {
+        $this->fail('Expected translator name not present');
+      }
+    }
+
+    // Only translator2 has such capabilities.
+    $translators = tmgmt_local_translators('en', array('ru', 'fr'));
+    $this->assertTrue(isset($translators[$translator2->uid]));
+  }
 }

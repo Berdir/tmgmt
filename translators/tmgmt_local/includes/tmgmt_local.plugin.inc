@@ -44,7 +44,7 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
    * Overrides TMGMTDefaultTranslatorPluginController::getSupportedTargetLanguages().
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
-    $languages = drupal_map_assoc(tmgmt_local_translation_capabilities($source_language));
+    $languages = tmgmt_local_supported_target_languages($source_language);
     if ($translator->getSetting('allow_all')) {
       $languages += parent::getSupportedTargetLanguages($translator, $source_language);
     }
