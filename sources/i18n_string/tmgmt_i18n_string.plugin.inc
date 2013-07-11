@@ -51,7 +51,16 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
    */
   public function getLabel(TMGMTJobItem $job_item) {
     if ($i18n_object = $this->getI18nObjectWrapper($job_item)) {
-      return strip_tags(drupal_substr($i18n_object->get_title(), 0, 64)) . ' (' . $job_item->item_id . ')';
+      // Get the label, default to the get_title() method, fall back to the
+      // first string if that is empty.
+      $title = t('Unknown');
+      if ($i18n_object->get_title()) {
+        $title = $i18n_object->get_title();
+      }
+      elseif ($strings = $i18n_object->get_strings(array('empty' => TRUE))) {
+        $title = reset($strings)->get_string();
+      }
+      return t('@title (@id)', array('@title' => strip_tags(drupal_substr($title, 0, 64)), '@id' => $job_item->item_id));
     }
     return parent::getLabel($job_item);
   }
@@ -78,7 +87,6 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
     return parent::getType($job_item);
   }
 
-
   /**
    * Helper function to get i18n_object_wrapper for given job item.
    *
@@ -87,28 +95,8 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
    * @return i18n_string_object_wrapper
    */
   protected function getI18nObjectWrapper(TMGMTJobItem $job_item) {
-    $identifiers = $this->getI18nObjectIdentifiers($job_item);
-    return i18n_get_object($job_item->item_type, $identifiers['id']);
-  }
-
-  /**
-   * Parses TMGMTJobItem::item_id for i18n string identifiers.
-   *
-   * @param TMGMTJobItem $job_item
-   *
-   * @return array
-   *   Associative array of identifiers:
-   *   - textgroup
-   *   - type
-   *   - id
-   */
-  protected function getI18nObjectIdentifiers(TMGMTJobItem $job_item) {
-    $identifiers = explode(':', $job_item->item_id);
-    return array(
-      'textgroup' => array_shift($identifiers),
-      'type' => array_shift($identifiers),
-      'id' => (count($identifiers) == 1) ? reset($identifiers) : $identifiers,
-    );
+    list($textgroup, $type, $object_id) = explode(':', $job_item->item_id, 3);
+    return tmgmt_i18n_string_get_wrapper($job_item->item_type, (object) array('type' => $type, 'objectid' => $object_id));
   }
 
 }

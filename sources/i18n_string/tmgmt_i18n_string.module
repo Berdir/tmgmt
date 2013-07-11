@@ -16,11 +16,7 @@ function tmgmt_i18n_string_tmgmt_source_plugin_info() {
     'ui controller class' => 'TMGMTI18nStringDefaultSourceUIController',
   );
   foreach (i18n_object_info() as $object_type => $object_info) {
-    // @todo. Exclude objects that don't have a type: block, fields.
-    //   Currently not supported as they don't follow the standard pattern.
-    if (isset($object_info['string translation']['type'])) {
-      $info['i18n_string']['item types'][$object_type] = $object_info['title'];
-    }
+    $info['i18n_string']['item types'][$object_type] = $object_info['title'];
   }
   return $info;
 }
@@ -44,8 +40,19 @@ function tmgmt_i18n_string_get_strings($type, $search_label = NULL, $limit = 20)
   $languages = drupal_map_assoc(array_keys(language_list()));
   $select = db_select('i18n_string', 'i18n_s');
 
-  $select->condition('i18n_s.type', $info['string translation']['type']);
   $select->condition('i18n_s.textgroup', $info['string translation']['textgroup']);
+  if (isset($info['string translation']['type'])) {
+    $select->condition('i18n_s.type', $info['string translation']['type']);
+  }
+  elseif ($type == 'field' || $type == 'field_instance') {
+    // Fields and field instances share the same textgroup. Use list of bundles
+    // to include/exclude field_instances.
+    $bundles = array();
+    foreach (entity_get_info() as $entity_info) {
+      $bundles = array_merge($bundles, array_keys($entity_info['bundles']));
+    }
+    $select->condition('i18n_s.objectid', $bundles, $type == 'field_instance' ? 'IN' : 'NOT IN');
+  }
 
   $select->join('locales_source', 'ls', 'ls.lid = i18n_s.lid');
   $select->addField('ls', 'source');
@@ -57,12 +64,15 @@ function tmgmt_i18n_string_get_strings($type, $search_label = NULL, $limit = 20)
     $langcode = str_replace('-', '', $langcode);
     $select->leftJoin('locales_target', "lt_$langcode", "i18n_s.lid = %alias.lid AND %alias.language = '$langcode'");
     $select->addField("lt_$langcode", 'language', "lang_$langcode");
-    $select->fields("i18n_s", array('lid', 'textgroup', 'context', 'type', 'objectid'));
   }
+  $select->fields("i18n_s", array('lid', 'textgroup', 'context', 'type', 'objectid'));
 
-  $select->addExpression("concat(i18n_s.textgroup, ':', i18n_s.context)", 'i18n_string_name');
+  $select->addExpression("concat(i18n_s.textgroup, ':', i18n_s.type, ':', i18n_s.objectid)", 'job_item_id');
 
   $select->orderBy('i18n_s.context');
+
+  $select->groupBy('type');
+  $select->groupBy('objectid');
 
   $select = $select->extend('PagerDefault')->limit($limit);
 
@@ -77,19 +87,11 @@ function tmgmt_i18n_string_get_strings($type, $search_label = NULL, $limit = 20)
 function tmgmt_i18n_string_form_i18n_string_translate_page_overview_form_alter(&$form, &$form_state) {
   $object = $form['object']['#value'];
 
-  // Provide request translation UI only for supported types.
-  $plugin_info = tmgmt_source_plugin_info('i18n_string');
-  if (!isset($plugin_info['item types'][$object->get_type()])) {
-    return;
-  }
-
-  // Build the id. This might be little risky as not sure if we can trust
-  // object properties, but for now the only way that I could come up with.
-  $textgroup = array_keys($object->get_properties());
-  $id = array_shift($textgroup) . ':' . implode(':', $object->get_string_context());
+  // Create the id: textgroup:type:objectid.
+  $id = $object->get_textgroup() . ':' . implode(':', $object->get_string_context());
   $source_language = variable_get_value('i18n_string_source_language');
 
-  $existing_items = tmgmt_job_item_load_latest('i18n_string', 'i18n_string', $id, $source_language);
+  $existing_items = tmgmt_job_item_load_latest('i18n_string', $object->get_type(), $id, $source_language);
 
   $form['languages']['#type'] = 'tableselect';
 
@@ -103,6 +105,9 @@ function tmgmt_i18n_string_form_i18n_string_translate_page_overview_form_alter(&
 
       if ($existing_items[$lang]->isNeedsReview()) {
         $row['operations'] .= ' | ' . l(t('review'), 'admin/config/regional/tmgmt/items/' . $existing_items[$lang]->tjiid, array('query' => array('destination' => $_GET['q'])));
+      }
+      elseif ($existing_items[$lang]->isActive()) {
+        $row['operations'] .= ' | ' . l(t('in progress'), 'admin/config/regional/tmgmt/items/' . $existing_items[$lang]->tjiid, array('query' => array('destination' => $_GET['q'])));
       }
     }
 
@@ -121,8 +126,8 @@ function tmgmt_i18n_string_form_i18n_string_translate_page_overview_form_alter(&
   $form['actions']['request_translation'] = array(
     '#type' => 'submit',
     '#value' => t('Request translation'),
-    '#submit' => array('tmgmt_i18n_string_translate_form_validate'),
-    '#validate' => array('tmgmt_i18n_string_translate_form_submit'),
+    '#submit' => array('tmgmt_i18n_string_translate_form_submit'),
+    '#validate' => array('tmgmt_i18n_string_translate_form_validate'),
   );
 }
 
@@ -173,7 +178,10 @@ function tmgmt_i18n_string_translate_form_submit($form, &$form_state) {
   $redirects = tmgmt_ui_job_checkout_multiple($jobs);
   // If necessary, do a redirect.
   if ($redirects) {
-    tmgmt_ui_redirect_queue_set($redirects, current_path());
+    tmgmt_ui_redirect_queue_set($redirects, isset($_GET['destination']) ? $_GET['destination'] : current_path());
+    // Remove an eventually existing destination, as that will prevent us
+    // from being redirect to the job checkout page.
+    unset($_GET['destination']);
     $form_state['redirect'] = tmgmt_ui_redirect_queue_dequeue();
 
     // Count of the job messages is one less due to the final redirect.
@@ -193,6 +201,58 @@ function tmgmt_i18n_string_i18n_object_info_alter(&$info) {
     if (!isset($object['load callback']) && !isset($object['entity']) && isset($entity_info[$name])) {
       $object['entity'] = $name;
     }
+  }
+}
+
+/**
+ * Returns the i18n wrapper object.
+ *
+ * I18N objects with one or two keys are supported.
+ *
+ * @param string $type
+ *   I18n object type.
+ * @param object $i18n_string
+ *   Object with type and objectid properties.
+ *
+ * @return i18n_string_object_wrapper
+ */
+function tmgmt_i18n_string_get_wrapper($type, $i18n_string) {
+  $object_key = i18n_object_info($type, 'key');
+  // Special handling if the object has two keys. Assume that they
+  // mean type and object id.
+   if ($type == 'field') {
+    // Special case for fields which expect the type to be the identifier.
+    $wrapper = i18n_get_object($type, $i18n_string->type);
+    return $wrapper;
+  }
+  elseif ($type == 'field_instance') {
+    // Special case for field instances, which use the field name as type and
+    // bundle as object id. We don't know the entity_type, so we loop over all
+    // entity_types to search for the bundle. This will clash if different
+    // entity types have bundles with the same names.
+    foreach (entity_get_info() as $entity_type => $entity_info) {
+      if (isset($entity_info['bundles'][$i18n_string->objectid])) {
+        list($type_key, $objectid_key) = $object_key;
+        $wrapper = i18n_get_object($type, array(
+          $type_key => $i18n_string->type,
+          $objectid_key => $i18n_string->objectid
+        ), field_info_instance($entity_type, $i18n_string->type, $i18n_string->objectid));
+        return $wrapper;
+      }
+    }
+  }
+  elseif (count($object_key) == 2) {
+    list($type_key, $objectid_key) = $object_key;
+    $wrapper = i18n_get_object($type, array(
+      $type_key => $i18n_string->type,
+      $objectid_key => $i18n_string->objectid
+    ));
+    return $wrapper;
+  }
+  else {
+    // Otherwise, use the object id.
+    $wrapper = i18n_get_object($type, $i18n_string->objectid);
+    return $wrapper;
   }
 }
 
