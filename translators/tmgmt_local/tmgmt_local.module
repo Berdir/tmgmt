@@ -559,7 +559,7 @@ function tmgmt_local_tasks_languages($tasks) {
   $query->join('tmgmt_job', 'j', 't.tjid = j.tjid');
   $query->fields('j', array('source_language', 'target_language'));
   $query->groupBy('target_language');
-  $result = $query->execute()->fetchAll();
+  $result = $query->execute();
   $languages = array();
 
   foreach ($result as $row) {
@@ -723,7 +723,7 @@ function tmgmt_local_supported_language_pairs($source_language = NULL, $uids = a
   $query = tmgmt_local_capabilities_query($source_language, NULL, $uids);
   $language_pairs[$cache_key] = array();
 
-  foreach ($query->execute()->fetchAll() as $row) {
+  foreach ($query->execute() as $row) {
     // Prevent duplicates.
     $pair_key = $row->tmgmt_translation_skills_language_from . '__' . $row->tmgmt_translation_skills_language_to;
     $language_pairs[$cache_key][$pair_key] = array(
@@ -761,12 +761,15 @@ function tmgmt_local_supported_target_languages($source_language, $uids = array(
  * Gets local translator for given language combination.
  *
  * @param string $source_language
+ *   (optional) Source language to limit on.
  * @param array $target_languages
+ *   (optional) List of target languages to limit to.
+ *
  * @return array
  *   Array of uid => name translators or empty array if there are no translator
  *   users.
  */
-function tmgmt_local_translators($source_language = NULL, $target_languages = array()) {
+function tmgmt_local_translators($source_language = NULL, array $target_languages = array()) {
   $translators = &drupal_static(__FUNCTION__);
 
   if (!empty($target_languages) && !is_array($target_languages)) {
@@ -782,7 +785,7 @@ function tmgmt_local_translators($source_language = NULL, $target_languages = ar
   // Get all capabilities keyed by uids for given source language.
   $query = tmgmt_local_capabilities_query($source_language);
   $translators_capabilities = array();
-  foreach ($query->execute()->fetchAll() as $row) {
+  foreach ($query->execute() as $row) {
     $translators_capabilities[$row->uid][] = $row->tmgmt_translation_skills_language_to;
   }
 
@@ -809,11 +812,17 @@ function tmgmt_local_translators($source_language = NULL, $target_languages = ar
 }
 
 /**
+ * Builds a query to search for language capabilities.
+ *
  * @param string $source_language
+ *   (optional) Limit the source language.
  * @param string $target_language
+ *   (optional) Limit the target language.
  * @param array $uids
+ *   (optional) Limit to specific users.
  *
  * @return SelectQuery
+ *   A select query that is preconfigured based on the passed in conditions.
  */
 function tmgmt_local_capabilities_query($source_language = NULL, $target_language = NULL, $uids = array()) {
 
