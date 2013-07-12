@@ -584,7 +584,7 @@ function tmgmt_local_get_translators_for_tasks($tasks) {
   $translators = array();
 
   foreach (tmgmt_local_tasks_languages($tasks) as $source_language => $target_languages) {
-    $translators[] = tmgmt_local_translators($source_language, $target_languages);
+    $translators[] = tmgmt_local_translators($source_language, array($target_languages));
   }
 
   if (count($translators) > 1) {
@@ -771,10 +771,6 @@ function tmgmt_local_supported_target_languages($source_language, $uids = array(
  */
 function tmgmt_local_translators($source_language = NULL, array $target_languages = array()) {
   $translators = &drupal_static(__FUNCTION__);
-
-  if (!empty($target_languages) && !is_array($target_languages)) {
-    $target_languages = array($target_languages);
-  }
 
   $key = $source_language . '_' . implode('_', $target_languages);
 

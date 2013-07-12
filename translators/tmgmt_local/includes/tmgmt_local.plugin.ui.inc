@@ -14,7 +14,7 @@ class TMGMTLocalTranslatorUIController extends TMGMTDefaultTranslatorUIControlle
    * Overrides TMGMTDefaultTranslatorPluginController::checkoutSettingsForm().
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
-    if ($translators = tmgmt_local_translators($job->source_language, $job->target_language)) {
+    if ($translators = tmgmt_local_translators($job->source_language, array($job->target_language))) {
       $form['translator'] = array(
         '#title' => t('Select translator for this job'),
         '#type' => 'select',
