@@ -584,7 +584,7 @@ function tmgmt_local_get_translators_for_tasks($tasks) {
   $translators = array();
 
   foreach (tmgmt_local_tasks_languages($tasks) as $source_language => $target_languages) {
-    $translators[] = tmgmt_local_translators($source_language, array($target_languages));
+    $translators[] = tmgmt_local_translators($source_language, $target_languages);
   }
 
   if (count($translators) > 1) {
