@@ -74,19 +74,20 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
     $objects = array();
     $source_language = variable_get_value('i18n_string_source_language');
 
-    foreach ($i18n_strings as $object) {
-      $wrapper = i18n_get_object($type, $object->objectid);
+    foreach ($i18n_strings as $i18n_string) {
+      $wrapper = tmgmt_i18n_string_get_wrapper($type, $i18n_string);
 
       if ($wrapper instanceof i18n_string_object_wrapper) {
-        $id = implode(':', array($object->textgroup, $object->type, $object->objectid));
+        $id = $i18n_string->job_item_id;
 
         // Get existing translations and current job items for the entity
         // to determine translation statuses
-        $current_job_items = tmgmt_job_item_load_latest('i18n_string', 'i18n_string', $id, $source_language);
+        $current_job_items = tmgmt_job_item_load_latest('i18n_string', $wrapper->get_type(), $id, $source_language);
 
         $objects[$id] = array(
           'id' => $id,
           'object' => $wrapper->get_strings(array('empty' => TRUE)),
+          'wrapper' => $wrapper,
         );
         // Load entity translation specific data.
         foreach (language_list() as $langcode => $language) {
@@ -97,7 +98,7 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
           if ($langcode == $source_language) {
             $translation_status = 'original';
           }
-          elseif ($object->{'lang_' . $langcode} === NULL) {
+          elseif ($i18n_string->{'lang_' . $langcode} === NULL) {
             $translation_status = 'missing';
           }
 
@@ -183,12 +184,12 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
     // Set the default item key, assume it's the first.
     $item_title = reset($data['object']);
 
-    $type = i18n_object_info($type, 'title');
+    $type_label = i18n_object_info($type, 'title');
 
     $row = array(
       'id' => $data['id'],
-      'title' => $item_title->get_string(),
-      'type' => empty($type) ? t('Unknown') : $type,
+      'title' => $item_title->get_string() ? t('@title (@id)', array('@title' => $item_title->get_string(), '@id' => $data['id'])) : $data['id'],
+      'type' => empty($type_label) ? t('Unknown') : $type_label,
     );
 
     foreach (language_list() as $langcode => $language) {

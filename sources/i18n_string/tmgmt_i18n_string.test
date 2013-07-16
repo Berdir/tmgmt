@@ -20,7 +20,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
    * Overrides SimplenewsTestCase::setUp()
    */
   function setUp() {
-    parent::setUp(array('tmgmt_ui', 'tmgmt_i18n_string', 'taxonomy', 'i18n_taxonomy'));
+    parent::setUp(array('tmgmt_ui', 'tmgmt_i18n_string', 'taxonomy', 'i18n_taxonomy', 'i18n_block', 'i18n_field', 'list'));
     $this->setEnvironment('de');
     $this->translator = $this->createTranslator();
   }
@@ -215,14 +215,109 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
 
     // Request translation via translate tab of i18n.
     $this->drupalPost('admin/structure/taxonomy/test_vocab/translate', array('languages[taxonomy:vocabulary:1:de]' => 1), t('Request translation'));
-    // Test for the job checkout url.
-    $this->assertTrue(strpos($this->getUrl(), 'admin/config/regional/tmgmt/jobs') !== FALSE);
-    entity_get_controller('tmgmt_job')->resetCache();
-    $jobs = entity_load('tmgmt_job', FALSE);
-    /** @var TMGMTJob $job */
-    $job = array_pop($jobs);
-    $this->assertFieldByName('label', $job->label());
+    $this->drupalPost(NULL, array(), t('Submit to translator'));
 
+    // Verify that the job item status is shown.
+    $this->assertText(t('Needs review'));
+    $this->clickLink(t('review'));
+    $this->drupalPost(NULL, array(), t('Save as completed'));
+    $this->assertText(t('The translation for @label has been accepted.', array('@label' => $job->label())));
+  }
+
+  /**
+   * Tests translation of blocks through the user interface.
+   */
+  function testI18nStringPluginUIBlock() {
+
+    $this->loginAsAdmin(array('administer blocks', 'translate interface', 'translate user-defined strings'));
+
+    // Make some blocks translatable.
+    $navigation_edit = array(
+      'title' => $this->randomName(),
+      'i18n_mode' => 1,
+    );
+    $this->drupalPost('admin/structure/block/manage/system/navigation/configure', $navigation_edit, t('Save block'));
+    $powered_edit = array(
+      'title' => $this->randomName(),
+      'i18n_mode' => 1,
+    );
+    $this->drupalPost('admin/structure/block/manage/system/powered-by/configure', $powered_edit, t('Save block'));
+
+    $this->drupalGet('admin/config/regional/tmgmt/i18n_string/block');
+    $this->assertText($navigation_edit['title']);
+    $this->assertText($powered_edit['title']);
+
+    // Request translation via i18n source tab.
+    $edit = array(
+      'items[blocks:system:powered-by]' => 1,
+      'items[blocks:system:navigation]' => 1,
+    );
+    $this->drupalPost(NULL, $edit, t('Request translation'));
+    $this->assertText($navigation_edit['title']);
+    $this->assertText($powered_edit['title']);
+    $this->drupalPost(NULL, array(), t('Submit to translator'));
+
+    $this->assertRaw(t('Active job item: Needs review'));
+  }
+
+  /**
+   * Tests translation of fields through the user interface.
+   */
+  function testI18nStringPluginUIField() {
+    $this->loginAsAdmin(array('translate interface', 'translate user-defined strings'));
+    $type = $this->drupalCreateContentType(array('type' => $type = $this->randomName()));
+
+    // Create a field.
+    $field = array(
+      'field_name' => 'list_test',
+      'type' => 'list_text',
+    );
+    for ($i = 0; $i < 5; $i++) {
+      $field['settings']['allowed_values'][$this->randomName()] = $this->randomString();
+    }
+    field_create_field($field);
+
+    // Create an instance of the previously created field.
+    $instance = array(
+      'field_name' => 'list_test',
+      'entity_type' => 'node',
+      'bundle' => $type->type,
+      'label' => $this->randomName(10),
+      'description' => $this->randomString(30),
+    );
+    field_create_instance($instance);
+
+    // The body field doesn't have anything that can be translated on the field
+    // level, so it shouldn't show up in the field overview.
+    $this->drupalGet('admin/config/regional/tmgmt/i18n_string/field');
+    $this->assertNoText(t('Body'));
+    // @todo: Label doesn't work here?
+    $this->assertText('field:list_test:#allowed_values');
+
+    $this->drupalGet('admin/config/regional/tmgmt/i18n_string/field_instance');
+    $this->assertUniqueText(t('Body'));
+    $this->assertUniqueText($instance['label']);
+
+    // Request translation.
+    $edit = array(
+      'items[field:body:' . $type->type . ']' => 1,
+      'items[field:list_test:' . $type->type . ']' => 1,
+    );
+    $this->drupalPost(NULL, $edit, t('Request translation'));
+    $this->assertText(t('Body'));
+    $this->assertText($instance['label']);
+    $this->drupalPost(NULL, array(), t('Submit to translator'));
+
+    $this->assertRaw(t('Active job item: Needs review'));
+
+    // Review the first item.
+    $this->clickLink(t('reviewed'));
+    $this->drupalPost(NULL, array(), t('Save as completed'));
+
+    // The overview should now have a translated field and a pending job item.
+    $this->drupalGet('admin/config/regional/tmgmt/i18n_string/field_instance');
+    $this->assertRaw(t('Translation up to date'));
+    $this->assertRaw(t('Active job item: Needs review'));
 
   }
 }
