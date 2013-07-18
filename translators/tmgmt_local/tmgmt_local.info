@@ -6,6 +6,8 @@ core = 7.x
 dependencies[] = tmgmt
 dependencies[] = tmgmt_language_combination
 
+configure = admin/config/regional/tmgmt_translator
+
 files[] = controller/tmgmt_local.controller.task.inc
 files[] = controller/tmgmt_local.controller.task_item.inc
 files[] = entity/tmgmt_local.entity.task.inc

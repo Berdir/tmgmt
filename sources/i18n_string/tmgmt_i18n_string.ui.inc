@@ -224,7 +224,7 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
       $job->addItem('i18n_string', $type, $item);
     }
 
-    $form_state['redirect'] = array('admin/config/regional/tmgmt/jobs/' . $job->tjid,
+    $form_state['redirect'] = array('admin/tmgmt/jobs/' . $job->tjid,
       array('query' => array('destination' => current_path())));
     drupal_set_message(t('One job needs to be checked out.'));
   }

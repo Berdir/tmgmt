@@ -133,7 +133,7 @@ class TMGMTJobItem extends Entity {
     // Having to maintain two unknowns / wildcards (job and job item) in the
     // path is more complex than it has to be. Instead we just append the
     // additional breadcrumb pieces manually with _tmgmt_ui_breadcrumb().
-    return array('path' => 'admin/config/regional/tmgmt/items/' . $this->tjiid);
+    return array('path' => 'admin/tmgmt/items/' . $this->tjiid);
   }
 
   /**

@@ -97,7 +97,7 @@ function tmgmt_node_ui_help($path, $arg){
   $output = '';
 
   switch($path){
-    case 'admin/config/regional/tmgmt/node':
+    case 'admin/tmgmt/sources/node':
       $output = tmgmt_ui_color_legend();
       break;
   }

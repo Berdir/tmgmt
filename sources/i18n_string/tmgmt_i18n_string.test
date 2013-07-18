@@ -200,13 +200,13 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $this->clickLink(t('add terms'));
     $this->drupalPost(NULL, $term_data, t('Save'));
 
-    $this->drupalGet('admin/config/regional/tmgmt/i18n_string/taxonomy_vocabulary');
+    $this->drupalGet('admin/tmgmt/sources/i18n_string_taxonomy_vocabulary');
     $this->assertText($vocab_data['name']);
 
     // Request translation via i18n source tab
     $this->drupalPost(NULL, array('items[taxonomy:vocabulary:1]' => 1), t('Request translation'));
     // Test for the job checkout url.
-    $this->assertTrue(strpos($this->getUrl(), 'admin/config/regional/tmgmt/jobs') !== FALSE);
+    $this->assertTrue(strpos($this->getUrl(), 'admin/tmgmt/jobs') !== FALSE);
     entity_get_controller('tmgmt_job')->resetCache();
     $jobs = entity_load('tmgmt_job', FALSE);
     /** @var TMGMTJob $job */
@@ -243,7 +243,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     );
     $this->drupalPost('admin/structure/block/manage/system/powered-by/configure', $powered_edit, t('Save block'));
 
-    $this->drupalGet('admin/config/regional/tmgmt/i18n_string/block');
+    $this->drupalGet('admin/tmgmt/sources/i18n_string_block');
     $this->assertText($navigation_edit['title']);
     $this->assertText($powered_edit['title']);
 
@@ -289,12 +289,12 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
 
     // The body field doesn't have anything that can be translated on the field
     // level, so it shouldn't show up in the field overview.
-    $this->drupalGet('admin/config/regional/tmgmt/i18n_string/field');
+    $this->drupalGet('admin/tmgmt/sources/i18n_string_field');
     $this->assertNoText(t('Body'));
     // @todo: Label doesn't work here?
     $this->assertText('field:list_test:#allowed_values');
 
-    $this->drupalGet('admin/config/regional/tmgmt/i18n_string/field_instance');
+    $this->drupalGet('admin/tmgmt/sources/i18n_string_field_instance');
     $this->assertUniqueText(t('Body'));
     $this->assertUniqueText($instance['label']);
 
@@ -315,7 +315,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $this->drupalPost(NULL, array(), t('Save as completed'));
 
     // The overview should now have a translated field and a pending job item.
-    $this->drupalGet('admin/config/regional/tmgmt/i18n_string/field_instance');
+    $this->drupalGet('admin/tmgmt/sources/i18n_string_field_instance');
     $this->assertRaw(t('Translation up to date'));
     $this->assertRaw(t('Active job item: Needs review'));
 

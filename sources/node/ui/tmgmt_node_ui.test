@@ -62,7 +62,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
 
     $no_permissions = $this->drupalCreateUser();
     $this->drupalLogin($no_permissions);
-    $this->drupalGet('admin/config/regional/tmgmt');
+    $this->drupalGet('admin/tmgmt');
     $this->assertResponse(403);
 
     // Test with a user that is only allowed to create jobs.
@@ -85,7 +85,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     // Verify that we are still on the translate tab.
     $this->assertText(t('Translations of @title', array('@title' => $node->title)));
 
-    $this->drupalGet('admin/config/regional/tmgmt');
+    $this->drupalGet('admin/tmgmt');
     $this->assertResponse(200);
     $this->assertLink(t('manage'));
     $this->assertNoLink(t('submit'));
@@ -110,7 +110,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $this->assertNoRaw(t('Request translation'));
 
     // Go to the overview and submit the job.
-    $this->drupalGet('admin/config/regional/tmgmt');
+    $this->drupalGet('admin/tmgmt');
     $this->assertResponse(200);
     $this->assertLink(t('submit'));
     $this->assertNoLink(t('manage'));
@@ -133,7 +133,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     $accept_user = $this->drupalCreateUser(array('access administration pages', 'accept translation jobs'));
     $this->drupalLogin($accept_user);
 
-    $this->drupalGet('admin/config/regional/tmgmt');
+    $this->drupalGet('admin/tmgmt');
     $this->clickLink('manage');
     $this->clickLink('review');
 
