@@ -686,7 +686,7 @@ function tmgmt_job_form_submit($form, &$form_state) {
   }
   $job->save();
   // Per default we want to redirect the user to the overview.
-  $form_state['redirect'] = 'admin/config/regional/tmgmt';
+  $form_state['redirect'] = 'admin/tmgmt';
   // Everything below this line is only invoked if the 'Submit to translator'
   // button was clicked.
   if ($form_state['triggering_element']['#value'] == $form['actions']['checkout']['#value']) {

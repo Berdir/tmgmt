@@ -200,7 +200,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $this->clickLink(t('add terms'));
     $this->drupalPost(NULL, $term_data, t('Save'));
 
-    $this->drupalGet('admin/tmgmt/sources/i18n_string/taxonomy_vocabulary');
+    $this->drupalGet('admin/tmgmt/sources/i18n_string_taxonomy_vocabulary');
     $this->assertText($vocab_data['name']);
 
     // Request translation via i18n source tab
