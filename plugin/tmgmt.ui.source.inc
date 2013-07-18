@@ -71,25 +71,11 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
         'access arguments' => array('create'),
       );
       foreach ($types as $type => $name) {
-        if (empty($items['admin/config/regional/tmgmt/' . $this->pluginType])) {
-          // Make the first item type of this source the default menu tab.
-          $items['admin/config/regional/tmgmt/' . $this->pluginType] = $defaults + array(
-            'title' => t('@type sources', array('@type' => ucfirst($this->pluginInfo['label']))),
-            'page arguments' => array('tmgmt_ui_' . $this->pluginType . '_source_' . $type . '_overview_form', $this->pluginType, $type),
-            'type' => MENU_LOCAL_TASK,
-          );
-          $items['admin/config/regional/tmgmt/' . $this->pluginType . '/' . $type] = array(
-            'title' => check_plain($name),
-            'type' => MENU_DEFAULT_LOCAL_TASK,
-          );
-        }
-        else {
-          $items['admin/config/regional/tmgmt/' . $this->pluginType . '/' . $type] = $defaults + array(
-            'title' => check_plain($name),
-            'page arguments' => array('tmgmt_ui_' . $this->pluginType . '_source_' . $type . '_overview_form', $this->pluginType, $type),
-            'type' => MENU_LOCAL_TASK,
-          );
-        }
+        $items['admin/tmgmt/sources/' . $this->pluginType . '_' . $type] = $defaults + array(
+          'title' => check_plain($name),
+          'page arguments' => array('tmgmt_ui_' . $this->pluginType . '_source_' . $type . '_overview_form', $this->pluginType, $type),
+          'type' => MENU_LOCAL_TASK,
+        );
       }
     }
     return $items;

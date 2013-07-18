@@ -32,7 +32,7 @@ class tmgmt_handler_field_tmgmt_job_item_operations extends views_handler_field_
     }
     if (user_access('administer tmgmt') && !$item->isAccepted()) {
       $element['#links']['delete'] = array(
-        'href' => 'admin/config/regional/tmgmt/items/' . $item->tjiid . '/delete',
+        'href' => 'admin/tmgmt/items/' . $item->tjiid . '/delete',
         'query' => array('destination' => current_path()),
         'title' => t('delete'),
       );

@@ -292,7 +292,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $keys = array_keys($data);
     $key = $keys[0];
 
-    $this->drupalGet('admin/config/regional/tmgmt/items/' . $item->tjiid);
+    $this->drupalGet('admin/tmgmt/items/' . $item->tjiid);
     // Testing the result of the
     // TMGMTTranslatorUIControllerInterface::reviewDataItemElement()
     $this->assertText(t('Testing output of review data item element @key from the testing translator.', array('@key' => $key)));
@@ -302,7 +302,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
 
     // Save translation.
     $this->drupalPost(NULL, array('dummy|deep_nesting[translation]' => $data[$key]['#text'] . 'translated'), t('Save'));
-    $this->drupalGet('admin/config/regional/tmgmt/items/' . $item->tjiid);
+    $this->drupalGet('admin/tmgmt/items/' . $item->tjiid);
     // Check if translation has been saved.
     $this->assertFieldByName('dummy|deep_nesting[translation]', $data[$key]['#text'] . 'translated');
   }

@@ -66,7 +66,7 @@ class TMGMTUpgradeAlpha1TestCase extends DrupalWebTestCase {
     $translator = $this->drupalCreateUser(array('administer tmgmt'));
     $this->drupalLogin($translator);
     // Go to a job and check the review form.
-    $this->drupalGet('admin/config/regional/tmgmt/jobs/1');
+    $this->drupalGet('admin/tmgmt/jobs/1');
     // Make sure the #status values have been set accordingly.
     $this->assertRaw(t('Accepted: @accepted, reviewed: @reviewed, translated: @translated, pending: @pending.', array('@accepted' => 0, '@reviewed' => 0, '@translated' => 2, '@pending' => 0)));
     // Extract the word count field and make sure it's correct.
@@ -83,7 +83,7 @@ class TMGMTUpgradeAlpha1TestCase extends DrupalWebTestCase {
     $this->assertRaw('✗');
 
     // Check that accepted count has been updated correctly.
-    $this->drupalGet('admin/config/regional/tmgmt/jobs/2');
+    $this->drupalGet('admin/tmgmt/jobs/2');
     // Make sure the #status values have been set accordingly.
     $this->assertRaw(t('Accepted: @accepted, reviewed: @reviewed, translated: @translated, pending: @pending.', array('@accepted' => 2, '@reviewed' => 0, '@translated' => 0, '@pending' => 0)));
 

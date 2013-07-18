@@ -12,19 +12,19 @@ function tmgmt_ui_entity_info() {
   $info['tmgmt_translator'] = array(
     'admin ui' => array(
       'controller class' => 'TMGMTTranslatorUIController',
-      'path' => 'admin/config/regional/tmgmt/translators',
+      'path' => 'admin/config/regional/tmgmt_translator',
     ),
   );
   $info['tmgmt_job'] = array(
     'admin ui' => array(
       'controller class' => 'TMGMTJobUIController',
-      'path' => 'admin/config/regional/tmgmt/jobs',
+      'path' => 'admin/tmgmt/jobs',
     ),
   );
   $info['tmgmt_job_item'] = array(
     'admin ui' => array(
       'controller class' => 'TMGMTJobItemUIController',
-      'path' => 'admin/config/regional/tmgmt/items',
+      'path' => 'admin/tmgmt/items',
     ),
   );
   foreach ($info as $key => $item) {
@@ -41,20 +41,11 @@ function tmgmt_ui_entity_info() {
  * Implements hook_menu().
  */
 function tmgmt_ui_menu() {
-  $items['admin/config/regional/tmgmt'] = array(
-    'title' => 'Translation Management',
-    'description' => 'Use the Translation Management Tool',
-    'page callback' => 'tmgmt_ui_dashboard_page',
-    'page arguments' => array('tmgmt_job_overview'),
-    'access callback' => 'tmgmt_job_access',
-    'access arguments' => array('view'),
-  );
-  $items['admin/config/regional/tmgmt/settings'] = array(
-    'title' => 'Settings',
+  $items['admin/config/regional/tmgmt_settings'] = array(
+    'title' => 'Translation Management settings',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('tmgmt_ui_settings_form'),
     'access arguments' => array('administer tmgmt'),
-    'type' => MENU_LOCAL_TASK,
     'file' => 'includes/tmgmt_ui.pages.inc',
     'weight' => 10,
   );
@@ -63,6 +54,49 @@ function tmgmt_ui_menu() {
     $items += $controller->hook_menu();
   }
   return $items;
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function tmgmt_ui_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'menu_alter') {
+    // Move tmgmt_ui_menu_alter() to the end to be able to see views-defined
+    // source overviews.
+    $group = $implementations['tmgmt_ui'];
+    unset($implementations['tmgmt_ui']);
+    $implementations['tmgmt_ui'] = $group;
+  }
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function tmgmt_ui_menu_alter(&$items) {
+  $weight = NULL;
+  $default_path = NULL;
+  // Look for the sources overview local task with the lowest weight.
+  foreach ($items as $path => $item) {
+    $item += array('weight' => 0);
+    if (strpos($path, 'admin/tmgmt/sources') !== FALSE) {
+      if ($weight === NULL || $weight > $item['weight']) {
+        $weight = $item['weight'];
+        $default_path = $path;
+      }
+    }
+  }
+
+  // If we have found a default path, define a parent menu item based on it's
+  // definitions and change the type to a default local task.
+  if ($default_path) {
+    $items['admin/tmgmt/sources'] = array(
+      'title' => 'Sources',
+      'description' => 'Source overview',
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 10,
+    ) + $items[$default_path];
+    $items[$default_path]['type'] = MENU_DEFAULT_LOCAL_TASK;
+  }
 }
 
 /**
@@ -122,7 +156,7 @@ function tmgmt_ui_forms() {
  */
 function tmgmt_ui_system_info_alter(&$info, $file, $type) {
   if ($file->name == 'tmgmt') {
-    $info['configure'] = 'admin/config/regional/tmgmt/settings';
+    $info['configure'] = 'admin/config/regional/tmgmt_settings';
   }
 }
 
@@ -188,7 +222,7 @@ function tmgmt_ui_source_overview_form_defaults($form, &$form_state, $plugin, $i
   $controller = tmgmt_source_plugin_controller($plugin);
   $info = tmgmt_source_plugin_info($plugin);
   // Set a generic title that includes the source plugin and item type label.
-  drupal_set_title(t('@plugin overview (@type)', array('@type' => $controller->getItemTypeLabel($item_type), '@plugin' => $info['label'])), PASS_THROUGH);
+  drupal_set_title(t('@type overview (@plugin)', array('@type' => $controller->getItemTypeLabel($item_type), '@plugin' => $info['label'])), PASS_THROUGH);
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',

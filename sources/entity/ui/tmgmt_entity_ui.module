@@ -47,7 +47,7 @@ function tmgmt_entity_ui_help($path, $arg){
   $output = '';
 
   switch($path){
-    case 'admin/config/regional/tmgmt/entity':
+    case 'admin/tmgmt/entity':
       $output = tmgmt_ui_color_legend();
       break;
   }

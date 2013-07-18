@@ -189,13 +189,13 @@ function tmgmt_translator_form($form, &$form_state, TMGMTTranslator $translator,
     '#type' => 'submit',
     '#value' => t('Delete'),
     '#submit' => array('tmgmt_ui_submit_redirect'),
-    '#redirect' => 'admin/config/regional/tmgmt/translators/manage/' . $translator->name . '/delete',
+    '#redirect' => 'admin/config/regional/tmgmt_translator/manage/' . $translator->name . '/delete',
     '#access' => $old,
   );
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#title' => t('Cancel'),
-    '#href' => 'admin/config/regional/tmgmt/translators',
+    '#href' => 'admin/config/regional/tmgmt_translator',
   );
   return $form;
 }
@@ -225,7 +225,7 @@ function tmgmt_translator_form_validate($form, &$form_state) {
 function tmgmt_translator_form_submit($form, &$form_state) {
   entity_ui_form_submit_build_entity($form, $form_state)->save();
   drupal_set_message(t('The configuration options have been saved.'));
-  $form_state['redirect'] = 'admin/config/regional/tmgmt/translators';
+  $form_state['redirect'] = 'admin/config/regional/tmgmt_translator';
 }
 
 /**
@@ -468,7 +468,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     // Show a list of translators tagged by availability for the selected source
     // and target language combination.
     if (!$translators = tmgmt_translator_labels_flagged($job)) {
-      drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => l(t('configure'), 'admin/config/regional/tmgmt/translators'))), 'warning');
+      drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => l(t('configure'), 'admin/config/regional/tmgmt_translator'))), 'warning');
     }
     $preselected_translator = !empty($job->translator) && isset($translators[$job->translator]) ? $job->translator : key($translators);
     $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : $preselected_translator;
@@ -540,7 +540,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       '#type' => 'submit',
       '#value' => t('Delete'),
       '#submit' => array('tmgmt_ui_submit_redirect'),
-      '#redirect' => 'admin/config/regional/tmgmt/jobs/' . $job->tjid . '/delete',
+      '#redirect' => 'admin/tmgmt/jobs/' . $job->tjid . '/delete',
       // Don't run validations, so the user can always delete the job.
       '#limit_validation_errors' => array(),
     );
@@ -551,7 +551,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
     '#type' => 'button',
     '#value' => t('Cancel'),
     '#submit' => array('tmgmt_ui_submit_redirect'),
-    '#redirect' => 'admin/config/regional/tmgmt/jobs',
+    '#redirect' => 'admin/tmgmt/jobs',
     '#access' => $job->isActive(),
   );
   $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
@@ -828,9 +828,7 @@ function tmgmt_ui_ajax_callback_translator_select($form, &$form_state) {
  */
 function _tmgmt_ui_breadcrumb(TMGMTJobItem $item) {
   $breadcrumb = drupal_get_breadcrumb();
-  foreach (array('admin/config/regional/tmgmt/jobs', 'admin/config/regional/tmgmt/jobs/' . $item->tjid) as $path) {
-    $menu = menu_get_item($path);
-    $breadcrumb[] = l($menu['title'], $path);
-  }
+  $menu = menu_get_item('admin/tmgmt/jobs/' . $item->tjid);
+  $breadcrumb[] = l($menu['title'], 'admin/tmgmt/jobs/' . $item->tjid);
   drupal_set_breadcrumb($breadcrumb);
 }

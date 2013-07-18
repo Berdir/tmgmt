@@ -104,7 +104,7 @@ function tmgmt_i18n_string_form_i18n_string_translate_page_overview_form_alter(&
       $row['status'] = $states[$existing_items[$lang]->state];
 
       if ($existing_items[$lang]->isNeedsReview()) {
-        $row['operations'] .= ' | ' . l(t('review'), 'admin/config/regional/tmgmt/items/' . $existing_items[$lang]->tjiid, array('query' => array('destination' => $_GET['q'])));
+        $row['operations'] .= ' | ' . l(t('review'), 'admin/tmgmt/items/' . $existing_items[$lang]->tjiid, array('query' => array('destination' => $_GET['q'])));
       }
       elseif ($existing_items[$lang]->isActive()) {
         $row['operations'] .= ' | ' . l(t('in progress'), 'admin/config/regional/tmgmt/items/' . $existing_items[$lang]->tjiid, array('query' => array('destination' => $_GET['q'])));
@@ -262,7 +262,7 @@ function tmgmt_i18n_string_get_wrapper($type, $i18n_string) {
 function tmgmt_i18n_string_help($path, $arg) {
   $output = '';
 
-  if (strpos($path, 'admin/config/regional/tmgmt/i18n_string') !== false) {
+  if (strpos($path, 'admin/tmgmt/sources/i18n_string') !== false) {
     $output = tmgmt_ui_color_legend();
   }
 
