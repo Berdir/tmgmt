@@ -116,16 +116,6 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
     );
     // @todo Remove that once it has a generic implementation in the default
     // controller.
-    $data['node']['tmgmt_translatable_types'] = array(
-      'title' => t('Translatable types'),
-      'help' => t('Filter translatable elements based on their types.'),
-      'filter' => array(
-        'handler' => 'views_handler_filter_in_operator',
-        'real field' => 'type',
-        'options callback' => 'tmgmt_source_translatable_item_types',
-        'options arguments' => array($this->pluginType),
-      ),
-    );
     return $data;
   }
 
