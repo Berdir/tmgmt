@@ -71,11 +71,14 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTEntityTestCaseUtility {
     // Go to the overview page and make sure the nodes are there.
     $this->drupalGet('admin/tmgmt/sources/node');
 
+    // Make sure that valid nodes are shown.
     $this->assertText($node1->title);
     $this->assertText($node2->title);
     $this->assertText($node3->title);
     $this->assertText($node4->title);
+    // Nodes without a language must not be shown.
     $this->assertNoText($node5->title);
+    // Node with a type that is not enabled for translation must not be shown.
     $this->assertNoText($node6->title);
 
     // Now translate them.

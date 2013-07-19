@@ -286,18 +286,18 @@ $handler->display->display_options['filters']['language_1']['expose']['label'] =
 $handler->display->display_options['filters']['language_1']['expose']['operator'] = 'language_1_op';
 $handler->display->display_options['filters']['language_1']['expose']['identifier'] = 'language_1';
 /* Filter criterion: Content translation: Select translatable content types */
-$handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['id'] = 'tmgmt_translatable_types_exposed';
-$handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['table'] = 'node';
-$handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['field'] = 'tmgmt_translatable_types_exposed';
-$handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['exposed'] = TRUE;
-$handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['expose']['operator_id'] = 'tmgmt_translatable_types_exposed_op';
-$handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['expose']['label'] = 'Content type';
-$handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['expose']['operator'] = 'tmgmt_translatable_types_exposed_op';
-$handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['expose']['identifier'] = 'tmgmt_translatable_types_exposed';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['id'] = 'tmgmt_translatable_types_select';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['table'] = 'node';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['field'] = 'tmgmt_translatable_types_select';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['exposed'] = TRUE;
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['expose']['operator_id'] = 'tmgmt_translatable_types_select_op';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['expose']['label'] = 'Content type';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['expose']['operator'] = 'tmgmt_translatable_types_select_op';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['expose']['identifier'] = 'tmgmt_translatable_types_select';
 /* Filter criterion: Content translation: All translatable types */
-$handler->display->display_options['filters']['tmgmt_translatable_types']['id'] = 'tmgmt_translatable_types';
-$handler->display->display_options['filters']['tmgmt_translatable_types']['table'] = 'node';
-$handler->display->display_options['filters']['tmgmt_translatable_types']['field'] = 'tmgmt_translatable_types';
+$handler->display->display_options['filters']['tmgmt_translatable_types_all']['id'] = 'tmgmt_translatable_types_all';
+$handler->display->display_options['filters']['tmgmt_translatable_types_all']['table'] = 'node';
+$handler->display->display_options['filters']['tmgmt_translatable_types_all']['field'] = 'tmgmt_translatable_types_all';
 
 /* Display: Page */
 $handler = $view->new_display('page', 'Page', 'page');

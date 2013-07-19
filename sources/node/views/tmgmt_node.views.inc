@@ -59,7 +59,7 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
         ),
       ),
     );
-    $data['node']['tmgmt_translatable_types'] = array(
+    $data['node']['tmgmt_translatable_types_all'] = array(
       'group' => t('Content translation'),
       'title' => t('All translatable types'),
       'help' => t('Enforces that only nodes from node types which are translatable are '),
@@ -114,7 +114,7 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
         'handler' => 'tmgmt_node_handler_field_translation_language_status_single',
       ),
     );
-    $data['node']['tmgmt_translatable_types_exposed'] = array(
+    $data['node']['tmgmt_translatable_types_select'] = array(
       'group' => t('Content translation'),
       'title' => t('Select translatable content types'),
       'help' => t('Allows to filter on specific translatable types.'),
