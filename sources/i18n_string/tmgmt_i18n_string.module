@@ -256,15 +256,3 @@ function tmgmt_i18n_string_get_wrapper($type, $i18n_string) {
   }
 }
 
-/**
- * Implements hook_help().
- */
-function tmgmt_i18n_string_help($path, $arg) {
-  $output = '';
-
-  if (strpos($path, 'admin/tmgmt/sources/i18n_string') !== false) {
-    $output = tmgmt_ui_color_legend();
-  }
-
-  return $output;
-}

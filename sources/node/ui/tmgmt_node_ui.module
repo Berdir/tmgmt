@@ -90,17 +90,4 @@ function tmgmt_node_ui_checkout_multiple_action($nodes, $info) {
   }
 }
 
-/**
- * Implements hook_help.
- */
-function tmgmt_node_ui_help($path, $arg){
-  $output = '';
 
-  switch($path){
-    case 'admin/tmgmt/sources/node':
-      $output = tmgmt_ui_color_legend();
-      break;
-  }
-
-  return $output;
-}

@@ -975,3 +975,16 @@ function tmgmt_ui_color_legend() {
 
   return $output;
 }
+
+
+/**
+ * Implements hook_help().
+ */
+function tmgmt_ui_help($path, $arg) {
+  $output = '';
+  if (strpos($path, 'admin/tmgmt/sources') !== FALSE) {
+    $output = tmgmt_ui_color_legend();
+  }
+
+  return $output;
+}

@@ -40,17 +40,3 @@ function tmgmt_entity_ui_tmgmt_source_plugin_info_alter(&$info) {
   $info['entity']['file path'] = drupal_get_path('module', 'tmgmt_entity_ui');
 }
 
-/**
- * Implements hook_help.
- */
-function tmgmt_entity_ui_help($path, $arg){
-  $output = '';
-
-  switch($path){
-    case 'admin/tmgmt/entity':
-      $output = tmgmt_ui_color_legend();
-      break;
-  }
-
-  return $output;
-}
