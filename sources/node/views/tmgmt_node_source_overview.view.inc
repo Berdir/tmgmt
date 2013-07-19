@@ -282,19 +282,19 @@ $handler->display->display_options['filters']['language_1']['field'] = 'language
 $handler->display->display_options['filters']['language_1']['group'] = 1;
 $handler->display->display_options['filters']['language_1']['exposed'] = TRUE;
 $handler->display->display_options['filters']['language_1']['expose']['operator_id'] = 'language_1_op';
-$handler->display->display_options['filters']['language_1']['expose']['label'] = 'Source Language';
+$handler->display->display_options['filters']['language_1']['expose']['label'] = 'Source language';
 $handler->display->display_options['filters']['language_1']['expose']['operator'] = 'language_1_op';
 $handler->display->display_options['filters']['language_1']['expose']['identifier'] = 'language_1';
-/* Filter criterion: Content: Filter translatable types */
+/* Filter criterion: Content translation: Select translatable content types */
 $handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['id'] = 'tmgmt_translatable_types_exposed';
 $handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['table'] = 'node';
 $handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['field'] = 'tmgmt_translatable_types_exposed';
 $handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['exposed'] = TRUE;
 $handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['expose']['operator_id'] = 'tmgmt_translatable_types_exposed_op';
-$handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['expose']['label'] = 'Translatable types';
+$handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['expose']['label'] = 'Content type';
 $handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['expose']['operator'] = 'tmgmt_translatable_types_exposed_op';
 $handler->display->display_options['filters']['tmgmt_translatable_types_exposed']['expose']['identifier'] = 'tmgmt_translatable_types_exposed';
-/* Filter criterion: Content: Limit to translatable types */
+/* Filter criterion: Content translation: All translatable types */
 $handler->display->display_options['filters']['tmgmt_translatable_types']['id'] = 'tmgmt_translatable_types';
 $handler->display->display_options['filters']['tmgmt_translatable_types']['table'] = 'node';
 $handler->display->display_options['filters']['tmgmt_translatable_types']['field'] = 'tmgmt_translatable_types';
@@ -332,7 +332,7 @@ $translatables['tmgmt_node_source_overview'] = array(
   t('Updated date'),
   t('Node title'),
   t('Published'),
-  t('Source Language'),
-  t('Translatable types'),
+  t('Source language'),
+  t('Content type'),
   t('Page'),
 );

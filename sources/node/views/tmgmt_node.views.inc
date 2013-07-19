@@ -60,7 +60,8 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
       ),
     );
     $data['node']['tmgmt_translatable_types'] = array(
-      'title' => t('Translatable types'),
+      'group' => t('Content translation'),
+      'title' => t('All translatable types'),
       'help' => t('Enforces that only nodes from node types which are translatable are '),
       'filter' => array(
         'handler' => 'tmgmt_node_ui_handler_filter_node_translatable_types',
@@ -98,6 +99,7 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
       ),
     );
     $data['node']['translation_language_status'] = array(
+      'group' => t('Content translation'),
       'title' => t('All translation languages'),
       'help' => t('Display all target lanuages.'),
       'real field' => 'tnid',
@@ -113,7 +115,8 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
       ),
     );
     $data['node']['tmgmt_translatable_types_exposed'] = array(
-      'title' => t('Translatable types filter'),
+      'group' => t('Content translation'),
+      'title' => t('Select translatable content types'),
       'help' => t('Allows to filter on specific translatable types.'),
       'filter' => array(
         'handler' => 'views_handler_filter_in_operator',
