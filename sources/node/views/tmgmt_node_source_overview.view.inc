@@ -1,6 +1,6 @@
 <?php
 
-$view = new view;
+$view = new view();
 $view->name = 'tmgmt_node_source_overview';
 $view->description = 'Node source overview for bulk operations.';
 $view->tag = 'Translation Management';
@@ -13,6 +13,7 @@ $view->disabled = FALSE; /* Edit this to true to make a default view disabled in
 /* Display: Master */
 $handler = $view->new_display('default', 'Master', 'default');
 $handler->display->display_options['title'] = 'Content overview';
+$handler->display->display_options['use_more_always'] = FALSE;
 $handler->display->display_options['group_by'] = TRUE;
 $handler->display->display_options['access']['type'] = 'perm';
 $handler->display->display_options['access']['perm'] = 'create translation jobs';
@@ -43,7 +44,6 @@ $handler->display->display_options['style_options']['info'] = array(
 $handler->display->display_options['empty']['area']['id'] = 'area';
 $handler->display->display_options['empty']['area']['table'] = 'views';
 $handler->display->display_options['empty']['area']['field'] = 'area';
-$handler->display->display_options['empty']['area']['empty'] = FALSE;
 $handler->display->display_options['empty']['area']['content'] = 'There are no nodes that match the specified filter criteria.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 /* Relationship: User */
@@ -58,71 +58,56 @@ $handler->display->display_options['fields']['views_bulk_operations']['table'] =
 $handler->display->display_options['fields']['views_bulk_operations']['field'] = 'views_bulk_operations';
 $handler->display->display_options['fields']['views_bulk_operations']['ui_name'] = 'Bulk operations';
 $handler->display->display_options['fields']['views_bulk_operations']['label'] = '<!--views-bulk-operations-select-all-->';
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['external'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['more_link'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['html'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['element_label_colon'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['hide_empty'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['empty_zero'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['hide_alter_empty'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['entity_load_capacity'] = '10';
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['operations'] = array(
+$handler->display->display_options['fields']['views_bulk_operations']['element_label_colon'] = FALSE;
+$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '1';
+$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
+$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
+$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
+$handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'action::node_assign_owner_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_message_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::node_make_sticky_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::node_make_unsticky_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -132,6 +117,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo']['op
         '_all_' => '_all_',
       ),
     ),
+    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 0,
@@ -144,31 +130,31 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo']['op
   ),
   'action::node_promote_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::node_publish_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_goto_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::node_unpromote_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'rules_component::tmgmt_node_ui_request_translation' => array(
     'selected' => 0,
@@ -184,38 +170,33 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo']['op
   ),
   'action::node_save_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::node_unpublish_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
   'action::node_unpublish_by_keyword_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
+    'postpone_processing' => 0,
   ),
 );
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['enable_select_all_pages'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_type'] = '1';
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_result'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['merge_single_action'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['force_single'] = 0;
 /* Field: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'node';
@@ -265,8 +246,6 @@ $handler->display->display_options['filters']['title']['expose']['operator_id'] 
 $handler->display->display_options['filters']['title']['expose']['label'] = 'Node title';
 $handler->display->display_options['filters']['title']['expose']['operator'] = 'title_op';
 $handler->display->display_options['filters']['title']['expose']['identifier'] = 'title';
-$handler->display->display_options['filters']['title']['expose']['required'] = 0;
-$handler->display->display_options['filters']['title']['expose']['multiple'] = FALSE;
 /* Filter criterion: Published */
 $handler->display->display_options['filters']['status']['id'] = 'status';
 $handler->display->display_options['filters']['status']['table'] = 'node';
@@ -280,17 +259,6 @@ $handler->display->display_options['filters']['status']['expose']['label'] = 'Pu
 $handler->display->display_options['filters']['status']['expose']['operator'] = 'status_op';
 $handler->display->display_options['filters']['status']['expose']['identifier'] = 'status';
 $handler->display->display_options['filters']['status']['expose']['required'] = TRUE;
-/* Filter criterion: Translatable types */
-$handler->display->display_options['filters']['tmgmt_translatable_types_1']['id'] = 'tmgmt_translatable_types_1';
-$handler->display->display_options['filters']['tmgmt_translatable_types_1']['table'] = 'node';
-$handler->display->display_options['filters']['tmgmt_translatable_types_1']['field'] = 'tmgmt_translatable_types';
-$handler->display->display_options['filters']['tmgmt_translatable_types_1']['ui_name'] = 'Translatable types';
-$handler->display->display_options['filters']['tmgmt_translatable_types_1']['group'] = 1;
-$handler->display->display_options['filters']['tmgmt_translatable_types_1']['exposed'] = TRUE;
-$handler->display->display_options['filters']['tmgmt_translatable_types_1']['expose']['operator_id'] = '';
-$handler->display->display_options['filters']['tmgmt_translatable_types_1']['expose']['label'] = 'Translatable types';
-$handler->display->display_options['filters']['tmgmt_translatable_types_1']['expose']['operator'] = 'tmgmt_translatable_types_1_op';
-$handler->display->display_options['filters']['tmgmt_translatable_types_1']['expose']['identifier'] = 'types';
 /* Filter criterion: Source translation */
 $handler->display->display_options['filters']['source_translation']['id'] = 'source_translation';
 $handler->display->display_options['filters']['source_translation']['table'] = 'node';
@@ -298,7 +266,7 @@ $handler->display->display_options['filters']['source_translation']['field'] = '
 $handler->display->display_options['filters']['source_translation']['ui_name'] = 'Source translation';
 $handler->display->display_options['filters']['source_translation']['operator'] = '1';
 $handler->display->display_options['filters']['source_translation']['group'] = 1;
-/* Filter criterion: Content translation: Language */
+/* Filter criterion: Content: Language */
 $handler->display->display_options['filters']['language']['id'] = 'language';
 $handler->display->display_options['filters']['language']['table'] = 'node';
 $handler->display->display_options['filters']['language']['field'] = 'language';
@@ -307,17 +275,29 @@ $handler->display->display_options['filters']['language']['value'] = array(
   'und' => 'und',
 );
 $handler->display->display_options['filters']['language']['group'] = 1;
-/* Filter criterion: Content translation: Language */
+/* Filter criterion: Content: Language */
 $handler->display->display_options['filters']['language_1']['id'] = 'language_1';
 $handler->display->display_options['filters']['language_1']['table'] = 'node';
 $handler->display->display_options['filters']['language_1']['field'] = 'language';
 $handler->display->display_options['filters']['language_1']['group'] = 1;
 $handler->display->display_options['filters']['language_1']['exposed'] = TRUE;
 $handler->display->display_options['filters']['language_1']['expose']['operator_id'] = 'language_1_op';
-$handler->display->display_options['filters']['language_1']['expose']['label'] = 'Source Language';
+$handler->display->display_options['filters']['language_1']['expose']['label'] = 'Source language';
 $handler->display->display_options['filters']['language_1']['expose']['operator'] = 'language_1_op';
 $handler->display->display_options['filters']['language_1']['expose']['identifier'] = 'language_1';
-$handler->display->display_options['filters']['language_1']['expose']['reduce'] = 0;
+/* Filter criterion: Content translation: Select translatable content types */
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['id'] = 'tmgmt_translatable_types_select';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['table'] = 'node';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['field'] = 'tmgmt_translatable_types_select';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['exposed'] = TRUE;
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['expose']['operator_id'] = 'tmgmt_translatable_types_select_op';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['expose']['label'] = 'Content type';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['expose']['operator'] = 'tmgmt_translatable_types_select_op';
+$handler->display->display_options['filters']['tmgmt_translatable_types_select']['expose']['identifier'] = 'tmgmt_translatable_types_select';
+/* Filter criterion: Content translation: All translatable types */
+$handler->display->display_options['filters']['tmgmt_translatable_types_all']['id'] = 'tmgmt_translatable_types_all';
+$handler->display->display_options['filters']['tmgmt_translatable_types_all']['table'] = 'node';
+$handler->display->display_options['filters']['tmgmt_translatable_types_all']['field'] = 'tmgmt_translatable_types_all';
 
 /* Display: Page */
 $handler = $view->new_display('page', 'Page', 'page');
@@ -338,6 +318,10 @@ $translatables['tmgmt_node_source_overview'] = array(
   t('Items per page'),
   t('- All -'),
   t('Offset'),
+  t('« first'),
+  t('‹ previous'),
+  t('next ›'),
+  t('last »'),
   t('There are no nodes that match the specified filter criteria.'),
   t('User'),
   t('<!--views-bulk-operations-select-all-->'),
@@ -348,7 +332,7 @@ $translatables['tmgmt_node_source_overview'] = array(
   t('Updated date'),
   t('Node title'),
   t('Published'),
-  t('Translatable types'),
-  t('Source Language'),
+  t('Source language'),
+  t('Content type'),
   t('Page'),
 );

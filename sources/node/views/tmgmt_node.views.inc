@@ -59,11 +59,10 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
         ),
       ),
     );
-    // @TODO: What about a translation managment group?
-    // Comment from fubhy: Yes, let's do that :)
-    $data['node']['tmgmt_translatable_types'] = array(
-      'title' => t('Translatable types'),
-      'help' => t('Display only nodes from node types which are translatable'),
+    $data['node']['tmgmt_translatable_types_all'] = array(
+      'group' => t('Content translation'),
+      'title' => t('All translatable types'),
+      'help' => t('Enforces that only nodes from node types which are translatable are '),
       'filter' => array(
         'handler' => 'tmgmt_node_ui_handler_filter_node_translatable_types',
         'real field' => 'type',
@@ -100,6 +99,7 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
       ),
     );
     $data['node']['translation_language_status'] = array(
+      'group' => t('Content translation'),
       'title' => t('All translation languages'),
       'help' => t('Display all target lanuages.'),
       'real field' => 'tnid',
@@ -114,11 +114,10 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
         'handler' => 'tmgmt_node_handler_field_translation_language_status_single',
       ),
     );
-    // @todo Remove that once it has a generic implementation in the default
-    // controller.
-    $data['node']['tmgmt_translatable_types'] = array(
-      'title' => t('Translatable types'),
-      'help' => t('Filter translatable elements based on their types.'),
+    $data['node']['tmgmt_translatable_types_select'] = array(
+      'group' => t('Content translation'),
+      'title' => t('Select translatable content types'),
+      'help' => t('Allows to filter on specific translatable types.'),
       'filter' => array(
         'handler' => 'views_handler_filter_in_operator',
         'real field' => 'type',

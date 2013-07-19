@@ -4,7 +4,7 @@
  * Basic Node Source tests.
  *
  */
-class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
+class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
 
   /**
    * Implements getInfo().
@@ -22,7 +22,6 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
    */
   function setUp() {
     parent::setUp(array('tmgmt_node_ui', 'block'));
-    variable_set('language_content_type_page', TRANSLATION_ENABLED);
 
     // We need the administer blocks permission.
     $this->loginAsAdmin(array('administer blocks'));
@@ -39,23 +38,10 @@ class TMGMTNodeSourceUITestCase extends TMGMTBaseTestCase {
     );
     $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
 
-    // Copied from standard.install
-    $type = array(
-      'type' => 'page',
-      'name' => st('Basic page'),
-      'base' => 'node_content',
-      'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
-      'custom' => 1,
-      'modified' => 1,
-      'locked' => 0,
-    );
-    $type = node_type_set_defaults($type);
-    node_type_save($type);
-    node_add_body_field($type);
-    node_types_rebuild();
+    $this->createNodeType('page', 'Page', TRANSLATION_ENABLED, FALSE);
   }
 
-    /**
+  /**
    * Tests the create, submit and accept permissions.
    */
   function testPermissions() {

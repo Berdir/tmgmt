@@ -26,7 +26,8 @@ abstract class TMGMTEntityTestCaseUtility extends TMGMTBaseTestCase {
    * @param string $human_name
    *   Human readable name of the node type.
    * @param int $language_content_type
-   *   Flag of how the translation should be handled.
+   *   Either 0 (disabled), 1 (language enabled but no translations),
+   *   TRANSLATION_ENABLED or ENTITY_TRANSLATION_ENABLED.
    * pparam bool $attach_fields
    *   (optional) If fields with the same translatability should automatically
    *   be attached to the node type.
