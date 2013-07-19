@@ -59,11 +59,9 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
         ),
       ),
     );
-    // @TODO: What about a translation managment group?
-    // Comment from fubhy: Yes, let's do that :)
     $data['node']['tmgmt_translatable_types'] = array(
       'title' => t('Translatable types'),
-      'help' => t('Display only nodes from node types which are translatable'),
+      'help' => t('Enforces that only nodes from node types which are translatable are '),
       'filter' => array(
         'handler' => 'tmgmt_node_ui_handler_filter_node_translatable_types',
         'real field' => 'type',
@@ -114,8 +112,16 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
         'handler' => 'tmgmt_node_handler_field_translation_language_status_single',
       ),
     );
-    // @todo Remove that once it has a generic implementation in the default
-    // controller.
+    $data['node']['tmgmt_translatable_types_exposed'] = array(
+      'title' => t('Translatable types filter'),
+      'help' => t('Allows to filter on specific translatable types.'),
+      'filter' => array(
+        'handler' => 'views_handler_filter_in_operator',
+        'real field' => 'type',
+        'options callback' => 'tmgmt_source_translatable_item_types',
+        'options arguments' => array($this->pluginType),
+      ),
+    );
     return $data;
   }
 
