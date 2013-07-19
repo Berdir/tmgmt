@@ -1,4 +1,4 @@
-Translation Management Tools (tmgmt)
+Translation Management Tool (tmgmt)
 -------------------------------------
 
 A collection of tools to facilitate the translation of text elements in Drupal.
@@ -20,7 +20,7 @@ following modules:
  * Rules
 
 Optional dependencies:
- * Internationalization/i18n (latest dev Version!)
+ * Internationalization/i18n
    (Only necessary for i18n_string translation)
  * Entity Translation (only for entity sources)
 
@@ -45,12 +45,9 @@ Active          The job is in the process of being translated. Depending on
                 'needs review' to 'accepted'.
 Finished        The job has been accepted and the translated node was created
 
-A job deleted from the list is not visible any more. You can choose to purge
-jobs automatically from the list after a defined time span in the settings.
-
-The project also provides overviews for the node and entity sources that allow
-to translate multiple pieces of content in a single job and see the current
-translation status for your site content.
+The project also provides overviews for the supported sources that allow to
+translate multiple pieces of content (job items) in a single job and see the
+current translation status for your site content.
 
 Getting started
 ------------------
@@ -64,7 +61,7 @@ The first simple translation job using Microsoft's translation service.
 - Modify one content type to be multilingual. Choose 'Enabled, with translation'
   from the Publishing Options / Multilingual support.
 
-2) Set up Translation Management Tools
+2) Set up Translation Management Tool
 
 - Download tmgmt module
 - Download tmgmt_microsoft module
@@ -75,7 +72,7 @@ The first simple translation job using Microsoft's translation service.
 - A translator has been automatically created. Go to the Translator management
   page at:
 
-    Configuration > Regional and language > Translation Management > Translators
+    Configuration > Regional and language > Translation Management Translators
 
   Adjust the label to your liking and get a client ID and client secret using
   the provided link in the settings. Then save the updated translator.
@@ -98,41 +95,45 @@ The first simple translation job using Microsoft's translation service.
 
 For further options, see the documentation on http://drupal.org/node/1445790.
 
-== State of Module ==
+Features
+----------
 
-This projects consists of many pluggable, independent elements. It is alpha
-quality and not every plugin is in an equal state. The list below aims to give a
-short overview of each translator and source plugin.
+This projects consists of 3 major parts. The starting point are the sources,
+which expose translatable content like nodes, other entities and i18n strings.
 
-IMPORTANT: As of alpha2, the external translators have been moved to a separate
-           project
+On the other side are the so called translators, which are responsible for
+getting the requested sources translated.
 
-The management part itself is working well. It is possible to create and submit
-jobs to various translators, get the translated text back into the system,
-review and accept it. The user interfaces are already quite usable and we
-continue to work on further improvements.
+The core system combine these two parts and provide the ability to create,
+manage and review translation jobs.
 
-==== Sources ====
+The main features of the core system include:
+
+- Creation of translations and managing their progress
+- Review of returned translations, ability to request revisions and communicate
+  with the translator if supported.
+- Translation overviews that allow to see which content is available in which
+  language and what translation jobs are currently ongoing.
+- The same information is provided on the translate tab of the supported
+  sources.
+- A suggestions system that makes recommendations about related content that
+  could be translated with the same job.
+
+The following sources are currently supported:
 
 - Content Translation
-  Plugin and User Interface is working and tested. There is an interface for
-  bulk translation which also provides a translation status for each piece of
-  content and language.
+  Integrates with the core translation module to translate nodes.
 
 - Entity Translation
-  Plugin and User Interface is working and tested. There is an interface for
-  bulk translation, the translation status is displayed as well. Note that the
-  overview requires a current Drupal 7.x-dev snapshot or 7.15 once available.
+  Integrates with the entity_translation module that allows to translate fields
+  on any entity type.
 
-- Internationalization (I18n)
-  The API works but we're missing a user interface.
+- Internationalization (i18n)
+  Integrates with the i18n project (http://drupal.org/project/i18n) and allows
+  to translate various configuration elements of a site: blocks, terms, fields,
+  node types, contact categories and many more.
 
-=== Translators ===
-
-- Microsoft Translator
-  Machine translation, technically working well but the results are of course of
-  varying quality.
-  Moved to http://drupal.org/project/tmgmt_microsoft.
+Two translators are included in the project:
 
 - File translator
   Allows to export jobs into files and import them once they have been
@@ -140,27 +141,34 @@ continue to work on further improvements.
   currently XLIFF and HTML.
 
 - Local Translator
-  The current code has been removed from the code base because the plugin is
-  currently unfortunately broken. It is being re-created as part of the
-  Translation Management Server GSoC Project, you can follow the development in
-  the following sandbox: http://drupal.org/sandbox/sumsi/1668042.
+  The local translator allows to manage translators on your own site so that
+  they can translate your content in a central place and defined workflows.
+  Together with the TMGMT Server, it can be used to build your own translation
+  server. Check the Hermes installation profile for more information:
+  http://drupal.org/project/hermes
 
-- Gengo (Previously named MyGengo)
-  Integrates with http://www.gengo.com. Works, has tests, a few known issues
-  that need to be resolved.
-  Moved to http://drupal.org/project/tmgmt_mygengo.
+Translators in separate projects:
 
-- Supertext
-  Integrates with http://www.supertext.ch. Has been updated and improved,
-  including automated tests.
-  Moved to http://drupal.org/project/tmgmt_supertext.
-
-- Nativy
-  Integrates with http://www.nativy.com/. Has been updated to use the new,
-  improved API and is the first translator with support for a review process
-  within TMGMT.
-  Moved to http://drupal.org/project/tmgmt_nativy.
+- Microsoft Translator
+  Machine translation using Microsoft's Bing translation.
+  http://drupal.org/project/tmgmt_microsoft.
 
 - Google
-  New translator that allows to use the machine translation API from Google.
-  Available at Moved to http://drupal.org/project/tmgmt_google.
+  Machine translation using Google Translate.
+  Moved to http://drupal.org/project/tmgmt_google.
+
+- Gengo (Previously named MyGengo)
+  Human translation that integrates with http://www.gengo.com.
+  http://drupal.org/project/tmgmt_mygengo.
+
+- Supertext
+  Human translation that integrates with http://www.supertext.ch.
+  http://drupal.org/project/tmgmt_supertext.
+
+- Nativy
+  Human translation that integrates with http://www.nativy.com.
+  http://drupal.org/project/tmgmt_nativy.
+
+- One Hour Translation
+  Human translation that integrates with http://www.onehourtranslation.com.
+  http://drupal.org/project/tmgmt_oht
