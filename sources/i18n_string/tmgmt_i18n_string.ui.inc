@@ -35,7 +35,7 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::overviewForm().
+   * {@inheritdoc}
    */
   public function overviewForm($form, &$form_state, $type) {
     $form += $this->overviewSearchFormPart($form, $form_state, $type);
@@ -204,7 +204,7 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::overviewFormSubmit().
+   * {@inheritdoc}
    */
   public function overviewFormSubmit($form, &$form_state, $type) {
 

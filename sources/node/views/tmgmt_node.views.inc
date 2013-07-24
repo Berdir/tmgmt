@@ -8,7 +8,7 @@
 class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
 
   /**
-   * Overrides TMGMTDefaultSourceViewsController::views_data().
+   * {@inheritdoc}
    */
   public function views_data() {
     // Relationships between job items and nodes.

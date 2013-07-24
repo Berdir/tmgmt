@@ -23,7 +23,7 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
   }
 
   /**
-   * Implements TMGMTFileExportInterface::export().
+   * {@inheritdoc}
    */
   public function export(TMGMTJob $job) {
 
@@ -43,7 +43,7 @@ class TMGMTFileFormatHTML implements TMGMTFileFormatInterface {
   }
 
   /**
-   * Implements TMGMTFileExportInterface::import().
+   * {@inheritdoc}
    */
   public function import($imported_file) {
     $dom = new DOMDocument();

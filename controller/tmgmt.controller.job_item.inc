@@ -12,7 +12,7 @@
  */
 class TMGMTJobItemController extends EntityAPIController {
   /**
-   * Overrides EntityAPIController::save().
+   * {@inheritdoc}
    *
    * @todo Eliminate the need to flatten and unflatten the JobItem data.
    */
@@ -23,7 +23,7 @@ class TMGMTJobItemController extends EntityAPIController {
   }
 
   /**
-   * Overrides EntityAPIController::delete().
+   * {@inheritdoc}
    */
   public function delete($ids, $transaction = NULL) {
     parent::delete($ids, $transaction);
@@ -51,7 +51,7 @@ class TMGMTJobItemController extends EntityAPIController {
   }
 
   /**
-   * Overrides EntityAPIController::invoke().
+   * {@inheritdoc}
    */
   public function invoke($hook, $entity) {
     // We need to check whether the state of the job is affected by this

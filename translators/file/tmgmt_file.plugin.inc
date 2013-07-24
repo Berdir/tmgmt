@@ -11,7 +11,7 @@
 class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginController {
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
+   * {@inheritdoc}
    */
   public function canTranslate(TMGMTTranslator $translator, TMGMTJob $job) {
     // Anything can be exported.
@@ -19,7 +19,7 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
+   * {@inheritdoc}
    */
   public function requestTranslation(TMGMTJob $job) {
     $name = "JobID" . $job->tjid . '_' . $job->source_language . '_' . $job->target_language;
@@ -36,14 +36,14 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::hasCheckoutSettings().
+   * {@inheritdoc}
    */
   public function hasCheckoutSettings(TMGMTJob $job) {
     return $job->getTranslator()->getSetting('allow_override');
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::defaultSettings().
+   * {@inheritdoc}
    */
   public function defaultSettings() {
     return array(

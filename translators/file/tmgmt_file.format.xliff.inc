@@ -63,7 +63,7 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
   }
 
   /**
-   * Implements TMGMTFileExportInterface::export().
+   * {@inheritdoc}
    */
   public function export(TMGMTJob $job) {
 
@@ -121,7 +121,7 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
   }
 
   /**
-   * Implements TMGMTFileExportInterface::import().
+   * {@inheritdoc}
    */
   public function import($imported_file) {
     // It is not possible to load the file directly with simplexml as it gets
@@ -141,7 +141,7 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
   }
 
   /**
-   * Implements TMGMTFileExportInterface::validateImport().
+   * {@inheritdoc}
    */
   public function validateImport($imported_file) {
     // It is not possible to load the file directly with simplexml as it gets

@@ -9,56 +9,56 @@
 class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSourceUIControllerInterface {
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::reviewForm().
+   * {@inheritdoc}
    */
   public function reviewForm($form, &$form_state, TMGMTJobItem $item) {
     return $form;
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::reviewDataItemElement().
+   * {@inheritdoc}
    */
   public function reviewDataItemElement($form, &$form_state, $data_item_key, $parent_key, array $data_item, TMGMTJobItem $item) {
     return $form;
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::reviewFormValidate().
+   * {@inheritdoc}
    */
   public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item) {
     // Nothing to do here by default.
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::reviewFormSubmit().
+   * {@inheritdoc}
    */
   public function reviewFormSubmit($form, &$form_state, TMGMTJobItem $item) {
     // Nothing to do here by default.
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::overviewForm().
+   * {@inheritdoc}
    */
   public function overviewForm($form, &$form_state, $type) {
     return $form;
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::overviewFormValidate().
+   * {@inheritdoc}
    */
   public function overviewFormValidate($form, &$form_state, $type) {
     // Nothing to do here by default.
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::overviewFormSubmit().
+   * {@inheritdoc}
    */
   public function overviewFormSubmit($form, &$form_state, $type) {
     // Nothing to do here by default.
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::hook_menu().
+   * {@inheritdoc}
    */
   public function hook_menu() {
     $items = array();
@@ -82,7 +82,7 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::hook_form().
+   * {@inheritdoc}
    */
   public function hook_forms() {
     $info = array();
@@ -98,7 +98,7 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::hook_views_default_views().
+   * {@inheritdoc}
    */
   public function hook_views_default_views() {
     return array();

@@ -14,7 +14,7 @@ class TMGMTPluginBase implements TMGMTPluginBaseInterface {
   protected $pluginInfo;
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::__construct().
+   * {@inheritdoc}
    */
   public function __construct($type, $plugin) {
     $this->pluginType = $plugin;
@@ -22,14 +22,14 @@ class TMGMTPluginBase implements TMGMTPluginBaseInterface {
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::pluginInfo().
+   * {@inheritdoc}
    */
   public function pluginInfo() {
     return $this->pluginInfo;
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::pluginType().
+   * {@inheritdoc}
    */
   public function pluginType() {
     return $this->pluginType;

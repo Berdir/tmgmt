@@ -11,21 +11,21 @@
 class tmgmt_views_job_access extends views_plugin_access {
 
   /**
-   * Overrides views_plugin_access::summary_title().
+   * {@inheritdoc}
    */
   function summary_title() {
     return t('Job view access');
   }
 
   /**
-   * Overrides views_plugin_access::access().
+   * {@inheritdoc}
    */
   function access($account) {
     return entity_access('view', 'tmgmt_job', NULL, $account);
   }
 
   /**
-   * Overrides views_plugin_access::access().
+   * {@inheritdoc}
    */
   function get_access_callback() {
     return array('entity_access', array('view', 'tmgmt_job'));

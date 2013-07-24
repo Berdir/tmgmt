@@ -8,14 +8,14 @@
 class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController {
 
   /**
-   * Overrides TMGMTDefaultSourcePluginController::getLabel().
+   * {@inheritdoc}
    */
   public function getLabel(TMGMTJobItem $job_item) {
     return $this->pluginType . ':' . $job_item->item_type . ':' . $job_item->item_id;
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getData().
+   * {@inheritdoc}
    */
   public function getData(TMGMTJobItem $job_item) {
     return array(
@@ -29,7 +29,7 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::saveTranslation().
+   * {@inheritdoc}
    */
   public function saveTranslation(TMGMTJobItem $job_item) {
     // Set a variable that can be checked later for a given job item.

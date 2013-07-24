@@ -69,21 +69,21 @@ class TMGMTLocalTaskItem extends Entity {
   public $count_completed = 0;
 
   /**
-   * Overrides Entity::__construct().
+   * {@inheritdoc}
    */
   public function __construct(array $values = array(), $entity_type = 'tmgmt_local_task_item') {
     parent::__construct($values, $entity_type);
   }
 
   /*
-   * Overrides Entity::defaultUri().
+   * {@inheritdoc}
    */
   public function defaultUri() {
     return array('path' => 'translate/' . $this->tltid . '/item/' . $this->tltiid);
   }
 
   /**
-   * Overrides Entity::defaultLabel().
+   * {@inheritdoc}
    */
   protected function defaultLabel() {
     if ($job_item = $this->getJobItem()) {
@@ -111,7 +111,7 @@ class TMGMTLocalTaskItem extends Entity {
   }
 
   /**
-   * Overrides Entity::buildContent().
+   * {@inheritdoc}
    */
   public function buildContent($view_mode = 'full', $langcode = NULL) {
     $content = drupal_get_form('tmgmt_local_translation_form', $this);

@@ -25,7 +25,7 @@ class tmgmt_handler_field_tmgmt_wordcount extends views_handler_field_entity {
   }
 
   /**
-   * Overrides views_handler_field_entity::render().
+   * {@inheritdoc}
    */
   function render($values) {
     $object = $this->get_value($values);

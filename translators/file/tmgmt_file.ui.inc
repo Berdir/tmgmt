@@ -11,7 +11,7 @@
 class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController {
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::checkoutSettingsForm().
+   * {@inheritdoc}
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['export_format'] = array(
@@ -48,7 +48,7 @@ class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController
   }
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::checkoutSettingsForm().
+   * {@inheritdoc}
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     if ($job->getTranslator()->getSetting('allow_override')) {
@@ -64,7 +64,7 @@ class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController
   }
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::checkoutInfo().
+   * {@inheritdoc}
    */
   public function checkoutInfo(TMGMTJob $job) {
     // If the job is finished, it's not possible to import translations anymore.

@@ -11,7 +11,7 @@
 class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginController {
 
   /**
-   * Overrides TMGMTDefaultSourcePluginController::getData().
+   * {@inheritdoc}
    */
   public function getData(TMGMTJobItem $job_item) {
     $i18n_object = $this->getI18nObjectWrapper($job_item);
@@ -30,7 +30,7 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
   }
 
   /**
-   * Overrides TMGMTDefaultSourcePluginController::saveTranslation().
+   * {@inheritdoc}
    */
   public function saveTranslation(TMGMTJobItem $job_item) {
     $job = tmgmt_job_load($job_item->tjid);
@@ -47,7 +47,7 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getLabel().
+   * {@inheritdoc}
    */
   public function getLabel(TMGMTJobItem $job_item) {
     if ($i18n_object = $this->getI18nObjectWrapper($job_item)) {
@@ -66,7 +66,7 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getUri().
+   * {@inheritdoc}
    */
   public function getUri(TMGMTJobItem $job_item) {
     if ($wrapper = $this->getI18nObjectWrapper($job_item)) {
@@ -78,7 +78,7 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
   }
 
   /**
-   * Implements TMGMTEntitySourcePluginControllerInterface::getType().
+   * {@inheritdoc}
    */
   public function getType(TMGMTJobItem $job_item) {
     if ($label = $this->getItemTypeLabel($job_item->item_type)) {

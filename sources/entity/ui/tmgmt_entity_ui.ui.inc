@@ -71,7 +71,7 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::overviewForm().
+   * {@inheritdoc}
    */
   public function overviewForm($form, &$form_state, $type) {
 
@@ -106,14 +106,14 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::overviewFormValidate().
+   * {@inheritdoc}
    */
   public function overviewFormValidate($form, &$form_state, $type) {
 
   }
 
   /**
-   * Implements TMGMTSourceUIControllerInterface::overviewFormSubmit().
+   * {@inheritdoc}
    */
   public function overviewFormSubmit($form, &$form_state, $type) {
 

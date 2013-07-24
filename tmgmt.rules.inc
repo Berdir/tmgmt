@@ -6,7 +6,7 @@
  */
 
 /**
- * Implements hook_rules_action_info().
+ * {@inheritdoc}
  */
 function tmgmt_rules_action_info() {
   $info['tmgmt_rules_job_request_translation'] = array(

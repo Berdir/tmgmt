@@ -104,7 +104,7 @@ class TMGMTJobItem extends Entity {
   public $word_count = 0;
 
   /**
-   * Overrides Entity::__construct().
+   * {@inheritdoc}
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_job_item');
@@ -114,7 +114,7 @@ class TMGMTJobItem extends Entity {
   }
 
   /**
-   * Overrides Entity::defaultLabel()
+   * {@inheritdoc}
    */
   public function defaultLabel() {
     if ($controller = $this->getSourceController()) {
@@ -124,7 +124,7 @@ class TMGMTJobItem extends Entity {
   }
 
   /**
-   * Overrides Entity::defaultUri()
+   * {@inheritdoc}
    *
    * @see _tmgmt_ui_breadcrumb()
    */
@@ -137,7 +137,7 @@ class TMGMTJobItem extends Entity {
   }
 
   /**
-   * Overrides Entity::buildContent().
+   * {@inheritdoc}
    */
   public function buildContent($view_mode = 'full', $langcode = NULL) {
     $content = array();

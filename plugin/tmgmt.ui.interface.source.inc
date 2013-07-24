@@ -29,21 +29,21 @@ interface TMGMTSourceUIControllerInterface extends TMGMTPluginBaseInterface {
   public function reviewFormSubmit($form, &$form_state, TMGMTJobItem $item);
 
   /**
-   * Implements hook_menu().
+   * {@inheritdoc}
    *
    * @see tmgmt_ui_menu().
    */
   public function hook_menu();
 
   /**
-   * Implements hook_forms().
+   * {@inheritdoc}
    *
    * @see tmgmt_ui_forms().
    */
   public function hook_forms();
 
   /**
-   * Implements hook_views_default_views().
+   * {@inheritdoc}
    *
    * @see tmgmt_ui_views_default_views().
    */

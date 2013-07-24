@@ -16,7 +16,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   protected $remoteLanguagesMappings = array();
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::isAvailable().
+   * {@inheritdoc}
    */
   public function isAvailable(TMGMTTranslator $translator) {
     // Assume that the translation service is always available.
@@ -24,7 +24,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::canTranslate().
+   * {@inheritdoc}
    */
   public function canTranslate(TMGMTTranslator $translator, TMGMTJob $job) {
     // The job is only translatable if the translator is available too.
@@ -37,7 +37,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::cancelTranslation().
+   * {@inheritdoc}
    */
   public function cancelTranslation(TMGMTJob $job) {
     // Assume that we can cancel a translation job at any time.
@@ -46,21 +46,21 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getDefaultRemoteLanguagesMappings().
+   * {@inheritdoc}
    */
   public function getDefaultRemoteLanguagesMappings() {
     return array();
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguages().
+   * {@inheritdoc}
    */
   public function getSupportedRemoteLanguages(TMGMTTranslator $translator) {
     return array();
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getRemoteLanguagesMappings().
+   * {@inheritdoc}
    */
   public function getRemoteLanguagesMappings(TMGMTTranslator $translator) {
     if (!empty($this->remoteLanguagesMappings)) {
@@ -75,7 +75,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::mapToRemoteLanguage().
+   * {@inheritdoc}
    */
   public function mapToRemoteLanguage(TMGMTTranslator $translator, $language) {
     if (!tmgmt_provide_remote_languages_mappings($translator)) {
@@ -96,7 +96,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::mapToLocalLanguage().
+   * {@inheritdoc}
    */
   public function mapToLocalLanguage(TMGMTTranslator $translator, $language) {
     if (!tmgmt_provide_remote_languages_mappings($translator)) {
@@ -118,7 +118,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedTargetLanguages().
+   * {@inheritdoc}
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $languages = entity_metadata_language_list();
@@ -127,7 +127,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getSupportedLanguagePairs().
+   * {@inheritdoc}
    *
    * Default implementation that gets target languages for each remote language.
    * This approach is ineffective and therefore it is advised that a plugin
@@ -146,7 +146,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getNotCanTranslateReason().
+   * {@inheritdoc}
    */
   public function getNotCanTranslateReason(TMGMTJob $job) {
     $wrapper = entity_metadata_wrapper('tmgmt_job', $job);
@@ -154,14 +154,14 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::getNotAvailableReason().
+   * {@inheritdoc}
    */
   public function getNotAvailableReason(TMGMTTranslator $translator) {
     return t('@translator is not available. Make sure it is properly !configured.', array('@translator' => $this->pluginInfo['label'], '!configured' => l(t('configured'), 'admin/config/regional/tmgmt_translator/manage/' . $translator->name)));
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::defaultSettings().
+   * {@inheritdoc}
    */
   public function defaultSettings() {
     $defaults = array('auto_accept' => FALSE);
@@ -173,14 +173,14 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::checkoutInfo().
+   * {@inheritdoc}
    */
   public function hasCheckoutSettings(TMGMTJob $job) {
     return TRUE;
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::acceptedDataItem().
+   * {@inheritdoc}
    */
   public function acceptetDataItem(TMGMTJobItem $job_item, array $key) {
     return TRUE;

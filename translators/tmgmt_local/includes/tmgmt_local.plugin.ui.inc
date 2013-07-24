@@ -11,7 +11,7 @@
 class TMGMTLocalTranslatorUIController extends TMGMTDefaultTranslatorUIController {
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::checkoutSettingsForm().
+   * {@inheritdoc}
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     if ($translators = tmgmt_local_translators($job->source_language, array($job->target_language))) {
@@ -32,7 +32,7 @@ class TMGMTLocalTranslatorUIController extends TMGMTDefaultTranslatorUIControlle
   }
 
   /**
-   * Overrides TMGMTTranslatorUIControllerInterface::checkoutInfo().
+   * {@inheritdoc}
    */
   public function checkoutInfo(TMGMTJob $job) {
     $label = $job->getTranslator()->label();

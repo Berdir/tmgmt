@@ -76,21 +76,21 @@ class TMGMTLocalTask extends Entity {
   public $loop_count;
 
   /**
-   * Overrides Entity::__construct().
+   * {@inheritdoc}
    */
   public function __construct(array $values = array(), $entity_type = 'tmgmt_local_task') {
     parent::__construct($values, $entity_type);
   }
 
   /*
-   * Overrides Entity::defaultUri().
+   * {@inheritdoc}
    */
   public function defaultUri() {
     return array('path' => 'translate/' . $this->tltid);
   }
 
   /**
-   * Overrides Entity::defaultLabel().
+   * {@inheritdoc}
    */
   protected function defaultLabel() {
     if (empty($this->tuid)) {
@@ -114,7 +114,7 @@ class TMGMTLocalTask extends Entity {
   }
 
   /**
-   * Overrides Entity::buildContent().
+   * {@inheritdoc}
    */
   public function buildContent($view_mode = 'full', $langcode = NULL) {
     $content = entity_ui_get_form('tmgmt_local_task', $this);

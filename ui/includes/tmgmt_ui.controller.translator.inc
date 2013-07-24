@@ -11,7 +11,7 @@
 class TMGMTTranslatorUIController extends EntityDefaultUIController {
 
   /**
-   * Overrides EntityDefaultUIController::hook_menu().
+   * {@inheritdoc}
    */
   public function hook_menu() {
     $items = parent::hook_menu();
@@ -27,7 +27,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
   }
 
   /**
-   * Overrides EntityDefaultUIController::overviewForm().
+   * {@inheritdoc}
    */
   public function overviewForm($form, &$form_state) {
     $form['translators']['#tree'] = TRUE;
@@ -48,7 +48,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
   }
 
   /**
-   * Overrides EntityDefaultUIController::overviewFormSubmit().
+   * {@inheritdoc}
    */
   public function overviewFormSubmit($form, &$form_state) {
     // Update image effect weights.
@@ -151,7 +151,7 @@ class TMGMTTranslatorUIController extends EntityDefaultUIController {
   }
 
   /**
-   * Overrides EntityDefaultUIController::applyOperation().
+   * {@inheritdoc}
    */
   public function applyOperation($op, $entity) {
     if ($op == 'delete' && tmgmt_translator_busy($entity->name)) {

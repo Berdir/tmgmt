@@ -12,7 +12,7 @@
 class TMGMTJobMetadataController extends EntityDefaultMetadataController {
 
   /**
-   * Overrides EntityDefaultMetadataController::entityPropertyInfo().
+   * {@inheritdoc}
    */
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
@@ -94,7 +94,7 @@ class TMGMTJobItemMetadataController extends EntityDefaultMetadataController {
 class TMGMTMessageMetadataController extends EntityDefaultMetadataController {
 
   /**
-   * Overrides EntityDefaultMetadataController::entityPropertyInfo().
+   * {@inheritdoc}
    */
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
@@ -134,7 +134,7 @@ class TMGMTMessageMetadataController extends EntityDefaultMetadataController {
 class TMGMTTranslatorMetadataController extends EntityDefaultMetadataController {
 
   /**
-   * Overrides EntityDefaultMetadataController::entityPropertyInfo().
+   * {@inheritdoc}
    */
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();

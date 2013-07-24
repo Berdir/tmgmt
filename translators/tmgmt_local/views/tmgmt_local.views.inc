@@ -11,7 +11,7 @@
 class TMGMTLocalTaskViewsController extends EntityDefaultViewsController {
 
   /**
-   * Overrides EntityDefaultViewsController::views_data().
+   * {@inheritdoc}
    */
   public function views_data() {
     $data = parent::views_data();
@@ -78,7 +78,7 @@ class TMGMTLocalTaskViewsController extends EntityDefaultViewsController {
 class TMGMTLocalTaskItemViewsController extends EntityDefaultViewsController {
 
   /**
-   * Overrides EntityDefaultViewsController::views_data().
+   * {@inheritdoc}
    */
   public function views_data() {
     $data = parent::views_data();

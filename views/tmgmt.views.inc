@@ -22,7 +22,7 @@ function tmgmt_views_data() {
 class TMGMTJobItemViewsController extends EntityDefaultViewsController {
 
   /**
-   * Overrides EntityDefaultViewsController::views_data().
+   * {@inheritdoc}
    */
   public function views_data() {
     $data = parent::views_data();
@@ -67,7 +67,7 @@ class TMGMTJobItemViewsController extends EntityDefaultViewsController {
 class TMGMTJobViewsController extends EntityDefaultViewsController {
 
   /**
-   * Overrides EntityDefaultViewsController::views_data().
+   * {@inheritdoc}
    */
   public function views_data() {
     $data = parent::views_data();
@@ -125,7 +125,7 @@ class TMGMTJobViewsController extends EntityDefaultViewsController {
 class TMGMTMessageViewsController extends EntityDefaultViewsController {
 
   /**
-   * Overrides EntityDefaultViewsController::views_data().
+   * {@inheritdoc}
    */
   public function views_data() {
     $data = parent::views_data();
@@ -150,7 +150,7 @@ interface TMGMTSourceViewsControllerInterface extends TMGMTPluginBaseInterface {
 class TMGMTDefaultSourceViewsController extends TMGMTPluginBase implements TMGMTSourceViewsControllerInterface {
 
   /**
-   * Implements TMGMTSourceViewsControllerInterface::views_data().
+   * {@inheritdoc}
    */
   public function views_data() {
     // @todo Implement this in a generic fashion.

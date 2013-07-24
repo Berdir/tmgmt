@@ -6,7 +6,7 @@
 class TMGMTLocalTaskItemUIController extends EntityDefaultUIController {
 
   /**
-   * Overrides EntityDefaultUIController::hook_menu().
+   * {@inheritdoc}
    */
   public function hook_menu() {
     $id_count = count(explode('/', $this->path));
