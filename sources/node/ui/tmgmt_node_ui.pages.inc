@@ -103,7 +103,10 @@ function tmgmt_node_ui_translate_form_submit($form, &$form_state) {
   $redirects = tmgmt_ui_job_checkout_multiple($jobs);
   // If necessary, do a redirect.
   if ($redirects) {
-    tmgmt_ui_redirect_queue_set($redirects, current_path());
+    tmgmt_ui_redirect_queue_set($redirects, isset($_GET['destination']) ? $_GET['destination'] : current_path());
+    // Remove an eventually existing destination, as that will prevent us
+    // from being redirect to the job checkout page.
+    unset($_GET['destination']);
     $form_state['redirect'] = tmgmt_ui_redirect_queue_dequeue();
 
     // Count of the job messages is one less due to the final redirect.
