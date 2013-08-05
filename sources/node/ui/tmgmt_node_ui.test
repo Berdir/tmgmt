@@ -185,6 +185,24 @@ class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
     // German node should now be listed and be clickable.
     $this->drupalGet('node/' . $node->nid . '/translate');
     $this->clickLink('de_' . $node->title);
+
+    // Test that the destination query argument does not break the redirect
+    // and we are redirected back to the correct page.
+    $this->drupalGet('node/' . $node->nid . '/translate', array('query' => array('destination' => 'node')));
+
+    // Request a spanish translation.
+    $edit = array(
+      'languages[es]' => TRUE,
+    );
+    $this->drupalPost(NULL, $edit, t('Request translation'));
+
+    // Verify that we are on the checkout page.
+    $this->assertText(t('One job needs to be checked out.'));
+    $this->assertText($node->title);
+    $this->drupalPost(NULL, array(), t('Submit to translator'));
+
+    // Make sure that we're back on the originally defined destination URL.
+    $this->assertEqual(url('node', array('absolute' => TRUE)), $this->getUrl());
   }
 
   /**
