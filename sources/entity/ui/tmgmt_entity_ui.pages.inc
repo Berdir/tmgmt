@@ -126,16 +126,5 @@ function tmgmt_entity_ui_translate_form_submit($form, &$form_state) {
       drupal_set_message(t('Unable to add job item for target language %name. Make sure the source content is not empty.', array('%name' => $target_lang_name)), 'error');
     }
   }
-  $redirects = tmgmt_ui_job_checkout_multiple($jobs);
-  // If necessary, do a redirect.
-  if ($redirects) {
-    tmgmt_ui_redirect_queue_set($redirects, isset($_GET['destination']) ? $_GET['destination'] : current_path());
-    // Remove an eventually existing destination, as that will prevent us
-    // from being redirect to the job checkout page.
-    unset($_GET['destination']);
-    $form_state['redirect'] = tmgmt_ui_redirect_queue_dequeue();
-
-    // Count of the job messages is one less due to the final redirect.
-    drupal_set_message(format_plural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
-  }
+  tmgmt_ui_job_checkout_and_redirect($form_state, $jobs);
 }
