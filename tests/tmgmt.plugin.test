@@ -10,14 +10,11 @@
  */
 class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Plugin tests'),
-      'description' => t('Verifies basic functionality of source and translator plugins'),
-      'group' => t('Translation Management'),
+      'name' => 'Plugin tests',
+      'description' => 'Verifies basic functionality of source and translator plugins',
+      'group' => 'Translation Management',
     );
   }
 

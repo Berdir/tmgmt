@@ -10,20 +10,14 @@
  */
 class TMGMTFileTestCase extends TMGMTBaseTestCase {
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('File Translator tests'),
-      'description' => t('Tests the file translator plugin integration.'),
-      'group' => t('Translation Management'),
+      'name' => 'File Translator tests',
+      'description' => 'Tests the file translator plugin integration.',
+      'group' => 'Translation Management',
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
   function setUp() {
     parent::setUp(array('tmgmt_file', 'tmgmt_ui'));
     $this->loginAsAdmin();

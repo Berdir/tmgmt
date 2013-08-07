@@ -10,14 +10,11 @@
  */
 class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('CRUD tests'),
-      'description' => t('Basic crud operations for jobs and translators'),
-      'group' => t('Translation Management'),
+      'name' => 'CRUD tests',
+      'description' => 'Basic crud operations for jobs and translators',
+      'group' => 'Translation Management',
     );
   }
 

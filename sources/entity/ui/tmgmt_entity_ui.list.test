@@ -5,14 +5,11 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntityTestCaseUtility {
 
   protected $nodes = array();
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Entity Source List tests'),
-      'description' => t('Tests the user interface for entity translation lists.'),
-      'group' => t('Translation Management'),
+      'name' => 'Entity Source List tests',
+      'description' => 'Tests the user interface for entity translation lists.',
+      'group' => 'Translation Management',
     );
   }
 

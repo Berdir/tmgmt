@@ -5,21 +5,15 @@
  */
 class TMGMTNodeSourceUIOverviewTestCase extends TMGMTEntityTestCaseUtility {
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Node Source UI Overview tests'),
-      'description' => t('Tests the user interface for node overviews.'),
-      'group' => t('Translation Management'),
+      'name' => 'Node Source UI Overview tests',
+      'description' => 'Tests the user interface for node overviews.',
+      'group' => 'Translation Management',
       'dependencies' => array('rules'),
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
   function setUp() {
     parent::setUp(array('tmgmt_node_ui'));
 

@@ -2,27 +2,18 @@
 
 
 /**
- * Basic Entity Source tests.
- *
- * @todo: Write tests for these cases:
- *  - any generic entity (defined by the tmgmt_entity_test module).
+ * Basic Node Source tests.
  */
 class TMGMTNodeSourceTestCase extends TMGMTEntityTestCaseUtility {
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Node Source tests'),
-      'description' => t('Exporting source data from nodes and saving translations back to nodes'),
-      'group' => t('Translation Management'),
+      'name' => 'Node Source tests',
+      'description' => 'Exporting source data from nodes and saving translations back to nodes',
+      'group' => 'Translation Management',
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
   function setUp() {
     parent::setUp(array('tmgmt_node', 'translation'));
     $this->loginAsAdmin();

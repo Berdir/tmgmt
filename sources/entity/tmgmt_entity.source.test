@@ -7,21 +7,15 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
 
   public $vocabulary;
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Entity Source tests'),
-      'description' => t('Exporting source data from entities and saving translations back to entities.'),
-      'group' => t('Translation Management'),
+      'name' => 'Entity Source tests',
+      'description' => 'Exporting source data from entities and saving translations back to entities.',
+      'group' => 'Translation Management',
       'dependencies' => array('entity_translation'),
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
   function setUp() {
     parent::setUp(array('tmgmt_entity', 'taxonomy', 'entity_translation'));
 

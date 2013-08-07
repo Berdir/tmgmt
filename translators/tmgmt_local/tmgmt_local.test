@@ -23,20 +23,14 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     'use Rules component rules_tmgmt_local_task_unassign',
   );
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Local Translator tests'),
-      'description' => t('Tests the local translator plugin integration.'),
-      'group' => t('Translation Management'),
+      'name' => 'Local Translator tests',
+      'description' => 'Tests the local translator plugin integration.',
+      'group' => 'Translation Management',
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
   function setUp() {
     parent::setUp(array('tmgmt_language_combination', 'tmgmt_local', 'tmgmt_ui'));
     $this->loginAsAdmin();

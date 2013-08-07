@@ -6,24 +6,18 @@
  */
 
 /**
- * Test the userinterface of tmgmt, for example the checkout form.
+ * Test the UI of tmgmt, for example the checkout form.
  */
 class TMGMTUITestCase extends TMGMTBaseTestCase {
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('UI tests'),
-      'description' => t('Verifies basic functionality of the user interface'),
-      'group' => t('Translation Management'),
+      'name' => 'UI tests',
+      'description' => 'Verifies basic functionality of the user interface',
+      'group' => 'Translation Management',
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
   function setUp() {
     parent::setUp(array('tmgmt_ui'));
 
