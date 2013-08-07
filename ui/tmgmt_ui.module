@@ -269,7 +269,9 @@ function tmgmt_ui_source_overview_form_submit($form, &$form_state) {
  *   Array of redirect url's if there are any jobs that need manual checkout.
  *
  * @ingroup tmgmt_job
+ *
  * @see tmgmt_ui_redirect_queue()
+ * @see tmgmt_ui_job_checkout_and_redirect()
  */
 function tmgmt_ui_job_checkout_multiple(array $jobs) {
   $redirects = array();
@@ -976,6 +978,38 @@ function tmgmt_ui_color_legend() {
   return $output;
 }
 
+/**
+ * Attempts to checkout a number of jobs and prepare the necessary redirects.
+ *
+ * @param array $form_state
+ *   Form state array, used to set the initial redirect.
+ * @param array $jobs
+ *   Array of jobs to attempt checkout
+ *
+ * @ingroup tmgmt_job
+ *
+ * @see tmgmt_ui_job_checkout_multiple()
+ */
+function tmgmt_ui_job_checkout_and_redirect(array &$form_state, array $jobs) {
+  $redirects = tmgmt_ui_job_checkout_multiple($jobs);
+  // If necessary, do a redirect.
+  if ($redirects) {
+    if (isset($_GET['destination'])) {
+      // Remove existing destination, as that will prevent us from being
+      // redirect to the job checkout page. Set the destination as the final
+      // redirect instead.
+      tmgmt_ui_redirect_queue_set($redirects, $_GET['destination']);
+      unset($_GET['destination']);
+    }
+    else {
+      tmgmt_ui_redirect_queue_set($redirects, current_path());
+    }
+    $form_state['redirect'] = tmgmt_ui_redirect_queue_dequeue();
+
+    // Count of the job messages is one less due to the final redirect.
+    drupal_set_message(format_plural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
+  }
+}
 
 /**
  * Implements hook_help().
