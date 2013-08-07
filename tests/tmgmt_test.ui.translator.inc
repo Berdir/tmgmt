@@ -8,7 +8,7 @@
 class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController {
 
   /**
-   * Overrides TMGMTDefaultTranslatorUIController::pluginSettingsForm().
+   * {@inheritdoc}
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
     $form['expose_settings'] = array(
@@ -32,7 +32,7 @@ class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController
   }
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::checkoutSettingsForm().
+   * {@inheritdoc}
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     if ($job->getTranslator()->getSetting('expose_settings')) {
@@ -53,7 +53,7 @@ class TMGMTTestTranslatorUIController extends TMGMTDefaultTranslatorUIController
   }
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::reviewDataItemElement().
+   * {@inheritdoc}
    */
   public function reviewDataItemElement($form, &$form_state, $data_item_key, $parent_key, array $data_item, TMGMTJobItem $item) {
     $form['below'] = array(

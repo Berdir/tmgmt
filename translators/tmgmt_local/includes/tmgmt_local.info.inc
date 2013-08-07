@@ -12,7 +12,7 @@
 class TMGMTLocalTaskMetadataController extends EntityDefaultMetadataController {
 
   /**
-   * Overrides EntityDefaultMetadataController::entityPropertyInfo().
+   * {@inheritdoc}
    */
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
@@ -70,7 +70,7 @@ class TMGMTLocalTaskMetadataController extends EntityDefaultMetadataController {
 class TMGMTLocalTaskItemMetadataController extends EntityDefaultMetadataController {
 
   /**
-   * Overrides EntityDefaultMetadataController::entityPropertyInfo().
+   * {@inheritdoc}
    */
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();

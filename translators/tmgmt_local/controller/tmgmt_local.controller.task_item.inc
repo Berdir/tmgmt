@@ -13,7 +13,7 @@
 class TMGMTLocalTaskItemController extends EntityAPIController {
 
   /**
-   * Overrides EntityAPIController::save().
+   * {@inheritdoc}
    *
    * @todo Eliminate the need to flatten and unflatten the TaskItem data.
    */

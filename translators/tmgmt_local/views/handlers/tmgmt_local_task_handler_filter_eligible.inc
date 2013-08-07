@@ -9,7 +9,7 @@
 class tmgmt_local_task_handler_filter_eligible extends views_handler_filter {
 
   /**
-   * Overrides views_handler_filter::query().
+   * {@inheritdoc}
    */
   public function query() {
     $this->ensure_my_table();

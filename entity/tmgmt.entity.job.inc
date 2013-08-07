@@ -89,7 +89,7 @@ class TMGMTJob extends Entity {
   public $uid;
 
   /**
-   * Overrides Entity::__construct().
+   * {@inheritdoc}
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_job');
@@ -102,7 +102,7 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Overrides Entity::defaultLabel().
+   * {@inheritdoc}
    */
   public function defaultLabel() {
     // In some cases we might have a user-defined label.
@@ -131,14 +131,14 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Overrides Entity::defaultUri().
+   * {@inheritdoc}
    */
   public function defaultUri() {
     return array('path' => 'admin/tmgmt/jobs/' . $this->tjid);
   }
 
   /**
-   * Overrides Entity::buildContent().
+   * {@inheritdoc}
    */
   public function buildContent($view_mode = 'full', $langcode = NULL) {
     $content = array();

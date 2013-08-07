@@ -8,7 +8,7 @@
 class tmgmt_local_task_handler_field_loop_count extends views_handler_field_entity {
 
   /**
-   * Overrides views_handler_field_entity::render().
+   * {@inheritdoc}
    */
   function render($values) {
     $object = $this->get_value($values);

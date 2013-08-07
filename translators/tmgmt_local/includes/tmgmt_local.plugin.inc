@@ -13,7 +13,7 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
   protected $language_pairs = array();
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::requestTranslation().
+   * {@inheritdoc}
    */
   public function requestTranslation(TMGMTJob $job) {
     $tuid = $job->getSetting('translator');
@@ -41,7 +41,7 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
   }
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::getSupportedTargetLanguages().
+   * {@inheritdoc}
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $languages = tmgmt_local_supported_target_languages($source_language);
@@ -52,7 +52,7 @@ class TMGMTLocalTranslatorPluginController extends TMGMTDefaultTranslatorPluginC
   }
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::getSupportedLanguagePairs().
+   * {@inheritdoc}
    */
   public function getSupportedLanguagePairs(TMGMTTranslator $translator) {
 

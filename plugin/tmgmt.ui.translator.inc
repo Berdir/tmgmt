@@ -8,7 +8,7 @@
 class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGMTTranslatorUIControllerInterface {
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::pluginSettingsForm().
+   * {@inheritdoc}
    */
   public function pluginSettingsForm($form, &$form_state, TMGMTTranslator $translator, $busy = FALSE) {
 
@@ -58,7 +58,7 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
   }
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::checkoutSettingsForm().
+   * {@inheritdoc}
    */
   public function checkoutSettingsForm($form, &$form_state, TMGMTJob $job) {
     if (!element_children($form)) {
@@ -68,7 +68,7 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
   }
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::checkoutInfo().
+   * {@inheritdoc}
    */
   public function checkoutInfo(TMGMTJob $job) {
     return array();
@@ -96,28 +96,28 @@ class TMGMTDefaultTranslatorUIController extends TMGMTPluginBase implements TMGM
   }
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::reviewForm().
+   * {@inheritdoc}
    */
   public function reviewForm($form, &$form_state, TMGMTJobItem $item) {
     return $form;
   }
 
   /**
-   * Implements TMGMTTranslatorUIControllerInterface::reviewDataItemElement().
+   * {@inheritdoc}
    */
   public function reviewDataItemElement($form, &$form_state, $data_item_key, $parent_key, array $data_item, TMGMTJobItem $item) {
     return $form;
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::reviewFormValidate().
+   * {@inheritdoc}
    */
   public function reviewFormValidate($form, &$form_state, TMGMTJobItem $item) {
     // Nothing to do here by default.
   }
 
   /**
-   * Implements TMGMTTranslatorPluginControllerInterface::reviewFormSubmit().
+   * {@inheritdoc}
    */
   public function reviewFormSubmit($form, &$form_state, TMGMTJobItem $item) {
     // Nothing to do here by default.

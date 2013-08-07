@@ -8,7 +8,7 @@
 class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController {
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getData().
+   * {@inheritdoc}
    *
    * Returns the data from the fields as a structure that can be processed by
    * the Translation Management system.
@@ -25,7 +25,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::saveTranslation().
+   * {@inheritdoc}
    */
   public function saveTranslation(TMGMTJobItem $job_item) {
     if ($node = node_load($job_item->item_id)) {
@@ -68,7 +68,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getLabel().
+   * {@inheritdoc}
    */
   public function getLabel(TMGMTJobItem $job_item) {
     if ($node = node_load($job_item->item_id)) {
@@ -78,7 +78,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getUri().
+   * {@inheritdoc}
    */
   public function getUri(TMGMTJobItem $job_item) {
     if ($node = node_load($job_item->item_id)) {
@@ -88,7 +88,7 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
   }
 
   /**
-   * Implements TMGMTEntitySourcePluginControllerInterface::getType().
+   * {@inheritdoc}
    */
   public function getType(TMGMTJobItem $job_item) {
     if ($node = node_load($job_item->item_id)) {

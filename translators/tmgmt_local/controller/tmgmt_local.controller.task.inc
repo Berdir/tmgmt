@@ -13,7 +13,7 @@
 class TMGMTLocalTaskController extends EntityAPIController {
 
   /**
-   * Overrides EntityAPIController::save().
+   * {@inheritdoc}
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $entity->changed = REQUEST_TIME;
@@ -21,7 +21,7 @@ class TMGMTLocalTaskController extends EntityAPIController {
   }
 
   /**
-   * Overrides EntityAPIController::delete().
+   * {@inheritdoc}
    */
   public function delete($ids, $transaction = NULL) {
     parent::delete($ids, $transaction);

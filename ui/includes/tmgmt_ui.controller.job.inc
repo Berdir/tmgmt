@@ -11,7 +11,7 @@
 class TMGMTJobUIController extends EntityDefaultUIController {
 
   /**
-   * Overrides EntityDefaultUIController::hook_menu().
+   * {@inheritdoc}
    */
   public function hook_menu() {
     $id_count = count(explode('/', $this->path));
@@ -47,7 +47,7 @@ class TMGMTJobUIController extends EntityDefaultUIController {
   }
 
   /**
-   * Overrides EntityDefaultUIController::operationForm().
+   * {@inheritdoc}
    */
   public function operationForm($form, &$form_state, $entity, $op) {
     switch ($op) {
@@ -63,7 +63,7 @@ class TMGMTJobUIController extends EntityDefaultUIController {
   }
 
   /**
-   * Overrides EntityDefaultUIController::applyOperation().
+   * {@inheritdoc}
    */
   public function applyOperation($op, $entity) {
     switch ($op) {

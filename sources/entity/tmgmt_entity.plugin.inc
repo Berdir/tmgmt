@@ -20,7 +20,7 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
   }
 
   /**
-   * Implements TMGMTEntitySourcePluginController::getData().
+   * {@inheritdoc}
    *
    * Returns the data from the fields as a structure that can be processed by
    * the Translation Management system.
@@ -34,7 +34,7 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
   }
 
   /**
-   * Implements TMGMTEntitySourcePluginController::saveTranslation().
+   * {@inheritdoc}
    */
   public function saveTranslation(TMGMTJobItem $job_item) {
     $entity = entity_load_single($job_item->item_type, $job_item->item_id);
@@ -61,7 +61,7 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
   }
 
   /**
-   * Implements TMGMTEntitySourcePluginControllerInterface::getType().
+   * {@inheritdoc}
    */
   public function getType(TMGMTJobItem $job_item) {
     if ($entity = entity_load_single($job_item->item_type, $job_item->item_id)) {

@@ -25,7 +25,7 @@ class tmgmt_local_task_handler_field_progress extends tmgmt_handler_field_tmgmt_
   }
 
   /**
-   * Overrides tmgmt_handler_field_tmgmt_progress::render().
+   * {@inheritdoc}
    */
   function render($values) {
     $object = $this->get_value($values);
@@ -45,7 +45,7 @@ class tmgmt_local_task_handler_field_progress extends tmgmt_handler_field_tmgmt_
   }
 
   /**
-   * Overrides tmgmt_handler_field_tmgmt_progress::build_progressbar_settings().
+   * {@inheritdoc}
    */
   function build_progressbar_settings($id, $counts, $prefix = 'progress') {
     $settings['chart'][$prefix . $id] = array(

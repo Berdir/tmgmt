@@ -8,7 +8,7 @@
 class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginController implements TMGMTTranslatorRejectDataItem {
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::getDefaultRemoteLanguagesMappings().
+   * {@inheritdoc}
    */
   public function getDefaultRemoteLanguagesMappings() {
     return array(
@@ -18,14 +18,14 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   }
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::hasCheckoutSettings().
+   * {@inheritdoc}
    */
   public function hasCheckoutSettings(TMGMTJob $job) {
     return $job->getTranslator()->getSetting('expose_settings');
   }
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::requestTranslation().
+   * {@inheritdoc}
    */
   function requestTranslation(TMGMTJob $job) {
     // Add a debug message.
@@ -62,7 +62,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   }
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::canTranslate().
+   * {@inheritdoc}
    */
   function canTranslate(TMGMTTranslator $translator, TMGMTJob $job) {
     if (isset($job->settings['action']) && $job->settings['action'] == 'not_translatable') {
@@ -72,7 +72,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   }
 
   /**
-   * Overrides TMGMTDefaultTranslatorPluginController::getSupportedTargetLanguages().
+   * {@inheritdoc}
    */
   public function getSupportedTargetLanguages(TMGMTTranslator $translator, $source_language) {
     $languages = drupal_map_assoc(array('en', 'de', 'es', 'it', 'zh-hans'));
@@ -81,7 +81,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   }
 
   /**
-   * Overrides TMGMTTranslatorRejectDataItem::rejectDataItem().
+   * {@inheritdoc}
    */
   public function rejectDataItem(TMGMTJobItem $job_item, array $key, array $values = NULL) {
     $key = '[' . implode('][', $key) . ']';
@@ -90,7 +90,7 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   }
 
   /**
-   * Implements TMGMTTranslatorRejectDataItem::rejectForm().
+   * {@inheritdoc}
    */
   public function rejectForm($form, &$form_state) {
     return $form;

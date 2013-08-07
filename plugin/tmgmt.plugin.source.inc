@@ -13,14 +13,14 @@
 abstract class TMGMTDefaultSourcePluginController extends TMGMTPluginBase implements TMGMTSourcePluginControllerInterface {
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getLabel().
+   * {@inheritdoc}
    */
   public function getLabel(TMGMTJobItem $job_item) {
     return t('@plugin item unavailable (@item)', array('@plugin' => $this->pluginInfo['label'], '@item' => $job_item->item_type . ':' . $job_item->item_id));
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getUri().
+   * {@inheritdoc}
    */
   public function getUri(TMGMTJobItem $job_item) {
     return array(
@@ -30,14 +30,14 @@ abstract class TMGMTDefaultSourcePluginController extends TMGMTPluginBase implem
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getItemTypes().
+   * {@inheritdoc}
    */
   public function getItemTypes() {
     return isset($this->pluginInfo['item types']) ? $this->pluginInfo['item types'] : array();
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getItemTypeLabel().
+   * {@inheritdoc}
    */
   public function getItemTypeLabel($type) {
     $types = $this->getItemTypes();
@@ -48,7 +48,7 @@ abstract class TMGMTDefaultSourcePluginController extends TMGMTPluginBase implem
   }
 
   /**
-   * Implements TMGMTSourcePluginControllerInterface::getType().
+   * {@inheritdoc}
    */
   public function getType(TMGMTJobItem $job_item) {
     return ucfirst($job_item->item_type);

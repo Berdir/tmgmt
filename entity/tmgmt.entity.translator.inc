@@ -83,7 +83,7 @@ class TMGMTTranslator extends Entity {
   protected $languageCacheOutdated;
 
   /**
-   * Overrides Entity::__construct().
+   * {@inheritdoc}
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_translator');

@@ -69,7 +69,7 @@ class TMGMTMessage extends Entity {
   public $type;
 
   /**
-   * Overrides Entity::__construct().
+   * {@inheritdoc}
    */
   public function __construct(array $values = array()) {
     parent::__construct($values, 'tmgmt_message');
@@ -82,7 +82,7 @@ class TMGMTMessage extends Entity {
   }
 
   /**
-   * Overrides Entity::label().
+   * {@inheritdoc}
    */
   public function defaultLabel() {
     $created = format_date($this->created);

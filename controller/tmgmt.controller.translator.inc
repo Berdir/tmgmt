@@ -13,7 +13,7 @@
 class TMGMTTranslatorController extends EntityAPIControllerExportable {
 
   /**
-   * Overrides EntityAPIControllerExportable::buildQuery().
+   * {@inheritdoc}
    */
   protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     $query = parent::buildQuery($ids, $conditions, $revision_id);
@@ -30,7 +30,7 @@ class TMGMTTranslatorController extends EntityAPIControllerExportable {
   }
 
   /**
-   * Overrides EntityAPIControllerExportable::delete().
+   * {@inheritdoc}
    */
   public function delete($ids, DatabaseTransaction $transaction = NULL) {
     $cids = array();
@@ -51,7 +51,7 @@ class TMGMTTranslatorController extends EntityAPIControllerExportable {
   }
 
   /**
-  * Overrides EntityAPIControllerExportable::save().
+  * {@inheritdoc}
   */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $return = parent::save($entity, $transaction);
