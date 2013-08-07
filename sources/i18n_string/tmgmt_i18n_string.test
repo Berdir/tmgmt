@@ -50,7 +50,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     }
 
     // Check the structure of the imported data.
-    $this->assertEqual($item1->item_id, $string_object_name, t('i18n Strings object correctly saved'));
+    $this->assertEqual($item1->item_id, $string_object_name, 'i18n Strings object correctly saved');
 
     // Check string translation.
     $this->assertEqual(i18n_string_translate('taxonomy:vocabulary:' . $vocabulary->vid . ':name', $source_text, array('langcode' => $job->target_language)), $job->target_language . '_' . $source_text);
@@ -133,7 +133,7 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($data['menu:menu:' . $menu['menu_name'] . ':description']['#text'], $config['description']);
 
     // Check the structure of the imported data.
-    $this->assertEqual($item1->item_id, $string_name, t('String is correctly saved'));
+    $this->assertEqual($item1->item_id, $string_name, 'String is correctly saved');
 
     // Check string translation.
     $this->assertEqual(i18n_string_translate($string_name . ':title', $source_text, array('langcode' => $job->target_language)), $job->target_language . '_' . $source_text);
