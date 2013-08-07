@@ -10,14 +10,11 @@
  */
 class TMGMTHelperTestCase extends TMGMTBaseTestCase {
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Helper functions Test case'),
-      'description' => t('Helper functions for other modules'),
-      'group' => t('Translation Management'),
+      'name' => 'Helper functions Test case',
+      'description' => 'Helper functions for other modules',
+      'group' => 'Translation Management',
     );
   }
 

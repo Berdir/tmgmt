@@ -2,27 +2,18 @@
 
 
 /**
- * Basic Entity Source tests.
- *
- * @todo: Write tests for these cases:
- *  - any generic entity (defined by the tmgmt_entity_test module).
+ * Basic Node Source tests.
  */
 class TMGMTNodeSourceTestCase extends TMGMTEntityTestCaseUtility {
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Node Source tests'),
-      'description' => t('Exporting source data from nodes and saving translations back to nodes'),
-      'group' => t('Translation Management'),
+      'name' => 'Node Source tests',
+      'description' => 'Exporting source data from nodes and saving translations back to nodes',
+      'group' => 'Translation Management',
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
   function setUp() {
     parent::setUp(array('tmgmt_node', 'translation'));
     $this->loginAsAdmin();
@@ -56,14 +47,14 @@ class TMGMTNodeSourceTestCase extends TMGMTEntityTestCaseUtility {
       $item->acceptTranslation();
       $node = node_load($item->item_id);
       // Check if the tnid attribute is bigger than 0.
-      $this->assertTrue($node->tnid > 0, t('The source node is part of a translation set.'));
+      $this->assertTrue($node->tnid > 0, 'The source node is part of a translation set.');
       // The translations may be statically cached, so make make sure
       // to reset the cache before loading the node translations.
       $cached_translations = & drupal_static('translation_node_get_translations', array());
       unset($cached_translations[$node->tnid]);
       // Load the translation set of the source node.
       $translations = translation_node_get_translations($node->tnid);
-      $this->assertNotNull($translations['de'], t('Translation found for the source node.'));
+      $this->assertNotNull($translations['de'], 'Translation found for the source node.');
       if (isset($translations['de'])) {
         $tnode = node_load($translations['de']->nid, NULL, TRUE);
         $this->checkTranslatedData($tnode, $item->getData(), 'de');
@@ -84,7 +75,7 @@ class TMGMTNodeSourceTestCase extends TMGMTEntityTestCaseUtility {
   function checkTranslatedData($node, $data, $langcode) {
     foreach (element_children($data) as $field_name) {
       if ($field_name == 'node_title') {
-        $this->assertEqual($node->title, $data['node_title']['#translation']['#text'], t('The title of the translated node matches the translated data.'));
+        $this->assertEqual($node->title, $data['node_title']['#translation']['#text'], 'The title of the translated node matches the translated data.');
         continue;
       }
       foreach (element_children($data[$field_name]) as $delta) {
@@ -92,7 +83,7 @@ class TMGMTNodeSourceTestCase extends TMGMTEntityTestCaseUtility {
         foreach (element_children($data[$field_name][$delta]) as $column) {
           $column_value = $data[$field_name][$delta][$column];
           if (!isset($column_value['#translate']) || $column_value['#translate']) {
-            $this->assertEqual($node->{$field_name}[$field_langcode][$delta][$column], $column_value['#translation']['#text'], t('The translatable field %field:%delta has been populated with the proper translated data.', array(
+            $this->assertEqual($node->{$field_name}[$field_langcode][$delta][$column], $column_value['#translation']['#text'], format_string('The translatable field %field:%delta has been populated with the proper translated data.', array(
               '%field' => $field_name,
               'delta' => $delta
             )));

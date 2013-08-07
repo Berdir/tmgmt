@@ -1,25 +1,18 @@
 <?php
 
 /**
- * Basic Node Source tests.
- *
+ * Basic Node Source UI tests.
  */
 class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Node Source UI tests'),
-      'description' => t('Tests the user interface for node translation sources.'),
-      'group' => t('Translation Management'),
+      'name' => 'Node Source UI tests',
+      'description' => 'Tests the user interface for node translation sources.',
+      'group' => 'Translation Management',
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
   function setUp() {
     parent::setUp(array('tmgmt_node_ui', 'block'));
 

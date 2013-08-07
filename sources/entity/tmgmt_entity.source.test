@@ -7,21 +7,15 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
 
   public $vocabulary;
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Entity Source tests'),
-      'description' => t('Exporting source data from entities and saving translations back to entities.'),
-      'group' => t('Translation Management'),
+      'name' => 'Entity Source tests',
+      'description' => 'Exporting source data from entities and saving translations back to entities.',
+      'group' => 'Translation Management',
       'dependencies' => array('entity_translation'),
     );
   }
 
-  /**
-   * Overrides SimplenewsTestCase::setUp()
-   */
   function setUp() {
     parent::setUp(array('tmgmt_entity', 'taxonomy', 'entity_translation'));
 
@@ -120,10 +114,10 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
     $job = tmgmt_job_create('en', NULL);
     try {
       $job->addItem('entity', 'taxonomy_term', $empty_term->tid);
-      $this->fail(t('Job item added with empty source text.'));
+      $this->fail('Job item added with empty source text.');
     }
     catch (TMGMTException $e) {
-      $this->assert(empty($job->tjid), t('After adding a job item with empty source text its tjid has to be unset.'));
+      $this->assert(empty($job->tjid), 'After adding a job item with empty source text its tjid has to be unset.');
     }
 
     // Create term with populated source content.
@@ -131,7 +125,7 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
 
     // Lets reuse the last created term with populated source content.
     $job->addItem('entity', 'taxonomy_term', $populated_content_term->tid);
-    $this->assert(!empty($job->tjid), t('After adding another job item with populated source text its tjid must be set.'));
+    $this->assert(!empty($job->tjid), 'After adding another job item with populated source text its tjid must be set.');
   }
 
   /**
@@ -150,10 +144,10 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
         foreach (element_children($data[$field_name][$delta]) as $column) {
           $column_value = $data[$field_name][$delta][$column];
           if (!empty($column_value['#translate'])) {
-            $this->assertEqual($tentity->{$field_name}[$langcode][$delta][$column], $column_value['#translation']['#text'], t('The field %field:%delta has been populated with the proper translated data.', array('%field' => $field_name, 'delta' => $delta)));
+            $this->assertEqual($tentity->{$field_name}[$langcode][$delta][$column], $column_value['#translation']['#text'], format_string('The field %field:%delta has been populated with the proper translated data.', array('%field' => $field_name, 'delta' => $delta)));
           }
           else {
-            $this->assertEqual($tentity->{$field_name}[$langcode][$delta][$column], $column_value['#text'], t('The field %field:%delta has been populated with the proper untranslated data.', array('%field' => $field_name, 'delta' => $delta)));
+            $this->assertEqual($tentity->{$field_name}[$langcode][$delta][$column], $column_value['#text'], format_string('The field %field:%delta has been populated with the proper untranslated data.', array('%field' => $field_name, 'delta' => $delta)));
           }
         }
       }
@@ -178,10 +172,10 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
       if (!$field_info['translatable']) {
         // Avoid some PHP warnings.
         if (isset($data[$field_name])) {
-          $this->assertNull($data[$field_name]['#translation']['#text'], t('The not translatable field was not translated.'));
+          $this->assertNull($data[$field_name]['#translation']['#text'], 'The not translatable field was not translated.');
         }
         if (isset($tentity->{$field_name}[$langcode])) {
-          $this->assertNull($tentity->{$field_name}[$langcode], t('The entity has translated data in a field that is translatable.'));
+          $this->assertNull($tentity->{$field_name}[$langcode], 'The entity has translated data in a field that is translatable.');
         }
       }
     }

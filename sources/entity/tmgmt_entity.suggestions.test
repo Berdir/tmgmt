@@ -11,9 +11,9 @@ class TMGMTSuggestionsTestCase extends TMGMTBaseTestCase {
 
   static function getInfo() {
     return array(
-      'name' => t('Entity Suggestions tests'),
-      'description' => t('Tests suggestion implementation for the entity source plugin'),
-      'group' => t('Translation Management'),
+      'name' => 'Entity Suggestions tests',
+      'description' => 'Tests suggestion implementation for the entity source plugin',
+      'group' => 'Translation Management',
       'dependencies' => array('file_entity'),
     );
   }

@@ -5,14 +5,11 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntityTestCaseUtility {
 
   protected $nodes = array();
 
-  /**
-   * Implements getInfo().
-   */
   static function getInfo() {
     return array(
-      'name' => t('Entity Source List tests'),
-      'description' => t('Tests the user interface for entity translation lists.'),
-      'group' => t('Translation Management'),
+      'name' => 'Entity Source List tests',
+      'description' => 'Tests the user interface for entity translation lists.',
+      'group' => 'Translation Management',
     );
   }
 
@@ -242,11 +239,11 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntityTestCaseUtility {
     $edit = array();
     $edit['search[title]'] = "$title_part_1 $title_part_3";
     $this->drupalPost('admin/tmgmt/sources/entity_node', $edit, t('Search'));
-    $this->assertText("$title_part_1 $title_part_2 $title_part_3", t('Searching on partial node title must return the result.'));
+    $this->assertText("$title_part_1 $title_part_2 $title_part_3", 'Searching on partial node title must return the result.');
 
     // Check if there is only one result in the list.
     $search_result_rows = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr');
-    $this->assert(count($search_result_rows) == 1, t('The search result must return only one row.'));
+    $this->assert(count($search_result_rows) == 1, 'The search result must return only one row.');
 
     // To test if other entity types work go for simple comment search.
     $comment = new stdClass();
@@ -266,6 +263,6 @@ class TMGMTEntitySourceListTestCase extends TMGMTEntityTestCaseUtility {
     $edit = array();
     $edit['search[subject]'] = $comment->subject;
     $this->drupalPost('admin/tmgmt/sources/entity_comment', $edit, t('Search'));
-    $this->assertText($comment->subject, t('Searching for a comment subject.'));
+    $this->assertText($comment->subject, 'Searching for a comment subject.');
   }
 }
