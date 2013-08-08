@@ -154,7 +154,7 @@ function tmgmt_modules_installed($modules) {
     // Check if this translator plugin has been added by one of the recently
     // installed modules and doesn't prevent auto creation.
     if ((!isset($definition['auto create']) || $definition['auto create'] == TRUE) && in_array($definition['provider'], $modules)) {
-      tmgmt_translator_auto_create($id);
+      tmgmt_translator_auto_create($definition);
     }
   }
 }

@@ -205,7 +205,7 @@ class EntitySourceUnitTest extends EntityUnitTestBase {
     $job_item = tmgmt_job_item_create('entity', 'node', $node->id(), array('tjid' => $job->id()));
     $job_item->save();
 
-    $source_plugin = $this->container('plugin.manager.tmgmt.source')->createInstance('entity');
+    $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('entity');
     $data = $source_plugin->getData($job_item);
 
     // Test the title property.
