@@ -7,14 +7,12 @@
 
 namespace Drupal\tmgmt\EntityController;
 
-use Drupal\Core\Entity\EntityFormController;
-
 /**
  * Form controller for the translator edit forms.
  *
  * @ingroup tmgmt_translator
  */
-class TranslatorFormController extends EntityFormController {
+class TranslatorFormController extends TMGMTFormControllerBase {
 
   /**
    * Overrides Drupal\Core\Entity\EntityFormController::form().
@@ -26,7 +24,7 @@ class TranslatorFormController extends EntityFormController {
     if ($busy = !$entity->isNew() ? tmgmt_translator_busy($entity->name) : FALSE) {
       drupal_set_message(t("This translator is currently in use. It cannot be deleted. The chosen Translation Plugin cannot be changed."), 'warning');
     }
-    $available = tmgmt_translator_plugin_labels();
+    $available = $this->translatorManager->getLabels();
     // If the translator plugin is not set, pick the first available plugin as the
     // default.
     $entity->plugin = empty($entity->plugin) ? key($available) : $entity->plugin;
@@ -82,11 +80,11 @@ class TranslatorFormController extends EntityFormController {
     );
     // Pull the translator plugin info if any.
     if ($entity->plugin) {
-      $info = tmgmt_translator_plugin_info($entity->plugin);
+      $definition = $this->translatorManager->getDefinition($entity->plugin);
       $form['plugin_wrapper']['plugin'] = array(
         '#type' => 'select',
         '#title' => t('Translator plugin'),
-        '#description' => isset($info['description']) ? filter_xss($info['description']) : '',
+        '#description' => isset($definition['description']) ? filter_xss($definition['description']) : '',
         '#options' => $available,
         '#default_value' => $entity->plugin,
         '#required' => TRUE,
@@ -98,12 +96,12 @@ class TranslatorFormController extends EntityFormController {
       );
       $form['plugin_wrapper']['settings'] = array(
         '#type' => 'fieldset',
-        '#title' => t('@plugin plugin settings', array('@plugin' => $info['label'])),
+        '#title' => t('@plugin plugin settings', array('@plugin' => $definition['label'])),
         '#tree' => TRUE,
       );
       // Add the translator plugin settings form.
-      $controller = tmgmt_translator_ui_controller($entity->plugin);
-      $form['plugin_wrapper']['settings'] += $controller->pluginSettingsForm($form['plugin_wrapper']['settings'], $form_state, $entity, $busy);
+      $plugin_ui = $this->translatorManager->createUIInstance($entity->plugin);
+      $form['plugin_wrapper']['settings'] += $plugin_ui->pluginSettingsForm($form['plugin_wrapper']['settings'], $form_state, $entity, $busy);
     }
     // Add a submit button and a cancel link to the form.
     $form['actions']['#type'] = 'actions';

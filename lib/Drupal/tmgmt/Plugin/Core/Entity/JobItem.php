@@ -375,7 +375,7 @@ class JobItem extends Entity {
   public function getSourceController() {
     if (!empty($this->plugin)) {
       try {
-        return tmgmt_source_plugin_controller($this->plugin);
+        return \Drupal::service('plugin.manager.tmgmt.source')->createInstance($this->plugin);
       } catch (PluginException $e) {
         // Ignore exceptions due to missing source plugins.
       }

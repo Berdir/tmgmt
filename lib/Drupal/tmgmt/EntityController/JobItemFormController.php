@@ -7,15 +7,12 @@
 
 namespace Drupal\tmgmt\EntityController;
 
-use Drupal\Core\Entity\EntityFormController;
-use Drupal\tmgmt\Plugin\Core\Entity\Job;
-
 /**
  * Form controller for the job item edit forms.
  *
  * @ingroup tmgmt_job
  */
-class JobItemFormController extends EntityFormController {
+class JobItemFormController extends TMGMTFormControllerBase {
 
   /**
    * Overrides Drupal\Core\Entity\EntityFormController::form().
@@ -117,12 +114,12 @@ class JobItemFormController extends EntityFormController {
     // that process is completely unique and custom for each translation service.
 
     // Give the source ui controller a chance to affect the review form.
-    $source = tmgmt_source_ui_controller($item->plugin);
+    $source = $this->sourceManager->createUIInstance($item->plugin);
     $form = $source->reviewForm($form, $form_state, $item);
     // Give the translator ui controller a chance to affect the review form.
     if ($item->getTranslator()) {
-      $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-      $form = $translator->reviewForm($form, $form_state, $item);
+      $plugin_ui = $this->translatorManager->createUIInstance($item->getTranslator()->plugin);
+      $form = $plugin_ui->reviewForm($form, $form_state, $item);
     }
 
     return $form;
@@ -174,12 +171,12 @@ class JobItemFormController extends EntityFormController {
     parent::validate($form, $form_state);
     $item = $this->buildEntity($form, $form_state);
     // First invoke the validation method on the source controller.
-    $source = tmgmt_source_ui_controller($item->plugin);
-    $source->reviewFormValidate($form, $form_state, $item);
+    $source_ui = $this->sourceManager->createUIInstance($item->plugin);
+    $source_ui->reviewFormValidate($form, $form_state, $item);
     // Invoke the validation method on the translator controller (if available).
     if($item->getTranslator()){
-      $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-      $translator->reviewFormValidate($form, $form_state, $item);
+      $translator_ui = $this->translatorManager->createUIInstance($item->getTranslator()->plugin);
+      $translator_ui->reviewFormValidate($form, $form_state, $item);
     }
   }
 
@@ -189,12 +186,12 @@ class JobItemFormController extends EntityFormController {
   public function save(array $form, array &$form_state) {
     $item = $this->entity;
     // First invoke the submit method on the source controller.
-    $source = tmgmt_source_ui_controller($item->plugin);
-    $source->reviewFormSubmit($form, $form_state, $item);
+    $source_ui = $this->sourceManager->createUIInstance($item->plugin);
+    $source_ui->reviewFormSubmit($form, $form_state, $item);
     // Invoke the submit method on the translator controller (if available).
     if ($item->getTranslator()){
-      $translator = tmgmt_translator_ui_controller($item->getTranslator()->plugin);
-      $translator->reviewFormSubmit($form, $form_state, $item);
+      $translator_ui = $this->translatorManager->createUIInstance($item->getTranslator()->plugin);
+      $translator_ui->reviewFormSubmit($form, $form_state, $item);
     }
     // Write changes back to item.
     foreach ($form_state['values'] as $key => $value) {

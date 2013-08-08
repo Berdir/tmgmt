@@ -62,4 +62,18 @@ class TranslatorManager extends DefaultPluginManager {
     return $this->ui[$plugin];
   }
 
+  /**
+   * Returns the translator plugin labels.
+   *
+   * @return array
+   *   Array of plugin labels, keyed by the plugin id.
+   */
+  public function getLabels() {
+    $list = array();
+    foreach ($this->getDefinitions() as $plugin => $definition) {
+      $list[$plugin] = $definition['label'];
+    }
+    return $list;
+  }
+
 }

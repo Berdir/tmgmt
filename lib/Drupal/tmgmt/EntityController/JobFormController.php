@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt\EntityController;
 
-use Drupal\Core\Entity\EntityFormController;
 use Drupal\tmgmt\Plugin\Core\Entity\Job;
 
 /**
@@ -15,7 +14,7 @@ use Drupal\tmgmt\Plugin\Core\Entity\Job;
  *
  * @ingroup tmgmt_job
  */
-class JobFormController extends EntityFormController {
+class JobFormController extends TMGMTFormControllerBase {
 
   /**
    * Overrides Drupal\Core\Entity\EntityFormController::form().
@@ -454,8 +453,8 @@ class JobFormController extends EntityFormController {
       $form['#description'] = filter_xss($job->getTranslator()->getNotCanTranslateReason($job));
     }
     else {
-      $controller = tmgmt_translator_ui_controller($translator->plugin);
-      $form = $controller->checkoutSettingsForm($form, $form_state, $job);
+      $plugin_ui = $this->translatorManager->createUIInstance($translator->plugin);
+      $form = $plugin_ui->checkoutSettingsForm($form, $form_state, $job);
     }
     return $form;
   }
@@ -469,8 +468,8 @@ class JobFormController extends EntityFormController {
     if (!$translator) {
       return array();
     }
-    $controller = tmgmt_translator_ui_controller($translator->plugin);
-    return $controller->checkoutInfo($job);
+    $plugin_ui = $this->translatorManager->createUIInstance($translator->plugin);
+    return $plugin_ui->checkoutInfo($job);
   }
 
   /**

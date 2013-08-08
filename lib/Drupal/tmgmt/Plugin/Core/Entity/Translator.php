@@ -140,7 +140,7 @@ class Translator extends ConfigEntityBase {
    */
   public function getController() {
     if (!empty($this->plugin)) {
-      return tmgmt_translator_plugin_controller($this->plugin);
+      return \Drupal::service('plugin.manager.tmgmt.translator')->createInstance($this->plugin);
     }
     return FALSE;
   }

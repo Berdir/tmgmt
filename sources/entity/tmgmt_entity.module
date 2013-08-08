@@ -64,7 +64,7 @@ function tmgmt_entity_get_translatable_bundles($entity_type) {
 
   // If given entity type does not have entity translations enabled, no reason
   // to continue.
-  $enabled_types = tmgmt_source_plugin_controller('entity')->getItemTypes();
+  $enabled_types = Drupal::service('plugin.manager.tmgmt.source')->createInstance('entity')->getItemTypes();
   if (!isset($enabled_types[$entity_type])) {
     return array();
   }
@@ -101,7 +101,7 @@ function tmgmt_entity_get_translatable_entities($entity_type, $property_conditio
 
   // If given entity type does not have entity translations enabled, no reason
   // to continue.
-  $enabled_types = tmgmt_source_plugin_controller('entity')->getItemTypes();
+  $enabled_types = Drupal::service('plugin.manager.tmgmt.source')->createInstance('entity')->getItemTypes();
   if (!isset($enabled_types[$entity_type])) {
     return array();
   }

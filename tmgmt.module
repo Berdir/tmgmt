@@ -148,12 +148,13 @@ function tmgmt_permission() {
  * Implements hook_modules_installed().
  */
 function tmgmt_modules_installed($modules) {
-  Drupal::service('plugin.manager.tmgmt.translator')->clearCachedDefinitions();
-  foreach (tmgmt_translator_plugin_info() as $key => $info) {
+  $translator_manager = Drupal::service('plugin.manager.tmgmt.translator');
+  $translator_manager->clearCachedDefinitions();
+  foreach ($translator_manager->getDefinitions() as $id => $definition) {
     // Check if this translator plugin has been added by one of the recently
     // installed modules and doesn't prevent auto creation.
-    if ((!isset($info['auto create']) || $info['auto create'] == TRUE) && in_array($info['provider'], $modules)) {
-      tmgmt_translator_auto_create($key);
+    if ((!isset($definition['auto create']) || $definition['auto create'] == TRUE) && in_array($definition['provider'], $modules)) {
+      tmgmt_translator_auto_create($id);
     }
   }
 }
@@ -707,80 +708,18 @@ function tmgmt_translator_create($plugin, $name, $label, $description = '', $set
 /**
  * Auto creates a translator from a translator plugin definition.
  *
- * @param $plugin
- *   The machine-readable name of a translator plugin.
+ * @param array $definition
+ *   The definition of a translator plugin.
  */
-function tmgmt_translator_auto_create($plugin) {
-  if ($info = tmgmt_translator_plugin_info($plugin)) {
-    if (!tmgmt_translator_load($plugin)) {
-      $label = $info['label'] . ' (auto created)';
-      $translator = tmgmt_translator_create($plugin, $plugin, $label, $info['description']);
-      // Append some default settings from the translator plugin definition.
-      $translator->settings = $translator->getController()->defaultSettings();
-      $translator->save();
-    }
+function tmgmt_translator_auto_create(array $definition) {
+  $plugin = $definition['id'];
+  if (!tmgmt_translator_load($plugin)) {
+    $label = $definition['label'] . ' (auto created)';
+    $translator = tmgmt_translator_create($plugin, $plugin, $label, $definition['description']);
+    // Append some default settings from the translator plugin definition.
+    $translator->settings = $translator->getController()->defaultSettings();
+    $translator->save();
   }
-}
-
-/**
- * Determines all available service plugins.
- *
- * @param $plugin
- *   (Optional) The machine-readable name of a service plugin.
- *
- * @return array
- *   An array of translator plugin definitions.
- */
-function tmgmt_translator_plugin_info($plugin = NULL) {
-  if ($plugin) {
-    return Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($plugin);
-  }
-  else {
-    return Drupal::service('plugin.manager.tmgmt.translator')->getDefinitions();
-  }
-}
-
-/**
- * Determines the controller class for a given service plugin.
- *
- * @param $plugin
- *   (Optional) The machine-readable name of a service plugin.
- *
- * @return \Drupal\tmgmt\TranslatorPluginInterface
- *   - If the translator exists the controller object for the given source plugin
- *     or an array containing all available translator plugin controller objects
- *     if no plugin name was given.
- *   - Array of existing Translators if a translator with given name does not
- *     exists.
- */
-function tmgmt_translator_plugin_controller($plugin = NULL) {
-  return Drupal::service('plugin.manager.tmgmt.translator')->createInstance($plugin);
-}
-
-/**
- * Get the ui controller class for a given translator plugin.
- *
- * @param $plugin
- *   (Optional) The machine-readable name of a translator plugin.
- *
- * @return TranslatorUIControllerInterface
- *   The ui controller object for the given translator plugin or an array
- *   containing all available translator plugin controller objects if no plugin
- *   name was given.
- */
-function tmgmt_translator_ui_controller($plugin = NULL) {
-  return Drupal::service('plugin.manager.tmgmt.translator')->createUiInstance($plugin);
-}
-
-/**
- * Returns an array of all available translator plugins with the labels as
- * values and the machine-readable name as the key.
- *
- * @return array
- *   An array of the labels of all available plugins.
- */
-function tmgmt_translator_plugin_labels() {
-  return _tmgmt_plugin_labels('translator');
 }
 
 /**
@@ -836,7 +775,7 @@ function tmgmt_translator_labels_flagged($job = NULL) {
  *   mapping feature it will return TRUE.
  */
 function tmgmt_provide_remote_languages_mappings(Translator $translator) {
-  $info = tmgmt_translator_plugin_info($translator->plugin);
+  $info = Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($translator->plugin);
 
   if (!isset($info['map_remote_languages'])) {
     return TRUE;
@@ -855,7 +794,7 @@ function tmgmt_provide_remote_languages_mappings(Translator $translator) {
  *   If job settings are to be handled by the plugin.
  */
 function tmgmt_job_settings_custom_handling(Translator $translator) {
-  $info = tmgmt_translator_plugin_info($translator->plugin);
+  $info = Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($translator->plugin);
 
   if (isset($info['job_settings_custom_handling'])) {
     return $info['job_settings_custom_handling'];
@@ -890,60 +829,6 @@ function tmgmt_source_plugin_info($plugin = NULL) {
 }
 
 /**
- * Get the plugin controller class for a given source plugin.
- *
- * @param $plugin
- *   (Optional) The machine-readable name of a source plugin.
- *
- * @return \Drupal\tmgmt\SourcePluginInterface
- *   The controller object for the given source plugin or an array containing
- *   all available source plugin controller objects if no plugin name was given.
- */
-function tmgmt_source_plugin_controller($plugin = NULL) {
-  return Drupal::service('plugin.manager.tmgmt.source')->createInstance($plugin);
-}
-
-/**
- * Get the ui controller class for a given source plugin.
- *
- * @param $plugin
- *   (Optional) The machine-readable name of a source plugin.
- *
- * @return \Drupal\tmgmt\SourcePluginUiInterface
- *   The ui controller object for the given source plugin or an array containing
- *   all available source ui controller objects if no plugin name was given.
- */
-function tmgmt_source_ui_controller($plugin = NULL) {
-  return Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($plugin);
-}
-
-/**
- * Get the views controller class for a given source plugin.
- *
- * @param $plugin
- *   (Optional) The machine-readable name of a source plugin.
- *
- * @return TMGMTSourceViewsControllerInterface
- *   The views controller object for the given source plugin or an array
- *   containing all available source views controller objects if no plugin name
- *   was given.
- */
-function tmgmt_source_views_controller($plugin = NULL) {
-  return _tmgmt_plugin_controller('source', $plugin, 'views', 'TMGMTDefaultSourceViewsController');
-}
-
-/**
- * Returns an array of all available source plugins with the labels as
- * values and the machine-readable name as the key.
- *
- * @return array
- *   An array of the labels of all available plugins.
- */
-function tmgmt_source_plugin_labels() {
-  return _tmgmt_plugin_labels('source');
-}
-
-/**
  * Returns an array of translatable item types of a source plugin.
  *
  * @param $plugin
@@ -955,7 +840,7 @@ function tmgmt_source_plugin_labels() {
  * @see TMGMTSourcePluginControllerInterface::getItemTypes()
  */
 function tmgmt_source_translatable_item_types($plugin) {
-  $controller = tmgmt_source_plugin_controller($plugin);
+  $controller = Drupal::service('plugin.manager.tmgmt.source')->createInstance($plugin);
   return $controller->getItemTypes();
 }
 
@@ -970,22 +855,6 @@ function tmgmt_source_is_translatable_item_type($plugin, $item_type) {
 /**
  * @} End of "addtogroup tmgmt_source".
  */
-
-/**
- * Returns an array of labels of all available plugins of a given type with the
- * machine-readable name as the key.
- *
- * @return array
- *   An array of the labels of all available plugins.
- */
-function _tmgmt_plugin_labels($type) {
-  $list = array();
-  $definitions = Drupal::service('plugin.manager.tmgmt.' . $type)->getDefinitions();
-  foreach ($definitions as $plugin => $definition) {
-    $list[$plugin] = $definition['label'];
-  }
-  return $list;
-}
 
 /**
  * Converts a nested data array into a flattened structure with a combined key.

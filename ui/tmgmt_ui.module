@@ -29,8 +29,8 @@ function tmgmt_ui_menu() {
     'weight' => 5,
   );
   // Some source plugins might provide menu items.
-  foreach (tmgmt_source_plugin_info() as $plugin => $definition) {
-    $items += tmgmt_source_ui_controller($plugin)->hook_menu();
+  foreach (Drupal::service('plugin.manager.tmgmt.source')->getDefinitions() as $plugin => $definition) {
+    $items += Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($plugin)->hook_menu();
   }
   return $items;
 }
@@ -117,15 +117,15 @@ function tmgmt_ui_theme() {
  */
 function tmgmt_ui_forms() {
   $forms = array();
-  foreach (tmgmt_source_plugin_info() as $plugin => $info) {
+  foreach (Drupal::service('plugin.manager.tmgmt.source')->getDefinitions() as $plugin => $info) {
     $forms['tmgmt_ui_' . $plugin . '_translation_review_form'] = array(
       'callback' => 'tmgmt_ui_translation_review_form',
       'wrapper_callback' => 'tmgmt_ui_translation_review_form_defaults',
     );
   }
   // Some source plugins might provide forms.
-  foreach (tmgmt_source_plugin_info() as $plugin => $definition) {
-    $forms += tmgmt_source_ui_controller($plugin)->hook_forms();
+  foreach (Drupal::service('plugin.manager.tmgmt.source')->getDefinitions() as $plugin => $definition) {
+    $forms += Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($plugin)->hook_forms();
   }
   return $forms;
 }
@@ -144,18 +144,6 @@ function tmgmt_ui_system_info_alter(&$info, $file, $type) {
  */
 function tmgmt_ui_views_api() {
   return array('api' => 3.0);
-}
-
-/**
- * Implements hook_views_default_views().
- */
-function tmgmt_ui_views_default_views() {
-  $views = _tmgmt_load_exports('tmgmt_ui', 'views', 'view.inc', 'view');
-  // Some source controllers might provide custom views.
-  foreach (tmgmt_source_ui_controller() as $controller) {
-    $views += $controller->hook_views_default_views();
-  }
-  return $views;
 }
 
  /**
@@ -188,20 +176,20 @@ function tmgmt_ui_embed_view($view, $display_id = NULL, array $args = array()) {
  * Form callback for the source overview form.
  */
 function tmgmt_ui_source_overview_form($form, &$form_state, $plugin, $item_type = NULL) {
-  $controller = tmgmt_source_ui_controller($plugin);
+  $source_ui = Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($plugin);
   $form_state['plugin'] = $plugin;
   $form_state['item_type'] = $item_type;
-  return $controller->overviewForm($form, $form_state, $item_type);
+  return $source_ui->overviewForm($form, $form_state, $item_type);
 }
 
 /**
  * Form callback for the source overview form.
  */
 function tmgmt_ui_source_overview_form_defaults($form, &$form_state, $plugin, $item_type = NULL) {
-  $controller = tmgmt_source_plugin_controller($plugin);
-  $info = tmgmt_source_plugin_info($plugin);
+  $source = Drupal::service('plugin.manager.tmgmt.source')->createInstance($plugin);
+  $definition = Drupal::service('plugin.manager.tmgmt.source')->getDefinition($plugin);
   // Set a generic title that includes the source plugin and item type label.
-  drupal_set_title(t('@type overview (@plugin)', array('@type' => $controller->getItemTypeLabel($item_type), '@plugin' => $info['label'])), PASS_THROUGH);
+  drupal_set_title(t('@type overview (@plugin)', array('@type' => $source->getItemTypeLabel($item_type), '@plugin' => $definition['label'])), PASS_THROUGH);
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -223,8 +211,8 @@ function tmgmt_ui_source_overview_form_validate($form, &$form_state) {
   }
   list($plugin, $item_type) = $form_state['build_info']['args'];
   // Execute the validation method on the source plugin controller.
-  $controller = tmgmt_source_ui_controller($plugin);
-  $controller->overviewFormValidate($form, $form_state, $item_type);
+  $source_ui = Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($plugin);
+  $source_ui->overviewFormValidate($form, $form_state, $item_type);
 }
 
 /**
@@ -233,8 +221,8 @@ function tmgmt_ui_source_overview_form_validate($form, &$form_state) {
 function tmgmt_ui_source_overview_form_submit($form, &$form_state) {
   list($plugin, $item_type) = $form_state['build_info']['args'];
   // Execute the submit method on the source plugin controller.
-  $controller = tmgmt_source_ui_controller($plugin);
-  $controller->overviewFormSubmit($form, $form_state, $item_type);
+  $source_ui = Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($plugin);
+  $source_ui->overviewFormSubmit($form, $form_state, $item_type);
 }
 
 /**
@@ -526,10 +514,10 @@ function _tmgmt_ui_review_form_element(&$form_state, $data, JobItem $job_item, &
       );
 
       // Give the translator ui controller a chance to affect the data item element.
-      $form[$target_key] = tmgmt_translator_ui_controller($job_item->getTranslator()->plugin)
+      $form[$target_key] = Drupal::service('plugin.manager.tmgmt.translator')->createUiInstance($job_item->getTranslator()->plugin)
           ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
       // Give the source ui controller a chance to affect the data item element.
-      $form[$target_key] = tmgmt_source_ui_controller($job_item->plugin)
+      $form[$target_key] = Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($job_item->plugin)
           ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
     }
   }
