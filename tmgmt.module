@@ -390,13 +390,6 @@ function tmgmt_job_create($source_language, $target_language, $uid = NULL, array
 }
 
 /**
- * Access callback for tmgmt remote entity.
- */
-function tmgmt_remote_access($op, $tmgmt_remote = NULL, $account = NULL) {
-  return user_access('administer tmgmt', $account);
-}
-
-/**
  * Loads an array with the word and status statistics of a job.
  *
  * @param $tjids
@@ -466,26 +459,6 @@ function tmgmt_job_statistic(Job $job, $key) {
 }
 
 /**
- * Access callback for the job item entity.
- *
- * @param $op
- *   The operation being performed.
- * @param $item
- *   (Optional) A JobItem entity to check access for. If no entity is
- *   given, it will be determined whether access is allowed for all entities.
- * @param $account
- *   (Optional) The user to check for. Leave it to NULL to check for the global
- *   user.
- *
- * @return boolean
- *   TRUE if access is allowed, FALSE otherwise.
- */
-function tmgmt_job_item_access($op, JobItem $item = NULL, $account = NULL) {
-  // There are no item specific permissions yet.
-  return tmgmt_job_access($op, $item ? $item->getJob() : NULL, $account);
-}
-
-/**
  * Access callback wrapper for reviewing a job item entity.
  *
  * @param \Drupal\tmgmt\Plugin\Core\Entity\JobItem $item
@@ -502,34 +475,6 @@ function tmgmt_job_item_review_access(JobItem $item, $account = NULL) {
     return tmgmt_job_item_access('accept', $item, $account);
   }
   return FALSE;
-}
-
-/**
- * Access callback for the job message entity.
- *
- * @param $op
- *   The operation being performed.
- * @param $item
- *   (Optional) A JobMessage entity to check access for. If no entity is
- *   given, it will be determined whether access is allowed for all entities.
- * @param $account
- *   (Optional) The user to check for. Leave it to NULL to check for the global
- *   user.
- *
- * @return boolean
- *   TRUE if access is allowed, FALSE otherwise.
- */
-function tmgmt_message_access($op, TMGMTMessage $message = NULL, $account = NULL) {
-  // All users that can see jobs can see messages as well.
-  if ($op == 'view') {
-    $job = NULL;
-    if ($message) {
-      $job = $message->getJob();
-    }
-    return tmgmt_job_access('view', $job, $account);
-  }
-  // Changing or creating messages is only possible for admins.
-  return user_access('administer tmgmt');
 }
 
 /**
@@ -912,8 +857,8 @@ function tmgmt_provide_remote_languages_mappings(Translator $translator) {
 function tmgmt_job_settings_custom_handling(Translator $translator) {
   $info = tmgmt_translator_plugin_info($translator->plugin);
 
-  if (isset($info['job settings custom handling'])) {
-    return $info['job settings custom handling'];
+  if (isset($info['job_settings_custom_handling'])) {
+    return $info['job_settings_custom_handling'];
   }
 
   return FALSE;
@@ -1160,38 +1105,6 @@ function tmgmt_unflatten_data($flattened_data) {
  */
 function _tmgmt_filter_data($value) {
   return !(empty($value['#text']) || (isset($value['#translate']) && $value['#translate'] === FALSE));
-}
-
-/**
- * Fetches an array of exportables from files.
- *
- * @param $module
- *   The module invoking this request. (Can be called by other modules.)
- * @param $directory
- *   The subdirectory in the custom module.
- * @param $extension
- *   The file extension.
- * @param $name
- *   The name of the variable found in each file. Defaults to the same as
- *   $extension.
- *
- * @return array
- *   Array of $name objects.
- */
-function _tmgmt_load_exports($module, $directory, $extension, $name = NULL) {
-  if (!$name) {
-    $name = $extension;
-  }
-  $return = array();
-  // Find all the files in the directory with the correct extension.
-  $files = file_scan_directory(drupal_get_path('module', $module) . "/$directory", "/\.{$extension}$/");
-  foreach ($files as $path => $file) {
-    require DRUPAL_ROOT . '/' . $path;
-    if (isset($name)) {
-      $return[$$name->name] = $$name;
-    }
-  }
-  return $return;
 }
 
 /**
