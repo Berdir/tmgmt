@@ -8,6 +8,8 @@
 namespace Drupal\tmgmt_entity;
 
 use Drupal\tmgmt\SourcePluginUiBase;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Abstract entity ui controller class for source plugin that provides
@@ -201,7 +203,7 @@ abstract class EntitySourcePluginUiBase extends SourcePluginUiBase {
    */
   public function overviewSearchFormRedirect($form, &$form_state, $type) {
     if ($form_state['triggering_element']['#id'] == 'edit-search-cancel') {
-      drupal_goto($_GET['q']);
+      return drupal_redirect_form($form_state);
     }
     elseif ($form_state['triggering_element']['#id'] == 'edit-search-submit') {
 
@@ -210,8 +212,7 @@ abstract class EntitySourcePluginUiBase extends SourcePluginUiBase {
       foreach ($form_state['values']['search'] as $key => $value) {
         $query[$key] = $value;
       }
-
-      drupal_goto($_GET['q'], array('query' => $query));
+      return new RedirectResponse(url($_GET['q'], array('query' => $query)));
     }
   }
 

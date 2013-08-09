@@ -22,7 +22,7 @@ class JobAccessController extends EntityAccessController {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
-    if (user_access('administer tmgmt', $account)) {
+    if ($account->hasPermission('administer tmgmt')) {
       // Administrators can do everything.
       return TRUE;
     }
@@ -30,7 +30,7 @@ class JobAccessController extends EntityAccessController {
     switch ($operation) {
       case 'view':
       case 'update':
-        return user_access('create translation jobs', $account) || user_access('submit translation jobs', $account) || user_access('accept translation jobs', $account);
+        return $account->hasPermission('create translation jobs') || $account->hasPermission('submit translation jobs') || $account->hasPermission('accept translation jobs');
         break;
 
       case 'delete':
@@ -40,11 +40,11 @@ class JobAccessController extends EntityAccessController {
 
       // Custom operations.
       case 'submit':
-        return user_access('submit translation jobs');
+        return $account->hasPermission('submit translation jobs');
         break;
 
       case 'accept':
-        return user_access('accept translation jobs');
+        return $account->hasPermission('accept translation jobs');
         break;
     }
   }
@@ -53,7 +53,7 @@ class JobAccessController extends EntityAccessController {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return user_access('create translation jobs', $account);
+    return $account->hasPermission('administer tmgmt') || $account->hasPermission('create translation jobs');
   }
 
 
