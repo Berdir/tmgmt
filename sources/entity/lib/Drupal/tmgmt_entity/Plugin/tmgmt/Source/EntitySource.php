@@ -119,7 +119,14 @@ class EntitySource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function getItemTypes() {
-    return array('node' => t('Content'));
+    $entity_types = \Drupal::entityManager()->getDefinitions();
+    $types = array();
+    foreach ($entity_types as $entity_type => $definition) {
+      if (content_translation_enabled($entity_type)) {
+        $types[$entity_type] = $definition['label'];
+      }
+    }
+    return $types;
   }
 
   /**
