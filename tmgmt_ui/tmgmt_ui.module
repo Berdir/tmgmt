@@ -10,22 +10,17 @@ use Drupal\tmgmt\TranslatorRejectDataInterface;
  */
 
 /**
-
-/**
  * Implements hook_menu().
  */
 function tmgmt_ui_menu() {
   $items['admin/config/regional/tmgmt_settings'] = array(
     'title' => 'Translation Management settings',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('tmgmt_ui_settings_form'),
-    'access arguments' => array('administer tmgmt'),
-    'file' => 'includes/tmgmt_ui.pages.inc',
+    'route_name' => 'tmgmt_settings',
     'weight' => 10,
   );
   $items['admin/config/regional/tmgmt_translator'] = array(
-    'route_name' => 'tmgmt_translator_list',
     'title' => 'Translation Management translators',
+    'route_name' => 'tmgmt_translator_list',
     'weight' => 5,
   );
   // Some source plugins might provide menu items.
