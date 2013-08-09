@@ -14,7 +14,7 @@ use Drupal\tmgmt\Plugin\Core\Entity\Job;
  *
  * @ingroup tmgmt_job
  */
-class JobFormController extends TMGMTFormControllerBase {
+class JobFormController extends TmgmtFormControllerBase {
 
   /**
    * Overrides Drupal\Core\Entity\EntityFormController::form().

@@ -7,16 +7,19 @@
 
 namespace Drupal\tmgmt\EntityController;
 
+use Drupal\Core\Entity\EntityControllerInterface;
 use Drupal\Core\Entity\EntityFormController;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\tmgmt\SourceManager;
 use Drupal\tmgmt\TranslatorManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form controller for the job item edit forms.
  *
  * @ingroup tmgmt_job
  */
-class TMGMTFormControllerBase extends EntityFormController {
+class TmgmtFormControllerBase extends EntityFormController implements EntityControllerInterface {
 
   /**
    * Translator plugin manager.

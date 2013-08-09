@@ -12,7 +12,7 @@ namespace Drupal\tmgmt\EntityController;
  *
  * @ingroup tmgmt_translator
  */
-class TranslatorFormController extends TMGMTFormControllerBase {
+class TranslatorFormController extends TmgmtFormControllerBase {
 
   /**
    * Overrides Drupal\Core\Entity\EntityFormController::form().

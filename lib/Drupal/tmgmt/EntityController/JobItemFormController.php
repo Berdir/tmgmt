@@ -12,7 +12,7 @@ namespace Drupal\tmgmt\EntityController;
  *
  * @ingroup tmgmt_job
  */
-class JobItemFormController extends TMGMTFormControllerBase {
+class JobItemFormController extends TmgmtFormControllerBase {
 
   /**
    * Overrides Drupal\Core\Entity\EntityFormController::form().
