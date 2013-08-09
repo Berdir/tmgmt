@@ -154,14 +154,16 @@ abstract class EntityTestBase extends TMGMTTestBase {
     );
 
     foreach ($this->field_names['node'][$bundle] as $field_name) {
-      $field_info = field_info_field($field_name);
-      $cardinality = $field_info->cardinality == FIELD_CARDINALITY_UNLIMITED ? 1 : $field_info->cardinality;
+      // @todo: Why are some missing?
+      if ($field_info = field_info_field($field_name)) {
+        $cardinality = $field_info->cardinality == FIELD_CARDINALITY_UNLIMITED ? 1 : $field_info->cardinality;
 
-      // Create two deltas for each field.
-      for ($delta = 0; $delta <= $cardinality; $delta++) {
-        $node[$field_name][$delta]['value'] = $this->randomName(20);
-        if ($field_info['type'] == 'text_with_summary') {
-          $node[$field_name][$delta]['summary'] = $this->randomName(10);
+        // Create two deltas for each field.
+        for ($delta = 0; $delta <= $cardinality; $delta++) {
+          $node[$field_name][$delta]['value'] = $this->randomName(20);
+          if ($field_info['type'] == 'text_with_summary') {
+            $node[$field_name][$delta]['summary'] = $this->randomName(10);
+          }
         }
       }
     }
