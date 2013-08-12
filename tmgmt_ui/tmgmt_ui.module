@@ -526,7 +526,7 @@ function _tmgmt_ui_review_form_element(&$form_state, $data, JobItem $job_item, &
 function tmgmt_ui_translation_review_form_revert($form, &$form_state) {
 
   /** @var JobItem $item */
-  $item = $form_state['item'];
+  $item = $form_state['controller']->getEntity();
 
   $key = tmgmt_ensure_keys_array($form_state['triggering_element']['#data_item_key']);
 
@@ -554,7 +554,7 @@ function tmgmt_ui_translation_review_form_update_state($form, &$form_state) {
   preg_match("/^(?P<action>[^-]+)-(?P<key>.+)/i", $form_state['triggering_element']['#name'], $matches);
   $values = $form_state['values'];
   $data = array();
-  $job_item = $form_state['item'];
+  $job_item = $form_state['controller']->getEntity();
 
   $controller = $job_item->getTranslatorController();
   $success = TRUE;
@@ -607,7 +607,7 @@ function tmgmt_ui_translation_review_form_update_state($form, &$form_state) {
 function tmgmt_ui_translation_review_form_ajax($form, &$form_state) {
   $key = array_slice($form_state['triggering_element']['#array_parents'], 0, 2);
   $render_data = NestedArray::getValue($form, $key);
-  tmgmt_ui_write_request_messages($form_state['item']->getJob());
+  tmgmt_ui_write_request_messages($form_state['controller']->getEntity()->getJob());
   return drupal_render($render_data);
 }
 
