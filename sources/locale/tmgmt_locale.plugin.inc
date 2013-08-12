@@ -41,7 +41,7 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
         'language' => $target_language,
         'translation' => $translation,
       );
-      $ret = db_insert('locales_target')
+      db_insert('locales_target')
         ->fields($fields)
         ->execute();
     }
@@ -49,19 +49,13 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
       $fields = array(
          'translation' => $translation,
       );
-      $ret = db_update('locales_target')
+      db_update('locales_target')
         ->fields($fields)
         ->condition('lid', $lid)
         ->condition('language', $target_language)
         ->execute();
     }
-
-    if ($ret > 0) {
-      return TRUE;
-    }
-    else {
-      return FALSE;
-    }
+    return TRUE;
   }
 
   /**
@@ -123,12 +117,20 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
   public function getLabel(TMGMTJobItem $job_item) {
     if ($locale_object = $this->getLocaleObject($job_item)) {
       if ($locale_object->origin == 'source') {
-        return $locale_object->source;
+        $label =  $locale_object->source;
       }
       else {
-        return $locale_object->translation;
+        $label = $locale_object->translation;
       }
+      return truncate_utf8($label, 30, FALSE, TRUE);
     }
+  }
+
+  /**
+   * [@inheritdoc}
+   */
+  public function getType(TMGMTJobItem $job_item) {
+    return $this->getItemTypeLabel($job_item->item_type);
   }
 
   /**
@@ -144,7 +146,7 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
       }
 
       $structure[$locale_object->lid] = array(
-        '#label' => $locale_object->lid . $locale_object->textgroup,
+        '#label' => t('Locale'),
         '#text' => (string) $text,
         '#translate' => TRUE,
       );
@@ -169,8 +171,6 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
         }
       }
     }
-
-    return TRUE;
   }
 
 }

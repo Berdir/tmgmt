@@ -912,7 +912,7 @@ class TMGMTJobItem extends Entity {
         }
       }
     }
-    else {
+    elseif (is_array($item)) {
       foreach (element_children($item) as $key) {
         $this->count($item[$key]);
       }
