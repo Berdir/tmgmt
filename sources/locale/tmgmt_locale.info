@@ -1,0 +1,8 @@
+name = Locales Source
+description = Locales source plugin for the Translation Management system.
+package = Translation Management
+core = 7.x
+dependencies[] = tmgmt
+dependencies[] = locale
+files[] = tmgmt_locale.plugin.inc
+files[] = tmgmt_locale.test

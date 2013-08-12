@@ -1,0 +1,83 @@
+<?php
+
+/**
+ * Basic Locale Source tests.
+ */
+class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
+
+  static function getInfo() {
+    return array(
+      'name' => 'Locale Source tests',
+      'description' => 'Exporting source data from locale and saving translations back',
+      'group' => 'Translation Management',
+    );
+  }
+
+  function setUp() {
+    parent::setUp(array('tmgmt_locale', 'locale'));
+    $this->langcode = 'de';
+    $this->context = 'default';
+    $file = new StdClass;
+    $file->uri = drupal_realpath(drupal_get_path('module', 'tmgmt') . '/sources/locale/translations/test.xx.po');
+    $this->pofile = file_save($file);
+    $this->setEnvironment($this->langcode);
+    $this->translator = $this->createTranslator();
+  }
+
+  /**
+   *  Tests translation of a locale singular term.
+   */
+  function testLocaleSourceSingularTerm() {
+    // Load PO file to create a locale structure in the database.
+    _locale_import_po($this->pofile, $this->langcode, LOCALE_IMPORT_OVERWRITE, $this->context);
+
+    // Obtain one locale string with translation ('Hello' => 'Hallo').
+    $locale_object = db_query("SELECT * FROM {locales_source} LIMIT 1")->fetchObject();
+    $source_text = $locale_object->source;
+
+    // Create the new job and job item.
+    $job = $this->createJob();
+    $job->translator = $this->translator->name;
+    $job->settings = array();
+    $job->save();
+
+    $item1 = $job->addItem('locale_source', 'locale', $locale_object->lid);
+    $this->assertEqual('Locale', $item1->getSourceType());
+    $this->assertEqual('Hello', $item1->getSourceLabel());
+    $job->requestTranslation();
+
+    foreach ($job->getItems() as $item) {
+      /* @var $item TMGMTJobItem */
+      $item->acceptTranslation();
+    }
+
+    // Check the structure of the imported data.
+    $this->assertEqual($item1->item_id, $locale_object->lid, 'Locale Strings object correctly saved');
+
+    // Check string translation.
+    $this->assertEqual(locale($source_text, null, $this->langcode), $job->target_language . '_' . $source_text);
+  }
+
+  /**
+   * Tests that system behaves correctly with an inexistant locale.
+   */
+  function testInexistantSource() {
+    // Create inexistant locale object.
+    $locale_object = new StdClass();
+    $locale_object->lid = 0;
+
+    // Create the job.
+    $job = $this->createJob();
+    $job->translator = $this->translator->name;
+    $job->settings = array();
+    $job->save();
+
+    // Create the job item.
+    try {
+      $job->addItem('locale_source', 'locale', $locale_object->lid);
+      $this->fail('Job item add with an inexistant locale.');
+    }
+    catch (TMGMTException $e) {
+    }
+  }
+}
