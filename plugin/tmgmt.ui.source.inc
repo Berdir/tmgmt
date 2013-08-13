@@ -64,12 +64,16 @@ class TMGMTDefaultSourceUIController extends TMGMTPluginBase implements TMGMTSou
     $items = array();
     if ($types = tmgmt_source_translatable_item_types($this->pluginType)) {
       $defaults = array(
-        'file' => isset($this->pluginInfo['file']) ? $this->pluginInfo['file'] : $this->pluginInfo['module'] . '.pages.inc',
-        'file path' => isset($this->pluginInfo['file path']) ? $this->pluginInfo['file path'] : drupal_get_path('module', $this->pluginInfo['module']),
         'page callback' => 'drupal_get_form',
         'access callback' => 'tmgmt_job_access',
         'access arguments' => array('create'),
       );
+      if (isset($this->pluginInfo['file'])) {
+        $defaults['file'] = $this->pluginInfo['file'];
+      }
+      if (isset($this->pluginInfo['file path'])) {
+        $defaults['file path'] = $this->pluginInfo['file path'];
+      }
       foreach ($types as $type => $name) {
         $items['admin/tmgmt/sources/' . $this->pluginType . '_' . $type] = $defaults + array(
           'title' => check_plain($name),
