@@ -16,6 +16,20 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   protected $remoteLanguagesMappings = array();
 
   /**
+   * Characters that indicates the beginning of an escaped string.
+   *
+   * @var string
+   */
+  protected $escapeStart = '';
+
+  /**
+   * Characters that indicates the end of an escaped string.
+   *
+   * @var string
+   */
+  protected $escapeEnd = '';
+
+  /**
    * {@inheritdoc}
    */
   public function isAvailable(TMGMTTranslator $translator) {
@@ -184,5 +198,63 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
    */
   public function acceptetDataItem(TMGMTJobItem $job_item, array $key) {
     return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function escapeText(array $data_item) {
+    if (empty($data_item['#escape'])) {
+      return $data_item['#text'];
+    }
+
+    // Split strings to escape into two groups: with position and without.
+    $position_strings = array();
+    $strings = array();
+    foreach ($data_item['#escape'] as $pattern) {
+      if (isset($pattern['position'])) {
+        $position_strings[$pattern['position']] = $pattern['string'];
+      }
+      else {
+        $strings[] = $pattern['string'];
+      }
+    }
+
+    $text = $data_item['#text'];
+
+    // Process strings with a position first, sort them in reverse order based
+    // on the position and process them, so that positions don't change.
+    krsort($position_strings, SORT_NUMERIC);
+
+    foreach ($position_strings as $position => $string) {
+      $text = substr_replace($text, $this->getEscapedString($string), $position, strlen($string));
+    }
+
+    // Now replace all strings that don't have a position.
+    foreach ($strings as $string) {
+      $text = str_replace($string, $this->getEscapedString($string), $text);
+    }
+    return $text;
+  }
+
+  /**
+   * Returns the escaped string.
+   *
+   * Defaults to use the escapeStart and escapeEnd properties but can be
+   * overriden if non-static replacement pattern is used.
+   *
+   * @param string $string
+   *   String that should be escaped.
+   * @return string
+   */
+  protected function getEscapedString($string) {
+    return $this->escapeStart . $string . $this->escapeEnd;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function unescapeText($text) {
+    return preg_replace('/' . preg_quote($this->escapeStart, '/') . '(.+)' . preg_quote($this->escapeEnd, '/') . '/U', '$1', $text);
   }
 }
