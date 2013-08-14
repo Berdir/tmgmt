@@ -42,7 +42,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     return $job;
   }
 
-  function dtestBasicWorkflow() {
+  function testBasicWorkflow() {
     // Submit a translation job.
     $submit_job = $this->createJob();
     $submit_job->settings = array('action' => 'submit');
@@ -135,7 +135,7 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
   /**
    * Tests remote languages mappings support in the tmgmt core.
    */
-  function dtestRemoteLanguagesMappings() {
+  function testRemoteLanguagesMappings() {
     $this->loginAsAdmin();
     $this->setEnvironment('de');
     $controller = $this->default_translator->getController();
@@ -180,37 +180,18 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
       array(
         'item' => array(
           '#text' => 'single placeholder',
-          '#escape' => array(array('string' => 'placeholder')),
+          '#escape' => array(
+            7 => array('string' => 'placeholder'),
+           ),
         ),
         'expected' => 'single [[[placeholder]]]',
       ),
       array(
         'item' => array(
           '#text' => 'two placeholder, the second placeholder',
-          '#escape' => array(array('string' => 'placeholder')),
-        ),
-        'expected' => 'two [[[placeholder]]], the second [[[placeholder]]]',
-      ),
-      array(
-        'item' => array(
-          '#text' => 'two placeholder, the second placeholder',
-          '#escape' => array(array('string' => 'placeholder', 'position' => 4)),
-        ),
-        'expected' => 'two [[[placeholder]]], the second placeholder',
-      ),
-      array(
-        'item' => array(
-          '#text' => 'two placeholder, the second placeholder',
-          '#escape' => array(array('string' => 'placeholder', 'position' => 28)),
-        ),
-        'expected' => 'two placeholder, the second [[[placeholder]]]',
-      ),
-      array(
-        'item' => array(
-          '#text' => 'two placeholder, the second placeholder',
           '#escape' => array(
-            array('string' => 'placeholder', 'position' => 4),
-            array('string' => 'placeholder', 'position' => 28),
+            4 => array('string' => 'placeholder'),
+            28 => array('string' => 'placeholder'),
           ),
         ),
         'expected' => 'two [[[placeholder]]], the second [[[placeholder]]]',
@@ -219,8 +200,8 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
         'item' => array(
           '#text' => 'something, something else',
           '#escape' => array(
-            array('string' => 'something', 'position' => 0),
-            array('string' => 'else', 'position' => 21),
+            0 => array('string' => 'something'),
+            21 => array('string' => 'else'),
           ),
         ),
         'expected' => '[[[something]]], something [[[else]]]',
@@ -229,95 +210,11 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
         'item' => array(
           '#text' => 'something, something else',
           '#escape' => array(
-            array('string' => 'something'),
-            array('string' => 'else', 'position' => 21),
+            21 => array('string' => 'else'),
+            11 => array('string' => 'something'),
           ),
         ),
-        'expected' => '[[[something]]], [[[something]]] [[[else]]]',
-      ),
-      array(
-        'item' => array(
-          '#text' => 'something, something else',
-          '#escape' => array(
-            array('string' => 'something', 'position' => 0),
-            array('string' => 'else'),
-          ),
-        ),
-        'expected' => '[[[something]]], something [[[else]]]',
-      ),
-      array(
-        'item' => array(
-          '#text' => 'mixing multiple placeholders with positions and without. with, without, with, without, mixing',
-          '#escape' => array(
-            array('string' => 'multiple'),
-            array('string' => 'with', 'position' => 57),
-            array('string' => 'with', 'position' => 29),
-            array('string' => 'without'),
-            array('string' => 'mixing', 'position' => 87),
-          ),
-        ),
-        'expected' => 'mixing [[[multiple]]] placeholders [[[with]]] positions and [[[without]]]. [[[with]]], [[[without]]], with, [[[without]]], [[[mixing]]]',
-      ),
-      array(
-        'item' => array(
-          '#text' => 'Escaping must not break search patterns, it is bad, so bad',
-          '#escape' => array(
-            array('string' => 'bad'),
-            array('string' => 'is bad'),
-          ),
-        ),
-        'expected' => 'Avoid double-escaping, it [[[is bad]]], so [[[bad]]]',
-      ),
-      '<a alt="blabla" href="@url">Das ist ein Link</a>',
-      '[[[<a alt="]]]blabla[[[" href="]][[@url]][[">]]]Das ist ein Link[[[</a>']]],
-
-      '<a alt="blabla" href="[[[@url]]]">Das ist ein Link</a>',
-      '[[[<a alt="]]]bla&quot;bla[[[" href="]]]@url[[[">]]]Das ist ein Link[[[</a>]]]',
-      '[[[<a alt="]]]bla"bla[[[" href="]]]@url[[[">]]]Das ist ein Link[[[</a>]]]',
-
-      '[[[<a alt="bla&quot;bla" href="@url">]]]Das ist ein Link[[[</a>]]]',
-      '<a alt="{{{bla"bla}}}" href="{{{@url}}}">Das ist ein Link</a>',
-
-
-      array(
-        'item' => array(
-          '#text' => 'Avoid double-escaping, it is bad, so bad',
-          '#escape' => array(
-            array('string' => 'is bad'),
-            array('string' => 'bad'),
-            array('string' => 'is'),
-          ),
-        ),
-        'expected' => 'Avoid double-escaping, it [[[is bad]]], so [[[bad]]]',
-      ),
-      array(
-        'item' => array(
-          '#text' => 'Avoid double-escaping, it is bad, so bad',
-          '#escape' => array(
-            array('string' => 'bad', 'position' => 29),
-            array('string' => 'is bad'),
-          ),
-        ),
-        'expected' => 'Avoid double-escaping, it [[[is bad]]], so [[[bad]]]',
-      ),
-      array(
-        'item' => array(
-          '#text' => 'Non-existing placeholders',
-          '#escape' => array(
-            array('string' => 'something'),
-          ),
-        ),
-        'expected' => 'Non-existing placeholders',
-      ),
-      array(
-        'item' => array(
-          '#text' => 'Misplaced placeholders',
-          '#escape' => array(
-            array('string' => 'place', 'position' => 13),
-            array('string' => 'outside', 'position' => 100),
-          ),
-        ),
-        'expected' => 'Misplaced placeholders',
+        'expected' => 'something, [[[something]]] [[[else]]]',
       ),
     );
 

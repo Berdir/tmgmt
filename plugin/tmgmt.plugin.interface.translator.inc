@@ -225,7 +225,7 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    *   The text from which escape patterns should be removed.
    *
    * @return string
-   *   The nescaped text.
+   *   The unescaped text.
    */
   public function unescapeText($text);
 

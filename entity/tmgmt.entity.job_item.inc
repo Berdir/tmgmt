@@ -270,9 +270,10 @@ class TMGMTJobItem extends Entity {
    * - #comment: (Optional) A comment with additional information.
    * - #translate: (Optional) If set to FALSE the text will not be translated.
    * - #translation: The translated data. Set by the translator plugin.
-   * - #escape: (Optional) List of arrays with a required string key and an
-   *   optional position key. Whe missing, all occurrences of the given string
-   *   are replaced, otherwise only the one at the specified position.
+   * - #escape: (Optional) List of arrays with a required string key, keyed by
+   *   the position key. Translators must use this list to prevent translation
+   *   of these strings if possible.
+   *
    *
    * @todo: Move data item documentation to a new, separate api group.
    *

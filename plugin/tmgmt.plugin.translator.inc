@@ -208,32 +208,17 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
       return $data_item['#text'];
     }
 
-    // Split strings to escape into two groups: with position and without.
-    $position_strings = array();
-    $strings = array();
-    foreach ($data_item['#escape'] as $pattern) {
-      if (isset($pattern['position'])) {
-        $position_strings[$pattern['position']] = $pattern['string'];
-      }
-      else {
-        $strings[] = $pattern['string'];
-      }
-    }
-
     $text = $data_item['#text'];
+    $escape = $data_item['#escape'];
 
-    // Process strings with a position first, sort them in reverse order based
-    // on the position and process them, so that positions don't change.
-    krsort($position_strings, SORT_NUMERIC);
+    // Sort them in reverse order based/ on the position and process them,
+    // so that positions don't change.
+    krsort($escape, SORT_NUMERIC);
 
-    foreach ($position_strings as $position => $string) {
-      $text = substr_replace($text, $this->getEscapedString($string), $position, strlen($string));
+    foreach ($escape as $position => $info) {
+      $text = substr_replace($text, $this->getEscapedString($info['string']), $position, strlen($info['string']));
     }
 
-    // Now replace all strings that don't have a position.
-    foreach ($strings as $string) {
-      $text = str_replace($string, $this->getEscapedString($string), $text);
-    }
     return $text;
   }
 
@@ -241,7 +226,7 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
    * Returns the escaped string.
    *
    * Defaults to use the escapeStart and escapeEnd properties but can be
-   * overriden if non-static replacement pattern is used.
+   * overriden if a non-static replacement pattern is used.
    *
    * @param string $string
    *   String that should be escaped.

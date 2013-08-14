@@ -122,7 +122,7 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
       else {
         $label = $locale_object->translation;
       }
-      return truncate_utf8($label, 30, FALSE, TRUE);
+      return truncate_utf8(strip_tags($label), 30, FALSE, TRUE);
     }
   }
 
@@ -145,12 +145,23 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
         $text = $locale_object->translation;
       }
 
+      // Identify placeholders that need to be escaped. Assume that placeholders
+      // consist of alphanumeric characters and _,- only and are delimited by
+      // non-alphanumeric characters. There are cases that don't match, for
+      // example appended SI units like "@valuems", there only @value is the
+      // actual placeholder.
+      $escape = array();
+      if (preg_match_all('/([@!%][a-zA-Z0-9_-]+)/', $text, $matches, PREG_OFFSET_CAPTURE)) {
+         foreach ($matches[0] as $match) {
+           $escape[$match[1]]['string'] = $match[0];
+         }
+      }
       $structure[$locale_object->lid] = array(
         '#label' => t('Locale'),
         '#text' => (string) $text,
         '#translate' => TRUE,
+        '#escape' => $escape,
       );
-
       return $structure;
     }
   }
