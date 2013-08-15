@@ -55,6 +55,9 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
         ->condition('language', $target_language)
         ->execute();
     }
+    // Clear locale caches.
+    _locale_invalidate_js($target_language);
+    cache_clear_all('locale:' . $target_language, 'cache');
     return TRUE;
   }
 
