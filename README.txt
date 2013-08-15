@@ -118,6 +118,8 @@ The main features of the core system include:
   sources.
 - A suggestions system that makes recommendations about related content that
   could be translated with the same job.
+- Sources can declare which parts of a source text should not be translated,
+  for example placeholders for user interface strings.
 
 The following sources are currently supported:
 
@@ -132,6 +134,10 @@ The following sources are currently supported:
   Integrates with the i18n project (http://drupal.org/project/i18n) and allows
   to translate various configuration elements of a site: blocks, terms, fields,
   node types, contact categories and many more.
+
+- Locale
+  Allows to translate locale strings. Currently limited to the default
+  textgroup (user interface strings passed through t()).
 
 Two translators are included in the project:
 
