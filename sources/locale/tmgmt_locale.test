@@ -104,7 +104,7 @@ class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
       20 => array('string' => '%to'),
       27 => array('string' => '!esc_aped'),
     );
-    $this->assertEqual($data[$lid]['#escape'], $expected_escape);
+    $this->assertEqual($data['singular']['#escape'], $expected_escape);
 
     // Invalid patterns that should be ignored.
     $lid = db_insert('locales_source')

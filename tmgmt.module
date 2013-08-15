@@ -1463,7 +1463,6 @@ function tmgmt_data_item_label(array $data_item, $max_length = NULL) {
           $labels[] = truncate_utf8($label_part, $current_max_length, FALSE, TRUE);
         }
         $label = implode(t(' > '), $labels);
-        debug($label);
       } while (drupal_strlen($label) > $max_length);
       return $label;
     }

@@ -80,7 +80,7 @@ class TMGMTHelperTestCase extends TMGMTBaseTestCase {
       '#label' => 'A label',
     );
     $this->assertEqual(tmgmt_data_item_label($node_example), 'This is a very loooong title, so looong > Body > Delta #0 > Body');
-    $this->assertEqual(tmgmt_data_item_label($node_example, 52), 'This is a very loooong title, ... > Body > Delta #0 > Body');
+    $this->assertEqual(tmgmt_data_item_label($node_example, 56), 'This is a very loooong title... > Body > Delta #0 > Body');
   }
 
   function testWordCount() {
