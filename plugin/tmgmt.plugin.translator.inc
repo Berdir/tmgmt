@@ -16,6 +16,20 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   protected $remoteLanguagesMappings = array();
 
   /**
+   * Characters that indicate the beginning of an escaped string.
+   *
+   * @var string
+   */
+  protected $escapeStart = '';
+
+  /**
+   * Characters that indicate the end of an escaped string.
+   *
+   * @var string
+   */
+  protected $escapeEnd = '';
+
+  /**
    * {@inheritdoc}
    */
   public function isAvailable(TMGMTTranslator $translator) {
@@ -184,5 +198,48 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
    */
   public function acceptetDataItem(TMGMTJobItem $job_item, array $key) {
     return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function escapeText(array $data_item) {
+    if (empty($data_item['#escape'])) {
+      return $data_item['#text'];
+    }
+
+    $text = $data_item['#text'];
+    $escape = $data_item['#escape'];
+
+    // Sort them in reverse order based/ on the position and process them,
+    // so that positions don't change.
+    krsort($escape, SORT_NUMERIC);
+
+    foreach ($escape as $position => $info) {
+      $text = substr_replace($text, $this->getEscapedString($info['string']), $position, strlen($info['string']));
+    }
+
+    return $text;
+  }
+
+  /**
+   * Returns the escaped string.
+   *
+   * Defaults to use the escapeStart and escapeEnd properties but can be
+   * overriden if a non-static replacement pattern is used.
+   *
+   * @param string $string
+   *   String that should be escaped.
+   * @return string
+   */
+  protected function getEscapedString($string) {
+    return $this->escapeStart . $string . $this->escapeEnd;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function unescapeText($text) {
+    return preg_replace('/' . preg_quote($this->escapeStart, '/') . '(.+)' . preg_quote($this->escapeEnd, '/') . '/U', '$1', $text);
   }
 }

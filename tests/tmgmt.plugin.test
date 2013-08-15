@@ -165,4 +165,66 @@ class TMGMTPluginsTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en');
     $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de');
   }
+
+  /**
+   * Tests escaping and unescaping text.
+   */
+  function testEscaping() {
+    $controller = $this->default_translator->getController();
+
+    $tests = array(
+      array(
+        'item' => array('#text' => 'no escaping'),
+        'expected' => 'no escaping',
+      ),
+      array(
+        'item' => array(
+          '#text' => 'single placeholder',
+          '#escape' => array(
+            7 => array('string' => 'placeholder'),
+           ),
+        ),
+        'expected' => 'single [[[placeholder]]]',
+      ),
+      array(
+        'item' => array(
+          '#text' => 'two placeholder, the second placeholder',
+          '#escape' => array(
+            4 => array('string' => 'placeholder'),
+            28 => array('string' => 'placeholder'),
+          ),
+        ),
+        'expected' => 'two [[[placeholder]]], the second [[[placeholder]]]',
+      ),
+      array(
+        'item' => array(
+          '#text' => 'something, something else',
+          '#escape' => array(
+            0 => array('string' => 'something'),
+            21 => array('string' => 'else'),
+          ),
+        ),
+        'expected' => '[[[something]]], something [[[else]]]',
+      ),
+      array(
+        'item' => array(
+          '#text' => 'something, something else',
+          '#escape' => array(
+            21 => array('string' => 'else'),
+            11 => array('string' => 'something'),
+          ),
+        ),
+        'expected' => 'something, [[[something]]] [[[else]]]',
+      ),
+    );
+
+    foreach ($tests as $test) {
+      $escaped = $controller->escapeText($test['item']);
+      // Assert that the string was escaped as expected.
+      $this->assertEqual($escaped, $test['expected']);
+
+      // Assert that the string is the same as the original when unescaped.
+      $this->assertEqual($controller->unescapeText($escaped), $test['item']['#text']);
+    }
+  }
 }

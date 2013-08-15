@@ -206,4 +206,27 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
    */
   public function acceptetDataItem(TMGMTJobItem $job_item, array $key);
 
+  /**
+   * Returns the escaped #text of a data item.
+   *
+   * @param array $data_item
+   *   A data item with a #text and optional #escape definitions.
+   *
+   * @return string
+   *   The text of the data item with translator-specific escape patterns
+   *   applied.
+   */
+  public function escapeText(array $data_item);
+
+  /**
+   * Removes escape patterns from an escaped text.
+   *
+   * @param string $text
+   *   The text from which escape patterns should be removed.
+   *
+   * @return string
+   *   The unescaped text.
+   */
+  public function unescapeText($text);
+
 }

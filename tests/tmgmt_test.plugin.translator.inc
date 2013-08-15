@@ -10,6 +10,16 @@ class TMGMTTestTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
   /**
    * {@inheritdoc}
    */
+  protected $escapeStart = '[[[';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $escapeEnd = ']]]';
+
+  /**
+   * {@inheritdoc}
+   */
   public function getDefaultRemoteLanguagesMappings() {
     return array(
       'en' => 'en-us',

@@ -82,6 +82,46 @@ class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
   }
 
   /**
+   * Verifies that strings that need escaping are correctly identified.
+   */
+  function testEscaping() {
+    $lid = db_insert('locales_source')
+      ->fields(array(
+        'source' => '@place-holders need %to be !esc_aped.',
+        'textgroup' => 'default',
+        'context' => '',
+      ))
+      ->execute();
+    $job = $this->createJob('en', 'de');
+    $job->translator = $this->default_translator->name;
+    $job->settings = array();
+    $job->save();
+
+    $item = $job->addItem('locale', 'default', $lid);
+    $data = $item->getData();
+    $expected_escape = array(
+      0 => array('string' => '@place-holders'),
+      20 => array('string' => '%to'),
+      27 => array('string' => '!esc_aped'),
+    );
+    $this->assertEqual($data[$lid]['#escape'], $expected_escape);
+
+    // Invalid patterns that should be ignored.
+    $lid = db_insert('locales_source')
+      ->fields(array(
+        'source' => '@ % ! example',
+        'textgroup' => 'default',
+        'context' => '',
+      ))
+      ->execute();
+
+    $item = $job->addItem('locale', 'default', $lid);
+    $data = $item->getData();
+    $this->assertTrue(empty($data[$lid]['#escape']));
+
+  }
+
+  /**
    * Tests that system behaves correctly with an non-existing locales.
    */
   function testInexistantSource() {
