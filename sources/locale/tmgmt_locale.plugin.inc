@@ -156,8 +156,8 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
            $escape[$match[1]]['string'] = $match[0];
          }
       }
-      $structure[$locale_object->lid] = array(
-        '#label' => t('Locale'),
+      $structure['singular'] = array(
+        '#label' => t('Singular'),
         '#text' => (string) $text,
         '#translate' => TRUE,
         '#escape' => $escape,
@@ -171,15 +171,13 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
    */
   public function saveTranslation(TMGMTJobItem $job_item) {
     $job = tmgmt_job_load($job_item->tjid);
-
-    foreach ($job_item->getData() as $lid => $item) {
-      if (isset($item)) {
-        $translation = $item['#translation']['#text'];
-        // Update the locale string in the system.
-        // @todo: Send error message to user if update fails.
-        if ($this->updateTranslation($lid, $job->target_language, $translation)) {
-          $job_item->accepted();
-        }
+    $data = $job_item->getData();
+    if (isset($data['singular'])) {
+      $translation = $data['singular']['#translation']['#text'];
+      // Update the locale string in the system.
+      // @todo: Send error message to user if update fails.
+      if ($this->updateTranslation($job_item->item_id, $job->target_language, $translation)) {
+        $job_item->accepted();
       }
     }
   }

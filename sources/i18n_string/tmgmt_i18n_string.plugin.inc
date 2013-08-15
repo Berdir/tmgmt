@@ -15,7 +15,7 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
    */
   public function getData(TMGMTJobItem $job_item) {
     $i18n_object = $this->getI18nObjectWrapper($job_item);
-    $structure = array('#label' => t('i18n Strings: @title', array('@title' => $i18n_object->get_title())));
+    $structure = array();
     if ($i18n_object instanceof i18n_string_object_wrapper) {
       $i18n_strings = $i18n_object->get_strings();
       foreach ($i18n_strings as $string_id => $string) {
