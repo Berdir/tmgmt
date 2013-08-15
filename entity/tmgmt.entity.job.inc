@@ -653,14 +653,22 @@ class TMGMTJob extends Entity {
     $data = array();
     if (!empty($key)) {
       $tjiid = array_shift($key);
-      $job_item = entity_load_single('tmgmt_job_item', $tjiid);
-      if ($job_item) {
-        $data[$tjiid] = $job_item->getData($key, $index);
+      $item = entity_load_single('tmgmt_job_item', $tjiid);
+      if ($item) {
+        $data[$tjiid] = $item->getData($key, $index);
+        // If not set, use the job item label as the data label.
+        if (!isset($data[$tjiid]['#label'])) {
+          $data[$tjiid]['#label'] = $item->getSourceLabel();
+        }
       }
     }
     else {
-      foreach ($this->getItems() as $key => $item) {
-        $data[$key] = $item->getData();
+      foreach ($this->getItems() as $tjiid => $item) {
+        $data[$tjiid] = $item->getData();
+        // If not set, use the job item label as the data label.
+        if (!isset($data[$tjiid]['#label'])) {
+          $data[$tjiid]['#label'] = $item->getSourceLabel();
+        }
       }
     }
     return $data;

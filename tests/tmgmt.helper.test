@@ -50,16 +50,37 @@ class TMGMTHelperTestCase extends TMGMTBaseTestCase {
       '#text' => 'No label',
     );
     $this->assertEqual(tmgmt_data_item_label($no_label), 'No label');
+    $this->assertEqual(tmgmt_data_item_label($no_label, 6), 'No ...');
     $label = array(
       '#parent_label' => array(),
       '#label' => 'A label',
     );
     $this->assertEqual(tmgmt_data_item_label($label), 'A label');
+    $this->assertEqual(tmgmt_data_item_label($label, 6), 'A l...');
     $parent_label = array(
       '#parent_label' => array('Parent label', 'Sub label'),
       '#label' => 'A label',
     );
     $this->assertEqual(tmgmt_data_item_label($parent_label), 'Parent label > Sub label');
+    $this->assertEqual(tmgmt_data_item_label($parent_label, 18), 'Pare... > Sub ...');
+    $nested = array(
+      '#parent_label' => array('Parent label', 'Sub label', 'Sub-sub label'),
+      '#label' => 'A label',
+    );
+    $this->assertEqual(tmgmt_data_item_label($nested), 'Parent label > Sub label > Sub-sub label');
+    $this->assertEqual(tmgmt_data_item_label($nested, 28), 'Pare... > Sub ... > Sub-...');
+    $long_label = array(
+      '#parent_label' => array('Loooooooooooong label', 'Short'),
+      '#label' => 'A label',
+    );
+    $this->assertEqual(tmgmt_data_item_label($long_label), 'Loooooooooooong label > Short');
+    $this->assertEqual(tmgmt_data_item_label($long_label, 30), 'Loooooooooooong label > Short');
+    $node_example = array(
+      '#parent_label' => array('This is a very loooong title, so looong', 'Body', 'Delta #0', 'Body'),
+      '#label' => 'A label',
+    );
+    $this->assertEqual(tmgmt_data_item_label($node_example), 'This is a very loooong title, so looong > Body > Delta #0 > Body');
+    $this->assertEqual(tmgmt_data_item_label($node_example, 56), 'This is a very loooong title... > Body > Delta #0 > Body');
   }
 
   function testWordCount() {

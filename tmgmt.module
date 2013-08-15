@@ -1439,20 +1439,44 @@ function _tmgmt_load_exports($module, $directory, $extension, $name = NULL) {
  *
  * @param array $data_item
  *   The data item array.
+ * @param int $max_length
+ *   (optional) Specify the max length that the resulting label string should
+ *   be cut to.
  *
  * @return string
  *   A label for the data item.
  */
-function tmgmt_data_item_label(array $data_item) {
+function tmgmt_data_item_label(array $data_item, $max_length = NULL) {
   if (!empty($data_item['#parent_label'])) {
-    return implode(t(' > '), $data_item['#parent_label']);
+    if ($max_length) {
+      // When having multiple label parts, we don't know how long each of them is,
+      // truncating each to the same length might result in a considerably shorter
+      // length than max length when there are short and long labels. Instead,
+      // start with the max length and repeat until the whole string is less than
+      // max_length. Remove 4 characters per part to avoid unecessary loops.
+      $current_max_length = $max_length - (count($data_item['#parent_label']) * 4);
+      do {
+        $current_max_length--;
+        $labels = array();
+        foreach ($data_item['#parent_label'] as $label_part) {
+          // If this not the last part, reserve 3 characters for the delimiter.
+          $labels[] = truncate_utf8($label_part, $current_max_length, FALSE, TRUE);
+        }
+        $label = implode(t(' > '), $labels);
+      } while (drupal_strlen($label) > $max_length);
+      return $label;
+    }
+    else {
+      return implode(t(' > '), $data_item['#parent_label']);
+    }
   }
   elseif (!empty($data_item['#label'])) {
-    return $data_item['#label'];
+    return $max_length ? truncate_utf8($data_item['#label'], $max_length, FALSE, TRUE) : $data_item['#label'];
   }
   else {
-    // As a last resort, fall back to a shortened version of the text.
-    return truncate_utf8($data_item['#text'], 50, TRUE, TRUE);
+    // As a last resort, fall back to a shortened version of the text. Default
+    // to a limit of 50 characters.
+    return truncate_utf8($data_item['#text'], $max_length ? $max_length : 50, FALSE, TRUE);
   }
 }
 
