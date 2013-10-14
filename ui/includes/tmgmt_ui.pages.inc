@@ -373,43 +373,38 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   }
 
   if ($view = views_get_view('tmgmt_ui_job_items')) {
-    // Wrapper on the right side which holds the jobs and the suggestions.
-    $form['translator_wrapper_right'] = array(
-      '#type' => 'container',
-      '#prefix' => '<div class="tmgmt-ui-translator-wrapper-right">',
+    $form['job_items_wrapper'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Job items'),
+      '#collapsible' => TRUE,
+      '#weight' => 10,
+      '#prefix' => '<div class="tmgmt-ui-job-checkout-fieldset">',
       '#suffix' => '</div>',
-      '#weight' => 25,
     );
 
     // Translation jobs.
-    $form['translator_wrapper_right']['items'] = array(
-      '#type' => 'item',
-      '#title' => $view->get_title(),
-      '#prefix' => '<div class="' . 'tmgmt-ui-job-items ' . ($job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage') . '">',
+    $form['job_items_wrapper']['items'] = array(
+      '#type' => 'markup',
       '#markup' => $view->preview($job->isSubmittable() ? 'submit' : 'block', array($job->tjid)),
+      '#prefix' => '<div class="' . 'tmgmt-ui-job-items ' . ($job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage') . '">',
       '#attributes' => array('class' => array('tmgmt-ui-job-items', $job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage')),
       '#suffix' => '</div>',
-      '#weight' => $job->isSubmittable() ? 30 : 10,
     );
 
     // A Wrapper for a button and a table with all suggestions.
-    $form['translator_wrapper_right']['suggestions'] = array(
-      '#type' => 'fieldset',
-      '#title' => '',
-      '#prefix' => '<div class="tmgmt-ui-job-items-suggestions">',
-      '#suffix' => '</div>',
-      '#weight' => 35,
+    $form['job_items_wrapper']['suggestions'] = array(
+      '#type' => 'container',
       '#access' => $job->isSubmittable(),
     );
 
     // Button to load all translation suggestions with AJAX.
-    $form['translator_wrapper_right']['suggestions']['load'] = array(
+    $form['job_items_wrapper']['suggestions']['load'] = array(
       '#type' => 'submit',
       '#value' => t('Load suggestions'),
       '#submit' => array('tmgmt_ui_ajax_submit_load_suggestions'),
       '#limit_validation_errors' => array(),
       '#attributes' => array(
-        'class' => array('tmgmt-ui-job-suggestions-load')
+        'class' => array('tmgmt-ui-job-suggestions-load'),
       ),
       '#ajax' => array(
         'callback' => 'tmgmt_ui_ajax_callback_load_suggestions',
@@ -417,7 +412,12 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
         'method' => 'replace',
         'effect' => 'fade',
       ),
-      '#weight' => 10,
+    );
+
+    $form['job_items_wrapper']['suggestions']['container'] = array(
+      '#type' => 'container',
+      '#prefix' => '<div id="tmgmt-ui-job-items-suggestions">',
+      '#suffix' => '</div>',
     );
 
     // Create the suggestions table.
@@ -426,7 +426,6 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       '#header' => array(),
       '#options' => array(),
       '#multiple' => TRUE,
-      '#weight' => 30,
     );
 
     // If this is an AJAX-Request, load all related nodes and fill the table.
@@ -442,29 +441,31 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
           '#submit' => array('tmgmt_ui_submit_add_suggestions'),
           '#limit_validation_errors' => array(array('suggestions_table')),
           '#attributes' => array(
-            'class' => array('tmgmt-ui-job-suggestions-add')
+            'class' => array('tmgmt-ui-job-suggestions-add'),
           ),
-          '#weight' => 40,
+          '#access' => !empty($suggestions_table['#options']),
         ),
       );
+      $form['job_items_wrapper']['suggestions']['container']['suggestions_list'] = array(
+          '#type' => 'fieldset',
+          '#title' => t('Suggestions'),
+          '#prefix' => '<div id="tmgmt-ui-job-items-suggestions">',
+          '#suffix' => '</div>',
+        ) + $suggestions_table;
     }
-    $form['translator_wrapper_right']['suggestions']['suggestions_list'] = array(
-      '#type' => 'container',
-      '#prefix' => '<div id="tmgmt-ui-job-items-suggestions" class="tmgmt-ui-job-items-suggestions">',
-      '#suffix' => '</div>',
-      '#weight' => 20,
-    ) + $suggestions_table;
-  }
 
-  $form['translator_wrapper'] = array(
-    '#type' => 'container',
-    '#prefix' => '<div class="tmgmt-ui-translator-wrapper">',
-    '#suffix' => '</div>',
-    '#weight' => 20,
-  );
+  }
 
   // Display the checkout settings form if the job can be checked out.
   if ($job->isSubmittable()) {
+
+    $form['translator_wrapper'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Configure translator'),
+      '#collapsible' => FALSE,
+      '#weight' => 20,
+    );
+
     // Show a list of translators tagged by availability for the selected source
     // and target language combination.
     if (!$translators = tmgmt_translator_labels_flagged($job)) {
@@ -500,7 +501,22 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   }
   // Otherwise display the checkout info.
   elseif (!empty($job->translator)) {
+
+    $form['translator_wrapper'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Translator information'),
+      '#collapsible' => TRUE,
+      '#weight' => 20,
+    );
+
     $form['translator_wrapper']['info'] = tmgmt_ui_checkout_info($job);
+  }
+
+  if (!$job->isSubmittable() && empty($form['translator_wrapper']['info'])) {
+    $form['translator_wrapper']['info'] = array(
+      '#type' => 'markup',
+      '#markup' => t('The translator does not provide any information.'),
+    );
   }
 
   $form['clearfix'] = array(
@@ -516,7 +532,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       '#weight' => 50,
     );
     $form['messages']['view'] = array(
-      '#type' => 'item',
+      '#type' => 'markup',
       '#markup' => $output,
     );
   }
@@ -590,7 +606,7 @@ function tmgmt_ui_submit_add_suggestions($form, &$form_state) {
  * Returns the suggestions table for an AJAX-Call.
  */
 function tmgmt_ui_ajax_callback_load_suggestions($form, &$form_state) {
-  return $form['translator_wrapper_right']['suggestions']['suggestions_list'];
+  return $form['job_items_wrapper']['suggestions']['container']['suggestions_list'];
 }
 
 /**
@@ -627,7 +643,7 @@ function _tmgmt_ui_translation_suggestions(array &$suggestions_table, array &$fo
     $suggestions_table['#options'] = $options;
     $suggestions_table['#empty'] = t('No related suggestions available.');
     $suggestions_table['#header'] = array(
-      'title' => t('Title'),
+      'title' => t('Label'),
       'plugin' => t('Type'),
       'reason' => t('Reason'),
       'words' => t('Word count'),
