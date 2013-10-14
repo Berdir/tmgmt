@@ -10,6 +10,21 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
   /**
    * {@inheritdoc}
    */
+  public function getUri(TMGMTJobItem $job_item) {
+    // Provide logic which allows to test for source which is either accessible
+    // or not accessible to anonymous user. This is may then be used to test if
+    // the source url is attached to the job comment sent to a translation
+    // service.
+    $path = 'node';
+    if ($job_item->item_type == 'test_not_accessible') {
+      $path = 'admin';
+    }
+    return array('path' => $path, 'options' => array());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getLabel(TMGMTJobItem $job_item) {
     return $this->pluginType . ':' . $job_item->item_type . ':' . $job_item->item_id;
   }
