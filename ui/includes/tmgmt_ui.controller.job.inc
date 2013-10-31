@@ -11,6 +11,13 @@
 class TMGMTJobUIController extends EntityDefaultUIController {
 
   /**
+   * Translation job that is a duplicate of an aborted job.
+   *
+   * @var TMGMTJob
+   */
+  private $jobToResubmit = NULL;
+
+  /**
    * {@inheritdoc}
    */
   public function hook_menu() {
@@ -27,20 +34,28 @@ class TMGMTJobUIController extends EntityDefaultUIController {
       'file' => $this->entityInfo['admin ui']['file'],
       'file path' => $this->entityInfo['admin ui']['file path'],
     );
-    $items[$this->path . '/' . $wildcard . '/cancel'] = array(
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
-      'load arguments' => array($this->entityType),
-      'access callback' => 'entity_access',
-      'access arguments' => array('submit', $this->entityType, $id_count),
-      'type' => MENU_CALLBACK,
-    );
     $items[$this->path . '/' . $wildcard . '/delete'] = array(
       'page callback' => 'drupal_get_form',
       'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
       'load arguments' => array($this->entityType),
       'access callback' => 'entity_access',
       'access arguments' => array('delete', $this->entityType, $id_count),
+      'type' => MENU_CALLBACK,
+    );
+    $items[$this->path . '/' . $wildcard . '/abort'] = array(
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'entity_access',
+      'access arguments' => array('abort', $this->entityType, $id_count),
+      'type' => MENU_CALLBACK,
+    );
+    $items[$this->path . '/' . $wildcard . '/resubmit'] = array(
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array($this->entityType . '_operation_form', $this->entityType, $id_count, $id_count + 1),
+      'load arguments' => array($this->entityType),
+      'access callback' => 'entity_access',
+      'access arguments' => array('resubmit', $this->entityType, $id_count),
       'type' => MENU_CALLBACK,
     );
     return $items;
@@ -51,12 +66,15 @@ class TMGMTJobUIController extends EntityDefaultUIController {
    */
   public function operationForm($form, &$form_state, $entity, $op) {
     switch ($op) {
-      case 'cancel':
-        $confirm_question = t('Are you sure you want to cancel the translation job %label?', array('%label' => $entity->label()));
-        return confirm_form($form, $confirm_question, $this->path);
       case 'delete':
         $confirm_question = t('Are you sure you want to delete the translation job %label?', array('%label' => $entity->label()));
         return confirm_form($form, $confirm_question, $this->path);
+      case 'abort':
+        return confirm_form($form, t('Abort this job?'), 'admin/tmgmt/jobs/' . $entity->tjid,
+          t('This will send a request to the translator to abort the job. After the action the job translation process will be aborted and only remaining action will be resubmitting it.'));
+      case 'resubmit':
+        return confirm_form($form, t('Resubmit as a new job?'), 'admin/tmgmt/jobs/' . $entity->tjid,
+          t('This creates a new job with the same items which can then be submitted again. In case the sources meanwhile changed, the new job will reflect the update.'));
     }
     drupal_not_found();
     exit;
@@ -70,11 +88,52 @@ class TMGMTJobUIController extends EntityDefaultUIController {
       case 'delete':
         $entity->delete();
         return t('Deleted the translation job %label.', array('%label' => $entity->label()));
-      case 'cancel':
-        $entity->cancelTranslation();
-        return t('Cancelled the translation job %label.', array('%label' => $entity->label()));
+      case 'abort':
+        if (!$entity->cancelTranslation()) {
+          // This is the case when a translator does not support the cancel operation.
+          // It would make more sense to not display the button for the action,
+          // however we do not know if the translator is able to cancel a job until
+          // we trigger the action.
+          foreach ($entity->getMessagesSince() as $message) {
+            if ($message->type == 'debug') {
+              continue;
+            }
+            if ($text = $message->getMessage()) {
+              // We want to persist also the type therefore we will set the
+              // messages directly and not return them.
+              drupal_set_message(filter_xss($text), $message->type);
+            }
+          }
+        }
+        break;
+      case 'resubmit':
+        $this->jobToResubmit = $entity->cloneAsUnprocessed();
+        $this->jobToResubmit->uid = $GLOBALS['user']->uid;
+        $this->jobToResubmit->save();
+        /** @var TMGMTJobItem $item */
+        foreach ($entity->getItems() as $item) {
+          $item_to_resubmit = $item->cloneAsActive();
+          $this->jobToResubmit->addExistingItem($item_to_resubmit);
+        }
+
+        $entity->addMessage('Job has been duplicated as a new job <a href="@url">#@id</a>.',
+          array('@url' => url('admin/tmgmt/jobs/' . $this->jobToResubmit->tjid), '@id' => $this->jobToResubmit->tjid));
+        $this->jobToResubmit->addMessage('This job is a duplicate of the previously aborted job <a href="@url">#@id</a>',
+          array('@url' => url('admin/tmgmt/jobs/' . $entity->tjid), '@id' => $entity->tjid));
+
+        return t('The aborted job has been duplicated. You can resubmit it now.');
     }
     return FALSE;
+  }
+
+  /**
+   * Operation form submit callback.
+   */
+  public function operationFormSubmit($form, &$form_state) {
+    parent::operationFormSubmit($form, $form_state);
+    if ($form_state['op'] == 'resubmit') {
+      $form_state['redirect'] = $this->path . '/' . $this->jobToResubmit->tjid;
+    }
   }
 
 }

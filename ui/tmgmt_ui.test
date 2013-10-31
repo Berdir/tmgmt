@@ -370,4 +370,82 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertText('test_source:test_suggestion_suggestion:7');
 
   }
+
+  /**
+   * Test the process of aborting and resubmitting the job.
+   */
+  function testAbortJob() {
+    $job = $this->createJob();
+    $job->addItem('test_source', 'test', 1);
+    $job->addItem('test_source', 'test', 2);
+    $job->addItem('test_source', 'test', 3);
+
+    $edit = array(
+      'target_language' => 'es',
+      'settings[action]' => 'translate',
+    );
+    $this->drupalPost('admin/tmgmt/jobs/' . $job->tjid, $edit, t('Submit to translator'));
+
+    // Abort job.
+    $this->drupalPost('admin/tmgmt/jobs/' . $job->tjid, array(), t('Abort job'));
+    $this->drupalPost(NULL, array(), t('Confirm'));
+    // Reload job and check its state.
+    entity_get_controller('tmgmt_job')->resetCache();
+    /** @var TMGMTJob $job */
+    $job = tmgmt_job_load($job->tjid);
+    $this->assertTrue($job->isCancelled());
+    foreach ($job->getItems() as $item) {
+      $this->assertTrue($item->isAborted());
+    }
+
+    // Resubmit the job.
+    $this->drupalPost('admin/tmgmt/jobs/' . $job->tjid, array(), t('Resubmit'));
+    $this->drupalPost(NULL, array(), t('Confirm'));
+    // Test for the log message.
+    $this->assertRaw(t('This job is a duplicate of the previously aborted job <a href="@url">#@id</a>',
+      array('@url' => url('admin/tmgmt/jobs/' . $job->tjid), '@id' => $job->tjid)));
+
+    // Load the resubmitted job and check for its status and values.
+    $url_parts = explode('/', $this->getUrl());
+    $resubmitted_job = tmgmt_job_load(array_pop($url_parts));
+
+    $this->assertTrue($resubmitted_job->isUnprocessed());
+    $this->assertEqual($job->translator, $resubmitted_job->translator);
+    $this->assertEqual($job->source_language, $resubmitted_job->source_language);
+    $this->assertEqual($job->target_language, $resubmitted_job->target_language);
+    $this->assertEqual($job->settings, $resubmitted_job->settings);
+
+    // Test if job items were duplicated correctly.
+    /** @var TMGMTJobItem $item */
+    foreach ($job->getItems() as $item) {
+      // We match job items based on "id #" string. This is not that straight
+      // forward, but it works as the test source text is generated as follows:
+      // Text for job item with type #type and id #id.
+      $_items = $resubmitted_job->getItems(array('data' => array('value' => '%id ' . $item->item_id . '%', 'operator' => 'LIKE')));
+      $_item = reset($_items);
+      /** @var TMGMTJobItem $_item */
+      $this->assertNotEqual($_item->tjid, $item->tjid);
+      $this->assertEqual($_item->plugin, $item->plugin);
+      $this->assertEqual($_item->item_id, $item->item_id);
+      $this->assertEqual($_item->item_type, $item->item_type);
+      // Make sure counts have been recalculated.
+      $this->assertTrue($_item->word_count > 0);
+      $this->assertTrue($_item->count_pending > 0);
+      $this->assertEqual($_item->count_translated, 0);
+      $this->assertEqual($_item->count_accepted, 0);
+      $this->assertEqual($_item->count_reviewed, 0);
+    }
+
+    // Navigate back to the cancelled job and check for the log message.
+    $this->drupalGet('admin/tmgmt/jobs/' . $job->tjid);
+    $this->assertRaw(t('Job has been duplicated as a new job <a href="@url">#@id</a>.',
+      array('@url' => url('admin/tmgmt/jobs/' . $resubmitted_job->tjid), '@id' => $resubmitted_job->tjid)));
+
+    $this->drupalGet('admin/tmgmt/jobs');
+    $elements = $this->xpath('//table[contains(@class, @view)]//tr[contains(@class, @row)]//td[contains(@class, @field)]',
+      array('@view' => 'views-table', '@row' => 'views-row-last', '@field' => 'views-field-progress'));
+    $status = $elements[0];
+    $this->assertEqual(trim((string)$status), t('N/A'));
+
+  }
 }

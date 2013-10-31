@@ -102,6 +102,20 @@ class TMGMTJob extends Entity {
   }
 
   /**
+   * Clones job as unprocessed.
+   */
+  public function cloneAsUnprocessed() {
+    $clone = clone $this;
+    $clone->tjid = NULL;
+    $clone->uid = NULL;
+    $clone->changed = NULL;
+    $clone->reference = NULL;
+    $clone->created = REQUEST_TIME;
+    $clone->state = TMGMT_JOB_STATE_UNPROCESSED;
+    return $clone;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function defaultLabel() {
@@ -424,10 +438,12 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Returns whether the state of this job is 'cancelled'.
+   * Returns whether the state of this job is 'aborted'.
    *
    * @return boolean
-   *   TRUE if the state is 'cancelled', FALSE otherwise.
+   *   TRUE if the state is 'aborted', FALSE otherwise.
+   *
+   * @todo Rename method to isAborted() in https://drupal.org/node/2124825
    */
   public function isCancelled() {
     return $this->isState(TMGMT_JOB_STATE_CANCELLED);
@@ -479,13 +495,15 @@ class TMGMTJob extends Entity {
   }
 
   /**
-   * Checks whether a job is cancelable.
+   * Checks whether a job is abortable.
    *
    * @return boolean
-   *   TRUE if the job can be cancelled, FALSE otherwise.
+   *   TRUE if the job can be aborted, FALSE otherwise.
+   *
+   * @todo Rename method to isAbortable() in https://drupal.org/node/2124825
    */
   public function isCancelable() {
-    // Only non-submitted translation jobs can be cancelled.
+    // Only non-submitted translation jobs can be aborted.
     return $this->isActive();
   }
 
@@ -496,7 +514,7 @@ class TMGMTJob extends Entity {
    *   TRUE if the job can be submitted, FALSE otherwise.
    */
   public function isSubmittable() {
-    return $this->isUnprocessed() || $this->isRejected() || $this->isCancelled();
+    return $this->isUnprocessed() || $this->isRejected();
   }
 
   /**
@@ -563,10 +581,16 @@ class TMGMTJob extends Entity {
    *   The job entity.
    *
    * @see TMGMTJob::addMessage()
+   *
+   * @todo Rename method to aborted() in https://drupal.org/node/2124825
    */
   public function cancelled($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
-      $message = 'The translation job has been cancelled.';
+      $message = 'The translation job has been aborted.';
+    }
+    /** @var TMGMTJobItem $item */
+    foreach ($this->getItems() as $item) {
+      $item->setState(TMGMT_JOB_ITEM_STATE_ABORTED);
     }
     return $this->setState(TMGMT_JOB_STATE_CANCELLED, $message, $variables, $type);
   }
@@ -622,7 +646,7 @@ class TMGMTJob extends Entity {
     // We don't know if the translator plugin was able to cancel the translation
     // job after this point. That means that the plugin has to set the
     // 'cancelled' state on its own.
-    $controller->cancelTranslation($this);
+    return $controller->cancelTranslation($this);
   }
 
   /**

@@ -51,6 +51,9 @@ define('TMGMT_JOB_STATE_ACCEPTED', 3);
  * A job can be cancelled at any time. If he is currently in the submitted state
  * the translator plugin is asked if this translation can be cancelled and needs
  * to confirm it by returning TRUE in cancelTranslation().
+ *
+ * @todo Rename constant to TMGMT_JOB_STATE_ABORTED in
+ * https://drupal.org/node/2124825
  */
 define('TMGMT_JOB_STATE_CANCELLED', 4);
 
@@ -88,6 +91,11 @@ define('TMGMT_JOB_ITEM_STATE_REVIEW', 2);
  * 'accepted' if the translated object could be saved successfully.
  */
 define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
+
+/**
+ * The translation process of the job item is aborted.
+ */
+define('TMGMT_JOB_ITEM_STATE_ABORTED', 4);
 
 /**
  * The translation data item has not been translated.
@@ -316,6 +324,12 @@ function tmgmt_language_label($language) {
  */
 /**
  * Loads a translation job.
+ *
+ * @param int $tjid
+ *   Translation job id.
+ *
+ * @return TMGMTJob
+ *   Loaded translation job entity.
  */
 function tmgmt_job_load($tjid) {
   $jobs = tmgmt_job_load_multiple(array($tjid), array());
@@ -521,6 +535,11 @@ function tmgmt_job_access($op, $job = NULL, $account = NULL) {
       return user_access('submit translation jobs');
       break;
 
+    case 'abort':
+    case 'resubmit':
+      return user_access('submit translation jobs');
+      break;
+
     case 'accept':
       return user_access('accept translation jobs');
       break;
@@ -681,7 +700,7 @@ function tmgmt_job_states() {
     TMGMT_JOB_STATE_UNPROCESSED => t('Unprocessed'),
     TMGMT_JOB_STATE_ACTIVE => t('Active'),
     TMGMT_JOB_STATE_REJECTED => t('Rejected'),
-    TMGMT_JOB_STATE_CANCELLED => t('Cancelled'),
+    TMGMT_JOB_STATE_CANCELLED => t('Aborted'),
     TMGMT_JOB_STATE_FINISHED => t('Finished'),
   );
 }
@@ -697,6 +716,7 @@ function tmgmt_job_item_states() {
     TMGMT_JOB_ITEM_STATE_ACTIVE => t('In progress'),
     TMGMT_JOB_ITEM_STATE_REVIEW => t('Needs review'),
     TMGMT_JOB_ITEM_STATE_ACCEPTED => t('Accepted'),
+    TMGMT_JOB_ITEM_STATE_ABORTED => t('Aborted'),
   );
 }
 

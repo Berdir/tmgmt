@@ -505,7 +505,7 @@ function tmgmt_ui_translation_review_form_defaults($form, &$form_state, TMGMTJob
   $form['actions']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
-    '#access' => !$item->isAccepted(),
+    '#access' => !$item->isAccepted() && !$item->isAborted(),
   );
   $uri = $item->getJob()->uri();
   $url = isset($_GET['destination']) ? $_GET['destination'] : $uri['path'];
@@ -579,7 +579,8 @@ function _tmgmt_ui_review_form_element(&$form_state, $data, TMGMTJobItem $job_it
       $form[$target_key]['actions'] = array(
         '#type' => 'container',
       );
-      if (!$job_item->isAccepted()) {
+      // Display data item actions unless the job item is accepted or aborted.
+      if (!$job_item->isAccepted() && !$job_item->isAborted()) {
         if ($data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_REVIEWED) {
           $form[$target_key]['actions']['reviewed'] = array(
             '#type' => 'submit',

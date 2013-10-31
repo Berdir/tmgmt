@@ -114,6 +114,24 @@ class TMGMTJobItem extends Entity {
   }
 
   /**
+   * Clones as active.
+   */
+  public function cloneAsActive() {
+    $clone = clone $this;
+    $clone->data = NULL;
+    $clone->tjid = NULL;
+    $clone->tjiid = NULL;
+    $clone->changed = NULL;
+    $clone->word_count = NULL;
+    $clone->count_accepted = NULL;
+    $clone->count_pending = NULL;
+    $clone->count_translated = NULL;
+    $clone->count_reviewed = NULL;
+    $clone->state = TMGMT_JOB_ITEM_STATE_ACTIVE;
+    return $clone;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function defaultLabel() {
@@ -502,6 +520,16 @@ class TMGMTJobItem extends Entity {
    */
   public function isNeedsReview() {
     return $this->isState(TMGMT_JOB_ITEM_STATE_REVIEW);
+  }
+
+  /**
+   * Checks whether the state of this transaction is 'aborted'.
+   *
+   * @return boolean
+   *   TRUE if the state is 'aborted', FALSE otherwise.
+   */
+  public function isAborted() {
+    return $this->isState(TMGMT_JOB_ITEM_STATE_ABORTED);
   }
 
   /**

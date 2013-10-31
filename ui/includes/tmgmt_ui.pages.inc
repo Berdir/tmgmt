@@ -550,6 +550,20 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       '#access' => $job->isSubmittable(),
       '#disabled' => empty($job->translator),
     );
+    $form['actions']['resubmit_job'] = array(
+      '#type' => 'submit',
+      '#submit' => array('tmgmt_ui_submit_redirect'),
+      '#redirect' => 'admin/tmgmt/jobs/' . $job->tjid . '/resubmit',
+      '#value' => t('Resubmit'),
+      '#access' => $job->isCancelled(),
+    );
+    $form['actions']['abort_job'] = array(
+      '#type' => 'submit',
+      '#value' => t('Abort job'),
+      '#redirect' => 'admin/tmgmt/jobs/' . $job->tjid . '/abort',
+      '#submit' => array('tmgmt_ui_submit_redirect'),
+      '#access' => $job->isCancelable(),
+    );
   }
   if ($old) {
     $form['actions']['delete'] = array(
@@ -564,12 +578,12 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
   // Only show the 'Cancel' button if the job has been submitted to the
   // translator.
   $form['actions']['cancel'] = array(
-    '#type' => 'button',
-    '#value' => t('Cancel'),
-    '#submit' => array('tmgmt_ui_submit_redirect'),
-    '#redirect' => 'admin/tmgmt/jobs',
-    '#access' => $job->isActive(),
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'admin/tmgmt/jobs',
+    '#weight' => 10,
   );
+
   $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
   return $form;
 }
