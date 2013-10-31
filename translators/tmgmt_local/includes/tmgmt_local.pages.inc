@@ -141,7 +141,7 @@ function tmgmt_local_translation_form($form, &$form_state, TMGMTLocalTaskItem $t
     $form['job_comment'] = array(
       '#type' => 'item',
       '#title' => t('Job comment'),
-      '#markup' => $job->getSetting('job_comment'),
+      '#markup' => filter_xss($job->getSetting('job_comment')),
     );
   }
 

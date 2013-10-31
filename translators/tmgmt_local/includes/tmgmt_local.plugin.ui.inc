@@ -59,7 +59,7 @@ class TMGMTLocalTranslatorUIController extends TMGMTDefaultTranslatorUIControlle
       $form['job_comment'] = array(
         '#type' => 'item',
         '#title' => t('Job comment'),
-        '#markup' => check_plain($job->getSetting('job_comment')),
+        '#markup' => filter_xss($job->getSetting('job_comment')),
       );
     }
 
