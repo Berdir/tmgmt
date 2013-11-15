@@ -101,7 +101,14 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $item1 = $job->addItem('test_source', 'type', 5);
     $item2 = $job->addItem('test_source', 'type', 4);
 
-    $result = $item1->addRemoteMapping($data_key, 'id11', array('remote_identifier_2' => 'id12', 'remote_identifier_3' => 'id13'));
+    $mapping_data = array(
+      'remote_identifier_2' => 'id12',
+      'remote_identifier_3' => 'id13',
+      'amount' => 1043,
+      'currency' => 'EUR',
+    );
+
+    $result = $item1->addRemoteMapping($data_key, 'id11', $mapping_data);
     $this->assertEqual($result, SAVED_NEW);
 
     $job_mappings = $job->getRemoteMappings();
@@ -125,7 +132,9 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $remote_mapping_controller = entity_get_controller('tmgmt_remote');
     $remote_mappings = $remote_mapping_controller->loadByRemoteIdentifier('id11', 'id12', 'id13');
     $remote_mapping = array_shift($remote_mappings);
-    $this->assertEqual($item1->tjiid, $remote_mapping->tjiid);
+    $this->assertEqual($remote_mapping->tjiid, $item1->tjiid);
+    $this->assertEqual($remote_mapping->amount, $mapping_data['amount']);
+    $this->assertEqual($remote_mapping->currency, $mapping_data['currency']);
 
     $this->assertEqual(count($remote_mapping_controller->loadByRemoteIdentifier('id11')), 1);
     $this->assertEqual(count($remote_mapping_controller->loadByRemoteIdentifier('id11', '')), 0);

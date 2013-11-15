@@ -242,4 +242,5 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   public function unescapeText($text) {
     return preg_replace('/' . preg_quote($this->escapeStart, '/') . '(.+)' . preg_quote($this->escapeEnd, '/') . '/U', '$1', $text);
   }
+
 }

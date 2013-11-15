@@ -76,6 +76,20 @@ class TMGMTRemote extends Entity {
   public $word_count;
 
   /**
+   * Amount charged for the remote translation job.
+   *
+   * @var int
+   */
+  public $amount;
+
+  /**
+   * Amount charged currency.
+   *
+   * @var string
+   */
+  public $currency;
+
+  /**
    * Custom remote data.
    *
    * @var array

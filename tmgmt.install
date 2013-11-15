@@ -151,6 +151,20 @@ function tmgmt_schema() {
         'default' => 0,
         'description' => 'Word count info provided by the remote service.',
       ),
+      'amount' => array(
+        'type' => 'int',
+        'size' => 'big',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Amount charged for the remote translation job.',
+      ),
+      'currency' => array(
+        'type' => 'char',
+        'length' => 3,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Amount charged currency.',
+      ),
       'remote_data' => array(
         'description' => 'Custom remote data.',
         'type' => 'text',
@@ -841,4 +855,23 @@ function tmgmt_update_7013() {
     'length' => 255,
   ));
   db_add_index('tmgmt_job', 'reference', array('reference'));
+}
+
+/**
+ * Add amount and currency fields for {tmgmt_remote} table.
+ */
+function tmgmt_update_7014() {
+  db_add_field('tmgmt_remote', 'amount', array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+    'description' => 'Amount charged for the remote translation job.',
+  ));
+  db_add_field('tmgmt_remote', 'currency', array(
+    'type' => 'char',
+    'length' => 3,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => 'Amount charged currency.',
+  ));
 }
