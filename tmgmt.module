@@ -783,8 +783,12 @@ function tmgmt_job_item_create($plugin, $item_type, $item_id, array $values = ar
  *   A job message entity or FALSE if the query didn't yield any results.
  */
 function tmgmt_message_load($mid) {
-  $jobs = tmgmt_message_load_multiple(array($mid));
-  return $jobs ? reset($jobs) : FALSE;
+  // Avoid collision with the message module because this looks like the module
+  // implements hook_ENTITY_TYPE_load() for message.
+  if (!is_array($mid)) {
+    $jobs = tmgmt_message_load_multiple(array($mid));
+    return $jobs ? reset($jobs) : FALSE;
+  }
 }
 
 /**
