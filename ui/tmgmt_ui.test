@@ -442,8 +442,8 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       array('@url' => url('admin/tmgmt/jobs/' . $resubmitted_job->tjid), '@id' => $resubmitted_job->tjid)));
 
     $this->drupalGet('admin/tmgmt/jobs');
-    $elements = $this->xpath('//table[contains(@class, @view)]//tr[contains(@class, @row)]//td[contains(@class, @field)]',
-      array('@view' => 'views-table', '@row' => 'views-row-last', '@field' => 'views-field-progress'));
+    $elements = $this->xpath('//table[contains(@class, @view)]//td[contains(., @text)]',
+      array('@view' => 'views-table', '@text' => t('N/A')));
     $status = $elements[0];
     $this->assertEqual(trim((string)$status), t('N/A'));
 
