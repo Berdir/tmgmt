@@ -2,6 +2,7 @@ name = Translation Management Demo
 description = All elements for a functioning demo.
 package = Translation Management
 core = 7.x
+hidden = TRUE
 
 dependencies[] = tmgmt_ui
 dependencies[] = tmgmt_node_ui
