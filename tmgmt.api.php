@@ -201,3 +201,59 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  *   sources in their implementation of
  *   TMGMTSourcePluginControllerInterface::saveTranslation().
  */
+
+/**
+ * @defgroup tmgmt_remote_languages_mapping Remote languages mapping
+ *
+ * Logic to deal with different language codes at client and server that stand
+ * for the same language.
+ *
+ * Each tmgmt plugin is expected to support this feature. However for those
+ * plugins where such feature has no use there is a plugin setting
+ * "map remote languages" which can be set to FALSE.
+ *
+ * @section mappings_info Mappings info
+ *
+ * There are several methods defined by
+ * TMGMTTranslatorPluginControllerInterface and implemented in
+ * TMGMTDefaultTranslatorPluginController that deal with mappings info.
+ *
+ * - getRemoteLanguagesMappings() - provides pairs of local_code => remote_code.
+ * - mapToRemoteLanguage() & mapToLocalLanguage() - helpers to map local/remote.
+ *   Note that methods with same names and functionality are provided by the
+ *   TMGMTTranslator entity. These are convenience methods.
+ *
+ * The above methods should not need reimplementation unless special logic is
+ * needed. However following methods provide only the fallback behaviour and
+ * therefore it is recommended that each plugin provides its specific
+ * implementation.
+ *
+ * - getDefaultRemoteLanguagesMappings() - we might know some mapping pairs
+ *   prior to configuring a plugin, this is the place where we can define these
+ *   mappings. The default implementation returns an empty array.
+ * - getSupportedRemoteLanguages() - gets array of language codes in lang_code =>
+ *   lang_code format. It says with what languages the remote system can deal
+ *   with. These codes are in the remote format.
+ *
+ * @section mapping_remote_to_local Mapping remote to local
+ *
+ * Mapping remote to local language codes is done when determining the
+ * language capabilities of the remote system. All following logic should then
+ * solely work with local language codes. There are two methods defined by
+ * the TMGMTTranslatorPluginControllerInterface interface. To do the mapping
+ * a plugin must implement getSupportedTargetLanguages().
+ *
+ * - getSupportedTargetLanguages() - should return local language codes. So
+ *   within this method the mapping needs to be executed.
+ * - getSupportedLanguagePairs() - gets language pairs for which translations
+ *   can be done. The language codes must be in local form. The default
+ *   implementation uses getSupportedTargetLanguages() so mapping occur. However
+ *   this approach is not effective and therefore each plugin should provide
+ *   its specific implementation with regard to performance.
+ *
+ * @section mapping_local_to_remote Mapping local to remote
+ *
+ * Mapping of local to remote language codes is done upon translation job
+ * request in the TMGMTTranslatorPluginControllerInterface::requestTranslation()
+ * plugin implementation.
+ */
