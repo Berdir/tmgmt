@@ -6,6 +6,7 @@ core = 7.x
 dependencies[] = entity
 dependencies[] = locale
 dependencies[] = views
+simplytest_dependencies[] = tmgmt_demo
 
 files[] = includes/tmgmt.exception.inc
 files[] = controller/tmgmt.controller.job.inc

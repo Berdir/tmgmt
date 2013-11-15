@@ -1,0 +1,9 @@
+name = Translation Management Demo
+description = All elements for a functioning demo.
+package = Translation Management
+core = 7.x
+
+dependencies[] = tmgmt_ui
+dependencies[] = tmgmt_node_ui
+dependencies[] = tmgmt_file
+dependencies[] = tmgmt_local
