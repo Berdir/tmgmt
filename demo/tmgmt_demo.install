@@ -11,7 +11,7 @@
 function tmgmt_demo_install() {
   include_once DRUPAL_ROOT . '/includes/locale.inc';
   // Add German to the language list.
-  if (!in_array('de', language_list())) {
+  if (!array_key_exists('de', language_list())) {
     locale_add_language('de');
   }
 
