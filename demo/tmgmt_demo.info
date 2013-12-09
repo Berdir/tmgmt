@@ -8,3 +8,4 @@ dependencies[] = tmgmt_ui
 dependencies[] = tmgmt_node_ui
 dependencies[] = tmgmt_file
 dependencies[] = tmgmt_local
+dependencies[] = google_chart_tools
