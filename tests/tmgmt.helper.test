@@ -100,13 +100,23 @@ class TMGMTHelperTestCase extends TMGMTBaseTestCase {
       'complex punctuation' => array(
         'text' => '<[({-!ReAd@*;: ,?+MoRe...})]>\\|/',
         'count' => 2,
+        'exclude_tags' => FALSE,
       ),
       'repeat' => array(
         'text' => 'repeat repeat',
         'count' => 2,
       ),
+      'strip tags' => array(
+        'text' => '<a href="http://example.com">link text</a> plain text <div class="some-css-class"></div>',
+        'count' => 4,
+      ),
     );
     foreach ($unit_tests as $id => $test_data) {
+      // Set the exclude_tags flag. In case not provided the TRUE is default.
+      $test_data += array('exclude_tags' => TRUE);
+      if (variable_get('tmgmt_word_count_exclude_tags', TRUE) != $test_data['exclude_tags']) {
+        variable_set('tmgmt_word_count_exclude_tags', $test_data['exclude_tags']);
+      }
       $this->assertEqual($real_count = tmgmt_word_count($test_data['text']), $desirable_count = $test_data['count'], t('!test_id: Real count (=!real_count) should be equal to desirable (=!desirable_count)', array('!test_id' => $id, '!real_count' => $real_count, '!desirable_count' => $desirable_count)));
     }
   }

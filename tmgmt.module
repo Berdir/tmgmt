@@ -1531,6 +1531,10 @@ function tmgmt_views_plugins() {
  *   Returns count of words of text.
  */
 function tmgmt_word_count($text) {
+  // Strip tags in case it is requested to not include them in the count.
+  if (variable_get('tmgmt_word_count_exclude_tags', TRUE)) {
+    $text = strip_tags($text);
+  }
   // Replace each punctuation mark with space.
   $text = str_replace(array('`', '~', '!', '@', '"', '#', '$', ';', '%', '^', ':', '?', '&', '*', '(', ')', '-', '_', '+', '=', '{', '}', '[', ']', '\\', '|', '/', '\'', '<', '>', ',', '.'), ' ', $text);
   // Remove duplicate spaces.
