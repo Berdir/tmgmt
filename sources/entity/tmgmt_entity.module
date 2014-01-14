@@ -105,13 +105,11 @@ function tmgmt_entity_get_translatable_bundles($entity_type) {
  *   is processed.
  * @param bool $pager
  *   Flag to determine if pager will be used.
- * @param int $limit
- *   Query result limit.
  *
  * @return array
  *   Array of translatable entities.
  */
-function tmgmt_entity_get_translatable_entities($entity_type, $property_conditions = array(), $pager = FALSE, $limit = 20) {
+function tmgmt_entity_get_translatable_entities($entity_type, $property_conditions = array(), $pager = FALSE) {
 
   if (!in_array($entity_type, variable_get('entity_translation_entity_types', array()))) {
     return array();
@@ -185,10 +183,10 @@ function tmgmt_entity_get_translatable_entities($entity_type, $property_conditio
   }
 
   if ($pager) {
-    $query = $query->extend('PagerDefault')->limit($limit);
+    $query = $query->extend('PagerDefault')->limit(variable_get('tmgmt_source_list_limit', 20));
   }
   else {
-    $query->range(0, $limit);
+    $query->range(0, variable_get('tmgmt_source_list_limit', 20));
   }
 
   $query->orderBy($entity_info['entity keys']['id'], 'DESC');

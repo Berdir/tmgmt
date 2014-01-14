@@ -19,13 +19,11 @@ class TMGMTLocaleSourceUIController extends TMGMTDefaultSourceUIController {
    *   The locale textgroup.
    * @param string $search_label
    *   Label to search for.
-   * @param int $limit
-   *   Pager query limit.
    *
    * @return array
    *   List of i18n strings data.
    */
-  function getStrings($textgroup, $search_label = NULL, $limit = 20) {
+  function getStrings($textgroup, $search_label = NULL) {
     $languages = drupal_map_assoc(array_keys(language_list()));
     $select = db_select('locales_source', 'ls')
       ->fields('ls', array('lid', 'source'));
@@ -40,7 +38,7 @@ class TMGMTLocaleSourceUIController extends TMGMTDefaultSourceUIController {
       $select->leftJoin('locales_target', "lt_$langcode", "ls.lid = %alias.lid AND %alias.language = '$langcode'");
       $select->addField("lt_$langcode", 'language', "lang_$langcode");
     }
-    $select = $select->extend('PagerDefault')->limit($limit);
+    $select = $select->extend('PagerDefault')->limit(variable_get('tmgmt_source_list_limit', 20));
     return $select->execute()->fetchAll();
   }
 

@@ -106,6 +106,11 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTEntityTestCaseUtility {
     $this->clickLink($node1->title);
     $this->clickLink(t('Translate'));
     $this->assertText('de_' . $node1->title);
+
+    // Test for the source list limit set in the views export.
+    $view = views_get_view('tmgmt_node_source_overview');
+    $view->execute_display('default');
+    $this->assertEqual($view->get_items_per_page(), variable_get('tmgmt_source_list_limit', 20));
   }
 }
 
