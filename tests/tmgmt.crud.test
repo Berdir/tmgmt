@@ -224,6 +224,14 @@ class TMGMTCRUDTestCase extends TMGMTBaseTestCase {
     $this->assertEqual($data['#translation']['#origin'], 'remote');
     $this->assertEqual($data['#translation']['#timestamp'], REQUEST_TIME);
 
+    // Set status back to pending as if the data item was rejected.
+    $item1->updateData(array('dummy', 'deep_nesting'), array('#status' => TMGMT_DATA_ITEM_STATE_PENDING));
+    // Add same translation text.
+    $translation['dummy']['deep_nesting']['#text'] = 'translated 1';
+    $item1->addTranslatedData($translation);
+    $data = $item1->getData($key);
+    // Check if the status has been updated back to translated.
+    $this->assertEqual($data['#status'], TMGMT_DATA_ITEM_STATE_TRANSLATED);
 
     // Add translation, however locally customized.
     $translation['dummy']['deep_nesting']['#text'] = 'translated 2';

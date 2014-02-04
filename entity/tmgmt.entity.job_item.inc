@@ -550,16 +550,18 @@ class TMGMTJobItem extends Entity {
     if (isset($translation['#text'])) {
       $data = $this->getData(tmgmt_ensure_keys_array($key));
       if (empty($data['#status']) || $data['#status'] != TMGMT_DATA_ITEM_STATE_ACCEPTED) {
-        // If we already have a translation text and it hasn't changed, don't
-        // update anything.
-        if (!empty($data['#translation']['#text']) && $data['#translation']['#text'] == $translation['#text']) {
-          return;
-        }
 
         // In case the origin is not set consider it to be remote.
         if (!isset($translation['#origin'])) {
           $translation['#origin'] = 'remote';
         }
+
+        // If we already have a translation text and it hasn't changed, don't
+        // update anything unless the origin is remote.
+        if (!empty($data['#translation']['#text']) && $data['#translation']['#text'] == $translation['#text'] && $translation['#origin'] != 'remote') {
+          return;
+        }
+
         // In case the timestamp is not set consider it to be now.
         if (!isset($translation['#timestamp'])) {
           $translation['#timestamp'] = REQUEST_TIME;
