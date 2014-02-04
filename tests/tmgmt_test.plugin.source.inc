@@ -26,7 +26,16 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
    * {@inheritdoc}
    */
   public function getLabel(TMGMTJobItem $job_item) {
-    return $this->pluginType . ':' . $job_item->item_type . ':' . $job_item->item_id;
+    $label = $this->pluginType . ':' . $job_item->item_type . ':' . $job_item->item_id;
+
+    // We need to test if job and job item labels get properly truncated,
+    // therefore in case the job item type is "test_with_long_label" we append
+    // further text to the existing label.
+    if ($job_item->item_type == 'test_with_long_label') {
+      $label .= 'Some very long and boring label that definitely exceeds hundred and twenty eight characters which is the maximum character count for the job item label.';
+    }
+
+    return $label;
   }
 
   /**

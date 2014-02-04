@@ -136,9 +136,17 @@ class TMGMTJobItem extends Entity {
    */
   public function defaultLabel() {
     if ($controller = $this->getSourceController()) {
-      return $controller->getLabel($this);
+      $label = $controller->getLabel($this);
     }
-    return parent::defaultLabel();
+    else {
+      $label = parent::defaultLabel();
+    }
+
+    if (strlen($label) > TMGMT_JOB_LABEL_MAX_LENGTH) {
+      $label = truncate_utf8($label, TMGMT_JOB_LABEL_MAX_LENGTH, TRUE);
+    }
+
+    return $label;
   }
 
   /**

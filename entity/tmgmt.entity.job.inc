@@ -127,8 +127,18 @@ class TMGMTJob extends Entity {
     $items = $this->getItems();
     $count = count($items);
     if ($count > 0) {
-      $t_args = array('@title' => reset($items)->getSourceLabel(), '@more' => $count - 1);
-      return format_plural($count, '@title', '@title and @more more', $t_args);
+      $source_label = reset($items)->getSourceLabel();
+      $t_args = array('!title' => $source_label, '!more' => $count - 1);
+      $label = format_plural($count, '!title', '!title and !more more', $t_args);
+
+      // If the label length exceeds maximum allowed then cut off exceeding
+      // characters from the title and use it to recreate the label.
+      if (strlen($label) > TMGMT_JOB_LABEL_MAX_LENGTH) {
+        $max_length = strlen($source_label) - (strlen($label) - TMGMT_JOB_LABEL_MAX_LENGTH);
+        $source_label = truncate_utf8($source_label, $max_length, TRUE);
+        $t_args['!title'] = $source_label;
+        $label = format_plural($count, '!title', '!title and !more more', $t_args);
+      }
     }
     else {
       $wrapper = entity_metadata_wrapper($this->entityType, $this);
@@ -140,8 +150,10 @@ class TMGMTJob extends Entity {
       if (empty($target)) {
         $target = '?';
       }
-      return t('From @source to @target', array('@source' => $source, '@target' => $target));
+      $label = t('From !source to !target', array('!source' => $source, '!target' => $target));
     }
+
+    return $label;
   }
 
   /**

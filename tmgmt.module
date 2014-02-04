@@ -118,6 +118,10 @@ define('TMGMT_DATA_ITEM_STATE_TRANSLATED', 2);
 define('TMGMT_DATA_ITEM_STATE_ACCEPTED', 3);
 
 /**
+ * Maximum length of a job or job item label.
+ */
+define('TMGMT_JOB_LABEL_MAX_LENGTH', 128);
+/**
  * @} End of "addtogroup tmgmt_job".
  */
 
