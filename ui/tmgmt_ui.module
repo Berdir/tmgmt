@@ -671,8 +671,10 @@ function _tmgmt_ui_review_form_element(&$form_state, $data, TMGMTJobItem $job_it
       );
 
       // Give the translator ui controller a chance to affect the data item element.
-      $form[$target_key] = tmgmt_translator_ui_controller($job_item->getTranslator()->plugin)
-          ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
+      if ($translator = $job_item->getTranslator()) {
+        $form[$target_key] = tmgmt_translator_ui_controller($translator->plugin)
+            ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
+      }
       // Give the source ui controller a chance to affect the data item element.
       $form[$target_key] = tmgmt_source_ui_controller($job_item->plugin)
           ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);

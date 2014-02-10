@@ -83,11 +83,19 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
 
   // If we have an active job item, wrap it in a link.
   if (!empty($variables['job_item'])) {
-    $wrapper = entity_metadata_wrapper('tmgmt_job_item', $variables['job_item']);
-    $label = t('Active job item: @state', array('@state' => $wrapper->state->label()));
+    $job_item_wrapper = entity_metadata_wrapper('tmgmt_job_item', $variables['job_item']);
+    $label = t('Active job item: @state', array('@state' => $job_item_wrapper->state->label()));
+    $uri = $variables['job_item']->uri();
+    /** @var TMGMTJob $job */
+    $job = $variables['job_item']->getJob();
+    $job_wrapper = entity_metadata_wrapper('tmgmt_job', $job);
 
     switch ($variables['job_item']->state) {
       case TMGMT_JOB_ITEM_STATE_ACTIVE:
+        if ($job->isUnprocessed()) {
+          $uri = $job->uri();
+          $label = t('Active job item: @state', array('@state' => $job_wrapper->state->label()));
+        }
         $icon_color = 'tmgmt-ui-icon-blue';
         break;
 
@@ -105,7 +113,6 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
 
     $job_status = sprintf('<div class="%s" title="%s"><span></span></div>', implode(' ', $classes), $label);
 
-    $uri = $variables['job_item']->uri();
     $status .= l($job_status, $uri['path'], array(
       'query' => array('destination' => current_path()),
       'html' => TRUE,

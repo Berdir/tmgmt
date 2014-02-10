@@ -64,6 +64,14 @@ class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
     // Verify that we are still on the translate tab.
     $this->assertText(t('Translations of @title', array('@title' => $node->title)));
 
+    // The job is unprocessed, check the status flag in the source list.
+    $this->drupalGet('admin/tmgmt/sources');
+    $links = $this->xpath('//a[contains(@title, :title)]', array(':title' => t('Active job item: @state', array('@state' => t('Unprocessed')))));
+    $attributes = $links[0]->attributes();
+    // Check if the found link points to the job checkout page instead of the
+    // job item review form.
+    $this->assertEqual($attributes['href'], url('admin/tmgmt/jobs/1', array('query' => array('destination' => 'admin/tmgmt/sources'))));
+
     $this->drupalGet('admin/tmgmt');
     $this->assertResponse(200);
     $this->assertLink(t('manage'));
@@ -159,6 +167,12 @@ class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
     // Verify that we are on the translate tab.
     $this->assertText(t('One job needs to be checked out.'));
     $this->assertText($node->title);
+
+    // Go to the translate tab and check if the pending translation label is
+    // "Unprocessed" and links to the job checkout page.
+    $this->drupalGet('node/' . $node->nid . '/translate');
+    $this->assertLink(t('Unprocessed'));
+    $this->clickLink(t('Unprocessed'));
 
     // Submit.
     $this->drupalPost(NULL, array(), t('Submit to translator'));
