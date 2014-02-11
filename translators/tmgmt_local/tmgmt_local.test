@@ -83,7 +83,6 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     );
     $this->drupalPost('user/' . $translator3->uid . '/edit', $edit, t('Save'));
 
-
     $job1 = $this->createJob('en', 'de');
     $job2 = $this->createJob('de', 'en');
     $job3 = $this->createJob('en', 'fr');
@@ -275,13 +274,19 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     );
     $this->drupalPost(NULL, $edit, t('Save as completed'));
 
-    // The first item should be accepted now, the second still in progress.
-    $this->assertText(t('Completed'));
-    $this->assertText(t('Untranslated'));
-
+    // Review and accept the first item.
+    entity_get_controller('tmgmt_job_item')->resetCache(array(1));
     entity_get_controller('tmgmt_local_task')->resetCache();
     entity_get_controller('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
+    $item1 = tmgmt_job_item_load(1);
+    $item1->acceptTranslation();
+
+    // The first item should be accepted now, the second still in progress.
+    $this->drupalGet('translate/1');
+    $this->assertText(t('Completed'));
+    $this->assertText(t('Untranslated'));
+
     $task = tmgmt_local_task_load($task->tltid);
     $this->assertTrue($task->isPending());
     $this->assertEqual($task->getCountCompleted(), 1);
@@ -367,9 +372,17 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->clickLink(t('translate'));
     $this->drupalPost(NULL, array(), t('Save as completed'));
 
+    // Review and accept the second item.
+    entity_get_controller('tmgmt_job_item')->resetCache(array(2));
     entity_get_controller('tmgmt_local_task')->resetCache();
     entity_get_controller('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
+    $item1 = tmgmt_job_item_load(2);
+    $item1->acceptTranslation();
+
+    // Refresh the page.
+    $this->drupalGet($this->url);
+
     $task = tmgmt_local_task_load($task->tltid);
     $this->assertTrue($task->isClosed());
     $this->assertEqual($task->getCountCompleted(), 2);
