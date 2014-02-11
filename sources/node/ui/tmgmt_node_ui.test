@@ -104,17 +104,22 @@ class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
     $this->assertNoLink(t('delete'));
     $this->assertText(t('@title', array('@title' => $node->title)));
 
+    // Go to the job checkout page and submit it.
     $this->clickLink('submit');
-
     $this->drupalPost(NULL, array(), t('Submit to translator'));
+    // After submit the redirect goes back to the job overview.
+    $this->assertUrl('admin/tmgmt');
 
     // Make sure that the job is active now.
     $this->assertText(t('Active'));
-    $this->assertLink(t('cancel'));
+    // Click abort link and check if we are at the job abort confirm page.
+    $this->clickLink(t('abort'));
+    $this->assertText(t('This will send a request to the translator to abort the job. After the action the job translation process will be aborted and only remaining action will be resubmitting it.'));
+    // Return back to job overview and test the manage link.
+    $this->drupalGet('admin/tmgmt');
     $this->clickLink(t('manage'));
     $this->assertText(t('Needs review'));
     $this->assertNoLink(t('review'));
-    $this->assertTrue(empty($urls));
 
     // Now log in as user with only accept permission and review the job.
     $accept_user = $this->drupalCreateUser(array('access administration pages', 'accept translation jobs'));
