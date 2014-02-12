@@ -22,6 +22,13 @@ class TMGMTFileTranslatorUIController extends TMGMTDefaultTranslatorUIController
       '#description' => t('Please select the format you want to export data.'),
     );
 
+    $form['xliff_processing'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Extended XLIFF processing'),
+      '#description' => t('Check to further process content semantics and mask HTML tags instead just escaping it.'),
+      '#default_value' => $translator->getSetting('xliff_processing'),
+    );
+
     $form['allow_override'] = array(
       '#type' => 'checkbox',
       '#title' => t('Allow to override the format per job'),

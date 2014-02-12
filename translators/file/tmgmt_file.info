@@ -9,4 +9,5 @@ files[] = tmgmt_file.ui.inc
 files[] = tmgmt_file.format.interface.inc
 files[] = tmgmt_file.format.xliff.inc
 files[] = tmgmt_file.format.html.inc
+files[] = tmgmt_file.recursive_iterator.inc
 files[] = tmgmt_file.test

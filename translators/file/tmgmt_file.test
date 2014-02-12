@@ -25,6 +25,152 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
   }
 
   /**
+   * Test the content processing for XLIFF export and import.
+   */
+  function testXLIFFTextProcessing() {
+    $translator = $this->createTranslator();
+    $translator->plugin = 'file';
+    $translator->settings = array(
+      'export_format' => 'xlf',
+      'xliff_processing' => TRUE,
+    );
+    $translator->save();
+
+    // Get the source text.
+    $source_text = trim(file_get_contents(drupal_get_path('module', 'tmgmt') . '/tests/testing_html/sample.html'));
+
+    // Create the reader instance, it will be used through the tests.
+    $reader = new XMLReader();
+    $xliff_elements = array('bpt', 'ept', 'ph', 'x', '#text', '#cdata-section', 'content');
+
+    // ==== First test the whole cycle ==== //
+    $job = $this->createJob();
+    $job->translator = $translator->name;
+    $job->addItem('test_html_source', 'test', '1');
+
+    // Requesting translation will mask the html.
+    $job->requestTranslation();
+    $content = $this->getTransUnitsContent($job);
+    // Test that the exported trans unit contains only xliff elements.
+    $reader->XML('<content>' . $content[0]['source'] . '</content>');
+    while ($reader->read()) {
+      if (!in_array($reader->name, $xliff_elements)) {
+        $this->fail(t('The source contains unexpected element %element', array('%element' => $reader->name)));
+      }
+    }
+    $reader->XML('<content>' . $content[0]['target'] . '</content>');
+    while ($reader->read()) {
+      if (!in_array($reader->name, $xliff_elements)) {
+        $this->fail(t('The target contains unexpected element %element', array('%element' => $reader->name)));
+      }
+    }
+
+    // Import the file, make sure all the html has been revealed and no xliff
+    // elements are present in the job translation.
+    $messages = $job->getMessages();
+    $message = reset($messages);
+    $content = str_replace('one paragraph with a break line', 'one paragraph with a break line translated', file_get_contents($message->variables['!link']));
+    $xml = simplexml_load_string($content);
+    $translated_file = 'public://tmgmt_file/translated.xlf';
+    $xml->asXML($translated_file);
+    $uri = $job->uri();
+    $edit = array(
+      'files[file]' => $translated_file,
+    );
+    $this->drupalPost($uri['path'] . '/manage', $edit, t('Import'));
+    // Reset caches and reload job.
+    entity_get_controller('tmgmt_job')->resetCache();
+    entity_get_controller('tmgmt_job_item')->resetCache();
+    $job = tmgmt_job_load($job->tjid);
+
+    // Do the comparison of the translation text and the source. It must be the
+    // same as there was no change done to the translation.
+    $item_data = $job->getData(array(1, 'dummy', 'deep_nesting'));
+    $this->assertEqual(trim($item_data[1]['#translation']['#text']), str_replace('one paragraph with a break line', 'one paragraph with a break line translated', $source_text));
+    $job_items = $job->getItems();
+    /** @var TMGMTJobItem $job_item */
+    $job_item = array_shift($job_items);
+    // Job item must be in review.
+    $this->assertTrue($job_item->isNeedsReview());
+
+    // ==== Test integrity check ==== //
+    $job = $this->createJob();
+    $job->translator = $translator->name;
+    $job->addItem('test_html_source', 'test', '1');
+    $job->requestTranslation();
+
+    $messages = $job->getMessages();
+    $message = reset($messages);
+    // Get the xml content and remove the element representing <br />. This will
+    // result in different element counts in the source and target and should
+    // trigger an error and not import the translation.
+    $content = str_replace('<x id="tjiid2-4" ctype="lb"/>', '', file_get_contents($message->variables['!link']));
+    $xml = simplexml_load_string($content);
+    $translated_file = 'public://tmgmt_file/translated.xlf';
+    $xml->asXML($translated_file);
+    $uri = $job->uri();
+    $edit = array(
+      'files[file]' => $translated_file,
+    );
+    $this->drupalPost($uri['path'] . '/manage', $edit, t('Import'));
+    entity_get_controller('tmgmt_job')->resetCache();
+    entity_get_controller('tmgmt_job_item')->resetCache();
+    $job = tmgmt_job_load($job->tjid);
+
+    $integrity_check_failed = FALSE;
+    /** @var TMGMTMessage $message */
+    foreach ($job->getMessages() as $message) {
+      if ($message->getMessage() == t('Failed to validate semantic integrity of %key element. Please check also the HTML code of the element in the review process.', array('%key' => 'dummy][deep_nesting'))) {
+        $integrity_check_failed = TRUE;
+        break;
+      }
+    }
+    // We must have the message that integrity check failed.
+    $this->assertTrue($integrity_check_failed, 'The validation of semantic integrity must fail.');
+
+    // Set the XLIFF processing to FALSE and test it results in the source
+    // text not being XLIFF processed.
+    $translator->settings['xliff_processing'] = FALSE;
+    $translator->save();
+    $job = $this->createJob();
+    $job->translator = $translator->name;
+    $job->addItem('test_html_source', 'test', '1');
+    $job->requestTranslation();
+    $targets = $this->getTransUnitsContent($job);
+    $this->assertEqual(trim(html_entity_decode($targets['0']['target'])), $source_text);
+  }
+
+  /**
+   * Gets trans-unit content from the XLIFF file that has been exported for the
+   * given job as last.
+   */
+  protected function getTransUnitsContent(TMGMTJob $job) {
+    $messages = $job->getMessages();
+    $message = reset($messages);
+    $download_url = $message->variables['!link'];
+    $xml_string = file_get_contents($download_url);
+    $xml = simplexml_load_string($xml_string);
+
+    // Register the xliff namespace, required for xpath.
+    $xml->registerXPathNamespace('xliff', 'urn:oasis:names:tc:xliff:document:1.2');
+
+    $reader = new XMLReader();
+    $data = array();
+    $i = 0;
+    foreach ($xml->xpath('//xliff:trans-unit') as $unit) {
+      $reader->XML($unit->source->asXML());
+      $reader->read();
+      $data[$i]['source'] = $reader->readInnerXML();
+      $reader->XML($unit->target->asXML());
+      $reader->read();
+      $data[$i]['target'] = $reader->readInnerXML();
+      $i++;
+    }
+
+    return $data;
+  }
+
+  /**
    * Tests export and import for the HTML format.
    */
   function testHTML() {
@@ -64,7 +210,7 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
   }
 
   /**
-   * Tests import and export for the xliff format.
+   * Tests import and export for the XLIFF format.
    */
   function testXLIFF() {
     $translator = $this->createTranslator();
@@ -134,6 +280,10 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
     $wrong_xml = clone $xml;
     $second_job = $this->createJob();
     $second_job->translator = $translator->name;
+    // We need to add the elements count value into settings, otherwise the
+    // validation will fail on integrity check.
+    $second_job->settings['xliff_validation'][1] = 0;
+    $second_job->settings['xliff_validation'][2] = 0;
     $second_job->save();
     $wrong_xml->file->header->{'phase-group'}->phase['job-id'] = $second_job->tjid;
     $wrong_file = 'public://tmgmt_file/wrong_file.xlf';

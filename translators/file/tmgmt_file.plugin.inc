@@ -50,6 +50,9 @@ class TMGMTFileTranslatorPluginController extends TMGMTDefaultTranslatorPluginCo
       'export_format' => 'xlf',
       'allow_override' => TRUE,
       'scheme' => 'public',
+      // Making this setting TRUE by default is more appropriate, however we
+      // need to make it FALSE due to backwards compatibility.
+      'xliff_processing' => FALSE,
     );
   }
 

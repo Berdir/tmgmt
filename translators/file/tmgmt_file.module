@@ -56,7 +56,7 @@ function tmgmt_file_import_form_submit($form, &$form_state) {
         try {
           // Validation successful, start import.
           $job->addTranslatedData($controller->import($file->uri));
-          $job->addMessage('Sucessfully imported file.');
+          $job->addMessage('Successfully imported file.');
         } catch (Exception $e) {
           $job->addMessage('File import failed with the following message: @message', array('@message' => $e->getMessage()), 'error');
         }
@@ -80,7 +80,7 @@ function tmgmt_file_import_form_submit($form, &$form_state) {
  * @param $plugin
  *   (Optional) Name of a plugin/extension.
  *
- * @return
+ * @return array
  *   If a plugin name is provided, information about that plugin, an array of
  *   plugin information otherwise. The information of each plugin consists of
  *   the label and plugin controller class, keyed by the plugin name which is
@@ -99,6 +99,9 @@ function tmgmt_file_format_plugin_labels() {
 
 /**
  * Returns the file format plugin controller.
+ *
+ * @param $plugin
+ *   (Optional) Name of a plugin/extension.
  *
  * @return TMGMTFileFormatInterface
  *   Either a specific file format plugin controller instance or an array of
