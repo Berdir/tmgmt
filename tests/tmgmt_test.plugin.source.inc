@@ -42,14 +42,43 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
    * {@inheritdoc}
    */
   public function getData(TMGMTJobItem $job_item) {
-    return array(
+    // Allow tests to set custom source data.
+    $source = variable_get('tmgmt_test_source_data', array(
       'dummy' => array(
         'deep_nesting' => array(
-          '#text' => 'Text for job item with type ' . $job_item->item_type . ' and id ' . $job_item->item_id . '.',
-          '#label' => 'Label for job item with type ' . $job_item->item_type . ' and id ' . $job_item->item_id . '.',
+          '#text' => 'Text for job item with type @type and id @id.',
+          '#label' => 'Label for job item with type @type and id @id.',
         ),
       ),
+    ));
+
+    $variables = array(
+      '@type' => $job_item->item_type,
+      '@id' => $job_item->item_id,
     );
+
+    $this->replacePlaceholders($source, $variables);
+
+    return $source;
+  }
+
+  /**
+   * Will replace placeholders in the #text offsets.
+   *
+   * @param array $data
+   *   Data structures where to replace placeholders.
+   * @param $variables
+   *   Key value pairs.
+   */
+  protected function replacePlaceholders(&$data, $variables) {
+    foreach (element_children($data) as $key) {
+      if (isset($data[$key]['#text'])) {
+        $data[$key]['#text'] = format_string($data[$key]['#text'], $variables);
+      }
+      else {
+        $this->replacePlaceholders($data[$key], $variables);
+      }
+    }
   }
 
   /**

@@ -701,6 +701,20 @@ class TMGMTJobItem extends Entity {
    * This function calls for TMGMTJobItem::addTranslatedDataRecursive() which
    * sets the status of each added data item to TMGMT_DATA_ITEM_STATE_TRANSLATED.
    *
+   * Following rules apply while adding translated data:
+   *
+   * 1) Updated are only items that are changed. In case there is local
+   * modification the translation is added as a revision with a message stating
+   * this fact.
+   *
+   * 2) Merging happens at the data items level, so updating only those that are
+   * changed. If a data item is in review/reject status and is being updated
+   * with translation originating from remote the status is updated to
+   * 'translated' no matter if it is changed or not.
+   *
+   * 3) Each time a data item is updated the previous translation becomes a
+   * revision.
+   *
    * If all data items are translated, the status of the job item is updated to
    * needs review.
    *
