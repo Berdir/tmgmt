@@ -16,7 +16,10 @@ function tmgmt_i18n_string_tmgmt_source_plugin_info() {
     'ui controller class' => 'TMGMTI18nStringDefaultSourceUIController',
   );
   foreach (i18n_object_info() as $object_type => $object_info) {
-    $info['i18n_string']['item types'][$object_type] = $object_info['title'];
+    // Only consider object types that have string translation information.
+    if (isset($object_info['string translation'])) {
+      $info['i18n_string']['item types'][$object_type] = $object_info['title'];
+    }
   }
   return $info;
 }
