@@ -588,8 +588,11 @@ function tmgmt_local_get_translators_for_tasks($tasks) {
   if (count($translators) > 1) {
     return call_user_func_array('array_intersect', $translators);
   }
+  elseif (count($translators) == 1) {
+    return array_shift($translators);
+  }
 
-  return array_shift($translators);
+  return array();
 }
 
 /**
@@ -718,10 +721,9 @@ function tmgmt_local_supported_language_pairs($source_language = NULL, $uids = a
     return $language_pairs[$cache_key];
   }
 
-  $query = tmgmt_local_capabilities_query($source_language, NULL, $uids);
   $language_pairs[$cache_key] = array();
 
-  foreach ($query->execute() as $row) {
+  foreach (tmgmt_local_capabilities($source_language, NULL, $uids) as $row) {
     // Prevent duplicates.
     $pair_key = $row->tmgmt_translation_skills_language_from . '__' . $row->tmgmt_translation_skills_language_to;
     $language_pairs[$cache_key][$pair_key] = array(
@@ -777,9 +779,8 @@ function tmgmt_local_translators($source_language = NULL, array $target_language
   }
 
   // Get all capabilities keyed by uids for given source language.
-  $query = tmgmt_local_capabilities_query($source_language);
   $translators_capabilities = array();
-  foreach ($query->execute() as $row) {
+  foreach (tmgmt_local_capabilities($source_language) as $row) {
     $translators_capabilities[$row->uid][] = $row->tmgmt_translation_skills_language_to;
   }
 
@@ -806,7 +807,7 @@ function tmgmt_local_translators($source_language = NULL, array $target_language
 }
 
 /**
- * Builds a query to search for language capabilities.
+ * Gets language capabilities.
  *
  * @param string $source_language
  *   (optional) Limit the source language.
@@ -815,10 +816,22 @@ function tmgmt_local_translators($source_language = NULL, array $target_language
  * @param array $uids
  *   (optional) Limit to specific users.
  *
- * @return SelectQuery
- *   A select query that is preconfigured based on the passed in conditions.
+ * @return array
+ *   Array of language capabilities with following data:
+ *   - tmgmt_translation_skills_language_from
+ *   - tmgmt_translation_skills_language_to
+ *   - uid
+ *   - name
+ *   - mail
  */
-function tmgmt_local_capabilities_query($source_language = NULL, $target_language = NULL, $uids = array()) {
+function tmgmt_local_capabilities($source_language = NULL, $target_language = NULL, $uids = array()) {
+
+  $roles = tmgmt_local_translator_roles();
+  // If there are no roles that have the required permission, return an empty
+  // array.
+  if (empty($roles)) {
+    return array();
+  }
 
   $query = db_select('field_data_tmgmt_translation_skills', 'ts')
     ->fields('ts', array('tmgmt_translation_skills_language_from', 'tmgmt_translation_skills_language_to'))
@@ -841,14 +854,26 @@ function tmgmt_local_capabilities_query($source_language = NULL, $target_languag
     $query->condition('u.uid', $uids);
   }
 
-  // Only consider users that have the 'provide translation services' perm.
-  $roles = user_roles(TRUE, 'provide translation services');
-  $query->leftJoin('users_roles', 'ur', "ur.uid = u.uid AND ur.rid IN (:roles)", array(':roles' => implode(', ', array_keys($roles))));
+  // If the authenticated user role has the required permission we do not have
+  // to do the role check.
+  if (!in_array('authenticated user', $roles)) {
+    $query->leftJoin('users_roles', 'ur', "ur.uid = u.uid AND ur.rid IN (:roles)", array(':roles' => array_keys($roles)));
+  }
 
   // Add a tag so other modules can alter this query at will.
   $query->addTag('tmgmt_translation_combination');
 
-  return $query;
+  return $query->execute()->fetchAll();
 }
 
+/**
+ * Get roles with 'provide translation services' permissions.
+ *
+ * @return array
+ *   An associative array with the role id as the key and the role name as
+ *   value.
+ */
+function tmgmt_local_translator_roles() {
+  return user_roles(TRUE, 'provide translation services');
+}
 

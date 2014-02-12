@@ -406,6 +406,12 @@ function tmgmt_local_translation_form_update_state_ajax($form, &$form_state) {
 function tmgmt_local_translation_assign_form($form, &$form_state, $tasks) {
   $form_state['tasks'] = explode(',', $tasks);
 
+  $roles = tmgmt_local_translator_roles();
+  if (empty($roles)) {
+    drupal_set_message(t('No user role has the "provide translation services" permission. <a href="@url">Configure permissions</a> for the Local translator module.',
+      array('@url' => url('admin/people/permissions'))), 'warning');
+  }
+
   $form['tuid'] = array(
     '#title' => t('Assign to'),
     '#type' => 'select',
@@ -452,6 +458,12 @@ function tmgmt_local_translation_assign_form_submit($form, &$form_state) {
  */
 function tmgmt_local_translation_reassign_form($form, &$form_state, $tasks) {
   $form_state['tasks'] = explode(',', $tasks);
+
+  $roles = tmgmt_local_translator_roles();
+  if (empty($roles)) {
+    drupal_set_message(t('No user role has the "provide translation services" permission. <a href="@url">Configure permissions</a> for the Local translator module.',
+      array('@url' => url('admin/people/permissions'))), 'warning');
+  }
 
   $form['tuid'] = array(
     '#title' => t('Assign to'),
