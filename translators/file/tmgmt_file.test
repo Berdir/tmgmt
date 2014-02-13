@@ -419,7 +419,7 @@ class TMGMTFileTestCase extends TMGMTBaseTestCase {
   }
 
   /**
-   * Creates a translated XLIFF file basd on the replacement definition.
+   * Creates a translated XLIFF file based on the replacement definition.
    *
    * @param string $source_file
    *   Source file name.
