@@ -107,14 +107,14 @@ class TMGMTFileformatXLIFF extends XMLWriter implements TMGMTFileFormatInterface
     $this->endElement();
     $this->startElement('target');
     $this->writeAttribute('xml:lang', $this->job->getTranslator()->mapToRemoteLanguage($this->job->target_language));
-    // @todo - temporary solution, it will be changed in the [#2006786]
-    $target = (!empty($element['#translation']['#text']) ? $element['#translation']['#text'] : $element['#text']);
 
-    if ($job->getSetting('xliff_processing')) {
-      $this->writeRaw($this->processForExport($target, $key_array));
-    }
-    else {
-      $this->text($element['#text']);
+    if (!empty($element['#translation']['#text'])) {
+      if ($job->getSetting('xliff_processing')) {
+        $this->writeRaw($this->processForExport($element['#translation']['#text'], $key_array));
+      }
+      else {
+        $this->text($element['#translation']['#text']);
+      }
     }
 
     $this->endElement();
