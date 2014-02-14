@@ -88,6 +88,38 @@ class TMGMTI18nStringSourcePluginController extends TMGMTDefaultSourcePluginCont
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getSourceLangCode(TMGMTJobItem $job_item) {
+    return i18n_string_source_language();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getExistingLangCodes(TMGMTJobItem $job_item) {
+    $existing_lang_codes = array();
+    $languages = language_list();
+
+    if ($object = $this->getI18nObjectWrapper($job_item)) {
+      $existing_lang_codes = array_keys($languages);
+      foreach ($object->load_strings() as $string) {
+        foreach ($languages as $language) {
+          if ($language->language == $this->getSourceLangCode($job_item)) {
+            continue;
+          }
+          // Remove languages for which we fail to find translation.
+          if (in_array($language->language, $existing_lang_codes) && !$string->get_translation($language->language)) {
+            $existing_lang_codes = array_diff($existing_lang_codes, array($language->language));
+          }
+        }
+      }
+    }
+
+    return $existing_lang_codes;
+  }
+
+  /**
    * Helper function to get i18n_object_wrapper for given job item.
    *
    * @param TMGMTJobItem $job_item

@@ -78,9 +78,13 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $this->assertEqual(t('Taxonomy term'), $item1->getSourceType());
     $job->requestTranslation();
 
+    /* @var $item TMGMTJobItem */
     foreach ($job->getItems() as $item) {
-      /* @var $item TMGMTJobItem */
+      // The source is available only in en.
+      $this->assertJobItemLangCodes($item, 'en', array('en'));
       $item->acceptTranslation();
+      // The source should be now available in de and en.
+      $this->assertJobItemLangCodes($item, 'en', array('de', 'en'));
     }
 
     // Check the structure of the imported data.
@@ -123,9 +127,11 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $item1 = $job->addItem('i18n_string', 'menu', $string_name);
     $this->assertEqual(t('Menu'), $item1->getSourceType());
     $job->requestTranslation();
+    /* @var $item TMGMTJobItem */
     foreach ($job->getItems() as $item) {
-      /* @var $item TMGMTJobItem */
+      $this->assertJobItemLangCodes($item, 'en', array('en'));
       $item->acceptTranslation();
+      $this->assertJobItemLangCodes($item, 'en', array('de', 'en'));
     }
 
     $data = $item1->getData();
@@ -160,9 +166,11 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $item1 = $job->addItem('i18n_string', 'menu_link', $string_name);
     $this->assertEqual(t('Menu link'), $item1->getSourceType());
     $job->requestTranslation();
+    /* @var $item TMGMTJobItem */
     foreach ($job->getItems() as $item) {
-      /* @var $item TMGMTJobItem */
+      $this->assertJobItemLangCodes($item, 'en', array('en'));
       $item->acceptTranslation();
+      $this->assertJobItemLangCodes($item, 'en', array('de', 'en'));
     }
 
     $data = $item1->getData();
@@ -174,6 +182,34 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     // Check string translation.
     $this->assertEqual(i18n_string_translate($string_name . ':title', $source_text, array('langcode' => $job->target_language)), $job->target_language . '_' . $source_text);
 
+  }
+
+  function testI18nStringSourceLangCodes() {
+    $config = array(
+      'name' => $this->randomName(),
+      'description' => 'description_' . $this->randomName(),
+      'machine_name' => 'test_vocab',
+      'i18n_mode' => I18N_MODE_LOCALIZE,
+    );
+    $vocabulary = entity_create('taxonomy_vocabulary', $config);
+    taxonomy_vocabulary_save($vocabulary);
+
+    $string_object_name = "taxonomy:vocabulary:" . $vocabulary->vid;
+
+    // Create the new job and job item.
+    $job = $this->createJob();
+    $job->translator = $this->translator->name;
+    $job->settings = array();
+    $job->save();
+
+    $item = $job->addItem('i18n_string', 'taxonomy_vocabulary', $string_object_name);
+    $this->assertJobItemLangCodes($item, 'en', array('en'));
+
+    i18n_string_translation_update($string_object_name . ':description', 'de_' . $config['description'], 'de');
+    $this->assertJobItemLangCodes($item, 'en', array('en'));
+
+    i18n_string_translation_update($string_object_name . ':name', 'de_' . $config['name'], 'de');
+    $this->assertJobItemLangCodes($item, 'en', array('en', 'de'));
   }
 
   function testI18nStringPluginUI() {

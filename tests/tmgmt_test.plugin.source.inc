@@ -89,4 +89,18 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
     variable_set('tmgmt_test_saved_translation_' . $job_item->item_type . '_' . $job_item->item_id, TRUE);
     $job_item->accepted();
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getExistingLangCodes(TMGMTJobItem $job_item) {
+    return array();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSourceLangCode(TMGMTJobItem $job_item) {
+    return 'en';
+  }
 }

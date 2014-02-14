@@ -75,4 +75,29 @@ interface TMGMTSourcePluginControllerInterface extends TMGMTPluginBaseInterface 
    */
   public function getType(TMGMTJobItem $job_item);
 
+  /**
+   * Gets language code of the job item source.
+   *
+   * @param TMGMTJobItem $job_item
+   *   The job item.
+   *
+   * @return string
+   *   Language code.
+   */
+  public function getSourceLangCode(TMGMTJobItem $job_item);
+
+  /**
+   * Gets existing translation language codes of the job item source.
+   *
+   * Returns language codes that can be used as the source language for a
+   * translation job.
+   *
+   * @param TMGMTJobItem $job_item
+   *   The job item.
+   *
+   * @return array
+   *   Array of language codes.
+   */
+  public function getExistingLangCodes(TMGMTJobItem $job_item);
+
 }

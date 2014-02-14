@@ -44,6 +44,9 @@ class TMGMTNodeSourceTestCase extends TMGMTEntityTestCaseUtility {
     $job->requestTranslation();
 
     foreach ($job->getItems() as $item) {
+      // The source is only available in en.
+      $this->assertJobItemLangCodes($item, 'en', array('en'));
+
       $item->acceptTranslation();
       $node = node_load($item->item_id);
       // Check if the tnid attribute is bigger than 0.
@@ -59,6 +62,9 @@ class TMGMTNodeSourceTestCase extends TMGMTEntityTestCaseUtility {
         $tnode = node_load($translations['de']->nid, NULL, TRUE);
         $this->checkTranslatedData($tnode, $item->getData(), 'de');
       }
+
+      // The source should be now available for en and de.
+      $this->assertJobItemLangCodes($item, 'en', array('de', 'en'));
     }
   }
 

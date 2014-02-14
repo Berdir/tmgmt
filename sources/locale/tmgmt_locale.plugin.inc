@@ -86,6 +86,8 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
         ->execute()
         ->fetchObject();
 
+      $locale_object->language = 'en';
+
       if (empty($locale_object)) {
         return null;
       }
@@ -194,6 +196,30 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
         $job_item->accepted();
       }
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSourceLangCode(TMGMTJobItem $job_item) {
+    // For the locale source English is always the source language.
+    return 'en';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getExistingLangCodes(TMGMTJobItem $job_item) {
+    $query = db_select('locales_target', 'lt');
+    $query->fields('lt', array('language'));
+    $query->condition('lt.lid', $job_item->item_id);
+
+    $existing_lang_codes = array('en');
+    foreach ($query->execute() as $language) {
+      $existing_lang_codes[] = $language->language;
+    }
+
+    return $existing_lang_codes;
   }
 
 }

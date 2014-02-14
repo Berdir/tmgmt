@@ -97,5 +97,30 @@ class TMGMTNodeSourcePluginController extends TMGMTDefaultSourcePluginController
     return parent::getType($job_item);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getSourceLangCode(TMGMTJobItem $job_item) {
+    if ($node = node_load($job_item->item_id)) {
+      return entity_language('node', $node);
+    }
+
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getExistingLangCodes(TMGMTJobItem $job_item) {
+    $existing_lang_codes = array();
+    if ($node = node_load($job_item->item_id)) {
+      $existing_lang_codes = array(entity_language('node', $node));
+    }
+    if ($translations = translation_node_get_translations($job_item->item_id)) {
+      $existing_lang_codes = array_unique(array_merge($existing_lang_codes, array_keys($translations)));
+    }
+
+    return $existing_lang_codes;
+  }
 
 }

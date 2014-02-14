@@ -54,5 +54,11 @@ abstract class TMGMTDefaultSourcePluginController extends TMGMTPluginBase implem
     return ucfirst($job_item->item_type);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getExistingLangCodes(TMGMTJobItem $job_item) {
+    return array();
+  }
 
 }

@@ -53,6 +53,8 @@ class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
       /* @var $item TMGMTJobItem */
       $item->acceptTranslation();
       $this->assertTrue($item->isAccepted());
+      // The source is now available in en and de.
+      $this->assertJobItemLangCodes($item, 'en', array('en', 'de'));
     }
 
     // Check string translation.
@@ -75,6 +77,9 @@ class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
       /* @var $item TMGMTJobItem */
       $item->acceptTranslation();
       $this->assertTrue($item->isAccepted());
+
+      // The source should be now available for en, de and es languages.
+      $this->assertJobItemLangCodes($item, 'en', array('en', 'de', 'es'));
     }
 
     // Check string translation.

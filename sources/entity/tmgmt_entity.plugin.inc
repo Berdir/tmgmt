@@ -82,4 +82,26 @@ class TMGMTEntitySourcePluginController extends TMGMTDefaultSourcePluginControll
   }
 
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getSourceLangCode(TMGMTJobItem $job_item) {
+    $entity = entity_load_single($job_item->item_type, $job_item->item_id);
+    return isset($entity->translations->original) ? $entity->translations->original : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getExistingLangCodes(TMGMTJobItem $job_item) {
+    if ($entity = entity_load_single($job_item->item_type, $job_item->item_id)) {
+      $entity_info = entity_get_info($job_item->item_type);
+      if (isset($entity_info['entity keys']['translations'])){
+        $translations_key = $entity_info['entity keys']['translations'];
+        return array_keys($entity->{$translations_key}->data);
+      }
+    }
+
+    return array();
+  }
 }

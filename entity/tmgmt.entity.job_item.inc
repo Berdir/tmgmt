@@ -905,6 +905,26 @@ class TMGMTJobItem extends Entity {
   }
 
   /**
+   * Gets language code of the job item source.
+   *
+   * @return string
+   *   Language code.
+   */
+  public function getSourceLangCode() {
+    return $this->getSourceController()->getSourceLangCode($this);
+  }
+
+  /**
+   * Gets existing translation language codes of the job item source.
+   *
+   * @return array
+   *   Array of language codes.
+   */
+  public function getExistingLangCodes() {
+    return $this->getSourceController()->getExistingLangCodes($this);
+  }
+
+  /**
    * Recalculate statistical word-data: pending, translated, reviewed, accepted.
    */
   public function recalculateStatistics() {

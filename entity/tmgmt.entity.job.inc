@@ -267,7 +267,10 @@ class TMGMTJob extends Entity {
   /**
    * Returns all job items attached to this job.
    *
-   * @return array
+   * @param array $conditions
+   *   Additional conditions to pass into EFQ.
+   *
+   * @return TMGMTJobItem[]
    *   An array of translation job items.
    */
   public function getItems($conditions = array()) {

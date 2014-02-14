@@ -56,12 +56,16 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
 
     // Check the translated job items.
     foreach ($job->getItems() as $item) {
+      // The source is available only for en.
+      $this->assertJobItemLangCodes($item, 'en', array('en'));
       $item->acceptTranslation();
       $this->assertTrue($item->isAccepted());
       $entity = entity_load_single($item->item_type, $item->item_id);
       $data = $item->getData();
       $this->checkTranslatedData($entity, $data, 'de');
       $this->checkUntranslatedData($entity, $this->field_names['node']['article'], $data, 'de');
+      // The source is now available for both en and de.
+      $this->assertJobItemLangCodes($item, 'en', array('de', 'en'));
     }
   }
 
@@ -91,17 +95,18 @@ class TMGMTEntitySourceTestCase extends TMGMTEntityTestCaseUtility {
 
     // Check if the fields were translated.
     foreach ($job->getItems() as $item) {
+      $this->assertJobItemLangCodes($item, 'en', array('en'));
       $item->acceptTranslation();
       $entity = entity_load_single($item->item_type, $item->item_id);
       $data = $item->getData();
       $this->checkTranslatedData($entity, $data, 'de');
       $this->checkUntranslatedData($entity, $this->field_names['taxonomy_term'][$this->vocabulary->machine_name], $data, 'de');
+      $this->assertJobItemLangCodes($item, 'en', array('de', 'en'));
     }
   }
 
   function testAddingJobItemsWithEmptySourceText() {
     $this->setEnvironment('de');
-
 
     // Create term with empty texts.
     $empty_term = new stdClass();
