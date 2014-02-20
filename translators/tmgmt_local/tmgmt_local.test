@@ -19,8 +19,6 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
 
   protected $local_translator_permissions = array(
     'provide translation services',
-    'use Rules component rules_tmgmt_local_task_assign_to_me',
-    'use Rules component rules_tmgmt_local_task_unassign',
   );
 
   static function getInfo() {
@@ -233,6 +231,20 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertText(t('Task for @job', array('@job' => $job->label())));
     // @todo: Fails, encoding problem?
     //$this->assertText(t('@from => @to', array('@from' => 'en', '@to' => 'de')));
+    $edit = array(
+      'views_bulk_operations[0]' => $job->tjid,
+    );
+    $this->drupalPost(NULL, $edit, t('Assign to me'));
+    $this->assertText(t('Performed Assign to me on 1 item.'));
+
+    // Unassign again.
+    $edit = array(
+      'views_bulk_operations[0]' => $job->tjid,
+    );
+    $this->drupalPost(NULL, $edit, t('Unassign'));
+    $this->assertText(t('Performed Unassign on 1 item.'));
+
+    // Now test the assign link.
     $this->clickLink(t('assign'));
 
     // Log in with the translator with the same capabilities, make sure that he
@@ -242,13 +254,6 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     $this->assertNoText(t('Task for @job', array('@job' => $job->label())));
 
     $this->drupalLogin($this->local_translator);
-
-    // @todo: Assign bulk action missing, permission problem?
-    /*$edit = array(
-      'views_bulk_operations[0]' => $job->tjid,
-    );
-    $this->drupalPost(NULL, $edit, t('Assign to me'));*/
-
 
     // Translate the task.
     $this->drupalGet('translate');
@@ -572,5 +577,38 @@ class TMGMTLocalTestCase extends TMGMTBaseTestCase {
     // Only translator2 has such capabilities.
     $translators = tmgmt_local_translators('en', array('ru', 'fr'));
     $this->assertTrue(isset($translators[$translator2->uid]));
+  }
+
+  /**
+   * Test permissions for the tmgmt_local VBO actions.
+   */
+  function testVBOPermissions() {
+    $translator = tmgmt_translator_load('local');
+    $job = $this->createJob();
+    $job->translator = $translator->name;
+    $job->settings['job_comment'] = $job_comment = 'Dummy job comment';
+    $job->addItem('test_source', 'test', '1');
+    $job->addItem('test_source', 'test', '2');
+
+    // Create another local translator with the required capabilities.
+    $local_translator = $this->loginAsTranslator($this->local_translator_permissions);
+    // Configure language capabilities.
+    $edit = array(
+      'tmgmt_translation_skills[und][0][language_from]' => 'en',
+      'tmgmt_translation_skills[und][0][language_to]' => 'de',
+    );
+    $this->drupalPost('user/' . $local_translator->uid . '/edit', $edit, t('Save'));
+
+    $job->requestTranslation();
+
+    $this->drupalGet('translate');
+    $this->assertFieldById('edit-rules-componentrules-tmgmt-local-task-assign-to-me', t('Assign to me'));
+    $this->assertFieldById('edit-rules-componentrules-tmgmt-local-task-unassign', t('Unassign'));
+
+    // Login as admin and check VBO submit actions are present.
+    $this->loginAsAdmin(array('administer translation tasks'));
+    $this->drupalGet('manage-translate');
+    $this->assertFieldById('edit-actionviews-bulk-operations-argument-selector-action--2', t('Assign to...'));
+    $this->assertFieldById('edit-actionviews-bulk-operations-argument-selector-action', t('Assign to...'));
   }
 }

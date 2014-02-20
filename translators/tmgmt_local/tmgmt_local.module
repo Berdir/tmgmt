@@ -877,3 +877,27 @@ function tmgmt_local_translator_roles() {
   return user_roles(TRUE, 'provide translation services');
 }
 
+/**
+ * Implements hook_rules_action_info_alter().
+ */
+function tmgmt_local_rules_action_info_alter(&$actions) {
+  if (isset($actions['component_rules_tmgmt_local_task_assign_to_me'])) {
+    $actions['component_rules_tmgmt_local_task_assign_to_me']['access callback'] = 'tmgmt_local_rules_component_access';
+  }
+  if (isset($actions['component_rules_tmgmt_local_task_assign'])) {
+    $actions['component_rules_tmgmt_local_task_assign']['access callback'] = 'tmgmt_local_rules_component_access';
+  }
+}
+
+/**
+ * Access callback to translation tasks rules component actions.
+ */
+function tmgmt_local_rules_component_access($type, $name) {
+  switch ($name) {
+    case 'component_rules_tmgmt_local_task_assign_to_me':
+      return user_access('provide translation services');
+    case 'component_rules_tmgmt_local_task_assign';
+      return user_access('administer translation tasks');
+  }
+}
+

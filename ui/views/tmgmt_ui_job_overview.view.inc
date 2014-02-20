@@ -1,6 +1,6 @@
 <?php
 
-$view = new view;
+$view = new view();
 $view->name = 'tmgmt_ui_job_overview';
 $view->description = 'Gives a bulk operation overview of translation jobs in the system.';
 $view->tag = 'Translation Management';
@@ -13,6 +13,7 @@ $view->disabled = FALSE; /* Edit this to true to make a default view disabled in
 /* Display: Master */
 $handler = $view->new_display('default', 'Master', 'default');
 $handler->display->display_options['title'] = 'Job overview';
+$handler->display->display_options['use_more_always'] = FALSE;
 $handler->display->display_options['access']['type'] = 'tmgmt_views_job_access';
 $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['query']['type'] = 'views_query';
@@ -98,7 +99,6 @@ $handler->display->display_options['style_options']['info'] = array(
 $handler->display->display_options['empty']['area']['id'] = 'area';
 $handler->display->display_options['empty']['area']['table'] = 'views';
 $handler->display->display_options['empty']['area']['field'] = 'area';
-$handler->display->display_options['empty']['area']['empty'] = FALSE;
 $handler->display->display_options['empty']['area']['content'] = 'There are no translation jobs that match the specified filter criteria.';
 $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
 /* Relationship: Translator */
@@ -107,71 +107,56 @@ $handler->display->display_options['relationships']['translator']['table'] = 'tm
 $handler->display->display_options['relationships']['translator']['field'] = 'translator';
 $handler->display->display_options['relationships']['translator']['ui_name'] = 'Translator';
 $handler->display->display_options['relationships']['translator']['label'] = 'Translator';
-$handler->display->display_options['relationships']['translator']['required'] = 0;
 /* Field: Bulk operations */
 $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
 $handler->display->display_options['fields']['views_bulk_operations']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['views_bulk_operations']['field'] = 'views_bulk_operations';
 $handler->display->display_options['fields']['views_bulk_operations']['ui_name'] = 'Bulk operations';
 $handler->display->display_options['fields']['views_bulk_operations']['label'] = '';
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['external'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['more_link'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['alter']['html'] = 0;
 $handler->display->display_options['fields']['views_bulk_operations']['element_label_colon'] = FALSE;
-$handler->display->display_options['fields']['views_bulk_operations']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['hide_empty'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['empty_zero'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['hide_alter_empty'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['entity_load_capacity'] = '10';
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['operations'] = array(
+$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['display_type'] = '0';
+$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['enable_select_all_pages'] = 1;
+$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
+$handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
+$handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
   'rules_component::rules_tmgmt_job_accept_translation' => array(
     'selected' => 1,
-    'use_queue' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 1,
     'override_label' => 0,
     'label' => '',
   ),
   'rules_component::rules_tmgmt_job_cancel_translation' => array(
     'selected' => 1,
-    'use_queue' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 1,
     'override_label' => 0,
     'label' => '',
   ),
   'action::views_bulk_operations_delete_item' => array(
-    'selected' => 1,
-    'use_queue' => 0,
+    'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 1,
     'label' => 'Delete Job',
   ),
-  'action::system_message_action' => array(
-    'selected' => 0,
-    'use_queue' => 0,
+  'rules_component::rules_tmgmt_job_delete' => array(
+    'selected' => 1,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -191,26 +176,14 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo']['op
       'url' => '',
     ),
   ),
-  'action::system_goto_action' => array(
-    'selected' => 0,
-    'use_queue' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-  ),
   'action::system_send_email_action' => array(
     'selected' => 0,
-    'use_queue' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
   ),
 );
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['enable_select_all_pages'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_type'] = '0';
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_result'] = 1;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['merge_single_action'] = 0;
-$handler->display->display_options['fields']['views_bulk_operations']['vbo']['force_single'] = 0;
 /* Field: Label */
 $handler->display->display_options['fields']['label']['id'] = 'label';
 $handler->display->display_options['fields']['label']['table'] = 'tmgmt_job';
@@ -247,24 +220,6 @@ $handler->display->display_options['fields']['progress']['ui_name'] = 'Progress'
 $handler->display->display_options['fields']['word_count']['id'] = 'word_count';
 $handler->display->display_options['fields']['word_count']['table'] = 'tmgmt_job';
 $handler->display->display_options['fields']['word_count']['field'] = 'word_count';
-$handler->display->display_options['fields']['word_count']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['word_count']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['word_count']['alter']['absolute'] = 0;
-$handler->display->display_options['fields']['word_count']['alter']['external'] = 0;
-$handler->display->display_options['fields']['word_count']['alter']['replace_spaces'] = 0;
-$handler->display->display_options['fields']['word_count']['alter']['trim_whitespace'] = 0;
-$handler->display->display_options['fields']['word_count']['alter']['nl2br'] = 0;
-$handler->display->display_options['fields']['word_count']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['word_count']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['word_count']['alter']['more_link'] = 0;
-$handler->display->display_options['fields']['word_count']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['word_count']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['word_count']['alter']['html'] = 0;
-$handler->display->display_options['fields']['word_count']['element_label_colon'] = 1;
-$handler->display->display_options['fields']['word_count']['element_default_classes'] = 1;
-$handler->display->display_options['fields']['word_count']['hide_empty'] = 0;
-$handler->display->display_options['fields']['word_count']['empty_zero'] = 0;
-$handler->display->display_options['fields']['word_count']['hide_alter_empty'] = 1;
 /* Field: Changed */
 $handler->display->display_options['fields']['changed']['id'] = 'changed';
 $handler->display->display_options['fields']['changed']['table'] = 'tmgmt_job';
@@ -347,6 +302,10 @@ $translatables['tmgmt_ui_job_overview'] = array(
   t('Items per page'),
   t('- All -'),
   t('Offset'),
+  t('« first'),
+  t('‹ previous'),
+  t('next ›'),
+  t('last »'),
   t('There are no translation jobs that match the specified filter criteria.'),
   t('Translator'),
   t('Label'),
@@ -359,3 +318,4 @@ $translatables['tmgmt_ui_job_overview'] = array(
   t('Operations'),
   t('Page'),
 );
+

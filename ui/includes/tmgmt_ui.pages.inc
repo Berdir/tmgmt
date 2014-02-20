@@ -573,6 +573,7 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       '#redirect' => 'admin/tmgmt/jobs/' . $job->tjid . '/delete',
       // Don't run validations, so the user can always delete the job.
       '#limit_validation_errors' => array(),
+      '#access' => user_access('administer tmgmt'),
     );
   }
   // Only show the 'Cancel' button if the job has been submitted to the

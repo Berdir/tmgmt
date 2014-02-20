@@ -104,6 +104,15 @@ class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
     $this->assertNoLink(t('delete'));
     $this->assertText(t('@title', array('@title' => $node->title)));
 
+    // Check VBO actions - "submit translation job" has the right to cancel
+    // translation only.
+    $element = $this->xpath('//select[@id=:id]/option/@value', array(':id' => 'edit-operation'));
+    $options = array();
+    foreach ($element as $option) {
+      $options[] = (string) $option;
+    }
+    $this->assertTrue(in_array('rules_component::rules_tmgmt_job_cancel_translation', $options));
+
     // Go to the job checkout page and submit it.
     $this->clickLink('submit');
     $this->drupalPost(NULL, array(), t('Submit to translator'));
@@ -126,6 +135,16 @@ class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
     $this->drupalLogin($accept_user);
 
     $this->drupalGet('admin/tmgmt');
+
+    // Check VBO actions - "accept translation jobs" has the right to accept
+    // translation only.
+    $element = $this->xpath('//select[@id=:id]/option/@value', array(':id' => 'edit-operation'));
+    $options = array();
+    foreach ($element as $option) {
+      $options[] = (string) $option;
+    }
+    $this->assertTrue(in_array('rules_component::rules_tmgmt_job_accept_translation', $options));
+
     $this->clickLink('manage');
     $this->clickLink('review');
 
@@ -135,6 +154,20 @@ class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
     $this->drupalPost(NULL, array(), t('Save as completed'));
     $this->assertText(t('Accepted'));
     $this->assertText('1/0/0');
+
+    $create_user = $this->loginAsAdmin();
+    $this->drupalLogin($create_user);
+
+    $this->drupalGet('admin/tmgmt');
+    // Check VBO actions - "administer tmgmt" has rights for all actions.
+    $element = $this->xpath('//select[@id=:id]/option/@value', array(':id' => 'edit-operation'));
+    $options = array();
+    foreach ($element as $option) {
+      $options[] = (string) $option;
+    }
+    $this->assertTrue(in_array('rules_component::rules_tmgmt_job_accept_translation', $options));
+    $this->assertTrue(in_array('rules_component::rules_tmgmt_job_cancel_translation', $options));
+    $this->assertTrue(in_array('rules_component::rules_tmgmt_job_delete', $options));
 
     // Go to the translate tab, verify that there is no request translation
     // button.

@@ -29,5 +29,15 @@ function tmgmt_ui_default_rules_configuration() {
   }';
   $rule = rules_import($data);
   $configs[$rule->name] = $rule;
+  $data = '{ "rules_tmgmt_job_delete" : {
+      "LABEL" : "Delete Job",
+      "PLUGIN" : "rule",
+      "REQUIRES" : [ "tmgmt" ],
+      "USES VARIABLES" : { "job" : { "label" : "Job", "type" : "tmgmt_job" } },
+      "DO" : [ { "tmgmt_rules_job_delete" : { "job" : [ "job" ] } } ]
+    }
+  }';
+  $rule = rules_import($data);
+  $configs[$rule->name] = $rule;
   return $configs;
 }

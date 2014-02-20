@@ -35,6 +35,7 @@ function tmgmt_local_rules_action_info() {
         'description' => t('The translation task which will be unassigned.'),
       ),
     ),
+    'access callback' => 'tmgmt_local_rules_task_access',
   );
 
   return $info;
@@ -54,4 +55,11 @@ function tmgmt_local_rules_task_assign(TMGMTLocalTask $task, stdClass $translato
 function tmgmt_local_rules_task_unassign(TMGMTLocalTask $task) {
   $task->unassign();
   $task->save();
+}
+
+/**
+ * Access callback to the unassign task rules action.
+ */
+function tmgmt_local_rules_task_access() {
+  return user_access('administer translation tasks') || user_access('provide translation services');
 }

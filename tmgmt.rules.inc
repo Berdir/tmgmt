@@ -19,6 +19,7 @@ function tmgmt_rules_action_info() {
         'description' => t('The translation job for which translations should be requested.'),
       ),
     ),
+    'access callback' => 'tmgmt_rules_job_submit_access',
   );
   $info['tmgmt_rules_job_accept_translation'] = array(
     'label' => t('Accept Job translation'),
@@ -36,6 +37,7 @@ function tmgmt_rules_action_info() {
         'optional' => TRUE,
       ),
     ),
+    'access callback' => 'tmgmt_rules_job_accept_translation_access',
   );
   $info['tmgmt_rules_job_cancel_translation'] = array(
     'label' => t('Cancel translation job'),
@@ -44,9 +46,22 @@ function tmgmt_rules_action_info() {
       'job' => array(
         'type' => 'tmgmt_job',
         'label' => t('Translation Job'),
-        'description' => t('The translation job that should be canceled.'),
+        'description' => t('The translation job that should be aborted.'),
       ),
     ),
+    'access callback' => 'tmgmt_rules_job_submit_access',
+  );
+  $info['tmgmt_rules_job_delete'] = array(
+    'label' => t('Delete Job'),
+    'group' => t('Translation Management'),
+    'parameter' => array(
+      'job' => array(
+        'type' => 'tmgmt_job',
+        'label' => t('Translation Job'),
+        'description' => t('The translation job that should be deleted.'),
+      ),
+    ),
+    'access callback' => 'tmgmt_rules_job_delete_access',
   );
   $info['tmgmt_rules_job_checkout'] = array(
     'label' => t('Checkout a job'),
@@ -58,6 +73,7 @@ function tmgmt_rules_action_info() {
         'description' => t('The translation job that should be checked out.'),
       ),
     ),
+    'access callback' => 'tmgmt_rules_job_submit_access',
   );
   $info['tmgmt_get_first_from_node_list'] = array(
     'label' => t('Get first item from a list of nodes'),
@@ -197,4 +213,35 @@ function tmgmt_get_first_from_node_list($list) {
   return array(
     'first_node' => reset($list),
   );
+}
+
+/**
+ * Rules action to delete a translation job.
+ */
+function tmgmt_rules_job_delete(TMGMTJob $job) {
+  // Prevent users without job delete permission to be able to delete jobs.
+  if (tmgmt_job_access('delete')) {
+    $job->delete();
+  }
+}
+
+/**
+ * Checks access to rules job delete action.
+ */
+function tmgmt_rules_job_delete_access() {
+  return tmgmt_job_access('delete');
+}
+
+/**
+ * Checks access to rules job submit like actions.
+ */
+function tmgmt_rules_job_submit_access() {
+  return tmgmt_job_access('submit');
+}
+
+/**
+ * Checks access to rules accept translation action.
+ */
+function tmgmt_rules_job_accept_translation_access() {
+  return tmgmt_job_access('accept');
 }
