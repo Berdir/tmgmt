@@ -746,7 +746,7 @@ function tmgmt_job_item_load($tjiid) {
  * @param $conditions
  *   An array of additional conditions.
  *
- * @return
+ * @return TMGMTJobItem[]
  *   An array of job item entities or an empty array if the query returned no
  *   results.
  */

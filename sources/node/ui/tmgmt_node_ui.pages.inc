@@ -14,6 +14,11 @@ function tmgmt_node_ui_node_form($form, &$form_state, $node, $original) {
   // Store the node in the form state so we can easily create the job in the
   // submit handler.
   $form_state['node'] = $node;
+
+  $form['top_actions']['#type'] = 'actions';
+  $form['top_actions']['#weight'] = -10;
+  tmgmt_ui_add_cart_form($form['top_actions'], $form_state, 'node', 'node', $node->nid);
+
   // Inject our additional column into the header.
   array_splice($original['#header'], -1, 0, array(t('Pending Translations')));
   // Make this a tableselect form.

@@ -68,3 +68,26 @@ function tmgmt_test_tmgmt_file_text_processor_plugin_info() {
     ),
   );
 }
+
+/**
+ * Implements hook_menu().
+ */
+function tmgmt_test_menu() {
+  $items['tmgmt-add-to-cart/%tmgmt_job_item'] = array(
+    'title' => 'Add to cart',
+    'description' => 'Provides the possibility to add testing job items into the cart.',
+    'page callback' => 'tmgmt_test_add_to_cart',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Callback to add given job item into the cart.
+ */
+function tmgmt_test_add_to_cart(TMGMTJobITem $job_item) {
+  tmgmt_ui_cart_get()->addExistingJobItems(array($job_item));
+}

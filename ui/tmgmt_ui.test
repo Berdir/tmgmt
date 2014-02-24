@@ -448,4 +448,111 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     $this->assertEqual(trim((string)$status), t('N/A'));
 
   }
+
+  /**
+   * Test the cart functionality.
+   */
+  function testCart() {
+
+    $this->setEnvironment('fr');
+    $job_items = array();
+    // Create a few job items and add them to the cart.
+    for ($i = 1; $i < 6; $i++) {
+      $job_item = tmgmt_job_item_create('test_source', 'test', $i);
+      $job_item->save();
+      $job_items[$i] = $job_item;
+    }
+
+    $this->loginAsTranslator();
+    foreach ($job_items as $job_item) {
+      $this->drupalGet('tmgmt-add-to-cart/' . $job_item->tjiid);
+    }
+
+    // Check if the items are displayed in the cart.
+    $this->drupalGet('admin/tmgmt/cart');
+    foreach ($job_items as $job_item) {
+      $this->assertText($job_item->label());
+    }
+
+    // Test the remove items from cart functionality.
+    $this->drupalPost(NULL, array('items[1]' => TRUE, 'items[4]' => TRUE), t('Remove selected'));
+    $this->assertText($job_items[2]->label());
+    $this->assertText($job_items[3]->label());
+    $this->assertText($job_items[5]->label());
+    $this->assertNoText($job_items[1]->label());
+    $this->assertNoText($job_items[4]->label());
+    $this->assertText(t('Job items were removed from the cart.'));
+
+    // Test that removed job items from cart were deleted as well.
+    $existing_items = tmgmt_job_item_load_multiple(NULL);
+    $this->assertTrue(!isset($existing_items[$job_items[1]->tjiid]));
+    $this->assertTrue(!isset($existing_items[$job_items[4]->tjiid]));
+
+
+    $this->drupalPost(NULL, array(), t('Empty cart'));
+    $this->assertNoText($job_items[2]->label());
+    $this->assertNoText($job_items[3]->label());
+    $this->assertNoText($job_items[5]->label());
+    $this->assertText(t('All job items were removed from the cart.'));
+
+    // No remaining job items.
+    $existing_items = tmgmt_job_item_load_multiple(NULL);
+    $this->assertTrue(empty($existing_items));
+
+    $language_sequence = array('en', 'en', 'fr', 'fr', 'de', 'de');
+    for ($i = 1; $i < 7; $i++) {
+      $job_item = tmgmt_job_item_create('test_source', 'test', $i);
+      $job_item->save();
+      $job_items[$i] = $job_item;
+      $languages[$job_items[$i]->tjiid] = $language_sequence[$i - 1];
+    }
+    variable_set('tmgmt_test_source_languages', $languages);
+    foreach ($job_items as $job_item) {
+      $this->drupalGet('tmgmt-add-to-cart/' . $job_item->tjiid);
+    }
+
+    $this->drupalPost('admin/tmgmt/cart', array(
+      'items[' . $job_items[1]->tjiid . ']' => TRUE,
+      'items[' . $job_items[2]->tjiid . ']' => TRUE,
+      'items[' . $job_items[3]->tjiid . ']' => TRUE,
+      'items[' . $job_items[4]->tjiid . ']' => TRUE,
+      'items[' . $job_items[5]->tjiid . ']' => TRUE,
+      'target_language[]' => array('en', 'de'),
+    ), t('Request translation'));
+
+    $this->assertText(t('@count jobs need to be checked out.', array('@count' => 4)));
+
+    // We should have four jobs with following language combinations:
+    // [fr, fr] => [en]
+    // [de] => [en]
+    // [en, en] => [de]
+    // [fr, fr] => [de]
+
+    $jobs = entity_load('tmgmt_job', FALSE, array('source_language' => 'fr', 'target_language' => 'en'));
+    $job = reset($jobs);
+    $this->assertEqual(count($job->getItems()), 2);
+
+    $jobs = entity_load('tmgmt_job', FALSE, array('source_language' => 'de', 'target_language' => 'en'));
+    $job = reset($jobs);
+    $this->assertEqual(count($job->getItems()), 1);
+
+    $jobs = entity_load('tmgmt_job', FALSE, array('source_language' => 'en', 'target_language' => 'de'));
+    $job = reset($jobs);
+    $this->assertEqual(count($job->getItems()), 2);
+
+    $jobs = entity_load('tmgmt_job', FALSE, array('source_language' => 'fr', 'target_language' => 'de'));
+    $job = reset($jobs);
+    $this->assertEqual(count($job->getItems()), 2);
+
+    $this->drupalGet('admin/tmgmt/cart');
+    // Both fr and one de items must be gone.
+    $this->assertNoText($job_items[1]->label());
+    $this->assertNoText($job_items[2]->label());
+    $this->assertNoText($job_items[3]->label());
+    $this->assertNoText($job_items[4]->label());
+    $this->assertNoText($job_items[5]->label());
+    // One de item is in the cart as it was not selected for checkout.
+    $this->assertText($job_items[6]->label());
+  }
+
 }

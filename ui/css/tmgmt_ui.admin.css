@@ -177,3 +177,17 @@ table.tmgmt-ui-review tbody th {
 .tmgmt-legend-status{
   width: 152px;
 }
+
+.tmgmt-sources-wrapper div.form-item {
+  float: left;
+  margin-right: 16px;
+}
+
+.tmgmt-sources-wrapper input.form-submit {
+  margin: 20px 0 0 0;
+}
+
+.tmgmt-source-operations-wrapper {
+  clear: both;
+}
+

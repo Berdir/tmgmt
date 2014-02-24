@@ -51,10 +51,15 @@ class TMGMTLocaleSourceUiTestCase extends TMGMTBaseTestCase {
     $this->assertNoText('Example');
 
     $locale_object = db_query('SELECT * FROM {locales_source} WHERE source = :source LIMIT 1', array(':source' => 'Hello World'))->fetchObject();
+
+    // First add source to the cart to test its functionality.
     $edit = array(
       'items[' . $locale_object->lid . ']' => TRUE,
     );
-    $this->drupalPost(NULL, $edit, t('Request translation'));
+    $this->drupalPost(NULL, $edit, t('Add to cart'));
+    $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => url('admin/tmgmt/cart'))));
+    $edit['target_language[]'] = array('es');
+    $this->drupalPost('admin/tmgmt/cart', $edit, t('Request translation'));
 
     // Assert that the job item is displayed.
     $this->assertText('Hello World');
@@ -62,7 +67,8 @@ class TMGMTLocaleSourceUiTestCase extends TMGMTBaseTestCase {
     $this->assertText('2');
     $this->drupalPost(NULL, array('target_language' => 'es'), t('Submit to translator'));
 
-    // Now make sure that the active job is shown.
+    // Test for the translation flag title.
+    $this->drupalGet('admin/tmgmt/sources/locale_default');
     $this->assertRaw(t('Active job item: Needs review'));
 
     // Review and accept the job item.

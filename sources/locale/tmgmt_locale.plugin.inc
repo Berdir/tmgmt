@@ -77,7 +77,16 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
       throw new TMGMTException(t('Unable to load locale with id %id', array('%id' => $job_item->item_id)));
     }
 
-    if ($job_item->getJob()->source_language == 'en') {
+    // This is necessary as the method is also used in the getLabel() callback
+    // and for that case the job is not available in the cart.
+    if (!empty($job_item->tjid)) {
+      $source_language = $job_item->getJob()->source_language;
+    }
+    else {
+      $source_language = $job_item->getSourceLangCode();
+    }
+
+    if ($source_language == 'en') {
       $query = db_select('locales_source', 'ls');
       $query
         ->fields('ls')
@@ -101,7 +110,7 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
         ->fields('lt')
         ->fields('ls')
         ->condition('lt.lid', $locale_lid)
-        ->condition('lt.language', $job_item->getJob()->source_language);
+        ->condition('lt.language', $source_language);
       $locale_object = $query
         ->execute()
         ->fetchObject();

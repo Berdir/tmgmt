@@ -257,3 +257,16 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * request in the TMGMTTranslatorPluginControllerInterface::requestTranslation()
  * plugin implementation.
  */
+
+/**
+ * @defgroup tmgmt_ui_cart Translation cart
+ *
+ * The translation cart can collect multiple source items of different types
+ * which are meant for translation into a list. The list then provides
+ * functionality to request translation of the items into multiple target
+ * languages.
+ *
+ * Each source can easily plug into the cart system utilising the
+ * tmgmt_ui_add_cart_form() on either the source overview page as well as the
+ * translate tab.
+ */

@@ -18,7 +18,9 @@ class TMGMTJobItemController extends EntityAPIController {
    */
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $entity->changed = REQUEST_TIME;
-    $entity->recalculateStatistics();
+    if (!empty($entity->tjid)) {
+      $entity->recalculateStatistics();
+    }
     return parent::save($entity, $transaction);
   }
 

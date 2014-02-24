@@ -134,8 +134,9 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
     $default_values = $this->getSearchFormSubmittedParams();
 
     $form['search_wrapper'] = array(
-      '#prefix' => '<div class="tmgmt-i18n_string-sources-wrapper">',
+      '#prefix' => '<div class="tmgmt-sources-wrapper tmgmt-i18n_string-sources-wrapper">',
       '#suffix' => '</div>',
+      '#weight' => -15,
     );
     $form['search_wrapper']['search'] = array(
       '#tree' => TRUE,

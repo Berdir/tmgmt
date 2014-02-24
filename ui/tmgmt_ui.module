@@ -49,11 +49,30 @@ function tmgmt_ui_menu() {
     'file' => 'includes/tmgmt_ui.pages.inc',
     'weight' => 10,
   );
+  $items['admin/tmgmt/cart'] = array(
+    'title' => 'Cart',
+    'title callback' => 'tmgmt_ui_cart_title',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tmgmt_ui_cart_content'),
+    'access arguments' => array('create translation jobs'),
+    'file' => 'includes/tmgmt_ui.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 20,
+  );
   // Some source plugins might provide menu items.
   foreach (tmgmt_source_ui_controller() as $controller) {
     $items += $controller->hook_menu();
   }
   return $items;
+}
+
+/**
+ * Cart page title callback.
+ *
+ * @return string
+ */
+function tmgmt_ui_cart_title() {
+  return t('Cart (@count)', array('@count' => tmgmt_ui_cart_get()->count()));
 }
 
 /**
@@ -223,7 +242,15 @@ function tmgmt_ui_source_overview_form_defaults($form, &$form_state, $plugin, $i
   $info = tmgmt_source_plugin_info($plugin);
   // Set a generic title that includes the source plugin and item type label.
   drupal_set_title(t('@type overview (@plugin)', array('@type' => $controller->getItemTypeLabel($item_type), '@plugin' => $info['label'])), PASS_THROUGH);
-  $form['actions']['#type'] = 'actions';
+  $form['actions'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Operations'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#weight' => -10,
+    '#attributes' => array('class' => array('tmgmt-source-operations-wrapper'))
+  );
+  tmgmt_ui_add_cart_form($form['actions'], $form_state, $plugin, $item_type);
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Request translation'),
@@ -257,6 +284,138 @@ function tmgmt_ui_source_overview_form_submit($form, &$form_state) {
   $controller = tmgmt_source_ui_controller($plugin);
   $controller->overviewFormSubmit($form, $form_state, $item_type);
 }
+
+/**
+ * Gets the tmgmt cart singleton object.
+ *
+ * @return TMGMTJobItemUICart
+ *   The cart object.
+ */
+function tmgmt_ui_cart_get() {
+  return TMGMTJobItemUICart::getInstance();
+}
+
+/**
+ * @addtogroup tmgmt_ui_cart
+ * @{
+ */
+
+/**
+ * Adds add to cart form elements.
+ *
+ * There are two use cases for this function:
+ *
+ * 1) Add the "Add to cart" submit action to the source overview form. In this
+ * case the $item_id should not be provided and only the action button will be
+ * displayed. The form is expected to submit job items ids as items[] which is
+ * being validated via tmgmt_ui_source_add_to_cart_validate().
+ *
+ * 2) Add the "Add to cart" submit action to the translate tab. For this case
+ * the $item_id is required and with the add to cart button also the cart
+ * information is displayed. In this case there is no validation as the caller
+ * needs to provide valid $item_id value.
+ *
+ * The "Add to cart" action submits the form by calling
+ * tmgmt_ui_source_add_to_cart_submit() submit callback which processes either
+ * one job item or multiple.
+ *
+ * @param array $form
+ *   Form to which to add the add to cart form elements.
+ * @param array $form_state
+ *   The current form state object.
+ * @param string $plugin
+ *   Current plugin name.
+ * @param string $item_type
+ *   Type of the source item.
+ * @param mixed $item_id
+ *   (Optional) It is required in case a single source is being added into the
+ *   cart.
+ */
+function tmgmt_ui_add_cart_form(&$form, &$form_state, $plugin, $item_type, $item_id = NULL) {
+  $form_state['tmgmt_cart'] = array(
+    'plugin' => $plugin,
+    'item_type' => $item_type,
+    'item_id' => $item_id,
+  );
+  $form['add_to_cart'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add to cart'),
+    '#submit' => array('tmgmt_ui_source_add_to_cart_submit'),
+  );
+
+  if (empty($item_id)) {
+    $form['add_to_cart']['#validate'] = array('tmgmt_ui_cart_source_overview_validate');
+  }
+  else {
+    //
+    $form['add_to_cart']['#limit_validation_errors'] = array();
+    // Compose the cart info message for the translate tab.
+    $count = tmgmt_ui_cart_get()->count();
+    if (tmgmt_ui_cart_get()->isSourceItemAdded($plugin, $item_type, $item_id)) {
+      $form['add_to_cart']['#disabled'] = TRUE;
+      $message = format_plural($count, 'There is @count item in the <a href="@url">translation cart</a> including the current item.',
+        'There are @count items in the <a href="@url">translation cart</a> including the current item.', array('@url' => url('admin/tmgmt/cart')));
+    }
+    else {
+      $message = format_plural($count, 'There is @count item in the <a href="@url">translation cart</a>.',
+        'There are @count items in the <a href="@url">translation cart</a>.', array('@url' => url('admin/tmgmt/cart')));
+    }
+
+    $form['add_to_cart']['#suffix'] = '<span class="tmgmt-ui-cart-status-message">' . $message . '</span>';
+  }
+}
+
+/**
+ * Submit handler to add items into the cart.
+ *
+ * Based on the submitted data it will create job items and add them into the
+ * cart. Use it in combination with tmgmt_ui_add_cart_form() as that function
+ * sets all the necessary values needed to crate a job an add it into the cart.
+ *
+ * @see tmgmt_ui_add_cart_form()
+ */
+function tmgmt_ui_source_add_to_cart_submit($form, &$form_state) {
+
+  $cart_info = $form_state['tmgmt_cart'];
+  if (!empty($cart_info['plugin']) && !empty($cart_info['item_type']) && !empty($form_state['values']['items'])) {
+    $source_items = array_filter($form_state['values']['items']);
+    $item_type = $cart_info['item_type'];
+    $plugin = $cart_info['plugin'];
+  }
+  elseif (!empty($cart_info['plugin']) && !empty($cart_info['item_type']) && !empty($cart_info['item_id'])) {
+    $source_items = array($cart_info['item_id']);
+    $item_type = $cart_info['item_type'];
+    $plugin = $cart_info['plugin'];
+  }
+  else {
+    drupal_set_message(t('Unable to add the content into the cart.'), 'error');
+    return;
+  }
+
+  $i = 0;
+  foreach ($source_items as $source_id) {
+    if (tmgmt_ui_cart_get()->addJobItem($plugin, $item_type, $source_id)) {
+      $i++;
+    }
+  }
+
+  drupal_set_message(format_plural($i, '@count content source was added into the <a href="@url">cart</a>.',
+    '@count content sources were added into the <a href="@url">cart</a>.', array('@url' => url('admin/tmgmt/cart'))));
+}
+
+/**
+ * Cart form validation callback for the source overview.
+ */
+function tmgmt_ui_cart_source_overview_validate($form, &$form_state) {
+  $items = array_filter($form_state['values']['items']);
+  if (empty($items)) {
+    form_set_error('items', t('No job items were selected.'));
+  }
+}
+
+/**
+ * @} End of "addtogroup tmgmt_ui_cart".
+ */
 
 /**
  * Attempts to check out a number of jobs. Performs a number of checks on each

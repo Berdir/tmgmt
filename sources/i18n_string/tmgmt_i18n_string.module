@@ -94,6 +94,10 @@ function tmgmt_i18n_string_form_i18n_string_translate_page_overview_form_alter(&
 
   $existing_items = tmgmt_job_item_load_latest('i18n_string', $object->get_type(), $id, $source_language);
 
+  $form['top_actions']['#type'] = 'actions';
+  $form['top_actions']['#weight'] = -10;
+  tmgmt_ui_add_cart_form($form['top_actions'], $form_state, 'i18n_string', $object->get_type(), $id);
+
   $form['languages']['#type'] = 'tableselect';
 
   // Append lang code so that we can use it

@@ -117,8 +117,9 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
     $form_state['entity_type'] = $type;
 
     $form['search_wrapper'] = array(
-      '#prefix' => '<div class="tmgmt-entity-sources-wrapper">',
+      '#prefix' => '<div class="tmgmt-sources-wrapper tmgmt-entity-sources-wrapper">',
       '#suffix' => '</div>',
+      '#weight' => -15,
     );
     $form['search_wrapper']['search'] = array(
       '#tree' => TRUE,

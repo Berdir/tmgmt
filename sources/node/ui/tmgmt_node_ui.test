@@ -416,4 +416,35 @@ class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
     $this->drupalGet('node/' . $node->nid . '/translate');
     $this->clickLink('de_' . $node->title);
   }
+
+  /**
+   * Test the node source specific cart functionality.
+   */
+  function testCart() {
+    $nodes = array();
+    for ($i = 0; $i < 4; $i++) {
+      $nodes[] = $this->createNode('page');
+    }
+
+    $this->loginAsAdmin(array_merge($this->translator_permissions, array('translate content')));
+
+    // Test the source overview.
+    $this->drupalPost('admin/tmgmt/sources/node', array(
+      'views_bulk_operations[0]' => TRUE,
+      'views_bulk_operations[1]' => TRUE,
+    ), t('Add to cart'));
+    $this->drupalGet('admin/tmgmt/cart');
+    $this->assertText($nodes[0]->title);
+    $this->assertText($nodes[1]->title);
+
+    // Test the translate tab.
+    $this->drupalGet('node/' . $nodes[3]->nid . '/translate');
+    $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a>.',
+      array('@count' => 2, '@url' => url('admin/tmgmt/cart'))));
+
+    $this->drupalPost(NULL, array(), t('Add to cart'));
+    $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => url('admin/tmgmt/cart'))));
+    $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a> including the current item.',
+      array('@count' => 3, '@url' => url('admin/tmgmt/cart'))));
+  }
 }

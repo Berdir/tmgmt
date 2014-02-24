@@ -21,6 +21,7 @@ $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['query']['type'] = 'views_query';
 $handler->display->display_options['query']['options']['query_comment'] = FALSE;
 $handler->display->display_options['exposed_form']['type'] = 'basic';
+$handler->display->display_options['exposed_form']['options']['submit_button'] = 'Search';
 $handler->display->display_options['pager']['type'] = 'full';
 $handler->display->display_options['pager']['options']['items_per_page'] = variable_get('tmgmt_source_list_limit', 20);
 $handler->display->display_options['pager']['options']['offset'] = '0';
@@ -64,50 +65,50 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_setti
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['force_single'] = 0;
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_settings']['entity_load_capacity'] = '10';
 $handler->display->display_options['fields']['views_bulk_operations']['vbo_operations'] = array(
+  'rules_component::tmgmt_node_ui_tmgmt_nodes_add_items_to_cart' => array(
+    'selected' => 1,
+    'skip_confirmation' => 1,
+    'override_label' => 0,
+    'label' => '',
+  ),
   'action::node_assign_owner_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_delete_item' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
-  ),
-  'action::system_message_action' => array(
-    'selected' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_script_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
   ),
   'action::node_make_sticky_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
   ),
   'action::node_make_unsticky_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_modify_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
@@ -117,7 +118,6 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
         '_all_' => '_all_',
       ),
     ),
-    'postpone_processing' => 0,
   ),
   'action::views_bulk_operations_argument_selector_action' => array(
     'selected' => 0,
@@ -130,31 +130,24 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::node_promote_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
   ),
   'action::node_publish_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
-  ),
-  'action::system_goto_action' => array(
-    'selected' => 0,
-    'skip_confirmation' => 0,
-    'override_label' => 0,
-    'label' => '',
-    'postpone_processing' => 0,
   ),
   'action::node_unpromote_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
   ),
   'rules_component::tmgmt_node_ui_request_translation' => array(
     'selected' => 0,
@@ -170,31 +163,31 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
   ),
   'action::node_save_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
   ),
   'action::system_send_email_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
   ),
   'action::node_unpublish_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
   ),
   'action::node_unpublish_by_keyword_action' => array(
     'selected' => 0,
+    'postpone_processing' => 0,
     'skip_confirmation' => 0,
     'override_label' => 0,
     'label' => '',
-    'postpone_processing' => 0,
   ),
 );
 /* Field: Title */
@@ -310,7 +303,7 @@ $translatables['tmgmt_node_source_overview'] = array(
   t('Master'),
   t('Content overview'),
   t('more'),
-  t('Apply'),
+  t('Search'),
   t('Reset'),
   t('Sort by'),
   t('Asc'),

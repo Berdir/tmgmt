@@ -200,9 +200,6 @@ class TMGMTJob extends Entity {
     }
 
     $item = tmgmt_job_item_create($plugin, $item_type, $item_id, array('tjid' => $this->tjid));
-    // Initialize job item data variable needed to determine word count
-    // in job item getWordCount().
-    $item->getData();
     $item->save();
 
     if ($item->getWordCount() == 0) {
@@ -215,8 +212,8 @@ class TMGMTJob extends Entity {
         $this->tjid = NULL;
       }
 
-      throw new TMGMTException('Created job item with word count 0. Plugin: @plugin | Item type: @item_type | Item id: @item_id',
-        array('@plugin' => $plugin, '@item_type' => $item_type, '@item_id' => $item_id));
+      throw new TMGMTException('Job item @label (@type) has no translatable content.',
+        array('@label' => $item->label(), '@type' => $item->getSourceType()));
     }
 
     return $item;

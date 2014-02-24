@@ -313,7 +313,7 @@ class TMGMTJobItem extends Entity {
    *   A structured data array.
    */
   public function getData(array $key = array(), $index = NULL) {
-    if (empty($this->data)) {
+    if (empty($this->data) && !empty($this->tjid)) {
       // Load the data from the source if it has not been set yet.
       $this->data = $this->getSourceData();
       $this->save();

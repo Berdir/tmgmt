@@ -257,4 +257,37 @@ class TMGMTEntitySourceUITestCase extends TMGMTEntityTestCaseUtility {
     $this->drupalGet('es/node/' . $comment->cid);
     $this->assertText('es_' . $comment->comment_body['en'][0]['value']);
   }
+
+  /**
+   * Test the entity source specific cart functionality.
+   */
+  function testCart() {
+    $this->loginAsTranslator(array('translate node entities'));
+
+    $nodes = array();
+    for ($i = 0; $i < 4; $i++) {
+      $nodes[$i] = $this->createNode('page');
+    }
+
+    // Test the source overview.
+    $this->drupalGet('admin/tmgmt/sources/entity');
+    $this->drupalPost('admin/tmgmt/sources/entity', array(
+      'items[' . $nodes[1]->nid . ']' => TRUE,
+      'items[' . $nodes[2]->nid . ']' => TRUE,
+    ), t('Add to cart'));
+
+    $this->drupalGet('admin/tmgmt/cart');
+    $this->assertText($nodes[1]->title);
+    $this->assertText($nodes[2]->title);
+
+    // Test the translate tab.
+    $this->drupalGet('node/' . $nodes[3]->nid . '/translate');
+    $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a>.',
+        array('@count' => 2, '@url' => url('admin/tmgmt/cart'))));
+
+    $this->drupalPost(NULL, array(), t('Add to cart'));
+    $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => url('admin/tmgmt/cart'))));
+    $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a> including the current item.',
+        array('@count' => 3, '@url' => url('admin/tmgmt/cart'))));
+  }
 }

@@ -101,6 +101,11 @@ class TMGMTTestSourcePluginController extends TMGMTDefaultSourcePluginController
    * {@inheritdoc}
    */
   public function getSourceLangCode(TMGMTJobItem $job_item) {
+    $source_languages = variable_get('tmgmt_test_source_languages', array());
+    if (isset($source_languages[$job_item->tjiid])) {
+      return $source_languages[$job_item->tjiid];
+    }
+
     return 'en';
   }
 }

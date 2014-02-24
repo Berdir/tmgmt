@@ -351,4 +351,56 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $this->assertRaw(t('Active job item: Needs review'));
 
   }
+
+  /**
+   * Test the i18n specific cart functionality.
+   */
+  function testCart() {
+    $vocabulary1 = entity_create('taxonomy_vocabulary', array(
+        'name' => $this->randomName(),
+        'description' => 'description_' . $this->randomName(),
+        'machine_name' => 'test_vocab1',
+        'i18n_mode' => I18N_MODE_LOCALIZE,
+    ));
+    taxonomy_vocabulary_save($vocabulary1);
+    $string1 = "taxonomy:vocabulary:" . $vocabulary1->vid;
+
+    $vocabulary2 = entity_create('taxonomy_vocabulary', array(
+        'name' => $this->randomName(),
+        'description' => 'description_' . $this->randomName(),
+        'machine_name' => 'test_vocab2',
+        'i18n_mode' => I18N_MODE_LOCALIZE,
+    ));
+    taxonomy_vocabulary_save($vocabulary2);
+    $string2 = "taxonomy:vocabulary:" . $vocabulary2->vid;
+
+    $vocabulary3 = entity_create('taxonomy_vocabulary', array(
+        'name' => $this->randomName(),
+        'description' => 'description_' . $this->randomName(),
+        'machine_name' => 'test_vocab3',
+        'i18n_mode' => I18N_MODE_LOCALIZE,
+    ));
+    taxonomy_vocabulary_save($vocabulary3);
+
+    $this->loginAsAdmin(array_merge($this->translator_permissions, array('translate interface', 'translate user-defined strings')));
+
+    // Test source overview.
+    $this->drupalPost('admin/tmgmt/sources/i18n_string_taxonomy_vocabulary', array(
+      'items[' . $string1 . ']' => TRUE,
+      'items[' . $string2 . ']' => TRUE,
+    ), t('Add to cart'));
+    $this->drupalGet('admin/tmgmt/cart');
+    $this->assertText($vocabulary1->name);
+    $this->assertText($vocabulary2->name);
+
+    // Test translate tab.
+    $this->drupalGet('admin/structure/taxonomy/test_vocab3/translate');
+    $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a>.',
+        array('@count' => 2, '@url' => url('admin/tmgmt/cart'))));
+
+    $this->drupalPost(NULL, array(), t('Add to cart'));
+    $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => url('admin/tmgmt/cart'))));
+    $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a> including the current item.',
+        array('@count' => 3, '@url' => url('admin/tmgmt/cart'))));
+  }
 }
