@@ -749,7 +749,6 @@ class TMGMTJobItem extends Entity {
       }
       if ($finished) {
         // There are no unfinished elements left.
-        $uri = $this->getSourceUri();
         if ($this->getJob()->getTranslator()->getSetting('auto_accept')) {
           // If the job item is going to be auto-accepted, set to review without
           // a message.
@@ -759,10 +758,11 @@ class TMGMTJobItem extends Entity {
           // Otherwise, create a message that contains source label, target
           // language and links to the review form.
           $uri = $this->uri();
+          $job_uri = $this->getJob()->uri();
           $variables = array(
             '!source' => l($this->getSourceLabel(), $uri['path']),
             '@language' => entity_metadata_wrapper('tmgmt_job', $this->getJob())->target_language->label(),
-            '!review_url' => url($uri['path'], array('query' => array('destination' => current_path()))),
+            '!review_url' => url($uri['path'], array('query' => array('destination' => $job_uri['path']))),
           );
           $this->needsReview('The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.', $variables);
         }
