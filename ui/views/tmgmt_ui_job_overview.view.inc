@@ -126,7 +126,7 @@ $handler->display->display_options['fields']['views_bulk_operations']['vbo_opera
     'override_label' => 0,
     'label' => '',
   ),
-  'rules_component::rules_tmgmt_job_cancel_translation' => array(
+  'rules_component::rules_tmgmt_job_abort_translation' => array(
     'selected' => 1,
     'postpone_processing' => 0,
     'skip_confirmation' => 1,

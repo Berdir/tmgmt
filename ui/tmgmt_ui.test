@@ -393,7 +393,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
     entity_get_controller('tmgmt_job')->resetCache();
     /** @var TMGMTJob $job */
     $job = tmgmt_job_load($job->tjid);
-    $this->assertTrue($job->isCancelled());
+    $this->assertTrue($job->isAborted());
     foreach ($job->getItems() as $item) {
       $this->assertTrue($item->isAborted());
     }
@@ -436,7 +436,7 @@ class TMGMTUITestCase extends TMGMTBaseTestCase {
       $this->assertEqual($_item->count_reviewed, 0);
     }
 
-    // Navigate back to the cancelled job and check for the log message.
+    // Navigate back to the aborted job and check for the log message.
     $this->drupalGet('admin/tmgmt/jobs/' . $job->tjid);
     $this->assertRaw(t('Job has been duplicated as a new job <a href="@url">#@id</a>.',
       array('@url' => url('admin/tmgmt/jobs/' . $resubmitted_job->tjid), '@id' => $resubmitted_job->tjid)));

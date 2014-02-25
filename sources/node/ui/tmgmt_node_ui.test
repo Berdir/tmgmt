@@ -111,7 +111,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
     foreach ($element as $option) {
       $options[] = (string) $option;
     }
-    $this->assertTrue(in_array('rules_component::rules_tmgmt_job_cancel_translation', $options));
+    $this->assertTrue(in_array('rules_component::rules_tmgmt_job_abort_translation', $options));
 
     // Go to the job checkout page and submit it.
     $this->clickLink('submit');
@@ -166,7 +166,7 @@ class TMGMTNodeSourceUITestCase extends TMGMTEntityTestCaseUtility {
       $options[] = (string) $option;
     }
     $this->assertTrue(in_array('rules_component::rules_tmgmt_job_accept_translation', $options));
-    $this->assertTrue(in_array('rules_component::rules_tmgmt_job_cancel_translation', $options));
+    $this->assertTrue(in_array('rules_component::rules_tmgmt_job_abort_translation', $options));
     $this->assertTrue(in_array('rules_component::rules_tmgmt_job_delete', $options));
 
     // Go to the translate tab, verify that there is no request translation

@@ -190,15 +190,15 @@ interface TMGMTTranslatorPluginControllerInterface extends TMGMTPluginBaseInterf
   public function requestTranslation(TMGMTJob $job);
 
   /**
-   * Cancels a translation job.
+   * Aborts a translation job.
    *
    * @param TMGMTJob $job
-   *   The job that should have its translation cancelled.
+   *   The job that should have its translation aborted.
    *
    * @return boolean
-   *   TRUE if the job could be cancelled, FALSE otherwise.
+   *   TRUE if the job could be aborted, FALSE otherwise.
    */
-  public function cancelTranslation(TMGMTJob $job);
+  public function abortTranslation(TMGMTJob $job);
 
   /**
    * Defines default settings.

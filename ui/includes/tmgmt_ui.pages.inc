@@ -555,14 +555,14 @@ function tmgmt_job_form($form, &$form_state, TMGMTJob $job, $op = 'edit') {
       '#submit' => array('tmgmt_ui_submit_redirect'),
       '#redirect' => 'admin/tmgmt/jobs/' . $job->tjid . '/resubmit',
       '#value' => t('Resubmit'),
-      '#access' => $job->isCancelled(),
+      '#access' => $job->isAborted(),
     );
     $form['actions']['abort_job'] = array(
       '#type' => 'submit',
       '#value' => t('Abort job'),
       '#redirect' => 'admin/tmgmt/jobs/' . $job->tjid . '/abort',
       '#submit' => array('tmgmt_ui_submit_redirect'),
-      '#access' => $job->isCancelable(),
+      '#access' => $job->isAbortable(),
     );
   }
   if ($old) {

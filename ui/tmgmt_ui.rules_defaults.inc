@@ -19,12 +19,12 @@ function tmgmt_ui_default_rules_configuration() {
   }';
   $rule = rules_import($data);
   $configs[$rule->name] = $rule;
-  $data = '{ "rules_tmgmt_job_cancel_translation" : {
-      "LABEL" : "Cancel Translation",
+  $data = '{ "rules_tmgmt_job_abort_translation" : {
+      "LABEL" : "Abort Translation",
       "PLUGIN" : "rule",
       "REQUIRES" : [ "tmgmt" ],
       "USES VARIABLES" : { "job" : { "label" : "Job", "type" : "tmgmt_job" } },
-      "DO" : [ { "tmgmt_rules_job_cancel_translation" : { "job" : [ "job" ] } } ]
+      "DO" : [ { "tmgmt_rules_job_abort_translation" : { "job" : [ "job" ] } } ]
     }
   }';
   $rule = rules_import($data);

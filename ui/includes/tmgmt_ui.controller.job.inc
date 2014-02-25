@@ -89,10 +89,10 @@ class TMGMTJobUIController extends EntityDefaultUIController {
         $entity->delete();
         return t('Deleted the translation job %label.', array('%label' => $entity->label()));
       case 'abort':
-        if (!$entity->cancelTranslation()) {
-          // This is the case when a translator does not support the cancel operation.
+        if (!$entity->abortTranslation()) {
+          // This is the case when a translator does not support the abort operation.
           // It would make more sense to not display the button for the action,
-          // however we do not know if the translator is able to cancel a job until
+          // however we do not know if the translator is able to abort a job until
           // we trigger the action.
           foreach ($entity->getMessagesSince() as $message) {
             if ($message->type == 'debug') {

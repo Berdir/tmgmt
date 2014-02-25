@@ -46,16 +46,13 @@ define('TMGMT_JOB_STATE_REJECTED', 2);
 define('TMGMT_JOB_STATE_ACCEPTED', 3);
 
 /**
- * The translation job has been cancelled.
+ * The translation job has been aborted.
  *
- * A job can be cancelled at any time. If he is currently in the submitted state
- * the translator plugin is asked if this translation can be cancelled and needs
- * to confirm it by returning TRUE in cancelTranslation().
- *
- * @todo Rename constant to TMGMT_JOB_STATE_ABORTED in
- * https://drupal.org/node/2124825
+ * A job can be aborted at any time. If he is currently in the submitted state
+ * the translator plugin is asked if this translation can be aborted and needs
+ * to confirm it by returning TRUE in abortTranslation().
  */
-define('TMGMT_JOB_STATE_CANCELLED', 4);
+define('TMGMT_JOB_STATE_ABORTED', 4);
 
 /**
  * The translation job has been finished.
@@ -704,7 +701,7 @@ function tmgmt_job_states() {
     TMGMT_JOB_STATE_UNPROCESSED => t('Unprocessed'),
     TMGMT_JOB_STATE_ACTIVE => t('Active'),
     TMGMT_JOB_STATE_REJECTED => t('Rejected'),
-    TMGMT_JOB_STATE_CANCELLED => t('Aborted'),
+    TMGMT_JOB_STATE_ABORTED => t('Aborted'),
     TMGMT_JOB_STATE_FINISHED => t('Finished'),
   );
 }

@@ -28,7 +28,7 @@ class tmgmt_handler_field_tmgmt_job_operations extends views_handler_field_entit
         'title' => t('manage'),
       );
     }
-    if ($job->isCancelable() && entity_access('submit', 'tmgmt_job', $job)) {
+    if ($job->isAbortable() && entity_access('submit', 'tmgmt_job', $job)) {
       $element['#links']['cancel'] = array(
         'href' => 'admin/tmgmt/jobs/' . $job->tjid . '/abort',
         'query' => array('destination' => current_path()),

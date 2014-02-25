@@ -53,9 +53,9 @@ abstract class TMGMTDefaultTranslatorPluginController extends TMGMTPluginBase im
   /**
    * {@inheritdoc}
    */
-  public function cancelTranslation(TMGMTJob $job) {
-    // Assume that we can cancel a translation job at any time.
-    $job->cancelled();
+  public function abortTranslation(TMGMTJob $job) {
+    // Assume that we can abort a translation job at any time.
+    $job->aborted();
     return TRUE;
   }
 

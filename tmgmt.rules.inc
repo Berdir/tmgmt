@@ -39,8 +39,8 @@ function tmgmt_rules_action_info() {
     ),
     'access callback' => 'tmgmt_rules_job_accept_translation_access',
   );
-  $info['tmgmt_rules_job_cancel_translation'] = array(
-    'label' => t('Cancel translation job'),
+  $info['tmgmt_rules_job_abort_translation'] = array(
+    'label' => t('Abort translation job'),
     'group' => t('Translation Management'),
     'parameter' => array(
       'job' => array(
@@ -164,8 +164,8 @@ function tmgmt_rules_job_accept_translation(TMGMTJob $job, $message) {
 /**
  * Rules callback to cancel a translation job.
  */
-function tmgmt_rules_job_cancel_translation(TMGMTJob $job) {
-  $job->cancelTranslation();
+function tmgmt_rules_job_abort_translation(TMGMTJob $job) {
+  $job->abortTranslation();
 }
 
 /**
