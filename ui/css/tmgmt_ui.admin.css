@@ -191,3 +191,6 @@ table.tmgmt-ui-review tbody th {
   clear: both;
 }
 
+.view-tmgmt-node-source-overview .view-filters, .tmgmt-sources-wrapper {
+  margin-right: 310px;
+}
