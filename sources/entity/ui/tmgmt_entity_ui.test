@@ -61,6 +61,10 @@ class TMGMTEntitySourceUITestCase extends TMGMTEntityTestCaseUtility {
 
     // Create an english source node.
     $node = $this->createNode('page', 'en');
+    // Create a nodes that will not be translated to test the missing
+    // translation filter.
+    $node_not_translated = $this->createNode('page', 'en');
+    $node_german = $this->createNode('page', 'de');
 
     // Go to the translate tab.
     $this->drupalGet('node/' . $node->nid);
@@ -117,6 +121,37 @@ class TMGMTEntitySourceUITestCase extends TMGMTEntityTestCaseUtility {
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertEqual(url('node', array('absolute' => TRUE)), $this->getUrl());
+
+    // Test the missing translation filter.
+    $this->drupalGet('admin/tmgmt/sources');
+    $this->assertText($node->title);
+    $this->assertText($node_not_translated->title);
+    $this->drupalPost(NULL, array(
+      'search[target_language]' => 'de',
+      'search[target_status]' => 'untranslated',
+    ), t('Search'));
+    $this->assertNoText($node->title);
+    $this->assertNoText($node_german->title);
+    $this->assertText($node_not_translated->title);
+    // Update the the translate flag of the translated node and test if it is
+    // listed among sources with missing translation.
+    db_update('entity_translation')->fields(array('translate' => 1))
+      ->condition('entity_type', 'node')->condition('entity_id', $node->nid)->execute();
+    $this->drupalPost(NULL, array(
+      'search[target_language]' => 'de',
+      'search[target_status]' => 'outdated',
+    ), t('Search'));
+    $this->assertText($node->title);
+    $this->assertNoText($node_german->title);
+    $this->assertNoText($node_not_translated->title);
+
+    $this->drupalPost(NULL, array(
+      'search[target_language]' => 'de',
+      'search[target_status]' => 'untranslated_or_outdated',
+    ), t('Search'));
+    $this->assertText($node->title);
+    $this->assertNoText($node_german->title);
+    $this->assertText($node_not_translated->title);
   }
 
   /**

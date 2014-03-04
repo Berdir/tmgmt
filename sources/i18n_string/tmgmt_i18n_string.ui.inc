@@ -48,7 +48,7 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
 
     $search_data = $this->getSearchFormSubmittedParams();
 
-    $i18n_strings = tmgmt_i18n_string_get_strings($type, $search_data['label']);
+    $i18n_strings = tmgmt_i18n_string_get_strings($type, $search_data['label'], $search_data['target_language'], $search_data['target_status']);
 
     foreach ($this->getTranslationData($i18n_strings, $form_state['item_type']) as $id => $data) {
       $form['items']['#options'][$id] = $this->overviewRow($type, $data);
@@ -146,6 +146,33 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
       '#title' => t('Label in source language'),
       '#default_value' => isset($default_values['label']) ? $default_values['label'] : NULL,
     );
+
+    // Unset the source language as it should not be listed among target
+    // languages.
+    unset($options[i18n_string_source_language()]);
+
+    $form['search_wrapper']['search']['target_language'] = array(
+      '#type' => 'select',
+      '#title' => t('Target language'),
+      '#options' => $options,
+      '#empty_option' => t('Any'),
+      '#default_value' => isset($default_values['target_language']) ? $default_values['target_language'] : NULL,
+    );
+    $form['search_wrapper']['search']['target_status'] = array(
+      '#type' => 'select',
+      '#title' => t('Target status'),
+      '#options' => array(
+        'untranslated_or_outdated' => t('Untranslated or outdated'),
+        'untranslated' => t('Untranslated'),
+        'outdated' => t('Outdated'),
+      ),
+      '#default_value' => isset($default_values['target_status']) ? $default_values['target_status'] : NULL,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="search[target_language]"]' => array('value' => ''),
+        ),
+      ),
+    );
     $form['search_wrapper']['search_submit'] = array(
       '#type' => 'submit',
       '#value' => t('Search'),
@@ -162,10 +189,18 @@ class TMGMTI18nStringDefaultSourceUIController extends TMGMTDefaultSourceUIContr
   public function getSearchFormSubmittedParams() {
     $params = array(
       'label' => NULL,
+       'target_language' => NULL,
+       'target_status' => NULL,
     );
 
     if (isset($_GET['label'])) {
       $params['label'] = $_GET['label'];
+    }
+    if (isset($_GET['target_language'])) {
+      $params['target_language'] = $_GET['target_language'];
+    }
+    if (isset($_GET['target_status'])) {
+      $params['target_status'] = $_GET['target_status'];
     }
 
     return $params;

@@ -224,12 +224,18 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $term_data = array(
       'name' => $this->randomName(),
     );
+    $vocab_data_not_translated = array(
+      'name' => $this->randomName(),
+      'machine_name' => 'test_vocab3',
+      'i18n_mode' => I18N_MODE_LOCALIZE,
+    );
 
     // Configure taxonomy and create vocab + term.
     $this->drupalPost('admin/structure/taxonomy/add', $vocab_data, t('Save'));
     $this->drupalGet('admin/structure/taxonomy');
     $this->clickLink(t('add terms'));
     $this->drupalPost(NULL, $term_data, t('Save'));
+    $this->drupalPost('admin/structure/taxonomy/add', $vocab_data_not_translated, t('Save'));
 
     $this->drupalGet('admin/tmgmt/sources/i18n_string_taxonomy_vocabulary');
     $this->assertText($vocab_data['name']);
@@ -253,6 +259,50 @@ class TMGMTI18nStringSourceTestCase extends TMGMTBaseTestCase {
     $this->clickLink(t('review'));
     $this->drupalPost(NULL, array(), t('Save as completed'));
     $this->assertText(t('The translation for @label has been accepted.', array('@label' => $job->label())));
+
+    // Test the missing translation filter.
+    $this->drupalGet('admin/tmgmt/sources/i18n_string_taxonomy_vocabulary');
+    // Check that the source language has been removed from the target language
+    // select box.
+    $elements = $this->xpath('//select[@name=:name]//option[@value=:option]', array(':name' => 'search[target_language]', ':option' => i18n_string_source_language()));
+    $this->assertTrue(empty($elements));
+    $edit = array(
+      'search[target_language]' => 'de',
+      'search[target_status]' => 'untranslated',
+    );
+    $this->drupalPost('admin/tmgmt/sources/i18n_string_taxonomy_vocabulary', $edit, t('Search'));
+    // The vocabulary name is translated to "de" therefore it must not show up
+    // in the list.
+    $this->assertNoText($vocab_data['name']);
+    $this->assertText($vocab_data_not_translated['name']);
+
+    $edit = array(
+      'search[target_language]' => 'de',
+      'search[target_status]' => 'untranslated',
+    );
+    $this->drupalPost(NULL, $edit, t('Search'));
+    $this->assertNoText($vocab_data['name']);
+    $this->assertText($vocab_data_not_translated['name']);
+
+    // Update the string status to I18N_STRING_STATUS_UPDATE.
+    $lid = db_select('locales_source', 's')->fields('s', array('lid'))->condition('source', $vocab_data['name'])->execute()->fetchField();
+    db_update('locales_target')->fields(array('i18n_status' => I18N_STRING_STATUS_UPDATE))->condition('lid', $lid)->execute();
+
+    $edit = array(
+      'search[target_language]' => 'de',
+      'search[target_status]' => 'outdated',
+    );
+    $this->drupalPost(NULL, $edit, t('Search'));
+    $this->assertText($vocab_data['name']);
+    $this->assertNoText($vocab_data_not_translated['name']);
+
+    $edit = array(
+      'search[target_language]' => 'de',
+      'search[target_status]' => 'untranslated_or_outdated',
+    );
+    $this->drupalPost(NULL, $edit, t('Search'));
+    $this->assertText($vocab_data['name']);
+    $this->assertText($vocab_data_not_translated['name']);
   }
 
   /**

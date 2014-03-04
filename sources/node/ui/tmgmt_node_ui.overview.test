@@ -111,6 +111,50 @@ class TMGMTNodeSourceUIOverviewTestCase extends TMGMTEntityTestCaseUtility {
     $view = views_get_view('tmgmt_node_source_overview');
     $view->execute_display('default');
     $this->assertEqual($view->get_items_per_page(), variable_get('tmgmt_source_list_limit', 20));
+
+    // Test the missing translation filter.
+
+    // Create nodes needed to test the missing translation filter here so that
+    // VBO order is not affected.
+    $node_not_translated = $this->drupalCreateNode(array('type' => 'page', 'language' => 'en', 'body' => array('en' => array(array()))));
+    $node_de = $this->drupalCreateNode(array('type' => 'page', 'language' => 'de', 'body' => array('de' => array(array()))));
+
+    $this->drupalGet('admin/tmgmt/sources/node');
+    $this->assertText($node1->title);
+    $this->assertText($node_not_translated->title);
+    $this->assertText($node_de->title);
+
+    // Submitting the search form will not work. After the form submission the
+    // page does gets redirected to url without query parameters. So we simply
+    // access the page with desired query.
+    $this->drupalGet('admin/tmgmt/sources/node', array('query' => array(
+      'tmgmt_node_missing_translation' => 'de',
+      'target_status' => 'untranslated',
+    )));
+    $this->assertNoText($node1->title);
+    $this->assertText($node_not_translated->title);
+    $this->assertNoText($node_de->title);
+
+    // Update the the translate flag of the translated node and test if it is
+    // listed among sources with missing translation.
+    db_update('node')->fields(array('translate' => 1))
+      ->condition('nid', $node1->nid)->execute();
+
+    $this->drupalGet('admin/tmgmt/sources/node', array('query' => array(
+      'tmgmt_node_missing_translation' => 'de',
+      'target_status' => 'outdated',
+    )));
+    $this->assertText($node1->title);
+    $this->assertNoText($node_not_translated->title);
+    $this->assertNoText($node_de->title);
+
+    $this->drupalGet('admin/tmgmt/sources/node', array('query' => array(
+      'tmgmt_node_missing_translation' => 'de',
+      'target_status' => 'untranslated_or_outdated',
+    )));
+    $this->assertText($node1->title);
+    $this->assertText($node_not_translated->title);
+    $this->assertNoText($node_de->title);
   }
 }
 

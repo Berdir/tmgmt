@@ -17,7 +17,10 @@ class tmgmt_node_handler_field_translation_language_status_single extends views_
 
   function init(&$view, &$options) {
     parent::init($view, $options);
-    $this->additional_fields['nid'] = 'nid';
+    $this->additional_fields['nid'] = array(
+        'table' => 'node',
+        'field' => 'nid',
+    );
   }
 
   function render($values) {

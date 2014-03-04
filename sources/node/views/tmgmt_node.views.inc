@@ -68,6 +68,15 @@ class TMGMTNodeSourceViewsController extends TMGMTDefaultSourceViewsController {
         'real field' => 'type',
       ),
     );
+    $data['node']['tmgmt_node_missing_translation'] = array(
+      'group' => t('Content translation'),
+      'title' => t('Missing translation'),
+      'help' => t('Enables the search for nodes with missing translation ofr the specified language'),
+      'filter' => array(
+        'handler' => 'tmgmt_node_handler_filter_missing_translation',
+        'real field' => 'nid',
+      ),
+    );
     $data['node']['tmgmt_jobs'] = array(
       'title' => t('Translation jobs'),
       'help' => t('Shows all translation jobs which contains this node'),

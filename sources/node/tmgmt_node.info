@@ -16,3 +16,4 @@ files[] = views/tmgmt_node.views.inc
 files[] = views/handlers/tmgmt_node_handler_field_translation_language_status.inc
 files[] = views/handlers/tmgmt_node_handler_field_translation_language_status_single.inc
 files[] = views/handlers/tmgmt_node_handler_filter_node_translatable_types.inc
+files[] = views/handlers/tmgmt_node_handler_filter_missing_translation.inc

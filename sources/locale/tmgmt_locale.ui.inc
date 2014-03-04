@@ -19,11 +19,13 @@ class TMGMTLocaleSourceUIController extends TMGMTDefaultSourceUIController {
    *   The locale textgroup.
    * @param string $search_label
    *   Label to search for.
+   * @param string $missing_target_language
+   *   Missing translation language.
    *
    * @return array
    *   List of i18n strings data.
    */
-  function getStrings($textgroup, $search_label = NULL) {
+  function getStrings($textgroup, $search_label = NULL, $missing_target_language = NULL) {
     $languages = drupal_map_assoc(array_keys(language_list()));
     $select = db_select('locales_source', 'ls')
       ->fields('ls', array('lid', 'source'));
@@ -31,6 +33,9 @@ class TMGMTLocaleSourceUIController extends TMGMTDefaultSourceUIController {
     $select->condition('ls.textgroup', $textgroup);
     if (!empty($search_label)) {
       $select->condition('ls.source', "%$search_label%", 'LIKE');
+    }
+    if (!empty($missing_target_language) && in_array($missing_target_language, $languages)) {
+      $select->isNull("lt_$missing_target_language.language");
     }
 
     foreach ($languages as $langcode) {
@@ -78,7 +83,7 @@ class TMGMTLocaleSourceUIController extends TMGMTDefaultSourceUIController {
 
     $search_data = $this->getSearchFormSubmittedParams();
 
-    $strings = $this->getStrings($type, $search_data['label']);
+    $strings = $this->getStrings($type, $search_data['label'], $search_data['missing_target_language']);
 
     foreach ($this->getTranslationData($strings, $type) as $id => $data) {
       $form['items']['#options'][$id] = $this->overviewRow($type, $data);
@@ -172,6 +177,17 @@ class TMGMTLocaleSourceUIController extends TMGMTDefaultSourceUIController {
       '#title' => t('Source text'),
       '#default_value' => isset($default_values['label']) ? $default_values['label'] : NULL,
     );
+
+    // Unset English as it is the source language for all locale strings.
+    unset($options['en']);
+
+    $form['search_wrapper']['search']['missing_target_language'] = array(
+      '#type' => 'select',
+      '#title' => t('Not translated to'),
+      '#options' => $options,
+      '#empty_option' => '--',
+      '#default_value' => isset($default_values['missing_target_language']) ? $default_values['missing_target_language'] : NULL,
+    );
     $form['search_wrapper']['search_submit'] = array(
       '#type' => 'submit',
       '#value' => t('Search'),
@@ -188,10 +204,14 @@ class TMGMTLocaleSourceUIController extends TMGMTDefaultSourceUIController {
   public function getSearchFormSubmittedParams() {
     $params = array(
       'label' => NULL,
+      'missing_target_language' => NULL,
     );
 
     if (isset($_GET['label'])) {
       $params['label'] = $_GET['label'];
+    }
+    if (isset($_GET['missing_target_language'])) {
+      $params['missing_target_language'] = $_GET['missing_target_language'];
     }
 
     return $params;

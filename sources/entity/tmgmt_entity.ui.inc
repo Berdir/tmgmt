@@ -181,6 +181,34 @@ abstract class TMGMTEntityDefaultSourceUIController extends TMGMTDefaultSourceUI
       unset($form['search_wrapper']);
     }
 
+    $options = array();
+    foreach (language_list() as $langcode => $language) {
+      $options[$langcode] = $language->name;
+    }
+
+    $form['search_wrapper']['search']['target_language'] = array(
+      '#type' => 'select',
+      '#title' => t('Target language'),
+      '#options' => $options,
+      '#empty_option' => t('Any'),
+      '#default_value' => isset($_GET['target_language']) ? $_GET['target_language'] : NULL,
+    );
+    $form['search_wrapper']['search']['target_status'] = array(
+      '#type' => 'select',
+      '#title' => t('Target status'),
+      '#options' => array(
+        'untranslated_or_outdated' => t('Untranslated or outdated'),
+        'untranslated' => t('Untranslated'),
+        'outdated' => t('Outdated'),
+      ),
+      '#default_value' => isset($_GET['target_status']) ? $_GET['target_status'] : NULL,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="search[target_language]"]' => array('value' => ''),
+        ),
+      ),
+    );
+
     return $form;
   }
 

@@ -109,7 +109,9 @@ class TMGMTEntitySourceUIController extends TMGMTEntityDefaultSourceUIController
    * {@inheritdoc}
    */
   public function overviewFormValidate($form, &$form_state, $type) {
-
+    if (!empty($form_state['values']['search']['target_language']) && $form_state['values']['search']['language'] == $form_state['values']['search']['target_language']) {
+      form_set_error('search[target_language]', t('The source and target languages must not be the same.'));
+    }
   }
 
   /**

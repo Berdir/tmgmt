@@ -86,6 +86,20 @@ class TMGMTLocaleSourceUiTestCase extends TMGMTBaseTestCase {
         $this->assertEqual((string) $row->td[4]->div['title'], t('Translation up to date'));
       }
     }
+
+    // Test the missing translation filter.
+    $this->drupalGet('admin/tmgmt/sources/locale_default');
+    // Check that the source language (en) has been removed from the target language
+    // select box.
+    $elements = $this->xpath('//select[@name=:name]//option[@value=:option]', array(':name' => 'search[target_language]', ':option' => 'en'));
+    $this->assertTrue(empty($elements));
+
+    // Filter on the "Not translated to".
+    $edit = array('search[missing_target_language]' => 'es');
+    $this->drupalPost(NULL, $edit, t('Search'));
+    // Hello World is translated to "es" therefore it must not show up in the
+    // list.
+    $this->assertNoText('Hello World');
   }
 
 }

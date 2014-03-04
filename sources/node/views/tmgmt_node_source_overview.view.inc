@@ -291,6 +291,15 @@ $handler->display->display_options['filters']['tmgmt_translatable_types_select']
 $handler->display->display_options['filters']['tmgmt_translatable_types_all']['id'] = 'tmgmt_translatable_types_all';
 $handler->display->display_options['filters']['tmgmt_translatable_types_all']['table'] = 'node';
 $handler->display->display_options['filters']['tmgmt_translatable_types_all']['field'] = 'tmgmt_translatable_types_all';
+/* Filter criterion: Content translation: Missing translation */
+$handler->display->display_options['filters']['tmgmt_node_missing_translation']['id'] = 'tmgmt_node_missing_translation';
+$handler->display->display_options['filters']['tmgmt_node_missing_translation']['table'] = 'node';
+$handler->display->display_options['filters']['tmgmt_node_missing_translation']['field'] = 'tmgmt_node_missing_translation';
+$handler->display->display_options['filters']['tmgmt_node_missing_translation']['exposed'] = TRUE;
+$handler->display->display_options['filters']['tmgmt_node_missing_translation']['expose']['operator_id'] = 'tmgmt_node_missing_translation_op';
+$handler->display->display_options['filters']['tmgmt_node_missing_translation']['expose']['label'] = 'Target language';
+$handler->display->display_options['filters']['tmgmt_node_missing_translation']['expose']['operator'] = 'tmgmt_node_missing_translation_op';
+$handler->display->display_options['filters']['tmgmt_node_missing_translation']['expose']['identifier'] = 'tmgmt_node_missing_translation';
 
 /* Display: Page */
 $handler = $view->new_display('page', 'Page', 'page');

@@ -24,3 +24,12 @@ function tmgmt_node_tmgmt_source_plugin_info() {
   }
   return $info;
 }
+
+/**
+ * Form element validator for the missing target language views field handler.
+ */
+function tmgmt_node_views_exposed_target_language_validate($form, &$form_state) {
+  if (!empty($form_state['values']['tmgmt_node_missing_translation']) && $form_state['values']['language_1'] == $form_state['values']['tmgmt_node_missing_translation']) {
+    form_set_error('tmgmt_node_missing_translation', t('The source and target languages must not be the same.'));
+  }
+}

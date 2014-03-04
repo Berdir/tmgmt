@@ -115,12 +115,45 @@ function tmgmt_entity_get_translatable_entities($entity_type, $property_conditio
     return array();
   }
 
+  $languages = drupal_map_assoc(array_keys(language_list()));
+
   $entity_info = entity_get_info($entity_type);
   $label_key = isset($entity_info['entity keys']['label']) ? $entity_info['entity keys']['label'] : NULL;
 
+  $id_key = $entity_info['entity keys']['id'];
   $query = db_select($entity_info['base table'], 'e');
-  $query->addField('e', $entity_info['entity keys']['id']);
+  $query->addField('e', $id_key);
 
+  // Searching for sources with missing translation.
+  if (!empty($property_conditions['target_status']) && !empty($property_conditions['target_language']) && in_array($property_conditions['target_language'], $languages)) {
+
+    $translation_table_alias = db_escape_field('et_' . $property_conditions['target_language']);
+    $query->leftJoin('entity_translation', $translation_table_alias, "%alias.entity_type = :entity_type AND %alias.entity_id = e.$id_key AND %alias.language = :language",
+        array(':entity_type' => $entity_type, ':language' => $property_conditions['target_language']));
+
+    // Exclude entities with having source language same as the target language
+    // we search for.
+    $query->condition('e.language', $property_conditions['target_language'], '<>');
+
+    if ($property_conditions['target_status'] == 'untranslated_or_outdated') {
+      $or = db_or();
+      $or->isNull("$translation_table_alias.language");
+      $or->condition("$translation_table_alias.translate", 1);
+      $query->condition($or);
+    }
+    elseif ($property_conditions['target_status'] == 'outdated') {
+      $query->condition("$translation_table_alias.translate", 1);
+    }
+    elseif ($property_conditions['target_status'] == 'untranslated') {
+      $query->isNull("$translation_table_alias.language");
+    }
+  }
+
+  // Remove the condition so we do not try to add it again below.
+  unset($property_conditions['target_language']);
+  unset($property_conditions['target_status']);
+
+  // Searching for the source label.
   if (!empty($label_key) && isset($property_conditions[$label_key])) {
     $search_tokens = explode(' ', $property_conditions[$label_key]);
     $or = db_or();
@@ -139,25 +172,18 @@ function tmgmt_entity_get_translatable_entities($entity_type, $property_conditio
     unset($property_conditions[$label_key]);
   }
 
-  // Add query conditions based on provided properties.
-  foreach ($property_conditions as $property_name => $property_value) {
-    // The comment bundle filter is handled below.
-    if ($entity_type == 'comment' && $property_name == 'type') {
-      continue;
-    }
-
-    // Switch to vid for taxonomy terms.
-    if ($entity_type == 'taxonomy_term' && $property_name == 'vocabulary_machine_name') {
-      $property_name = 'vid';
-      $vocabulary = taxonomy_vocabulary_machine_name_load($property_value);
-      $property_value = $vocabulary->vid;
-    }
-
+  // Searching by taxonomy bundles - we need to switch to vid as the bundle key.
+  if ($entity_type == 'taxonomy_term' && !empty($property_conditions['vocabulary_machine_name'])) {
+    $property_name = 'vid';
+    $vocabulary = taxonomy_vocabulary_machine_name_load($property_conditions['vocabulary_machine_name']);
+    $property_value = $vocabulary->vid;
     $query->condition('e.' . $property_name, $property_value);
+    // Remove the condition so we do not try to add it again below.
+    unset($property_conditions['vocabulary_machine_name']);
   }
-
-  // We have to specifically handle comments and nodes.
-  if (in_array($entity_type, array('comment', 'node'))) {
+  // Searching by the node bundles - that applies for node entities as well as
+  // comment.
+  elseif (in_array($entity_type, array('comment', 'node'))) {
     $node_table_alias = 'e';
 
     // For comments join node table so that we can filter based on type.
@@ -175,11 +201,19 @@ function tmgmt_entity_get_translatable_entities($entity_type, $property_conditio
     // If we have type property add condition.
     if (isset($property_conditions['type'])) {
       $query->condition($node_table_alias . '.type', $property_conditions['type']);
+      // Remove the condition so we do not try to add it again below.
+      unset($property_conditions['type']);
     }
     // If not, query db only for translatable node types.
     else {
       $query->condition($node_table_alias . '.type', $translatable_node_types);
     }
+  }
+
+  // Add remaining query conditions which are expected to be handled in a
+  // generic way.
+  foreach ($property_conditions as $property_name => $property_value) {
+    $query->condition('e.' . $property_name, $property_value);
   }
 
   if ($pager) {
@@ -190,7 +224,6 @@ function tmgmt_entity_get_translatable_entities($entity_type, $property_conditio
   }
 
   $query->orderBy($entity_info['entity keys']['id'], 'DESC');
-
   $entity_ids = $query->execute()->fetchCol();
   $entities = array();
 

@@ -31,17 +31,37 @@ function tmgmt_i18n_string_tmgmt_source_plugin_info() {
  *   i18n object type.
  * @param string $search_label
  *   Label to search for.
+ * @param string $target_language
+ *   Target language.
+ * @param string $target_status
+ *   Target status.
  *
  * @return array
  *   List of i18n strings data.
  */
-function tmgmt_i18n_string_get_strings($type, $search_label = NULL) {
+function tmgmt_i18n_string_get_strings($type, $search_label = NULL, $target_language = NULL, $target_status = 'untranslated_or_outdated') {
   $info = i18n_object_info($type);
 
   $languages = drupal_map_assoc(array_keys(language_list()));
   $select = db_select('i18n_string', 'i18n_s');
 
   $select->condition('i18n_s.textgroup', $info['string translation']['textgroup']);
+
+  if (!empty($target_language) && in_array($target_language, $languages)) {
+    if ($target_status == 'untranslated_or_outdated') {
+      $or = db_or();
+      $or->isNull("lt_$target_language.language");
+      $or->condition("lt_$target_language.i18n_status", I18N_STRING_STATUS_UPDATE);
+      $select->condition($or);
+    }
+    elseif ($target_status == 'outdated') {
+      $select->condition("lt_$target_language.i18n_status", I18N_STRING_STATUS_UPDATE);
+    }
+    elseif ($target_status == 'untranslated') {
+      $select->isNull("lt_$target_language.language");
+    }
+  }
+
   if (isset($info['string translation']['type'])) {
     $select->condition('i18n_s.type', $info['string translation']['type']);
   }
