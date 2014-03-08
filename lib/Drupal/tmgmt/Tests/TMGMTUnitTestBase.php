@@ -10,12 +10,11 @@ namespace Drupal\tmgmt\Tests;
 use Drupal\Core\Language\Language;
 use Drupal\simpletest\DrupalUnitTestBase;
 use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt\Entity\Translator;
 
 /**
  * Base class for tests.
  */
-class TMGMTUnitTestBase extends DrupalUnitTestBase {
+abstract class TMGMTUnitTestBase extends DrupalUnitTestBase {
 
   /**
    * A default translator using the test translator.
