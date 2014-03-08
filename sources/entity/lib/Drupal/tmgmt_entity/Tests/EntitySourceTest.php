@@ -20,28 +20,28 @@ class EntitySourceTest extends EntityTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt_entity', 'taxonomy', 'translation_entity');
+  public static $modules = array('tmgmt_entity', 'taxonomy', 'content_translation');
 
   public $vocabulary;
 
-  /**
-  static function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Entity Source tests',
       'description' => 'Exporting source data from entities and saving translations back to entities.',
       'group' => 'Translation Management',
     );
-  }*/
+  }
 
   function setUp() {
+    parent::setUp();
     $this->vocabulary = $this->createTaxonomyVocab(strtolower($this->randomName()), $this->randomName(), array(FALSE, TRUE, TRUE, TRUE));
-    translation_entity_set_config('taxonomy_term', $this->vocabulary->id(), 'enabled', TRUE);
+    content_translation_set_config('taxonomy_term', $this->vocabulary->id(), 'enabled', TRUE);
   }
 
   /**
    * Tests nodes field translation.
    */
-  function dtestEntitySourceNode() {
+  function testEntitySourceNode() {
     $this->addLanguage('de');
 
     $this->createNodeType('article', 'Article', TRUE);
@@ -57,7 +57,7 @@ class EntitySourceTest extends EntityTestBase {
       $node = $this->createNode('article');
       // Create a job item for this node and add it to the job.
       $item = $job->addItem('entity', 'node', $node->id());
-      $this->assertEqual(t('@type (@bundle)', array('@type' => t('Node'), '@bundle' => 'Article')), $item->getSourceType());
+      $this->assertEqual(t('@type (@bundle)', array('@type' => t('Content'), '@bundle' => 'Article')), $item->getSourceType());
     }
 
     // Translate the job.
@@ -96,7 +96,7 @@ class EntitySourceTest extends EntityTestBase {
     for ($i = 1; $i <= 5; $i++) {
       $term = $this->createTaxonomyTerm($this->vocabulary);
       // Create the item and assign it to the job.
-      $item = $job->addItem('entity', 'taxonomy_term', $term->tid);
+      $item = $job->addItem('entity', 'taxonomy_term', $term->id());
       $this->assertEqual(t('@type (@bundle)', array('@type' => t('Taxonomy term'), '@bundle' => $this->vocabulary->name)), $item->getSourceType());
     }
     // Request the translation and accept it.
@@ -109,7 +109,7 @@ class EntitySourceTest extends EntityTestBase {
       $entity = entity_load($item->item_type, $item->item_id);
       $data = $item->getData();
       $this->checkTranslatedData($entity, $data, 'de');
-      $this->checkUntranslatedData($entity, $this->field_names['taxonomy_term'][$this->vocabulary->machine_name], $data, 'de');
+      $this->checkUntranslatedData($entity, $this->field_names['taxonomy_term'][$this->vocabulary->id()], $data, 'de');
       $this->assertJobItemLangCodes($item, 'en', array('de', 'en'));
     }
   }
@@ -118,19 +118,20 @@ class EntitySourceTest extends EntityTestBase {
     $this->addLanguage('de');
 
     // Create term with empty texts.
-    $empty_term = new stdClass();
-    $empty_term->name = $this->randomName();
-    $empty_term->description = $this->randomName();
-    $empty_term->vid = $this->vocabulary->vid;
-    taxonomy_term_save($empty_term);
+    $empty_term = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'vid' => $this->vocabulary->vid,
+    ));
+    $empty_term->save();
 
     // Create the job.
     $job = tmgmt_job_create('en', NULL);
     try {
-      $job->addItem('entity', 'taxonomy_term', $empty_term->tid);
+      $job->addItem('entity', 'taxonomy_term', $empty_term->id());
       $this->fail('Job item added with empty source text.');
     }
-    catch (TMGMTException $e) {
+    catch (\Exception $e) {
       $this->assert(empty($job->tjid), 'After adding a job item with empty source text its tjid has to be unset.');
     }
 
@@ -138,7 +139,7 @@ class EntitySourceTest extends EntityTestBase {
     $populated_content_term = $this->createTaxonomyTerm($this->vocabulary);
 
     // Lets reuse the last created term with populated source content.
-    $job->addItem('entity', 'taxonomy_term', $populated_content_term->tid);
+    $job->addItem('entity', 'taxonomy_term', $populated_content_term->id());
     $this->assert(!empty($job->tjid), 'After adding another job item with populated source text its tjid must be set.');
   }
 
@@ -153,15 +154,16 @@ class EntitySourceTest extends EntityTestBase {
    *  The code of the target language.
    */
   function checkTranslatedData($tentity, $data, $langcode) {
+    $tentity = $tentity->getTranslation($langcode);
     foreach (element_children($data) as $field_name) {
       foreach (element_children($data[$field_name]) as $delta) {
         foreach (element_children($data[$field_name][$delta]) as $column) {
           $column_value = $data[$field_name][$delta][$column];
           if (!empty($column_value['#translate'])) {
-            $this->assertEqual($tentity->{$field_name}[$langcode][$delta][$column], $column_value['#translation']['#text'], format_string('The field %field:%delta has been populated with the proper translated data.', array('%field' => $field_name, 'delta' => $delta)));
+            $this->assertEqual($tentity->get($field_name)->get($delta)->$column, $column_value['#translation']['#text'], format_string('The field %field:%delta has been populated with the proper translated data.', array('%field' => $field_name, 'delta' => $delta)));
           }
           else {
-            $this->assertEqual($tentity->{$field_name}[$langcode][$delta][$column], $column_value['#text'], format_string('The field %field:%delta has been populated with the proper untranslated data.', array('%field' => $field_name, 'delta' => $delta)));
+            $this->assertEqual($tentity->get($field_name)->get($delta)->$column, $column_value['#text'], format_string('The field %field:%delta has been populated with the proper untranslated data.', array('%field' => $field_name, 'delta' => $delta)));
           }
         }
       }
@@ -171,7 +173,7 @@ class EntitySourceTest extends EntityTestBase {
   /**
    * Checks the fields that should not be translated.
    *
-   * @param $tentity
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
    *  The translated entity object.
    * @param $fields
    *  An array with the field names to check.
@@ -180,16 +182,12 @@ class EntitySourceTest extends EntityTestBase {
    * @param $langcode
    *  The code of the target language.
    */
-  function checkUntranslatedData($tentity, $fields, $data, $langcode) {
+  function checkUntranslatedData($entity, $fields, $data, $langcode) {
     foreach ($fields as $field_name) {
-      $field_info = field_info_field($tentity->getEntityTypeId(), $field_name);
-      if (!$field_info['translatable']) {
+      if (!$entity->getFieldDefinition($field_name)->isTranslatable()) {
         // Avoid some PHP warnings.
         if (isset($data[$field_name])) {
           $this->assertNull($data[$field_name]['#translation']['#text'], 'The not translatable field was not translated.');
-        }
-        if (isset($tentity->{$field_name}[$langcode])) {
-          $this->assertNull($tentity->{$field_name}[$langcode], 'The entity has translated data in a field that is translatable.');
         }
       }
     }

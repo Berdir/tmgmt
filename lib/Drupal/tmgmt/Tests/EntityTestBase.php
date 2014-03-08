@@ -38,7 +38,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
    *   be attached to the node type.
    */
   function createNodeType($machine_name, $human_name, $entity_translation = FALSE, $attach_fields = TRUE) {
-    $type = $this->drupalCreateContentType(array('type' => $machine_name, 'label' => $human_name));
+    $type = $this->drupalCreateContentType(array('type' => $machine_name, 'name' => $human_name));
 
     // Push in also the body field.
     $this->field_names['node'][$machine_name][] = 'body';
@@ -178,7 +178,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
    *
    * It uses $this->field_names to populate content of attached fields. You can
    * access fields values using
-   * $this->field_names['taxonomy_term'][$vocabulary->machine_name].
+   * $this->field_names['taxonomy_term'][$vocabulary->vid].
    *
    * @param object $vocabulary
    *   Vocabulary object for which the term should be created.
@@ -187,21 +187,23 @@ abstract class EntityTestBase extends TMGMTTestBase {
    *   Newly created node object.
    */
   function createTaxonomyTerm($vocabulary) {
-    $term = entity_create('taxonomy_term', array());
-    $term->name = $this->randomName();
-    $term->description = $this->randomName();
-    $term->vid = $vocabulary->vid;
+    $term = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'vid' => $vocabulary->vid,
+      'langcode' => 'en',
+    ));
 
-    foreach ($this->field_names['taxonomy_term'][$vocabulary->machine_name] as $field_name) {
-      $field_info = $this->container->get('field.info')->getField('taxonomy_term', $field_name);
-      $cardinality = $field_info->getFieldCardinality() == FieldDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_info->getFieldCardinality();
-      $field_lang = $field_info->isFieldTranslatable() ? 'en' : Language::LANGCODE_DEFAULT;
+    foreach ($this->field_names['taxonomy_term'][$vocabulary->id()] as $field_name) {
+      $field_definition = $term->getFieldDefinition($field_name);
+      $cardinality = $field_definition->getCardinality() == FieldDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_definition->getCardinality();
+      $field_lang = $field_definition->isTranslatable() ? 'en' : Language::LANGCODE_DEFAULT;
 
       // Create two deltas for each field.
       for ($delta = 0; $delta <= $cardinality; $delta++) {
-        $term->{$field_name}[$field_lang][$delta]['value'] = $this->randomName(20);
-        if ($field_info->getFieldType() == 'text_with_summary') {
-          $term->{$field_name}[$field_lang][$delta]['summary'] = $this->randomName(10);
+        $term->getTranslation($field_lang)->get($field_name)->get($delta)->value = $this->randomName(20);
+        if ($field_definition->getType() == 'text_with_summary') {
+          $term->getTranslation($field_lang)->get($field_name)->get($delta)->summary = $this->randomName(10);
         }
       }
     }

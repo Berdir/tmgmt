@@ -1,11 +1,31 @@
 <?php
 
 /**
+ * @file Contains \Drupal\tmgmt_locale\Tests\LocaleSourceTest.php.
+ */
+
+namespace Drupal\tmgmt_locale\Tests;
+
+use Drupal\locale\Gettext;
+use Drupal\tmgmt\Tests\TMGMTTestBase;
+use Drupal\tmgmt\TMGMTException;
+
+/**
  * Basic Locale Source tests.
  */
-class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
+class LocaleSourceTest extends TMGMTTestBase {
 
-  static function getInfo() {
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array('tmgmt_locale');
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getInfo() {
     return array(
       'name' => 'Locale Source tests',
       'description' => 'Exporting source data from locale and saving translations back',
@@ -13,24 +33,26 @@ class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
-    parent::setUp(array('tmgmt_locale'));
+    parent::setUp();
     $this->langcode = 'de';
     $this->context = 'default';
-    $file = new stdClass();
+    file_unmanaged_copy(drupal_get_path('module', 'tmgmt_locale') . '/tests/test.de.po', 'translations://', FILE_EXISTS_REPLACE);
+    $file = new \stdClass();
     $file->uri = drupal_realpath(drupal_get_path('module', 'tmgmt_locale') . '/tests/test.xx.po');
-    $this->pofile = file_save($file);
-    $this->setEnvironment($this->langcode);
-    $this->setEnvironment('es');
+    $file->langcode = $this->langcode;
+    Gettext::fileToDatabase($file, array());
+    $this->addLanguage($this->langcode);
+    $this->addLanguage('es');
   }
 
   /**
    *  Tests translation of a locale singular term.
    */
   function testSingularTerm() {
-    // Load PO file to create a locale structure in the database.
-    _locale_import_po($this->pofile, $this->langcode, LOCALE_IMPORT_OVERWRITE, $this->context);
-
     // Obtain one locale string with translation.
     $locale_object = db_query('SELECT * FROM {locales_source} WHERE source = :source LIMIT 1', array(':source' => 'Hello World'))->fetchObject();
     $source_text = $locale_object->source;
@@ -93,7 +115,6 @@ class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
     $lid = db_insert('locales_source')
       ->fields(array(
         'source' => '@place-holders need %to be !esc_aped.',
-        'textgroup' => 'default',
         'context' => '',
       ))
       ->execute();
@@ -115,7 +136,6 @@ class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
     $lid = db_insert('locales_source')
       ->fields(array(
         'source' => '@ % ! example',
-        'textgroup' => 'default',
         'context' => '',
       ))
       ->execute();
@@ -131,7 +151,7 @@ class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
    */
   function testInexistantSource() {
     // Create inexistant locale object.
-    $locale_object = new stdClass();
+    $locale_object = new \stdClass();
     $locale_object->lid = 0;
 
     // Create the job.
@@ -145,7 +165,7 @@ class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
       $job->addItem('locale', 'default', $locale_object->lid);
       $this->fail('Job item add with an inexistant locale.');
     }
-    catch (TMGMTException $e) {
+    catch (\Exception $e) {
       $this->pass('Exception thrown when trying to translate non-existing locale string');
     }
 
@@ -154,7 +174,6 @@ class TMGMTLocaleSourceTestCase extends TMGMTBaseTestCase {
     $lid = db_insert('locales_source')
       ->fields(array(
         'source' => 'No translation',
-        'textgroup' => 'default',
         'context' => '',
       ))
       ->execute();
