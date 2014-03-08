@@ -16,7 +16,7 @@ use Drupal\tmgmt\Entity\Translator;
 /**
  * Base class for tests.
  */
-class TMGMTTestBase extends WebTestBase {
+abstract class TMGMTTestBase extends WebTestBase {
 
   /**
    * A default translator using the test translator.
