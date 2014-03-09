@@ -8,7 +8,7 @@
 namespace Drupal\tmgmt_language_combination\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\field\FieldInterface;
+use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\Field\ConfigFieldItemBase;
 
 /**
@@ -23,25 +23,15 @@ use Drupal\Core\Field\ConfigFieldItemBase;
  * )
  */
 class LanguageCombination extends ConfigFieldItemBase {
-  /**
-   * Definitions of the contained properties.
-   *
-   * @var array
-   */
-  static $propertyDefinitions;
 
   /**
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldDefinitionInterface $field) {
-    $property_definitions['language_from'] = array(
-      'type' => 'string',
-      'label' => t('From language'),
-    );
-    $property_definitions['language_to'] = array(
-      'type' => 'string',
-      'label' => t('To language'),
-    );
+    $property_definitions['language_from'] = DataDefinition::create('string')
+      ->setLabel(t('From language'));
+    $property_definitions['language_to'] = DataDefinition::create('string')
+      ->setLabel(t('To language'));
     return $property_definitions;
   }
 
