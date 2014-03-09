@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_entity\Tests;
 
+use Drupal\Core\Language\Language;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
 
 /**
@@ -14,20 +15,31 @@ use Drupal\system\Tests\Entity\EntityUnitTestBase;
  */
 class EntitySuggestionsTest extends EntityUnitTestBase {
 
-  static function getInfo() {
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array('tmgmt', 'tmgmt_entity', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language');
+
+  public static function getInfo() {
     return array(
       'name' => 'Entity Suggestions tests',
       'description' => 'Tests suggestion implementation for the entity source plugin',
       'group' => 'Translation Management',
-      'dependencies' => array('file_entity'),
     );
   }
 
   public function setUp() {
-    parent::setUp(array('file_entity', 'tmgmt_entity', 'tmgmt_ui'));
-    $this->loginasadmin(array('administer entity translation'));
+    throw new \Exception('@todo: Update this test.');
+    parent::setUp(array('tmgmt_entity'));
 
-    $this->setEnvironment('de');
+
+    $edit = array(
+      'id' => 'de',
+    );
+    $language = new Language($edit);
+    language_save($language);
 
     // Enable entity translations for nodes and comments.
     $edit = array();

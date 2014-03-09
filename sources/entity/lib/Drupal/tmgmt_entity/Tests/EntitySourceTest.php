@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt_entity\Tests\EntitySourceTest.php
+ * Contains \Drupal\tmgmt_entity\Tests\EntitySourceTest.php
  */
 
 namespace Drupal\tmgmt_entity\Tests;

@@ -24,6 +24,7 @@ class EntitySourcePathAutoTest extends WebTestBase {
   }
 
   function setUp() {
+    throw new \Exception('@todo: Update this test.');
     parent::setUp(array('tmgmt_entity', 'entity_translation', 'pathauto'));
     $this->loginAsAdmin();
     $this->createNodeType('article', 'Article', ENTITY_TRANSLATION_ENABLED);

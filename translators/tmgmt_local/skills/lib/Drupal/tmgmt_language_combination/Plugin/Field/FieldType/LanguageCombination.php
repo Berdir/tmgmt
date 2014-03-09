@@ -33,19 +33,16 @@ class LanguageCombination extends ConfigFieldItemBase {
   /**
    * {@inheritdoc}
    */
-  public function getPropertyDefinitions() {
-
-    if (!isset(static::$propertyDefinitions)) {
-      static::$propertyDefinitions['language_from'] = array(
-        'type' => 'string',
-        'label' => t('From language'),
-      );
-      static::$propertyDefinitions['language_to'] = array(
-        'type' => 'string',
-        'label' => t('To language'),
-      );
-    }
-    return static::$propertyDefinitions;
+  public static function propertyDefinitions(FieldDefinitionInterface $field) {
+    $property_definitions['language_from'] = array(
+      'type' => 'string',
+      'label' => t('From language'),
+    );
+    $property_definitions['language_to'] = array(
+      'type' => 'string',
+      'label' => t('To language'),
+    );
+    return $property_definitions;
   }
 
 
@@ -72,6 +69,9 @@ class LanguageCombination extends ConfigFieldItemBase {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function isEmpty() {
     if (empty($this->language_from) || empty($this->language_to) || $this->language_from == '_none' || $this->language_to == '_none') {
       return TRUE;
