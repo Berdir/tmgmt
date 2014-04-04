@@ -56,7 +56,7 @@ class JobFormController extends TmgmtFormControllerBase {
 
     $states = tmgmt_job_states();
     // Set the title of the page to the label and the current state of the job.
-    drupal_set_title(t('@title (@source to @target, @state)', array(
+    $form['#title'] = (t('@title (@source to @target, @state)', array(
       '@title' => $job->label(),
       '@source' => $source,
       '@target' => $target,

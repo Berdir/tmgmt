@@ -150,7 +150,7 @@ abstract class TMGMTTestBase extends WebTestBase {
    * @return \Drupal\tmgmt\Entity\Translator
    */
   function createTranslator() {
-    $translator = new Translator();
+    $translator = entity_create('tmgmt_translator', array());
     $translator->name = strtolower($this->randomName());
     $translator->label = $this->randomName();
     $translator->plugin = 'test_translator';

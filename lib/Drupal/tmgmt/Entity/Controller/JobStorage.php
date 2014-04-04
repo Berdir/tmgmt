@@ -2,20 +2,19 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt\Entity\Controller\JobStorageController.
+ * Contains Drupal\tmgmt\Entity\Controller\JobStorage.
  */
 
 namespace Drupal\tmgmt\Entity\Controller;
 
-use Drupal\Core\Entity\DatabaseStorageController;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityDatabaseStorage;
 
 /**
  * Controller class for the job entity.
  *
  * @ingroup tmgmt_job
  */
-class JobStorageController extends DatabaseStorageController {
+class JobStorage extends EntityDatabaseStorage {
 
   /**
    * Overrides Drupal\entity\DatabaseStorageConroller::attachLoad().

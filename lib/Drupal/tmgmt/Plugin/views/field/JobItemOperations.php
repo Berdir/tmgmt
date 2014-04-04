@@ -15,7 +15,7 @@ use Drupal\views\ResultRow;
 /**
  * Field handler which shows the operations for a job.
  *
- * @PluginID("tmgmt_job_item_operations")
+ * @ViewsField("tmgmt_job_item_operations")
  */
 class JobItemOperations extends FieldPluginBase {
 

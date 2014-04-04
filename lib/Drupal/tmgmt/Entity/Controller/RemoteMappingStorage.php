@@ -2,20 +2,19 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt\Entity\Controller\RemoteMappingStorageController.
+ * Contains Drupal\tmgmt\Entity\Controller\RemoteMappingStorage.
  */
 
 namespace Drupal\tmgmt\Entity\Controller;
 
-use Drupal\Core\Entity\DatabaseStorageController;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityDatabaseStorage;
 
 /**
  * Controller class for the job entity.
  *
  * @ingroup tmgmt_job
  */
-class RemoteMappingStorageController extends DatabaseStorageController {
+class RemoteMappingStorage extends EntityDatabaseStorage {
 
   public function attachLoad(&$queried_entities, $load_revision = FALSE) {
     parent::attachLoad($queried_entities, $load_revision);

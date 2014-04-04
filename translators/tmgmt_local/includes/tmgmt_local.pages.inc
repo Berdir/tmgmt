@@ -29,7 +29,7 @@ function tmgmt_local_task_form($form, &$form_state, TMGMTLocalTask $task, $op = 
   $wrapper = entity_metadata_wrapper('tmgmt_local_task', $task);
 
   // Set the title of the page to the label and the current status of the task.
-  drupal_set_title(t('@label (@status)', array('@label' => $task->label(), '@status' => $wrapper->status->label())));
+  $form['#title'] = (t('@label (@status)', array('@label' => $task->label(), '@status' => $wrapper->status->label())));
 
   // Check if the translator entity is completely new or not.
   $old = empty($task->is_new) && $op != 'clone';

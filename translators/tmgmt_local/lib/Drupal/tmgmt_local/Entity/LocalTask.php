@@ -8,7 +8,7 @@
 namespace Drupal\tmgmt_local\Entity;
 
 use Drupal\Core\Entity\Entity;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\tmgmt\Entity\JobItem;
 
 /**
@@ -19,7 +19,7 @@ use Drupal\tmgmt\Entity\JobItem;
  *   label = @Translation("Translation Task"),
  *   module = "tmgmt_local",
  *   controllers = {
- *     "storage" = "Drupal\Core\Entity\DatabaseStorageController",
+ *     "storage" = "Drupal\Core\Entity\DatabaseStorage",
  *     "access" = "Drupal\tmgmt_local\Entity\Controller\LocalTaskAccessController",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt_local\Entity\Form\LocalTaskFormController"
@@ -406,7 +406,7 @@ class LocalTask extends Entity {
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageControllerInterface $storage_controller) {
+  public function preSave(EntityStorageInterface $storage_controller) {
     parent::preSave($storage_controller);
     $this->changed = REQUEST_TIME;
   }
@@ -414,7 +414,7 @@ class LocalTask extends Entity {
   /**
    * {@inheritdoc}
    */
-  public static function postDelete(EntityStorageControllerInterface $storage_controller, array $entities) {
+  public static function postDelete(EntityStorageInterface $storage_controller, array $entities) {
     parent::postDelete($storage_controller, $entities);
     $ids = \Drupal::entityQuery('tmgmt_local_task_item')
       ->condition('tltid', array_keys($entities))

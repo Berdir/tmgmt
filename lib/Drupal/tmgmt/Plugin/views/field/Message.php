@@ -19,7 +19,7 @@ use Drupal\views\Plugin\views\display\DisplayPluginBase;
  *
  * @ingroup views_field_handlers
  *
- * @PluginID("tmgmt_message")
+ * @ViewsField("tmgmt_message")
  */
 class Message extends FieldPluginBase {
 

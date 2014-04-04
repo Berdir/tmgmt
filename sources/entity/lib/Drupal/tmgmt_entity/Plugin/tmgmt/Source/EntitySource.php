@@ -37,7 +37,7 @@ class EntitySource extends SourcePluginBase {
     if ($entity = entity_load($job_item->item_type, $job_item->item_id)) {
       // @todo: Use routes.
       $uri['path'] = $entity->getSystemPath();
-      $uri += $entity->urlInfo();
+      $uri += $entity->urlInfo()->toArray();
       return $uri;
     }
   }

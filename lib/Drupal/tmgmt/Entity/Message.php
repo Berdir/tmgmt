@@ -10,7 +10,7 @@ namespace Drupal\tmgmt\Entity;
 use Drupal\Core\Entity\Entity;
 use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * Entity class for the tmgmt_message entity.
@@ -20,7 +20,7 @@ use Drupal\Core\Entity\EntityStorageControllerInterface;
  *   label = @Translation("Translation Message"),
  *   module = "tmgmt",
  *   controllers = {
- *     "storage" = "Drupal\tmgmt\Entity\Controller\MessageStorageController",
+ *     "storage" = "Drupal\tmgmt\Entity\Controller\MessageStorage",
  *   },
  *   uri_callback = "tmgmt_message_uri",
  *   base_table = "tmgmt_message",
@@ -172,7 +172,7 @@ class Message extends Entity {
   /**
    * {@inheritdoc}
    */
-  public static function postLoad(EntityStorageControllerInterface $storage_controller, array &$entities) {
+  public static function postLoad(EntityStorageInterface $storage_controller, array &$entities) {
     parent::postLoad($storage_controller, $entities);
     foreach ($entities as $entity) {
       $entity->variables = unserialize($entity->variables);

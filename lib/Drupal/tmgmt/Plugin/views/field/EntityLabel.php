@@ -14,7 +14,7 @@ use Drupal\views\ResultRow;
 /**
  * Field handler which shows the label for a job or job item.
  *
- * @PluginID("tmgmt_entity_label")
+ * @ViewsField("tmgmt_entity_label")
  */
 class EntityLabel extends FieldPluginBase {
 

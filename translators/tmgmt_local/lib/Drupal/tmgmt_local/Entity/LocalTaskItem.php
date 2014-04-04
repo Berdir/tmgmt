@@ -9,7 +9,7 @@ namespace Drupal\tmgmt_local\Entity;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Entity;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 
 /**
@@ -20,7 +20,7 @@ use Drupal\Core\Entity\EntityStorageControllerInterface;
  *   label = @Translation("Translation Task Item"),
  *   module = "tmgmt_local",
  *   controllers = {
- *     "storage" = "Drupal\Core\Entity\DatabaseStorageController",
+ *     "storage" = "Drupal\Core\Entity\DatabaseStorage",
  *     "access" = "Drupal\tmgmt_local\Entity\Controller\LocalTaskItemAccessController",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt_local\Entity\Form\LocalTaskItemFormController"
@@ -271,7 +271,7 @@ class LocalTaskItem extends Entity {
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageControllerInterface $storage_controller) {
+  public function preSave(EntityStorageInterface $storage_controller) {
     parent::preSave($storage_controller);
     // @todo Eliminate the need to flatten and unflatten the TaskItem data.
     // Consider everything translated when the job item is translated.

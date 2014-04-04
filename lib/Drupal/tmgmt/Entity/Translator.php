@@ -20,7 +20,7 @@ use Drupal\Core\Annotation\Translation;
  *   label = @Translation("Translator"),
  *   module = "tmgmt",
  *   controllers = {
- *     "storage" = "Drupal\tmgmt\Entity\Controller\TranslatorStorageController",
+ *     "storage" = "Drupal\tmgmt\Entity\Controller\TranslatorStorage",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Entity\Form\TranslatorFormController",
  *       "add" = "Drupal\tmgmt\Entity\Form\TranslatorFormController"

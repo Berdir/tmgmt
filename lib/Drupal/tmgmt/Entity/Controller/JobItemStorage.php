@@ -2,20 +2,19 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt\Entity\Controller\JobItemStorageController.
+ * Contains Drupal\tmgmt\Entity\Controller\JobItemStorage.
  */
 
 namespace Drupal\tmgmt\Entity\Controller;
 
-use Drupal\Core\Entity\DatabaseStorageController;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityDatabaseStorage;
 
 /**
  * Controller class for the job item entity.
  *
  * @ingroup tmgmt_job
  */
-class JobItemStorageController extends DatabaseStorageController {
+class JobItemStorage extends EntityDatabaseStorage {
 
   /**
    * Overrides EntityAPIController::invoke().

@@ -14,7 +14,7 @@ use Drupal\views\ResultRow;
 /**
  * Field handler which shows the operations for a job.
  *
- * @PluginID("tmgmt_translator")
+ * @ViewsField("tmgmt_translator")
  */
 class Translator extends FieldPluginBase {
 

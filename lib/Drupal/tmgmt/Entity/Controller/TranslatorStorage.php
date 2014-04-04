@@ -2,12 +2,12 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt\Entity\Controller\TranslatorStorageController.
+ * Contains Drupal\tmgmt\Entity\Controller\TranslatorStorage.
  */
 
 namespace Drupal\tmgmt\Entity\Controller;
 
-use Drupal\Core\Config\Entity\ConfigStorageController;
+use Drupal\Core\Config\Entity\ConfigEntityStorage;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
@@ -15,12 +15,10 @@ use Drupal\Core\Entity\EntityInterface;
  *
  * @ingroup tmgmt_translator
  */
-class TranslatorStorageController extends ConfigStorageController {
+class TranslatorStorage extends ConfigEntityStorage {
 
   /**
-   * Overrides Drupal\entity\DatabaseStorageController::buildQuery().
-   *
-   * @todo: Convert.
+   * {@inheritdoc}
    */
   protected function buildQuery($ids, $revision_id = FALSE) {
     $result = parent::buildQuery($ids, $revision_id);
@@ -37,7 +35,7 @@ class TranslatorStorageController extends ConfigStorageController {
   }
 
   /**
-   * Overrides Drupal\Core\Config\Entity\ConfigStorageController::delete().
+   * {@inheritdoc}
    */
   public function delete(array $entities) {
     // We are never going to have many entities here, so we can risk a loop.
@@ -56,7 +54,7 @@ class TranslatorStorageController extends ConfigStorageController {
   }
 
   /**
-   * Overrides Drupal\entity\DatabaseStorageController::postSave().
+   * {@inheritdoc}
    */
   public function postSave(EntityInterface $entity, $update) {
     // Clear the languages cache.

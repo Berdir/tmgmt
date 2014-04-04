@@ -2,26 +2,19 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\Entity\Controller\MessageStorageController.
+ * Contains \Drupal\tmgmt\Entity\Controller\MessageStorage.
  */
 
 namespace Drupal\tmgmt\Entity\Controller;
 
-use Drupal\Core\Entity\DatabaseStorageController;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityDatabaseStorage;
 
 /**
  * Controller class for the job item entity.
  *
  * @ingroup tmgmt_job
  */
-
-/**
- * Controller class for the job item entity.
- *
- * @ingroup tmgmt_job
- */
-class MessageStorageController extends DatabaseStorageController {
+class MessageStorage extends EntityDatabaseStorage {
 
   /**
    * Overrides Drupal\entity\DatabaseStorageConroller::attachLoad().

@@ -14,7 +14,7 @@ use Drupal\views\ResultRow;
 /**
  * Field handler which shows the progress of a job or job item.
  *
- * @PluginID("tmgmt_progress")
+ * @ViewsField("tmgmt_progress")
  */
 class Progress extends FieldPluginBase {
 

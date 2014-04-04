@@ -10,7 +10,8 @@ namespace Drupal\tmgmt\Entity;
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Entity;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Language\Language;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Annotation\Translation;
@@ -23,7 +24,7 @@ use Drupal\Core\Annotation\Translation;
  *   label = @Translation("Translation Job Item"),
  *   module = "tmgmt",
  *   controllers = {
- *     "storage" = "Drupal\tmgmt\Entity\Controller\JobItemStorageController",
+ *     "storage" = "Drupal\tmgmt\Entity\Controller\JobItemStorage",
  *     "access" = "Drupal\tmgmt\Entity\Controller\JobItemAccessController",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Entity\Form\JobItemFormController"
@@ -163,7 +164,7 @@ class JobItem extends Entity {
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageControllerInterface $storage) {
+  public function preSave(EntityStorageInterface $storage) {
     $this->changed = REQUEST_TIME;
     if ($this->tjid) {
      $this->recalculateStatistics();
@@ -173,7 +174,7 @@ class JobItem extends Entity {
   /**
    * {@inheritdoc}
    */
-  public static function postDelete(EntityStorageControllerInterface $storage, array $entities) {
+  public static function postDelete(EntityStorageInterface $storage, array $entities) {
     // Since we are deleting one or multiple job items here we also need to
     // delete the attached messages.
     /*
@@ -1082,7 +1083,14 @@ class JobItem extends Entity {
   /**
    * {@inheritdoc}
    */
-  public static function postLoad(EntityStorageControllerInterface $storage_controller, array &$entities) {
+  public function language() {
+    return new Language(array('id' => Language::LANGCODE_NOT_SPECIFIED));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function postLoad(EntityStorageInterface $storage_controller, array &$entities) {
     parent::postLoad($storage_controller, $entities);
     foreach ($entities as $entity) {
       $entity->data = unserialize($entity->data);

@@ -8,11 +8,8 @@
 namespace Drupal\tmgmt\Entity;
 
 use Drupal\Core\Entity\Entity;
-use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
-use Drupal\tmgmt\Entity\JobItem;
-use Drupal\tmgmt\Entity\Translator;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Language\Language;
 use Drupal\tmgmt\TMGMTException;
 
 /**
@@ -23,7 +20,7 @@ use Drupal\tmgmt\TMGMTException;
  *   label = @Translation("Translation Job"),
  *   module = "tmgmt",
  *   controllers = {
- *     "storage" = "Drupal\tmgmt\Entity\Controller\JobStorageController",
+ *     "storage" = "Drupal\tmgmt\Entity\Controller\JobStorage",
  *     "access" = "Drupal\tmgmt\Entity\Controller\JobAccessController",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Entity\Form\JobFormController",
@@ -156,14 +153,14 @@ class Job extends Entity {
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageControllerInterface $storage_controller) {
+  public function preSave(EntityStorageInterface $storage_controller) {
     $this->changed = REQUEST_TIME;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function postDelete(EntityStorageControllerInterface $storage_controller, array $entities) {
+  public static function postDelete(EntityStorageInterface $storage_controller, array $entities) {
     // Since we are deleting one or multiple jobs here we also need to delete
     // the attached job items and messages.
     $tjiids = \Drupal::entityQuery('tmgmt_job_item')
@@ -982,7 +979,14 @@ class Job extends Entity {
   /**
    * {@inheritdoc}
    */
-  public static function postLoad(EntityStorageControllerInterface $storage_controller, array &$entities) {
+  public function language() {
+    return new Language(array('id' => Language::LANGCODE_NOT_SPECIFIED));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function postLoad(EntityStorageInterface $storage_controller, array &$entities) {
     parent::postLoad($storage_controller, $entities);
     foreach ($entities as $entity) {
       $entity->settings = unserialize($entity->settings);

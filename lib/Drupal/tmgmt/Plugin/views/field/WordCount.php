@@ -14,7 +14,7 @@ use Drupal\views\ResultRow;
 /**
  * Field handler which shows the word count for a job or job item.
  *
- * @PluginID("tmgmt_wordcount")
+ * @ViewsField("tmgmt_wordcount")
  */
 class WordCount extends FieldPluginBase {
 

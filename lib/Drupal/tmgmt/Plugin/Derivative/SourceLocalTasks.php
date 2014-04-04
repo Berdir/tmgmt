@@ -46,7 +46,7 @@ class SourceLocalTasks extends DerivativeBase implements ContainerDerivativeInte
   /**
    * {@inheritdoc}
    */
-  public function getDerivativeDefinitions(array $base_plugin_definition) {
+  public function getDerivativeDefinitions($base_plugin_definition) {
     // Create tabs for all possible source item types.
     $weight = 0;
     foreach ($this->sourceManager->getDefinitions() as $type => $definition) {
