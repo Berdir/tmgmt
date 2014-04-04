@@ -172,7 +172,7 @@ function tmgmt_modules_installed($modules) {
  * Implements hook_cron().
  */
 function tmgmt_cron() {
-  $offset = config('tmgmt.settings')->get('purge_finished');
+  $offset = \Drupal::config('tmgmt.settings')->get('purge_finished');
   if ($offset != '_never') {
     // Delete all finished translation jobs that haven't been changed for a
     // time span longer than the given offset.
