@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\Entity\Formr\TmgmtFormControllerBase.
+ * Contains \Drupal\tmgmt\Entity\Formr\TmgmtFormBase.
  */
 
-namespace Drupal\tmgmt\Entity\Form;
+namespace Drupal\tmgmt\Form;
 
 use Drupal\Core\Entity\EntityControllerInterface;
 use Drupal\Core\Entity\EntityForm;
@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @ingroup tmgmt_job
  */
-class TmgmtFormControllerBase extends EntityForm {
+class TmgmtFormBase extends EntityForm {
 
   /**
    * Translator plugin manager.

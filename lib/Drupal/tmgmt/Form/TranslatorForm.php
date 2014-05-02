@@ -2,17 +2,17 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\Entity\Form\TranslatorFormController.
+ * Contains \Drupal\tmgmt\Form\TranslatorForm.
  */
 
-namespace Drupal\tmgmt\Entity\Form;
+namespace Drupal\tmgmt\Form;
 
 /**
  * Form controller for the translator edit forms.
  *
  * @ingroup tmgmt_translator
  */
-class TranslatorFormController extends TmgmtFormControllerBase {
+class TranslatorForm extends TmgmtFormBase {
 
   /**
    * Overrides Drupal\Core\Entity\EntityForm::form().

@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\Entity\Form\JobFormController.
+ * Contains \Drupal\tmgmt\Form\JobForm.
  */
 
-namespace Drupal\tmgmt\Entity\Form;
+namespace Drupal\tmgmt\Form;
 
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
@@ -16,7 +16,7 @@ use Drupal\views\Entity\View;
  *
  * @ingroup tmgmt_job
  */
-class JobFormController extends TmgmtFormControllerBase {
+class JobForm extends TmgmtFormBase {
 
   /**
    * @var \Drupal\tmgmt\Entity\Job

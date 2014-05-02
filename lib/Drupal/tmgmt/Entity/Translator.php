@@ -9,31 +9,27 @@ namespace Drupal\tmgmt\Entity;
 
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * Entity class for the tmgmt_translator entity.
  *
- * @EntityType(
+ * @ConfigEntityType(
  *   id = "tmgmt_translator",
  *   label = @Translation("Translator"),
- *   module = "tmgmt",
  *   controllers = {
- *     "storage" = "Drupal\tmgmt\Entity\Controller\TranslatorStorage",
  *     "form" = {
- *       "edit" = "Drupal\tmgmt\Entity\Form\TranslatorFormController",
- *       "add" = "Drupal\tmgmt\Entity\Form\TranslatorFormController"
+ *       "edit" = "Drupal\tmgmt\Form\TranslatorForm",
+ *       "add" = "Drupal\tmgmt\Form\TranslatorForm"
  *     },
- *     "list" = "Drupal\tmgmt\Entity\Controller\TranslatorList",
+ *     "list_builder" = "Drupal\tmgmt\Entity\Controller\TranslatorListBuilder",
  *     "access" = "Drupal\tmgmt\Entity\Controller\TranslatorAccessController",
  *   },
  *   uri_callback = "tmgmt_translator_uri",
- *   config_prefix = "tmgmt.translator",
+ *   config_prefix = "translator",
  *   entity_keys = {
  *     "id" = "name",
  *     "label" = "label",
- *     "uuid" = "uuid",
  *     "weight" = "weight"
  *   }
  * )
@@ -124,6 +120,33 @@ class Translator extends ConfigEntityBase {
    */
   public function id() {
     return $this->name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    // Clear the languages cache.
+    \Drupal::cache('tmgmt')->delete('languages:' . $this->name);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function preDelete(EntityStorageInterface $storage, array $entities) {
+    // We are never going to have many entities here, so we can risk a loop.
+    foreach ($entities as $key => $name) {
+      if (tmgmt_translator_busy($key)) {
+        // The translator can't be deleted because it is currently busy. Remove
+        // it from the ids so it wont get deleted in the parent implementation.
+        unset($entities[$key]);
+      }
+      else {
+        // Clear the language cache for the deleted translators.
+        \Drupal::cache('tmgmt')->delete('languages:' . $key);
+      }
+    }
+    parent::preDelete($storage, $entities);
   }
 
   /**

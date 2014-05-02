@@ -2,13 +2,14 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\Entity\Form\JobResubmitForm.
+ * Contains \Drupal\tmgmt\Form\JobResubmitForm.
  */
 
-namespace Drupal\tmgmt\Entity\Form;
+namespace Drupal\tmgmt\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Url;
+use Drupal\tmgmt\Entity\Form\TMGMTJobItem;
 
 /**
  * Provides a form for deleting a node.

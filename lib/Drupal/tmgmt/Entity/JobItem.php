@@ -24,10 +24,10 @@ use Drupal\Core\Annotation\Translation;
  *   label = @Translation("Translation Job Item"),
  *   module = "tmgmt",
  *   controllers = {
- *     "storage" = "Drupal\tmgmt\Entity\Controller\JobItemStorage",
+ *     "storage" = "Drupal\Core\Entity\EntityDatabaseStorage",
  *     "access" = "Drupal\tmgmt\Entity\Controller\JobItemAccessController",
  *     "form" = {
- *       "edit" = "Drupal\tmgmt\Entity\Form\JobItemFormController"
+ *       "edit" = "Drupal\tmgmt\Form\JobItemForm"
  *     },
  *   },
  *   uri_callback = "tmgmt_job_item_uri",
@@ -169,6 +169,24 @@ class JobItem extends Entity {
     if ($this->tjid) {
      $this->recalculateStatistics();
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function preDelete(EntityStorageInterface $storage, array $entities) {
+    // We need to check whether the state of the job is affected by this
+    // deletion.
+    foreach ($entities as $entity) {
+      if ($job = $entity->getJob()) {
+        // We only care for active jobs.
+        if ($job->isActive() && tmgmt_job_check_finished($job->tjid)) {
+          // Mark the job as finished.
+          $job->finished();
+        }
+      }
+    }
+    parent::preDelete($storage, $entities);
   }
 
   /**

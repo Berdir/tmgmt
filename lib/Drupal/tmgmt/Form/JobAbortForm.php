@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\Entity\Form\JobAbortForm.
+ * Contains \Drupal\tmgmt\Form\JobAbortForm.
  */
 
-namespace Drupal\tmgmt\Entity\Form;
+namespace Drupal\tmgmt\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Url;

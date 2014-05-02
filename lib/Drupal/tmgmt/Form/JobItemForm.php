@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\Entity\Form\JobItemFormController.
+ * Contains \Drupal\tmgmt\Form\JobItemForm.
  */
 
-namespace Drupal\tmgmt\Entity\Form;
+namespace Drupal\tmgmt\Form;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\tmgmt\Entity\JobItem;
@@ -15,7 +15,7 @@ use Drupal\tmgmt\Entity\JobItem;
  *
  * @ingroup tmgmt_job
  */
-class JobItemFormController extends TmgmtFormControllerBase {
+class JobItemForm extends TmgmtFormBase {
 
   /**
    * Overrides Drupal\Core\Entity\EntityForm::form().

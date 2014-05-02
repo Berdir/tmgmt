@@ -17,7 +17,7 @@ use Drupal\Core\Entity\EntityDatabaseStorage;
 class MessageStorage extends EntityDatabaseStorage {
 
   /**
-   * Overrides Drupal\entity\DatabaseStorageConroller::attachLoad().
+   * {@inheritdoc}
    */
   public function attachLoad(&$queried_entities, $revision_id = FALSE) {
     parent::attachLoad($queried_entities, $revision_id);
