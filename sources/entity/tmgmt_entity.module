@@ -184,7 +184,8 @@ function tmgmt_entity_get_translatable_entities($entity_type_id, $property_condi
   }
 
   $query->orderBy($entity_type->getKey('id'), 'DESC');
-  $entity_ids = $query->execute()->fetchCol();
+  $result = $query->execute();
+  $entity_ids = $result->fetchCol();
   $entities = array();
 
   if (!empty($entity_ids)) {

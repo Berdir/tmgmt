@@ -23,7 +23,7 @@ use Drupal\tmgmt\TMGMTException;
  *     "storage" = "Drupal\tmgmt\Entity\Controller\JobStorage",
  *     "access" = "Drupal\tmgmt\Entity\Controller\JobAccessController",
  *     "form" = {
- *       "edit" = "Drupal\tmgmt\Entity\Form\JobForm",
+ *       "edit" = "Drupal\tmgmt\Form\JobForm",
  *       "abort" = "Drupal\tmgmt\Form\JobAbortForm",
  *       "resubmit" = "Drupal\tmgmt\Form\JobResubmitForm",
  *     }

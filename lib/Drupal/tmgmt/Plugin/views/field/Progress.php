@@ -33,7 +33,7 @@ class Progress extends FieldPluginBase {
         if ($value->tmgmt_job_state == TMGMT_JOB_STATE_ABORTED) {
           continue;
         }
-        $tjids[] = $value->getJobId();
+        $tjids[] = $value->tjid;
       }
       tmgmt_job_statistics_load($tjids);
     }

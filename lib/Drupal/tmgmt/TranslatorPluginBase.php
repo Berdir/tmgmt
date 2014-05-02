@@ -172,7 +172,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
    * {@inheritdoc}
    */
   public function getNotCanTranslateReason(Job $job) {
-    return t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => tmgmt_language_label($job->source_language), '@target' => tmgmt_language_label($job->target_language)));
+    return t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => \Drupal::languageManager()->getLanguage($job->source_language)->getName(), '@target' => \Drupal::languageManager()->getLanguage($job->target_language)->getName()));
   }
 
   /**

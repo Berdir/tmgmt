@@ -6,11 +6,8 @@
  */
 
 use Drupal\Component\Utility\NestedArray;
-use Drupal\tmgmt\SourcePluginUiInterface;
 use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
-use Drupal\Core\Language\Language;
 
 /**
  * @addtogroup tmgmt_job
@@ -159,7 +156,7 @@ function tmgmt_permission() {
 function tmgmt_modules_installed($modules) {
   $translator_manager = \Drupal::service('plugin.manager.tmgmt.translator');
   $translator_manager->clearCachedDefinitions();
-  foreach ($translator_manager->getDefinitions() as $id => $definition) {
+  foreach ($translator_manager->getDefinitions() as $definition) {
     // Check if this translator plugin has been added by one of the recently
     // installed modules and doesn't prevent auto creation.
     if ((!isset($definition['auto create']) || $definition['auto create'] == TRUE) && in_array($definition['provider'], $modules)) {
@@ -221,23 +218,6 @@ function tmgmt_available_languages($exclude = array()) {
     }
   }
   return $labels;
-}
-
-/**
- * Returns the label of a language.
- *
- * @param $language
- *   A language in ISO format.
- * @return string
- *   The label of the language or an empty string if the language or its label
- *   are not defined.
- */
-function tmgmt_language_label($language) {
-  $languages = language_list();
-  if (!empty($languages[$language])) {
-    return $languages[$language]->name;
-  }
-  return '';
 }
 
 /**

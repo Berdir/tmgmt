@@ -20,7 +20,7 @@ class TmgmtEntityUiRouteSubscriber extends RouteSubscriberBase {
   /**
    * {@inheritdoc}
    */
-  protected function alterRoutes(RouteCollection $collection, $provider) {
+  protected function alterRoutes(RouteCollection $collection) {
     // Look for routes that use  ContentTranslationController and change it
     // to our subclass.
     foreach ($collection as $route) {

@@ -45,13 +45,13 @@ class JobForm extends TmgmtFormBase {
       }
     }
 
-    $source = tmgmt_language_label($job->source_language) ?: '?';
+    $source = \Drupal::languageManager()->getLanguage($job->source_language)->getName() ?: '?';
     if (empty($job->target_language)) {
       $job->target_language = key($available['target_language']);
       $target = '?';
     }
     else {
-      $target = tmgmt_language_label($job->target_language);
+      $target = \Drupal::languageManager()->getLanguage($job->target_language)->getName();
     }
 
     $states = tmgmt_job_states();

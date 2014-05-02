@@ -46,7 +46,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
       foreach ($controller->getRemoteLanguagesMappings($translator) as $local_language => $remote_language) {
         $form['remote_languages_mappings'][$local_language] = array(
           '#type' => 'textfield',
-          '#title' => tmgmt_language_label($local_language) . ' (' . $local_language . ')',
+          '#title' => \Drupal::languageManager()->getLanguage($local_language)->getName() . ' (' . $local_language . ')',
           '#default_value' => $remote_language,
           '#size' => 6,
         );
@@ -61,7 +61,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
     }
 
     if (!element_children($form)) {
-      $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginInfo['label']));
+      $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginDefinition['label']));
     }
     return $form;
   }

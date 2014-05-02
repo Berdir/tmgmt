@@ -202,20 +202,56 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
     'class' => 'tmgmt-ui-data-item-actions',
   );
   foreach ($row as $cell) {
-    $result .= _theme_table_cell($cell);
+    $result = tmgmt_ui_build_table_cell($cell);
   }
   $result .= '</tr>';
 
   if (!empty($element['below'])) {
     $result .= '<tr' . new Attribute(array('class' => $element['#zebra'])) . '>';
-    $result .= _theme_table_cell(array(
+    $cell = array(
       'data' => drupal_render($element['below']),
       'colspan' => '4',
-    ));
+    );
+    $result .= tmgmt_ui_build_table_cell($cell);
     $result .= '</tr>';
   }
 
   return $result;
+}
+
+/**
+ * Builds a table cell.
+ *
+ * @param array|string $cell
+ *   A cell content array or string.
+ *
+ * @return string
+ *   The table cell.
+ */
+function tmgmt_ui_build_table_cell($cell) {
+  if (!is_array($cell)) {
+    $cell_content = $cell;
+    $cell_attributes = array();
+    $is_header = FALSE;
+  }
+  else {
+    $cell_content = '';
+    if (isset($cell['data'])) {
+      $cell_content = $cell['data'];
+      unset($cell['data']);
+    }
+    // Flag the cell as a header or not and remove the flag.
+    $is_header = !empty($cell['header']);
+    unset($cell['header']);
+
+    $cell_attributes = $cell;
+
+    if (is_array($cell_content)) {
+      $cell_content = drupal_render($cell_content);
+    }
+  }
+  $cell_tag = $is_header ? 'th' : 'td';
+  return '<' . $cell_tag . new Attribute($cell_attributes) . '>' . $cell_content . '</' . $cell_tag . '>';
 }
 
 /**
@@ -246,8 +282,9 @@ function theme_tmgmt_ui_translator_review_form($variables) {
           // @todo: Deal with right to left languages.
           'data' => check_plain(implode(t(' > '), $labels)),
           'colspan' => 4,
+          'header' => TRUE,
         );
-        $element_group = '<tr>' . _theme_table_cell($cell, TRUE) . '</tr>';
+        $element_group = '<tr>' . tmgmt_ui_build_table_cell($cell, TRUE) . '</tr>';
       }
     }
     $element_group .= drupal_render($element[$key]);
@@ -261,56 +298,10 @@ function theme_tmgmt_ui_translator_review_form($variables) {
     $cell = array(
       'data' => $parent_label,
       'colspan' => 5,
+      'header' => TRUE,
     );
-    $result = '<thead><tr>' . _theme_table_cell($cell, TRUE) . '</tr></thead>' . implode('', $element_groups);
+    $result = '<thead><tr>' . tmgmt_ui_build_table_cell($cell) . '</tr></thead>' . implode('', $element_groups);
   }
   $table = '<table class="tmgmt-ui-review"><colgroup width="100" /><colgroup width="*" span="2" /><colgroup width="100" />' . $result . '</table>';
   return '<div id="' . $element['#ajaxid'] . '">' . $table . '</div>';
-}
-
-/**
- * Adds a description to the translator entity on the entity overview form.
- *
- * @see theme_entity_ui_overview_item()
- */
-function theme_tmgmt_ui_translator_overview_item($variables) {
-  $output = theme('entity_ui_overview_item', $variables);
-  if (!empty($variables['description'])) {
-    $output = '<div class="tmgmt-ui-translator-label-wrapper">' . $output . '<div class="description">' . $variables['description'] . '</div></div>';
-  }
-  return $output;
-}
-
-/**
- * Theme callback for adding the tabledrag to the translator entity overview
- * form.
- */
-function theme_tmgmt_ui_translator_overview_form($variables) {
-  $form = $variables['form'];
-  $colspan = !empty($form['#entity_info']['exportable']) ? 4 : 3;
-  $rows = array();
-  $header = array(
-    t('Label'),
-    t('Plugin'),
-    t('Configured'),
-    t('Status'),
-    array('data' => t('Operations'), 'colspan' => $colspan),
-    t('Weight'),
-  );
-  foreach (element_children($form) as $key) {
-    $row = array();
-    $form[$key]['weight']['#attributes']['class'] = array('tmgmt-ui-translator-weight');
-    $row[] = drupal_render($form[$key]['label']);
-    $row[] = drupal_render($form[$key]['plugin']);
-    $row[] = drupal_render($form[$key]['configured']);
-    $row[] = drupal_render($form[$key]['status']);
-    $operations = element_children($form[$key]['operations']);
-    foreach ($operations as $op) {
-      $row[] = array('data' => $form[$key]['operations'][$op]);
-    }
-    $row[] = drupal_render($form[$key]['weight']);
-    $rows[] = array('data' => $row, 'class' => array('draggable'));
-  }
-  drupal_add_tabledrag('tmgmt-ui-translator-overview', 'order', 'sibling', 'tmgmt-ui-translator-weight');
-  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('None.'), 'attributes' => array('id' => 'tmgmt-ui-translator-overview')));
 }
