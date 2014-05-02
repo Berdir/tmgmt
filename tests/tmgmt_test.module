@@ -25,7 +25,7 @@ function tmgmt_test_tmgmt_source_suggestions(array $items, Job $job) {
       $suggestions[] = array(
         'job_item' => tmgmt_job_item_create('test_source', $item->item_type .  '_suggestion', $item->item_id),
         'reason' => t('Test suggestion for @type source @id', array('@type' => $item->item_type,'@id' => $item->item_id)),
-        'from_item' => $item->tjiid,
+        'from_item' => $item->id(),
       );
     }
   }

@@ -184,7 +184,7 @@ class JobForm extends TmgmtFormBase {
         '#type' => 'markup',
         '#title' => $view->label(),
         '#prefix' => '<div class="' . 'tmgmt-ui-job-items ' . ($job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage') . '">',
-        'view' => $view->getExecutable()->preview($job->isSubmittable() ? 'submit' : 'block', array($job->tjid)),
+        'view' => $view->getExecutable()->preview($job->isSubmittable() ? 'submit' : 'block', array($job->id())),
         '#attributes' => array('class' => array('tmgmt-ui-job-items', $job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage')),
         '#suffix' => '</div>',
       );
@@ -328,7 +328,7 @@ class JobForm extends TmgmtFormBase {
         '#collapsible' => TRUE,
         '#weight' => 50,
       );
-      $form['messages']['view'] = $view->getExecutable()->preview('block', array($job->tjid));
+      $form['messages']['view'] = $view->getExecutable()->preview('block', array($job->id()));
     }
 
     $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
@@ -367,14 +367,14 @@ class JobForm extends TmgmtFormBase {
       $actions['resubmit_job'] = array(
         '#type' => 'submit',
         '#submit' => array('tmgmt_ui_submit_redirect'),
-        '#redirect' => 'admin/tmgmt/jobs/' . $job->tjid . '/resubmit',
+        '#redirect' => 'admin/tmgmt/jobs/' . $job->id() . '/resubmit',
         '#value' => t('Resubmit'),
         '#access' => $job->isAborted(),
       );
       $actions['abort_job'] = array(
         '#type' => 'submit',
         '#value' => t('Abort job'),
-        '#redirect' => 'admin/tmgmt/jobs/' . $job->tjid . '/abort',
+        '#redirect' => 'admin/tmgmt/jobs/' . $job->id() . '/abort',
         '#submit' => array('tmgmt_ui_submit_redirect'),
         '#access' => $job->isAbortable(),
       );
@@ -426,7 +426,7 @@ class JobForm extends TmgmtFormBase {
     $job = parent::buildEntity($form, $form_state);
     // If requested custom job settings handling, copy values from original job.
     if (tmgmt_job_settings_custom_handling($job->getTranslator())) {
-      $original_job = entity_load_unchanged('tmgmt_job', $job->tjid);
+      $original_job = entity_load_unchanged('tmgmt_job', $job->id());
       $job->settings = $original_job->settings;
     }
 

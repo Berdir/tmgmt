@@ -133,7 +133,7 @@ class LocalTaskItem extends Entity {
    * @return JobItem
    */
   public function getJobItem() {
-    return entity_load('tmgmt_job_item', $this->tjiid);
+    return entity_load('tmgmt_job_item', $this->id());
   }
 
   /**

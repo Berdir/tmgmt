@@ -58,7 +58,7 @@ class CrudTest extends TMGMTUnitTestBase {
   function testJobs() {
     $job = $this->createJob();
 
-    $loaded_job = tmgmt_job_load($job->tjid);
+    $loaded_job = tmgmt_job_load($job->id());
 
     $this->assertEqual($job->source_language, $loaded_job->source_language);
     $this->assertEqual($job->target_language, $loaded_job->target_language);
@@ -73,7 +73,7 @@ class CrudTest extends TMGMTUnitTestBase {
     $job->reference = 7;
     $this->assertEqual(SAVED_UPDATED, $job->save());
 
-    $loaded_job = tmgmt_job_load($job->tjid);
+    $loaded_job = tmgmt_job_load($job->id());
 
     $this->assertEqual($job->reference, $loaded_job->reference);
 
@@ -85,16 +85,16 @@ class CrudTest extends TMGMTUnitTestBase {
     $items = $job->getItems();
     $this->assertEqual(2, count($items));
 
-    $this->assertEqual($item1->plugin, $items[$item1->tjiid]->plugin);
-    $this->assertEqual($item1->item_type, $items[$item1->tjiid]->item_type);
-    $this->assertEqual($item1->item_id, $items[$item1->tjiid]->item_id);
-    $this->assertEqual($item2->plugin, $items[$item2->tjiid]->plugin);
-    $this->assertEqual($item2->item_type, $items[$item2->tjiid]->item_type);
-    $this->assertEqual($item2->item_id, $items[$item2->tjiid]->item_id);
+    $this->assertEqual($item1->plugin, $items[$item1->id()]->plugin);
+    $this->assertEqual($item1->item_type, $items[$item1->id()]->item_type);
+    $this->assertEqual($item1->item_id, $items[$item1->id()]->item_id);
+    $this->assertEqual($item2->plugin, $items[$item2->id()]->plugin);
+    $this->assertEqual($item2->item_type, $items[$item2->id()]->item_type);
+    $this->assertEqual($item2->item_id, $items[$item2->id()]->item_id);
 
     // Delete the job and make sure it is gone.
     $job->delete();
-    $this->assertFalse(tmgmt_job_load($job->tjid));
+    $this->assertFalse(tmgmt_job_load($job->id()));
   }
 
   function testRemoteMappings() {
@@ -125,13 +125,13 @@ class CrudTest extends TMGMTUnitTestBase {
     $item_mapping = array_shift($item_mappings);
 
     $_job = $job_mapping->getJob();
-    $this->assertEqual($job->tjid, $_job->tjid);
+    $this->assertEqual($job->id(), $_job->id());
 
     $_job = $item_mapping->getJob();
-    $this->assertEqual($job->tjid, $_job->tjid);
+    $this->assertEqual($job->id(), $_job->id());
 
     $_item1 = $item_mapping->getJobItem();
-    $this->assertEqual($item1->tjiid, $_item1->tjiid);
+    $this->assertEqual($item1->id(), $_item1->id());
 
     /**
      * @var TMGMTRemoteController $remote_mapping_controller
@@ -139,7 +139,7 @@ class CrudTest extends TMGMTUnitTestBase {
     $remote_mapping_controller = entity_get_controller('tmgmt_remote');
     $remote_mappings = $remote_mapping_controller->loadByRemoteIdentifier('id11', 'id12', 'id13');
     $remote_mapping = array_shift($remote_mappings);
-    $this->assertEqual($remote_mapping->tjiid, $item1->tjiid);
+    $this->assertEqual($remote_mapping->id(), $item1->id());
     $this->assertEqual($remote_mapping->amount, $mapping_data['amount']);
     $this->assertEqual($remote_mapping->currency, $mapping_data['currency']);
 
@@ -163,14 +163,14 @@ class CrudTest extends TMGMTUnitTestBase {
     $item1->delete();
     // Test if mapping for item1 has been removed as well.
 
-    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item1->tjiid)), 0);
+    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item1->id())), 0);
 
     // We still should have mapping for item2.
-    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item2->tjiid)), 1);
+    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item2->id())), 1);
 
     // Now delete the job and see if remaining mappings were removed as well.
     $job->delete();
-    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item2->tjiid)), 0);
+    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item2->id())), 0);
   }
 
   /**
@@ -184,25 +184,25 @@ class CrudTest extends TMGMTUnitTestBase {
     $item2 = $job->addItem('test_source', 'test_with_long_label', 4);
 
     // Test single load callback.
-    $item = tmgmt_job_item_load($item1->tjiid);
+    $item = tmgmt_job_item_load($item1->id());
     $this->assertEqual($item1->plugin, $item->plugin);
     $this->assertEqual($item1->item_type, $item->item_type);
     $this->assertEqual($item1->item_id, $item->item_id);
 
     // Test multiple load callback.
-    $items = tmgmt_job_item_load_multiple(array($item1->tjiid, $item2->tjiid));
+    $items = tmgmt_job_item_load_multiple(array($item1->id(), $item2->id()));
 
     $this->assertEqual(2, count($items));
 
-    $this->assertEqual($item1->plugin, $items[$item1->tjiid]->plugin);
-    $this->assertEqual($item1->item_type, $items[$item1->tjiid]->item_type);
-    $this->assertEqual($item1->item_id, $items[$item1->tjiid]->item_id);
-    $this->assertEqual($item2->plugin, $items[$item2->tjiid]->plugin);
-    $this->assertEqual($item2->item_type, $items[$item2->tjiid]->item_type);
-    $this->assertEqual($item2->item_id, $items[$item2->tjiid]->item_id);
+    $this->assertEqual($item1->plugin, $items[$item1->id()]->plugin);
+    $this->assertEqual($item1->item_type, $items[$item1->id()]->item_type);
+    $this->assertEqual($item1->item_id, $items[$item1->id()]->item_id);
+    $this->assertEqual($item2->plugin, $items[$item2->id()]->plugin);
+    $this->assertEqual($item2->item_type, $items[$item2->id()]->item_type);
+    $this->assertEqual($item2->item_id, $items[$item2->id()]->item_id);
     // Test the second item label length - it must not exceed the
     // TMGMT_JOB_LABEL_MAX_LENGTH.
-    $this->assertTrue(TMGMT_JOB_LABEL_MAX_LENGTH >= strlen($items[$item2->tjiid]->label()));
+    $this->assertTrue(TMGMT_JOB_LABEL_MAX_LENGTH >= strlen($items[$item2->id()]->label()));
   }
 
   /**
@@ -384,12 +384,12 @@ class CrudTest extends TMGMTUnitTestBase {
     $this->assertEqual(0, $job->getWordCount());
 
     // Add a test items.
-    $job_item1 = tmgmt_job_item_create('plugin', 'type', 4, array('tjid' => $job->tjid));
+    $job_item1 = tmgmt_job_item_create('plugin', 'type', 4, array('tjid' => $job->id()));
     $job_item1->save();
 
     // No pending, translated and confirmed data items.
-    $job = entity_load('tmgmt_job', $job->tjid);
-    $job_item1 = entity_load('tmgmt_job_item', $job_item1->tjiid);
+    $job = entity_load('tmgmt_job', $job->id());
+    $job_item1 = entity_load('tmgmt_job_item', $job_item1->id());
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(0, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
@@ -405,8 +405,8 @@ class CrudTest extends TMGMTUnitTestBase {
     $job_item1->save();
 
     // One pending data items.
-    $job = entity_load('tmgmt_job', $job->tjid);
-    $job_item1 = entity_load('tmgmt_job_item', $job_item1->tjiid);
+    $job = entity_load('tmgmt_job', $job->id());
+    $job_item1 = entity_load('tmgmt_job_item', $job_item1->id());
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(1, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
@@ -424,8 +424,8 @@ class CrudTest extends TMGMTUnitTestBase {
     $job_item1->save();
 
     // One pending data items.
-    $job = entity_load('tmgmt_job', $job->tjid);
-    $job_item1 = entity_load('tmgmt_job_item', $job_item1->tjiid);
+    $job = entity_load('tmgmt_job', $job->id());
+    $job_item1 = entity_load('tmgmt_job_item', $job_item1->id());
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(1, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
@@ -459,8 +459,8 @@ class CrudTest extends TMGMTUnitTestBase {
     $this->assertEqual(1, $job->getCountReviewed());
 
     // Add a translated and an untranslated and a confirmed data item
-    $job = entity_load('tmgmt_job', $job->tjid);
-    $job_item1 = entity_load('tmgmt_job_item', $job_item1->tjiid);
+    $job = entity_load('tmgmt_job', $job->id());
+    $job_item1 = entity_load('tmgmt_job_item', $job_item1->id());
     $job_item1->data['data_item1'] = $data1;
     $job_item1->data['data_item2'] = $data3;
     $job_item1->data['data_item3'] = $data4;
@@ -478,8 +478,8 @@ class CrudTest extends TMGMTUnitTestBase {
     $job_item1->save();
 
     // One pending data items.
-    $job = entity_load('tmgmt_job', $job->tjid);
-    $job_item1 = entity_load('tmgmt_job_item', $job_item1->tjiid);
+    $job = entity_load('tmgmt_job', $job->id());
+    $job_item1 = entity_load('tmgmt_job_item', $job_item1->id());
     $this->assertEqual('label', $job_item1->data['data_item1']['#label']);
     $this->assertEqual(3, count($job_item1->data['data_item1']));
 
@@ -496,14 +496,14 @@ class CrudTest extends TMGMTUnitTestBase {
     $job_item1->save();
 
     // 3 pending and 7 translated data items each.
-    $job = entity_load('tmgmt_job', $job->tjid);
+    $job = entity_load('tmgmt_job', $job->id());
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(3, $job->getCountPending());
     $this->assertEqual(7, $job->getCountTranslated());
     $this->assertEqual(5, $job->getCountReviewed());
 
     // Add several job items
-    $job_item2 = tmgmt_job_item_create('plugin', 'type', 5, array('tjid' => $job->tjid));
+    $job_item2 = tmgmt_job_item_create('plugin', 'type', 5, array('tjid' => $job->id()));
     for ($index = 1; $index <= 4; $index++) {
       $job_item2->data['data_item' . $index] = $data1;
     }
@@ -516,7 +516,7 @@ class CrudTest extends TMGMTUnitTestBase {
     $job_item2->save();
 
     // 3 pending and 7 translated data items each.
-    $job = entity_load('tmgmt_job', $job->tjid);
+    $job = entity_load('tmgmt_job', $job->id());
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(7, $job->getCountPending());
     $this->assertEqual(15, $job->getCountTranslated());

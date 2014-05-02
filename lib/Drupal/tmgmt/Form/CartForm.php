@@ -30,7 +30,7 @@ class Cartform extends FormBase {
     $options = array();
     foreach (tmgmt_ui_cart_get()->getJobItemsFromCart() as $item) {
       $uri = $item->getSourceUri();
-      $options[$item->tjiid] = array(
+      $options[$item->id()] = array(
         $item->getSourceType(),
         (!empty($uri['path']) ? l($item->label(), $uri['path']) : $item->label()),
         isset($languages[$item->getSourceLangCode()]) ? $languages[$item->getSourceLangCode()] : t('Unknown'),
@@ -117,7 +117,7 @@ class Cartform extends FormBase {
     $job_items_by_source_language = array();
     // Group the selected items by source language.
     foreach (tmgmt_job_item_load_multiple(array_filter($form_state['values']['items'])) as $job_item) {
-      $job_items_by_source_language[$job_item->getSourceLangCode()][$job_item->tjiid] = $job_item;
+      $job_items_by_source_language[$job_item->getSourceLangCode()][$job_item->id()] = $job_item;
     }
 
     $jobs = array();
@@ -141,7 +141,7 @@ class Cartform extends FormBase {
             // re-create them and delete the old ones, after removing them from
             // the cart.
             $job->addItem($job_item->plugin, $job_item->item_type, $job_item->item_id);
-            $remove_job_item_ids[$job_item->tjiid] = $job_item->tjiid;
+            $remove_job_item_ids[$job_item->id()] = $job_item->id();
             $job_empty = FALSE;
           }
           catch (Exception $e) {

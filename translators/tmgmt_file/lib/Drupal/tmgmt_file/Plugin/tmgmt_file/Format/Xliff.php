@@ -80,7 +80,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
    */
   protected function addItem(JobItem $item) {
     $this->startElement('group');
-    $this->writeAttribute('id', $item->tjiid);
+    $this->writeAttribute('id', $item->id());
 
     // Add a note for the source label.
     $this->writeElement('note', $item->getSourceLabel());
@@ -88,7 +88,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     // @todo: Write in nested groups instead of flattening it.
     $data = array_filter(tmgmt_flatten_data($item->getData()), '_tmgmt_filter_data');
     foreach ($data as $key => $element) {
-      $this->addTransUnit($item->tjiid . '][' . $key, $element, $this->job);
+      $this->addTransUnit($item->id() . '][' . $key, $element, $this->job);
     }
     $this->endElement();
   }
@@ -175,7 +175,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     $this->writeAttribute('tool-id', 'tmgmt');
     $this->writeAttribute('phase-name', 'extraction');
     $this->writeAttribute('process-name', 'extraction');
-    $this->writeAttribute('job-id', $job->tjid);
+    $this->writeAttribute('job-id', $job->id());
 
     $this->endElement();
     $this->endElement();

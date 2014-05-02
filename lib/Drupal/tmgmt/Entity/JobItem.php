@@ -180,7 +180,7 @@ class JobItem extends Entity {
     foreach ($entities as $entity) {
       if ($job = $entity->getJob()) {
         // We only care for active jobs.
-        if ($job->isActive() && tmgmt_job_check_finished($job->tjid)) {
+        if ($job->isActive() && tmgmt_job_check_finished($job->id())) {
           // Mark the job as finished.
           $job->finished();
         }
@@ -245,7 +245,7 @@ class JobItem extends Entity {
     // Having to maintain two unknowns / wildcards (job and job item) in the
     // path is more complex than it has to be. Instead we just append the
     // additional breadcrumb pieces manually with _tmgmt_ui_breadcrumb().
-    return array('path' => 'admin/tmgmt/items/' . $this->tjiid);
+    return array('path' => 'admin/tmgmt/items/' . $this->id());
   }
 
   /**
@@ -266,8 +266,8 @@ class JobItem extends Entity {
    */
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job item if it hasn't yet been saved.
-    if (!empty($this->tjiid) || $this->save()) {
-      $message = tmgmt_message_create($message, $variables, array('tjid' => $this->tjid, 'tjiid' => $this->tjiid, 'type' => $type));
+    if (!empty($this->id()) || $this->save()) {
+      $message = tmgmt_message_create($message, $variables, array('tjid' => $this->tjid, 'tjiid' => $this->id(), 'type' => $type));
       if ($message->save()) {
         return $message;
       }
@@ -896,7 +896,7 @@ class JobItem extends Entity {
   public function getSiblings() {
     $query = new EntityFieldQuery();
     $result = $query->entityCondition('entity_type', 'tmgmt_job_item')
-      ->propertyCondition('tjiid', $this->tjiid, '<>')
+      ->propertyCondition('tjiid', $this->id(), '<>')
       ->propertyCondition('tjid', $this->tjid)
       ->execute();
     if (!empty($result['tmgmt_job_item'])) {
@@ -945,7 +945,7 @@ class JobItem extends Entity {
 
     $data = array(
       'tjid' => $this->tjid,
-      'tjiid' => $this->tjiid,
+      'tjiid' => $this->id(),
       'data_item_key' => $data_item_key,
       'remote_identifier_1' => $remote_identifier_1,
     );
@@ -967,7 +967,7 @@ class JobItem extends Entity {
    */
   public function getRemoteMappings() {
     $trids = \Drupal::entityQuery('tmgmt_remote')
-      ->condition('tjiid', $this->tjiid)
+      ->condition('tjiid', $this->id())
       ->execute();
 
     if (!empty($trids)) {

@@ -104,7 +104,7 @@ class JobItemForm extends TmgmtFormBase {
         '#collapsible' => TRUE,
         '#weight' => 50,
       );
-      $form['messages']['view'] = $view->getExecutable()->preview('block', array($item->tjiid));
+      $form['messages']['view'] = $view->getExecutable()->preview('block', array($item->id()));
     }
 
     $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';

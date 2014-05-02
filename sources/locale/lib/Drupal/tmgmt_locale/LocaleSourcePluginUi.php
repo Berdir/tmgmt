@@ -284,7 +284,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
     }
 
     $form_state['redirect'] = array(
-      'admin/tmgmt/jobs/' . $job->tjid,
+      'admin/tmgmt/jobs/' . $job->id(),
       array('query' => array('destination' => current_path()))
     );
     drupal_set_message(t('One job needs to be checked out.'));

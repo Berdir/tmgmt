@@ -116,8 +116,8 @@ class TestSource extends SourcePluginBase {
    */
   public function getSourceLangCode(JobItem $job_item) {
     $source_languages = \Drupal::state()->get('tmgmt.test_source_languages', array());
-    if (isset($source_languages[$job_item->tjiid])) {
-      return $source_languages[$job_item->tjiid];
+    if (isset($source_languages[$job_item->id()])) {
+      return $source_languages[$job_item->id()];
     }
 
     return 'en';

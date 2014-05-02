@@ -244,14 +244,14 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // @todo: Fails, encoding problem?
     //$this->assertText(t('@from => @to', array('@from' => 'en', '@to' => 'de')));
     $edit = array(
-      'views_bulk_operations[0]' => $job->tjid,
+      'views_bulk_operations[0]' => $job->id(),
     );
     $this->drupalPostForm(NULL, $edit, t('Assign to me'));
     $this->assertText(t('Performed Assign to me on 1 item.'));
 
     // Unassign again.
     $edit = array(
-      'views_bulk_operations[0]' => $job->tjid,
+      'views_bulk_operations[0]' => $job->id(),
     );
     $this->drupalPostForm(NULL, $edit, t('Unassign'));
     $this->assertText(t('Performed Unassign on 1 item.'));
@@ -385,9 +385,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($second_task_item->getCountUntranslated(), 0);
 
     // Check the job data.
-    entity_get_controller('tmgmt_job')->resetCache(array($job->tjid));
+    entity_get_controller('tmgmt_job')->resetCache(array($job->id()));
     entity_get_controller('tmgmt_job_item')->resetCache();
-    $job = tmgmt_job_load($job->tjid);
+    $job = tmgmt_job_load($job->id());
     list($item1, $item2) = array_values($job->getItems());
     // The text in the first item should be available for review, the
     // translation of the second item not.
@@ -436,9 +436,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertText($task->getJob()->label());
     $this->assertText(t('Completed'));
 
-    entity_get_controller('tmgmt_job')->resetCache(array($job->tjid));
+    entity_get_controller('tmgmt_job')->resetCache(array($job->id()));
     entity_get_controller('tmgmt_job_item')->resetCache();
-    $job = tmgmt_job_load($job->tjid);
+    $job = tmgmt_job_load($job->id());
     list($item1, $item2) = array_values($job->getItems());
     // Job was accepted and finished automatically due to the default approve
     // setting.

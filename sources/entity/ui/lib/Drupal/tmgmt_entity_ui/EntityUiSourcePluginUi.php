@@ -159,9 +159,9 @@ class EntityUiSourcePluginUi extends EntitySourcePluginUiBase {
           // Add initial job item.
           $job->addItem('entity', $type, $entity->id());
           // Add job identifier into registry
-          $source_lang_registry[$source_lang] = $job->tjid;
+          $source_lang_registry[$source_lang] = $job->id();
           // Add newly created job into jobs queue.
-          $jobs[$job->tjid] = $job;
+          $jobs[$job->id()] = $job;
         }
         // We have a job for given source lang, so just add new job item for the
         // existing job.

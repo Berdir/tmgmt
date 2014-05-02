@@ -49,7 +49,7 @@ class JobResubmitForm extends EntityConfirmFormBase {
     }
 
     $this->entity->addMessage('Job has been duplicated as a new job <a href="@url">#@id</a>.',
-      array('@url' => url('admin/tmgmt/jobs/' . $new_job->tjid), '@id' => $new_job->tjid));
+      array('@url' => url('admin/tmgmt/jobs/' . $new_job->id()), '@id' => $new_job->id()));
     $new_job->addMessage('This job is a duplicate of the previously aborted job <a href="@url">#@id</a>',
       array('@url' => url('admin/tmgmt/jobs/' . $this->entity->tjid), '@id' => $this->entity->tjid));
 

@@ -84,7 +84,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Test translator (auto created)', '@source' => 'English', '@target' => 'Greek')));
 
     // Job still needs to be in state new.
-    $job = entity_load_unchanged('tmgmt_job', $job->tjid);
+    $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isUnprocessed());
 
     $edit = array(
@@ -94,7 +94,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
 
     // Job needs to be in state active.
-    $job = entity_load_unchanged('tmgmt_job', $job->tjid);
+    $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isActive());
     foreach ($job->getItems() as $job_item) {
       /* @var $job_item TMGMTJobItem */
@@ -107,10 +107,10 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText(t('Job overview'));
 
     // Another job.
-    $previous_tjid = $job->tjid;
+    $previous_tjid = $job->id();
     $job = tmgmt_job_match_item('en', '');
     $job->addItem('test_source', 'test', 1);
-    $this->assertNotEqual($job->tjid, $previous_tjid);
+    $this->assertNotEqual($job->id(), $previous_tjid);
 
     // Go to checkout form.
     $redirects = tmgmt_ui_job_checkout_multiple(array($job));
@@ -126,7 +126,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
     $this->assertText(t('Test submit'));
-    $job = entity_load_unchanged('tmgmt_job', $job->tjid);
+    $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isActive());
 
     // Another job.
@@ -146,7 +146,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
     $this->assertText(t('This is not supported'));
-    $job = entity_load_unchanged('tmgmt_job', $job->tjid);
+    $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isRejected());
 
     // Check displayed job messages.
@@ -185,7 +185,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
     $this->assertText(t('Service not reachable'));
-    $job = entity_load_unchanged('tmgmt_job', $job->tjid);
+    $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isUnprocessed());
 
     // Verify that we are still on the form.
@@ -209,7 +209,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
     // @todo Update to correct failure message.
     $this->assertText(t('Fail'));
-    $job = entity_load_unchanged('tmgmt_job', $job->tjid);
+    $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isUnprocessed());
 
     // Test default settings.
@@ -229,7 +229,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     // The action should now default to reject.
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
     $this->assertText(t('This is not supported.'));
-    $job = entity_load_unchanged('tmgmt_job', $job->tjid);
+    $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isRejected());
   }
 
@@ -296,7 +296,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $keys = array_keys($data);
     $key = $keys[0];
 
-    $this->drupalGet('admin/tmgmt/items/' . $item->tjiid);
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
     // Testing the result of the
     // TMGMTTranslatorUIControllerInterface::reviewDataItemElement()
     $this->assertText(t('Testing output of review data item element @key from the testing translator.', array('@key' => $key)));
@@ -306,7 +306,7 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Save translation.
     $this->drupalPostForm(NULL, array('dummy|deep_nesting[translation]' => $data[$key]['#text'] . 'translated'), t('Save'));
-    $this->drupalGet('admin/tmgmt/items/' . $item->tjiid);
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
     // Check if translation has been saved.
     $this->assertFieldByName('dummy|deep_nesting[translation]', $data[$key]['#text'] . 'translated');
   }
@@ -394,26 +394,26 @@ class TMGMTUiTest extends TMGMTTestBase {
       'target_language' => 'es',
       'settings[action]' => 'translate',
     );
-    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->tjid, $edit, t('Submit to translator'));
+    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), $edit, t('Submit to translator'));
 
     // Abort job.
-    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->tjid, array(), t('Abort job'));
+    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), array(), t('Abort job'));
     $this->drupalPostForm(NULL, array(), t('Confirm'));
     // Reload job and check its state.
     entity_get_controller('tmgmt_job')->resetCache();
     /** @var TMGMTJob $job */
-    $job = tmgmt_job_load($job->tjid);
+    $job = tmgmt_job_load($job->id());
     $this->assertTrue($job->isAborted());
     foreach ($job->getItems() as $item) {
       $this->assertTrue($item->isAborted());
     }
 
     // Resubmit the job.
-    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->tjid, array(), t('Resubmit'));
+    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), array(), t('Resubmit'));
     $this->drupalPostForm(NULL, array(), t('Confirm'));
     // Test for the log message.
     $this->assertRaw(t('This job is a duplicate of the previously aborted job <a href="@url">#@id</a>',
-      array('@url' => url('admin/tmgmt/jobs/' . $job->tjid), '@id' => $job->tjid)));
+      array('@url' => url('admin/tmgmt/jobs/' . $job->id()), '@id' => $job->id())));
 
     // Load the resubmitted job and check for its status and values.
     $url_parts = explode('/', $this->getUrl());
@@ -447,9 +447,9 @@ class TMGMTUiTest extends TMGMTTestBase {
     }
 
     // Navigate back to the aborted job and check for the log message.
-    $this->drupalGet('admin/tmgmt/jobs/' . $job->tjid);
+    $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
     $this->assertRaw(t('Job has been duplicated as a new job <a href="@url">#@id</a>.',
-      array('@url' => url('admin/tmgmt/jobs/' . $resubmitted_job->tjid), '@id' => $resubmitted_job->tjid)));
+      array('@url' => url('admin/tmgmt/jobs/' . $resubmitted_job->id()), '@id' => $resubmitted_job->id())));
 
     $this->drupalGet('admin/tmgmt');
     $elements = $this->xpath('//table[contains(@class, @view)]//td[contains(., @text)]',
@@ -475,7 +475,7 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     $this->loginAsTranslator();
     foreach ($job_items as $job_item) {
-      $this->drupalGet('tmgmt-add-to-cart/' . $job_item->tjiid);
+      $this->drupalGet('tmgmt-add-to-cart/' . $job_item->id());
     }
 
     // Check if the items are displayed in the cart.
@@ -495,8 +495,8 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Test that removed job items from cart were deleted as well.
     $existing_items = tmgmt_job_item_load_multiple(NULL);
-    $this->assertTrue(!isset($existing_items[$job_items[1]->tjiid]));
-    $this->assertTrue(!isset($existing_items[$job_items[4]->tjiid]));
+    $this->assertTrue(!isset($existing_items[$job_items[1]->id()]));
+    $this->assertTrue(!isset($existing_items[$job_items[4]->id()]));
 
 
     $this->drupalPostForm(NULL, array(), t('Empty cart'));
@@ -514,19 +514,19 @@ class TMGMTUiTest extends TMGMTTestBase {
       $job_item = tmgmt_job_item_create('test_source', 'test', $i);
       $job_item->save();
       $job_items[$i] = $job_item;
-      $languages[$job_items[$i]->tjiid] = $language_sequence[$i - 1];
+      $languages[$job_items[$i]->id()] = $language_sequence[$i - 1];
     }
     \Drupal::state()->set('tmgmt.test_source_languages', $languages);
     foreach ($job_items as $job_item) {
-      $this->drupalGet('tmgmt-add-to-cart/' . $job_item->tjiid);
+      $this->drupalGet('tmgmt-add-to-cart/' . $job_item->id());
     }
 
     $this->drupalPostForm('admin/tmgmt/cart', array(
-      'items[' . $job_items[1]->tjiid . ']' => TRUE,
-      'items[' . $job_items[2]->tjiid . ']' => TRUE,
-      'items[' . $job_items[3]->tjiid . ']' => TRUE,
-      'items[' . $job_items[4]->tjiid . ']' => TRUE,
-      'items[' . $job_items[5]->tjiid . ']' => TRUE,
+      'items[' . $job_items[1]->id() . ']' => TRUE,
+      'items[' . $job_items[2]->id() . ']' => TRUE,
+      'items[' . $job_items[3]->id() . ']' => TRUE,
+      'items[' . $job_items[4]->id() . ']' => TRUE,
+      'items[' . $job_items[5]->id() . ']' => TRUE,
       'target_language[]' => array('en', 'de'),
     ), t('Request translation'));
 

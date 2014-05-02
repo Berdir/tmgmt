@@ -39,7 +39,7 @@ class JobOperations extends FieldPluginBase {
     }
     if ($job->isAbortable() && $job->access('submit')) {
       $element['#links']['cancel'] = array(
-        'href' => 'admin/tmgmt/jobs/' . $job->tjid . '/abort',
+        'href' => 'admin/tmgmt/jobs/' . $job->id() . '/abort',
         'query' => array('destination' => current_path()),
         'title' => t('abort'),
       );

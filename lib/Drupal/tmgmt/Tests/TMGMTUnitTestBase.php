@@ -75,7 +75,7 @@ abstract class TMGMTUnitTestBase extends DrupalUnitTestBase {
     $this->assertEqual(SAVED_NEW, $job->save());
 
     // Assert that the translator was assigned a tid.
-    $this->assertTrue($job->tjid > 0);
+    $this->assertTrue($job->id() > 0);
     return $job;
   }
 

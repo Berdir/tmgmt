@@ -39,7 +39,7 @@ class LocalTranslator extends TranslatorPluginBase {
     $local_task = tmgmt_local_task_create(array(
       'uid' => $job->uid,
       'tuid' => $tuid,
-      'tjid' => $job->tjid,
+      'tjid' => $job->id(),
       'title' => t('Task for !label', array('!label' => $job->label())),
     ));
     // If we have translator then switch to pending state.

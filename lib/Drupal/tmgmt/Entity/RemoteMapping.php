@@ -140,8 +140,8 @@ class RemoteMapping extends Entity {
    * @return \Drupal\tmgmt\Entity\JobItem
    */
   function getJobItem() {
-    if (!empty($this->tjiid)) {
-      return tmgmt_job_item_load($this->tjiid);
+    if (!empty($this->id())) {
+      return tmgmt_job_item_load($this->id());
     }
     return NULL;
   }

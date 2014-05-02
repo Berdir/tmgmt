@@ -49,11 +49,11 @@ class Html implements FormatInterface {
     foreach ($job->getItems() as $item) {
       $data = array_filter(tmgmt_flatten_data($item->getData()), '_tmgmt_filter_data');
       foreach ($data as $key => $value) {
-        $items[$item->tjiid][$this->encodeIdSafeBase64($item->tjiid . '][' . $key)] = $value;
+        $items[$item->id()][$this->encodeIdSafeBase64($item->id() . '][' . $key)] = $value;
       }
     }
     return _theme('tmgmt_file_html_template', array(
-      'tjid' => $job->tjid,
+      'tjid' => $job->id(),
       'source_language' => $job->getTranslator()->mapToRemoteLanguage($job->source_language),
       'target_language' => $job->getTranslator()->mapToRemoteLanguage($job->target_language),
       'items' => $items,

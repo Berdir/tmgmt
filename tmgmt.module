@@ -474,9 +474,9 @@ function tmgmt_job_statistics_load(array $tjids) {
  *   The requested information as an integer.
  */
 function tmgmt_job_statistic(Job $job, $key) {
-  $statistics = tmgmt_job_statistics_load(array($job->tjid));
-  if (isset($statistics[$job->tjid]->$key)) {
-    return $statistics[$job->tjid]->$key;
+  $statistics = tmgmt_job_statistics_load(array($job->id()));
+  if (isset($statistics[$job->id()]->$key)) {
+    return $statistics[$job->id()]->$key;
   }
   return 0;
 }

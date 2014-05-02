@@ -50,7 +50,7 @@ class PluginsTest extends TMGMTUnitTestBase {
     // Submit a translation job.
     $submit_job = $this->createJobWithItems('submit');
     $submit_job->requestTranslation();
-    $submit_job = tmgmt_job_load($submit_job->tjid);
+    $submit_job = tmgmt_job_load($submit_job->id());
     $this->assertTrue($submit_job->isActive());
     $messages = $submit_job->getMessages();
     $last_message = end($messages);
@@ -59,7 +59,7 @@ class PluginsTest extends TMGMTUnitTestBase {
     // Translate a job.
     $translate_job = $this->createJobWithItems('translate');
     $translate_job->requestTranslation();
-    $translate_job = tmgmt_job_load($translate_job->tjid);
+    $translate_job = tmgmt_job_load($translate_job->id());
     foreach ($translate_job->getItems() as $job_item) {
       $this->assertTrue($job_item->isNeedsReview());
     }

@@ -122,7 +122,7 @@ function tmgmt_entity_ui_translate_form_submit($form, &$form_state) {
       $job->addItem('entity', $entity->getEntityTypeId(), $entity->id());
       // Append this job to the array of created jobs so we can redirect the user
       // to a multistep checkout form if necessary.
-      $jobs[$job->tjid] = $job;
+      $jobs[$job->id()] = $job;
     }
     catch (TMGMTException $e) {
       watchdog_exception('tmgmt', $e);

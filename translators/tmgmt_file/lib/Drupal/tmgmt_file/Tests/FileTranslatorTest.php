@@ -92,7 +92,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     // Reset caches and reload job.
     entity_get_controller('tmgmt_job')->resetCache();
     entity_get_controller('tmgmt_job_item')->resetCache();
-    $job = tmgmt_job_load($job->tjid);
+    $job = tmgmt_job_load($job->id());
 
     // Do the comparison of the translation text and the source. It must be the
     // same as there was no change done to the translation.
@@ -126,7 +126,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $this->drupalPostForm($uri['path'], $edit, t('Import'));
     entity_get_controller('tmgmt_job')->resetCache();
     entity_get_controller('tmgmt_job_item')->resetCache();
-    $job = tmgmt_job_load($job->tjid);
+    $job = tmgmt_job_load($job->id());
 
     $this->assertIntegrityCheck($job);
 
@@ -291,7 +291,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $second_job->settings['xliff_validation'][1] = 0;
     $second_job->settings['xliff_validation'][2] = 0;
     $second_job->save();
-    $wrong_xml->file->header->{'phase-group'}->phase['job-id'] = $second_job->tjid;
+    $wrong_xml->file->header->{'phase-group'}->phase['job-id'] = $second_job->id();
     $wrong_file = 'public://tmgmt_file/wrong_file.xlf';
     $wrong_xml->asXML($wrong_file);
     $uri = $job->uri();

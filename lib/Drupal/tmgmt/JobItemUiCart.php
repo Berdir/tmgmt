@@ -70,7 +70,7 @@ class JobItemUiCart {
   public function addExistingJobItems(array $items) {
     foreach ($items as $item) {
       if (!$this->isSourceItemAdded($item->plugin, $item->item_type, $item->item_id)) {
-        $this->cart[] = $item->tjiid;
+        $this->cart[] = $item->id();
       }
     }
   }
@@ -95,7 +95,7 @@ class JobItemUiCart {
 
     $job_item = tmgmt_job_item_create($plugin, $item_type, $item_id);
     $job_item->save();
-    $this->cart[] = $job_item->tjiid;
+    $this->cart[] = $job_item->id();
     return $job_item;
   }
 

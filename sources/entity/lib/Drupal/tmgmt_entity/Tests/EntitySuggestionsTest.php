@@ -192,7 +192,7 @@ class EntitySuggestionsTest extends EntityUnitTestBase {
     $this->assertEqual($suggestion['job_item']->item_type, 'file', 'Got a file in the suggestion.');
     $this->assertEqual($suggestion['job_item']->item_id, $node->field1[LANGUAGE_NONE][1]['fid'], 'File id match between node and suggestion.');
     $this->assertEqual($suggestion['reason'], 'Field Field 1');
-    $this->assertEqual($suggestion['from_item'], $item->tjiid);
+    $this->assertEqual($suggestion['from_item'], $item->id());
     $job->addExistingItem($suggestion['job_item']);
 
     $suggestion = array_shift($suggestions);
@@ -201,7 +201,7 @@ class EntitySuggestionsTest extends EntityUnitTestBase {
     $this->assertEqual($suggestion['job_item']->item_type, 'file', 'Got a file in the suggestion.');
     $this->assertEqual($suggestion['job_item']->item_id, $node->field2[LANGUAGE_NONE][1]['fid'], 'File id match between node and suggestion.');
     $this->assertEqual($suggestion['reason'], 'Field Field 2');
-    $this->assertEqual($suggestion['from_item'], $item->tjiid);
+    $this->assertEqual($suggestion['from_item'], $item->id());
 
     // Add the suggestion to the job and re-get all suggestions.
     $job->addExistingItem($suggestion['job_item']);

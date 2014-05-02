@@ -117,7 +117,7 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
    */
   public function rejectDataItem(JobItem $job_item, array $key, array $values = NULL) {
     $key = '[' . implode('][', $key) . ']';
-    $job_item->addMessage('Rejected data item @key for job item @item in job @job.', array('@key' => $key, '@item' => $job_item->tjiid, '@job' => $job_item->tjid));
+    $job_item->addMessage('Rejected data item @key for job item @item in job @job.', array('@key' => $key, '@item' => $job_item->id(), '@job' => $job_item->tjid));
     return TRUE;
   }
 

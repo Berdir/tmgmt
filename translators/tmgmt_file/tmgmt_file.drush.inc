@@ -63,14 +63,14 @@ function drush_tmgmt_file_tmgmt_translate_import($name = NULL) {
     }
 
     if ($job->isFinished()) {
-      drush_log(dt('Skipping @filename for finished job @name (#@id).', array('@filename' => $info->name, '@name' => $job->label(), '@id' => $job->tjid)), 'warning');
+      drush_log(dt('Skipping @filename for finished job @name (#@id).', array('@filename' => $info->name, '@name' => $job->label(), '@id' => $job->id())), 'warning');
       continue;
     }
 
     try {
       // Validation successful, start import.
       $job->addTranslatedData($controller->import($path));
-      drush_log(dt('Successfully imported file @filename for translation job @name (#@id).', array('@filename' => $info->name, '@name' => $job->label(), '@id' => $job->tjid)), 'success');
+      drush_log(dt('Successfully imported file @filename for translation job @name (#@id).', array('@filename' => $info->name, '@name' => $job->label(), '@id' => $job->id())), 'success');
     }
     catch (Exception $e) {
       drush_log(dt('Failed importing file @filename: @error', array('@filename' => $info->name, '@error' => $e->getMessage())), 'error');
