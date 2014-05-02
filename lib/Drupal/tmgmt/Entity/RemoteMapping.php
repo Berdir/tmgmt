@@ -124,6 +124,9 @@ class RemoteMapping extends Entity {
     return $this->trid;
   }
 
+  public function getJobId() {
+    return $this->tjid;
+  }
 
   /**
    * Gets translation job.
@@ -131,7 +134,7 @@ class RemoteMapping extends Entity {
    * @return \Drupal\tmgmt\Entity\Job
    */
   function getJob() {
-    return tmgmt_job_load($this->tjid);
+    return tmgmt_job_load($this->getJobId());
   }
 
   /**

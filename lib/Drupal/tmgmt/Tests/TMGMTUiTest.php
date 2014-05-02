@@ -434,7 +434,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       $_items = $resubmitted_job->getItems(array('data' => array('value' => '%id ' . $item->item_id . '%', 'operator' => 'LIKE')));
       $_item = reset($_items);
       /** @var TMGMTJobItem $_item */
-      $this->assertNotEqual($_item->tjid, $item->tjid);
+      $this->assertNotEqual($_item->getJobId(), $item->getJobId());
       $this->assertEqual($_item->plugin, $item->plugin);
       $this->assertEqual($_item->item_id, $item->item_id);
       $this->assertEqual($_item->item_type, $item->item_type);

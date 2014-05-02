@@ -10,25 +10,6 @@ use Drupal\tmgmt\JobItemUiCart;
  */
 
 /**
- * Implements hook_menu_link_defaults().
- */
-function tmgmt_ui_menu_link_defaults() {
-  $items['tmgmt.settings'] = array(
-    'link_title' => 'Translation Management settings',
-    'route_name' => 'tmgmt.settings',
-    'parent' => 'system.admin.config.regional',
-    'weight' => 10,
-  );
-  $items['tmgmt.translator_list'] = array(
-    'link_title' => 'Translation Management translators',
-    'route_name' => 'tmgmt.translator_list',
-    'parent' => 'system.admin.config.regional',
-    'weight' => 15,
-  );
-  return $items;
-}
-
-/**
  * Implements hook_theme().
  */
 function tmgmt_ui_theme() {

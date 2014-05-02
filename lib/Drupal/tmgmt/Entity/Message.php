@@ -149,8 +149,8 @@ class Message extends Entity {
    *   a problem.
    */
   public function getJob() {
-    if (!empty($this->tjid)) {
-      return tmgmt_job_load($this->tjid);
+    if (!empty($this->getJobId())) {
+      return tmgmt_job_load($this->getJobId());
     }
     return FALSE;
   }

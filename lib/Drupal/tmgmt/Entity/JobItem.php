@@ -166,7 +166,7 @@ class JobItem extends Entity {
    */
   public function preSave(EntityStorageInterface $storage) {
     $this->changed = REQUEST_TIME;
-    if ($this->tjid) {
+    if ($this->getJobId()) {
      $this->recalculateStatistics();
     }
   }
@@ -219,6 +219,10 @@ class JobItem extends Entity {
     return $this->tjiid;
   }
 
+  public function getJobId() {
+    return $this->tjid;
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -266,8 +270,8 @@ class JobItem extends Entity {
    */
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job item if it hasn't yet been saved.
-    if (!empty($this->id()) || $this->save()) {
-      $message = tmgmt_message_create($message, $variables, array('tjid' => $this->tjid, 'tjiid' => $this->id(), 'type' => $type));
+    if (!$this->isNew() || $this->save()) {
+      $message = tmgmt_message_create($message, $variables, array('tjid' => $this->getJobId(), 'tjiid' => $this->id(), 'type' => $type));
       if ($message->save()) {
         return $message;
       }
@@ -322,8 +326,8 @@ class JobItem extends Entity {
    *   a problem.
    */
   public function getJob() {
-    if (!empty($this->tjid)) {
-      return tmgmt_job_load($this->tjid);
+    if ($this->getJobId()) {
+      return tmgmt_job_load($this->getJobId());
     }
     return FALSE;
   }
@@ -383,7 +387,7 @@ class JobItem extends Entity {
    *   A structured data array.
    */
   public function getData(array $key = array(), $index = NULL) {
-    if (empty($this->data) && !empty($this->tjid)) {
+    if (empty($this->data) && $this->getJobId()) {
       // Load the data from the source if it has not been set yet.
       $this->data = $this->getSourceData();
       $this->save();
@@ -501,7 +505,7 @@ class JobItem extends Entity {
     }
     $return = $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED, $message, $variables, $type);
     // Check if this was the last unfinished job item in this job.
-    if (tmgmt_job_check_finished($this->tjid) && $job = $this->getJob()) {
+    if (tmgmt_job_check_finished($this->getJobId()) && $job = $this->getJob()) {
       // Mark the job as finished.
       $job->finished();
     }
@@ -897,7 +901,7 @@ class JobItem extends Entity {
     $query = new EntityFieldQuery();
     $result = $query->entityCondition('entity_type', 'tmgmt_job_item')
       ->propertyCondition('tjiid', $this->id(), '<>')
-      ->propertyCondition('tjid', $this->tjid)
+      ->propertyCondition('tjid', $this->getJobId())
       ->execute();
     if (!empty($result['tmgmt_job_item'])) {
       return entity_load_multiple('tmgmt_job_item', array_keys($result['tmgmt_job_item']));
@@ -944,7 +948,7 @@ class JobItem extends Entity {
     }
 
     $data = array(
-      'tjid' => $this->tjid,
+      'tjid' => $this->getJobId(),
       'tjiid' => $this->id(),
       'data_item_key' => $data_item_key,
       'remote_identifier_1' => $remote_identifier_1,

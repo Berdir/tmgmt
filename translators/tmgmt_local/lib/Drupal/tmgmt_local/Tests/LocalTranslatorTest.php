@@ -96,21 +96,21 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     $local_task1 = tmgmt_local_task_create(array(
       'uid' => $job1->uid,
-      'tjid' => $job1->tjid,
+      'tjid' => $job1->id(),
       'title' => 'Task 1',
     ));
     $local_task1->save();
 
     $local_task2 = tmgmt_local_task_create(array(
       'uid' => $job2->uid,
-      'tjid' => $job2->tjid,
+      'tjid' => $job2->id(),
       'title' => 'Task 2',
     ));
     $local_task2->save();
 
     $local_task3 = tmgmt_local_task_create(array(
       'uid' => $job3->uid,
-      'tjid' => $job3->tjid,
+      'tjid' => $job3->id(),
       'title' => 'Task 3',
     ));
     $local_task3->save();

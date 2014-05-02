@@ -1,0 +1,10 @@
+tmgmt.settings:
+  title: 'Translation Management settings'
+  route_name: tmgmt.settings
+  parent: system.admin_config_regional
+  weight: 10
+tmgmt.translator_list:
+  title: 'Translation Management translators'
+  route_name: tmgmt.translator_list
+  parent: system.admin.config.regional
+  weight: 15

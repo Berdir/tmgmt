@@ -98,7 +98,7 @@ class EntitySource extends SourcePluginBase {
    */
   public function saveTranslation(JobItem $job_item) {
     $entity = entity_load($job_item->item_type, $job_item->item_id);
-    $job = tmgmt_job_load($job_item->tjid);
+    $job = tmgmt_job_load($job_item->getJobId());
 
     $translation = $entity->getTranslation($job->target_language);
     $data = $job_item->getData();

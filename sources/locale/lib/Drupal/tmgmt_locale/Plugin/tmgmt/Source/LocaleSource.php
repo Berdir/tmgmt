@@ -104,7 +104,7 @@ class LocaleSource extends SourcePluginBase {
 
     // This is necessary as the method is also used in the getLabel() callback
     // and for that case the job is not available in the cart.
-    if (!empty($job_item->tjid)) {
+    if (!empty($job_item->getJobId())) {
       $source_language = $job_item->getJob()->source_language;
     }
     else {
@@ -209,7 +209,7 @@ class LocaleSource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function saveTranslation(JobItem $job_item) {
-    $job = tmgmt_job_load($job_item->tjid);
+    $job = tmgmt_job_load($job_item->getJobId());
     $data = $job_item->getData();
     if (isset($data['singular'])) {
       $translation = $data['singular']['#translation']['#text'];
