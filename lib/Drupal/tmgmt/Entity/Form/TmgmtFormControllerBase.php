@@ -8,7 +8,7 @@
 namespace Drupal\tmgmt\Entity\Form;
 
 use Drupal\Core\Entity\EntityControllerInterface;
-use Drupal\Core\Entity\EntityFormController;
+use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\tmgmt\SourceManager;
 use Drupal\tmgmt\TranslatorManager;
@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @ingroup tmgmt_job
  */
-class TmgmtFormControllerBase extends EntityFormController {
+class TmgmtFormControllerBase extends EntityForm {
 
   /**
    * Translator plugin manager.
@@ -36,7 +36,7 @@ class TmgmtFormControllerBase extends EntityFormController {
   protected $sourceManager;
 
   /**
-   * Constructs an EntityFormController object.
+   * Constructs an EntityForm object.
    *
    * @param \Drupal\Core\Extension\ModuleHandlerInterface
    *   The module handler service.

@@ -15,7 +15,7 @@ namespace Drupal\tmgmt\Entity\Form;
 class TranslatorFormController extends TmgmtFormControllerBase {
 
   /**
-   * Overrides Drupal\Core\Entity\EntityFormController::form().
+   * Overrides Drupal\Core\Entity\EntityForm::form().
    */
   public function form(array $form, array &$form_state) {
     $form = parent::form($form, $form_state);
@@ -138,7 +138,7 @@ class TranslatorFormController extends TmgmtFormControllerBase {
 
 
   /**
-   * Overrides Drupal\Core\Entity\EntityFormController::save().
+   * Overrides Drupal\Core\Entity\EntityForm::save().
    */
   public function save(array $form, array &$form_state) {
     $entity = $this->entity;
