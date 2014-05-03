@@ -835,12 +835,11 @@ class JobItem extends Entity {
         else {
           // Otherwise, create a message that contains source label, target
           // language and links to the review form.
-          $uri = $this->uri();
-          $job_uri = $this->getJob()->uri();
+          $job_url = $this->getJob()->url();
           $variables = array(
-            '!source' => l($this->getSourceLabel(), $uri['path']),
-            '@language' => language_load($this->getJob()->target_language)->name,
-            '!review_url' => url($uri['path'], array('query' => array('destination' => $job_uri['path']))),
+            '!source' => l($this->getSourceLabel(), $this->getSystemPath('edit')),
+            '@language' => $this->getJob()->getTargetLanguage()->getName(),
+            '!review_url' => url($this->getSystemPath('edit'), array('query' => array('destination' => $job_url))),
           );
           $this->needsReview('The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.', $variables);
         }

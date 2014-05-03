@@ -37,7 +37,8 @@ abstract class TMGMTUnitTestBase extends DrupalUnitTestBase {
     parent::setUp();
 
     // @todo: Try to get rid of these.
-    $this->installSchema('system', 'url_alias');
+    $this->installSchema('system', array('url_alias', 'router'));
+    $this->installSchema('user', array('users'));
     $this->installSchema('tmgmt', array('tmgmt_job', 'tmgmt_job_item', 'tmgmt_message'));
 
     $this->default_translator = entity_create('tmgmt_translator', array('name' => 'test_translator', 'plugin' => 'test_translator'));
@@ -68,7 +69,8 @@ abstract class TMGMTUnitTestBase extends DrupalUnitTestBase {
   /**
    * Creates, saves and returns a translation job.
    *
-   * @return Job
+   * @return \Drupal\tmgmt\Entity\Job
+   *   A new job.
    */
   function createJob($source = 'en', $target = 'de', $uid = 0)  {
     $job = tmgmt_job_create($source, $target, $uid);

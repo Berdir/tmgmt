@@ -7,20 +7,25 @@
 
 namespace Drupal\tmgmt\Entity;
 
-use Drupal\Core\Entity\Entity;
+use Drupal\Core\Entity\Annotation\EntityType;
+use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Language\Language;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\tmgmt\TMGMTException;
+use Drupal\user\EntityOwnerInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Entity class for the tmgmt_job entity.
  *
- * @EntityType(
+ * @ContentEntityType(
  *   id = "tmgmt_job",
  *   label = @Translation("Translation Job"),
  *   module = "tmgmt",
  *   controllers = {
- *     "storage" = "Drupal\tmgmt\Entity\Controller\JobStorage",
  *     "access" = "Drupal\tmgmt\Entity\Controller\JobAccessController",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\JobForm",
@@ -44,104 +49,165 @@ use Drupal\tmgmt\TMGMTException;
  *
  * @ingroup tmgmt_job
  */
-class Job extends Entity {
-
-  /**
-   * Translation job identifier.
-   *
-   * @var integer
-   */
-  public $tjid;
-
-  /**
-   * A custom label for this job.
-   */
-  public $label;
-
-  /**
-   * Current state of the translation job.
-   *
-   * @var int
-   */
-  public $state;
-
-  /**
-   * Language to be translated from.
-   *
-   * @var string
-   */
-  public $source_language;
-
-  /**
-   * Language into which the data needs to be translated.
-   *
-   * @var string
-   */
-  public $target_language;
-
-  /**
-   * Reference to the used translator of this job.
-   *
-   * @see Job::getTranslatorController()
-   *
-   * @var string
-   */
-  public $translator;
-
-  /**
-   * Translator specific configuration and context information for this job.
-   *
-   * @var array
-   */
-  public $settings;
-
-  /**
-   * Remote identification of this job.
-   *
-   * @var integer
-   */
-  public $reference;
-
-  /**
-   * The time when the job was created as a timestamp.
-   *
-   * @var integer
-   */
-  public $created;
-
-  /**
-   * The time when the job was changed as a timestamp.
-   *
-   * @var integer
-   */
-  public $changed;
-
-  /**
-   * The user id of the creator of the job.
-   *
-   * @var integer
-   */
-  public $uid;
+class Job extends ContentEntityBase implements EntityOwnerInterface {
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $values = array(), $type = 'tmgmt_job') {
-    parent::__construct($values, $type);
-    if (empty($this->tjid)) {
-      $this->created = REQUEST_TIME;
-    }
-    if (!isset($this->state)) {
-      $this->state = TMGMT_JOB_STATE_UNPROCESSED;
-    }
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields['tjid'] = FieldDefinition::create('integer')
+      ->setLabel(t('Node ID'))
+      ->setDescription(t('The Job ID.'))
+      ->setReadOnly(TRUE)
+      ->setSetting('unsigned', TRUE);
+
+    $fields['uuid'] = FieldDefinition::create('uuid')
+      ->setLabel(t('UUID'))
+      ->setDescription(t('The node UUID.'))
+      ->setReadOnly(TRUE);
+
+    $fields['source_language'] = FieldDefinition::create('language')
+      ->setLabel(t('Language code'))
+      ->setDescription(t('The source language.'))
+      ->setSetting('default_value', Language::LANGCODE_NOT_SPECIFIED);
+
+    $fields['target_language'] = FieldDefinition::create('language')
+      ->setLabel(t('Language code'))
+      ->setDescription(t('The target language.'))
+      ->setSetting('default_value', Language::LANGCODE_NOT_SPECIFIED);
+
+    $fields['label'] = FieldDefinition::create('string')
+      ->setLabel(t('Label'))
+      ->setDescription(t('The label of this job.'))
+      ->setSettings(array(
+        'default_value' => '',
+        'max_length' => 255,
+      ))
+      ->setDisplayOptions('form', array(
+        'type' => 'string',
+        'weight' => -5,
+      ))
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['uid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Owner'))
+      ->setDescription(t('The user that is the job owner.'))
+      ->setSettings(array(
+        'target_type' => 'user',
+        'default_value' => 0,
+      ));
+
+    $fields['translator'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Translator'))
+      ->setDescription(t('The selected translator'))
+      ->setSettings(array(
+        'target_type' => 'tmgmt_translator',
+      ));
+
+    $fields['settings'] = FieldDefinition::create('map')
+      ->setLabel(t('Settings'))
+      ->setDescription(t('Translator specific configuration and context information for this job.'))
+      ->setSettings(array(
+        'default_value' => array(),
+      ));
+
+    $fields['reference'] = FieldDefinition::create('string')
+      ->setLabel(t('Reference'))
+      ->setDescription(t('Remote reference of this job'))
+      ->setSettings(array(
+        'default_value' => '',
+        'max_length' => 255,
+      ));
+    $fields['state'] = FieldDefinition::create('integer')
+      ->setLabel(t('Publishing status'))
+      ->setDescription(t('A boolean indicating whether the node is published.'))
+      ->setSetting('default_value', TMGMT_JOB_STATE_UNPROCESSED);
+
+    $fields['created'] = FieldDefinition::create('created')
+      ->setLabel(t('Created'))
+      ->setDescription(t('The time that the job was created.'));
+
+    $fields['changed'] = FieldDefinition::create('changed')
+      ->setLabel(t('Changed'))
+      ->setDescription(t('The time that the job was last edited.'));
+    return $fields;
+  }
+
+  /**
+   * Returns the target language.
+   *
+   * @return \Drupal\Core\Language\LanguageInterface
+   *   The target language.
+   */
+  function getTargetLanguage() {
+    return $this->get('target_language')->language;
+  }
+
+  /**
+   * Returns the target language code.
+   *
+   * @return string
+   *   The target language code
+   */
+  function getTargetLangcode() {
+    return $this->get('target_language')->value;
+  }
+
+  /**
+   * Returns the source language.
+   *
+   * @return \Drupal\Core\Language\LanguageInterface
+   *   The source language.
+   */
+  function getSourceLanguage() {
+    return $this->get('source_language')->language;
+  }
+
+  /**
+   * Returns the source language code.
+   *
+   * @return string
+   *   The source language code
+   */
+  function getSourceLangcode() {
+    return $this->get('source_language')->value;
+  }
+
+  /**
+   * Returns the created time.
+   *
+   * @return int
+   *   The time when the job was last changed.
+   */
+  function getChangedTime() {
+    return $this->get('changed')->value;
+  }
+
+  /**
+   * Returns the created time.
+   *
+   * @return int
+   *   The time when the job was last changed.
+   */
+  function getCreatedTime() {
+    return $this->get('created')->value;
+  }
+
+  /**
+   * Returns the reference.
+   *
+   * @return string
+   *   The reference set by the translator.
+   */
+  function getReference() {
+    return $this->get('reference')->value;
   }
 
   /**
    * Clones job as unprocessed.
    */
   public function cloneAsUnprocessed() {
-    $clone = clone $this;
-    $clone->tjid = NULL;
+    $clone = $this->createDuplicate();
     $clone->uid = NULL;
     $clone->changed = NULL;
     $clone->reference = NULL;
@@ -150,12 +216,6 @@ class Job extends Entity {
     return $clone;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function preSave(EntityStorageInterface $storage_controller) {
-    $this->changed = REQUEST_TIME;
-  }
 
   /**
    * {@inheritdoc}
@@ -169,14 +229,13 @@ class Job extends Entity {
     if (!empty($tjiids)) {
       entity_delete_multiple('tmgmt_job_item', $tjiids);
     }
-    /*
-    $mids = \Drupal::entityQuery('tmgmt_job_message')
+
+    $mids = \Drupal::entityQuery('tmgmt_message')
       ->condition('tjid', array_keys($entities))
       ->execute();
     if (!empty($mids)) {
       entity_delete_multiple('tmgmt_job_message', $mids);
     }
-    }*/
 
     $trids = \Drupal::entityQuery('tmgmt_remote')
       ->condition('tjid', array_keys($entities))
@@ -186,21 +245,13 @@ class Job extends Entity {
     }
   }
 
-
-  /**
-   * {inheritdoc}
-   */
-  public function id() {
-    return $this->tjid;
-  }
-
   /**
    * {inheritdoc}
    */
   public function label($langcode = NULL) {
     // In some cases we might have a user-defined label.
-    if (!empty($this->label)) {
-      return $this->label;
+    if (!empty($this->get('label')->value)) {
+      return $this->get('label')->value;
     }
 
     $items = $this->getItems();
@@ -220,37 +271,12 @@ class Job extends Entity {
       }
     }
     else {
-      $languages = \Drupal::languageManager()->getLanguages();
-      $source = isset($languages[$this->source_language]) ? $languages[$this->source_language]->name : NULL;
-      if (empty($source)) {
-        $source = '?';
-      }
-      $target = isset($languages[$this->target_language]) ? $languages[$this->target_language]->name : NULL;
-      if (empty($target)) {
-        $target = '?';
-      }
+      $source = $this->source_language->language ? $this->source_language->language->getName() : '?';
+      $target = $this->target_language->language ? $this->target_language->language->getName() : '?';
       $label = t('From !source to !target', array('!source' => $source, '!target' => $target));
     }
 
     return $label;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function uri() {
-    return array('path' => 'admin/tmgmt/jobs/' . $this->tjid);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildContent($view_mode = 'full', $langcode = NULL) {
-    $content = array();
-    if (module_exists('tmgmt_ui')) {
-      $content = entity_ui_get_form('tmgmt_job', $this);
-    }
-    return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
   }
 
   /**
@@ -273,12 +299,12 @@ class Job extends Entity {
     $transaction = db_transaction();
     $is_new = FALSE;
 
-    if (empty($this->tjid)) {
+    if ($this->isNew()) {
       $this->save();
       $is_new = TRUE;
     }
 
-    $item = tmgmt_job_item_create($plugin, $item_type, $item_id, array('tjid' => $this->tjid));
+    $item = tmgmt_job_item_create($plugin, $item_type, $item_id, array('tjid' => $this->id()));
     $item->save();
 
     if ($item->getWordCount() == 0) {
@@ -301,11 +327,11 @@ class Job extends Entity {
   /**
    * Add a givenJobItem to this job.
    *
-   * @param \Drupal\tmgmt\Entity\JobItem $job
+   * @param \Drupal\tmgmt\Entity\JobItem $item
    *   The job item to add.
    */
-  function addExistingItem(JobItem &$item) {
-    $item->tjid = $this->tjid;
+  function addExistingItem(JobItem $item) {
+    $item->tjid = $this->id();
     $item->save();
   }
 
@@ -327,8 +353,8 @@ class Job extends Entity {
    */
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job if it hasn't yet been saved.
-    if (!empty($this->tjid) || $this->save()) {
-      $message = tmgmt_message_create($message, $variables, array('tjid' => $this->tjid, 'type' => $type));
+    if (!$this->isNew() || $this->save()) {
+      $message = tmgmt_message_create($message, $variables, array('tjid' => $this->id(), 'type' => $type));
       if ($message->save()) {
         return $message;
       }
@@ -340,9 +366,9 @@ class Job extends Entity {
    * Returns all job items attached to this job.
    *
    * @param array $conditions
-   *   Additional conditions to pass into EFQ.
+   *   Additional conditions.
    *
-   * @return TMGMTJobItem[]
+   * @return \Drupal\tmgmt\Entity\JobItem[]
    *   An array of translation job items.
    */
   public function getItems($conditions = array()) {
@@ -367,7 +393,10 @@ class Job extends Entity {
   /**
    * Returns all job messages attached to this job.
    *
-   * @return array
+   * @param array $conditions
+   *   Additional conditions.
+   *
+   * @return \Drupal\tmgmt\Entity\Message[]
    *   An array of translation job messages.
    */
   public function getMessages($conditions = array()) {
@@ -393,11 +422,11 @@ class Job extends Entity {
    * Returns all job messages attached to this job with timestamp newer than
    * $time.
    *
-   * @param $time
+   * @param int $time
    *   (Optional) Messages need to have a newer timestamp than $time. Defaults
    *   to REQUEST_TIME.
    *
-   * @return array
+   * @return \Drupal\tmgmt\Entity\Message[]
    *   An array of translation job messages.
    */
   public function getMessagesSince($time = NULL) {
@@ -410,7 +439,7 @@ class Job extends Entity {
    * Retrieves a setting value from the job settings. Pulls the default values
    * (if defined) from the plugin controller.
    *
-   * @param $name
+   * @param string $name
    *   The name of the setting.
    *
    * @return
@@ -418,8 +447,8 @@ class Job extends Entity {
    *   NULL if the setting does not exist at all.
    */
   public function getSetting($name) {
-    if (isset($this->settings[$name])) {
-      return $this->settings[$name];
+    if (isset($this->settings->$name)) {
+      return $this->settings->$name;
     }
     // The translator might provide default settings.
     if ($translator = $this->getTranslator()) {
@@ -442,8 +471,8 @@ class Job extends Entity {
    *   The translator entity or FALSE if there was a problem.
    */
   public function getTranslator() {
-    if (isset($this->translator)) {
-      return tmgmt_translator_load($this->translator);
+    if ($this->translator->target_id) {
+      return $this->translator->entity;
     }
     return FALSE;
   }
@@ -455,20 +484,20 @@ class Job extends Entity {
    *   The state of the job or NULL if it hasn't been set yet.
    */
   public function getState() {
-    // We don't need to check if the state is actually set because we always set
-    // it in the constructor.
-    return $this->state;
+    return $this->get('state')->value;
   }
 
   /**
    * Updates the state of the job.
    *
-   * @param $state
+   * @param int $state
    *   The new state of the job. Has to be one of the job state constants.
-   * @param $message
-   *   (Optional) The log message to be saved along with the state change.
-   * @param $variables
-   *   (Optional) An array of variables to replace in the message on display.
+   * @param string $message
+   *   (optional) The log message to be saved along with the state change.
+   * @param array $variables
+   *   (optional) An array of variables to replace in the message on display.
+   * @param string $type
+   *   (optional) The message type.
    *
    * @return int
    *   The updated state of the job if it could be set.
@@ -485,16 +514,16 @@ class Job extends Entity {
         $this->addMessage($message, $variables, $type);
       }
     }
-    return $this->state;
+    return $this->getState();
   }
 
   /**
    * Checks whether the passed value matches the current state.
    *
-   * @param $state
+   * @param int $state
    *   The value to check the current state against.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the passed state matches the current state, FALSE otherwise.
    */
   public function isState($state) {
@@ -504,18 +533,21 @@ class Job extends Entity {
   /**
    * Checks whether the user described by $account is the author of this job.
    *
-   * @param $account
+   * @param AccountInterface $account
    *   (Optional) A user object. Defaults to the currently logged in user.
+   *
+   * @return bool
+   *   TRUE if the passed account is the job owner.
    */
-  public function isAuthor($account = NULL) {
-    $account = isset($account) ? $account : $GLOBALS['user'];
-    return $this->uid == $account->id();
+  public function isAuthor(AccountInterface $account = NULL) {
+    $account = isset($account) ? $account : \Drupal::currentUser();
+    return $this->getOwnerId() == $account->id();
   }
 
   /**
    * Returns whether the state of this job is 'unprocessed'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the state is 'unprocessed', FALSE otherwise.
    */
   public function isUnprocessed() {
@@ -525,7 +557,7 @@ class Job extends Entity {
   /**
    * Returns whether the state of this job is 'aborted'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the state is 'aborted', FALSE otherwise.
    */
   public function isAborted() {
@@ -535,7 +567,7 @@ class Job extends Entity {
   /**
    * Returns whether the state of this job is 'active'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the state is 'active', FALSE otherwise.
    */
   public function isActive() {
@@ -545,7 +577,7 @@ class Job extends Entity {
   /**
    * Returns whether the state of this job is 'rejected'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the state is 'rejected', FALSE otherwise.
    */
   public function isRejected() {
@@ -555,7 +587,7 @@ class Job extends Entity {
   /**
    * Returns whether the state of this jon is 'finished'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the state is 'finished', FALSE otherwise.
    */
   public function isFinished() {
@@ -580,7 +612,7 @@ class Job extends Entity {
   /**
    * Checks whether a job is abortable.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the job can be aborted, FALSE otherwise.
    */
   public function isAbortable() {
@@ -591,7 +623,7 @@ class Job extends Entity {
   /**
    * Checks whether a job is submittable.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the job can be submitted, FALSE otherwise.
    */
   public function isSubmittable() {
@@ -601,7 +633,7 @@ class Job extends Entity {
   /**
    * Checks whether a job is deletable.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the job can be deleted, FALSE otherwise.
    */
   public function isDeletable() {
@@ -611,10 +643,12 @@ class Job extends Entity {
   /**
    * Set the state of the job to 'submitted'.
    *
-   * @param $message
-   *   The log message to be saved along with the state change.
-   * @param $variables
-   *   (Optional) An array of variables to replace in the message on display.
+   * @param string $message
+   *   (optional) The log message to be saved along with the state change.
+   * @param array $variables
+   *   (optional) An array of variables to replace in the message on display.
+   * @param string $type
+   *   (optional) The message type.
    *
    * @return \Drupal\tmgmt\Entity\Job
    *   The job entity.
@@ -883,7 +917,7 @@ class Job extends Entity {
    */
   public function getRemoteMappings() {
     $trids = \Drupal::entityQuery('tmgmt_remote')
-      ->condition('tjid', $this->tjid)
+      ->condition('tjid', $this->id())
       ->execute();
 
     if (!empty($trids)) {
@@ -912,7 +946,7 @@ class Job extends Entity {
     // source-language is stored in the job and not the item.
     foreach ($suggestions as &$suggestion) {
       $jobItem = $suggestion['job_item'];
-      $jobItem->tjid = $this->tjid;
+      $jobItem->tjid = $this->id();
       $jobItem->recalculateStatistics();
     }
     return $suggestions;
@@ -943,7 +977,7 @@ class Job extends Entity {
         // Check if there already exists a translation job for this item in the
         // current language.
         $items = tmgmt_job_item_load_all_latest($jobItem->plugin, $jobItem->item_type, $jobItem->item_id, $this->source_language);
-        if ($items && isset($items[$this->target_language])) {
+        if ($items && isset($items[$this->target_language->value])) {
           unset($suggestions[$k]);
           continue;
         }
@@ -965,20 +999,6 @@ class Job extends Entity {
   /**
    * {@inheritdoc}
    */
-  public function get($property_name) {
-    return isset($this->{$property_name}) ? $this->{$property_name} : NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function set($property_name, $value) {
-    $this->{$property_name} = $value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function language() {
     return new Language(array('id' => Language::LANGCODE_NOT_SPECIFIED));
   }
@@ -986,11 +1006,31 @@ class Job extends Entity {
   /**
    * {@inheritdoc}
    */
-  public static function postLoad(EntityStorageInterface $storage_controller, array &$entities) {
-    parent::postLoad($storage_controller, $entities);
-    foreach ($entities as $entity) {
-      $entity->settings = unserialize($entity->settings);
-    }
+  public function getOwner() {
+    return $this->get('uid')->entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOwnerId() {
+    return $this->get('uid')->target_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwnerId($uid) {
+    $this->set('uid', $uid);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwner(UserInterface $account) {
+    $this->set('uid', $account->id());
+    return $this;
   }
 
 }

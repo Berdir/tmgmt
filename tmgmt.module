@@ -230,7 +230,7 @@ function tmgmt_available_languages($exclude = array()) {
  * @param int $tjid
  *   Translation job id.
  *
- * @return TMGMTJob
+ * @return \Drupal\tmgmt\Entity\Job
  *   Loaded translation job entity.
  */
 function tmgmt_job_load($tjid) {

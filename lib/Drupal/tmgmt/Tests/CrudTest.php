@@ -22,6 +22,7 @@ class CrudTest extends TMGMTUnitTestBase {
 
   public function setUp() {
     parent::setUp();
+    \Drupal::service('router.builder')->rebuild();
     $this->installSchema('tmgmt', array('tmgmt_remote'));
   }
 
@@ -60,14 +61,14 @@ class CrudTest extends TMGMTUnitTestBase {
 
     $loaded_job = tmgmt_job_load($job->id());
 
-    $this->assertEqual($job->source_language, $loaded_job->source_language);
-    $this->assertEqual($job->target_language, $loaded_job->target_language);
+    $this->assertEqual($job->getSourceLangcode(), $loaded_job->getSourceLangcode());
+    $this->assertEqual($job->getTargetLangcode(), $loaded_job->getTargetLangcode());
 
     // Assert that the created and changed information has been set to the
     // default value.
-    $this->assertTrue($loaded_job->created > 0);
-    $this->assertTrue($loaded_job->changed > 0);
-    $this->assertEqual(0, $loaded_job->state);
+    $this->assertTrue($loaded_job->getCreatedTime() > 0);
+    $this->assertTrue($loaded_job->getChangedTime() > 0);
+    $this->assertEqual(0, $loaded_job->getState());
 
     // Update the settings.
     $job->reference = 7;
@@ -75,7 +76,7 @@ class CrudTest extends TMGMTUnitTestBase {
 
     $loaded_job = tmgmt_job_load($job->id());
 
-    $this->assertEqual($job->reference, $loaded_job->reference);
+    $this->assertEqual($job->getReference(), $loaded_job->getReference());
 
     // Test the job items.
     $item1 = $job->addItem('test_source', 'type', 5);
@@ -134,19 +135,19 @@ class CrudTest extends TMGMTUnitTestBase {
     $this->assertEqual($item1->id(), $_item1->id());
 
     /**
-     * @var TMGMTRemoteController $remote_mapping_controller
+     * @var \Drupal\tmgmt\Entity\Controller\RemoteMappingStorage $remote_mapping_storage
      */
-    $remote_mapping_controller = entity_get_controller('tmgmt_remote');
-    $remote_mappings = $remote_mapping_controller->loadByRemoteIdentifier('id11', 'id12', 'id13');
+    $remote_mapping_storage = \Drupal::entityManager()->getStorage('tmgmt_remote');
+    $remote_mappings = $remote_mapping_storage->loadByRemoteIdentifier('id11', 'id12', 'id13');
     $remote_mapping = array_shift($remote_mappings);
     $this->assertEqual($remote_mapping->id(), $item1->id());
     $this->assertEqual($remote_mapping->amount, $mapping_data['amount']);
     $this->assertEqual($remote_mapping->currency, $mapping_data['currency']);
 
-    $this->assertEqual(count($remote_mapping_controller->loadByRemoteIdentifier('id11')), 1);
-    $this->assertEqual(count($remote_mapping_controller->loadByRemoteIdentifier('id11', '')), 0);
-    $this->assertEqual(count($remote_mapping_controller->loadByRemoteIdentifier('id11', NULL, '')), 0);
-    $this->assertEqual(count($remote_mapping_controller->loadByRemoteIdentifier(NULL, NULL, 'id13')), 1);
+    $this->assertEqual(count($remote_mapping_storage->loadByRemoteIdentifier('id11')), 1);
+    $this->assertEqual(count($remote_mapping_storage->loadByRemoteIdentifier('id11', '')), 0);
+    $this->assertEqual(count($remote_mapping_storage->loadByRemoteIdentifier('id11', NULL, '')), 0);
+    $this->assertEqual(count($remote_mapping_storage->loadByRemoteIdentifier(NULL, NULL, 'id13')), 1);
 
     // Test remote data.
     $item_mapping->addRemoteData('test_data', 'test_value');
@@ -163,14 +164,14 @@ class CrudTest extends TMGMTUnitTestBase {
     $item1->delete();
     // Test if mapping for item1 has been removed as well.
 
-    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item1->id())), 0);
+    $this->assertEqual(count($remote_mapping_storage->loadByLocalData(NULL, $item1->id())), 0);
 
     // We still should have mapping for item2.
-    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item2->id())), 1);
+    $this->assertEqual(count($remote_mapping_storage->loadByLocalData(NULL, $item2->id())), 1);
 
     // Now delete the job and see if remaining mappings were removed as well.
     $job->delete();
-    $this->assertEqual(count($remote_mapping_controller->loadByLocalData(NULL, $item2->id())), 0);
+    $this->assertEqual(count($remote_mapping_storage->loadByLocalData(NULL, $item2->id())), 0);
   }
 
   /**

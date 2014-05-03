@@ -149,7 +149,7 @@ class Message extends Entity {
    *   a problem.
    */
   public function getJob() {
-    if (!empty($this->getJobId())) {
+    if ($this->getJobId()) {
       return tmgmt_job_load($this->getJobId());
     }
     return FALSE;
@@ -163,7 +163,7 @@ class Message extends Entity {
    *   there was a problem.
    */
   public function getJobItem() {
-    if (!empty($this->id())) {
+    if ($this->id()) {
       return tmgmt_job_item_load($this->id());
     }
     return FALSE;
