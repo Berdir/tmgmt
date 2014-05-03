@@ -202,7 +202,7 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
     'class' => 'tmgmt-ui-data-item-actions',
   );
   foreach ($row as $cell) {
-    $result = tmgmt_ui_build_table_cell($cell);
+    $result .= tmgmt_ui_build_table_cell($cell);
   }
   $result .= '</tr>';
 

@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_file\Tests;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 use Guzzle\Http\Exception\ClientErrorResponseException;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * Basic tests for the file translator.
@@ -345,16 +346,16 @@ class FileTranslatorTest extends TMGMTTestBase {
     $other_job->save();
     $other_job->delete();
     // Make sure the file of the other job still exists.
-    $response = \Drupal::httpClient()->get($download_url)->send();
+    $response = \Drupal::httpClient()->get($download_url);
     $this->assertEqual(200, $response->getStatusCode());
 
     // Delete the job and then make sure that the file has been deleted.
     $job->delete();
     try {
-      $response = \Drupal::httpClient()->get($download_url)->send();
+      $response = \Drupal::httpClient()->get($download_url);
       $this->fail('Expected exception not thrown.');
     }
-    catch (ClientErrorResponseException $e) {
+    catch (RequestException $e) {
       $this->assertEqual(404, $e->getResponse()->getStatusCode());
     }
   }

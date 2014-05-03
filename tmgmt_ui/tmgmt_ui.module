@@ -284,7 +284,7 @@ function tmgmt_ui_translation_review_form_reject_confirm($form, &$form_state, Jo
   $form_state['item'] = $job_item;
   $form['key'] = array('#type' => 'value', '#value' => $key);
   $form['actions']['submit']['#name'] = 'reject-' . $key;
-  $form['actions']['submit']['#submit'] = array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit');
+  $form['actions']['submit']['#submit'] = array('tmgmt_ui_translation_review_form_update_state');
 
   $form = $job_item->getTranslatorController()->rejectForm($form, $form_state);
 

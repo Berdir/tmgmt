@@ -9,6 +9,7 @@ namespace Drupal\tmgmt\Form;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\TranslatorRejectDataInterface;
 
 /**
  * Form controller for the job item edit forms.
@@ -209,8 +210,7 @@ class JobItemForm extends TmgmtFormBase {
       // Check if the item could be saved and accepted successfully and redirect
       // to the job item view if that is the case.
       if ($item->isAccepted()) {
-        $uri = $item->uri();
-        $form_state['redirect'] = $uri['path'];
+        $form_state['redirect_route'] = $item->urlInfo();
       }
       // Print all messages that have been saved while accepting the reviewed
       // translation.
@@ -290,7 +290,7 @@ class JobItemForm extends TmgmtFormBase {
               '#value' => '✓',
               '#attributes' => array('title' => t('Reviewed')),
               '#name' => 'reviewed-' . $target_key,
-              '#submit' => array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit'),
+              '#submit' => array('tmgmt_ui_translation_review_form_update_state'),
               '#ajax' => array(
                 'callback' => array($this, 'ajaxReviewForm'),
                 'wrapper' => $form['#ajaxid'],
@@ -304,7 +304,7 @@ class JobItemForm extends TmgmtFormBase {
               '#value' => '✓',
               '#attributes' => array('title' => t('Not reviewed'), 'class' => array('unreviewed')),
               '#name' => 'unreviewed-' . $target_key,
-              '#submit' => array('tmgmt_ui_translation_review_form_update_state', 'tmgmt_ui_translation_review_form_submit'),
+              '#submit' => array('tmgmt_ui_translation_review_form_update_state'),
               '#ajax' => array(
                 'callback' => array($this, 'ajaxReviewForm'),
                 'wrapper' => $form['#ajaxid'],
