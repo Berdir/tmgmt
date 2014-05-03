@@ -19,6 +19,11 @@ use Drupal\tmgmt\TranslatorRejectDataInterface;
 class JobItemForm extends TmgmtFormBase {
 
   /**
+   * @var \Drupal\tmgmt\Entity\JobItem
+   */
+  protected $entity;
+
+  /**
    * Overrides Drupal\Core\Entity\EntityForm::form().
    */
   public function form(array $form, array &$form_state) {
@@ -210,7 +215,7 @@ class JobItemForm extends TmgmtFormBase {
       // Check if the item could be saved and accepted successfully and redirect
       // to the job item view if that is the case.
       if ($item->isAccepted()) {
-        $form_state['redirect_route'] = $item->urlInfo();
+        $form_state['redirect_route'] = $item->getJob()->urlInfo();
       }
       // Print all messages that have been saved while accepting the reviewed
       // translation.

@@ -104,7 +104,7 @@ class LocaleSource extends SourcePluginBase {
 
     // This is necessary as the method is also used in the getLabel() callback
     // and for that case the job is not available in the cart.
-    if (!empty($job_item->getJobId())) {
+    if ($job_item->getJobId()) {
       $source_language = $job_item->getJob()->source_language;
     }
     else {
