@@ -132,7 +132,7 @@ class EntitySourceTest extends EntityTestBase {
       $this->fail('Job item added with empty source text.');
     }
     catch (\Exception $e) {
-      $this->assert(empty($job->id()), 'After adding a job item with empty source text its tjid has to be unset.');
+      $this->assertFalse($job->id(), 'After adding a job item with empty source text its tjid has to be unset.');
     }
 
     // Create term with populated source content.
@@ -140,7 +140,7 @@ class EntitySourceTest extends EntityTestBase {
 
     // Lets reuse the last created term with populated source content.
     $job->addItem('entity', 'taxonomy_term', $populated_content_term->id());
-    $this->assert(!empty($job->id()), 'After adding another job item with populated source text its tjid must be set.');
+    $this->assertTrue($job->id(), 'After adding another job item with populated source text its tjid must be set.');
   }
 
   /**
