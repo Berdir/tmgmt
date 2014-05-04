@@ -285,8 +285,11 @@ class FileTranslatorTest extends TMGMTTestBase {
     $second_job->translator = $translator->name;
     // We need to add the elements count value into settings, otherwise the
     // validation will fail on integrity check.
-    $second_job->settings['xliff_validation'][1] = 0;
-    $second_job->settings['xliff_validation'][2] = 0;
+    $xliff_validation = array(
+      1 => 0,
+      2 => 0,
+    );
+    $second_job->settings->xliff_validation = $xliff_validation;
     $second_job->save();
     $wrong_xml->file->header->{'phase-group'}->phase['job-id'] = $second_job->id();
     $wrong_file = 'public://tmgmt_file/wrong_file.xlf';

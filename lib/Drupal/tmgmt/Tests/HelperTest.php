@@ -6,6 +6,7 @@
  */
 
 namespace Drupal\tmgmt\Tests;
+use Drupal\tmgmt\Entity\Job;
 
 /**
  * Tests the helper functions in tmgmt.module.
@@ -34,11 +35,11 @@ class HelperTest extends TMGMTUnitTestBase {
     $job_en_sp = $this->createJob('en', 'es');
 
     // Add a job which has existing source-target combinations.
-    $this->assertEqual($job_en_fr->tjid, tmgmt_job_match_item('en', 'fr')->tjid);
-    $this->assertEqual($job_en_sp->tjid, tmgmt_job_match_item('en', 'es')->tjid);
+    $this->assertEqual($job_en_fr->id(), tmgmt_job_match_item('en', 'fr')->id());
+    $this->assertEqual($job_en_sp->id(), tmgmt_job_match_item('en', 'es')->id());
 
     // Add a job which has no existing source-target combination.
-    $this->assertTrue(tmgmt_job_match_item('fr', 'es'));
+    $this->assertTrue(tmgmt_job_match_item('fr', 'es') instanceof Job);
   }
 
   /**

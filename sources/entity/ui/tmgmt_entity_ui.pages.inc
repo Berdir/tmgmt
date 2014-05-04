@@ -55,7 +55,7 @@ function tmgmt_entity_ui_translate_form($form, &$form_state, $build) {
     elseif (isset($items[$langcode])) {
       $item = $items[$langcode];
       $states = tmgmt_job_item_states();
-      $additional = \Drupal::l($states[$item->state], $item->urlIinfo()->getRouteName(), $item->urlIinfo()->getRouteParameters() + array('destination' => current_path()));
+      $additional = \Drupal::l($states[$item->getState()], $item->urlInfo()->getRouteName(), $item->urlInfo()->getRouteParameters() + array('destination' => current_path()));
       // Disable the checkbox for this row since there is already a translation
       // in progress that has not yet been finished. This way we make sure that
       // we don't stack multiple active translations for the same item on top
@@ -116,6 +116,7 @@ function tmgmt_entity_ui_translate_form_submit($form, &$form_state) {
   foreach (array_keys(array_filter($values['languages'])) as $langcode) {
     // Create the job object.
     $job = tmgmt_job_create($entity->language()->id, $langcode, $GLOBALS['user']->id());
+    debug($job->toArray());
     try {
       // Add the job item.
       $job->addItem('entity', $entity->getEntityTypeId(), $entity->id());

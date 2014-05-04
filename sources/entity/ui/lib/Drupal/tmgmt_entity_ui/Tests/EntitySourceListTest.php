@@ -149,7 +149,7 @@ class EntitySourceListTest extends EntityTestBase {
     $states = tmgmt_job_item_states();
     $label = t('Active job item: @state', array('@state' => $states[reset($items)->getState()]));
 
-    $this->assertEqual($langstatus_de[0]->div['title'], $label);
+    $this->assertEqual((string)$langstatus_de[0]->div['title'], $label);
 
     // Test status: Current
     foreach ($job->getItems() as $job_item) {

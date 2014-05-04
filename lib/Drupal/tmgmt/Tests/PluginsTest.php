@@ -6,6 +6,7 @@
  */
 
 namespace Drupal\tmgmt\Tests;
+use Drupal\simpletest\DrupalUnitTestBase;
 
 /**
  * Tests interaction between core and the plugins.
@@ -19,6 +20,12 @@ class PluginsTest extends TMGMTUnitTestBase {
       'group' => 'Translation Management',
     );
   }
+
+  function setUp() {
+    parent::setUp();
+    \Drupal::service('router.builder')->rebuild();
+  }
+
 
   function createJobWithItems($action = 'translate') {
     $job = parent::createJob();

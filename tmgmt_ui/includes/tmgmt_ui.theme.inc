@@ -85,13 +85,13 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
   // If we have an active job item, wrap it in a link.
   if (!empty($variables['job_item'])) {
     $states_labels = tmgmt_job_item_states();
-    $state_label = $states_labels[$variables['job_item']->state];
+    $state_label = $states_labels[$variables['job_item']->getState()];
     $label = t('Active job item: @state', array('@state' => $state_label));
     $uri = $variables['job_item']->urlInfo();
     /** @var Job $job */
     $job = $variables['job_item']->getJob();
 
-    switch ($variables['job_item']->state) {
+    switch ($variables['job_item']->getState()) {
       case TMGMT_JOB_ITEM_STATE_ACTIVE:
         if ($job->isUnprocessed()) {
           $uri = $job->urlInfo();

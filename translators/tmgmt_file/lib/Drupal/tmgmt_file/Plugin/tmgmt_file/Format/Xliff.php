@@ -392,10 +392,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     $tray = array();
     $non_pair_tags = array('br', 'img');
 
-    if (!isset($this->job->settings['xliff_validation'])) {
-      $this->job->settings['xliff_validation'] = array();
-    }
-    $xliff_validation = $this->job->settings['xliff_validation'];
+    $xliff_validation = $this->job->getSetting('xliff_validation');
 
     /** @var \DOMElement $node */
     foreach ($iterator as $node) {
@@ -460,7 +457,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     }
 
     // Set the xliff_validation data and save the job.
-    $this->job->settings['xliff_validation'] = $xliff_validation;
+    $this->job->settings->xliff_validation = $xliff_validation;
     $this->job->save();
 
     $writer->endElement();
