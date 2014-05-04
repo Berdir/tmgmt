@@ -54,6 +54,13 @@ tmgmt.job_item_entity:
   requirements:
     _entity_access: tmgmt_job_item.update
 
+tmgmt.job_item_delete:
+  path: '/admin/tmgmt/items/{tmgmt_job_item}/delete'
+  defaults:
+    _entity_form: tmgmt_job_item.delete
+  requirements:
+    _entity_access: tmgmt_job_item.delete
+
 tmgmt.source_overview:
   path: '/admin/tmgmt/sources/{plugin}/{item_type}'
   defaults:

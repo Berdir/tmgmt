@@ -193,7 +193,7 @@ class JobItem extends ContentEntityBase {
       ->condition('tjiid', array_keys($entities))
       ->execute();
     if (!empty($mids)) {
-      entity_delete_multiple('tmgmt_job_message', $mids);
+      entity_delete_multiple('tmgmt_message', $mids);
     }
 
     $trids = \Drupal::entityQuery('tmgmt_remote')

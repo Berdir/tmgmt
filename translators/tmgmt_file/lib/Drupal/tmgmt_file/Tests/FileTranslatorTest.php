@@ -250,7 +250,6 @@ class FileTranslatorTest extends TMGMTTestBase {
     $xliff = file_get_contents($download_url);
     $dom = new \DOMDocument();
     $dom->loadXML($xliff);
-    debug($xliff);
     $this->assertTrue($dom->schemaValidate(drupal_get_path('module', 'tmgmt_file') . '/xliff-core-1.2-strict.xsd'));
 
     // "Translate" items.
@@ -299,7 +298,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     );
     $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
     $label = $second_job->label();
-    $this->assertRaw(t('Import file is from job <a href="@url">@label</a>, import aborted.', array('@url' => $job->url(), '@label' => $label)));
+    $this->assertRaw(t('Import file is from job <a href="@url">@label</a>, import aborted.', array('@url' => $second_job->url(), '@label' => $label)));
 
 
     $translated_file = 'public://tmgmt_file/translated file.xlf';

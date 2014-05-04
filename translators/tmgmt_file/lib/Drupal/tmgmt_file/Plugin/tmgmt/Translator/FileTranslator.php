@@ -43,7 +43,6 @@ class FileTranslator extends TranslatorPluginBase {
 
     $path = $job->getSetting('scheme') . '://tmgmt_file/' . $name . '.' .  $job->getSetting('export_format');
     $dirname = dirname($path);
-    debug($path);
     if (file_prepare_directory($dirname, FILE_CREATE_DIRECTORY)) {
       $file = file_save_data($export->export($job), $path);
       file_usage()->add($file, 'tmgmt_file', 'tmgmt_job', $job->id());

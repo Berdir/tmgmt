@@ -8,7 +8,6 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
-use Drupal\Core\Url;
 
 /**
  * Provides a form for deleting a node.
@@ -31,7 +30,6 @@ class JobAbortForm extends EntityConfirmFormBase {
    */
   public function getCancelRoute() {
     return $this->entity->urlInfo();
-
   }
 
   /**

@@ -351,12 +351,10 @@ class TMGMTUiTest extends TMGMTTestBase {
         }
         else {
           $this->fail('Unknown method/selector combination.');
-          debug($command);
         }
       }
       else {
         $this->fail('Unknown command.');
-        debug($command);
       }
     }
 
