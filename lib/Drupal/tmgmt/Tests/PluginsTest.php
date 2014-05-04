@@ -81,7 +81,7 @@ class PluginsTest extends TMGMTUnitTestBase {
     foreach ($translate_job->getItems() as $item) {
       // Check the translated text.
       if ($i != 3) {
-        $expected_text = 'de_Text for job item with type ' . $item->item_type . ' and id ' . $item->item_id . '.';
+        $expected_text = 'de_Text for job item with type ' . $item->getItemType() . ' and id ' . $item->getItemId() . '.';
       }
       else {
         // The third item has an explicitly stored data value.
@@ -106,7 +106,7 @@ class PluginsTest extends TMGMTUnitTestBase {
 
     // Check if the translations have been "saved".
     foreach ($translate_job->getItems() as $item) {
-      $this->assertTrue(\Drupal::state()->get('tmgmt_test_saved_translation_' . $item->item_type . '_' . $item->item_id, FALSE));
+      $this->assertTrue(\Drupal::state()->get('tmgmt_test_saved_translation_' . $item->getItemType() . '_' . $item->getItemId(), FALSE));
     }
 
     // A rejected job.

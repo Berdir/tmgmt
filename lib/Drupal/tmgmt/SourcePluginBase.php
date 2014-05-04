@@ -22,7 +22,7 @@ abstract class SourcePluginBase extends PluginBase implements SourcePluginInterf
    * {@inheritdoc}
    */
   public function getLabel(JobItem $job_item) {
-    return t('@plugin item unavailable (@item)', array('@plugin' => $this->pluginInfo['label'], '@item' => $job_item->item_type . ':' . $job_item->item_id));
+    return t('@plugin item unavailable (@item)', array('@plugin' => $this->pluginDefinition['label'], '@item' => $job_item->getItemType() . ':' . $job_item->getItemId()));
   }
 
   /**
@@ -39,7 +39,7 @@ abstract class SourcePluginBase extends PluginBase implements SourcePluginInterf
    * {@inheritdoc}
    */
   public function getItemTypes() {
-    return isset($this->pluginInfo['item types']) ? $this->pluginInfo['item types'] : array();
+    return isset($this->pluginDefinition['item types']) ? $this->pluginDefinition['item types'] : array();
   }
 
   /**
@@ -57,7 +57,7 @@ abstract class SourcePluginBase extends PluginBase implements SourcePluginInterf
    * {@inheritdoc}
    */
   public function getType(JobItem $job_item) {
-    return ucfirst($job_item->item_type);
+    return ucfirst($job_item->getItemType());
   }
 
   /**

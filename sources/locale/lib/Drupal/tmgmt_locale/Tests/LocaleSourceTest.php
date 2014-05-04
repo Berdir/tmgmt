@@ -66,7 +66,7 @@ class LocaleSourceTest extends TMGMTTestBase {
     $item1 = $job->addItem('locale', 'default', $locale_object->lid);
 
     // Check the structure of the imported data.
-    $this->assertEqual($item1->item_id, $locale_object->lid, 'Locale Strings object correctly saved');
+    $this->assertEqual($item1->getItemId(), $locale_object->lid, 'Locale Strings object correctly saved');
     $this->assertEqual('Locale', $item1->getSourceType());
     $this->assertEqual('Hello World', $item1->getSourceLabel());
     $job->requestTranslation();
@@ -80,7 +80,7 @@ class LocaleSourceTest extends TMGMTTestBase {
     }
 
     // Check string translation.
-    $expected_translation = $job->target_language . '_' . $source_text;
+    $expected_translation = $job->getTargetLangcode() . '_' . $source_text;
     $this->assertTranslation($locale_object->lid, 'de', $expected_translation);
 
     // Translate the german translation to spanish.
@@ -105,7 +105,7 @@ class LocaleSourceTest extends TMGMTTestBase {
     }
 
     // Check string translation.
-    $this->assertTranslation($locale_object->lid, $target_langcode, $job->target_language . '_' . $expected_translation);
+    $this->assertTranslation($locale_object->lid, $target_langcode, $job->getTargetLangcode() . '_' . $expected_translation);
   }
 
   /**

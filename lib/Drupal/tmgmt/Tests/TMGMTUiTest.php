@@ -242,8 +242,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Check out a job when only the test translator is available. That one has
     // settings, so a checkout is necessary.
     $redirects = tmgmt_ui_job_checkout_multiple(array($job));
-    $uri = $job->uri();
-    $this->assertEqual($uri['path'], $redirects[0]);
+    $this->assertEqual($job->getSystemPath(), $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
     $job->delete();
 
@@ -262,8 +261,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     // A job without target language needs to be checked out.
     $job = $this->createJob('en', '');
     $redirects = tmgmt_ui_job_checkout_multiple(array($job));
-    $uri = $job->uri();
-    $this->assertEqual($uri['path'], $redirects[0]);
+    $this->assertEqual($job->getSystemPath(), $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
 
     // Create a second file translator. This should check
@@ -277,8 +275,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $second_translator->save();
 
     $redirects = tmgmt_ui_job_checkout_multiple(array($job));
-    $uri = $job->uri();
-    $this->assertEqual($uri['path'], $redirects[0]);
+    $this->assertEqual($job->getSystemPath(), $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
   }
 
@@ -401,7 +398,6 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, array(), t('Confirm'));
     // Reload job and check its state.
     entity_get_controller('tmgmt_job')->resetCache();
-    /** @var TMGMTJob $job */
     $job = tmgmt_job_load($job->id());
     $this->assertTrue($job->isAborted());
     foreach ($job->getItems() as $item) {
@@ -420,30 +416,28 @@ class TMGMTUiTest extends TMGMTTestBase {
     $resubmitted_job = tmgmt_job_load(array_pop($url_parts));
 
     $this->assertTrue($resubmitted_job->isUnprocessed());
-    $this->assertEqual($job->translator, $resubmitted_job->translator);
-    $this->assertEqual($job->source_language, $resubmitted_job->source_language);
-    $this->assertEqual($job->target_language, $resubmitted_job->target_language);
-    $this->assertEqual($job->settings, $resubmitted_job->settings);
+    $this->assertEqual($job->getTranslator(), $resubmitted_job->getTranslator());
+    $this->assertEqual($job->getSourceLangcode(), $resubmitted_job->getSourceLangcode());
+    $this->assertEqual($job->getTargetLangcode(), $resubmitted_job->getTargetLangcode());
+    $this->assertEqual($job->get('settings')->getValue(), $resubmitted_job->get('settings')->getValue());
 
     // Test if job items were duplicated correctly.
-    /** @var TMGMTJobItem $item */
     foreach ($job->getItems() as $item) {
       // We match job items based on "id #" string. This is not that straight
       // forward, but it works as the test source text is generated as follows:
       // Text for job item with type #type and id #id.
-      $_items = $resubmitted_job->getItems(array('data' => array('value' => '%id ' . $item->item_id . '%', 'operator' => 'LIKE')));
+      $_items = $resubmitted_job->getItems(array('data' => array('value' => '%id ' . $item->getItemId() . '%', 'operator' => 'LIKE')));
       $_item = reset($_items);
-      /** @var TMGMTJobItem $_item */
       $this->assertNotEqual($_item->getJobId(), $item->getJobId());
-      $this->assertEqual($_item->plugin, $item->plugin);
-      $this->assertEqual($_item->item_id, $item->item_id);
-      $this->assertEqual($_item->item_type, $item->item_type);
+      $this->assertEqual($_item->getPlugin(), $item->getPlugin());
+      $this->assertEqual($_item->getItemId(), $item->getItemId());
+      $this->assertEqual($_item->getItemType(), $item->getItemType());
       // Make sure counts have been recalculated.
-      $this->assertTrue($_item->word_count > 0);
-      $this->assertTrue($_item->count_pending > 0);
-      $this->assertEqual($_item->count_translated, 0);
-      $this->assertEqual($_item->count_accepted, 0);
-      $this->assertEqual($_item->count_reviewed, 0);
+      $this->assertTrue($_item->getWordCount() > 0);
+      $this->assertTrue($_item->getCountPending() > 0);
+      $this->assertEqual($_item->getCountTranslated(), 0);
+      $this->assertEqual($_item->getCountAccepted(), 0);
+      $this->assertEqual($_item->getCountReviewed(), 0);
     }
 
     // Navigate back to the aborted job and check for the log message.

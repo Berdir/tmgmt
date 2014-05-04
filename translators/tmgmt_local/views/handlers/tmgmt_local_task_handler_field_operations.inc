@@ -11,20 +11,18 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
 
   function render($values) {
     /**
-     * @var TMGMTLocalTask $task
+     * @var \Drupal\tmgmt_local\Entity\LocalTask $task
      */
-    $task = $this->get_value($values);
+    $task = $this->getValue($values);
 
     $element = array();
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('links', 'inline'));
-    $uri = $task->uri();
-    if (entity_access('view', 'tmgmt_local_task', $task)) {
+    if ($task->access('view')) {
       $element['#links']['view'] = array(
-        'href' => $uri['path'],
         'query' => array('destination' => current_path()),
         'title' => t('view'),
-      );
+      ) + $task->urlInfo()->toArray();
     }
     if (user_access('administer translation tasks') && tmgmt_local_translation_access($task) && empty($task->tuid)) {
       $element['#links']['assign'] = array(
@@ -56,7 +54,7 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
         'title' => t('assign'),
       );
     }
-    if (!empty($task->tuid) && entity_access('unassign', 'tmgmt_local_task', $task)) {
+    if (!empty($task->tuid) && $task->access('unassign')) {
       $element['#links']['unassign'] = array(
         'href' => 'translate/' . $task->tltid . '/unassign',
         'query' => array('destination' => current_path()),
@@ -66,9 +64,10 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
         'title' => t('unassign'),
       );
     }
-    if (entity_access('delete', 'tmgmt_local_task', $task)) {
+    if ($task->access('delete')) {
       $element['#links']['delete'] = array(
-        'href' => $uri['path'] . '/delete',
+        'route_name' => 'tmgmt_local.local_task_delete',
+        'route_parameters' => array('tmgmt_local_task' => $task->id()),
         'query' => array('destination' => current_path()),
         'title' => t('delete'),
       );

@@ -37,7 +37,7 @@ function tmgmt_ui_theme() {
  * Attempts to check out a number of jobs. Performs a number of checks on each
  * job and also allows to alter the behavior through hooks.
  *
- * @param $jobs
+ * @param \Drupal\tmgmt\Entity\Job[] $jobs
  *   The jobs to be checked out.
  *
  * @return
@@ -70,8 +70,7 @@ function tmgmt_ui_job_checkout_multiple(array $jobs) {
         continue;
       }
 
-      $uri = $job->uri();
-      $redirects[] = $uri['path'];
+      $redirects[] = $job->getSystemPath();
     }
     else {
       // @todo this is dangerous because we don't catch request fails at all.
@@ -108,11 +107,11 @@ function tmgmt_ui_job_checkout_multiple(array $jobs) {
 function tmgmt_ui_job_needs_checkout_form(Job $job) {
   // If the job has no target language (or source language, even though this
   // should never be the case in our use case), checkout is mandatory.
-  if (empty($job->target_language) || empty($job->source_language)) {
+  if (!$job->getTargetLangcode() || !$job->getSourceLangcode()) {
     return TRUE;
   }
   // If no translator is pre-selected, try to pick one automatically.
-  if (empty($job->translator)) {
+  if (!$job->getTranslator()) {
     // If there is more than a single translator available or if there are no
     // translators available at all checkout is mandatory.
     $translators = tmgmt_translator_load_available($job);

@@ -144,7 +144,7 @@ class LocalTask extends Entity {
   /**
    * Return the corresponding translation job.
    *
-   * @return Job
+   * @return \Drupal\tmgmt\Entity\Job
    */
   public function getJob() {
     return tmgmt_job_load($this->tjid);
@@ -173,10 +173,13 @@ class LocalTask extends Entity {
   }
 
   /**
-   * Returns all job items attached to this task.
+   * Returns all local task items attached to this task.
    *
-   * @return array
-   *   An array of translation job items.
+   * @param array $conditions
+   *   Additional conditions.
+   *
+   * @return \Drupal\tmgmt_local\Entity\LocalTaskItem[]
+   *   An array of local task items.
    */
   public function getItems($conditions = array()) {
     $query = \Drupal::entityQuery('tmgmt_loal_task_item');

@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt\Entity;
 
-use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -119,8 +118,8 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
         'max_length' => 255,
       ));
     $fields['state'] = FieldDefinition::create('integer')
-      ->setLabel(t('Publishing status'))
-      ->setDescription(t('A boolean indicating whether the node is published.'))
+      ->setLabel(t('Job state'))
+      ->setDescription(t('The job state.'))
       ->setSetting('default_value', TMGMT_JOB_STATE_UNPROCESSED);
 
     $fields['created'] = FieldDefinition::create('created')
@@ -271,8 +270,8 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
       }
     }
     else {
-      $source = $this->source_language->language ? $this->source_language->language->getName() : '?';
-      $target = $this->target_language->language ? $this->target_language->language->getName() : '?';
+      $source = $this->getSourceLanguage() ? $this->getSourceLanguage()->getName() : '?';
+      $target = $this->getTargetLanguage() ? $this->getTargetLanguage()->getName() : '?';
       $label = t('From !source to !target', array('!source' => $source, '!target' => $target));
     }
 
@@ -976,8 +975,8 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
 
         // Check if there already exists a translation job for this item in the
         // current language.
-        $items = tmgmt_job_item_load_all_latest($jobItem->plugin, $jobItem->item_type, $jobItem->item_id, $this->source_language);
-        if ($items && isset($items[$this->target_language->value])) {
+        $items = tmgmt_job_item_load_all_latest($jobItem->getPlugin(), $jobItem->getItemType(), $jobItem->getItemId(), $this->getSourceLangcode());
+        if ($items && isset($items[$this->getTargetLangcode()])) {
           unset($suggestions[$k]);
           continue;
         }

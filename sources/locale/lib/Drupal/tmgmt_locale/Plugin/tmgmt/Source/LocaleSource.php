@@ -94,18 +94,18 @@ class LocaleSource extends SourcePluginBase {
    * @return locale object
    */
   protected function getLocaleObject(JobItem $job_item) {
-    $locale_lid = $job_item->item_id;
+    $locale_lid = $job_item->getItemId();
 
     // Check existence of assigned lid.
     $exists = db_query("SELECT COUNT(lid) FROM {locales_source} WHERE lid = :lid", array(':lid' => $locale_lid))->fetchField();
     if (!$exists) {
-      throw new TMGMTException(t('Unable to load locale with id %id', array('%id' => $job_item->item_id)));
+      throw new TMGMTException(t('Unable to load locale with id %id', array('%id' => $job_item->getItemId())));
     }
 
     // This is necessary as the method is also used in the getLabel() callback
     // and for that case the job is not available in the cart.
     if ($job_item->getJobId()) {
-      $source_language = $job_item->getJob()->source_language;
+      $source_language = $job_item->getJob()->getSourceLangcode();
     }
     else {
       $source_language = $job_item->getSourceLangCode();
@@ -169,7 +169,7 @@ class LocaleSource extends SourcePluginBase {
    * [@inheritdoc}
    */
   public function getType(JobItem $job_item) {
-    return $this->getItemTypeLabel($job_item->item_type);
+    return $this->getItemTypeLabel($job_item->getItemType());
   }
 
   /**
@@ -215,18 +215,18 @@ class LocaleSource extends SourcePluginBase {
       $translation = $data['singular']['#translation']['#text'];
       // Update the locale string in the system.
       // @todo: Send error message to user if update fails.
-      if ($this->updateTranslation($job_item->item_id, $job->target_language, $translation)) {
+      if ($this->updateTranslation($job_item->getItemId(), $job->getTargetLangcode(), $translation)) {
         $job_item->accepted();
       }
     }
 
     // @todo: Temporary backwards compability with existing jobs, remove in next
     //   release.
-    if (isset($data[$job_item->item_id])) {
-      $translation = $data[$job_item->item_id]['#translation']['#text'];
+    if (isset($data[$job_item->getItemId()])) {
+      $translation = $data[$job_item->getItemId()]['#translation']['#text'];
       // Update the locale string in the system.
       // @todo: Send error message to user if update fails.
-      if ($this->updateTranslation($job_item->item_id, $job->target_language, $translation)) {
+      if ($this->updateTranslation($job_item->getItemId(), $job->getTargetLangcode(), $translation)) {
         $job_item->accepted();
       }
     }
@@ -246,7 +246,7 @@ class LocaleSource extends SourcePluginBase {
   public function getExistingLangCodes(JobItem $job_item) {
     $query = db_select('locales_target', 'lt');
     $query->fields('lt', array('language'));
-    $query->condition('lt.lid', $job_item->item_id);
+    $query->condition('lt.lid', $job_item->getItemId());
 
     $existing_lang_codes = array('en');
     foreach ($query->execute() as $language) {

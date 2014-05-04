@@ -21,10 +21,10 @@ function tmgmt_test_tmgmt_translator_info_alter(&$definitions) {
 function tmgmt_test_tmgmt_source_suggestions(array $items, Job $job) {
   $suggestions = array();
   foreach ($items as $item) {
-    if ($item->plugin == 'test_source') {
+    if ($item->getPlugin() == 'test_source') {
       $suggestions[] = array(
-        'job_item' => tmgmt_job_item_create('test_source', $item->item_type .  '_suggestion', $item->item_id),
-        'reason' => t('Test suggestion for @type source @id', array('@type' => $item->item_type,'@id' => $item->item_id)),
+        'job_item' => tmgmt_job_item_create('test_source', $item->getItemType() .  '_suggestion', $item->getItemId()),
+        'reason' => t('Test suggestion for @type source @id', array('@type' => $item->getItemType(),'@id' => $item->getItemId())),
         'from_item' => $item->id(),
       );
     }

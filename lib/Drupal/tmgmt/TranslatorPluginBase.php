@@ -49,7 +49,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
    */
   public function canTranslate(Translator $translator, Job $job) {
     // The job is only translatable if the translator is available too.
-    if ($this->isAvailable($translator) && array_key_exists($job->target_language, $translator->getSupportedTargetLanguages($job->source_language))) {
+    if ($this->isAvailable($translator) && array_key_exists($job->getTargetLangcode(), $translator->getSupportedTargetLanguages($job->getSourceLangcode()))) {
       // We can only translate this job if the target language of the job is in
       // one of the supported languages.
       return TRUE;
@@ -172,7 +172,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
    * {@inheritdoc}
    */
   public function getNotCanTranslateReason(Job $job) {
-    return t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => \Drupal::languageManager()->getLanguage($job->source_language)->getName(), '@target' => \Drupal::languageManager()->getLanguage($job->target_language)->getName()));
+    return t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => $job->getSourceLanguage()->getName(), '@target' => $job->getTargetLanguage()->getName()));
   }
 
   /**

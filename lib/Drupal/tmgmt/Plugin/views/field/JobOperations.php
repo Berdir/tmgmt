@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt\Plugin\views\field;
 
-use Drupal\Component\Annotation\PluginID;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 
@@ -23,30 +22,30 @@ class JobOperations extends FieldPluginBase {
     $element = array();
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('inline'));
-    $uri = $job->uri();
+    $uri = $job->urlInfo();
     if ($job->isSubmittable() && $job->access('submit')) {
       $element['#links']['submit'] = array(
-        'href' => $uri['path'],
         'query' => array('destination' => current_path()),
         'title' => t('submit'),
-      );
+      ) + $uri->toArray();
     }
     else {
       $element['#links']['manage'] = array(
-        'href' => $uri['path'],
         'title' => t('manage'),
-      );
+      ) + $uri->toArray();;
     }
     if ($job->isAbortable() && $job->access('submit')) {
       $element['#links']['cancel'] = array(
-        'href' => 'admin/tmgmt/jobs/' . $job->id() . '/abort',
+        'route_name' => 'tmgmt.job_entity_abort',
+        'route_parameters' => array('tmgmt_job' => $job->id()),
         'query' => array('destination' => current_path()),
         'title' => t('abort'),
       );
     }
     if ($job->isDeletable() && user_access('administer tmgmt')) {
       $element['#links']['delete'] = array(
-        'href' => 'admin/tmgmt/jobs/' . $job->id() . '/delete',
+        'route_name' => 'tmgmt.job_entity_delete',
+        'route_parameters' => array('tmgmt_job' => $job->id()),
         'query' => array('destination' => current_path()),
         'title' => t('delete'),
       );

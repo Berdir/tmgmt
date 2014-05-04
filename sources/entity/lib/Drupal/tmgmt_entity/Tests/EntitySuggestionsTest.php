@@ -189,8 +189,8 @@ class EntitySuggestionsTest extends EntityUnitTestBase {
     $suggestion = array_shift($suggestions);
     $this->assertEqual($suggestion['job_item']->getWordCount(), 3, 'Three translatable words in the suggestion.');
     $this->assertEqual($suggestion['job_item']->plugin, 'entity', 'Got an entity as plugin in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->item_type, 'file', 'Got a file in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->item_id, $node->field1[LANGUAGE_NONE][1]['fid'], 'File id match between node and suggestion.');
+    $this->assertEqual($suggestion['job_item']->getItemType(), 'file', 'Got a file in the suggestion.');
+    $this->assertEqual($suggestion['job_item']->getItemId(), $node->field1[LANGUAGE_NONE][1]['fid'], 'File id match between node and suggestion.');
     $this->assertEqual($suggestion['reason'], 'Field Field 1');
     $this->assertEqual($suggestion['from_item'], $item->id());
     $job->addExistingItem($suggestion['job_item']);
@@ -198,8 +198,8 @@ class EntitySuggestionsTest extends EntityUnitTestBase {
     $suggestion = array_shift($suggestions);
     $this->assertEqual($suggestion['job_item']->getWordCount(), 3, 'Three translatable words in the suggestion.');
     $this->assertEqual($suggestion['job_item']->plugin, 'entity', 'Got an entity as plugin in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->item_type, 'file', 'Got a file in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->item_id, $node->field2[LANGUAGE_NONE][1]['fid'], 'File id match between node and suggestion.');
+    $this->assertEqual($suggestion['job_item']->getItemType(), 'file', 'Got a file in the suggestion.');
+    $this->assertEqual($suggestion['job_item']->getItemId(), $node->field2[LANGUAGE_NONE][1]['fid'], 'File id match between node and suggestion.');
     $this->assertEqual($suggestion['reason'], 'Field Field 2');
     $this->assertEqual($suggestion['from_item'], $item->id());
 

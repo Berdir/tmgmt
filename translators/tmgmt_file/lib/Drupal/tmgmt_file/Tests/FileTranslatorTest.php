@@ -85,11 +85,10 @@ class FileTranslatorTest extends TMGMTTestBase {
     $message = reset($messages);
     $translated_file = 'public://tmgmt_file/translated.xlf';
     $this->createTranslationFile($message->variables['!link'], 'one paragraph', 'one translated paragraph', $translated_file);
-    $uri = $job->uri();
     $edit = array(
       'files[file]' => $translated_file,
     );
-    $this->drupalPostForm($uri['path'], $edit, t('Import'));
+    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
     // Reset caches and reload job.
     entity_get_controller('tmgmt_job')->resetCache();
     entity_get_controller('tmgmt_job_item')->resetCache();
@@ -100,7 +99,6 @@ class FileTranslatorTest extends TMGMTTestBase {
     $item_data = $job->getData(array(1, 'dummy', 'deep_nesting'));
     $this->assertEqual(trim($item_data[1]['#translation']['#text']), str_replace('one paragraph', 'one translated paragraph', $source_text));
     $job_items = $job->getItems();
-    /** @var TMGMTJobItem $job_item */
     $job_item = array_shift($job_items);
     // Job item must be in review.
     $this->assertTrue($job_item->isNeedsReview());
@@ -120,11 +118,10 @@ class FileTranslatorTest extends TMGMTTestBase {
     // trigger an error and not import the translation.
     $translated_file = 'public://tmgmt_file/translated.xlf';
     $this->createTranslationFile($message->variables['!link'], '<x id="tjiid2-4" ctype="lb"/>', '', $translated_file);
-    $uri = $job->uri();
     $edit = array(
       'files[file]' => $translated_file,
     );
-    $this->drupalPostForm($uri['path'], $edit, t('Import'));
+    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
     entity_get_controller('tmgmt_job')->resetCache();
     entity_get_controller('tmgmt_job_item')->resetCache();
     $job = tmgmt_job_load($job->id());
@@ -276,11 +273,10 @@ class FileTranslatorTest extends TMGMTTestBase {
     $wrong_xml->file->header->{'phase-group'}->phase['job-id'] = 500;
     $wrong_file = 'public://tmgmt_file/wrong_file.xlf';
     $wrong_xml->asXML($wrong_file);
-    $uri = $job->uri();
     $edit = array(
       'files[file]' => $wrong_file,
     );
-    $this->drupalPostForm($uri['path'], $edit, t('Import'));
+    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
     $this->assertText(t('Failed to validate file, import aborted.'));
 
     // Change the job id to a wrong one and try to import it.
@@ -295,36 +291,32 @@ class FileTranslatorTest extends TMGMTTestBase {
     $wrong_xml->file->header->{'phase-group'}->phase['job-id'] = $second_job->id();
     $wrong_file = 'public://tmgmt_file/wrong_file.xlf';
     $wrong_xml->asXML($wrong_file);
-    $uri = $job->uri();
     $edit = array(
       'files[file]' => $wrong_file,
     );
-    $this->drupalPostForm($uri['path'], $edit, t('Import'));
-    $uri = $second_job->uri();
+    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
     $label = $second_job->label();
-    $this->assertRaw(t('Import file is from job <a href="@url">@label</a>, import aborted.', array('@url' => url($uri['path']), '@label' => $label)));
+    $this->assertRaw(t('Import file is from job <a href="@url">@label</a>, import aborted.', array('@url' => $job->url(), '@label' => $label)));
 
 
     $translated_file = 'public://tmgmt_file/translated file.xlf';
     $xml->asXML($translated_file);
 
     // Import the file and accept translation for the "dummy" item.
-    $uri = $job->uri();
     $edit = array(
         'files[file]' => $translated_file,
       );
-    $this->drupalPostForm($uri['path'], $edit, t('Import'));
+    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
     $this->clickLink(t('review'));
     $this->drupalPostAjaxForm(NULL, NULL, array('reviewed-dummy|deep_nesting' => '✓'));
 
     // Update the translation for "another" item and import.
     $xml->file->body->group[0]->{'trans-unit'}[1]->target = $xml->file->body->group[0]->{'trans-unit'}[1]->target . ' updated';
     $xml->asXML($translated_file);
-    $uri = $job->uri();
     $edit = array(
         'files[file]' => $translated_file,
       );
-    $this->drupalPostForm($uri['path'], $edit, t('Import'));
+    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
 
     // At this point we must have the "dummy" item accepted and intact. The
     // "another" item must have updated translation.
@@ -399,11 +391,10 @@ class FileTranslatorTest extends TMGMTTestBase {
 
   protected function importFile($translated_file, $translated_text, Job $job) {
     // To test the upload form functionality, navigate to the edit form.
-    $uri = $job->uri();
     $edit = array(
       'files[file]' => $translated_file,
     );
-    $this->drupalPostForm($uri['path'], $edit, t('Import'));
+    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
 
     // Make sure the translations have been imported correctly.
     $this->assertNoText(t('In progress'));

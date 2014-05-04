@@ -87,14 +87,14 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
     $states_labels = tmgmt_job_item_states();
     $state_label = $states_labels[$variables['job_item']->state];
     $label = t('Active job item: @state', array('@state' => $state_label));
-    $uri = $variables['job_item']->uri();
+    $uri = $variables['job_item']->urlInfo();
     /** @var Job $job */
     $job = $variables['job_item']->getJob();
 
     switch ($variables['job_item']->state) {
       case TMGMT_JOB_ITEM_STATE_ACTIVE:
         if ($job->isUnprocessed()) {
-          $uri = $job->uri();
+          $uri = $job->urlInfo();
           $label = t('Active job item: @state', array('@state' => $state_label));
         }
         $icon_color = 'tmgmt-ui-icon-blue';
@@ -114,8 +114,7 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
 
     $job_status = sprintf('<div class="%s" title="%s"><span></span></div>', implode(' ', $classes), $label);
 
-    $status .= l($job_status, $uri['path'], array(
-      'query' => array('destination' => current_path()),
+    $status .= \Drupal::l($job_status, $uri->getRouteName(), $uri->getRouteParameters() + array('destination' => current_path()), array(
       'html' => TRUE,
       'attributes' => array('title' => $label),
     ));

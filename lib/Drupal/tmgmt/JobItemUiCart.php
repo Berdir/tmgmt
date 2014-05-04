@@ -69,7 +69,7 @@ class JobItemUiCart {
    */
   public function addExistingJobItems(array $items) {
     foreach ($items as $item) {
-      if (!$this->isSourceItemAdded($item->plugin, $item->item_type, $item->item_id)) {
+      if (!$this->isSourceItemAdded($item->getPlugin(), $item->getItemType(), $item->getItemId())) {
         $this->cart[] = $item->id();
       }
     }
@@ -114,7 +114,7 @@ class JobItemUiCart {
    */
   public function isSourceItemAdded($plugin, $item_type, $source_id) {
     foreach ($this->getJobItemsFromCart() as $job_item) {
-      if ($job_item->item_id == $source_id && $job_item->item_type == $item_type && $job_item->plugin == $plugin) {
+      if ($job_item->getItemId() == $source_id && $job_item->getItemType() == $item_type && $job_item->getPlugin() == $plugin) {
         return TRUE;
       }
     }
@@ -134,7 +134,7 @@ class JobItemUiCart {
   /**
    * Gets job items in the cart.
    *
-   * @return JobItem[] $items
+   * @return \Drupal\tmgmt\Entity\JobItem[] $items
    *   Job items in the cart.
    */
   public function getJobItemsFromCart() {

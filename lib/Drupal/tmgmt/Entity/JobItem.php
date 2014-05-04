@@ -9,22 +9,21 @@ namespace Drupal\tmgmt\Entity;
 
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Entity\Entity;
+use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Language\Language;
 use Drupal\tmgmt\TMGMTException;
-use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * Entity class for the tmgmt_job_item entity.
  *
- * @EntityType(
+ * @ContentEntityType(
  *   id = "tmgmt_job_item",
  *   label = @Translation("Translation Job Item"),
  *   module = "tmgmt",
  *   controllers = {
- *     "storage" = "Drupal\Core\Entity\EntityDatabaseStorage",
  *     "access" = "Drupal\tmgmt\Entity\Controller\JobItemAccessController",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\JobItemForm"
@@ -35,120 +34,108 @@ use Drupal\Core\Annotation\Translation;
  *   entity_keys = {
  *     "id" = "tjiid",
  *     "uuid" = "uuid"
+ *   },
+ *   links = {
+ *     "canonical" = "tmgmt.job_item_entity",
  *   }
  * )
  *
  * @ingroup tmgmt_job
  */
-class JobItem extends Entity {
+class JobItem extends ContentEntityBase {
 
   /**
-   * The source plugin that provides the item.
-   *
-   * @var string
-   */
-  public $plugin;
-
-  /**
-   * The identifier of the translation job.
-   *
-   * @var integer
-   */
-  public $tjid;
-
-  /**
-   * The identifier of the translation job item.
-   *
-   * @var integer
-   */
-  public $tjiid;
-
-  /**
-   * Type of this item, used by the plugin to identify it.
-   *
-   * @var string
-   */
-  public $item_type;
-
-  /**
-   * Id of the item.
-   *
-   * @var integer
-   */
-  public $item_id;
-
-  /**
-   * The time when the job item was changed as a timestamp.
-   *
-   * @var integer
-   */
-  public $changed;
-
-  /**
-   * Can be used by the source plugin to store the data instead of creating it
-   * on demand.
-   *
-   * If additional information is added in the UI, like adding comments, it will
-   * also be saved here.
-   *
-   * Always use JobItem::getData() to load the data, which will use
-   * this property if present and otherwise get it from the source.
+   * Holds the unserialized source data.
    *
    * @var array
    */
-  public $data = array();
-
-  /**
-   * Counter for all data items waiting for translation.
-   *
-   * @var integer
-   */
-  public $count_pending = 0;
-
-  /**
-   * Counter for all translated data items.
-   *
-   * @var integer
-   */
-  public $count_translated = 0;
-
-  /**
-   * Counter for all accepted data items.
-   *
-   * @var integer
-   */
-  public $count_accepted = 0;
-
-  /**
-   * Counter for all reviewed data items.
-   *
-   * @var integer
-   */
-  public $count_reviewed = 0;
-
-  /**
-   * Amount of words in this job item.
-   *
-   * @var integer
-   */
-  public $word_count = 0;
+  protected $unserializedData;
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $values = array(), $type = 'tmgmt_job_item') {
-    parent::__construct($values, $type);
-    if (!isset($this->state)) {
-      $this->state = TMGMT_JOB_ITEM_STATE_ACTIVE;
-    }
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields['tjiid'] = FieldDefinition::create('integer')
+      ->setLabel(t('Job Item ID'))
+      ->setDescription(t('The Job Item ID.'))
+      ->setReadOnly(TRUE)
+      ->setSetting('unsigned', TRUE);
+
+    $fields['tjid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Job'))
+      ->setDescription(t('The Job.'))
+      ->setReadOnly(TRUE)
+      ->setSetting('target_type', 'tmgmt_job');
+
+    $fields['uuid'] = FieldDefinition::create('uuid')
+      ->setLabel(t('UUID'))
+      ->setDescription(t('The job item UUID.'))
+      ->setReadOnly(TRUE);
+
+    $fields['plugin'] = FieldDefinition::create('string')
+      ->setLabel(t('Plugin'))
+      ->setDescription(t('The plugin of this job item.'))
+      ->setSettings(array(
+        'max_length' => 255,
+      ));
+
+    $fields['item_type'] = FieldDefinition::create('string')
+      ->setLabel(t('Item Type'))
+      ->setDescription(t('The item type of this job item.'))
+      ->setSettings(array(
+        'max_length' => 255,
+      ));
+
+    $fields['item_id'] = FieldDefinition::create('string')
+      ->setLabel(t('Item ID'))
+      ->setDescription(t('The item ID of this job item.'))
+      ->setSettings(array(
+        'max_length' => 255,
+      ));
+
+    $fields['data'] = FieldDefinition::create('string_long')
+      ->setLabel(t('Data'))
+      ->setDescription(t('The source data'));
+
+    $fields['state'] = FieldDefinition::create('integer')
+      ->setLabel(t('Job item state'))
+      ->setDescription(t('The job item state'))
+      ->setSetting('default_value', TMGMT_JOB_ITEM_STATE_ACTIVE);
+
+    $fields['changed'] = FieldDefinition::create('changed')
+      ->setLabel(t('Changed'))
+      ->setDescription(t('The time that the job was last edited.'));
+
+    $fields['count_pending'] = FieldDefinition::create('integer')
+      ->setLabel(t('Pending count'))
+      ->setSetting('unsigned', TRUE);
+
+    $fields['count_translated'] = FieldDefinition::create('integer')
+      ->setLabel(t('Translated count'))
+      ->setSetting('unsigned', TRUE);
+
+    $fields['count_reviewed'] = FieldDefinition::create('integer')
+      ->setLabel(t('Reviewed count'))
+      ->setSetting('unsigned', TRUE);
+
+    $fields['count_accepted'] = FieldDefinition::create('integer')
+      ->setLabel(t('Accepted count'))
+      ->setSetting('unsigned', TRUE);
+
+    $fields['word_count'] = FieldDefinition::create('integer')
+      ->setLabel(t('Word count'))
+      ->setSetting('unsigned', TRUE);
+
+    return $fields;
   }
 
   /**
    * Clones as active.
    */
   public function cloneAsActive() {
-    $clone = clone $this;
+    $clone = $this->createDuplicate();
     $clone->data = NULL;
+    $clone->unserializedData = NULL;
     $clone->tjid = NULL;
     $clone->tjiid = NULL;
     $clone->changed = NULL;
@@ -165,9 +152,15 @@ class JobItem extends Entity {
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage) {
-    $this->changed = REQUEST_TIME;
+    parent::preSave($storage);
     if ($this->getJobId()) {
-     $this->recalculateStatistics();
+      $this->recalculateStatistics();
+    }
+    if ($this->unserializedData) {
+      $this->data = serialize($this->unserializedData);
+    }
+    elseif (empty($this->get('data')->value)) {
+      $this->data = serialize(array());
     }
   }
 
@@ -193,16 +186,15 @@ class JobItem extends Entity {
    * {@inheritdoc}
    */
   public static function postDelete(EntityStorageInterface $storage, array $entities) {
+    parent::postDelete($storage, $entities);
     // Since we are deleting one or multiple job items here we also need to
     // delete the attached messages.
-    /*
-    $mids = \Drupal::entityQuery('tmgmt_job_message')
+    $mids = \Drupal::entityQuery('tmgmt_message')
       ->condition('tjiid', array_keys($entities))
       ->execute();
     if (!empty($mids)) {
       entity_delete_multiple('tmgmt_job_message', $mids);
     }
-    }*/
 
     $trids = \Drupal::entityQuery('tmgmt_remote')
       ->condition('tjiid', array_keys($entities))
@@ -213,14 +205,43 @@ class JobItem extends Entity {
   }
 
   /**
-   * {@inheritdoc}
+   * Returns the Job ID.
+   *
+   * @return int
+   *   The job ID.
    */
-  public function id() {
-    return $this->tjiid;
+  public function getJobId() {
+    return $this->get('tjid')->target_id;
   }
 
-  public function getJobId() {
-    return $this->tjid;
+  /**
+   * Returns the plugin.
+   *
+   * @return string
+   *   The plugin ID.
+   */
+  public function getPlugin() {
+    return $this->get('plugin')->value;
+  }
+
+  /**
+   * Returns the item type.
+   *
+   * @return string
+   *   The item type.
+   */
+  public function getItemType() {
+    return $this->get('item_type')->value;
+  }
+
+  /**
+   * Returns the item ID.
+   *
+   * @return string
+   *   The item ID.
+   */
+  public function getItemId() {
+    return $this->get('item_id')->value;
   }
 
   /**
@@ -242,31 +263,22 @@ class JobItem extends Entity {
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function uri() {
-    // The path of a job item is not directly below the job that it belongs to.
-    // Having to maintain two unknowns / wildcards (job and job item) in the
-    // path is more complex than it has to be. Instead we just append the
-    // additional breadcrumb pieces manually with _tmgmt_ui_breadcrumb().
-    return array('path' => 'admin/tmgmt/items/' . $this->id());
-  }
-
-  /**
    * Add a log message for this job item.
    *
-   * @param $message
+   * @param string $message
    *   The message to store in the log. Keep $message translatable by not
    *   concatenating dynamic values into it! Variables in the message should be
    *   added by using placeholder strings alongside the variables argument to
    *   declare the value of the placeholders. See t() for documentation on how
    *   $message and $variables interact.
-   * @param $variables
+   * @param array $variables
    *   (Optional) An array of variables to replace in the message on display.
-   * @param $type
+   * @param string $type
    *   (Optional) The type of the message. Can be one of 'status', 'error',
    *   'warning' or 'debug'. Messages of the type 'debug' will not get printed
    *   to the screen.
+   *
+   * @return \Drupal\tmgmt\Entity\Message
    */
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job item if it hasn't yet been saved.
@@ -276,7 +288,6 @@ class JobItem extends Entity {
         return $message;
       }
     }
-    return FALSE;
   }
 
   /**
@@ -315,47 +326,44 @@ class JobItem extends Entity {
     if ($controller = $this->getSourceController()) {
       return $controller->getType($this);
     }
-    return ucfirst($this->item_type);
+    return ucfirst($this->get('item_type')->value);
   }
 
   /**
    * Loads the job entity that this job item is attached to.
    *
-   * @return Job
-   *   The job entity that this job item is attached to or FALSE if there was
-   *   a problem.
+   * @return \Drupal\tmgmt\Entity\Job
+   *   The job entity that this job item is attached to or NULL if there is
+   *   no job.
    */
   public function getJob() {
-    if ($this->getJobId()) {
-      return tmgmt_job_load($this->getJobId());
-    }
-    return FALSE;
+    return $this->get('tjid')->entity;
   }
 
   /**
    * Returns the translator for this job item.
    *
-   * @return Translator
-   *   The translator entity or FALSE if there was a problem.
+   * @return \Drupal\tmgmt\Entity\Translator
+   *   The translator entity or NULL if there is none.
    */
   public function getTranslator() {
     if ($job = $this->getJob()) {
       return $job->getTranslator();
     }
-    return FALSE;
+    return NULL;
   }
 
   /**
    * Returns the translator plugin controller of the translator of this job item.
    *
    * @return \Drupal\tmgmt\TranslatorPluginInterface
-   *   The controller of the translator plugin or FALSE if there was a problem.
+   *   The controller of the translator plugin or NULL if there is none.
    */
   public function getTranslatorController() {
     if ($job = $this->getJob()) {
       return $job->getTranslatorController();
     }
-    return FALSE;
+    return NULL;
   }
 
   /**
@@ -387,18 +395,21 @@ class JobItem extends Entity {
    *   A structured data array.
    */
   public function getData(array $key = array(), $index = NULL) {
-    if (empty($this->data) && $this->getJobId()) {
+    if (empty($this->unserializedData) && $this->get('data')->value) {
+      $this->unserializedData = unserialize($this->get('data')->value);
+    }
+    if (empty($this->unserializedData) && $this->getJobId()) {
       // Load the data from the source if it has not been set yet.
-      $this->data = $this->getSourceData();
+      $this->unserializedData = $this->getSourceData();
       $this->save();
     }
     if (empty($key)) {
-      return $this->data;
+      return $this->unserializedData;
     }
     if ($index) {
       $key = array_merge($key, array($index));
     }
-    return NestedArray::getValue($this->data, $key);
+    return NestedArray::getValue($this->unserializedData, $key);
   }
 
   /**
@@ -417,9 +428,9 @@ class JobItem extends Entity {
    * @return \Drupal\tmgmt\SourcePluginInterface
    */
   public function getSourceController() {
-    if (!empty($this->plugin)) {
+    if ($this->get('plugin')->value) {
       try {
-        return \Drupal::service('plugin.manager.tmgmt.source')->createInstance($this->plugin);
+        return \Drupal::service('plugin.manager.tmgmt.source')->createInstance($this->get('plugin')->value);
       } catch (PluginException $e) {
         // Ignore exceptions due to missing source plugins.
       }
@@ -428,53 +439,53 @@ class JobItem extends Entity {
   }
 
   /**
-   * Count of all pending data items
+   * Count of all pending data items.
    *
-   * @return
-   *   Pending counts
+   * @return int
+   *   Pending counts.
    */
   public function getCountPending() {
-    return $this->count_pending;
+    return $this->get('count_pending')->value;
   }
 
   /**
    * Count of all translated data items.
    *
-   * @return
-   *   Translated count
+   * @return int
+   *   Translated count.
    */
   public function getCountTranslated() {
-    return $this->count_translated;
+    return $this->get('count_translated')->value;
   }
 
   /**
    * Count of all accepted data items.
    *
-   * @return
-   *   Accepted count
+   * @return int
+   *   Accepted count.
    */
   public function getCountAccepted() {
-    return $this->count_accepted;
+    return $this->get('count_accepted')->value;
   }
 
   /**
    * Count of all accepted data items.
    *
-   * @return
+   * @return int
    *   Accepted count
    */
   public function getCountReviewed() {
-    return $this->count_reviewed;
+    return $this->get('count_reviewed')->value;
   }
 
   /**
    * Word count of all data items.
    *
-   * @return
+   * @return int
    *   Word count
    */
   public function getWordCount() {
-    return (int)$this->word_count;
+    return (int) $this->get('word_count')->value;
   }
 
   /**
@@ -541,7 +552,7 @@ class JobItem extends Entity {
    */
   public function setState($state, $message = NULL, $variables = array(), $type = 'debug') {
     // Return TRUE if the state could be set. Return FALSE otherwise.
-    if (array_key_exists($state, tmgmt_job_item_states()) && $this->state != $state) {
+    if (array_key_exists($state, tmgmt_job_item_states()) && $this->get('state')->value != $state) {
       $this->state = $state;
       $this->save();
       // If a message is attached to this state change add it now.
@@ -549,20 +560,20 @@ class JobItem extends Entity {
         $this->addMessage($message, $variables, $type);
       }
     }
-    return $this->state;
+    return $this->get('state')->value;
   }
 
   /**
    * Returns the state of the job item. Can be one of the job item state
    * constants.
    *
-   * @return integer
+   * @return int
    *   The state of the job item.
    */
   public function getState() {
     // We don't need to check if the state is actually set because we always set
     // it in the constructor.
-    return $this->state;
+    return $this->get('state')->value;
   }
 
   /**
@@ -571,7 +582,7 @@ class JobItem extends Entity {
    * @param $state
    *   The value to check the current state against.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the passed state matches the current state, FALSE otherwise.
    */
   public function isState($state) {
@@ -581,7 +592,7 @@ class JobItem extends Entity {
   /**
    * Checks whether the state of this transaction is 'accepted'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the state is 'accepted', FALSE otherwise.
    */
   public function isAccepted() {
@@ -591,7 +602,7 @@ class JobItem extends Entity {
   /**
    * Checks whether the state of this transaction is 'active'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the state is 'active', FALSE otherwise.
    */
   public function isActive() {
@@ -601,7 +612,7 @@ class JobItem extends Entity {
   /**
    * Checks whether the state of this transaction is 'needs review'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the state is 'needs review', FALSE otherwise.
    */
   public function isNeedsReview() {
@@ -611,7 +622,7 @@ class JobItem extends Entity {
   /**
    * Checks whether the state of this transaction is 'aborted'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the state is 'aborted', FALSE otherwise.
    */
   public function isAborted() {
@@ -751,14 +762,26 @@ class JobItem extends Entity {
    *
    * The values are either set or updated but never deleted.
    *
-   * @param $key
+   * @param string|array $key
    *   Key pointing to the item the values should be applied.
    *   The key can be either be an array containing the keys of a nested array
    *   hierarchy path or a string with '][' or '|' as delimiter.
-   * @param $values
+   * @param array $values
    *   Nested array of values to set.
+   * @param bool $replace
+   *   (optional) When TRUE, replaces the structure at the provided key instead
+   *   of writing into it.
    */
-  public function updateData($key, $values = array()) {
+  public function updateData($key, $values = array(), $replace = FALSE) {
+    if ($replace) {
+      if (!is_array($this->unserializedData)) {
+        $this->unserializedData = unserialize($this->get('data')->value);
+        if (!is_array($this->unserializedData)) {
+          $this->unserializedData = array();
+        }
+      }
+      NestedArray::setValue($this->unserializedData, tmgmt_ensure_keys_array($key), $values);
+    }
     foreach ($values as $index => $value) {
       // In order to preserve existing values, we can not aplly the values array
       // at once. We need to apply each containing value on its own.
@@ -768,7 +791,10 @@ class JobItem extends Entity {
       }
       // Apply the value.
       else {
-        NestedArray::setValue($this->data, array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+        if (!is_array($this->unserializedData)) {
+          $this->unserializedData = unserialize($this->get('data')->value);
+        }
+        NestedArray::setValue($this->unserializedData, array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
       }
     }
   }
@@ -837,9 +863,9 @@ class JobItem extends Entity {
           // language and links to the review form.
           $job_url = $this->getJob()->url();
           $variables = array(
-            '!source' => l($this->getSourceLabel(), $this->getSystemPath('edit')),
+            '!source' => l($this->getSourceLabel(), $this->getSystemPath()),
             '@language' => $this->getJob()->getTargetLanguage()->getName(),
-            '!review_url' => url($this->getSystemPath('edit'), array('query' => array('destination' => $job_url))),
+            '!review_url' => url($this->getSystemPath(), array('query' => array('destination' => $job_url))),
           );
           $this->needsReview('The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.', $variables);
         }
@@ -897,13 +923,12 @@ class JobItem extends Entity {
    *   An array of job items that are the siblings of this job item.
    */
   public function getSiblings() {
-    $query = new EntityFieldQuery();
-    $result = $query->entityCondition('entity_type', 'tmgmt_job_item')
-      ->propertyCondition('tjiid', $this->id(), '<>')
-      ->propertyCondition('tjid', $this->getJobId())
+    $ids = \Drupal::entityQuery('tmgmt_job_item')
+      ->condition('tjiid', $this->id(), '<>')
+      ->condition('tjid', $this->getJobId())
       ->execute();
-    if (!empty($result['tmgmt_job_item'])) {
-      return entity_load_multiple('tmgmt_job_item', array_keys($result['tmgmt_job_item']));
+    if ($ids) {
+      return entity_load_multiple('tmgmt_job_item', $ids);
     }
     return FALSE;
   }
@@ -912,7 +937,7 @@ class JobItem extends Entity {
    * Returns all job messages attached to this job item with timestamp newer
    * than $time.
    *
-   * @param $timestamp
+   * @param int $time
    *   (Optional) Messages need to have a newer timestamp than $time. Defaults
    *   to REQUEST_TIME.
    *
@@ -959,7 +984,7 @@ class JobItem extends Entity {
 
     $remote_mapping = entity_create('tmgmt_remote', $data);
 
-    return entity_get_controller('tmgmt_remote')->save($remote_mapping);
+    return $remote_mapping->save();
   }
 
   /**
@@ -1005,8 +1030,13 @@ class JobItem extends Entity {
    */
   public function recalculateStatistics() {
     // Set translatable data from the current entity to calculate words.
-    if (empty($this->data)) {
-      $this->data = $this->getSourceData();
+
+    if (empty($this->unserializedData) && $this->get('data')->value) {
+      $this->unserializedData = unserialize($this->get('data')->value);
+    }
+
+    if (empty($this->unserializedData)) {
+      $this->unserializedData = $this->getSourceData();
     }
 
     // Consider everything accepted when the job item is accepted.
@@ -1014,7 +1044,7 @@ class JobItem extends Entity {
       $this->count_pending = 0;
       $this->count_translated = 0;
       $this->count_reviewed = 0;
-      $this->count_accepted = count(array_filter(tmgmt_flatten_data($this->data), '_tmgmt_filter_data'));
+      $this->count_accepted = count(array_filter(tmgmt_flatten_data($this->unserializedData), '_tmgmt_filter_data'));
     }
     // Count the data item states.
     else {
@@ -1024,7 +1054,7 @@ class JobItem extends Entity {
       $this->count_reviewed = 0;
       $this->count_accepted = 0;
       $this->word_count = 0;
-      $this->count($this->data);
+      $this->count($this->unserializedData);
     }
   }
 
@@ -1040,7 +1070,7 @@ class JobItem extends Entity {
       if (_tmgmt_filter_data($item)) {
 
         // Count words of the data item.
-        $this->word_count += tmgmt_word_count($item['#text']);
+        $this->word_count->value += tmgmt_word_count($item['#text']);
 
         // Set default states if no state is set.
         if (!isset($item['#status'])) {
@@ -1055,13 +1085,13 @@ class JobItem extends Entity {
         }
         switch ($item['#status']) {
           case TMGMT_DATA_ITEM_STATE_REVIEWED:
-            $this->count_reviewed++;
+            $this->count_reviewed->value++;
             break;
           case TMGMT_DATA_ITEM_STATE_TRANSLATED:
-            $this->count_translated++;
+            $this->count_translated->value++;
             break;
           default:
-            $this->count_pending++;
+            $this->count_pending->value++;
             break;
         }
       }
@@ -1074,48 +1104,10 @@ class JobItem extends Entity {
   }
 
   /**
-   * @todo: Remove when http://drupal.org/node/2095399 is in.
-   */
-  public function getRevisionId() {
-    return NULL;
-  }
-
-  /**
-   * @todo: Remove when http://drupal.org/node/2095399 is in.
-   */
-  public function isDefaultRevision() {
-    return TRUE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function get($property_name) {
-    return isset($this->{$property_name}) ? $this->{$property_name} : NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function set($property_name, $value) {
-    $this->{$property_name} = $value;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function language() {
     return new Language(array('id' => Language::LANGCODE_NOT_SPECIFIED));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function postLoad(EntityStorageInterface $storage_controller, array &$entities) {
-    parent::postLoad($storage_controller, $entities);
-    foreach ($entities as $entity) {
-      $entity->data = unserialize($entity->data);
-    }
   }
 
 }

@@ -30,7 +30,7 @@ class TestSource extends SourcePluginBase {
     // the source url is attached to the job comment sent to a translation
     // service.
     $path = 'node';
-    if ($job_item->item_type == 'test_not_accessible') {
+    if ($job_item->getItemType() == 'test_not_accessible') {
       $path = 'admin';
     }
     return array('path' => $path, 'options' => array());
@@ -40,12 +40,12 @@ class TestSource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function getLabel(JobItem $job_item) {
-    $label = $this->pluginId . ':' . $job_item->item_type . ':' . $job_item->item_id;
+    $label = $this->pluginId . ':' . $job_item->getItemType() . ':' . $job_item->getItemId();
 
     // We need to test if job and job item labels get properly truncated,
     // therefore in case the job item type is "test_with_long_label" we append
     // further text to the existing label.
-    if ($job_item->item_type == 'test_with_long_label') {
+    if ($job_item->getItemType() == 'test_with_long_label') {
       $label .= 'Some very long and boring label that definitely exceeds hundred and twenty eight characters which is the maximum character count for the job item label.';
     }
 
@@ -67,8 +67,8 @@ class TestSource extends SourcePluginBase {
     ));
 
     $variables = array(
-      '@type' => $job_item->item_type,
-      '@id' => $job_item->item_id,
+      '@type' => $job_item->getItemType(),
+      '@id' => $job_item->getItemId(),
     );
 
     $this->replacePlaceholders($source, $variables);
@@ -100,7 +100,7 @@ class TestSource extends SourcePluginBase {
    */
   public function saveTranslation(JobItem $job_item) {
     // Set a variable that can be checked later for a given job item.
-    \Drupal::state()->set('tmgmt_test_saved_translation_' . $job_item->item_type . '_' . $job_item->item_id, TRUE);
+    \Drupal::state()->set('tmgmt_test_saved_translation_' . $job_item->getItemType() . '_' . $job_item->getItemId(), TRUE);
     $job_item->accepted();
   }
 

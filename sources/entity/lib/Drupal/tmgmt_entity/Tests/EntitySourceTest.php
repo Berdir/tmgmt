@@ -69,7 +69,7 @@ class EntitySourceTest extends EntityTestBase {
       $this->assertJobItemLangCodes($item, 'en', array('en'));
       $item->acceptTranslation();
       $this->assertTrue($item->isAccepted());
-      $entity = entity_load($item->item_type, $item->item_id);
+      $entity = entity_load($item->getItemType(), $item->getItemId());
       $data = $item->getData();
       $this->checkTranslatedData($entity, $data, 'de');
       $this->checkUntranslatedData($entity, $this->field_names['node']['article'], $data, 'de');
@@ -106,7 +106,7 @@ class EntitySourceTest extends EntityTestBase {
     foreach ($job->getItems() as $item) {
       $this->assertJobItemLangCodes($item, 'en', array('en'));
       $item->acceptTranslation();
-      $entity = entity_load($item->item_type, $item->item_id);
+      $entity = entity_load($item->getItemType(), $item->getItemId());
       $data = $item->getData();
       $this->checkTranslatedData($entity, $data, 'de');
       $this->checkUntranslatedData($entity, $this->field_names['taxonomy_term'][$this->vocabulary->id()], $data, 'de');

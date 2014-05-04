@@ -130,7 +130,7 @@ class LocalTaskItem extends Entity {
   /**
    * Returns the translation job item.
    *
-   * @return JobItem
+   * @return \Drupal\tmgmt\Entity\JobItem
    */
   public function getJobItem() {
     return entity_load('tmgmt_job_item', $this->id());

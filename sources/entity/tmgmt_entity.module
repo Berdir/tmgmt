@@ -202,10 +202,10 @@ function tmgmt_entity_tmgmt_source_suggestions(array $items, \Drupal\tmgmt\Entit
   $suggestions = array();
 
   foreach ($items as $item) {
-    if (($item instanceof \Drupal\tmgmt\Entity\JobItem) && ($item->plugin == 'entity') || ($item->plugin == 'node')) {
+    if (($item instanceof \Drupal\tmgmt\Entity\JobItem) && ($item->getPlugin() == 'entity') || ($item->getPlugin() == 'node')) {
       // Load the entity and extract the bundle name to get all fields from the
       // current entity.
-      $entity = entity_load($item->item_type, $item->item_id);
+      $entity = entity_load($item->getItemType(), $item->getItemId());
 
       // Loop over all fields, check if they are NOT translatable. Only if a
       // field is not translatable we may suggest a referenced entity. If so,

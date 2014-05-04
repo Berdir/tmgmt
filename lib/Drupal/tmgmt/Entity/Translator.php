@@ -31,6 +31,11 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *     "id" = "name",
  *     "label" = "label",
  *     "weight" = "weight"
+ *   },
+ *   links = {
+ *     "edit-form" = "tmgmt.translator_entity",
+ *     "add-form" = "tmgmt.translator_add",
+ *     "delete-form" = "tmgmt.translator_delete",
  *   }
  * )
  *
@@ -147,16 +152,6 @@ class Translator extends ConfigEntityBase {
       }
     }
     parent::preDelete($storage, $entities);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function uri() {
-    return array(
-      'path' => 'admin/config/regional/tmgmt_translator/manage/' . $this->id(),
-      'options' => array(),
-    );
   }
 
   /**

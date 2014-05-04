@@ -24,25 +24,24 @@ class JobItemOperations extends FieldPluginBase {
     $element = array();
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('inline'));
-    $uri = $item->uri();
+    $url = $item->urlInfo();
     if ($item->getCountTranslated() > 0 && $item->access('accept')) {
       $element['#links']['review'] = array(
-        'href' => $uri['path'],
         'query' => array('destination' => current_path()),
         'title' => t('review'),
-      );
+      ) + $url->toArray();
     }
     // Do not display view on unprocessed jobs.
     elseif (!$item->getJob()->isUnprocessed()) {
       $element['#links']['view'] = array(
-        'href' => $uri['path'],
         'query' => array('destination' => current_path()),
         'title' => t('view'),
-      );
+      ) + $url->toArray();
     }
     if (user_access('administer tmgmt') && !$item->isAccepted()) {
       $element['#links']['delete'] = array(
-        'href' => 'admin/tmgmt/items/' . $item->id() . '/delete',
+        'route_name' => 'tmgmt.job_item_delete',
+        'route_parameters' => array('tmgmt_job_item' => $item->id()),
         'query' => array('destination' => current_path()),
         'title' => t('delete'),
       );

@@ -54,9 +54,8 @@ function tmgmt_entity_ui_translate_form($form, &$form_state, $build) {
     }
     elseif (isset($items[$langcode])) {
       $item = $items[$langcode];
-      $uri = $item->uri();
       $states = tmgmt_job_item_states();
-      $additional = l($states[$item->state], $uri['path'], array('query' => array('destination' => current_path())));
+      $additional = \Drupal::l($states[$item->state], $item->urlIinfo()->getRouteName(), $item->urlIinfo()->getRouteParameters() + array('destination' => current_path()));
       // Disable the checkbox for this row since there is already a translation
       // in progress that has not yet been finished. This way we make sure that
       // we don't stack multiple active translations for the same item on top

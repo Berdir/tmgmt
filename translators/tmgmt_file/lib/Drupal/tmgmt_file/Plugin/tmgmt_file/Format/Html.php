@@ -54,8 +54,8 @@ class Html implements FormatInterface {
     }
     return _theme('tmgmt_file_html_template', array(
       'tjid' => $job->id(),
-      'source_language' => $job->getTranslator()->mapToRemoteLanguage($job->source_language),
-      'target_language' => $job->getTranslator()->mapToRemoteLanguage($job->target_language),
+      'source_language' => $job->getTranslator()->mapToRemoteLanguage($job->getSourceLangcode()),
+      'target_language' => $job->getTranslator()->mapToRemoteLanguage($job->getTargetLangcode()),
       'items' => $items,
     ));
   }
@@ -109,8 +109,8 @@ class Html implements FormatInterface {
 
 
     // Check language.
-    if ($meta['languageSource'] != $job->getTranslator()->mapToRemoteLanguage($job->source_language) ||
-        $meta['languageTarget'] != $job->getTranslator()->mapToRemoteLanguage($job->target_language)) {
+    if ($meta['languageSource'] != $job->getTranslator()->mapToRemoteLanguage($job->getSourceLangcode()) ||
+        $meta['languageTarget'] != $job->getTranslator()->mapToRemoteLanguage($job->getTargetLangcode())) {
       return FALSE;
     }
 

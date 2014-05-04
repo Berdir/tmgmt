@@ -51,8 +51,6 @@ interface SourcePluginInterface extends PluginInspectionInterface {
    *
    * @param \Drupal\tmgmt\Entity\JobItem $job_item
    *   The job item entity.
-   *
-   * @see entity_uri()
    */
   public function getUri(JobItem $job_item);
 

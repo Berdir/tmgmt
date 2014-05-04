@@ -37,7 +37,7 @@ class FileTranslator extends TranslatorPluginBase {
    * {@inheritdoc}
    */
   public function requestTranslation(Job $job) {
-    $name = "JobID" . $job->id() . '_' . $job->source_language . '_' . $job->target_language;
+    $name = "JobID" . $job->id() . '_' . $job->getSourceLangcode() . '_' . $job->getTargetLangcode();
 
     $export = tmgmt_file_format_controller($job->getSetting('export_format'));
 

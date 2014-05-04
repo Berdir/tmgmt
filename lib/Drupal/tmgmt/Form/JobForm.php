@@ -31,11 +31,11 @@ class JobForm extends TmgmtFormBase {
     $job = $this->entity;
     // Handle source language.
     $available['source_language'] = tmgmt_available_languages();
-    $job->source_language = isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : $job->source_language;
+    $job->source_language = isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : $job->getSourceLangcode();
 
     // Handle target language.
     $available['target_language'] = tmgmt_available_languages();
-    $job->target_language = isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : $job->target_language;
+    $job->target_language = isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : $job->getTargetLangcode();
 
     // Remove impossible combinations so we don't end up with the same source and
     // target language in the dropdowns.
@@ -45,13 +45,13 @@ class JobForm extends TmgmtFormBase {
       }
     }
 
-    $source = \Drupal::languageManager()->getLanguage($job->source_language)->getName() ?: '?';
-    if (empty($job->target_language)) {
+    $source = $job->getSourceLanguage() ? $job->getSourceLanguage()->getName() : '?';
+    if (!$job->getTargetLangcode()) {
       $job->target_language = key($available['target_language']);
       $target = '?';
     }
     else {
-      $target = \Drupal::languageManager()->getLanguage($job->target_language)->getName();
+      $target = $job->getTargetLanguage()->getName();
     }
 
     $states = tmgmt_job_states();
@@ -60,7 +60,7 @@ class JobForm extends TmgmtFormBase {
       '@title' => $job->label(),
       '@source' => $source,
       '@target' => $target,
-      '@state' => $states[$job->state],
+      '@state' => $states[$job->getState()],
     )));
 
     $form['info'] = array(
@@ -85,14 +85,14 @@ class JobForm extends TmgmtFormBase {
 
     // Make the source and target language flexible by showing either a select
     // dropdown or the plain string (if preselected).
-    if (!empty($job->source_language) || !$job->isSubmittable()) {
+    if ($job->getSourceLangcode() || !$job->isSubmittable()) {
       $form['info']['source_language'] = array(
         '#title' => t('Source language'),
         '#type' =>  'item',
-        '#markup' => isset($available['source_language'][$job->source_language]) ? $available['source_language'][$job->source_language] : '',
+        '#markup' => isset($available['source_language'][$job->getSourceLangcode()]) ? $available['source_language'][$job->getSourceLangcode()] : '',
         '#prefix' => '<div id="tmgmt-ui-source-language" class="tmgmt-ui-source-language tmgmt-ui-info-item">',
         '#suffix' => '</div>',
-        '#value' => $job->source_language,
+        '#value' => $job->getSourceLangcode(),
       );
     }
     else {
@@ -100,7 +100,7 @@ class JobForm extends TmgmtFormBase {
         '#title' => t('Source language'),
         '#type' => 'select',
         '#options' => $available['source_language'],
-        '#default_value' => $job->source_language,
+        '#default_value' => $job->getSourceLangcode(),
         '#required' => TRUE,
         '#prefix' => '<div id="tmgmt-ui-source-language" class="tmgmt-ui-source-language tmgmt-ui-info-item">',
         '#suffix' => '</div>',
@@ -113,10 +113,10 @@ class JobForm extends TmgmtFormBase {
       $form['info']['target_language'] = array(
         '#title' => t('Target language'),
         '#type' => 'item',
-        '#markup' => isset($available['target_language'][$job->target_language]) ? $available['target_language'][$job->target_language] : '',
+        '#markup' => isset($available['target_language'][$job->getTargetLangcode()]) ? $available['target_language'][$job->getTargetLangcode()] : '',
         '#prefix' => '<div id="tmgmt-ui-target-language" class="tmgmt-ui-target-language tmgmt-ui-info-item">',
         '#suffix' => '</div>',
-        '#value' => $job->target_language,
+        '#value' => $job->getTargetLangcode(),
       );
     }
     else {
@@ -124,7 +124,7 @@ class JobForm extends TmgmtFormBase {
         '#title' => t('Target language'),
         '#type' => 'select',
         '#options' => $available['target_language'],
-        '#default_value' => $job->target_language,
+        '#default_value' => $job->getTargetLangcode(),
         '#required' => TRUE,
         '#prefix' => '<div id="tmgmt-ui-target-language" class="tmgmt-ui-target-language tmgmt-ui-info-item">',
         '#suffix' => '</div>',
@@ -485,7 +485,7 @@ class JobForm extends TmgmtFormBase {
       $form['#description'] = filter_xss($job->getTranslator()->getNotAvailableReason());
     }
     // @todo: if the target language is not defined, the check will not work if the first language in the list is not available.
-    elseif ($job->target_language && !$translator->canTranslate($job)) {
+    elseif ($job->getTargetLangcode() && !$translator->canTranslate($job)) {
       $form['#description'] = filter_xss($job->getTranslator()->getNotCanTranslateReason($job));
     }
     else {

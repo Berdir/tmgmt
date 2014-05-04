@@ -28,13 +28,13 @@ use Drupal\tmgmt\TMGMTException;
 class EntitySource extends SourcePluginBase {
 
   public function getLabel(JobItem $job_item) {
-    if ($entity = entity_load($job_item->item_type, $job_item->item_id)) {
+    if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
       return $entity->label();
     }
   }
 
   public function getUri(JobItem $job_item) {
-    if ($entity = entity_load($job_item->item_type, $job_item->item_id)) {
+    if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
       // @todo: Use routes.
       $uri['path'] = $entity->getSystemPath();
       $uri += $entity->urlInfo()->toArray();
@@ -49,9 +49,9 @@ class EntitySource extends SourcePluginBase {
    * the Translation Management system.
    */
   public function getData(JobItem $job_item) {
-    $entity = entity_load($job_item->item_type, $job_item->item_id);
+    $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     if (!$entity) {
-      throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->item_type, $job_item->item_id)));
+      throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), $job_item->getItemId())));
     }
     $field_definitions = $entity->getFieldDefinitions();
     $translatable_fields = array_filter($field_definitions, function ($field_definition) {
@@ -59,7 +59,7 @@ class EntitySource extends SourcePluginBase {
     });
 
     $data = array();
-    $translation = $entity->getTranslation($job_item->getJob()->source_language);
+    $translation = $entity->getTranslation($job_item->getJob()->getSourceLangcode());
     foreach ($translatable_fields as $key => $field_definition) {
       $field = $translation->get($key);
       $data[$key]['#label'] = $field_definition->getLabel();
@@ -97,10 +97,10 @@ class EntitySource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function saveTranslation(JobItem $job_item) {
-    $entity = entity_load($job_item->item_type, $job_item->item_id);
+    $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     $job = tmgmt_job_load($job_item->getJobId());
 
-    $translation = $entity->getTranslation($job->target_language);
+    $translation = $entity->getTranslation($job->getTargetLangcode());
     $data = $job_item->getData();
     foreach ($data as $name => $field_data) {
       foreach (element_children($field_data) as $delta) {
@@ -143,13 +143,13 @@ class EntitySource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function getType(JobItem $job_item) {
-    if ($entity = entity_load($job_item->item_type, $job_item->item_id)) {
-      $bundles = entity_get_bundles($job_item->item_type);
+    if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
+      $bundles = entity_get_bundles($job_item->getItemType());
       $entity_type = $entity->getEntityType();
       $bundle = $entity->bundle();
       // Display entity type and label if we have one and the bundle isn't
       // the same as the entity type.
-      if (isset($bundles[$bundle]) && $bundle != $job_item->item_type) {
+      if (isset($bundles[$bundle]) && $bundle != $job_item->getItemType()) {
         return t('@type (@bundle)', array('@type' => $entity_type->getLabel(), '@bundle' => $bundles[$bundle]['label']));
       }
       // Otherwise just display the entity type label.
@@ -161,7 +161,7 @@ class EntitySource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function getSourceLangCode(JobItem $job_item) {
-    $entity = entity_load($job_item->item_type, $job_item->item_id);
+    $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     return $entity->getUntranslated()->language()->id;
   }
 
@@ -169,7 +169,7 @@ class EntitySource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function getExistingLangCodes(JobItem $job_item) {
-    if ($entity = entity_load($job_item->item_type, $job_item->item_id)) {
+    if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
       return array_keys($entity->getTranslationLanguages());
     }
 

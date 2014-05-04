@@ -384,7 +384,7 @@ function tmgmt_job_check_finished($tjid) {
  * @return \Drupal\tmgmt\Entity\Job
  *   The job entity.
  */
-function tmgmt_job_create($source_language, $target_language, $uid = NULL, array $values = array()) {
+function tmgmt_job_create($source_language, $target_language, $uid = 0, array $values = array()) {
   return entity_create('tmgmt_job', array_merge($values, array(
     'source_language' => $source_language,
     'target_language' => $target_language,
@@ -513,7 +513,7 @@ function tmgmt_job_item_load($tjiid) {
  * @param $conditions
  *   An array of additional conditions.
  *
- * @return TMGMTJobItem[]
+ * @return \Drupal\tmgmt\Entity\JobItem[]
  *   An array of job item entities or an empty array if the query returned no
  *   results.
  */

@@ -63,7 +63,7 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
     $job->addMessage('Test translator called.', array(), 'debug');
 
     // Do something different based on the action, if defined.
-    $action = isset($job->settings['action']) ? $job->settings['action'] : '';
+    $action =$job->getSetting('action') ?: '';
     switch ($action) {
       case 'submit':
         $job->submitted('Test submit.');
@@ -84,7 +84,7 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
         $data = array_filter(tmgmt_flatten_data($job->getData()), '_tmgmt_filter_data');
         $tdata = array();
         foreach ($data as $key => $value) {
-          $tdata[$key]['#text'] = $job->target_language . '_' . $value['#text'];
+          $tdata[$key]['#text'] = $job->getTargetLangcode() . '_' . $value['#text'];
         }
         $job->submitted('Test translation created.');
         $job->addTranslatedData(tmgmt_unflatten_data($tdata));

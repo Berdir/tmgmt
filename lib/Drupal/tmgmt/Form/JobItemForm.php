@@ -69,11 +69,11 @@ class JobItemForm extends TmgmtFormBase {
       '#value' => $item->state,
     );
     $job = $item->getJob();
-    $uri = $job->uri();
+    $url = $job->urlInfo();
     $form['info']['job'] = array(
       '#type' => 'item',
       '#title' => t('Job'),
-      '#markup' => l($job->label(), $uri['path']),
+      '#markup' => \Drupal::l($job->label(), $url->getRouteName(), $url->getRouteParameters()),
       '#prefix' => '<div class="tmgmt-ui-job tmgmt-ui-info-item">',
       '#suffix' => '</div>',
     );
@@ -118,7 +118,7 @@ class JobItemForm extends TmgmtFormBase {
     // that process is completely unique and custom for each translation service.
 
     // Give the source ui controller a chance to affect the review form.
-    $source = $this->sourceManager->createUIInstance($item->plugin);
+    $source = $this->sourceManager->createUIInstance($item->getPlugin());
     $form = $source->reviewForm($form, $form_state, $item);
     // Give the translator ui controller a chance to affect the review form.
     if ($item->getTranslator()) {
@@ -157,8 +157,8 @@ class JobItemForm extends TmgmtFormBase {
         array($this, 'save'),
       ),
     );
-    $uri = $item->getJob()->uri();
-    $url = isset($_GET['destination']) ? $_GET['destination'] : $uri['path'];
+    $url = $item->getJob()->url();
+    $url = isset($_GET['destination']) ? $_GET['destination'] : $url;
     $actions['cancel'] = array(
       '#type' => 'link',
       '#title' => t('Cancel'),
@@ -175,7 +175,7 @@ class JobItemForm extends TmgmtFormBase {
     parent::validate($form, $form_state);
     $item = $this->buildEntity($form, $form_state);
     // First invoke the validation method on the source controller.
-    $source_ui = $this->sourceManager->createUIInstance($item->plugin);
+    $source_ui = $this->sourceManager->createUIInstance($item->getPlugin());
     $source_ui->reviewFormValidate($form, $form_state, $item);
     // Invoke the validation method on the translator controller (if available).
     if($item->getTranslator()){
@@ -190,7 +190,7 @@ class JobItemForm extends TmgmtFormBase {
   public function save(array $form, array &$form_state) {
     $item = $this->entity;
     // First invoke the submit method on the source controller.
-    $source_ui = $this->sourceManager->createUIInstance($item->plugin);
+    $source_ui = $this->sourceManager->createUIInstance($item->getPlugin());
     $source_ui->reviewFormSubmit($form, $form_state, $item);
     // Invoke the submit method on the translator controller (if available).
     if ($item->getTranslator()){
@@ -381,7 +381,7 @@ class JobItemForm extends TmgmtFormBase {
         $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.translator')->createUiInstance($job_item->getTranslator()->plugin)
           ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
         // Give the source ui controller a chance to affect the data item element.
-        $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($job_item->plugin)
+        $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($job_item->getPlugin())
           ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
       }
     }

@@ -112,7 +112,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     $this->writeAttribute('resname', $key);
 
     $this->startElement('source');
-    $this->writeAttribute('xml:lang', $this->job->getTranslator()->mapToRemoteLanguage($this->job->source_language));
+    $this->writeAttribute('xml:lang', $this->job->getTranslator()->mapToRemoteLanguage($this->job->getSourceLangcode()));
 
     if ($job->getSetting('xliff_processing')) {
       $this->writeRaw($this->processForExport($element['#text'], $key_array));
@@ -123,7 +123,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
 
     $this->endElement();
     $this->startElement('target');
-    $this->writeAttribute('xml:lang', $this->job->getTranslator()->mapToRemoteLanguage($this->job->target_language));
+    $this->writeAttribute('xml:lang', $this->job->getTranslator()->mapToRemoteLanguage($this->job->getTargetLangcode()));
 
     if (!empty($element['#translation']['#text'])) {
       if ($job->getSetting('xliff_processing')) {
@@ -163,8 +163,8 @@ class Xliff extends \XMLWriter implements FormatInterface {
     // File element.
     $this->startElement('file');
     $this->writeAttribute('original', 'xliff-core-1.2-strict.xsd');
-    $this->writeAttribute('source-language', $job->getTranslator()->mapToRemoteLanguage($job->source_language));
-    $this->writeAttribute('target-language', $job->getTranslator()->mapToRemoteLanguage($job->target_language));
+    $this->writeAttribute('source-language', $job->getTranslator()->mapToRemoteLanguage($job->getSourceLangcode()));
+    $this->writeAttribute('target-language', $job->getTranslator()->mapToRemoteLanguage($job->getTargetLangcode()));
     $this->writeAttribute('datatype', 'plaintext');
     // Date needs to be in ISO-8601 UTC
     $this->writeAttribute('date', date('Y-m-d\Th:m:i\Z'));
@@ -235,12 +235,12 @@ class Xliff extends \XMLWriter implements FormatInterface {
     }
 
     // Compare source language.
-    if (!isset($xml->file['source-language']) || $job->getTranslator()->mapToRemoteLanguage($job->source_language) != $xml->file['source-language']) {
+    if (!isset($xml->file['source-language']) || $job->getTranslator()->mapToRemoteLanguage($job->getSourceLangcode()) != $xml->file['source-language']) {
       return FALSE;
     }
 
     // Compare target language.
-    if (!isset($xml->file['target-language']) || $job->getTranslator()->mapToRemoteLanguage($job->target_language) != $xml->file['target-language']) {
+    if (!isset($xml->file['target-language']) || $job->getTranslator()->mapToRemoteLanguage($job->getTargetLangcode()) != $xml->file['target-language']) {
       return FALSE;
     }
 

@@ -25,7 +25,7 @@ function tmgmt_local_task_view(LocalTask $task) {
 /**
  * Entity API form the local task entity.
  */
-function tmgmt_local_task_form($form, &$form_state, TMGMTLocalTask $task, $op = 'edit') {
+function tmgmt_local_task_form($form, &$form_state, LocalTask $task, $op = 'edit') {
   $wrapper = entity_metadata_wrapper('tmgmt_local_task', $task);
 
   // Set the title of the page to the label and the current status of the task.
@@ -49,7 +49,7 @@ function tmgmt_local_task_form($form, &$form_state, TMGMTLocalTask $task, $op = 
     '#access' => user_access('administer tmgmt') || user_access('administer translation tasks'),
   );
 
-  $translators = tmgmt_local_translators($task->getJob()->source_language, array($task->getJob()->target_language));
+  $translators = tmgmt_local_translators($task->getJob()->getSourceLanguage(), array($task->getJob()->getTargetLangcode()));
   $form['tuid'] = array(
     '#title' => t('Assigned'),
     '#type' => 'select',
@@ -205,12 +205,12 @@ function tmgmt_local_translation_form_save_as_completed_validate($form, &$form_s
  */
 function tmgmt_local_translation_form_save_as_completed_submit($form, &$form_state) {
   /**
-   * @var TMGMTLocalTask $task.
+   * @var \Drupal\tmgmt_local\Entity\LocalTask $task
    */
   $task = $form_state['task'];
 
   /**
-   * @var TMGMTLocalTaskItem $task_item.
+   * @var \Drupal\tmgmt_local\Entity\LocalTaskItem $task_item
    */
   $task_item = $form_state['task_item'];
   $task_item->completed();
@@ -231,12 +231,12 @@ function tmgmt_local_translation_form_save_as_completed_submit($form, &$form_sta
   }
   else {
     // If there are more task items, redirect back to the task.
-    $uri = $task->uri();
-    $form_state['redirect'] = $uri['path'];
+    $uri = $task->urlInfo();
+    $form_state['redirect_route'] = $uri;
   }
 
   /**
-   * @var JobItem $job_item.
+   * @var \Drupal\tmgmt\Entity\JobItem $job_item.
    */
   $job_item = $form_state['job_item'];
 
@@ -273,7 +273,7 @@ function tmgmt_local_translation_form_save_submit($form, &$form_state) {
 /**
  * Builds a translation form element.
  */
-function tmgmt_local_translation_form_element($data, TMGMTLocalTaskItem $item, &$zebra) {
+function tmgmt_local_translation_form_element($data, LocalTaskItem $item, &$zebra) {
   static $flip = array(
     'even' => 'odd',
     'odd' => 'even',
@@ -282,7 +282,6 @@ function tmgmt_local_translation_form_element($data, TMGMTLocalTaskItem $item, &
   $form = array();
 
   $job = $item->getJobItem()->getJob();
-  $language_list = language_list();
 
   foreach (element_children($data) as $key) {
     if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
@@ -297,19 +296,16 @@ function tmgmt_local_translation_form_element($data, TMGMTLocalTaskItem $item, &
         '#zebra' => $zebra,
       );
 
-      $source_language = $language_list[$job->source_language];
-      $target_language = $language_list[$job->target_language];
-
       $form[$target_key]['source'] = array(
         '#type' => 'textarea',
-        '#title' => $source_language->name,
+        '#title' => $job->getSourceLanguage()->getName(),
         '#value' => $data[$key]['#text'],
         '#disabled' => TRUE,
       );
 
       $form[$target_key]['translation'] = array(
         '#type' => 'textarea',
-        '#title' => $target_language->name,
+        '#title' => $job->getTargetLanguage()->getName(),
         '#default_value' => $item->getData(tmgmt_ensure_keys_array($key), '#text'),
         //'#required' => TRUE,
       );

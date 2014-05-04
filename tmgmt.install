@@ -212,7 +212,6 @@ function tmgmt_schema() {
         'type' => 'text',
         'not null' => TRUE,
         'size' => 'big',
-        'serialize' => TRUE,
       ),
       'changed' => array(
         'description' => 'Changed timestamp.',

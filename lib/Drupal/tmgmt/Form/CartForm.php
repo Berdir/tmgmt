@@ -140,7 +140,7 @@ class Cartform extends FormBase {
             // As the same item might be added to multiple jobs, we need to
             // re-create them and delete the old ones, after removing them from
             // the cart.
-            $job->addItem($job_item->plugin, $job_item->item_type, $job_item->item_id);
+            $job->addItem($job_item->getPlugin(), $job_item->getItemType(), $job_item->getItemId());
             $remove_job_item_ids[$job_item->id()] = $job_item->id();
             $job_empty = FALSE;
           }

@@ -20,7 +20,7 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
    * {@inheritdoc}
    */
   public function checkoutSettingsForm($form, &$form_state, Job $job) {
-    if ($translators = tmgmt_local_translators($job->source_language, array($job->target_language))) {
+    if ($translators = tmgmt_local_translators($job->getSourceLangcode(), array($job->getTargetLangcode()))) {
       $form['translator'] = array(
         '#title' => t('Select translator for this job'),
         '#type' => 'select',
