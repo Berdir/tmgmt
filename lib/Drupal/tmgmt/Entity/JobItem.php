@@ -65,7 +65,8 @@ class JobItem extends ContentEntityBase {
       ->setLabel(t('Job'))
       ->setDescription(t('The Job.'))
       ->setReadOnly(TRUE)
-      ->setSetting('target_type', 'tmgmt_job');
+      ->setSetting('target_type', 'tmgmt_job')
+      ->setSetting('default_value', 0);
 
     $fields['uuid'] = FieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
@@ -134,17 +135,16 @@ class JobItem extends ContentEntityBase {
    */
   public function cloneAsActive() {
     $clone = $this->createDuplicate();
-    $clone->data = NULL;
+    $clone->data->value = NULL;
     $clone->unserializedData = NULL;
-    $clone->tjid = NULL;
-    $clone->tjiid = NULL;
-    $clone->changed = NULL;
-    $clone->word_count = NULL;
-    $clone->count_accepted = NULL;
-    $clone->count_pending = NULL;
-    $clone->count_translated = NULL;
-    $clone->count_reviewed = NULL;
-    $clone->state = TMGMT_JOB_ITEM_STATE_ACTIVE;
+    $clone->tjid->target_id = 0;
+    $clone->tjiid->value = 0;
+    $clone->word_count->value = NULL;
+    $clone->count_accepted->value = NULL;
+    $clone->count_pending->value = NULL;
+    $clone->count_translated->value = NULL;
+    $clone->count_reviewed->value = NULL;
+    $clone->state->value = TMGMT_JOB_ITEM_STATE_ACTIVE;
     return $clone;
   }
 
@@ -242,6 +242,16 @@ class JobItem extends ContentEntityBase {
    */
   public function getItemId() {
     return $this->get('item_id')->value;
+  }
+
+  /**
+   * Returns the created time.
+   *
+   * @return int
+   *   The time when the job was last changed.
+   */
+  function getChangedTime() {
+    return $this->get('changed')->value;
   }
 
   /**
@@ -702,7 +712,7 @@ class JobItem extends ContentEntityBase {
             $translation['#text_revisions'][] = array(
               '#text' => $data['#translation']['#text'],
               '#origin' => isset($data['#translation']['#origin']) ? $data['#translation']['#origin'] : 'remote',
-              '#timestamp' => isset($data['#translation']['#timestamp']) ? $data['#translation']['#timestamp'] : $this->changed,
+              '#timestamp' => isset($data['#translation']['#timestamp']) ? $data['#translation']['#timestamp'] : $this->getChangedTime(),
             );
             // Add a message if the translation update is from remote.
             if ($translation['#origin'] == 'remote') {

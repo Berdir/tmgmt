@@ -207,11 +207,10 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    */
   public function cloneAsUnprocessed() {
     $clone = $this->createDuplicate();
-    $clone->uid = NULL;
-    $clone->changed = NULL;
-    $clone->reference = NULL;
-    $clone->created = REQUEST_TIME;
-    $clone->state = TMGMT_JOB_STATE_UNPROCESSED;
+    $clone->uid->value = 0;
+    $clone->reference->value = '';
+    $clone->created->value = REQUEST_TIME;
+    $clone->state->value = TMGMT_JOB_STATE_UNPROCESSED;
     return $clone;
   }
 
@@ -464,10 +463,20 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
+   * Returns the translator ID for this job.
+   *
+   * @return int
+   *   The translator ID or NULL if there is none.
+   */
+  public function getTranslatorId() {
+    return $this->get('translator')->target_id;
+  }
+
+  /**
    * Returns the translator for this job.
    *
    * @return Translator
-   *   The translator entity or FALSE if there was a problem.
+   *   The translator entity or NULL if there is none.
    */
   public function getTranslator() {
     if ($this->translator->target_id) {

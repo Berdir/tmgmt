@@ -7,9 +7,8 @@
 
 namespace Drupal\tmgmt\Form;
 
-use Drupal\Core\Entity\EntityControllerInterface;
-use Drupal\Core\Entity\EntityForm;
-use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\tmgmt\SourceManager;
 use Drupal\tmgmt\TranslatorManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -19,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @ingroup tmgmt_job
  */
-class TmgmtFormBase extends EntityForm {
+class TmgmtFormBase extends ContentEntityForm {
 
   /**
    * Translator plugin manager.
@@ -43,7 +42,8 @@ class TmgmtFormBase extends EntityForm {
    * @param \Drupal\tmgmt\TranslatorManager $translator_manager
    *   The translator plugin manager.
    */
-  public function __construct(TranslatorManager $translator_manager, SourceManager $source_manager) {
+  public function __construct(EntityManagerInterface $entity_manager, TranslatorManager $translator_manager, SourceManager $source_manager) {
+    $this->entityManager = $entity_manager;
     $this->translatorManager = $translator_manager;
     $this->sourceManager = $source_manager;
   }
@@ -53,6 +53,7 @@ class TmgmtFormBase extends EntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
+      $container->get('entity.manager'),
       $container->get('plugin.manager.tmgmt.translator'),
       $container->get('plugin.manager.tmgmt.source')
     );

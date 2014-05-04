@@ -6,13 +6,54 @@
  */
 
 namespace Drupal\tmgmt\Form;
+use Drupal\Core\Entity\EntityForm;
+use Drupal\tmgmt\SourceManager;
+use Drupal\tmgmt\TranslatorManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form controller for the translator edit forms.
  *
  * @ingroup tmgmt_translator
  */
-class TranslatorForm extends TmgmtFormBase {
+class TranslatorForm extends EntityForm {
+
+  /**
+   * Translator plugin manager.
+   *
+   * @var \Drupal\tmgmt\TranslatorManager
+   */
+  protected $translatorManager;
+
+  /**
+   * Source plugin manager.
+   *
+   * @var \Drupal\tmgmt\SourceManager
+   */
+  protected $sourceManager;
+
+  /**
+   * Constructs an EntityForm object.
+   *
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface
+   *   The module handler service.
+   * @param \Drupal\tmgmt\TranslatorManager $translator_manager
+   *   The translator plugin manager.
+   */
+  public function __construct(TranslatorManager $translator_manager, SourceManager $source_manager) {
+    $this->translatorManager = $translator_manager;
+    $this->sourceManager = $source_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('plugin.manager.tmgmt.translator'),
+      $container->get('plugin.manager.tmgmt.source')
+    );
+  }
 
   /**
    * Overrides Drupal\Core\Entity\EntityForm::form().

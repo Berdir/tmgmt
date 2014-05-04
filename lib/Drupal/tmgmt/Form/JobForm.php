@@ -27,7 +27,7 @@ class JobForm extends TmgmtFormBase {
    * Overrides Drupal\Core\Entity\EntityForm::form().
    */
   public function form(array $form, array &$form_state) {
-    $form = parent::form($form, $form_state);
+
     $job = $this->entity;
     // Handle source language.
     $available['source_language'] = tmgmt_available_languages();
@@ -41,7 +41,7 @@ class JobForm extends TmgmtFormBase {
     // target language in the dropdowns.
     foreach (array('source_language' => 'target_language', 'target_language' => 'source_language') as $key => $opposite) {
       if (!empty($job->{$key})) {
-        unset($available[$opposite][$job->{$key}]);
+        unset($available[$opposite][$job->{$key}->value]);
       }
     }
 
@@ -63,6 +63,8 @@ class JobForm extends TmgmtFormBase {
       '@state' => $states[$job->getState()],
     )));
 
+    $form = parent::form($form, $form_state);
+
     $form['info'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('tmgmt-ui-job-info', 'clearfix')),
@@ -74,14 +76,11 @@ class JobForm extends TmgmtFormBase {
       $job->label = NULL;
       $form_state['values']['label'] = $job->label = $job->label();
     }
-    $form['info']['label'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Label'),
-      '#description' => t('You can provide a label for this job in order to identify it easily later on. Or leave it empty to use default one.'),
-      '#default_value' => $job->label(),
-      '#prefix' => '<div id="tmgmt-ui-label">',
-      '#suffix' => '</div>',
-    );
+
+    $form['label']['widget'][0]['value']['#description'] = t('You can provide a label for this job in order to identify it easily later on. Or leave it empty to use default one.');
+    $form['label']['#group'] = 'info';
+    $form['label']['#prefix'] = '<div id="tmgmt-ui-label">';
+    $form['label']['#suffix'] = '</div>';
 
     // Make the source and target language flexible by showing either a select
     // dropdown or the plain string (if preselected).
@@ -141,10 +140,10 @@ class JobForm extends TmgmtFormBase {
       $form['info']['translator'] = array(
         '#type' => 'item',
         '#title' => t('Translator'),
-        '#markup' => isset($translators[$job->translator]) ? check_plain($translators[$job->translator]) : t('Missing translator'),
+        '#markup' => isset($translators[$job->getTranslatorId()]) ? check_plain($translators[$job->getTranslatorId()]) : t('Missing translator'),
         '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
         '#suffix' => '</div>',
-        '#value' => $job->translator,
+        '#value' => $job->getTranslatorId(),
       );
     }
 
@@ -161,10 +160,10 @@ class JobForm extends TmgmtFormBase {
       $form['info']['created'] = array(
         '#type' => 'item',
         '#title' => t('Created'),
-        '#markup' => format_date($job->created),
+        '#markup' => format_date($job->getCreatedTime()),
         '#prefix' => '<div class="tmgmt-ui-created tmgmt-ui-info-item">',
         '#suffix' => '</div>',
-        '#value' => $job->created,
+        '#value' => $job->getCreatedTime(),
       );
     }
 
@@ -268,7 +267,7 @@ class JobForm extends TmgmtFormBase {
       if (!$translators = tmgmt_translator_labels_flagged($job)) {
         drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => l(t('configure'), 'admin/config/regional/tmgmt_translator'))), 'warning');
       }
-      $preselected_translator = !empty($job->translator) && isset($translators[$job->translator]) ? $job->translator : key($translators);
+      $preselected_translator = $job->getTranslatorId() && isset($translators[$job->getTranslatorId()]) ? $job->getTranslatorId() : key($translators);
       $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : $preselected_translator;
 
       $form['translator_wrapper']['translator'] = array(
@@ -276,7 +275,7 @@ class JobForm extends TmgmtFormBase {
         '#title' => t('Translator'),
         '#description' => t('The configured translator plugin that will process of the translation.'),
         '#options' => $translators,
-        '#default_value' => $job->translator,
+        '#default_value' => $job->getTranslatorId(),
         '#required' => TRUE,
         '#ajax' => array(
           'callback' => array($this, 'ajaxTranslatorSelect'),
@@ -297,7 +296,7 @@ class JobForm extends TmgmtFormBase {
         ) + $settings;
     }
     // Otherwise display the checkout info.
-    elseif (!empty($job->translator)) {
+    elseif ($job->getTranslatorId()) {
 
       $form['translator_wrapper'] = array(
         '#type' => 'fieldset',
@@ -355,7 +354,7 @@ class JobForm extends TmgmtFormBase {
         '#button_type' => 'primary',
         '#value' => tmgmt_ui_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
         '#access' => $job->isSubmittable(),
-        '#disabled' => empty($job->translator),
+        '#disabled' => !$job->getTranslatorId(),
         '#validate' => array(
           array($this, 'validate'),
         ),
@@ -409,7 +408,7 @@ class JobForm extends TmgmtFormBase {
     parent::validate($form, $form_state);
     $job = $this->buildEntity($form, $form_state);
     // Load the selected translator.
-    $translator = tmgmt_translator_load($job->translator);
+    $translator = $job->getTranslator();
     // Check translator availability.
     if (!$translator->isAvailable()) {
       \Drupal::formBuilder()->setErrorByName('translator', $form_state, $translator->getNotAvailableReason());

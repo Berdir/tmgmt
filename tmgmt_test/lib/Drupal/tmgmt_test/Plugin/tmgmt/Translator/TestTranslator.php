@@ -96,7 +96,7 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
    * {@inheritdoc}
    */
   function canTranslate(Translator $translator, Job $job) {
-    if (isset($job->settings['action']) && $job->settings['action'] == 'not_translatable') {
+    if ($job->getSetting('action') == 'not_translatable') {
       return FALSE;
     }
     return parent::canTranslate($translator, $job);

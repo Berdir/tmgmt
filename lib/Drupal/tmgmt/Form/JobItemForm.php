@@ -55,7 +55,7 @@ class JobItemForm extends TmgmtFormBase {
     $form['info']['changed'] = array(
       '#type' => 'item',
       '#title' => t('Last change'),
-      '#markup' => format_date($item->changed),
+      '#markup' => format_date($item->getChangedTime()),
       '#prefix' => '<div class="tmgmt-ui-changed tmgmt-ui-info-item">',
       '#suffix' => '</div>',
     );
@@ -63,10 +63,10 @@ class JobItemForm extends TmgmtFormBase {
     $form['info']['state'] = array(
       '#type' => 'item',
       '#title' => t('State'),
-      '#markup' => $states[$item->state],
+      '#markup' => $states[$item->getState()],
       '#prefix' => '<div class="tmgmt-ui-item-state tmgmt-ui-info-item">',
       '#suffix' => '</div>',
-      '#value' => $item->state,
+      '#value' => $item->getState(),
     );
     $job = $item->getJob();
     $url = $job->urlInfo();
@@ -84,7 +84,7 @@ class JobItemForm extends TmgmtFormBase {
       $form['info']['translator'] = array(
         '#type' => 'item',
         '#title' => t('Translator'),
-        '#markup' => isset($translators[$item->getJob()->translator]) ? check_plain($translators[$item->getJob()->translator]) : t('Missing translator'),
+        '#markup' => isset($translators[$item->getJob()->getTranslatorId()]) ? check_plain($translators[$item->getJob()->getTranslatorId()]) : t('Missing translator'),
         '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
         '#suffix' => '</div>',
       );
