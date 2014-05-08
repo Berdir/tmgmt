@@ -151,33 +151,38 @@ class TMGMTLocaleSourcePluginController extends TMGMTDefaultSourcePluginControll
    * {@inheritdoc}
    */
   public function getData(TMGMTJobItem $job_item) {
-    if ($locale_object = $this->getLocaleObject($job_item)) {
-      if ($locale_object->origin == 'source') {
-        $text = $locale_object->source;
-      }
-      else {
-        $text = $locale_object->translation;
-      }
-
-      // Identify placeholders that need to be escaped. Assume that placeholders
-      // consist of alphanumeric characters and _,- only and are delimited by
-      // non-alphanumeric characters. There are cases that don't match, for
-      // example appended SI units like "@valuems", there only @value is the
-      // actual placeholder.
-      $escape = array();
-      if (preg_match_all('/([@!%][a-zA-Z0-9_-]+)/', $text, $matches, PREG_OFFSET_CAPTURE)) {
-         foreach ($matches[0] as $match) {
-           $escape[$match[1]]['string'] = $match[0];
-         }
-      }
-      $structure['singular'] = array(
-        '#label' => t('Singular'),
-        '#text' => (string) $text,
-        '#translate' => TRUE,
-        '#escape' => $escape,
-      );
-      return $structure;
+    $locale_object = $this->getLocaleObject($job_item);
+    if (empty($locale_object)) {
+      $languages = language_list();
+      throw new TMGMTException(t('Unable to load %language translation for the locale %id',
+        array('%language' => $languages[$job_item->getJob()->source_language]->name, '%id' => $job_item->item_id)));
     }
+
+    if ($locale_object->origin == 'source') {
+      $text = $locale_object->source;
+    }
+    else {
+      $text = $locale_object->translation;
+    }
+
+    // Identify placeholders that need to be escaped. Assume that placeholders
+    // consist of alphanumeric characters and _,- only and are delimited by
+    // non-alphanumeric characters. There are cases that don't match, for
+    // example appended SI units like "@valuems", there only @value is the
+    // actual placeholder.
+    $escape = array();
+    if (preg_match_all('/([@!%][a-zA-Z0-9_-]+)/', $text, $matches, PREG_OFFSET_CAPTURE)) {
+       foreach ($matches[0] as $match) {
+         $escape[$match[1]]['string'] = $match[0];
+       }
+    }
+    $structure['singular'] = array(
+      '#label' => t('Singular'),
+      '#text' => (string) $text,
+      '#translate' => TRUE,
+      '#escape' => $escape,
+    );
+    return $structure;
   }
 
   /**
