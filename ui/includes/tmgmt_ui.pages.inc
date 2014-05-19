@@ -912,10 +912,11 @@ function tmgmt_ui_cart_content($form, &$form_state) {
     '#description' => t('If the item\'s source language will be the same as the target language the item will be ignored.'),
   );
 
-  $form['empty_cart'] = array(
+  $form['request_translation'] = array(
     '#type' => 'submit',
-    '#value' => t('Empty cart'),
-    '#submit' => array('tmgmt_ui_cart_empty_cart_form_submit'),
+    '#value' => t('Request translation'),
+    '#submit' => array('tmgmt_ui_cart_request_translation_form_submit'),
+    '#validate' => array('tmgmt_ui_cart_source_overview_validate'),
   );
 
   $form['remove_selected'] = array(
@@ -925,11 +926,10 @@ function tmgmt_ui_cart_content($form, &$form_state) {
     '#validate' => array('tmgmt_ui_cart_source_overview_validate'),
   );
 
-  $form['request_translation'] = array(
+  $form['empty_cart'] = array(
     '#type' => 'submit',
-    '#value' => t('Request translation'),
-    '#submit' => array('tmgmt_ui_cart_request_translation_form_submit'),
-    '#validate' => array('tmgmt_ui_cart_source_overview_validate'),
+    '#value' => t('Empty cart'),
+    '#submit' => array('tmgmt_ui_cart_empty_cart_form_submit'),
   );
 
   return $form;
