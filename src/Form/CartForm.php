@@ -52,25 +52,29 @@ class Cartform extends FormBase {
       '#description' => t('If the item\'s source language will be the same as the target language the item will be ignored.'),
     );
 
-    $form['empty_cart'] = array(
+    $form['request_translation'] = array(
       '#type' => 'submit',
-      '#value' => t('Empty cart'),
-      '#submit' => array(array($this, 'submitEmptyCart')),
+      '#button_type' => 'primary',
+      '#value' => t('Request translation'),
+      '#submit' => array(array($this, 'submitRequestTranslation')),
+      '#validate' => array('tmgmt_ui_cart_source_overview_validate'),
     );
 
     $form['remove_selected'] = array(
       '#type' => 'submit',
+      '#button_type' => 'danger',
       '#value' => t('Remove selected'),
       '#submit' => array(array($this, 'submitRemoveSelected')),
       '#validate' => array('tmgmt_ui_cart_source_overview_validate'),
     );
 
-    $form['request_translation'] = array(
+    $form['empty_cart'] = array(
       '#type' => 'submit',
-      '#value' => t('Request translation'),
-      '#submit' => array(array($this, 'submitRequestTranslation')),
-      '#validate' => array('tmgmt_ui_cart_source_overview_validate'),
+      '#button_type' => 'danger',
+      '#value' => t('Empty cart'),
+      '#submit' => array(array($this, 'submitEmptyCart')),
     );
+
     return $form;
 
   }
