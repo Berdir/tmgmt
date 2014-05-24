@@ -4,6 +4,7 @@
  * @file
  * Source plugin for the Translation Management system that handles entities.
  */
+use Drupal\tmgmt\Entity\Job;
 
 /**
  * Implements hook_form_ID_alter().
@@ -11,7 +12,7 @@
  * Alters comment node type select box to filter out comment types that belongs
  * to non entity translatable node types.
  */
-function tmgmt_entity_form_tmgmt_ui_entity_source_comment_overview_form_alter(&$form, &$form_state) {
+function tmgmt_content_form_tmgmt_ui_entity_source_comment_overview_form_alter(&$form, &$form_state) {
 
   if (!isset($form['search_wrapper']['search']['node_type'])) {
     return;
@@ -39,11 +40,11 @@ function tmgmt_entity_form_tmgmt_ui_entity_source_comment_overview_form_alter(&$
  * @return array
  *   Array of key => values, where key is type and value its label.
  */
-function tmgmt_entity_get_translatable_bundles($entity_type) {
+function tmgmt_content_get_translatable_bundles($entity_type) {
 
   // If given entity type does not have entity translations enabled, no reason
   // to continue.
-  $enabled_types = \Drupal::service('plugin.manager.tmgmt.source')->createInstance('entity')->getItemTypes();
+  $enabled_types = \Drupal::service('plugin.manager.tmgmt.source')->createInstance('content')->getItemTypes();
   if (!isset($enabled_types[$entity_type])) {
     return array();
   }
@@ -74,11 +75,11 @@ function tmgmt_entity_get_translatable_bundles($entity_type) {
  * @return array
  *   Array of translatable entities.
  */
-function tmgmt_entity_get_translatable_entities($entity_type_id, $property_conditions = array(), $pager = FALSE) {
+function tmgmt_content_get_translatable_entities($entity_type_id, $property_conditions = array(), $pager = FALSE) {
 
   // If given entity type does not have entity translations enabled, no reason
   // to continue.
-  $enabled_types = \Drupal::service('plugin.manager.tmgmt.source')->createInstance('entity')->getItemTypes();
+  $enabled_types = \Drupal::service('plugin.manager.tmgmt.source')->createInstance('content')->getItemTypes();
   if (!isset($enabled_types[$entity_type_id])) {
     return array();
   }
@@ -198,11 +199,11 @@ function tmgmt_entity_get_translatable_entities($entity_type_id, $property_condi
 /**
  * Implements hook_tmgmt_source_suggestions()
  */
-function tmgmt_entity_tmgmt_source_suggestions(array $items, \Drupal\tmgmt\Entity\Job $job) {
+function tmgmt_content_tmgmt_source_suggestions(array $items, Job $job) {
   $suggestions = array();
 
   foreach ($items as $item) {
-    if (($item instanceof \Drupal\tmgmt\Entity\JobItem) && ($item->getPlugin() == 'entity') || ($item->getPlugin() == 'node')) {
+    if ($item instanceof \Drupal\tmgmt\Entity\JobItem && $item->getPlugin() == 'content') {
       // Load the entity and extract the bundle name to get all fields from the
       // current entity.
       $entity = entity_load($item->getItemType(), $item->getItemId());
@@ -222,7 +223,7 @@ function tmgmt_entity_tmgmt_source_suggestions(array $items, \Drupal\tmgmt\Entit
               if ($enabled) {
                 // Add the translation as a suggestion.
                 $suggestions[] = array(
-                  'job_item' => tmgmt_job_item_create('entity', $target->getEntityTypeId(), $target->id()),
+                  'job_item' => tmgmt_job_item_create('content', $target->getEntityTypeId(), $target->id()),
                   'reason' => t('Field @label', array('@label' => $definition->getFieldLabel())),
                   'from_item' => $item->id(),
                 );

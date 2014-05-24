@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_entity\Tests\EntitySuggestionsTest.
+ * Contains \Drupal\tmgmt_content\Tests\ContentEntitySuggestionsTest.
  */
 
-namespace Drupal\tmgmt_entity\Tests;
+namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\Core\Language\Language;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
@@ -13,14 +13,14 @@ use Drupal\system\Tests\Entity\EntityUnitTestBase;
 /**
  * Basic Source-Suggestions tests.
  */
-class EntitySuggestionsTest extends EntityUnitTestBase {
+class ContentEntitySuggestionsTest extends EntityUnitTestBase {
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  public static $modules = array('tmgmt', 'tmgmt_entity', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language');
+  public static $modules = array('tmgmt', 'tmgmt_content', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language');
 
   public static function getInfo() {
     return array(
@@ -32,7 +32,7 @@ class EntitySuggestionsTest extends EntityUnitTestBase {
 
   public function setUp() {
     throw new \Exception('@todo: Update this test.');
-    parent::setUp(array('tmgmt_entity'));
+    parent::setUp(array('tmgmt_content'));
 
 
     $edit = array(
@@ -176,7 +176,7 @@ class EntitySuggestionsTest extends EntityUnitTestBase {
     // Prepare a job and a node for testing.
     $job = $this->createJob();
     $node = $this->prepareTranslationSuggestions();
-    $item = $job->addItem('entity', 'node', $node->id());
+    $item = $job->addItem('content', 'node', $node->id());
 
     // Get all suggestions and clean the list.
     $suggestions = $job->getSuggestions();
@@ -188,7 +188,7 @@ class EntitySuggestionsTest extends EntityUnitTestBase {
     // Check for valid attributes on the suggestions.
     $suggestion = array_shift($suggestions);
     $this->assertEqual($suggestion['job_item']->getWordCount(), 3, 'Three translatable words in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->plugin, 'entity', 'Got an entity as plugin in the suggestion.');
+    $this->assertEqual($suggestion['job_item']->getPlugin(), 'content', 'Got an entity as plugin in the suggestion.');
     $this->assertEqual($suggestion['job_item']->getItemType(), 'file', 'Got a file in the suggestion.');
     $this->assertEqual($suggestion['job_item']->getItemId(), $node->field1[LANGUAGE_NONE][1]['fid'], 'File id match between node and suggestion.');
     $this->assertEqual($suggestion['reason'], 'Field Field 1');
@@ -197,7 +197,7 @@ class EntitySuggestionsTest extends EntityUnitTestBase {
 
     $suggestion = array_shift($suggestions);
     $this->assertEqual($suggestion['job_item']->getWordCount(), 3, 'Three translatable words in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->plugin, 'entity', 'Got an entity as plugin in the suggestion.');
+    $this->assertEqual($suggestion['job_item']->getPlugin(), 'content', 'Got an entity as plugin in the suggestion.');
     $this->assertEqual($suggestion['job_item']->getItemType(), 'file', 'Got a file in the suggestion.');
     $this->assertEqual($suggestion['job_item']->getItemId(), $node->field2[LANGUAGE_NONE][1]['fid'], 'File id match between node and suggestion.');
     $this->assertEqual($suggestion['reason'], 'Field Field 2');

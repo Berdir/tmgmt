@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_entity_ui\Controller\TmgmtContentTranslationControllerOverride.
+ * Contains \Drupal\tmgmt_content\Controller\ContentTranslationControllerOverride.
  */
 
-namespace Drupal\tmgmt_entity_ui\Controller;
+namespace Drupal\tmgmt_content\Controller;
 
 use Drupal\content_translation\Controller\ContentTranslationController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Overridden class for entity translation controllers.
  */
-class TmgmtContentTranslationControllerOverride extends ContentTranslationController  {
+class ContentTranslationControllerOverride extends ContentTranslationController  {
 
   /**
    * {@inheritdoc}
@@ -21,8 +21,7 @@ class TmgmtContentTranslationControllerOverride extends ContentTranslationContro
   public function overview(Request $request) {
     $build = parent::overview($request);
     if (\Drupal::entityManager()->getAccessController('tmgmt_job')->createAccess()) {
-      module_load_include('inc', 'tmgmt_entity_ui', 'tmgmt_entity_ui.pages');
-      $build = drupal_get_form('tmgmt_entity_ui_translate_form', $build);
+      $build = \Drupal::formBuilder()->getForm('Drupal\tmgmt_content\Form\ContentTranslateForm', $build);
     }
     return $build;
   }

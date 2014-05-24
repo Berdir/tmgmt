@@ -2,17 +2,17 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt_entity\Tests\EntitySourcePathAutoTest.php
+ * Contains Drupal\tmgmt_content\Tests\ContentEntitySourcePathAutoTest.php.
  */
 
-namespace Drupal\tmgmt_entity\Tests;
+namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\simpletest\WebTestBase;
 
 /**
  * Basic Entity Source tests.
  */
-class EntitySourcePathAutoTest extends WebTestBase {
+class ContentEntitySourcePathAutoTest extends WebTestBase {
 
   static function getInfo() {
     return array(
@@ -25,7 +25,7 @@ class EntitySourcePathAutoTest extends WebTestBase {
 
   function setUp() {
     throw new \Exception('@todo: Update this test.');
-    parent::setUp(array('tmgmt_entity', 'entity_translation', 'pathauto'));
+    parent::setUp(array('tmgmt_content', 'entity_translation', 'pathauto'));
     $this->loginAsAdmin();
     $this->createNodeType('article', 'Article', ENTITY_TRANSLATION_ENABLED);
   }
@@ -45,7 +45,7 @@ class EntitySourcePathAutoTest extends WebTestBase {
     // Create a node.
     $node = $this->createNode('article');
     // Create a job item for this node and add it to the job.
-    $job->addItem('entity', 'node', $node->id());
+    $job->addItem('content', 'node', $node->id());
 
     // Translate the job.
     $job->requestTranslation();

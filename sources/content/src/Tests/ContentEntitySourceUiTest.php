@@ -2,24 +2,24 @@
 
 /**
  * @file
- * Contains EntitySourceUITest
+ * Contains \Drupal\tmgmt_content\Tests\ContentEntitySourceUiTest.
  */
 
-namespace Drupal\tmgmt_entity_ui\Tests;
+namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\tmgmt\Tests\EntityTestBase;
 
 /**
- * Basic Node Source tests.
+ * Content entity source UI tests.
  */
-class EntitySourceUiTest extends EntityTestBase {
+class ContentEntitySourceUiTest extends EntityTestBase {
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  public static $modules = array('tmgmt_entity_ui', 'comment');
+  public static $modules = array('tmgmt_content', 'comment');
 
   static function getInfo() {
     return array(

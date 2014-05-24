@@ -2,14 +2,13 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_entity_ui\Routing\TmgmtEntityUiRouteSubscriber.
+ * Contains \Drupal\tmgmt_content\Routing\TmgmtEntityUiRouteSubscriber.
  */
 
-namespace Drupal\tmgmt_entity_ui\Routing;
+namespace Drupal\tmgmt_content\Routing;
 
 use Drupal\Core\Routing\RouteSubscriberBase;
 use Drupal\Core\Routing\RoutingEvents;
-use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
@@ -25,7 +24,7 @@ class TmgmtEntityUiRouteSubscriber extends RouteSubscriberBase {
     // to our subclass.
     foreach ($collection as $route) {
       if ($route->getDefault('_content') == '\Drupal\content_translation\Controller\ContentTranslationController::overview') {
-        $route->setDefault('_content', '\Drupal\tmgmt_entity_ui\Controller\TmgmtContentTranslationControllerOverride::overview');
+        $route->setDefault('_content', '\Drupal\tmgmt_content\Controller\TmgmtContentTranslationControllerOverride::overview');
       }
     }
   }

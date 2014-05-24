@@ -2,21 +2,21 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_entity_ui\Tests\EntitySourceListTest.
+ * Contains \Drupal\tmgmt_content\Tests\ContentEntitySourceListTest.
  */
 
-namespace Drupal\tmgmt_entity_ui\Tests;
+namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\tmgmt\Tests\EntityTestBase;
 
-class EntitySourceListTest extends EntityTestBase {
+class ContentEntitySourceListTest extends EntityTestBase {
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  public static $modules = array('tmgmt_entity_ui', 'taxonomy', 'comment');
+  public static $modules = array('tmgmt_content', 'taxonomy', 'comment');
 
   protected $nodes = array();
 
@@ -139,7 +139,7 @@ class EntitySourceListTest extends EntityTestBase {
     $job->settings = array();
     $job->save();
 
-    $job->addItem('entity', 'node', $this->nodes['article']['en'][0]->id());
+    $job->addItem('content', 'node', $this->nodes['article']['en'][0]->id());
     $job->requestTranslation();
 
     $this->drupalGet('admin/tmgmt/sources/entity/node');

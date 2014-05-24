@@ -2,8 +2,10 @@
 
 /**
  * @file
- * Hooks provided by the Entity Translation Management module.
+ * Hooks provided by the content entity source module.
  */
+
+use Drupal\Core\Entity\Query\QueryInterface;
 
 /**
  * @addtogroup tmgmt_source
@@ -16,8 +18,8 @@
  *
  * @see TMGMTEntityDefaultSourceUIController
  */
-function hook_tmgmt_entity_type_list_query_alter(EntityFieldQuery $query) {
-  $query->entityCondition('type', array('article', 'page'));
+function hook_tmgmt_content_list_query_alter(QueryInterface $query) {
+  $query->condition('type', array('article', 'page'));
 }
 
 /**

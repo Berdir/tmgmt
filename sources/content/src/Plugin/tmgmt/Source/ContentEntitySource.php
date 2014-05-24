@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt_entity\EntitySourcePluginController.
+ * Contains Drupal\tmgmt_content\EntitySourcePluginController.
  */
 
-namespace Drupal\tmgmt_entity\Plugin\tmgmt\Source;
+namespace Drupal\tmgmt_content\Plugin\tmgmt\Source;
 
 use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\TypedData\AllowedValuesInterface;
@@ -16,16 +16,16 @@ use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TMGMTException;
 
 /**
- * Entity source plugin controller.
+ * Content entity source plugin controller.
  *
  * @SourcePlugin(
- *   id = "entity",
- *   label = @Translation("Entity"),
+ *   id = "content",
+ *   label = @Translation("Content Entity"),
  *   description = @Translation("Source handler for entities."),
- *   ui = "Drupal\tmgmt_entity_ui\EntityUiSourcePluginUi"
+ *   ui = "Drupal\tmgmt_content\ContentEntitySourcePluginUi"
  * )
  */
-class EntitySource extends SourcePluginBase {
+class ContentEntitySource extends SourcePluginBase {
 
   public function getLabel(JobItem $job_item) {
     if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {

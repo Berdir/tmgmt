@@ -1,6 +1,6 @@
 services:
-  tmgmt_entity_ui.subscriber:
-    class: Drupal\tmgmt_entity_ui\Routing\TmgmtEntityUiRouteSubscriber
+  tmgmt_content.subscriber:
+    class: Drupal\tmgmt_content\Routing\TmgmtContentRouteSubscriber
     arguments: ['@content_translation.manager']
     tags:
       - { name: event_subscriber }

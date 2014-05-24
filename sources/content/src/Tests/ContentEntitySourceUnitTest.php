@@ -2,26 +2,26 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt_entity\Tests\EntitySourceUnitTest.php
+ * Contains Drupal\tmgmt_content\Tests\ContentEntitySourceUnitTest.php
  */
 
-namespace Drupal\tmgmt_entity\Tests;
+namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Language\Language;
 
 /**
- * Entity Source unit tests.
+ * Content entity Source unit tests.
  */
-class EntitySourceUnitTest extends EntityUnitTestBase {
+class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  public static $modules = array('tmgmt', 'tmgmt_entity', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language');
+  public static $modules = array('tmgmt', 'tmgmt_content', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language');
 
   protected $entity_type = 'entity_test_mul';
 
@@ -118,10 +118,10 @@ class EntitySourceUnitTest extends EntityUnitTestBase {
     $job = tmgmt_job_create('en', 'de');
     $job->translator = 'test_translator';
     $job->save();
-    $job_item = tmgmt_job_item_create('entity', $this->entity_type, $entity_test->id(), array('tjid' => $job->id()));
+    $job_item = tmgmt_job_item_create('content', $this->entity_type, $entity_test->id(), array('tjid' => $job->id()));
     $job_item->save();
 
-    $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('entity');
+    $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('content');
     $data = $source_plugin->getData($job_item);
 
     // Test the name property.
@@ -210,10 +210,10 @@ class EntitySourceUnitTest extends EntityUnitTestBase {
 
     $job = tmgmt_job_create('en', 'de');
     $job->save();
-    $job_item = tmgmt_job_item_create('entity', 'node', $node->id(), array('tjid' => $job->id()));
+    $job_item = tmgmt_job_item_create('entity', 'content', $node->id(), array('tjid' => $job->id()));
     $job_item->save();
 
-    $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('entity');
+    $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('content');
     $data = $source_plugin->getData($job_item);
 
     // Test the title property.
