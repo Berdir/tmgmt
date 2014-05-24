@@ -25,7 +25,7 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, array &$form_state) {
-    $config = $this->configFactory->get('tmgmt.settings');
+    $config = $this->configFactory()->get('tmgmt.settings');
     $form['workflow'] = array(
       '#type' => 'fieldset',
       '#title' => t('Workflow settings'),
@@ -54,7 +54,7 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    $this->configFactory->get('tmgmt.settings')
+    $this->configFactory()->get('tmgmt.settings')
       ->set('quick_checkout', $form_state['values']['tmgmt_quick_checkout'])
       ->set('purge_finished', $form_state['values']['tmgmt_purge_finished'])
       ->save();
