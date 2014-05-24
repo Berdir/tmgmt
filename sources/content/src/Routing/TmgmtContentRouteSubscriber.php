@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_content\Routing\TmgmtEntityUiRouteSubscriber.
+ * Contains \Drupal\tmgmt_content\Routing\TmgmtContentRouteSubscriber.
  */
 
 namespace Drupal\tmgmt_content\Routing;
@@ -14,7 +14,7 @@ use Symfony\Component\Routing\RouteCollection;
 /**
  * Subscriber to alter entity translation routes.
  */
-class TmgmtEntityUiRouteSubscriber extends RouteSubscriberBase {
+class TmgmtContentRouteSubscriber extends RouteSubscriberBase {
 
   /**
    * {@inheritdoc}
