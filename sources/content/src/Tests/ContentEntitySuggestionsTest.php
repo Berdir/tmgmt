@@ -8,19 +8,22 @@
 namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\Core\Language\Language;
-use Drupal\system\Tests\Entity\EntityUnitTestBase;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\node\Entity\Node;
+use Drupal\tmgmt\Tests\TMGMTTestBase;
 
 /**
  * Basic Source-Suggestions tests.
  */
-class ContentEntitySuggestionsTest extends EntityUnitTestBase {
+class ContentEntitySuggestionsTest extends TMGMTTestBase {
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  public static $modules = array('tmgmt', 'tmgmt_content', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language');
+  public static $modules = array('tmgmt_content', 'tmgmt_test', 'node');
 
   public static function getInfo() {
     return array(
@@ -31,21 +34,13 @@ class ContentEntitySuggestionsTest extends EntityUnitTestBase {
   }
 
   public function setUp() {
-    throw new \Exception('@todo: Update this test.');
-    parent::setUp(array('tmgmt_content'));
-
+    parent::setUp();
 
     $edit = array(
       'id' => 'de',
     );
     $language = new Language($edit);
     language_save($language);
-
-    // Enable entity translations for nodes and comments.
-    $edit = array();
-    $edit['entity_translation_entity_types[node]'] = 1;
-    $edit['entity_translation_entity_types[file]'] = 1;
-    $this->drupalPostForm('admin/config/regional/entity_translation', $edit, t('Save configuration'));
   }
 
   /**
@@ -63,109 +58,75 @@ class ContentEntitySuggestionsTest extends EntityUnitTestBase {
     // Only the first field is a translatable reference.
     $type = $this->drupalCreateContentType();
 
-    $field1 = field_create_field(array(
-      'field_name' => 'field1',
-      'type' => 'file',
+    $field1 = FieldConfig::create(array(
+      'name' => 'field1',
+      'entity_type' => 'node',
+      'type' => 'entity_reference',
       'cardinality' => -1,
+      'settings' => array('target_type' => 'node'),
     ));
-    $field2 = field_create_field(array(
-      'field_name' => 'field2',
-      'type' => 'file',
+    $field1->save();
+    $field2 = FieldConfig::create(array(
+      'name' => 'field2',
+      'entity_type' => 'node',
+      'type' => 'entity_reference',
       'cardinality' => -1,
       'translatable' => TRUE,
+      'settings' => array('target_type' => 'node'),
     ));
+    $field2->save();
 
     // Create field instances on the content type.
-    field_create_instance(array(
-      'field_name' => $field1['field_name'],
-      'entity_type' => 'node',
+    FieldInstanceConfig::create(array(
+      'field_name' => $field1->getName(),
       'bundle' => $type->type,
       'label' => 'Field 1',
-      'widget' => array('type' => 'file'),
       'settings' => array(),
     ));
-    field_create_instance(array(
-      'field_name' => $field2['field_name'],
-      'entity_type' => 'node',
+    FieldInstanceConfig::create(array(
+      'field_name' => $field2->getName(),
       'bundle' => $type->type,
       'label' => 'Field 2',
-      'widget' => array('type' => 'file'),
       'settings' => array(),
-    ));
+    ))->save();
 
     // Make the body field translatable from node.
-    $info = $this->container->get('field.info')->getField('node', 'body');
-    $info['translatable'] = TRUE;
-    field_update_field($info);
+    $field = FieldConfig::loadByName('node', 'body');
+    $field->translatable = TRUE;
+    $field->save();
 
-    // Make the file entity fields translatable.
-    $info = $this->container->get('field.info')->getField('node', 'field_file_image_alt_text');
-    $info['translatable'] = TRUE;
-    field_update_field($info);
+    // Create 4 nodes to be referenced.
+    $references = array();
+    for ($i = 0; $i < 4; $i++) {
+      $references[$i] = Node::create(array(
+        'title' => $this->randomName(),
+        'body' => $this->randomName(),
+        'type' => $type->type,
+      ));
+      $references[$i]->save();
+    }
 
-    $info = $this->container->get('field.info')->getField('node', 'field_file_image_title_text');
-    $info['translatable'] = TRUE;
-    field_update_field($info);
-
-    // Create and save files - two with some text and two with no text.
-    list($file1, $file2, $file3, $file4) = $this->drupalGetTestFiles('image');
-    $file2->field_file_image_alt_text['en'][0] = array(
-      'value' => $this->randomName(),
-      'type' => 'plain_text',
-    );
-    $file2->field_file_image_title_text['en'][0] = array(
-      'value' => $this->randomName() . ' ' . $this->randomName(),
-      'type' => 'plain_text',
-    );
-
-    $file4->field_file_image_alt_text['en'][0] = array(
-      'value' => $this->randomName(),
-      'type' => 'plain_text',
-    );
-    $file4->field_file_image_title_text['en'][0] = array(
-      'value' => $this->randomName() . ' ' . $this->randomName(),
-      'type' => 'plain_text',
-    );
-
-    file_save($file1);
-    file_save($file2);
-    file_save($file3);
-    file_save($file4);
-
-    // Create a node with two translatable and two non-translatable files.
+    // Create a node with two translatable and two non-translatable references.
     $node = $this->drupalCreateNode(array(
       'type' => $type->type,
       'language' => 'en',
-      'body' => array('en' => array(
+      'body' => $this->randomName(),
+      $field1->getName() => array(
         array(
-          'value' => $this->randomName(),
-        ),
-      )),
-      $field1['field_name'] => array(LANGUAGE_NONE => array(
-        array(
-          'fid' => $file1->fid,
-          'display' => 1,
-          'description' => '',
+          'target_id' => $references[0]->id(),
         ),
         array(
-          'fid' => $file2->fid,
-          'display' => 1,
-          'description' => '',
+          'target_id' => $references[1]->id(),
         ),
-      )),
-      $field2['field_name'] => array(LANGUAGE_NONE => array(
-        array(
-          'fid' => $file3->fid,
-          'display' => 1,
-          'description' => '',
-        ),
-        array(
-          'fid' => $file4->fid,
-          'display' => 1,
-          'description' => '',
-        ),
-      )),
-    ));
+      ),
+      $field2->getName() => array(
+      array(
+        'target_id' => $references[2]->id(),
+      ),
+      array(
+        'target_id' => $references[3]->id(),
+      ),
+    )));
     return $node;
   }
 

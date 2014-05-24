@@ -110,13 +110,13 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     $this->drupalGet('admin/tmgmt/sources/content/comment');
     // Check if we are at comments page.
-    $this->assertText(t('Comment overview (Entity)'));
+    $this->assertText(t('Comment overview (Content Entity)'));
     // No comments yet - empty message is expected.
     $this->assertText(t('No entities matching given criteria have been found.'));
 
     $this->drupalGet('admin/tmgmt/sources/content/node');
     // Check if we are at nodes page.
-    $this->assertText(t('Content overview (Entity)'));
+    $this->assertText(t('Content overview (Content Entity)'));
     // We expect article title as article node type is entity translatable.
     $this->assertText($this->nodes['article']['en'][0]->label());
     // Page node type should not be listed as it is not entity translatable.

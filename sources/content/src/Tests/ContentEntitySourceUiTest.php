@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_content\Tests;
 
+use Drupal\field\Entity\FieldConfig;
 use Drupal\tmgmt\Tests\EntityTestBase;
 
 /**
@@ -237,7 +238,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->drupalPostForm('admin/config/regional/entity_translation', $edit, t('Save configuration'));
 
     // Change comment_body field to be translatable.
-    $comment_body = $this->container->get('field.info')->getField('comment', 'comment_body');
+    $comment_body = FieldConfig::loadByName('comment', 'comment_body');
     $comment_body->translatable = TRUE;
     $comment_body->save();
 

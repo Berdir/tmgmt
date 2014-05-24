@@ -82,13 +82,11 @@ class ContentEntitySource extends SourcePluginBase {
           if ($property instanceof AllowedValuesInterface || !($property instanceof StringInterface)) {
             $translate = FALSE;
           }
-          //if ($translate) {
-            $data[$key][$index][$property_key] = array(
-              '#label' => $property_definition->getLabel(),
-              '#text' => $property->getValue(),
-              '#translate' => $translate,
-            );
-          //}
+          $data[$key][$index][$property_key] = array(
+            '#label' => $property_definition->getLabel(),
+            '#text' => $property->getValue(),
+            '#translate' => $translate,
+          );
         }
       }
     }
