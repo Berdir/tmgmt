@@ -5,7 +5,7 @@
  * Contains \Drupal\tmgmt_content\Form\ContentTranslateForm.
  */
 
-namespace Drupal\tmgmt_content\Form\ContentTranslateForm;
+namespace Drupal\tmgmt_content\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Language\LanguageInterface;
@@ -29,6 +29,8 @@ class ContentTranslateForm extends FormBase {
     $form_state['entity'] = $build['#entity'];
 
     $overview = $build['content_translation_overview'];
+
+    $form['#title'] = $this->t('Translations of @title', array('@title' => $build['#entity']->label()));
 
     $form['top_actions']['#type'] = 'actions';
     $form['top_actions']['#weight'] = -10;
@@ -126,7 +128,6 @@ class ContentTranslateForm extends FormBase {
     foreach (array_keys(array_filter($values['languages'])) as $langcode) {
       // Create the job object.
       $job = tmgmt_job_create($entity->language()->id, $langcode, $GLOBALS['user']->id());
-      debug($job->toArray());
       try {
         // Add the job item.
         $job->addItem('content', $entity->getEntityTypeId(), $entity->id());

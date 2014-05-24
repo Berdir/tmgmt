@@ -6,6 +6,7 @@
  */
 
 namespace Drupal\tmgmt\Form;
+use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\tmgmt\SourceManager;
 use Drupal\tmgmt\TranslatorManager;
@@ -125,7 +126,7 @@ class TranslatorForm extends EntityForm {
       $form['plugin_wrapper']['plugin'] = array(
         '#type' => 'select',
         '#title' => t('Translator plugin'),
-        '#description' => isset($definition['description']) ? filter_xss($definition['description']) : '',
+        '#description' => isset($definition['description']) ? Xss::filter($definition['description']) : '',
         '#options' => $available,
         '#default_value' => $entity->plugin,
         '#required' => TRUE,

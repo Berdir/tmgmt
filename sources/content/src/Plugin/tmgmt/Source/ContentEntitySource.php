@@ -82,11 +82,13 @@ class ContentEntitySource extends SourcePluginBase {
           if ($property instanceof AllowedValuesInterface || !($property instanceof StringInterface)) {
             $translate = FALSE;
           }
-          $data[$key][$index][$property_key] = array(
-            '#label' => $property_definition->getLabel(),
-            '#text' => $property->getValue(),
-            '#translate' => $translate,
-          );
+          //if ($translate) {
+            $data[$key][$index][$property_key] = array(
+              '#label' => $property_definition->getLabel(),
+              '#text' => $property->getValue(),
+              '#translate' => $translate,
+            );
+          //}
         }
       }
     }
@@ -97,8 +99,14 @@ class ContentEntitySource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function saveTranslation(JobItem $job_item) {
+    /* @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
-    $job = tmgmt_job_load($job_item->getJobId());
+    $job = $job_item->getJob();
+
+    // If the translation for this language does not exist yet, initialize it.
+    if (!$entity->hasTranslation($job->getTargetLangcode())) {
+      $entity->addTranslation($job->getTargetLangcode(), $entity->toArray());
+    }
 
     $translation = $entity->getTranslation($job->getTargetLangcode());
     $data = $job_item->getData();

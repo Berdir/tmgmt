@@ -127,7 +127,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertEqual(url('node', array('absolute' => TRUE)), $this->getUrl());
 
     // Test the missing translation filter.
-    $this->drupalGet('admin/tmgmt/sources/entity/node');
+    $this->drupalGet('admin/tmgmt/sources/content/node');
     $this->assertText($node->getTitle());
     $this->assertText($node_not_translated->getTitle());
     $this->drupalPostForm(NULL, array(
@@ -329,7 +329,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     }
 
     // Test the source overview.
-    $this->drupalPostForm('admin/tmgmt/sources/entity/node', array(
+    $this->drupalPostForm('admin/tmgmt/sources/content/node', array(
       'items[' . $nodes[1]->id() . ']' => TRUE,
       'items[' . $nodes[2]->id() . ']' => TRUE,
     ), t('Add to cart'));

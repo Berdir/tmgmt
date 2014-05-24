@@ -7,7 +7,7 @@
 
 namespace Drupal\tmgmt;
 
-use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Plugin\PluginBase;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\SourcePluginUiInterface;
 

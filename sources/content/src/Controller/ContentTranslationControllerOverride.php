@@ -8,12 +8,15 @@
 namespace Drupal\tmgmt_content\Controller;
 
 use Drupal\content_translation\Controller\ContentTranslationController;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Overridden class for entity translation controllers.
  */
 class ContentTranslationControllerOverride extends ContentTranslationController  {
+
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}

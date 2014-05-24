@@ -24,7 +24,7 @@ class TmgmtContentRouteSubscriber extends RouteSubscriberBase {
     // to our subclass.
     foreach ($collection as $route) {
       if ($route->getDefault('_content') == '\Drupal\content_translation\Controller\ContentTranslationController::overview') {
-        $route->setDefault('_content', '\Drupal\tmgmt_content\Controller\TmgmtContentTranslationControllerOverride::overview');
+        $route->setDefault('_content', '\Drupal\tmgmt_content\Controller\ContentTranslationControllerOverride::overview');
       }
     }
   }

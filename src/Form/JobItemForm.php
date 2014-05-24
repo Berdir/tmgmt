@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\Xss;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
 
@@ -225,7 +226,7 @@ class JobItemForm extends TmgmtFormBase {
           continue;
         }
         if ($text = $message->getMessage()) {
-          drupal_set_message(filter_xss($text), $message->type);
+          drupal_set_message(Xss::filter($text), $message->type);
         }
       }
     }
@@ -350,7 +351,7 @@ class JobItemForm extends TmgmtFormBase {
             $revisions[] = t('Origin: %origin, Created: %created</br>%text', array(
               '%origin' => $revision['#origin'],
               '%created' => format_date($revision['#timestamp']),
-              '%text' => filter_xss($revision['#text']),
+              '%text' => Xss::filter($revision['#text']),
             ));
           }
           $form[$target_key]['below']['revisions_wrapper'] = array(

@@ -48,7 +48,7 @@ class JobAbortForm extends EntityConfirmFormBase {
         if ($text = $message->getMessage()) {
           // We want to persist also the type therefore we will set the
           // messages directly and not return them.
-          drupal_set_message(filter_xss($text), $message->type);
+          drupal_set_message(String($text), $message->type);
         }
       }
     }

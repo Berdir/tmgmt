@@ -6,6 +6,7 @@
  */
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\Xss;
 use Drupal\tmgmt_local\Entity\LocalTask;
 use Drupal\tmgmt_local\Entity\LocalTaskItem;
 
@@ -145,7 +146,7 @@ function tmgmt_local_translation_form($form, &$form_state, TMGMTLocalTaskItem $t
     $form['job_comment'] = array(
       '#type' => 'item',
       '#title' => t('Job comment'),
-      '#markup' => filter_xss($job->getSetting('job_comment')),
+      '#markup' => Xss::filter($job->getSetting('job_comment')),
     );
   }
 

@@ -33,6 +33,13 @@ tmgmt.job_entity:
   requirements:
     _entity_access: tmgmt_job.update
 
+tmgmt.job_entity_delete:
+  path: '/admin/tmgmt/jobs/{tmgmt_job}/delete'
+  defaults:
+    _entity_form: tmgmt_job.delete
+  requirements:
+    _entity_access: tmgmt_job.delete
+
 tmgmt.job_entity_resubmit:
   path: '/admin/tmgmt/jobs/{tmgmt_job}/resubmit'
   defaults:

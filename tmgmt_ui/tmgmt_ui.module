@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Component\Utility\Xss;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobItemUiCart;
@@ -165,7 +166,7 @@ function tmgmt_ui_write_request_messages(Job $job) {
       $errors = TRUE;
     }
     if ($text = $message->getMessage()) {
-      drupal_set_message(filter_xss($text), $message->type);
+      drupal_set_message(Xss::filter($text), $message->type);
     }
   }
   return !$errors;

@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_content;
 
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\SourcePluginUiBase;
 use Drupal\tmgmt\TMGMTException;
@@ -18,7 +19,7 @@ use Drupal\tmgmt\TMGMTException;
  *
  * @ingroup tmgmt_source
  */
-abstract class ContentEntitySourcePluginUi extends SourcePluginUiBase {
+class ContentEntitySourcePluginUi extends SourcePluginUiBase {
 
   /**
    * Entity source list items limit.
@@ -382,7 +383,7 @@ abstract class ContentEntitySourcePluginUi extends SourcePluginUiBase {
         // For given source lang no job exists yet.
         if (!isset($source_lang_registry[$source_lang])) {
           // Create new job.
-          $job = tmgmt_job_create($source_lang, NULL, $GLOBALS['user']->id());
+          $job = tmgmt_job_create($source_lang, LanguageInterface::LANGCODE_NOT_SPECIFIED, $GLOBALS['user']->id());
           // Add initial job item.
           $job->addItem('content', $type, $entity->id());
           // Add job identifier into registry

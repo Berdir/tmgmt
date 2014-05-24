@@ -7,6 +7,8 @@
 
 namespace Drupal\tmgmt\Form;
 
+use Drupal\Component\Utility\Xss;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\views\Entity\View;
@@ -46,7 +48,7 @@ class JobForm extends TmgmtFormBase {
     }
 
     $source = $job->getSourceLanguage() ? $job->getSourceLanguage()->getName() : '?';
-    if (!$job->getTargetLangcode()) {
+    if (!$job->getTargetLangcode() || $job->getTargetLangcode() == LanguageInterface::LANGCODE_NOT_SPECIFIED) {
       $job->target_language = key($available['target_language']);
       $target = '?';
     }
@@ -337,7 +339,7 @@ class JobForm extends TmgmtFormBase {
   protected function actions(array $form, array &$form_state) {
     $job = $this->entity;
 
-    $actions['submit'] = array(
+    $actions['save'] = array(
       '#type' => 'submit',
       '#value' => t('Save job'),
       '#validate' => array(
@@ -347,9 +349,11 @@ class JobForm extends TmgmtFormBase {
         array($this, 'submit'),
         array($this, 'save'),
       ),
+      '#weight' => 5,
     );
+
     if ($job->access('submit')) {
-      $actions['checkout'] = array(
+      $actions['submit'] = array(
         '#type' => 'submit',
         '#button_type' => 'primary',
         '#value' => tmgmt_ui_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
@@ -362,6 +366,7 @@ class JobForm extends TmgmtFormBase {
           array($this, 'submit'),
           array($this, 'save'),
         ),
+        '#weight' => 0,
       );
       $actions['resubmit_job'] = array(
         '#type' => 'submit',
@@ -369,6 +374,7 @@ class JobForm extends TmgmtFormBase {
         '#redirect' => 'admin/tmgmt/jobs/' . $job->id() . '/resubmit',
         '#value' => t('Resubmit'),
         '#access' => $job->isAborted(),
+        '#weight' => 10,
       );
       $actions['abort_job'] = array(
         '#type' => 'submit',
@@ -376,8 +382,13 @@ class JobForm extends TmgmtFormBase {
         '#redirect' => 'admin/tmgmt/jobs/' . $job->id() . '/abort',
         '#submit' => array('tmgmt_ui_submit_redirect'),
         '#access' => $job->isAbortable(),
+        '#weight' => 15,
       );
     }
+    else {
+      $actions['save']['#button_type'] = 'primary';
+    }
+
     if (!$job->isNew()) {
       $actions['delete'] = array(
         '#type' => 'submit',
@@ -448,7 +459,7 @@ class JobForm extends TmgmtFormBase {
     $form_state['redirect'] = 'admin/tmgmt';
     // Everything below this line is only invoked if the 'Submit to translator'
     // button was clicked.
-    if ($form_state['triggering_element']['#value'] == $form['actions']['checkout']['#value']) {
+    if ($form_state['triggering_element']['#value'] == $form['actions']['submit']['#value']) {
       if (!tmgmt_ui_job_request_translation($entity)) {
         // Don't redirect the user if the translation request failed but retain
         // existing destination parameters so we can redirect once the request
@@ -481,11 +492,11 @@ class JobForm extends TmgmtFormBase {
       return $form;
     }
     if (!$translator->isAvailable()) {
-      $form['#description'] = filter_xss($job->getTranslator()->getNotAvailableReason());
+      $form['#description'] = Xss::filter($job->getTranslator()->getNotAvailableReason());
     }
     // @todo: if the target language is not defined, the check will not work if the first language in the list is not available.
     elseif ($job->getTargetLangcode() && !$translator->canTranslate($job)) {
-      $form['#description'] = filter_xss($job->getTranslator()->getNotCanTranslateReason($job));
+      $form['#description'] = Xss::filter($job->getTranslator()->getNotCanTranslateReason($job));
     }
     else {
       $plugin_ui = $this->translatorManager->createUIInstance($translator->plugin);

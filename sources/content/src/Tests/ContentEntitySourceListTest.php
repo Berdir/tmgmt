@@ -87,7 +87,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     content_translation_set_config('taxonomy_term', $vocabulary1->id(), 'enabled', TRUE);
     content_translation_set_config('taxonomy_term', $vocabulary2->id(), 'enabled', TRUE);
 
-    $this->drupalGet('admin/tmgmt/sources/entity/taxonomy_term');
+    $this->drupalGet('admin/tmgmt/sources/content/taxonomy_term');
     // Both terms should be displayed with their bundle.
     $this->assertText($term1->label());
     $this->assertText($term2->label());
@@ -108,13 +108,13 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
   function testAvailabilityOfEntityLists() {
 
-    $this->drupalGet('admin/tmgmt/sources/entity/comment');
+    $this->drupalGet('admin/tmgmt/sources/content/comment');
     // Check if we are at comments page.
     $this->assertText(t('Comment overview (Entity)'));
     // No comments yet - empty message is expected.
     $this->assertText(t('No entities matching given criteria have been found.'));
 
-    $this->drupalGet('admin/tmgmt/sources/entity/node');
+    $this->drupalGet('admin/tmgmt/sources/content/node');
     // Check if we are at nodes page.
     $this->assertText(t('Content overview (Entity)'));
     // We expect article title as article node type is entity translatable.
@@ -126,7 +126,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
   function testTranslationStatuses() {
 
     // Test statuses: Source, Missing.
-    $this->drupalGet('admin/tmgmt/sources/entity/node');
+    $this->drupalGet('admin/tmgmt/sources/content/node');
     $langstatus_en = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-en"]');
     $langstatus_de = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]');
 
@@ -142,7 +142,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $job->addItem('content', 'node', $this->nodes['article']['en'][0]->id());
     $job->requestTranslation();
 
-    $this->drupalGet('admin/tmgmt/sources/entity/node');
+    $this->drupalGet('admin/tmgmt/sources/content/node');
     $langstatus_de = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]/a');
 
     $items = $job->getItems();
@@ -156,7 +156,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
       $job_item->acceptTranslation();
     }
 
-    $this->drupalGet('admin/tmgmt/sources/entity/node');
+    $this->drupalGet('admin/tmgmt/sources/content/node');
     $langstatus_de = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]');
 
     $this->assertEqual($langstatus_de[0]->div['title'], t('Translation up to date'));
@@ -168,7 +168,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $nid = $this->nodes['article']['en'][0]->id();
     $edit = array();
     $edit["items[$nid]"] = 1;
-    $this->drupalPostForm('admin/tmgmt/sources/entity/node', $edit, t('Request translation'));
+    $this->drupalPostForm('admin/tmgmt/sources/content/node', $edit, t('Request translation'));
     $this->assertText(t('One job needs to be checked out.'));
 
     // Submission of two entities of the same source language.
@@ -177,7 +177,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $edit = array();
     $edit["items[$nid1]"] = 1;
     $edit["items[$nid2]"] = 1;
-    $this->drupalPostForm('admin/tmgmt/sources/entity/node', $edit, t('Request translation'));
+    $this->drupalPostForm('admin/tmgmt/sources/content/node', $edit, t('Request translation'));
     $this->assertText(t('One job needs to be checked out.'));
 
     // Submission of several entities of different source languages.
@@ -194,7 +194,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $edit["items[$nid4]"] = 1;
     $edit["items[$nid5]"] = 1;
     $edit["items[$nid6]"] = 1;
-    $this->drupalPostForm('admin/tmgmt/sources/entity/node', $edit, t('Request translation'));
+    $this->drupalPostForm('admin/tmgmt/sources/content/node', $edit, t('Request translation'));
     $this->assertText(t('@count jobs need to be checked out.', array('@count' => '3')));
   }
 
@@ -206,7 +206,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     // Check if we have appropriate message in case there are no entity
     // translatable content types.
-    $this->drupalGet('admin/tmgmt/sources/entity/node');
+    $this->drupalGet('admin/tmgmt/sources/content/node');
     $this->assertText(t('Entity translation is not enabled for any of existing content types. To use this functionality go to Content types administration and enable entity translation for desired content types.'));
 
     // Turn on the entity translation for both - article and page - to test
@@ -217,7 +217,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     // Create page node after entity translation is enabled.
     $page_node_translatable = $this->createNode('page');
 
-    $this->drupalGet('admin/tmgmt/sources/entity/node');
+    $this->drupalGet('admin/tmgmt/sources/content/node');
     // We have both listed - one of articles and page.
     $this->assertText($this->nodes['article']['en'][0]->label());
     $this->assertText($page_node_translatable->label());
@@ -225,7 +225,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     // Try the search by content type.
     $edit = array();
     $edit['search[type]'] = 'article';
-    $this->drupalPostForm('admin/tmgmt/sources/entity/node', $edit, t('Search'));
+    $this->drupalPostForm('admin/tmgmt/sources/content/node', $edit, t('Search'));
     // There should be article present.
     $this->assertText($this->nodes['article']['en'][0]->label());
     // The page node should not be listed.
@@ -233,7 +233,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     // Try cancel button - despite we do post content type search value
     // we should get nodes of botch content types.
-    $this->drupalPostForm('admin/tmgmt/sources/entity/node', $edit, t('Cancel'));
+    $this->drupalPostForm('admin/tmgmt/sources/content/node', $edit, t('Cancel'));
     $this->assertText($this->nodes['article']['en'][0]->label());
     $this->assertText($page_node_translatable->label());
   }
@@ -252,7 +252,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     // Submit partial node title and see if we have a result.
     $edit = array();
     $edit['search[title]'] = "$title_part_1 $title_part_3";
-    $this->drupalPostForm('admin/tmgmt/sources/entity/node', $edit, t('Search'));
+    $this->drupalPostForm('admin/tmgmt/sources/content/node', $edit, t('Search'));
     $this->assertText("$title_part_1 $title_part_2 $title_part_3", 'Searching on partial node title must return the result.');
 
     // Check if there is only one result in the list.
@@ -275,7 +275,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     // Do search for the comment.
     $edit = array();
     $edit['search[subject]'] = $comment->getSubject();
-    $this->drupalPostForm('admin/tmgmt/sources/entity/comment', $edit, t('Search'));
+    $this->drupalPostForm('admin/tmgmt/sources/content/comment', $edit, t('Search'));
     $this->assertText($comment->getSubject(), 'Searching for a comment subject.');
   }
 }

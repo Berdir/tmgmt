@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_local;
 
+use Drupal\Component\Utility\Xss;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\TranslatorPluginUiBase;
@@ -65,7 +66,7 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
       $form['job_comment'] = array(
         '#type' => 'item',
         '#title' => t('Job comment'),
-        '#markup' => filter_xss($job->getSetting('job_comment')),
+        '#markup' => Xss::filter($job->getSetting('job_comment')),
       );
     }
 
