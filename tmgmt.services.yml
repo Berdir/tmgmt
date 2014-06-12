@@ -8,7 +8,7 @@ services:
     arguments: [tmgmt]
   plugin.manager.tmgmt.translator:
     class: Drupal\tmgmt\TranslatorManager
-    arguments: ['@container.namespaces', '@cache.default', '@language_manager', '@module_handler']
+    parent: default_plugin_manager
   plugin.manager.tmgmt.source:
-      class: Drupal\tmgmt\SourceManager
-      arguments: ['@container.namespaces', '@cache.default', '@language_manager', '@module_handler']
+    class: Drupal\tmgmt\SourceManager
+    parent: default_plugin_manager
