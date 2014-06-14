@@ -7,21 +7,16 @@
 
 namespace Drupal\tmgmt\Entity;
 
-use Drupal\Core\Entity\Entity;
-use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\FieldDefinition;
 
 /**
  * Entity class for the tmgmt_message entity.
  *
- * @EntityType(
+ * @ContentEntityType(
  *   id = "tmgmt_message",
  *   label = @Translation("Translation Message"),
- *   module = "tmgmt",
- *   controllers = {
- *     "storage" = "Drupal\tmgmt\Entity\Controller\MessageStorage",
- *   },
  *   uri_callback = "tmgmt_message_uri",
  *   base_table = "tmgmt_message",
  *   entity_keys = {
@@ -32,90 +27,42 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *
  * @ingroup tmgmt_job
  */
-class Message extends Entity {
-
-  /**
-   * The ID of the message..
-   *
-   * @var integer
-   */
-  public $mid;
-
-  /**
-   * The UUID of the message.
-   *
-   * @var string
-   */
-  public $uuid;
-
-  /**
-   * The ID of the job.
-   *
-   * @var integer
-   */
-  public $tjid;
-
-  /**
-   * The ID of the job item.
-   *
-   * @var integer
-   */
-  public $tjiid;
-
-  /**
-   * The message text.
-   *
-   * @var string
-   */
-  public $message;
-
-  /**
-   * An array of string replacement arguments as used by t().
-   *
-   * @var array
-   */
-  public $variables;
-
-  /**
-   * The time when the message object was created as a timestamp.
-   *
-   * @var integer
-   */
-  public $created;
-
-  /**
-   * Type of the message (debug, status, warning or error).
-   *
-   * @var string
-   */
-  public $type;
-
+class Message extends ContentEntityBase {
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $values = array(), $type = 'tmgmt_message') {
-    parent::__construct($values, $type);
-    if (empty($this->created)) {
-      $this->created = REQUEST_TIME;
-    }
-    if (empty($this->type)) {
-      $this->type = 'status';
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function id() {
-    return $this->mid;
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields['mid'] = FieldDefinition::create('integer')
+      ->setLabel('Message ID')
+      ->setReadOnly(TRUE);;
+    $fields['uuid'] = FieldDefinition::create('uuid')
+      ->setLabel(t('UUID'))
+      ->setDescription(t('The node UUID.'))
+      ->setReadOnly(TRUE);
+    $fields['tjid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Job reference'))
+      ->setSetting('target_type', 'tmgmt_job');
+    $fields['tjiid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Job item reference'))
+      ->setSetting('target_type', 'tmgmt_job_item');
+    $fields['message'] = FieldDefinition::create('string')
+      ->setLabel(t('Message'));
+    $fields['variables'] = FieldDefinition::create('map')
+      ->setLabel(t('Variables'));
+    $fields['created'] = FieldDefinition::create('created')
+      ->setLabel('Created time');
+    $fields['type'] = FieldDefinition::create('string')
+      ->setLabel('Message type')
+      ->setSetting('default_value', 'status');
+    return $fields;
   }
 
   /**
    * {@inheritdoc}
    */
   public function defaultLabel() {
-    $created = format_date($this->created);
-    switch ($this->type) {
+    $created = format_date($this->created->value);
+    switch ($this->type->value) {
       case 'error':
         return t('Error message from @time', array('@time' => $created));
       case 'status':
@@ -134,9 +81,9 @@ class Message extends Entity {
    *   The translated message.
    */
   public function getMessage() {
-    $text = $this->message;
-    if (is_array($this->variables) && !empty($this->variables)) {
-      $text = t($text, $this->variables);
+    $text = $this->message->value;
+    if ($this->variables->first()->toArray()) {
+      $text = t($text, $this->variables->first()->toArray());
     }
     return $text;
   }
@@ -144,41 +91,23 @@ class Message extends Entity {
   /**
    * Loads the job entity that this job message is attached to.
    *
-   * @return Job
+   * @return \Drupal\tmgmt\Entity\Job
    *   The job entity that this job message is attached to or FALSE if there was
    *   a problem.
    */
   public function getJob() {
-    if ($this->getJobId()) {
-      return tmgmt_job_load($this->getJobId());
-    }
-    return FALSE;
+    return $this->get('tjid')->entity;
   }
 
   /**
    * Loads the job entity that this job message is attached to.
    *
-   * @return JobItem
+   * @return \Drupal\tmgmt\Entity\JobItem
    *   The job item entity that this job message is attached to or FALSE if
    *   there was a problem.
    */
   public function getJobItem() {
-    if ($this->id()) {
-      return tmgmt_job_item_load($this->id());
-    }
-    return FALSE;
+    return $this->get('tjid')->entity;
   }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function postLoad(EntityStorageInterface $storage_controller, array &$entities) {
-    parent::postLoad($storage_controller, $entities);
-    foreach ($entities as $entity) {
-      $entity->variables = unserialize($entity->variables);
-    }
-  }
-
-
 
 }

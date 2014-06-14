@@ -7,21 +7,16 @@
 
 namespace Drupal\tmgmt\Entity;
 
-use Drupal\Core\Entity\Entity;
-use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Annotation\Translation;
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\FieldDefinition;
 
 /**
  * Entity class for the tmgmt_remote entity.
  *
- * @EntityType(
+ * @ContentEntityType(
  *   id = "tmgmt_remote",
  *   label = @Translation("Translation Remote Mapping"),
- *   module = "tmgmt",
- *   controllers = {
- *     "storage" = "Drupal\tmgmt\Entity\Controller\RemoteMappingStorage",
- *   },
  *   base_table = "tmgmt_remote",
  *   entity_keys = {
  *     "id" = "trid",
@@ -31,101 +26,50 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *
  * @ingroup tmgmt_job
  */
-class RemoteMapping extends Entity {
+class RemoteMapping extends ContentEntityBase {
 
   /**
-   * Primary key.
-   *
-   * @var int
+   * {@inheritdoc}
    */
-  public $trid;
-
-  /**
-   * Job identifier.
-   *
-   * @var int
-   */
-  public $tjid;
-
-  /**
-   * Job item identifier.
-   *
-   * @var int
-   */
-  public $tjiid;
-
-  /**
-   * Translation job data item key.
-   *
-   * @var string
-   */
-  public $data_item_key;
-
-  /**
-   * Custom remote identifier 1.
-   *
-   * @var string
-   */
-  public $remote_identifier_1;
-
-  /**
-   * Custom remote identifier 2.
-   *
-   * @var string
-   */
-  public $remote_identifier_2;
-
-  /**
-   * Custom remote identifier 3.
-   *
-   * @var string
-   */
-  public $remote_identifier_3;
-
-  /**
-   * Remote job url.
-   *
-   * @var string
-   */
-  public $remote_url;
-
-  /**
-   * Word count provided by the remote service.
-   *
-   * @var int
-   */
-  public $word_count;
-
-  /**
-   * Amount charged for the remote translation job.
-   *
-   * @var int
-   */
-  public $amount;
-
-  /**
-   * Amount charged currency.
-   *
-   * @var string
-   */
-  public $currency;
-
-  /**
-   * Custom remote data.
-   *
-   * @var array
-   */
-  public $remote_data = array();
-
-  /**
-   * Overrides \Drupal\Core\Entity\Entiy::id().
-   */
-  public function id() {
-    return $this->trid;
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields['trid'] = FieldDefinition::create('integer')
+      ->setLabel(t('Remote mapping ID'))
+      ->setReadOnly(TRUE);
+    $fields['uuid'] = FieldDefinition::create('uuid')
+      ->setLabel(t('UUID'))
+      ->setDescription(t('The node UUID.'))
+      ->setReadOnly(TRUE);
+    $fields['tjid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Job reference'))
+      ->setSetting('target_type', 'tmgmt_job');
+    $fields['tjiid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Job item reference'))
+      ->setSetting('target_type', 'tmgmt_job_item');
+    $fields['data_item_key'] = FieldDefinition::create('string')
+      ->setLabel(t('Data Item Key'));
+    $fields['remote_identifier_1'] = FieldDefinition::create('string')
+      ->setLabel(t('Remote identifier 1'));
+    $fields['remote_identifier_2'] = FieldDefinition::create('string')
+      ->setLabel(t('Remote identifier 2'));
+    $fields['remote_identifier_3'] = FieldDefinition::create('string')
+      ->setLabel(t('Remote identifier 3'));
+    $fields['remote_url'] = FieldDefinition::create('uri')
+      ->setLabel(t('Remote URL'));
+    $fields['word_count'] = FieldDefinition::create('integer')
+      ->setLabel(t('Word count'))
+      ->setDescription(t('Word count provided by the remote service.'));
+    $fields['amount'] = FieldDefinition::create('integer')
+      ->setLabel(t('Amount'))
+      ->setDescription(t('Amount charged for the remote translation job.'));
+    $fields['currency'] = FieldDefinition::create('string')
+      ->setLabel(t('Currency'));
+    $fields['remote_data'] = FieldDefinition::create('map')
+      ->setLabel(t('Remote data'));
+    return $fields;
   }
 
   public function getJobId() {
-    return $this->tjid;
+    return $this->get('tjid')->target_id;
   }
 
   /**
@@ -134,7 +78,7 @@ class RemoteMapping extends Entity {
    * @return \Drupal\tmgmt\Entity\Job
    */
   function getJob() {
-    return tmgmt_job_load($this->getJobId());
+    return $this->get('tjid')->entity;
   }
 
   /**
@@ -143,10 +87,7 @@ class RemoteMapping extends Entity {
    * @return \Drupal\tmgmt\Entity\JobItem
    */
   function getJobItem() {
-    if ($this->tjiid) {
-      return tmgmt_job_item_load($this->tjiid);
-    }
-    return NULL;
+    return $this->get('tjiid')->entity;
   }
 
   /**
@@ -158,7 +99,7 @@ class RemoteMapping extends Entity {
    *   Value to store.
    */
   function addRemoteData($key, $value) {
-    $this->remote_data[$key] = $value;
+    $this->remote_data->$key = $value;
   }
 
   /**
@@ -171,7 +112,7 @@ class RemoteMapping extends Entity {
    *   Stored data.
    */
   function getRemoteData($key) {
-    return $this->remote_data[$key];
+    return $this->remote_data->$key;
   }
 
   /**
@@ -181,17 +122,116 @@ class RemoteMapping extends Entity {
    *   Access key for the data that are to be removed.
    */
   function removeRemoteData($key) {
-    unset($this->remote_data[$key]);
+    unset($this->remote_data->$key);
   }
 
   /**
-   * {@inheritdoc}
+   * Returns the amount.
+   *
+   * @return int
    */
-  public static function postLoad(EntityStorageInterface $storage_controller, array &$entities) {
-    parent::postLoad($storage_controller, $entities);
-    foreach ($entities as $entity) {
-      $entity->remote_data = unserialize($entity->remote_data);
+  function getAmount() {
+    return $this->get('amount')->value;
+  }
+
+  /**
+   * Returns the currency.
+   *
+   * @return int
+   */
+  function getCurrency() {
+    return $this->get('currency')->value;
+  }
+
+  /**
+   * Returns the remote identifier 1.
+   *
+   * @return string
+   */
+  function getRemoteIdentifier1() {
+    return $this->get('remote_identifier_1')->value;
+  }
+
+  /**
+   * Returns the remote identifier 2.
+   *
+   * @return string
+   */
+  function getRemoteIdentifier2() {
+    return $this->get('remote_identifier_1')->value;
+  }
+
+  /**
+   * Returns the remote identifier 3.
+   *
+   * @return string
+   */
+  function getRemoteIdentifier3() {
+    return $this->get('remote_identifier_3')->value;
+  }
+
+  /**
+   * Loads remote mappings based on local data.
+   *
+   * @param int $tjid
+   *   Translation job id.
+   * @param int $tjiid
+   *   Translation job item id.
+   * @param int $data_item_key
+   *   Data item key.
+   *
+   * @return static[]
+   *   Array of TMGMTRemote entities.
+   */
+  static public function loadByLocalData($tjid = NULL, $tjiid = NULL, $data_item_key = NULL) {
+    $data_item_key = tmgmt_ensure_keys_string($data_item_key);
+
+    $query = \Drupal::entityQuery('tmgmt_remote');
+    if (!empty($tjid)) {
+      $query->condition('tjid', $tjid);
     }
+    if (!empty($tjiid)) {
+      $query->condition('tjiid', $tjiid);
+    }
+    if (!empty($data_item_key)) {
+      $query->condition('data_item_key', $data_item_key);
+    }
+
+    $trids = $query->execute();
+    if (!empty($trids)) {
+      return static::loadMultiple($trids);
+    }
+
+    return array();
+  }
+
+  /**
+   * Loads remote mapping entities based on remote identifier.
+   *
+   * @param int $remote_identifier_1
+   * @param int $remote_identifier_2
+   * @param int $remote_identifier_3
+   *
+   * @return static[]
+   *   Array of TMGMTRemote entities.
+   */
+  static public function loadByRemoteIdentifier($remote_identifier_1 = NULL, $remote_identifier_2 = NULL, $remote_identifier_3 = NULL) {
+    $query = \Drupal::entityQuery('tmgmt_remote');
+    if ($remote_identifier_1 !== NULL) {
+      $query->condition('remote_identifier_1', $remote_identifier_1);
+    }
+    if ($remote_identifier_2 !== NULL) {
+      $query->condition('remote_identifier_2', $remote_identifier_2);
+    }
+    if ($remote_identifier_3 !== NULL) {
+      $query->condition('remote_identifier_3', $remote_identifier_3);
+    }
+    $trids = $query->execute();
+    if (!empty($trids)) {
+      return static::loadMultiple($trids);
+    }
+
+    return array();
   }
 
 }

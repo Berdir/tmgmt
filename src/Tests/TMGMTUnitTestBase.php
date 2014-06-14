@@ -38,8 +38,10 @@ abstract class TMGMTUnitTestBase extends DrupalUnitTestBase {
 
     // @todo: Try to get rid of these.
     $this->installSchema('system', array('url_alias', 'router'));
-    $this->installSchema('user', array('users'));
-    $this->installSchema('tmgmt', array('tmgmt_job', 'tmgmt_job_item', 'tmgmt_message'));
+    $this->installEntitySchema('user');
+    $this->installEntitySchema('tmgmt_job');
+    $this->installEntitySchema('tmgmt_job_item');
+    $this->installEntitySchema('tmgmt_message');
 
     $this->default_translator = entity_create('tmgmt_translator', array('name' => 'test_translator', 'plugin' => 'test_translator'));
     $this->default_translator->save();

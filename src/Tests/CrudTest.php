@@ -7,6 +7,8 @@
 
 namespace Drupal\tmgmt\Tests;
 
+use Drupal\tmgmt\Entity\RemoteMapping;
+
 /**
  * Basic CRUD tests.
  */
@@ -23,7 +25,7 @@ class CrudTest extends TMGMTUnitTestBase {
   public function setUp() {
     parent::setUp();
     \Drupal::service('router.builder')->rebuild();
-    $this->installSchema('tmgmt', array('tmgmt_remote'));
+    $this->installEntitySchema('tmgmt_remote');
   }
 
   /**
@@ -134,25 +136,21 @@ class CrudTest extends TMGMTUnitTestBase {
     $_item1 = $item_mapping->getJobItem();
     $this->assertEqual($item1->id(), $_item1->id());
 
-    /**
-     * @var \Drupal\tmgmt\Entity\Controller\RemoteMappingStorage $remote_mapping_storage
-     */
-    $remote_mapping_storage = \Drupal::entityManager()->getStorage('tmgmt_remote');
-    $remote_mappings = $remote_mapping_storage->loadByRemoteIdentifier('id11', 'id12', 'id13');
+    $remote_mappings = RemoteMapping::loadByRemoteIdentifier('id11', 'id12', 'id13');
     $remote_mapping = array_shift($remote_mappings);
     $this->assertEqual($remote_mapping->id(), $item1->id());
-    $this->assertEqual($remote_mapping->amount, $mapping_data['amount']);
-    $this->assertEqual($remote_mapping->currency, $mapping_data['currency']);
+    $this->assertEqual($remote_mapping->getAmount(), $mapping_data['amount']);
+    $this->assertEqual($remote_mapping->getCurrency(), $mapping_data['currency']);
 
-    $this->assertEqual(count($remote_mapping_storage->loadByRemoteIdentifier('id11')), 1);
-    $this->assertEqual(count($remote_mapping_storage->loadByRemoteIdentifier('id11', '')), 0);
-    $this->assertEqual(count($remote_mapping_storage->loadByRemoteIdentifier('id11', NULL, '')), 0);
-    $this->assertEqual(count($remote_mapping_storage->loadByRemoteIdentifier(NULL, NULL, 'id13')), 1);
+    $this->assertEqual(count(RemoteMapping::loadByRemoteIdentifier('id11')), 1);
+    $this->assertEqual(count(RemoteMapping::loadByRemoteIdentifier('id11', '')), 0);
+    $this->assertEqual(count(RemoteMapping::loadByRemoteIdentifier('id11', NULL, '')), 0);
+    $this->assertEqual(count(RemoteMapping::loadByRemoteIdentifier(NULL, NULL, 'id13')), 1);
 
     // Test remote data.
     $item_mapping->addRemoteData('test_data', 'test_value');
     $item_mapping->save();
-    $item_mapping = entity_load('tmgmt_remote', $item_mapping->trid);
+    $item_mapping = entity_load('tmgmt_remote', $item_mapping->id());
     $this->assertEqual($item_mapping->getRemoteData('test_data'), 'test_value');
 
     // Add mapping to the other job item as well.
@@ -164,14 +162,14 @@ class CrudTest extends TMGMTUnitTestBase {
     $item1->delete();
     // Test if mapping for item1 has been removed as well.
 
-    $this->assertEqual(count($remote_mapping_storage->loadByLocalData(NULL, $item1->id())), 0);
+    $this->assertEqual(count(RemoteMapping::loadByLocalData(NULL, $item1->id())), 0);
 
     // We still should have mapping for item2.
-    $this->assertEqual(count($remote_mapping_storage->loadByLocalData(NULL, $item2->id())), 1);
+    $this->assertEqual(count(RemoteMapping::loadByLocalData(NULL, $item2->id())), 1);
 
     // Now delete the job and see if remaining mappings were removed as well.
     $job->delete();
-    $this->assertEqual(count($remote_mapping_storage->loadByLocalData(NULL, $item2->id())), 0);
+    $this->assertEqual(count(RemoteMapping::loadByLocalData(NULL, $item2->id())), 0);
   }
 
   /**
@@ -230,7 +228,7 @@ class CrudTest extends TMGMTUnitTestBase {
     $messages = $job->getMessages();
     $this->assertEqual(count($messages), 1);
     $last_message = end($messages);
-    $this->assertEqual($last_message->message, 'The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.');
+    $this->assertEqual($last_message->message->value, 'The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.');
 
     // Initial state - translation has been received for the first time.
     $this->assertEqual($data['#translation']['#text'], 'translated 1');
@@ -291,7 +289,7 @@ class CrudTest extends TMGMTUnitTestBase {
     $messages = $job->getMessages();
     $this->assertEqual(count($messages), 2);
     $last_message = end($messages);
-    $this->assertEqual($last_message->message, 'Translation for customized @key received. Revert your changes if you wish to use it.');
+    $this->assertEqual($last_message->message->value, 'Translation for customized @key received. Revert your changes if you wish to use it.');
 
     // Revert to previous revision which is the latest received translation.
     $item1->dataItemRevert($key);
@@ -311,7 +309,7 @@ class CrudTest extends TMGMTUnitTestBase {
     $messages = $job->getMessages();
     $this->assertEqual(count($messages), 3);
     $last_message = end($messages);
-    $this->assertEqual($last_message->message, 'Translation for @key reverted to the latest version.');
+    $this->assertEqual($last_message->message->value, 'Translation for @key reverted to the latest version.');
 
     // There should be three revisions now.
     $this->assertEqual(count($data['#translation']['#text_revisions']), 3);
@@ -345,7 +343,7 @@ class CrudTest extends TMGMTUnitTestBase {
     $messages = $job->getMessages();
     $this->assertEqual(count($messages), 4);
     $last_message = end($messages);
-    $this->assertEqual($last_message->message, 'Translation for already reviewed @key received and stored as a new revision. Revert to it if you wish to use it.');
+    $this->assertEqual($last_message->message->value, 'Translation for already reviewed @key received and stored as a new revision. Revert to it if you wish to use it.');
   }
 
   /**

@@ -61,7 +61,7 @@ class PluginsTest extends TMGMTUnitTestBase {
     $this->assertTrue($submit_job->isActive());
     $messages = $submit_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual('Test submit.', $last_message->message);
+    $this->assertEqual('Test submit.', $last_message->message->value);
 
     // Translate a job.
     $translate_job = $this->createJobWithItems('translate');
@@ -74,15 +74,15 @@ class PluginsTest extends TMGMTUnitTestBase {
     $messages = $translate_job->getMessages();
     // array_values() results in numeric keys, which is necessary for list.
     list($debug, $translated, $needs_review) = array_values($messages);
-    $this->assertEqual('Test translator called.', $debug->message);
-    $this->assertEqual('debug', $debug->type);
-    $this->assertEqual('Test translation created.', $translated->message);
-    $this->assertEqual('status', $translated->type);
+    $this->assertEqual('Test translator called.', $debug->message->value);
+    $this->assertEqual('debug', $debug->type->value);
+    $this->assertEqual('Test translation created.', $translated->message->value);
+    $this->assertEqual('status', $translated->type->value);
 
     // The third message is specific to a job item and has different state
     // constants.
-    $this->assertEqual('The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.', $needs_review->message);
-    $this->assertEqual('status', $needs_review->type);
+    $this->assertEqual('The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.', $needs_review->message->value);
+    $this->assertEqual('status', $needs_review->type->value);
 
     $i = 1;
     foreach ($translate_job->getItems() as $item) {
@@ -108,7 +108,7 @@ class PluginsTest extends TMGMTUnitTestBase {
     /*
     $messages = $translate_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual('Job accepted', $last_message->message);
+    $this->assertEqual('Job accepted', $last_message->message->value);
     $this->assertEqual('status', $last_message->type);*/
 
     // Check if the translations have been "saved".
@@ -124,8 +124,8 @@ class PluginsTest extends TMGMTUnitTestBase {
 
     $messages = $reject_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual('This is not supported.', $last_message->message);
-    $this->assertEqual('error', $last_message->type);
+    $this->assertEqual('This is not supported.', $last_message->message->value);
+    $this->assertEqual('error', $last_message->type->value);
 
     // A failing job.
     $failing_job = $this->createJobWithItems('fail');
@@ -135,8 +135,8 @@ class PluginsTest extends TMGMTUnitTestBase {
 
     $messages = $failing_job->getMessages();
     $last_message = end($messages);
-    $this->assertEqual('Service not reachable.', $last_message->message);
-    $this->assertEqual('error', $last_message->type);
+    $this->assertEqual('Service not reachable.', $last_message->message->value);
+    $this->assertEqual('error', $last_message->type->value);
   }
 
   /**

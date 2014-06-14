@@ -32,7 +32,6 @@ use Drupal\user\UserInterface;
  *       "resubmit" = "Drupal\tmgmt\Form\JobResubmitForm",
  *     }
  *   },
- *   uri_callback = "tmgmt_job_uri",
  *   base_table = "tmgmt_job",
  *   entity_keys = {
  *     "id" = "tjid",

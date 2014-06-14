@@ -29,7 +29,6 @@ use Drupal\tmgmt\TMGMTException;
  *       "edit" = "Drupal\tmgmt\Form\JobItemForm"
  *     },
  *   },
- *   uri_callback = "tmgmt_job_item_uri",
  *   base_table = "tmgmt_job_item",
  *   entity_keys = {
  *     "id" = "tjiid",
