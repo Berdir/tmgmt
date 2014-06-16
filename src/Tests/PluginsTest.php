@@ -125,7 +125,7 @@ class PluginsTest extends TMGMTUnitTestBase {
     $messages = $reject_job->getMessages();
     $last_message = end($messages);
     $this->assertEqual('This is not supported.', $last_message->message->value);
-    $this->assertEqual('error', $last_message->type->value);
+    $this->assertEqual('error', $last_message->getType());
 
     // A failing job.
     $failing_job = $this->createJobWithItems('fail');
@@ -136,7 +136,7 @@ class PluginsTest extends TMGMTUnitTestBase {
     $messages = $failing_job->getMessages();
     $last_message = end($messages);
     $this->assertEqual('Service not reachable.', $last_message->message->value);
-    $this->assertEqual('error', $last_message->type->value);
+    $this->assertEqual('error', $last_message->getType());
   }
 
   /**

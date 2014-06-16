@@ -9,6 +9,7 @@ namespace Drupal\tmgmt\Form;
 
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\views\Entity\View;
@@ -456,7 +457,7 @@ class JobForm extends TmgmtFormBase {
     $status = $entity->save();
 
     // Per default we want to redirect the user to the overview.
-    $form_state['redirect'] = 'admin/tmgmt';
+    $form_state['redirect_route'] = new Url('views_view:view.tmgmt_ui_job_overview.page_1');
     // Everything below this line is only invoked if the 'Submit to translator'
     // button was clicked.
     if ($form_state['triggering_element']['#value'] == $form['actions']['submit']['#value']) {
@@ -464,18 +465,16 @@ class JobForm extends TmgmtFormBase {
         // Don't redirect the user if the translation request failed but retain
         // existing destination parameters so we can redirect once the request
         // finished successfully.
-        // @todo: Change this to stay on the form in case of an error instead of
-        // doing a redirect.
-        $form_state['redirect'] = array(current_path(), array('query' => drupal_get_destination()));
+        unset($form_state['redirect_route']);
         unset($_GET['destination']);
       }
       else if ($redirect = tmgmt_ui_redirect_queue_dequeue()) {
         // Proceed to the next redirect queue item, if there is one.
-        $form_state['redirect'] = $redirect;
+        $form_state['redirect_route'] = $redirect;
       }
       else {
         // Proceed to the defined destination if there is one.
-        $form_state['redirect'] = tmgmt_ui_redirect_queue_destination($form_state['redirect']);
+        $form_state['redirect_route'] = tmgmt_ui_redirect_queue_destination($form_state['redirect']);
       }
     }
   }

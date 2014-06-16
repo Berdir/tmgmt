@@ -222,7 +222,7 @@ class JobItemForm extends TmgmtFormBase {
       // translation.
       foreach ($item->getMessagesSince() as $message) {
         // Ignore debug messages.
-        if ($message->type == 'debug') {
+        if ($message->getType() == 'debug') {
           continue;
         }
         if ($text = $message->getMessage()) {

@@ -78,8 +78,8 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
     $fields['label'] = FieldDefinition::create('string')
       ->setLabel(t('Label'))
       ->setDescription(t('The label of this job.'))
+      ->setDefaultValue('')
       ->setSettings(array(
-        'default_value' => '',
         'max_length' => 255,
       ))
       ->setDisplayOptions('form', array(
@@ -93,8 +93,8 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
       ->setDescription(t('The user that is the job owner.'))
       ->setSettings(array(
         'target_type' => 'user',
-        'default_value' => 0,
-      ));
+      ))
+      ->setDefaultValue(0);
 
     $fields['translator'] = FieldDefinition::create('entity_reference')
       ->setLabel(t('Translator'))
@@ -106,15 +106,13 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
     $fields['settings'] = FieldDefinition::create('map')
       ->setLabel(t('Settings'))
       ->setDescription(t('Translator specific configuration and context information for this job.'))
-      ->setSettings(array(
-        'default_value' => array(),
-      ));
+      ->setDefaultValue(array());
 
     $fields['reference'] = FieldDefinition::create('string')
       ->setLabel(t('Reference'))
       ->setDescription(t('Remote reference of this job'))
+      ->setDefaultValue('')
       ->setSettings(array(
-        'default_value' => '',
         'max_length' => 255,
       ));
     $fields['state'] = FieldDefinition::create('integer')

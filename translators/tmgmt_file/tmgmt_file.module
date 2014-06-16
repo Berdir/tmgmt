@@ -55,11 +55,11 @@ function tmgmt_file_import_form_submit($form, &$form_state) {
   }
   foreach ($job->getMessagesSince() as $message) {
     // Ignore debug messages.
-    if ($message->type == 'debug') {
+    if ($message->getType() == 'debug') {
       continue;
     }
     if ($text = $message->getMessage()) {
-      drupal_set_message(Xss::filter($text), $message->type);
+      drupal_set_message(Xss::filter($text), $message->getType());
     }
   }
 }

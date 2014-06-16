@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt\Entity;
 
+use Drupal\aggregator\Annotation\AggregatorFetcher;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
@@ -45,15 +46,22 @@ class Message extends ContentEntityBase {
     $fields['tjiid'] = FieldDefinition::create('entity_reference')
       ->setLabel(t('Job item reference'))
       ->setSetting('target_type', 'tmgmt_job_item');
+    $fields['type'] = FieldDefinition::create('string')
+      ->setLabel('Message type')
+      ->setDefaultValue('status');
+    $fields['uid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Actor'))
+      ->setDescription(t('The user who performed the action.'))
+      ->setSettings(array(
+        'target_type' => 'user',
+      ))
+      ->setDefaultValue(0);
     $fields['message'] = FieldDefinition::create('string')
       ->setLabel(t('Message'));
     $fields['variables'] = FieldDefinition::create('map')
       ->setLabel(t('Variables'));
     $fields['created'] = FieldDefinition::create('created')
       ->setLabel('Created time');
-    $fields['type'] = FieldDefinition::create('string')
-      ->setLabel('Message type')
-      ->setDefaultValue('status');
     return $fields;
   }
 
@@ -108,6 +116,15 @@ class Message extends ContentEntityBase {
    */
   public function getJobItem() {
     return $this->get('tjid')->entity;
+  }
+
+  /**
+   * Returns the message type.
+   *
+   * @return string
+   */
+  public function getType() {
+    return $this->get('type')->value;
   }
 
 }

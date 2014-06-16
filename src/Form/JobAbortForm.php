@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt\Form;
 
+use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\EntityConfirmFormBase;
 
 /**
@@ -42,13 +43,13 @@ class JobAbortForm extends EntityConfirmFormBase {
       // however we do not know if the translator is able to abort a job until
       // we trigger the action.
       foreach ($this->entity->getMessagesSince() as $message) {
-        if ($message->type == 'debug') {
+        if ($message->getType() == 'debug') {
           continue;
         }
         if ($text = $message->getMessage()) {
           // We want to persist also the type therefore we will set the
           // messages directly and not return them.
-          drupal_set_message(String($text), $message->type);
+          drupal_set_message(String::checkPlain($text), $message->getType());
         }
       }
     }
