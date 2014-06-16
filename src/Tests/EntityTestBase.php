@@ -9,6 +9,7 @@ namespace Drupal\tmgmt\Tests;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Language\Language;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Utility test case class with helper methods to create entities and their
@@ -48,7 +49,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
     }
     else {
     // Change body field to be translatable.
-      $body = $this->container->get('field.info')->getField('node', 'body');
+      $body = FieldConfig::loadByName('node', 'body');
       $body->translatable = TRUE;
       $body->save();
     }
@@ -157,13 +158,13 @@ abstract class EntityTestBase extends TMGMTTestBase {
 
     foreach ($this->field_names['node'][$bundle] as $field_name) {
       // @todo: Why are some missing?
-      if ($field_info = $this->container->get('field.info')->getField('node', $field_name)) {
-        $cardinality = $field_info->cardinality == FieldDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_info->cardinality;
+      if ($field_config = FieldConfig::loadByName('node', $field_name)) {
+        $cardinality = $field_config->cardinality == FieldDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_config->cardinality;
 
         // Create two deltas for each field.
         for ($delta = 0; $delta <= $cardinality; $delta++) {
           $node[$field_name][$delta]['value'] = $this->randomName(20);
-          if ($field_info->getType() == 'text_with_summary') {
+          if ($field_config->getType() == 'text_with_summary') {
             $node[$field_name][$delta]['summary'] = $this->randomName(10);
           }
         }

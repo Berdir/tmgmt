@@ -78,13 +78,13 @@ class ContentEntitySuggestionsTest extends TMGMTTestBase {
 
     // Create field instances on the content type.
     FieldInstanceConfig::create(array(
-      'field_name' => $field1->getName(),
+      'field' => $field1,
       'bundle' => $type->type,
       'label' => 'Field 1',
       'settings' => array(),
-    ));
+    ))->save();
     FieldInstanceConfig::create(array(
-      'field_name' => $field2->getName(),
+      'field' => $field2,
       'bundle' => $type->type,
       'label' => 'Field 2',
       'settings' => array(),
@@ -107,7 +107,7 @@ class ContentEntitySuggestionsTest extends TMGMTTestBase {
     }
 
     // Create a node with two translatable and two non-translatable references.
-    $node = $this->drupalCreateNode(array(
+    $node = Node::create(array(
       'type' => $type->type,
       'language' => 'en',
       'body' => $this->randomName(),

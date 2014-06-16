@@ -59,9 +59,13 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $language = new Language($edit);
     language_save($language);
 
-    $this->installSchema('node', array('node', 'node_revision', 'node_field_revision', 'node_field_data'));
-    $this->installSchema('tmgmt', array('tmgmt_job', 'tmgmt_job_item', 'tmgmt_message'));
-    $this->installSchema('entity_test', array('entity_test_rev', 'entity_test_mul', 'entity_test_mulrev', 'entity_test_mul_property_data'));
+    $this->installEntitySchema('node');
+    $this->installEntitySchema('tmgmt_job');
+    $this->installEntitySchema('tmgmt_job_item');
+    $this->installEntitySchema('tmgmt_message');
+    $this->installEntitySchema('entity_test_rev');
+    $this->installEntitySchema('entity_test_mulrev');
+    $this->installEntitySchema('entity_test_mul');
     $this->installSchema('system', array('router'));
     entity_test_install();
 
@@ -72,7 +76,8 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $field->save();
 
     // Add an image field and make it translatable.
-    $this->installSchema('file', array('file_managed', 'file_usage'));
+    $this->installEntitySchema('file');
+    $this->installSchema('file', array('file_usage'));
 
     \Drupal::service('router.builder')->rebuild();
 

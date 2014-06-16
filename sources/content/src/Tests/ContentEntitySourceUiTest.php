@@ -49,9 +49,6 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->createNodeType('page', 'Page', TRUE);
     $this->createNodeType('article', 'Article', TRUE);
 
-    drupal_static_reset();
-    entity_info_cache_clear();
-
     // @todo: Find a way that doesn't require the block.
     $this->drupalPlaceBlock('system_main_block', array('region' => 'content'));
   }

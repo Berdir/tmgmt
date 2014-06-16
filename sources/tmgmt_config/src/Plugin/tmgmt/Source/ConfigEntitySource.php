@@ -74,7 +74,7 @@ class ConfigEntitySource extends SourcePluginBase {
     $types = array();
     foreach ($entity_types as $entity_type_name => $entity_type) {
       if ($entity_type->isSubclassOf('Drupal\Core\Config\Entity\ConfigEntityInterface')) {
-        $types[$entity_type_name] = $entity_type->getLabel();
+        $types[$entity_type_name] = (string) $entity_type->getLabel();
       }
     }
     return $types;

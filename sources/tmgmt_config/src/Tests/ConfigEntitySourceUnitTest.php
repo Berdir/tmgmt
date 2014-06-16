@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt_config\Tests\ConfigEntitySourceUnitTest.php
+ * Contains Drupal\tmgmt_config\Tests\ConfigEntitySourceUnitTest.
  */
 
 namespace Drupal\tmgmt_config\Tests;
@@ -55,7 +55,9 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $language = new Language($edit);
     language_save($language);
 
-    $this->installSchema('tmgmt', array('tmgmt_job', 'tmgmt_job_item', 'tmgmt_message'));
+    $this->installEntitySchema('tmgmt_job');
+    $this->installEntitySchema('tmgmt_job_item');
+    $this->installEntitySchema('tmgmt_message');
     $this->installSchema('system', array('router'));
 
     \Drupal::service('router.builder')->rebuild();
@@ -90,7 +92,7 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual($data['description']['#label'], 'Description');
     $this->assertEqual($data['description']['#text'], $node_type->description);
     $this->assertEqual($data['description']['#translate'], TRUE);
-    $this->assertEqual($data['title_label']['#label'], 'Title label');
+    $this->assertEqual($data['title_label']['#label'], 'Title field label');
     $this->assertEqual($data['title_label']['#text'], $node_type->title_label);
     $this->assertEqual($data['title_label']['#translate'], TRUE);
 
