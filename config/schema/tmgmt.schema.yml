@@ -1,0 +1,38 @@
+tmgmt.settings:
+  type: mapping
+  label: 'TMGMT settings'
+  mapping:
+    quick_checkout:
+      type: integer
+      label: 'Allow quick-checkout'
+    purge_finished:
+      type: string
+      label: 'Purge finished jobs'
+    word_count_exclude_tags:
+      type: boolean
+      label: 'Exclude tags from word count'
+    source_list_limit:
+      type: integer
+      label: 'Source list limit'
+
+tmgmt.translator.*:
+  type: config_entity
+  label: 'Translator'
+  mapping:
+    name:
+      type: label
+      label: 'Machine readable name of the translator'
+    type:
+      type: tabel
+      label: 'Translator label'
+    description:
+      type: string
+      label: 'Description'
+    weight:
+      type: integer
+      label: 'Weight of the translator'
+    plugin:
+      type: string
+      label: 'Translator plugin'
+    settings:
+      type: tmgmt.translator.[%parent.plugin].settings

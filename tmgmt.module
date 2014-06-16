@@ -704,7 +704,7 @@ function tmgmt_translator_auto_create(array $definition) {
   $plugin = $definition['id'];
   if (!tmgmt_translator_load($plugin)) {
     $label = $definition['label'] . ' (auto created)';
-    $translator = tmgmt_translator_create($plugin, $plugin, $label, $definition['description']);
+    $translator = tmgmt_translator_create($plugin, $plugin, $label, (string) $definition['description']);
     // Append some default settings from the translator plugin definition.
     $translator->settings = $translator->getController()->defaultSettings();
     $translator->save();
