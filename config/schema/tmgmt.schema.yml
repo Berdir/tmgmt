@@ -22,7 +22,7 @@ tmgmt.translator.*:
     name:
       type: label
       label: 'Machine readable name of the translator'
-    type:
+    label:
       type: tabel
       label: 'Translator label'
     description:

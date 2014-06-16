@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Language\Language;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\user\EntityOwnerInterface;
@@ -67,12 +68,12 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
     $fields['source_language'] = FieldDefinition::create('language')
       ->setLabel(t('Language code'))
       ->setDescription(t('The source language.'))
-      ->setSetting('default_value', Language::LANGCODE_NOT_SPECIFIED);
+      ->setDefaultValue(LanguageInterface::LANGCODE_NOT_SPECIFIED);
 
     $fields['target_language'] = FieldDefinition::create('language')
       ->setLabel(t('Language code'))
       ->setDescription(t('The target language.'))
-      ->setSetting('default_value', Language::LANGCODE_NOT_SPECIFIED);
+      ->setDefaultValue(LanguageInterface::LANGCODE_NOT_SPECIFIED);
 
     $fields['label'] = FieldDefinition::create('string')
       ->setLabel(t('Label'))
@@ -119,7 +120,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
     $fields['state'] = FieldDefinition::create('integer')
       ->setLabel(t('Job state'))
       ->setDescription(t('The job state.'))
-      ->setSetting('default_value', TMGMT_JOB_STATE_UNPROCESSED);
+      ->setDefaultValue(TMGMT_JOB_STATE_UNPROCESSED);
 
     $fields['created'] = FieldDefinition::create('created')
       ->setLabel(t('Created'))

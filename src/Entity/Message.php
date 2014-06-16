@@ -53,7 +53,7 @@ class Message extends ContentEntityBase {
       ->setLabel('Created time');
     $fields['type'] = FieldDefinition::create('string')
       ->setLabel('Message type')
-      ->setSetting('default_value', 'status');
+      ->setDefaultValue('status');
     return $fields;
   }
 

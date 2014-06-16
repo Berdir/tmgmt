@@ -65,7 +65,7 @@ class JobItem extends ContentEntityBase {
       ->setDescription(t('The Job.'))
       ->setReadOnly(TRUE)
       ->setSetting('target_type', 'tmgmt_job')
-      ->setSetting('default_value', 0);
+      ->setDefaultValue(0);
 
     $fields['uuid'] = FieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
@@ -100,7 +100,7 @@ class JobItem extends ContentEntityBase {
     $fields['state'] = FieldDefinition::create('integer')
       ->setLabel(t('Job item state'))
       ->setDescription(t('The job item state'))
-      ->setSetting('default_value', TMGMT_JOB_ITEM_STATE_ACTIVE);
+      ->setDefaultValue(TMGMT_JOB_ITEM_STATE_ACTIVE);
 
     $fields['changed'] = FieldDefinition::create('changed')
       ->setLabel(t('Changed'))
