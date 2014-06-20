@@ -8,13 +8,12 @@
 namespace Drupal\tmgmt\Tests;
 
 use Drupal\Core\Language\Language;
-use Drupal\simpletest\DrupalUnitTestBase;
-use Drupal\tmgmt\Entity\Job;
+use Drupal\simpletest\KernelTestBase;
 
 /**
  * Base class for tests.
  */
-abstract class TMGMTUnitTestBase extends DrupalUnitTestBase {
+abstract class TMGMTUnitTestBase extends KernelTestBase {
 
   /**
    * A default translator using the test translator.
@@ -28,7 +27,7 @@ abstract class TMGMTUnitTestBase extends DrupalUnitTestBase {
    *
    * @var array
    */
-  public static $modules = array('user', 'system', 'field', 'text', 'field_sql_storage', 'entity_test', 'language', 'locale', 'tmgmt', 'tmgmt_test');
+  public static $modules = array('user', 'system', 'field', 'text', 'entity_test', 'language', 'locale', 'tmgmt', 'tmgmt_test', 'menu_link');
 
   /**
    * Overrides DrupalUnitTestBase::setUp().
