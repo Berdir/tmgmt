@@ -9,7 +9,6 @@ namespace Drupal\tmgmt_file\Tests;
 
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
-use Guzzle\Http\Exception\ClientErrorResponseException;
 use GuzzleHttp\Exception\RequestException;
 
 /**
@@ -84,7 +83,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $messages = $job->getMessages();
     $message = reset($messages);
     $translated_file = 'public://tmgmt_file/translated.xlf';
-    $this->createTranslationFile($message->variables['!link'], 'one paragraph', 'one translated paragraph', $translated_file);
+    $this->createTranslationFile($message->variables->{'!link'}, 'one paragraph', 'one translated paragraph', $translated_file);
     $edit = array(
       'files[file]' => $translated_file,
     );
@@ -117,7 +116,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     // result in different element counts in the source and target and should
     // trigger an error and not import the translation.
     $translated_file = 'public://tmgmt_file/translated.xlf';
-    $this->createTranslationFile($message->variables['!link'], '<x id="tjiid2-4" ctype="lb"/>', '', $translated_file);
+    $this->createTranslationFile($message->variables->{'!link'}, '<x id="tjiid2-4" ctype="lb"/>', '', $translated_file);
     $edit = array(
       'files[file]' => $translated_file,
     );
@@ -147,7 +146,7 @@ class FileTranslatorTest extends TMGMTTestBase {
   protected function getTransUnitsContent(Job $job) {
     $messages = $job->getMessages();
     $message = reset($messages);
-    $download_url = $message->variables['!link'];
+    $download_url = $message->variables->{'!link'};
     $xml_string = file_get_contents($download_url);
     $xml = simplexml_load_string($xml_string);
 
@@ -189,9 +188,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $messages = $job->getMessages();
     $message = reset($messages);
 
-    // @todo: This should be handled by the storage controller.
-    $variables = $message->variables;
-    $download_url = $variables['!link'];
+    $download_url = $message->variables->{'!link'};
 
     // "Translate" items.
     $xml = simplexml_load_file($download_url);
@@ -246,7 +243,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $message = reset($messages);
 
     $variables = $message->variables;
-    $download_url = $variables['!link'];
+    $download_url = $variables->{'!link'};
     $xliff = file_get_contents($download_url);
     $dom = new \DOMDocument();
     $dom->loadXML($xliff);
@@ -378,7 +375,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $messages = $job->getMessages();
     $message = reset($messages);
 
-    $download_url = $message->variables['!link'];
+    $download_url = $message->variables->{'!link'};
     $this->drupalGet($download_url);
     // Verify that the URL is served using the private file system and the
     // access checks work.

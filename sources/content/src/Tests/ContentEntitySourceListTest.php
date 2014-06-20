@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_content\Tests;
 
+use Drupal\comment\Entity\CommentType;
 use Drupal\tmgmt\Tests\EntityTestBase;
 
 class ContentEntitySourceListTest extends EntityTestBase {
@@ -261,12 +262,13 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     // To test if other entity types work go for simple comment search.
     \Drupal::service('comment.manager')->addDefaultField('node', 'article');
-    content_translation_set_config('comment', 'node__comment', 'enabled', TRUE);
+    content_translation_set_config('comment', 'comment', 'enabled', TRUE);
     \Drupal::entityManager()->clearCachedDefinitions();
     $values = array(
       'entity_type' => 'node',
       'entity_id' => $this->nodes['article']['en'][0]->id(),
-      'field_id' => 'node__comment',
+      'field_name' => 'comment',
+      'comment_type' => 'comment',
       'comment_body' => $this->randomName(),
       'subject' => $this->randomName(),
     );

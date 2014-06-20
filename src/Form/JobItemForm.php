@@ -226,7 +226,7 @@ class JobItemForm extends TmgmtFormBase {
           continue;
         }
         if ($text = $message->getMessage()) {
-          drupal_set_message(Xss::filter($text), $message->type);
+          drupal_set_message(Xss::filter($text), $message->getType());
         }
       }
     }

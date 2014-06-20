@@ -7,8 +7,8 @@
 
 namespace Drupal\tmgmt\Tests;
 
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Language\Language;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\field\Entity\FieldConfig;
 
 /**
@@ -159,7 +159,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
     foreach ($this->field_names['node'][$bundle] as $field_name) {
       // @todo: Why are some missing?
       if ($field_config = FieldConfig::loadByName('node', $field_name)) {
-        $cardinality = $field_config->cardinality == FieldDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_config->cardinality;
+        $cardinality = $field_config->cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_config->cardinality;
 
         // Create two deltas for each field.
         for ($delta = 0; $delta <= $cardinality; $delta++) {
@@ -197,8 +197,8 @@ abstract class EntityTestBase extends TMGMTTestBase {
 
     foreach ($this->field_names['taxonomy_term'][$vocabulary->id()] as $field_name) {
       $field_definition = $term->getFieldDefinition($field_name);
-      $cardinality = $field_definition->getCardinality() == FieldDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_definition->getCardinality();
-      $field_lang = $field_definition->isTranslatable() ? 'en' : Language::LANGCODE_DEFAULT;
+      $cardinality = $field_definition->getFieldStorageDefinition()->getCardinality() == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_definition->getCardinality();
+      $field_lang = $field_definition->isTranslatable() ? 'en' : LanguageInterface::LANGCODE_DEFAULT;
 
       // Create two deltas for each field.
       for ($delta = 0; $delta <= $cardinality; $delta++) {

@@ -457,7 +457,7 @@ class JobForm extends TmgmtFormBase {
     $status = $entity->save();
 
     // Per default we want to redirect the user to the overview.
-    $form_state['redirect_route'] = new Url('views_view:view.tmgmt_ui_job_overview.page_1');
+    $form_state['redirect_route'] = new Url('view.tmgmt_ui_job_overview.page_1');
     // Everything below this line is only invoked if the 'Submit to translator'
     // button was clicked.
     if ($form_state['triggering_element']['#value'] == $form['actions']['submit']['#value']) {
@@ -474,7 +474,7 @@ class JobForm extends TmgmtFormBase {
       }
       else {
         // Proceed to the defined destination if there is one.
-        $form_state['redirect_route'] = tmgmt_ui_redirect_queue_destination($form_state['redirect']);
+        $form_state['redirect'] = tmgmt_ui_redirect_queue_destination($form_state['redirect']);
       }
     }
   }

@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_content\Tests;
 
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -85,7 +86,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
       'name' => 'image_test',
       'entity_type' => $this->entity_type,
       'type' => 'image',
-      'cardinality' => FieldDefinitionInterface::CARDINALITY_UNLIMITED,
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'translatable' => TRUE,
     ))->save();
     entity_create('field_instance_config', array(
