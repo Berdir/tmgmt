@@ -8,25 +8,28 @@
 namespace Drupal\tmgmt_local\Entity;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\Annotation\ContentEntityType;
+use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Entity;
+use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\FieldDefinition;
 
 
 /**
  * Entity class for the local task item entity.
  *
- * @EntityType(
+ * @ContentEntityType(
  *   id = "tmgmt_local_task_item",
  *   label = @Translation("Translation Task Item"),
- *   module = "tmgmt_local",
  *   controllers = {
- *     "storage" = "Drupal\Core\Entity\DatabaseStorage",
  *     "access" = "Drupal\tmgmt_local\Entity\Controller\LocalTaskItemAccessController",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt_local\Entity\Form\LocalTaskItemFormController"
  *     },
  *   },
- *   uri_callback = "tmgmt_job_item_uri",
  *   base_table = "tmgmt_local_task_item",
  *   entity_keys = {
  *     "id" = "tjiid",
@@ -36,76 +39,90 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *
  * @ingroup tmgmt_local_task
  */
-class LocalTaskItem extends Entity {
-
-  /**
-   * Translation local task item identifier.
-   *
-   * @var int
-   */
-  public $tltiid;
-
-  /**
-   * The task identifier.
-   *
-   * @var int
-   */
-  public $tltid;
-
-  /**
-   * Translation job item.
-   *
-   * @var int
-   */
-  public $tjiid;
-
-  /**
-   * Current status of the task.
-   *
-   * @var int
-   */
-  public $status;
-
-  /**
-   * Translated data and data item status.
-   *
-   * @var array
-   */
-  public $data = array();
-
-  /**
-   * Counter for all untranslated data items.
-   *
-   * @var integer
-   */
-  public $count_untranslated = 0;
-
-  /**
-   * Counter for all translated data items.
-   *
-   * @var integer
-   */
-  public $count_translated = 0;
-
-  /**
-   * Counter for all completed data items.
-   *
-   * @var integer
-   */
-  public $count_completed = 0;
+class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface {
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $values = array(), $entity_type = 'tmgmt_local_task_item') {
-    parent::__construct($values, $entity_type);
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields['tltiid'] = FieldDefinition::create('integer')
+      ->setLabel(t('Local Task ID'))
+      ->setDescription(t('The Local Task Item ID.'))
+      ->setReadOnly(TRUE)
+      ->setSetting('unsigned', TRUE);
+
+    $fields['tltid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Local task'))
+      ->setDescription(t('The local task.'))
+      ->setReadOnly(TRUE)
+      ->setSetting('target_type', 'tmgmt_local_task');
+
+    $fields['tjiid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Job Item'))
+      ->setDescription(t('The Job Item.'))
+      ->setReadOnly(TRUE)
+      ->setSetting('target_type', 'tmgmt_job_item');
+
+    $fields['uuid'] = FieldDefinition::create('uuid')
+      ->setLabel(t('UUID'))
+      ->setDescription(t('The job item UUID.'))
+      ->setReadOnly(TRUE);
+
+    $fields['item_type'] = FieldDefinition::create('string')
+      ->setLabel(t('Item Type'))
+      ->setDescription(t('The item type of this job item.'))
+      ->setSettings(array(
+        'max_length' => 255,
+      ));
+
+    $fields['item_id'] = FieldDefinition::create('string')
+      ->setLabel(t('Item ID'))
+      ->setDescription(t('The item ID of this job item.'))
+      ->setSettings(array(
+        'max_length' => 255,
+      ));
+
+    $fields['data'] = FieldDefinition::create('string_long')
+      ->setLabel(t('Data'))
+      ->setDescription(t('The source data'));
+
+    $fields['status'] = FieldDefinition::create('integer')
+      ->setLabel(t('Local task item status'))
+      ->setDescription(t('The local task item status'))
+      ->setDefaultValue(TMGMT_LOCAL_TASK_ITEM_STATUS_PENDING);
+
+    $fields['changed'] = FieldDefinition::create('changed')
+      ->setLabel(t('Changed'))
+      ->setDescription(t('The time that the job was last edited.'));
+
+    $fields['count_pending'] = FieldDefinition::create('integer')
+      ->setLabel(t('Pending count'))
+      ->setSetting('unsigned', TRUE);
+
+    $fields['count_translated'] = FieldDefinition::create('integer')
+      ->setLabel(t('Translated count'))
+      ->setSetting('unsigned', TRUE);
+
+    $fields['count_reviewed'] = FieldDefinition::create('integer')
+      ->setLabel(t('Reviewed count'))
+      ->setSetting('unsigned', TRUE);
+
+    $fields['count_accepted'] = FieldDefinition::create('integer')
+      ->setLabel(t('Accepted count'))
+      ->setSetting('unsigned', TRUE);
+
+    $fields['word_count'] = FieldDefinition::create('integer')
+      ->setLabel(t('Word count'))
+      ->setSetting('unsigned', TRUE);
+
+    return $fields;
   }
 
-  /*
+  /**
    * {@inheritdoc}
    */
-  public function defaultUri() {
-    return array('path' => 'translate/' . $this->tltid . '/item/' . $this->tltiid);
+  public function getChangedTime() {
+    $this->get('changed')->value;
   }
 
   /**
@@ -121,10 +138,10 @@ class LocalTaskItem extends Entity {
   /**
    * Returns the translation task.
    *
-   * @return TMGMTLocalTask
+   * @return LocalTask
    */
   public function getTask() {
-    return entity_load('tmgmt_local_task', $this->tltid);
+    $this->get('tltid')->entity;
   }
 
   /**
@@ -133,7 +150,7 @@ class LocalTaskItem extends Entity {
    * @return \Drupal\tmgmt\Entity\JobItem
    */
   public function getJobItem() {
-    return entity_load('tmgmt_job_item', $this->id());
+    return $this->get('tjiid')->entity;
   }
 
   /**
@@ -143,7 +160,7 @@ class LocalTaskItem extends Entity {
    *   TRUE if the local task item is untranslated.
    */
   public function isPending() {
-    return $this->status == TMGMT_LOCAL_TASK_ITEM_STATUS_PENDING;
+    return $this->status->value == TMGMT_LOCAL_TASK_ITEM_STATUS_PENDING;
   }
 
   /**
@@ -153,7 +170,7 @@ class LocalTaskItem extends Entity {
    *   TRUE if the local task item is translated.
    */
   public function isCompleted() {
-    return $this->status == TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED;
+    return $this->status->value == TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED;
   }
 
   /**
@@ -163,7 +180,7 @@ class LocalTaskItem extends Entity {
    *   TRUE if the local task item is translated and accepted.
    */
   public function isClosed() {
-    return $this->status == TMGMT_LOCAL_TASK_ITEM_STATUS_CLOSED;
+    return $this->status->value == TMGMT_LOCAL_TASK_ITEM_STATUS_CLOSED;
   }
 
   /**

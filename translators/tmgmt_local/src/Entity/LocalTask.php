@@ -7,25 +7,29 @@
 
 namespace Drupal\tmgmt_local\Entity;
 
+use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\Entity;
+use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\tmgmt\Entity\JobItem;
+use Drupal\user\EntityOwnerInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Entity class for the local task entity.
  *
- * @EntityType(
+ * @ContentEntityType(
  *   id = "tmgmt_local_task",
  *   label = @Translation("Translation Task"),
- *   module = "tmgmt_local",
  *   controllers = {
- *     "storage" = "Drupal\Core\Entity\DatabaseStorage",
  *     "access" = "Drupal\tmgmt_local\Entity\Controller\LocalTaskAccessController",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt_local\Entity\Form\LocalTaskFormController"
  *     }
  *   },
- *   uri_callback = "tmgmt_local_task_uri",
  *   base_table = "tmgmt_local_task",
  *   entity_keys = {
  *     "id" = "tltid",
@@ -37,83 +41,114 @@ use Drupal\tmgmt\Entity\JobItem;
  *
  * @ingroup tmgmt_local_task
  */
-class LocalTask extends Entity {
-
-  /**
-   * Translation local task identifier.
-   *
-   * @var int
-   */
-  public $tltid;
-
-  /**
-   * The user id of the creator of the task.
-   *
-   * @var int
-   */
-  public $uid;
-
-  /**
-   * The time when the task was created as a timestamp.
-   *
-   * @var int
-   */
-  public $created = REQUEST_TIME;
-
-  /**
-   * The time when the task was changed as a timestamp.
-   *
-   * @var int
-   */
-  public $changed;
-
-  /**
-   * A title of this task.
-   *
-   * @var string
-   */
-  public $title;
-
-  /**
-   * The user id of the assigned translator.
-   *
-   * @var int
-   */
-  public $tuid;
-
-  /**
-   * Translation job.
-   *
-   * @var int
-   */
-  public $tjid;
-
-  /**
-   * Current status of the task.
-   *
-   * @var int
-   */
-  public $status = TMGMT_LOCAL_TASK_STATUS_UNASSIGNED;
-
-  /**
-   * Counter for how many times task was returned to translator.
-   *
-   * @var int
-   */
-  public $loop_count;
+class LocalTask extends ContentEntityBase implements EntityChangedInterface, EntityOwnerInterface {
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $values = array(), $entity_type = 'tmgmt_local_task') {
-    parent::__construct($values, $entity_type);
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields['tltid'] = FieldDefinition::create('integer')
+      ->setLabel(t('Local task ID'))
+      ->setDescription(t('The local task ID.'))
+      ->setReadOnly(TRUE)
+      ->setSetting('unsigned', TRUE);
+
+    $fields['tjid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Job'))
+      ->setDescription(t('The Job for this task.'))
+      ->setReadOnly(TRUE)
+      ->setSetting('target_type', 'tmgmt_job')
+      ->setDefaultValue(0);
+
+    $fields['uuid'] = FieldDefinition::create('uuid')
+      ->setLabel(t('UUID'))
+      ->setDescription(t('The node UUID.'))
+      ->setReadOnly(TRUE);
+
+    $fields['title'] = FieldDefinition::create('string')
+      ->setLabel(t('Title'))
+      ->setDescription(t('The title of this local task.'))
+      ->setDefaultValue('')
+      ->setSettings(array(
+        'max_length' => 255,
+      ))
+      ->setDisplayOptions('form', array(
+        'type' => 'string',
+        'weight' => -5,
+      ))
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['uid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Owner'))
+      ->setDescription(t('The user that created the local task.'))
+      ->setSettings(array(
+        'target_type' => 'user',
+      ))
+      ->setDefaultValue(0);
+
+    $fields['tuid'] = FieldDefinition::create('entity_reference')
+      ->setLabel(t('Assigned translator'))
+      ->setDescription(t('The translator assigned to this task.'))
+      ->setSettings(array(
+        'target_type' => 'user',
+      ))
+      ->setDefaultValue(0);
+
+    $fields['status'] = FieldDefinition::create('integer')
+      ->setLabel(t('Local task status'))
+      ->setDescription(t('The local task status.'))
+      ->setDefaultValue(TMGMT_LOCAL_TASK_STATUS_UNASSIGNED);
+
+    $fields['loop_count'] = FieldDefinition::create('integer')
+      ->setLabel(t('Loop count'))
+      ->setDescription(t('Counter for how many times task was returned to translator.'))
+      ->setDefaultValue(TMGMT_LOCAL_TASK_STATUS_UNASSIGNED);
+
+    $fields['created'] = FieldDefinition::create('created')
+      ->setLabel(t('Created'))
+      ->setDescription(t('The time that the job was created.'));
+
+    $fields['changed'] = FieldDefinition::create('changed')
+      ->setLabel(t('Changed'))
+      ->setDescription(t('The time that the job was last edited.'));
+    return $fields;
   }
 
-  /*
+  /**
    * {@inheritdoc}
    */
-  public function defaultUri() {
-    return array('path' => 'translate/' . $this->tltid);
+  public function getOwner() {
+    return $this->get('uid')->entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOwnerId() {
+    return $this->get('uid')->target_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwnerId($uid) {
+    $this->set('uid', $uid);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwner(UserInterface $account) {
+    $this->set('uid', $account->id());
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getChangedTime() {
+    return $this->get('changed')->value;
   }
 
   /**
@@ -136,8 +171,6 @@ class LocalTask extends Entity {
         return t('@title assigned to @translator', array('@title' => $this->title, '@translator' => user_load($this->tuid->getUsername())));
       }
     }
-
-
   }
 
 
@@ -147,7 +180,7 @@ class LocalTask extends Entity {
    * @return \Drupal\tmgmt\Entity\Job
    */
   public function getJob() {
-    return tmgmt_job_load($this->tjid);
+    return $this->get('tjid')->entity;
   }
 
   /**
@@ -183,7 +216,7 @@ class LocalTask extends Entity {
    */
   public function getItems($conditions = array()) {
     $query = \Drupal::entityQuery('tmgmt_loal_task_item');
-    $query->condition('tltid', $this->tltid);
+    $query->condition('tltid', $this->id());
     foreach ($conditions as $key => $condition) {
       if (is_array($condition)) {
         $operator = isset($condition['operator']) ? $condition['operator'] : '=';
@@ -227,7 +260,7 @@ class LocalTask extends Entity {
    *   The status of the task or NULL if it hasn't been set yet.
    */
   public function getStatus() {
-    return $this->status;
+    return $this->status->value;
   }
 
   /**
@@ -248,7 +281,7 @@ class LocalTask extends Entity {
   public function setStatus($status) {
     // Return TRUE if the status could be set. Return FALSE otherwise.
     if (array_key_exists($status, tmgmt_local_task_statuses())) {
-      $this->incrementLoopCount($status, $this->tuid);
+      $this->incrementLoopCount($status, $this->tuid->target_id);
       $this->status = $status;
       $this->save();
     }
@@ -275,8 +308,8 @@ class LocalTask extends Entity {
    *   (Optional) A user object. Defaults to the currently logged in user.
    */
   public function isAuthor($account = NULL) {
-    $account = isset($account) ? $account : $GLOBALS['user'];
-    return $this->uid == $account->id();
+    $account = isset($account) ? $account : \Drupal::currentUser();
+    return $this->getOwnerId() == $account->id();
   }
 
   /**
@@ -377,7 +410,7 @@ class LocalTask extends Entity {
    *   Task loop count.
    */
   public function getLoopCount() {
-    return $this->loop_count;
+    return $this->loop_count->value;
   }
 
   /**
@@ -390,28 +423,20 @@ class LocalTask extends Entity {
    *   New translator uid.
    */
   public function incrementLoopCount($newStatus, $new_tuid) {
-     if ($this->status == TMGMT_LOCAL_TASK_STATUS_PENDING
+     if ($this->getStatus() == TMGMT_LOCAL_TASK_STATUS_PENDING
          && $newStatus == TMGMT_LOCAL_TASK_STATUS_PENDING
-         && $this->tuid != $new_tuid) {
-      ++$this->loop_count;
+         && $this->tuid->target_id != $new_tuid) {
+      ++$this->loop_count->value;
     }
-    else if ($this->status != TMGMT_LOCAL_TASK_STATUS_UNASSIGNED
+    else if ($this->getStatus() != TMGMT_LOCAL_TASK_STATUS_UNASSIGNED
              && $newStatus == TMGMT_LOCAL_TASK_STATUS_UNASSIGNED) {
-      ++$this->loop_count;
+      ++$this->loop_count->value;
     }
-    else if ($this->status != TMGMT_LOCAL_TASK_STATUS_UNASSIGNED
-             && $this->status != TMGMT_LOCAL_TASK_STATUS_PENDING
+    else if ($this->getStatus() != TMGMT_LOCAL_TASK_STATUS_UNASSIGNED
+             && $this->getStatus() != TMGMT_LOCAL_TASK_STATUS_PENDING
              && $newStatus == TMGMT_LOCAL_TASK_STATUS_PENDING) {
-      ++$this->loop_count;
+      ++$this->loop_count->value;
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function preSave(EntityStorageInterface $storage_controller) {
-    parent::preSave($storage_controller);
-    $this->changed = REQUEST_TIME;
   }
 
   /**
@@ -426,6 +451,5 @@ class LocalTask extends Entity {
       entity_delete_multiple('tmgmt_local_task_item', $ids);
     }
   }
-
 
 }

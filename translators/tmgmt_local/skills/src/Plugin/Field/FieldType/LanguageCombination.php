@@ -7,9 +7,9 @@
 
 namespace Drupal\tmgmt_language_combination\Plugin\Field\FieldType;
 
-use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemBase;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\Core\Field\ConfigFieldItemBase;
 
 /**
  * Plugin implementation of the 'tmgmt_language_combination' field type.
@@ -22,12 +22,12 @@ use Drupal\Core\Field\ConfigFieldItemBase;
  *   default_formatter = "tmgmt_language_combination_default"
  * )
  */
-class LanguageCombination extends ConfigFieldItemBase {
+class LanguageCombination extends FieldItemBase {
 
   /**
    * {@inheritdoc}
    */
-  public static function propertyDefinitions(FieldDefinitionInterface $field) {
+  public static function propertyDefinitions(FieldStorageDefinitionInterface $field) {
     $property_definitions['language_from'] = DataDefinition::create('string')
       ->setLabel(t('From language'));
     $property_definitions['language_to'] = DataDefinition::create('string')
@@ -39,7 +39,7 @@ class LanguageCombination extends ConfigFieldItemBase {
   /**
    * {@inheritdoc}
    */
-  public static function schema(FieldDefinitionInterface $field) {
+  public static function schema(FieldStorageDefinitionInterface $field) {
     return array(
       'columns' => array(
         'language_from' => array(

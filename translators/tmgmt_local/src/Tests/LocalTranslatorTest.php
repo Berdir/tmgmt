@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_local\Tests;
 
 use Drupal\tmgmt\Tests\TMGMTTestBase;
+use Drupal\tmgmt_local\Entity\LocalTask;
 
 /**
  * Basic tests for the local translator.
@@ -94,22 +95,22 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $job2 = $this->createJob('de', 'en');
     $job3 = $this->createJob('en', 'fr');
 
-    $local_task1 = tmgmt_local_task_create(array(
-      'uid' => $job1->uid,
+    $local_task1 = LocalTask::create(array(
+      'uid' => $job1->getOwnerId(),
       'tjid' => $job1->id(),
       'title' => 'Task 1',
     ));
     $local_task1->save();
 
-    $local_task2 = tmgmt_local_task_create(array(
-      'uid' => $job2->uid,
+    $local_task2 = LocalTask::create(array(
+      'uid' => $job2->getOwnerId(),
       'tjid' => $job2->id(),
       'title' => 'Task 2',
     ));
     $local_task2->save();
 
-    $local_task3 = tmgmt_local_task_create(array(
-      'uid' => $job3->uid,
+    $local_task3 = LocalTask::create(array(
+      'uid' => $job3->getOwnerId(),
       'tjid' => $job3->id(),
       'title' => 'Task 3',
     ));
@@ -117,7 +118,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Test languages involved in tasks.
     $this->assertEqual(
-      tmgmt_local_tasks_languages(array($local_task1->tltid, $local_task2->tltid, $local_task3->tltid)),
+      tmgmt_local_tasks_languages(array($local_task1->id(), $local_task2->id(), $local_task3->id())),
       array(
         'en' => array('de', 'fr'),
         'de' => array('en'),
@@ -126,7 +127,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Test available translators for task en - de.
     $this->assertEqual(
-      tmgmt_local_get_translators_for_tasks(array($local_task1->tltid)),
+      tmgmt_local_get_translators_for_tasks(array($local_task1->id())),
       array(
         $translator1->id() => $translator1->getUsername(),
         $translator2->id() => $translator2->getUsername(),
@@ -136,7 +137,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Test available translators for tasks en - de, de - en.
     $this->assertEqual(
-      tmgmt_local_get_translators_for_tasks(array($local_task1->tltid, $local_task2->tltid)),
+      tmgmt_local_get_translators_for_tasks(array($local_task1->id(), $local_task2->id())),
       array(
         $translator2->id() => $translator2->getUsername(),
         $translator3->id() => $translator3->getUsername(),
@@ -145,7 +146,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Test available translators for tasks en - de, de - en, en - fr.
     $this->assertEqual(
-      tmgmt_local_get_translators_for_tasks(array($local_task1->tltid, $local_task2->tltid, $local_task3->tltid)),
+      tmgmt_local_get_translators_for_tasks(array($local_task1->id(), $local_task2->id(), $local_task3->id())),
       array(
         $translator3->id() => $translator3->getUsername(),
       )
@@ -162,7 +163,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->loginAsTranslator();
     $job = $this->createJob();
     $job->translator = $translator->name;
-    $job->settings['job_comment'] = $job_comment = 'Dummy job comment';
+    $job->settings->job_comment = $job_comment = 'Dummy job comment';
     $job->addItem('test_source', 'test', '1');
     $job->addItem('test_source', 'test', '2');
     $job->save();
@@ -316,7 +317,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertText(t('Completed'));
     $this->assertText(t('Untranslated'));
 
-    $task = tmgmt_local_task_load($task->tltid);
+    $task = tmgmt_local_task_load($task->id());
     $this->assertTrue($task->isPending());
     $this->assertEqual($task->getCountCompleted(), 1);
     $this->assertEqual($task->getCountTranslated(), 0);
@@ -344,7 +345,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     entity_get_controller('tmgmt_local_task')->resetCache();
     entity_get_controller('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
-    $task = tmgmt_local_task_load($task->tltid);
+    $task = tmgmt_local_task_load($task->id());
     $this->assertTrue($task->isPending());
     $this->assertEqual($task->getCountCompleted(), 1);
     $this->assertEqual($task->getCountTranslated(), 0);
@@ -367,7 +368,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     entity_get_controller('tmgmt_local_task')->resetCache();
     entity_get_controller('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
-    $task = tmgmt_local_task_load($task->tltid);
+    $task = tmgmt_local_task_load($task->id());
     $this->assertTrue($task->isPending());
     $this->assertEqual($task->getCountCompleted(), 1);
     $this->assertEqual($task->getCountTranslated(), 1);
@@ -412,7 +413,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Refresh the page.
     $this->drupalGet($this->url);
 
-    $task = tmgmt_local_task_load($task->tltid);
+    $task = tmgmt_local_task_load($task->id());
     $this->assertTrue($task->isClosed());
     $this->assertEqual($task->getCountCompleted(), 2);
     $this->assertEqual($task->getCountTranslated(), 0);
@@ -457,7 +458,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Delete the job, make sure that the corresponding task and task items were
     // deleted.
     $job->delete();
-    $this->assertFalse(tmgmt_local_task_item_load($task->tltid));
+    $this->assertFalse(tmgmt_local_task_item_load($task->id()));
     $this->assertFalse($task->getItems());
   }
 
@@ -477,7 +478,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertFalse($job->requestTranslation(), 'Translation request was denied.');
 
     // Now enable the setting.
-    $translator->settings['allow_all'] = TRUE;
+    $translator->settings->allow_all = TRUE;
     $translator->save();
 
     $this->assertIdentical(NULL, $job->requestTranslation(), 'Translation request was successfull');
@@ -606,7 +607,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $translator = tmgmt_translator_load('local');
     $job = $this->createJob();
     $job->translator = $translator->name;
-    $job->settings['job_comment'] = $job_comment = 'Dummy job comment';
+    $job->settings->job_comment = $job_comment = 'Dummy job comment';
     $job->addItem('test_source', 'test', '1');
     $job->addItem('test_source', 'test', '2');
 
@@ -617,7 +618,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
       'tmgmt_translation_skills[und][0][language_from]' => 'en',
       'tmgmt_translation_skills[und][0][language_to]' => 'de',
     );
-    $this->drupalPostForm('user/' . $local_translator->uid . '/edit', $edit, t('Save'));
+    $this->drupalPostForm('user/' . $local_translator->id() . '/edit', $edit, t('Save'));
 
     $job->requestTranslation();
 

@@ -165,7 +165,7 @@ abstract class TMGMTTestBase extends WebTestBase {
   /**
    * Creates, saves and returns a translation job.
    *
-   * @return Job
+   * @return \Drupal\tmgmt\Entity\Job
    */
   function createJob($source = 'en', $target = 'de', $uid = 1)  {
     $job = tmgmt_job_create($source, $target, $uid);
