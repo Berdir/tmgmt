@@ -4,6 +4,7 @@
  * @file
  * Source plugin for the Translation Management system that handles entities.
  */
+use Drupal\Core\Entity\Plugin\DataType\EntityReference;
 use Drupal\tmgmt\Entity\Job;
 
 /**
@@ -209,22 +210,26 @@ function tmgmt_content_tmgmt_source_suggestions(array $items, Job $job) {
       $entity = entity_load($item->getItemType(), $item->getItemId());
 
       // Loop over all fields, check if they are NOT translatable. Only if a
-      // field is not translatable we may suggest a referenced entity. If so,
-      // check for a supported field type (image and file currently here).
+      // field is not translatable we may suggest a referenced entity.
       foreach ($entity as $field) {
+        /* @var \Drupal\Core\Field\FieldItemListInterface $field */
         $definition = $field->getFieldDefinition();
+
+        if (!$definition->isTranslatable()) {
+          continue;
+        }
 
         // Loop over all field items.
         foreach ($field as $field_item) {
           // Loop over all properties of a field item.
           foreach ($field_item->getProperties(TRUE) as $property) {
-            if ($property instanceof \Drupal\Core\Entity\Plugin\DataType\EntityReference && $target = $property->getTarget()) {
+            if ($property instanceof EntityReference && $target = $property->getTarget()) {
               $enabled = content_translation_enabled($target->getEntityTypeId(), $target->bundle());
               if ($enabled) {
                 // Add the translation as a suggestion.
                 $suggestions[] = array(
                   'job_item' => tmgmt_job_item_create('content', $target->getEntityTypeId(), $target->id()),
-                  'reason' => t('Field @label', array('@label' => $definition->getFieldLabel())),
+                  'reason' => t('Field @label', array('@label' => $definition->getLabel())),
                   'from_item' => $item->id(),
                 );
               }

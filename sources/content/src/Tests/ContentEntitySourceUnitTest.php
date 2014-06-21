@@ -9,8 +9,9 @@ namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\migrate_drupal\Plugin\migrate\source\d6\FieldInstance;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Language\Language;
 
 /**
@@ -23,7 +24,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt', 'tmgmt_content', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language', 'content_translation');
+  public static $modules = array('tmgmt', 'tmgmt_content', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language', 'content_translation', 'menu_link');
 
   protected $entity_type = 'entity_test_mul';
 
@@ -72,9 +73,11 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     // Make the test field translatable.
     $field = FieldConfig::loadByName('entity_test_mul', 'field_test_text');
-    $field->translatable = 1;
     $field->cardinality = 2;
     $field->save();
+    $instance = FieldInstanceConfig::loadByName('entity_test_mul', 'entity_test_mul', 'field_test_text');
+    $instance->setTranslatable(TRUE);
+    $instance->save();
 
     // Add an image field and make it translatable.
     $this->installEntitySchema('file');
@@ -139,7 +142,6 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual($data['name'][0]['value']['#translate'], TRUE);
 
     // Test the test field.
-    // @todo: Fields need better labels, needs to be fixed in core.
     $this->assertEqual($data['field_test_text']['#label'], 'Test text-field');
     $this->assertEqual($data['field_test_text'][0]['#label'], 'Delta #0');
     $this->assertEqual($data['field_test_text'][0]['value']['#label'], 'Text value');

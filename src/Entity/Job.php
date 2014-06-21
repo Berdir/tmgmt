@@ -946,7 +946,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    *   - from_job: The mainJob-ID which suggests this translation.
    */
   public function getSuggestions(array $conditions = array()) {
-    $suggestions = module_invoke_all('tmgmt_source_suggestions', $this->getItems($conditions), $this);
+    $suggestions = \Drupal::moduleHandler()->invokeAll('tmgmt_source_suggestions', array($this->getItems($conditions), $this));
 
     // EachJob needs a job id to be able to count the words, because the
     // source-language is stored in the job and not the item.
