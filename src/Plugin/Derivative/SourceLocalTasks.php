@@ -7,15 +7,15 @@
 
 namespace Drupal\tmgmt\Plugin\Derivative;
 
-use Drupal\Component\Plugin\Derivative\DerivativeBase;
-use Drupal\Core\Plugin\Discovery\ContainerDerivativeInterface;
+use Drupal\Component\Plugin\Derivative\DeriverBase;
+use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\tmgmt\SourceManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides dynamic local tasks for sources.
  */
-class SourceLocalTasks extends DerivativeBase implements ContainerDerivativeInterface {
+class SourceLocalTasks extends DeriverBase implements ContainerDeriverInterface {
 
   /**
    * The source manager.

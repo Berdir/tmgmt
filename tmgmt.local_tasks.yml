@@ -7,7 +7,7 @@ tmgmt.sources:
   route_name: tmgmt.source_overview
   tab_root_id: views_view:view.tmgmt_ui_job_overview.page_1
   tab_parent_id: tmgmt.sources_parent
-  derivative: 'Drupal\tmgmt\Plugin\Derivative\SourceLocalTasks'
+  deriver: 'Drupal\tmgmt\Plugin\Derivative\SourceLocalTasks'
 
 tmgmt.cart:
   route_name: tmgmt.cart
