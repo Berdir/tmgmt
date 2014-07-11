@@ -10,6 +10,11 @@ namespace Drupal\tmgmt_content\Tests;
 use Drupal\comment\Entity\CommentType;
 use Drupal\tmgmt\Tests\EntityTestBase;
 
+/**
+ * Tests the user interface for entity translation lists.
+ *
+ * @group Translation Management
+ */
 class ContentEntitySourceListTest extends EntityTestBase {
 
   /**
@@ -20,14 +25,6 @@ class ContentEntitySourceListTest extends EntityTestBase {
   public static $modules = array('tmgmt_content', 'taxonomy', 'comment');
 
   protected $nodes = array();
-
-  static function getInfo() {
-    return array(
-      'name' => 'Entity Source List tests',
-      'description' => 'Tests the user interface for entity translation lists.',
-      'group' => 'Translation Management',
-    );
-  }
 
   function setUp() {
     parent::setUp();
