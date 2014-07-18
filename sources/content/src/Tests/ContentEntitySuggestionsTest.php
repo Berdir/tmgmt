@@ -80,14 +80,14 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
 
     // Create field instances on the content type.
     FieldInstanceConfig::create(array(
-      'field' => $field1,
+      'field_storage' => $field1,
       'bundle' => $type->id(),
       'label' => 'Field 1',
       'translatable' => FALSE,
       'settings' => array(),
     ))->save();
     FieldInstanceConfig::create(array(
-      'field' => $field2,
+      'field_storage' => $field2,
       'bundle' => $type->id(),
       'label' => 'Field 2',
       'translatable' => TRUE,

@@ -109,7 +109,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
       $field_name = drupal_strtolower($this->randomName());
 
       // Create a field.
-      $field = entity_create('field_config', array(
+      $field = FieldStorageConfig::create(array(
         'name' => $field_name,
         'entity_type' => $entity_name,
         'type' => $field_type,
@@ -158,13 +158,13 @@ abstract class EntityTestBase extends TMGMTTestBase {
 
     foreach ($this->field_names['node'][$bundle] as $field_name) {
       // @todo: Why are some missing?
-      if ($field_config = FieldStorageConfig::loadByName('node', $field_name)) {
-        $cardinality = $field_config->cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_config->cardinality;
+      if ($field_storage_config = FieldStorageConfig::loadByName('node', $field_name)) {
+        $cardinality = $field_storage_config->cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_storage_config->cardinality;
 
         // Create two deltas for each field.
         for ($delta = 0; $delta <= $cardinality; $delta++) {
           $node[$field_name][$delta]['value'] = $this->randomName(20);
-          if ($field_config->getType() == 'text_with_summary') {
+          if ($field_storage_config->getType() == 'text_with_summary') {
             $node[$field_name][$delta]['summary'] = $this->randomName(10);
           }
         }

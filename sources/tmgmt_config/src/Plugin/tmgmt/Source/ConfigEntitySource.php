@@ -117,7 +117,8 @@ class ConfigEntitySource extends SourcePluginBase {
     $data = array();
     foreach ($schema as $key => $element) {
       $element_key = implode('.', array_filter(array($base_key, $key)));
-      $definition = $element->getDataDefinition() + array('label' => t('N/A'));
+      $definition = $element->getDataDefinition();
+        // + array('label' => t('N/A'));
       if ($element instanceof Element) {
         // Build sub-structure and include it with a wrapper in the form
         // if there are any translatable elements there.

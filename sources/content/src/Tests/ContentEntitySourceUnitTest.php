@@ -78,7 +78,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     \Drupal::service('router.builder')->rebuild();
 
-    entity_create('field_config', array(
+    FieldStorageConfig::create(array(
       'name' => 'image_test',
       'entity_type' => $this->entity_type,
       'type' => 'image',
