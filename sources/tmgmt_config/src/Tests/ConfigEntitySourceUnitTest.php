@@ -13,7 +13,9 @@ use Drupal\system\Tests\Entity\EntityUnitTestBase;
 use Drupal\Core\Language\Language;
 
 /**
- * Config entity source unit tests.
+ * Unit tests for exporting translatable data from config entities and saving it back.
+ *
+ * @group tmgmt
  */
 class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
 
@@ -27,14 +29,6 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
   /**
    * {@inheritdoc}
    */
-  static function getInfo() {
-    return array(
-      'name' => 'Config Entity Source Unit tests',
-      'description' => 'Unit tests for exporting translatable data from config entities and saving it back.',
-      'group' => 'Translation Management',
-    );
-  }
-
   public function setUp() {
     parent::setUp();
 

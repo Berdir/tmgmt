@@ -6,21 +6,17 @@
  */
 
 namespace Drupal\tmgmt\Tests;
-use Drupal\simpletest\DrupalUnitTestBase;
 
 /**
  * Tests interaction between core and the plugins.
+ *
+ * @group tmgmt
  */
 class PluginsTest extends TMGMTUnitTestBase {
 
-  static function getInfo() {
-    return array(
-      'name' => 'Plugin tests',
-      'description' => 'Verifies basic functionality of source and translator plugins',
-      'group' => 'Translation Management',
-    );
-  }
-
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
     parent::setUp();
     \Drupal::service('router.builder')->rebuild();

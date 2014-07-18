@@ -10,16 +10,10 @@ use Drupal\tmgmt\Entity\Job;
 
 /**
  * Tests the helper functions in tmgmt.module.
+ *
+ * @group tmgmt
  */
 class HelperTest extends TMGMTUnitTestBase {
-
-  static function getInfo() {
-    return array(
-      'name' => 'Helper functions Test case',
-      'description' => 'Helper functions for other modules',
-      'group' => 'Translation Management',
-    );
-  }
 
   /**
    * Tests tmgmt_job_match_item()

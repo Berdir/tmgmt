@@ -10,18 +10,15 @@ namespace Drupal\tmgmt\Tests;
 use Drupal\tmgmt\Entity\RemoteMapping;
 
 /**
- * Basic CRUD tests.
+ * Basic crud operations for jobs and translators
+ *
+ * @group tmgmt
  */
 class CrudTest extends TMGMTUnitTestBase {
 
-  static function getInfo() {
-    return array(
-      'name' => 'CRUD tests',
-      'description' => 'Basic crud operations for jobs and translators',
-      'group' => 'Translation Management',
-    );
-  }
-
+  /**
+   * {@inheritdoc}
+   */
   public function setUp() {
     parent::setUp();
     \Drupal::service('router.builder')->rebuild();

@@ -12,6 +12,8 @@ use Drupal\tmgmt\TMGMTException;
 
 /**
  * Basic Locale Source tests.
+ *
+ * @group tmgmt
  */
 class LocaleSourceTest extends TMGMTTestBase {
 
@@ -21,17 +23,6 @@ class LocaleSourceTest extends TMGMTTestBase {
    * @var array
    */
   public static $modules = array('tmgmt_locale');
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getInfo() {
-    return array(
-      'name' => 'Locale Source tests',
-      'description' => 'Exporting source data from locale and saving translations back',
-      'group' => 'Translation Management',
-    );
-  }
 
   /**
    * {@inheritdoc}

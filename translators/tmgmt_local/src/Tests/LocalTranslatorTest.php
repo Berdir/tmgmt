@@ -12,6 +12,8 @@ use Drupal\tmgmt_local\Entity\LocalTask;
 
 /**
  * Basic tests for the local translator.
+ *
+ * @group tmgmt
  */
 class LocalTranslatorTest extends TMGMTTestBase {
 
@@ -26,7 +28,6 @@ class LocalTranslatorTest extends TMGMTTestBase {
     'provide translation services',
   );
 
-
   /**
    * Modules to enable.
    *
@@ -34,14 +35,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
    */
   public static $modules = array('tmgmt_language_combination', 'tmgmt_local', 'tmgmt_ui');
 
-  static function getInfo() {
-    return array(
-      'name' => 'Local Translator tests',
-      'description' => 'Tests the local translator plugin integration.',
-      'group' => 'Translation Management',
-    );
-  }
-
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
     parent::setUp();
     $this->loginAsAdmin();

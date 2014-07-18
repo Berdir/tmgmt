@@ -7,11 +7,13 @@
 
 namespace Drupal\tmgmt_content\Tests;
 
-use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\tmgmt\Tests\EntityTestBase;
 
 /**
  * Content entity source UI tests.
+ *
+ * @group tmgmt
  */
 class ContentEntitySourceUiTest extends EntityTestBase {
 
@@ -22,14 +24,9 @@ class ContentEntitySourceUiTest extends EntityTestBase {
    */
   public static $modules = array('tmgmt_content', 'comment');
 
-  static function getInfo() {
-    return array(
-      'name' => 'Entity Source UI tests',
-      'description' => 'Tests the user interface for entity translation sources.',
-      'group' => 'Translation Management',
-    );
-  }
-
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
     parent::setUp();
 
@@ -235,7 +232,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->drupalPostForm('admin/config/regional/entity_translation', $edit, t('Save configuration'));
 
     // Change comment_body field to be translatable.
-    $comment_body = FieldConfig::loadByName('comment', 'comment_body');
+    $comment_body = FieldStorageConfig::loadByName('comment', 'comment_body');
     $comment_body->translatable = TRUE;
     $comment_body->save();
 

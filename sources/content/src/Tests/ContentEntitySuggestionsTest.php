@@ -8,7 +8,7 @@
 namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\Core\Language\Language;
-use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -16,6 +16,8 @@ use Drupal\tmgmt\Tests\TMGMTUnitTestBase;
 
 /**
  * Basic Source-Suggestions tests.
+ *
+ * @group tmgmt
  */
 class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
 
@@ -26,14 +28,9 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
    */
   public static $modules = array('tmgmt_content', 'tmgmt_test', 'content_translation', 'node', 'entity', 'filter');
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Entity Suggestions tests',
-      'description' => 'Tests suggestion implementation for the entity source plugin',
-      'group' => 'Translation Management',
-    );
-  }
-
+  /**
+   * {@inheritdoc}
+   */
   public function setUp() {
     parent::setUp();
 
@@ -64,7 +61,7 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
 
     content_translation_set_config('node', $type->id(), 'enabled', TRUE);
 
-    $field1 = FieldConfig::create(array(
+    $field1 = FieldStorageConfig::create(array(
       'name' => 'field1',
       'entity_type' => 'node',
       'type' => 'entity_reference',
@@ -72,7 +69,7 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
       'settings' => array('target_type' => 'node'),
     ));
     $field1->save();
-    $field2 = FieldConfig::create(array(
+    $field2 = FieldStorageConfig::create(array(
       'name' => 'field2',
       'entity_type' => 'node',
       'type' => 'entity_reference',

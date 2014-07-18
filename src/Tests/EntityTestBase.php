@@ -9,7 +9,7 @@ namespace Drupal\tmgmt\Tests;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
-use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Utility test case class with helper methods to create entities and their
@@ -49,7 +49,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
     }
     else {
     // Change body field to be translatable.
-      $body = FieldConfig::loadByName('node', 'body');
+      $body = FieldStorageConfig::loadByName('node', 'body');
       $body->translatable = TRUE;
       $body->save();
     }
@@ -158,7 +158,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
 
     foreach ($this->field_names['node'][$bundle] as $field_name) {
       // @todo: Why are some missing?
-      if ($field_config = FieldConfig::loadByName('node', $field_name)) {
+      if ($field_config = FieldStorageConfig::loadByName('node', $field_name)) {
         $cardinality = $field_config->cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_config->cardinality;
 
         // Create two deltas for each field.

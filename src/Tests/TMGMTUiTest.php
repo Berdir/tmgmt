@@ -8,7 +8,9 @@
 namespace Drupal\tmgmt\Tests;
 
 /**
- * Test the UI of tmgmt, for example the checkout form.
+ * Verifies basic functionality of the user interface
+ *
+ * @group
  */
 class TMGMTUiTest extends TMGMTTestBase {
 
@@ -19,14 +21,9 @@ class TMGMTUiTest extends TMGMTTestBase {
    */
   public static $modules = array('tmgmt_ui');
 
-  static function getInfo() {
-    return array(
-      'name' => 'UI tests',
-      'description' => 'Verifies basic functionality of the user interface',
-      'group' => 'Translation Management',
-    );
-  }
-
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
     parent::setUp();
 

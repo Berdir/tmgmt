@@ -12,7 +12,9 @@ use Drupal\tmgmt\Tests\TMGMTTestBase;
 use GuzzleHttp\Exception\RequestException;
 
 /**
- * Basic tests for the file translator.
+ * Tests for the file translator.
+ *
+ * @group tmgmt
  */
 class FileTranslatorTest extends TMGMTTestBase {
 
@@ -23,14 +25,9 @@ class FileTranslatorTest extends TMGMTTestBase {
    */
   static public $modules = array('tmgmt_file', 'tmgmt_ui');
 
-  static function getInfo() {
-    return array(
-      'name' => 'File Translator tests',
-      'description' => 'Tests the file translator plugin integration.',
-      'group' => 'Translation Management',
-    );
-  }
-
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
     parent::setUp();
     $this->loginAsAdmin();

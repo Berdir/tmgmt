@@ -8,14 +8,15 @@
 namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldInstanceConfig;
-use Drupal\migrate_drupal\Plugin\migrate\source\d6\FieldInstance;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
 use Drupal\Core\Language\Language;
 
 /**
  * Content entity Source unit tests.
+ *
+ * @group tmgmt
  */
 class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
@@ -31,16 +32,8 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
   protected $image_label;
 
   /**
-   * Implements getInfo().
+   * {@inheritdoc}
    */
-  static function getInfo() {
-    return array(
-      'name' => 'Entity Source Unit tests',
-      'description' => 'Unit tests for exporting translatable data from entities and saving it back.',
-      'group' => 'Translation Management',
-    );
-  }
-
   public function setUp() {
     parent::setUp();
 
@@ -72,7 +65,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     entity_test_install();
 
     // Make the test field translatable.
-    $field = FieldConfig::loadByName('entity_test_mul', 'field_test_text');
+    $field = FieldStorageConfig::loadByName('entity_test_mul', 'field_test_text');
     $field->cardinality = 2;
     $field->save();
     $instance = FieldInstanceConfig::loadByName('entity_test_mul', 'entity_test_mul', 'field_test_text');
@@ -198,7 +191,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     // Create an english node.
     $account = $this->createUser();
     $type = $this->drupalCreateContentType();
-    $field = FieldConfig::loadByName('node', 'body');
+    $field = FieldStorageConfig::loadByName('node', 'body');
     $field->translatable = TRUE;
     $field->cardinality = 2;
     $field->save();

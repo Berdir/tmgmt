@@ -10,7 +10,9 @@ use Drupal\locale\Gettext;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 
 /**
- * Basic Locale Source tests.
+ * Locale Source UI tests.
+ *
+ * @group tmgmt
  */
 class LocaleSourceUiTest extends TMGMTTestBase {
 
@@ -21,14 +23,9 @@ class LocaleSourceUiTest extends TMGMTTestBase {
    */
   public static $modules = array('tmgmt_ui', 'tmgmt_locale');
 
-  static function getInfo() {
-    return array(
-      'name' => 'Locale Source UI tests',
-      'description' => 'Tests the locale source overview',
-      'group' => 'Translation Management',
-    );
-  }
-
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
     parent::setUp();
     $this->langcode = 'de';
