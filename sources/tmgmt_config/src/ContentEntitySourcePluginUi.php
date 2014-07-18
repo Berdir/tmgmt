@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_content;
 
+use Drupal\Component\Utility\String;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\SourcePluginUiBase;
@@ -256,7 +257,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     $languages = array();
     foreach (language_list() as $langcode => $language) {
       $languages['langcode-' . $langcode] = array(
-        'data' => check_plain($language->name),
+        'data' => String::checkPlain(($language->getName()),
       );
     }
 

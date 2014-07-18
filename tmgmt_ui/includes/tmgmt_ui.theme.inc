@@ -5,6 +5,7 @@
  * Theme file stub for tmgmt.
  */
 
+use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
 use Drupal\tmgmt\Entity\Job;
 
@@ -19,7 +20,7 @@ function theme_tmgmt_ui_element($variables) {
   // Use the #title attribute.
   $title = '';
   if (!empty($element['#title'])) {
-    $title = '<h3>' . check_plain($element['#title']) . '</h3>';
+    $title = '<h3>' . String::checkPlain(($element['#title']) . '</h3>';
   }
 
   // Use #attributes to customize a wrapper <div>.
@@ -279,7 +280,7 @@ function theme_tmgmt_ui_translator_review_form($variables) {
         // Header row for the current element group.
         $cell = array(
           // @todo: Deal with right to left languages.
-          'data' => check_plain(implode(t(' > '), $labels)),
+          'data' => String::checkPlain(implode(t(' > '), $labels)),
           'colspan' => 4,
           'header' => TRUE,
         );

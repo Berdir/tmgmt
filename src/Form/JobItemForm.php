@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Xss;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
@@ -85,7 +86,7 @@ class JobItemForm extends TmgmtFormBase {
       $form['info']['translator'] = array(
         '#type' => 'item',
         '#title' => t('Translator'),
-        '#markup' => isset($translators[$item->getJob()->getTranslatorId()]) ? check_plain($translators[$item->getJob()->getTranslatorId()]) : t('Missing translator'),
+        '#markup' => isset($translators[$item->getJob()->getTranslatorId()]) ? String::checkPlain(($translators[$item->getJob()->getTranslatorId()]) : t('Missing translator'),
         '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
         '#suffix' => '</div>',
       );

@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_file;
 
+use Drupal\Component\Utility\String;
 use Drupal\tmgmt\TranslatorPluginUiBase;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Entity\Job;
@@ -44,7 +45,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
     // Any visible, writeable wrapper can potentially be used for the files
     // directory, including a remote file system that integrates with a CDN.
     foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
-      $options[$scheme] = check_plain($info['description']);
+      $options[$scheme] = String::checkPlain($info['description']);
     }
 
     if (!empty($options)) {
