@@ -20,7 +20,7 @@ function theme_tmgmt_ui_element($variables) {
   // Use the #title attribute.
   $title = '';
   if (!empty($element['#title'])) {
-    $title = '<h3>' . String::checkPlain(($element['#title']) . '</h3>';
+    $title = '<h3>' . String::checkPlain($element['#title']) . '</h3>';
   }
 
   // Use #attributes to customize a wrapper <div>.

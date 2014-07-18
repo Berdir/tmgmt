@@ -86,7 +86,7 @@ class JobItemForm extends TmgmtFormBase {
       $form['info']['translator'] = array(
         '#type' => 'item',
         '#title' => t('Translator'),
-        '#markup' => isset($translators[$item->getJob()->getTranslatorId()]) ? String::checkPlain(($translators[$item->getJob()->getTranslatorId()]) : t('Missing translator'),
+        '#markup' => isset($translators[$item->getJob()->getTranslatorId()]) ? String::checkPlain($translators[$item->getJob()->getTranslatorId()]) : t('Missing translator'),
         '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
         '#suffix' => '</div>',
       );

@@ -257,7 +257,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     $languages = array();
     foreach (language_list() as $langcode => $language) {
       $languages['langcode-' . $langcode] = array(
-        'data' => String::checkPlain(($language->getName()),
+        'data' => String::checkPlain($language->getName()),
       );
     }
 
