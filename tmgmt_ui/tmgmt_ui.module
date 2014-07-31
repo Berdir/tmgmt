@@ -405,7 +405,7 @@ function tmgmt_ui_color_legend() {
  *
  * @see tmgmt_ui_job_checkout_multiple()
  */
-function tmgmt_ui_job_checkout_and_redirect(array $form, FormStateInterface $form_state, array $jobs) {
+function tmgmt_ui_job_checkout_and_redirect(FormStateInterface $form_state, array $jobs) {
   $redirects = tmgmt_ui_job_checkout_multiple($jobs);
   // If necessary, do a redirect.
   if ($redirects) {
