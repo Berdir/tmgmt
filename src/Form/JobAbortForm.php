@@ -9,6 +9,7 @@ namespace Drupal\tmgmt\Form;
 
 use Drupal\Component\Utility\String;
 use Drupal\Core\Entity\EntityConfirmFormBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a form for deleting a node.
@@ -29,14 +30,14 @@ class JobAbortForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getCancelRoute() {
+  public function getCancelUrl() {
     return $this->entity->urlInfo();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, array &$form_state) {
+  public function submit(array $form, FormStateInterface $form_state) {
     if (!$this->entity->abortTranslation()) {
       // This is the case when a translator does not support the abort operation.
       // It would make more sense to not display the button for the action,

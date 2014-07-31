@@ -7,6 +7,8 @@
 
 namespace Drupal\tmgmt;
 
+use Drupal\Core\Form\FormState;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\SourcePluginUiInterface;
@@ -21,49 +23,49 @@ class SourcePluginUiBase extends PluginBase implements SourcePluginUiInterface {
   /**
    * {@inheritdoc}
    */
-  public function reviewForm($form, &$form_state, JobItem $item) {
+  public function reviewForm(array $form, FormStateInterface $form_state, JobItem $item) {
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function reviewDataItemElement($form, &$form_state, $data_item_key, $parent_key, array $data_item, JobItem $item) {
+  public function reviewDataItemElement(array $form, FormStateInterface $form_state, $data_item_key, $parent_key, array $data_item, JobItem $item) {
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function reviewFormValidate($form, &$form_state, JobItem $item) {
+  public function reviewFormValidate(array $form, FormStateInterface $form_state, JobItem $item) {
     // Nothing to do here by default.
   }
 
   /**
    * {@inheritdoc}
    */
-  public function reviewFormSubmit($form, &$form_state, JobItem $item) {
+  public function reviewFormSubmit(array $form, FormStateInterface $form_state, JobItem $item) {
     // Nothing to do here by default.
   }
 
   /**
    * {@inheritdoc}
    */
-  public function overviewForm($form, &$form_state, $type) {
+  public function overviewForm(array $form, FormStateInterface $form_state, $type) {
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function overviewFormValidate($form, &$form_state, $type) {
+  public function overviewFormValidate(array $form, FormStateInterface $form_state, $type) {
     // Nothing to do here by default.
   }
 
   /**
    * {@inheritdoc}
    */
-  public function overviewFormSubmit($form, &$form_state, $type) {
+  public function overviewFormSubmit(array $form, FormStateInterface $form_state, $type) {
     // Nothing to do here by default.
   }
 

@@ -8,8 +8,7 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
-use Drupal\Core\Url;
-use Drupal\tmgmt\Entity\Form\TMGMTJobItem;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a form for deleting a node.
@@ -30,7 +29,7 @@ class JobResubmitForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getCancelRoute() {
+  public function getCancelUrl() {
     return $this->entity->urlInfo();
 
   }
@@ -38,7 +37,7 @@ class JobResubmitForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, array &$form_state) {
+  public function submit(array $form, FormStateInterface $form_state) {
     $new_job = $this->entity->cloneAsUnprocessed();
     $new_job->uid = $this->currentUser()->id();
     $new_job->save();

@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\Entity\JobItem;
 
 /**
@@ -56,5 +57,5 @@ interface TranslatorRejectDataInterface {
    * @return
    *   The resulting form array.
    */
-  public function rejectForm($form, &$form_state);
+  public function rejectForm($form, FormStateInterface $form_state);
 }

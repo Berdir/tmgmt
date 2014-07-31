@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt;
 
 use Drupal\Component\Plugin\PluginBase as ComponentPluginBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
@@ -22,7 +23,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
   /**
    * {@inheritdoc}
    */
-  public function pluginSettingsForm($form, &$form_state, Translator $translator, $busy = FALSE) {
+  public function pluginSettingsForm($form, FormStateInterface $form_state, Translator $translator, $busy = FALSE) {
 
     $controller = $translator->getController();
     // If current translator is configured to provide remote language mapping
@@ -69,7 +70,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
   /**
    * {@inheritdoc}
    */
-  public function checkoutSettingsForm($form, &$form_state, Job $job) {
+  public function checkoutSettingsForm($form, FormStateInterface $form_state, Job $job) {
     if (!element_children($form)) {
       $form['#description'] = t("The @translator translator doesn't provide any checkout settings.", array('@translator' => $job->getTranslator()->label()));
     }
@@ -107,28 +108,28 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
   /**
    * {@inheritdoc}
    */
-  public function reviewForm($form, &$form_state, JobItem $item) {
+  public function reviewForm($form, FormStateInterface $form_state, JobItem $item) {
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function reviewDataItemElement($form, &$form_state, $data_item_key, $parent_key, array $data_item, JobItem $item) {
+  public function reviewDataItemElement($form, FormStateInterface $form_state, $data_item_key, $parent_key, array $data_item, JobItem $item) {
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function reviewFormValidate($form, &$form_state, JobItem $item) {
+  public function reviewFormValidate($form, FormStateInterface $form_state, JobItem $item) {
     // Nothing to do here by default.
   }
 
   /**
    * {@inheritdoc}
    */
-  public function reviewFormSubmit($form, &$form_state, JobItem $item) {
+  public function reviewFormSubmit($form, FormStateInterface $form_state, JobItem $item) {
     // Nothing to do here by default.
   }
 

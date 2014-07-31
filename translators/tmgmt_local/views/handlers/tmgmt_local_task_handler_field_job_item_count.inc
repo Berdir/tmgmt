@@ -1,4 +1,5 @@
 <?php
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Field handler to show the amount of job items per task.
@@ -17,7 +18,7 @@ class tmgmt_local_task_handler_field_job_item_count extends views_handler_field 
     return $options;
   }
 
-  function options_form(&$form, &$form_state) {
+  function options_form(&$form, FormStateInterface $form_state) {
     parent::options_form($form, $form_state);
     $options = array('' => t('- All -'));
     $options += tmgmt_job_item_states();

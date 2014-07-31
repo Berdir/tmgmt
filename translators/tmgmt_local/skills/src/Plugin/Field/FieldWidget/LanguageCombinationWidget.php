@@ -9,6 +9,7 @@ namespace Drupal\tmgmt_language_combination\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
+use Drupal\Core\Form\FormStateInterface;
 
 
 /**
@@ -28,7 +29,7 @@ class LanguageCombinationWidget extends WidgetBase {
   /**
    * {@inheritdoc}
    */
-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     if (isset($form_state['list_all_languages'])) {
       $languages_options = tmgmt_language_combination_languages_predefined_list();
     }

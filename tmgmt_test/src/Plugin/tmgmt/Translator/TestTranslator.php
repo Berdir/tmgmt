@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_test\Plugin\tmgmt\Translator;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\TranslatorPluginBase;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
@@ -124,7 +125,7 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
   /**
    * {@inheritdoc}
    */
-  public function rejectForm($form, &$form_state) {
+  public function rejectForm($form, FormStateInterface $form_state) {
     return $form;
   }
 

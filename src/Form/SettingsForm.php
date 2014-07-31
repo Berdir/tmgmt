@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Configure tmgmt settings.
@@ -24,7 +25,7 @@ class SettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->configFactory()->get('tmgmt.settings');
     $form['workflow'] = array(
       '#type' => 'fieldset',
@@ -53,7 +54,7 @@ class SettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->configFactory()->get('tmgmt.settings')
       ->set('quick_checkout', $form_state['values']['tmgmt_quick_checkout'])
       ->set('purge_finished', $form_state['values']['tmgmt_purge_finished'])

@@ -7,6 +7,7 @@
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt_local\Entity\LocalTask;
 use Drupal\tmgmt_local\Entity\LocalTaskItem;
 
@@ -26,7 +27,7 @@ function tmgmt_local_task_view(LocalTask $task) {
 /**
  * Entity API form the local task entity.
  */
-function tmgmt_local_task_form($form, &$form_state, LocalTask $task, $op = 'edit') {
+function tmgmt_local_task_form($form, FormStateInterface $form_state, LocalTask $task, $op = 'edit') {
   $wrapper = entity_metadata_wrapper('tmgmt_local_task', $task);
 
   // Set the title of the page to the label and the current status of the task.
@@ -96,7 +97,7 @@ function tmgmt_local_task_form($form, &$form_state, LocalTask $task, $op = 'edit
 /**
  * Submit callback for the local task form.
  */
-function tmgmt_local_task_form_submit($form, &$form_state) {
+function tmgmt_local_task_form_submit($form, FormStateInterface $form_state) {
   $task = entity_ui_form_submit_build_entity($form, $form_state);
   // If the task isn't assigned to anyone but doesn't have the unassigned status
   // update it.
@@ -135,7 +136,7 @@ function tmgmt_local_translation_assign_to_me(TMGMTLocalTask $task) {
 /**
  * Form callback for translating a job item.
  */
-function tmgmt_local_translation_form($form, &$form_state, TMGMTLocalTaskItem $task_item) {
+function tmgmt_local_translation_form($form, FormStateInterface $form_state, TMGMTLocalTaskItem $task_item) {
   $form_state['task'] = $task_item->getTask();
   $form_state['task_item'] = $task_item;
   $form_state['job_item'] = $job_item = $task_item->getJobItem();
@@ -188,7 +189,7 @@ function tmgmt_local_translation_form($form, &$form_state, TMGMTLocalTaskItem $t
  *
  * Verify that all items are translated.
  */
-function tmgmt_local_translation_form_save_as_completed_validate($form, &$form_state) {
+function tmgmt_local_translation_form_save_as_completed_validate($form, FormStateInterface $form_state) {
   // Loop over all data items and verify that there is a translation in there.
   foreach ($form_state['values'] as $key => $value) {
     if (is_array($value) && isset($value['translation'])) {
@@ -204,7 +205,7 @@ function tmgmt_local_translation_form_save_as_completed_validate($form, &$form_s
  *
  * Change items to needs review state and task to completed status.
  */
-function tmgmt_local_translation_form_save_as_completed_submit($form, &$form_state) {
+function tmgmt_local_translation_form_save_as_completed_submit($form, FormStateInterface $form_state) {
   /**
    * @var \Drupal\tmgmt_local\Entity\LocalTask $task
    */
@@ -250,7 +251,7 @@ function tmgmt_local_translation_form_save_as_completed_submit($form, &$form_sta
  *
  * Saves all items.
  */
-function tmgmt_local_translation_form_save_submit($form, &$form_state) {
+function tmgmt_local_translation_form_save_submit($form, FormStateInterface $form_state) {
   /**
    * @var TMGMTTaskItem $task_item.
    */
@@ -357,7 +358,7 @@ function tmgmt_local_translation_form_element($data, LocalTaskItem $item, &$zebr
 /**
  * Form submit callback for the translation state update button.
  */
-function tmgmt_local_translation_form_update_state_submit($form, &$form_state) {
+function tmgmt_local_translation_form_update_state_submit($form, FormStateInterface $form_state) {
   $values = $form_state['values'];
 
   /**
@@ -383,7 +384,7 @@ function tmgmt_local_translation_form_update_state_submit($form, &$form_state) {
 /**
  * Ajax callback for the job item review form.
  */
-function tmgmt_local_translation_form_update_state_ajax($form, &$form_state) {
+function tmgmt_local_translation_form_update_state_ajax($form, FormStateInterface $form_state) {
   $key = array_slice($form_state['triggering_element']['#array_parents'], 0, 3);
   $commands = array();
   $render_data = NestedArray::getValue($form, $key);
@@ -404,7 +405,7 @@ function tmgmt_local_translation_form_update_state_ajax($form, &$form_state) {
  * @return array
  *   Drupal form definition.
  */
-function tmgmt_local_translation_assign_form($form, &$form_state, $tasks) {
+function tmgmt_local_translation_assign_form($form, FormStateInterface $form_state, $tasks) {
   $form_state['tasks'] = explode(',', $tasks);
 
   $roles = tmgmt_local_translator_roles();
@@ -433,7 +434,7 @@ function tmgmt_local_translation_assign_form($form, &$form_state, $tasks) {
 /**
  * Submit handler for form for assigning multiple tasks to translator.
  */
-function tmgmt_local_translation_assign_form_submit($form, &$form_state) {
+function tmgmt_local_translation_assign_form_submit($form, FormStateInterface $form_state) {
   $translator = user_load($form_state['values']['tuid']);
 
   $how_many = 0;
@@ -457,7 +458,7 @@ function tmgmt_local_translation_assign_form_submit($form, &$form_state) {
  *
  * @see tmgmt_local_translation_assign_form().
  */
-function tmgmt_local_translation_reassign_form($form, &$form_state, $tasks) {
+function tmgmt_local_translation_reassign_form($form, FormStateInterface $form_state, $tasks) {
   $form_state['tasks'] = explode(',', $tasks);
 
   $roles = tmgmt_local_translator_roles();
@@ -485,7 +486,7 @@ function tmgmt_local_translation_reassign_form($form, &$form_state, $tasks) {
 /**
  * Submit handler for form for reassigning multiple tasks to translator.
  */
-function tmgmt_local_translation_reassign_form_submit($form, &$form_state) {
+function tmgmt_local_translation_reassign_form_submit($form, FormStateInterface $form_state) {
 
   if (!empty($form_state['values']['tuid'])) {
     $translator = user_load($form_state['values']['tuid']);

@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_test;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\TranslatorPluginUiBase;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
@@ -20,7 +21,7 @@ class TestTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function pluginSettingsForm($form, &$form_state, Translator $translator, $busy = FALSE) {
+  public function pluginSettingsForm($form, FormStateInterface $form_state, Translator $translator, $busy = FALSE) {
     $form['expose_settings'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display settings'),
@@ -44,7 +45,7 @@ class TestTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function checkoutSettingsForm($form, &$form_state, Job $job) {
+  public function checkoutSettingsForm($form, FormStateInterface $form_state, Job $job) {
     if ($job->getTranslator()->getSetting('expose_settings')) {
       $form['action'] = array(
         '#type' => 'select',
@@ -65,7 +66,7 @@ class TestTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function reviewDataItemElement($form, &$form_state, $data_item_key, $parent_key, array $data_item, JobItem $item) {
+  public function reviewDataItemElement($form, FormStateInterface $form_state, $data_item_key, $parent_key, array $data_item, JobItem $item) {
     $form['below'] = array(
       '#markup' => t('Testing output of review data item element @key from the testing translator.', array('@key' => $data_item_key))
     );

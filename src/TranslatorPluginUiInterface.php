@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
@@ -22,12 +23,12 @@ interface TranslatorPluginUiInterface extends PluginInspectionInterface {
   /**
    * Form callback for the plugin settings form.
    */
-  public function pluginSettingsForm($form, &$form_state, Translator $translator, $busy = FALSE);
+  public function pluginSettingsForm($form, FormStateInterface $form_state, Translator $translator, $busy = FALSE);
 
   /**
    * Form callback for the checkout settings form.
    */
-  public function checkoutSettingsForm($form, &$form_state, Job $job);
+  public function checkoutSettingsForm($form, FormStateInterface $form_state, Job $job);
 
   /**
    * Retrieves information about a translation job.
@@ -43,21 +44,21 @@ interface TranslatorPluginUiInterface extends PluginInspectionInterface {
   /**
    * Form callback for the job item review form.
    */
-  public function reviewForm($form, &$form_state, JobItem $item);
+  public function reviewForm($form, FormStateInterface $form_state, JobItem $item);
 
   /**
    * Form callback for the data item element form.
    */
-  public function reviewDataItemElement($form, &$form_state, $data_item_key, $parent_key, array $data_item, JobItem $item);
+  public function reviewDataItemElement($form, FormStateInterface $form_state, $data_item_key, $parent_key, array $data_item, JobItem $item);
 
   /**
    * Validation callback for the job item review form.
    */
-  public function reviewFormValidate($form, &$form_state, JobItem $item);
+  public function reviewFormValidate($form, FormStateInterface $form_state, JobItem $item);
 
   /**
    * Submit callback for the job item review form.
    */
-  public function reviewFormSubmit($form, &$form_state, JobItem $item);
+  public function reviewFormSubmit($form, FormStateInterface $form_state, JobItem $item);
 
 }

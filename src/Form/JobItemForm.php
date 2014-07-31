@@ -12,6 +12,7 @@ use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Xss;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Form controller for the job item edit forms.
@@ -28,7 +29,7 @@ class JobItemForm extends TmgmtFormBase {
   /**
    * Overrides Drupal\Core\Entity\EntityForm::form().
    */
-  public function form(array $form, array &$form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $item = $this->entity;
     $form['info'] = array(
@@ -131,7 +132,7 @@ class JobItemForm extends TmgmtFormBase {
     return $form;
   }
 
-  protected function actions(array $form, array &$form_state) {
+  protected function actions(array $form, FormStateInterface $form_state) {
     $item = $this->entity;
 
     // Add the form actions as well.
@@ -173,7 +174,7 @@ class JobItemForm extends TmgmtFormBase {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, array &$form_state) {
+  public function validate(array $form, FormStateInterface $form_state) {
     parent::validate($form, $form_state);
     $item = $this->buildEntity($form, $form_state);
     // First invoke the validation method on the source controller.
@@ -189,7 +190,7 @@ class JobItemForm extends TmgmtFormBase {
   /**
    * Overrides Drupal\Core\Entity\EntityForm::save().
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $item = $this->entity;
     // First invoke the submit method on the source controller.
     $source_ui = $this->sourceManager->createUIInstance($item->getPlugin());
@@ -237,7 +238,7 @@ class JobItemForm extends TmgmtFormBase {
   /**
    * {@inheritdoc}
    */
-  public function delete(array $form, array &$form_state) {
+  public function delete(array $form, FormStateInterface $form_state) {
     $entity = $this->entity;
     $form_state['redirect'] = 'admin/tmgmt/items/' . $entity->id() . '/delete';
   }
@@ -261,7 +262,7 @@ class JobItemForm extends TmgmtFormBase {
    * @param $parent_key
    *   The key for $data.
    */
-  function reviewFormElement(&$form_state, $data, JobItem $job_item, &$zebra, $parent_key) {
+  function reviewFormElement(FormStateInterface $form_state, $data, JobItem $job_item, &$zebra, $parent_key) {
     $flip = array(
       'even' => 'odd',
       'odd' => 'even',
@@ -393,7 +394,7 @@ class JobItemForm extends TmgmtFormBase {
   /**
    * Ajax callback for the job item review form.
    */
-  function ajaxReviewForm($form, &$form_state) {
+  function ajaxReviewForm($form, FormStateInterface $form_state) {
     $key = array_slice($form_state['triggering_element']['#array_parents'], 0, 2);
     $render_data = NestedArray::getValue($form, $key);
     tmgmt_ui_write_request_messages($form_state['controller']->getEntity()->getJob());

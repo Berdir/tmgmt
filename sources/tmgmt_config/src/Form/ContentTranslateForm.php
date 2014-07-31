@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_content\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\tmgmt\TMGMTException;
+use Drupal\Core\Form\FormStateInterface;
 
 class ContentTranslateForm extends FormBase {
   /**
@@ -22,7 +23,7 @@ class ContentTranslateForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  function buildForm(array $form, array &$form_state, array $build = NULL) {
+  function buildForm(array $form, FormStateInterface $form_state, array $build = NULL) {
     // Store the entity in the form state so we can easily create the job in the
     // submit handler.
 
@@ -110,7 +111,7 @@ class ContentTranslateForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  function validateForm(array &$form, array &$form_state) {
+  function validateForm(array &$form, FormStateInterface $form_state) {
     $selected = array_filter($form_state['values']['languages']);
     if (empty($selected)) {
       \Drupal::formBuilder()->setErrorByName('languages', $form_state,$this->t('You have to select at least one language for requesting a translation.'));
@@ -120,7 +121,7 @@ class ContentTranslateForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  function submitForm(array &$form, array &$form_state) {
+  function submitForm(array &$form, FormStateInterface $form_state) {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity = $form_state['entity'];
     $values = $form_state['values'];

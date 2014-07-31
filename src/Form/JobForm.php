@@ -14,6 +14,7 @@ use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\views\Entity\View;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Form controller for the job edit forms.
@@ -30,7 +31,7 @@ class JobForm extends TmgmtFormBase {
   /**
    * Overrides Drupal\Core\Entity\EntityForm::form().
    */
-  public function form(array $form, array &$form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
 
     $job = $this->entity;
     // Handle source language.
@@ -338,7 +339,7 @@ class JobForm extends TmgmtFormBase {
     return $form;
   }
 
-  protected function actions(array $form, array &$form_state) {
+  protected function actions(array $form, FormStateInterface $form_state) {
     $job = $this->entity;
 
     $actions['save'] = array(
@@ -417,7 +418,7 @@ class JobForm extends TmgmtFormBase {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, array &$form_state) {
+  public function validate(array $form, FormStateInterface $form_state) {
     parent::validate($form, $form_state);
     $job = $this->buildEntity($form, $form_state);
     // Load the selected translator.
@@ -434,7 +435,7 @@ class JobForm extends TmgmtFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildEntity(array $form, array &$form_state) {
+  public function buildEntity(array $form, FormStateInterface $form_state) {
     $job = parent::buildEntity($form, $form_state);
     // If requested custom job settings handling, copy values from original job.
     if (tmgmt_job_settings_custom_handling($job->getTranslator())) {
@@ -453,7 +454,7 @@ class JobForm extends TmgmtFormBase {
   /**
    * Overrides Drupal\Core\Entity\EntityForm::save().
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $entity = $this->entity;
     $status = $entity->save();
 
@@ -485,7 +486,7 @@ class JobForm extends TmgmtFormBase {
    *
    * @todo Make use of the response object here.
    */
-  function checkoutSettingsForm(&$form_state, Job $job) {
+  function checkoutSettingsForm(FormStateInterface $form_state, Job $job) {
     $form = array();
     $translator = $job->getTranslator();
     if (!$translator) {
@@ -521,7 +522,7 @@ class JobForm extends TmgmtFormBase {
   /**
    * {@inheritdoc}
    */
-  public function delete(array $form, array &$form_state) {
+  public function delete(array $form, FormStateInterface $form_state) {
     $entity = $this->entity;
     $form_state['redirect'] = 'admin/tmgmt/jobs/' . $entity->id() . '/delete';
   }
@@ -530,7 +531,7 @@ class JobForm extends TmgmtFormBase {
    * Ajax callback to fetch the supported translator services and rebuild the
    * target / source language dropdowns.
    */
-  public function ajaxLanguageSelect(array $form, array &$form_state) {
+  public function ajaxLanguageSelect(array $form, FormStateInterface $form_state) {
     $replace = $form_state['input']['_triggering_element_name'] == 'source_language' ? 'target_language' : 'source_language';
     $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand('#tmgmt-ui-translator-wrapper', drupal_render($form['translator_wrapper'])));
@@ -546,14 +547,14 @@ class JobForm extends TmgmtFormBase {
   /**
    * Ajax callback to fetch the options provided by a translator.
    */
-  public function ajaxTranslatorSelect(array $form, array &$form_state) {
+  public function ajaxTranslatorSelect(array $form, FormStateInterface $form_state) {
     return $form['translator_wrapper']['settings'];
   }
 
   /**
    * Adds selected suggestions to the job.
    */
-  function addSuggestionsSubmit($form, &$form_state) {
+  function addSuggestionsSubmit($form, FormStateInterface $form_state) {
     // Save all selected suggestion items.
     if (isset($form_state['values']['suggestions_table']) && is_array($form_state['values']['suggestions_table'])) {
       $job = $form_state['controller']->getEntity();
@@ -582,7 +583,7 @@ class JobForm extends TmgmtFormBase {
    * @param array $form_state
    *   The main form_state.
    */
-  function buildSuggestions(array &$suggestions_table, array &$form_state) {
+  function buildSuggestions(array &$suggestions_table, FormStateInterface $form_state) {
     $options = array();
     $job = $form_state['controller']->getEntity();
     if ($job instanceof Job) {
@@ -645,14 +646,14 @@ class JobForm extends TmgmtFormBase {
   /**
    * Returns the suggestions table for an AJAX-Call.
    */
-  function ajaxLoadSuggestions($form, &$form_state) {
+  function ajaxLoadSuggestions($form, FormStateInterface $form_state) {
     return $form['job_items_wrapper']['suggestions']['container']['suggestions_list'];
   }
 
   /**
    * Set a value in form_state to rebuild the form and fill with data.
    */
-  function loadSuggestionsSubmit(array $form, array &$form_state) {
+  function loadSuggestionsSubmit(array $form, FormStateInterface $form_state) {
     $form_state['rebuild'] = TRUE;
     $form_state['rebuild_suggestions'] = TRUE;
   }

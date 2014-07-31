@@ -9,6 +9,7 @@ namespace Drupal\tmgmt\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\tmgmt\Entity\JobItem;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Source overview form.
@@ -25,7 +26,7 @@ class Cartform extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, $plugin = NULL, $item_type = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, $plugin = NULL, $item_type = NULL) {
     $languages = tmgmt_available_languages();
     $options = array();
     foreach (tmgmt_ui_cart_get()->getJobItemsFromCart() as $item) {
@@ -82,21 +83,21 @@ class Cartform extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, array &$form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
 
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
 
   }
 
   /**
    * Form submit callback to remove the selected items.
    */
-  function submitRemoveSelected($form, &$form_state) {
+  function submitRemoveSelected($form, FormStateInterface $form_state) {
     $job_item_ids = array_filter($form_state['values']['items']);
     tmgmt_ui_cart_get()->removeJobItems($job_item_ids);
     entity_delete_multiple('tmgmt_job_item', $job_item_ids);
@@ -106,7 +107,7 @@ class Cartform extends FormBase {
   /**
    * Form submit callback to remove the selected items.
    */
-  function submitEmptyCart($form, &$form_state) {
+  function submitEmptyCart($form, FormStateInterface $form_state) {
     entity_delete_multiple('tmgmt_job_item', array_keys(tmgmt_ui_cart_get()->getJobItemsFromCart()));
     tmgmt_ui_cart_get()->emptyCart();
     drupal_set_message(t('All job items were removed from the cart.'));
@@ -115,7 +116,7 @@ class Cartform extends FormBase {
   /**
    * Custom form submit callback for tmgmt_ui_cart_cart_form().
    */
-  function submitRequestTranslation($form, &$form_state) {
+  function submitRequestTranslation($form, FormStateInterface $form_state) {
     $target_languages = array_filter($form_state['values']['target_language']);
 
     $job_items_by_source_language = array();

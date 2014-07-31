@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Source overview form.
@@ -24,7 +25,7 @@ class SourceOverviewForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, $plugin = NULL, $item_type = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, $plugin = NULL, $item_type = NULL) {
     $source = \Drupal::service('plugin.manager.tmgmt.source')->createInstance($plugin);
     $definition = \Drupal::service('plugin.manager.tmgmt.source')->getDefinition($plugin);
 
@@ -52,7 +53,7 @@ class SourceOverviewForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, array &$form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     // Copy the form state so we are not removing important information from it
     // when sending it through form_state_values_clean().
     $cleaned = $form_state;
@@ -69,7 +70,7 @@ class SourceOverviewForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     list($plugin, $item_type) = $form_state['build_info']['args'];
     // Execute the submit method on the source plugin controller.
     $source_ui = \Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($plugin);

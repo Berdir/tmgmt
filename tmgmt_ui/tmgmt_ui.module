@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobItemUiCart;
@@ -188,7 +189,7 @@ function tmgmt_ui_review_form_element_ajaxid($parent_key) {
 /**
  * Review form revert action callback.
  */
-function tmgmt_ui_translation_review_form_revert($form, &$form_state) {
+function tmgmt_ui_translation_review_form_revert($form, FormStateInterface $form_state) {
 
   /** @var JobItem $item */
   $item = $form_state['controller']->getEntity();
@@ -211,7 +212,7 @@ function tmgmt_ui_translation_review_form_revert($form, &$form_state) {
 /**
  * Callback for the action at the job item review form.
  */
-function tmgmt_ui_translation_review_form_update_state($form, &$form_state) {
+function tmgmt_ui_translation_review_form_update_state($form, FormStateInterface $form_state) {
   $matches = array();
   // We should have an #name element
   // and the name should beginn with approve-
@@ -270,7 +271,7 @@ function tmgmt_ui_translation_review_form_update_state($form, &$form_state) {
 /**
  * Form callback for the reject confirm form.
  */
-function tmgmt_ui_translation_review_form_reject_confirm($form, &$form_state, JobItem $job_item, $key) {
+function tmgmt_ui_translation_review_form_reject_confirm($form, FormStateInterface $form_state, JobItem $job_item, $key) {
   // Path of job item review form.
   $path = explode('/', current_path());
   $path = implode('/', array_slice($path, 0, count($path) - 2));
@@ -404,7 +405,7 @@ function tmgmt_ui_color_legend() {
  *
  * @see tmgmt_ui_job_checkout_multiple()
  */
-function tmgmt_ui_job_checkout_and_redirect(array &$form_state, array $jobs) {
+function tmgmt_ui_job_checkout_and_redirect(array FormStateInterface $form_state, array $jobs) {
   $redirects = tmgmt_ui_job_checkout_multiple($jobs);
   // If necessary, do a redirect.
   if ($redirects) {
@@ -441,7 +442,7 @@ function tmgmt_ui_help($path, $arg) {
 /**
  * Helper function for redirecting a form after a button has been clicked.
  */
-function tmgmt_ui_submit_redirect($form, &$form_state){
+function tmgmt_ui_submit_redirect($form, FormStateInterface $form_state){
   if (isset($form_state['triggering_element']['#redirect'])) {
     $form_state['redirect'] = $form_state['triggering_element']['#redirect'];
   }
@@ -493,7 +494,7 @@ function tmgmt_ui_cart_get() {
  *   (Optional) It is required in case a single source is being added into the
  *   cart.
  */
-function tmgmt_ui_add_cart_form(&$form, &$form_state, $plugin, $item_type, $item_id = NULL) {
+function tmgmt_ui_add_cart_form(&$form, FormStateInterface $form_state, $plugin, $item_type, $item_id = NULL) {
   $form_state['tmgmt_cart'] = array(
     'plugin' => $plugin,
     'item_type' => $item_type,
@@ -537,7 +538,7 @@ function tmgmt_ui_add_cart_form(&$form, &$form_state, $plugin, $item_type, $item
  *
  * @see tmgmt_ui_add_cart_form()
  */
-function tmgmt_ui_source_add_to_cart_submit($form, &$form_state) {
+function tmgmt_ui_source_add_to_cart_submit($form, FormStateInterface $form_state) {
 
   $cart_info = $form_state['tmgmt_cart'];
   if (!empty($cart_info['plugin']) && !empty($cart_info['item_type']) && !empty($form_state['values']['items'])) {
@@ -569,7 +570,7 @@ function tmgmt_ui_source_add_to_cart_submit($form, &$form_state) {
 /**
  * Cart form validation callback for the source overview.
  */
-function tmgmt_ui_cart_source_overview_validate($form, &$form_state) {
+function tmgmt_ui_cart_source_overview_validate($form, FormStateInterface $form_state) {
   $items = array_filter($form_state['values']['items']);
   if (empty($items)) {
     form_set_error('items', t('No job items were selected.'));

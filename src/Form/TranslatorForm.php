@@ -6,11 +6,13 @@
  */
 
 namespace Drupal\tmgmt\Form;
+
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\tmgmt\SourceManager;
 use Drupal\tmgmt\TranslatorManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Form controller for the translator edit forms.
@@ -59,7 +61,7 @@ class TranslatorForm extends EntityForm {
   /**
    * Overrides Drupal\Core\Entity\EntityForm::form().
    */
-  public function form(array $form, array &$form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $entity = $this->entity;
     // Check if the translator is currently in use.
@@ -171,7 +173,7 @@ class TranslatorForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, array &$form_state) {
+  public function validate(array $form, FormStateInterface $form_state) {
     parent::validate($form, $form_state);
     if (empty($form_state['values']['plugin'])) {
       form_set_error('plugin', t('You have to select a translator plugin.'));
@@ -182,7 +184,7 @@ class TranslatorForm extends EntityForm {
   /**
    * Overrides Drupal\Core\Entity\EntityForm::save().
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     $entity = $this->entity;
     $status = $entity->save();
 
@@ -199,7 +201,7 @@ class TranslatorForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function delete(array $form, array &$form_state) {
+  public function delete(array $form, FormStateInterface $form_state) {
     $entity = $this->entity;
     $form_state['redirect'] = 'admin/config/regional/tmgmt_translator/manage/' . $entity->id() . '/delete';
   }
@@ -209,7 +211,7 @@ class TranslatorForm extends EntityForm {
    * Ajax callback for loading the translator plugin settings form for the
    * currently selected translator plugin.
    */
-  function ajaxTranslaorPluginSelect($form, &$form_state) {
+  function ajaxTranslaorPluginSelect($form, FormStateInterface $form_state) {
     return $form['plugin_wrapper'];
   }
 

@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt_file\TMGMTFileFormatInterface;
 
@@ -24,7 +25,7 @@ function tmgmt_file_theme() {
 /**
  * Import form submit callback.
  */
-function tmgmt_file_import_form_submit($form, &$form_state) {
+function tmgmt_file_import_form_submit($form, FormStateInterface $form_state) {
   // Ensure we have the file uploaded.
   $job = $form_state['controller']->getEntity();
   $supported_formats = array_keys(tmgmt_file_format_plugin_info());
