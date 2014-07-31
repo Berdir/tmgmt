@@ -57,5 +57,5 @@ interface TranslatorRejectDataInterface {
    * @return
    *   The resulting form array.
    */
-  public function rejectForm($form, FormStateInterface $form_state);
+  public function rejectForm(array $form, FormStateInterface $form_state);
 }

@@ -125,7 +125,7 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
   /**
    * {@inheritdoc}
    */
-  public function rejectForm($form, FormStateInterface $form_state) {
+  public function rejectForm(array $form, FormStateInterface $form_state) {
     return $form;
   }
 

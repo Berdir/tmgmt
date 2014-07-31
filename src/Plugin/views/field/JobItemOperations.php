@@ -38,7 +38,7 @@ class JobItemOperations extends FieldPluginBase {
         'title' => t('view'),
       ) + $url->toArray();
     }
-    if (user_access('administer tmgmt') && !$item->isAccepted()) {
+    if (\Drupal::currentUser()->hasPermission('administer tmgmt') && !$item->isAccepted()) {
       $element['#links']['delete'] = array(
         'route_name' => 'tmgmt.job_item_delete',
         'route_parameters' => array('tmgmt_job_item' => $item->id()),

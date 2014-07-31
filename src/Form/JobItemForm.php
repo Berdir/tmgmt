@@ -394,7 +394,7 @@ class JobItemForm extends TmgmtFormBase {
   /**
    * Ajax callback for the job item review form.
    */
-  function ajaxReviewForm($form, FormStateInterface $form_state) {
+  function ajaxReviewForm(array $form, FormStateInterface $form_state) {
     $key = array_slice($form_state['triggering_element']['#array_parents'], 0, 2);
     $render_data = NestedArray::getValue($form, $key);
     tmgmt_ui_write_request_messages($form_state['controller']->getEntity()->getJob());

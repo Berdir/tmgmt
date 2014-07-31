@@ -81,7 +81,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
   /**
    * Implements TMGMTSourceUIControllerInterface::overviewForm().
    */
-  public function overviewForm($form, FormStateInterface $form_state, $type) {
+  public function overviewForm(array $form, FormStateInterface $form_state, $type) {
     $form += $this->overviewSearchFormPart($form, $form_state, $type);
 
     $form['items'] = array(
@@ -166,7 +166,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
    * @return array
    *   Drupal form array.
    */
-  public function overviewSearchFormPart($form, FormStateInterface $form_state, $type) {
+  public function overviewSearchFormPart(array $form, FormStateInterface $form_state, $type) {
 
     $options = array();
     foreach (language_list() as $langcode => $language) {
@@ -264,7 +264,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
   /**
    * Implements TMGMTSourceUIControllerInterface::overviewFormSubmit().
    */
-  public function overviewFormSubmit($form, FormStateInterface $form_state, $type) {
+  public function overviewFormSubmit(array $form, FormStateInterface $form_state, $type) {
     // Handle search redirect.
     if ($this->overviewSearchFormRedirect($form, $form_state, $type)) {
       return;
@@ -304,7 +304,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
    * @param $type
    *   Entity type.
    */
-  public function overviewSearchFormRedirect($form, FormStateInterface $form_state, $type) {
+  public function overviewSearchFormRedirect(array $form, FormStateInterface $form_state, $type) {
     if ($form_state['triggering_element']['#id'] == 'edit-search-submit') {
 
       $query = array();

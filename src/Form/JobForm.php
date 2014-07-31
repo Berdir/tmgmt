@@ -554,7 +554,7 @@ class JobForm extends TmgmtFormBase {
   /**
    * Adds selected suggestions to the job.
    */
-  function addSuggestionsSubmit($form, FormStateInterface $form_state) {
+  function addSuggestionsSubmit(array $form, FormStateInterface $form_state) {
     // Save all selected suggestion items.
     if (isset($form_state['values']['suggestions_table']) && is_array($form_state['values']['suggestions_table'])) {
       $job = $form_state['controller']->getEntity();
@@ -646,7 +646,7 @@ class JobForm extends TmgmtFormBase {
   /**
    * Returns the suggestions table for an AJAX-Call.
    */
-  function ajaxLoadSuggestions($form, FormStateInterface $form_state) {
+  function ajaxLoadSuggestions(array $form, FormStateInterface $form_state) {
     return $form['job_items_wrapper']['suggestions']['container']['suggestions_list'];
   }
 

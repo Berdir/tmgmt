@@ -25,7 +25,7 @@ function tmgmt_file_theme() {
 /**
  * Import form submit callback.
  */
-function tmgmt_file_import_form_submit($form, FormStateInterface $form_state) {
+function tmgmt_file_import_form_submit(array $form, FormStateInterface $form_state) {
   // Ensure we have the file uploaded.
   $job = $form_state['controller']->getEntity();
   $supported_formats = array_keys(tmgmt_file_format_plugin_info());

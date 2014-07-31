@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_content;
 
 use Drupal\Component\Utility\String;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\SourcePluginUiBase;
@@ -110,7 +111,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
    * @return array
    *   Drupal form array.
    */
-  public function overviewSearchFormPart($form, FormStateInterface $form_state, $type) {
+  public function overviewSearchFormPart(array $form, FormStateInterface $form_state, $type) {
 
     // Add search form specific styling.
     $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_content') . '/css/tmgmt_content.admin.entity_source_search_form.css';
@@ -230,7 +231,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
    * @param $type
    *   Entity type.
    */
-  public function overviewSearchFormRedirect($form, FormStateInterface $form_state, $type) {
+  public function overviewSearchFormRedirect(array $form, FormStateInterface $form_state, $type) {
     if ($form_state['triggering_element']['#id'] == 'edit-search-cancel') {
       $form_state['redirect_route'] = new Url('tmgmt.source_overview', array('plugin' => 'content', 'item_type' => $type));
       return TRUE;
@@ -319,7 +320,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function overviewForm($form, FormStateInterface $form_state, $type) {
+  public function overviewForm(array $form, FormStateInterface $form_state, $type) {
 
     $form += $this->overviewSearchFormPart($form, $form_state, $type);
 
@@ -356,7 +357,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function overviewFormValidate($form, FormStateInterface $form_state, $type) {
+  public function overviewFormValidate(array $form, FormStateInterface $form_state, $type) {
     if (!empty($form_state['values']['search']['target_language']) && $form_state['values']['search']['langcode'] == $form_state['values']['search']['target_language']) {
       \Drupal::formBuilder()->setErrorByName('search[target_language]', $form_state, $this->t('The source and target languages must not be the same.'));
     }
@@ -365,7 +366,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function overviewFormSubmit($form, FormStateInterface $form_state, $type) {
+  public function overviewFormSubmit(array $form, FormStateInterface $form_state, $type) {
     // Handle search redirect.
     if ($this->overviewSearchFormRedirect($form, $form_state, $type)) {
       return;

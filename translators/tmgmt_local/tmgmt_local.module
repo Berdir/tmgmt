@@ -219,7 +219,7 @@ function tmgmt_local_translation_access(LocalTask $task, AccountInterface $accou
   // - No modules say to deny access.
   // - At least one module says to grant access.
   // - User has translation capabilities for this task.
-  if (!user_access('provide translation services')) {
+  if (!\Drupal::currentUser()->hasPermission('provide translation services')) {
     $rights[$account->id()][$job->id()] = FALSE;
     return FALSE;
   }
@@ -229,7 +229,7 @@ function tmgmt_local_translation_access(LocalTask $task, AccountInterface $accou
     return TRUE;
   }
 
-  $access = module_invoke_all('tmgmt_local_translation_access', $job, $account);
+  $access = \Drupal::moduleHandler()->invokeAll('tmgmt_local_translation_access', array($job, $account));
   if (in_array(TMGMT_LOCAL_TRANSLATION_ACCESS_DENY, $access, TRUE)) {
     $rights[$account->id()][$job->id()] = FALSE;
     return FALSE;

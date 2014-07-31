@@ -23,12 +23,12 @@ interface TranslatorPluginUiInterface extends PluginInspectionInterface {
   /**
    * Form callback for the plugin settings form.
    */
-  public function pluginSettingsForm($form, FormStateInterface $form_state, Translator $translator, $busy = FALSE);
+  public function pluginSettingsForm(array $form, FormStateInterface $form_state, Translator $translator, $busy = FALSE);
 
   /**
    * Form callback for the checkout settings form.
    */
-  public function checkoutSettingsForm($form, FormStateInterface $form_state, Job $job);
+  public function checkoutSettingsForm(array $form, FormStateInterface $form_state, Job $job);
 
   /**
    * Retrieves information about a translation job.
@@ -44,21 +44,21 @@ interface TranslatorPluginUiInterface extends PluginInspectionInterface {
   /**
    * Form callback for the job item review form.
    */
-  public function reviewForm($form, FormStateInterface $form_state, JobItem $item);
+  public function reviewForm(array $form, FormStateInterface $form_state, JobItem $item);
 
   /**
    * Form callback for the data item element form.
    */
-  public function reviewDataItemElement($form, FormStateInterface $form_state, $data_item_key, $parent_key, array $data_item, JobItem $item);
+  public function reviewDataItemElement(array $form, FormStateInterface $form_state, $data_item_key, $parent_key, array $data_item, JobItem $item);
 
   /**
    * Validation callback for the job item review form.
    */
-  public function reviewFormValidate($form, FormStateInterface $form_state, JobItem $item);
+  public function reviewFormValidate(array $form, FormStateInterface $form_state, JobItem $item);
 
   /**
    * Submit callback for the job item review form.
    */
-  public function reviewFormSubmit($form, FormStateInterface $form_state, JobItem $item);
+  public function reviewFormSubmit(array $form, FormStateInterface $form_state, JobItem $item);
 
 }

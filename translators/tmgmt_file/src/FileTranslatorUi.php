@@ -21,7 +21,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function pluginSettingsForm($form, FormStateInterface $form_state, Translator $translator, $busy = FALSE) {
+  public function pluginSettingsForm(array $form, FormStateInterface $form_state, Translator $translator, $busy = FALSE) {
     $form['export_format'] = array(
       '#type' => 'radios',
       '#title' => t('Export to'),
@@ -65,7 +65,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function checkoutSettingsForm($form, FormStateInterface $form_state, Job $job) {
+  public function checkoutSettingsForm(array $form, FormStateInterface $form_state, Job $job) {
     if ($job->getTranslator()->getSetting('allow_override')) {
       $form['export_format'] = array(
         '#type' => 'radios',

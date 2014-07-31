@@ -45,7 +45,7 @@ class TMGMTLocalTaskUIController extends EntityDefaultUIController {
   /**
    * {@inheritdoc}
    */
-  public function operationForm($form, FormStateInterface $form_state, $entity, $op) {
+  public function operationForm(array $form, FormStateInterface $form_state, $entity, $op) {
     switch ($op) {
       case 'delete':
         $confirm_question = t('Are you sure you want to delete the translation task %label?', array('%label' => $entity->label()));

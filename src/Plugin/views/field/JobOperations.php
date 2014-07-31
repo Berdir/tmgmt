@@ -42,7 +42,7 @@ class JobOperations extends FieldPluginBase {
         'title' => t('abort'),
       );
     }
-    if ($job->isDeletable() && user_access('administer tmgmt')) {
+    if ($job->isDeletable() && \Drupal::currentUser()->hasPermission('administer tmgmt')) {
       $element['#links']['delete'] = array(
         'route_name' => 'tmgmt.job_entity_delete',
         'route_parameters' => array('tmgmt_job' => $job->id()),
