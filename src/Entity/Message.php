@@ -7,10 +7,9 @@
 
 namespace Drupal\tmgmt\Entity;
 
-use Drupal\aggregator\Annotation\AggregatorFetcher;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * Entity class for the tmgmt_message entity.
@@ -33,34 +32,34 @@ class Message extends ContentEntityBase {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['mid'] = FieldDefinition::create('integer')
+    $fields['mid'] = BaseFieldDefinition::create('integer')
       ->setLabel('Message ID')
       ->setReadOnly(TRUE);;
-    $fields['uuid'] = FieldDefinition::create('uuid')
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The node UUID.'))
       ->setReadOnly(TRUE);
-    $fields['tjid'] = FieldDefinition::create('entity_reference')
+    $fields['tjid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Job reference'))
       ->setSetting('target_type', 'tmgmt_job');
-    $fields['tjiid'] = FieldDefinition::create('entity_reference')
+    $fields['tjiid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Job item reference'))
       ->setSetting('target_type', 'tmgmt_job_item');
-    $fields['type'] = FieldDefinition::create('string')
+    $fields['type'] = BaseFieldDefinition::create('string')
       ->setLabel('Message type')
       ->setDefaultValue('status');
-    $fields['uid'] = FieldDefinition::create('entity_reference')
+    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Actor'))
       ->setDescription(t('The user who performed the action.'))
       ->setSettings(array(
         'target_type' => 'user',
       ))
       ->setDefaultValue(0);
-    $fields['message'] = FieldDefinition::create('string')
+    $fields['message'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Message'));
-    $fields['variables'] = FieldDefinition::create('map')
+    $fields['variables'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Variables'));
-    $fields['created'] = FieldDefinition::create('created')
+    $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel('Created time');
     return $fields;
   }

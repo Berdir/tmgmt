@@ -8,12 +8,10 @@
 namespace Drupal\tmgmt_local\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\Entity;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
-use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
@@ -47,25 +45,25 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['tltid'] = FieldDefinition::create('integer')
+    $fields['tltid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Local task ID'))
       ->setDescription(t('The local task ID.'))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
 
-    $fields['tjid'] = FieldDefinition::create('entity_reference')
+    $fields['tjid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Job'))
       ->setDescription(t('The Job for this task.'))
       ->setReadOnly(TRUE)
       ->setSetting('target_type', 'tmgmt_job')
       ->setDefaultValue(0);
 
-    $fields['uuid'] = FieldDefinition::create('uuid')
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The node UUID.'))
       ->setReadOnly(TRUE);
 
-    $fields['title'] = FieldDefinition::create('string')
+    $fields['title'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Title'))
       ->setDescription(t('The title of this local task.'))
       ->setDefaultValue('')
@@ -78,7 +76,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
       ))
       ->setDisplayConfigurable('form', TRUE);
 
-    $fields['uid'] = FieldDefinition::create('entity_reference')
+    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Owner'))
       ->setDescription(t('The user that created the local task.'))
       ->setSettings(array(
@@ -86,7 +84,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
       ))
       ->setDefaultValue(0);
 
-    $fields['tuid'] = FieldDefinition::create('entity_reference')
+    $fields['tuid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Assigned translator'))
       ->setDescription(t('The translator assigned to this task.'))
       ->setSettings(array(
@@ -94,21 +92,21 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
       ))
       ->setDefaultValue(0);
 
-    $fields['status'] = FieldDefinition::create('integer')
+    $fields['status'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Local task status'))
       ->setDescription(t('The local task status.'))
       ->setDefaultValue(TMGMT_LOCAL_TASK_STATUS_UNASSIGNED);
 
-    $fields['loop_count'] = FieldDefinition::create('integer')
+    $fields['loop_count'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Loop count'))
       ->setDescription(t('Counter for how many times task was returned to translator.'))
       ->setDefaultValue(TMGMT_LOCAL_TASK_STATUS_UNASSIGNED);
 
-    $fields['created'] = FieldDefinition::create('created')
+    $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
       ->setDescription(t('The time that the job was created.'));
 
-    $fields['changed'] = FieldDefinition::create('changed')
+    $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the job was last edited.'));
     return $fields;

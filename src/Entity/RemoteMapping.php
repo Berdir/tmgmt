@@ -9,7 +9,7 @@ namespace Drupal\tmgmt\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * Entity class for the tmgmt_remote entity.
@@ -32,38 +32,38 @@ class RemoteMapping extends ContentEntityBase {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['trid'] = FieldDefinition::create('integer')
+    $fields['trid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Remote mapping ID'))
       ->setReadOnly(TRUE);
-    $fields['uuid'] = FieldDefinition::create('uuid')
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The node UUID.'))
       ->setReadOnly(TRUE);
-    $fields['tjid'] = FieldDefinition::create('entity_reference')
+    $fields['tjid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Job reference'))
       ->setSetting('target_type', 'tmgmt_job');
-    $fields['tjiid'] = FieldDefinition::create('entity_reference')
+    $fields['tjiid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Job item reference'))
       ->setSetting('target_type', 'tmgmt_job_item');
-    $fields['data_item_key'] = FieldDefinition::create('string')
+    $fields['data_item_key'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Data Item Key'));
-    $fields['remote_identifier_1'] = FieldDefinition::create('string')
+    $fields['remote_identifier_1'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Remote identifier 1'));
-    $fields['remote_identifier_2'] = FieldDefinition::create('string')
+    $fields['remote_identifier_2'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Remote identifier 2'));
-    $fields['remote_identifier_3'] = FieldDefinition::create('string')
+    $fields['remote_identifier_3'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Remote identifier 3'));
-    $fields['remote_url'] = FieldDefinition::create('uri')
+    $fields['remote_url'] = BaseFieldDefinition::create('uri')
       ->setLabel(t('Remote URL'));
-    $fields['word_count'] = FieldDefinition::create('integer')
+    $fields['word_count'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Word count'))
       ->setDescription(t('Word count provided by the remote service.'));
-    $fields['amount'] = FieldDefinition::create('integer')
+    $fields['amount'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Amount'))
       ->setDescription(t('Amount charged for the remote translation job.'));
-    $fields['currency'] = FieldDefinition::create('string')
+    $fields['currency'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Currency'));
-    $fields['remote_data'] = FieldDefinition::create('map')
+    $fields['remote_data'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Remote data'));
     return $fields;
   }

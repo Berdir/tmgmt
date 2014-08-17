@@ -10,7 +10,7 @@ namespace Drupal\tmgmt\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -54,28 +54,28 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['tjid'] = FieldDefinition::create('integer')
+    $fields['tjid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Node ID'))
       ->setDescription(t('The Job ID.'))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
 
-    $fields['uuid'] = FieldDefinition::create('uuid')
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The node UUID.'))
       ->setReadOnly(TRUE);
 
-    $fields['source_language'] = FieldDefinition::create('language')
+    $fields['source_language'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))
       ->setDescription(t('The source language.'))
       ->setDefaultValue(LanguageInterface::LANGCODE_NOT_SPECIFIED);
 
-    $fields['target_language'] = FieldDefinition::create('language')
+    $fields['target_language'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))
       ->setDescription(t('The target language.'))
       ->setDefaultValue(LanguageInterface::LANGCODE_NOT_SPECIFIED);
 
-    $fields['label'] = FieldDefinition::create('string')
+    $fields['label'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Label'))
       ->setDescription(t('The label of this job.'))
       ->setDefaultValue('')
@@ -88,7 +88,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
       ))
       ->setDisplayConfigurable('form', TRUE);
 
-    $fields['uid'] = FieldDefinition::create('entity_reference')
+    $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Owner'))
       ->setDescription(t('The user that is the job owner.'))
       ->setSettings(array(
@@ -96,35 +96,35 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
       ))
       ->setDefaultValue(0);
 
-    $fields['translator'] = FieldDefinition::create('entity_reference')
+    $fields['translator'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Translator'))
       ->setDescription(t('The selected translator'))
       ->setSettings(array(
         'target_type' => 'tmgmt_translator',
       ));
 
-    $fields['settings'] = FieldDefinition::create('map')
+    $fields['settings'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Settings'))
       ->setDescription(t('Translator specific configuration and context information for this job.'))
       ->setDefaultValue(array());
 
-    $fields['reference'] = FieldDefinition::create('string')
+    $fields['reference'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Reference'))
       ->setDescription(t('Remote reference of this job'))
       ->setDefaultValue('')
       ->setSettings(array(
         'max_length' => 255,
       ));
-    $fields['state'] = FieldDefinition::create('integer')
+    $fields['state'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Job state'))
       ->setDescription(t('The job state.'))
       ->setDefaultValue(TMGMT_JOB_STATE_UNPROCESSED);
 
-    $fields['created'] = FieldDefinition::create('created')
+    $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
       ->setDescription(t('The time that the job was created.'));
 
-    $fields['changed'] = FieldDefinition::create('changed')
+    $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the job was last edited.'));
     return $fields;

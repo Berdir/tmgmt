@@ -10,7 +10,7 @@ namespace Drupal\tmgmt\Tests;
 /**
  * Verifies basic functionality of the user interface
  *
- * @group
+ * @group tmgmt
  */
 class TMGMTUiTest extends TMGMTTestBase {
 

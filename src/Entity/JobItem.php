@@ -12,7 +12,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
 use Drupal\tmgmt\TMGMTException;
 
@@ -54,75 +54,75 @@ class JobItem extends ContentEntityBase {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['tjiid'] = FieldDefinition::create('integer')
+    $fields['tjiid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Job Item ID'))
       ->setDescription(t('The Job Item ID.'))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
 
-    $fields['tjid'] = FieldDefinition::create('entity_reference')
+    $fields['tjid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Job'))
       ->setDescription(t('The Job.'))
       ->setReadOnly(TRUE)
       ->setSetting('target_type', 'tmgmt_job')
       ->setDefaultValue(0);
 
-    $fields['uuid'] = FieldDefinition::create('uuid')
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The job item UUID.'))
       ->setReadOnly(TRUE);
 
-    $fields['plugin'] = FieldDefinition::create('string')
+    $fields['plugin'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Plugin'))
       ->setDescription(t('The plugin of this job item.'))
       ->setSettings(array(
         'max_length' => 255,
       ));
 
-    $fields['item_type'] = FieldDefinition::create('string')
+    $fields['item_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Item Type'))
       ->setDescription(t('The item type of this job item.'))
       ->setSettings(array(
         'max_length' => 255,
       ));
 
-    $fields['item_id'] = FieldDefinition::create('string')
+    $fields['item_id'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Item ID'))
       ->setDescription(t('The item ID of this job item.'))
       ->setSettings(array(
         'max_length' => 255,
       ));
 
-    $fields['data'] = FieldDefinition::create('string_long')
+    $fields['data'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Data'))
       ->setDescription(t('The source data'));
 
-    $fields['state'] = FieldDefinition::create('integer')
+    $fields['state'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Job item state'))
       ->setDescription(t('The job item state'))
       ->setDefaultValue(TMGMT_JOB_ITEM_STATE_ACTIVE);
 
-    $fields['changed'] = FieldDefinition::create('changed')
+    $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the job was last edited.'));
 
-    $fields['count_pending'] = FieldDefinition::create('integer')
+    $fields['count_pending'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Pending count'))
       ->setSetting('unsigned', TRUE);
 
-    $fields['count_translated'] = FieldDefinition::create('integer')
+    $fields['count_translated'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Translated count'))
       ->setSetting('unsigned', TRUE);
 
-    $fields['count_reviewed'] = FieldDefinition::create('integer')
+    $fields['count_reviewed'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Reviewed count'))
       ->setSetting('unsigned', TRUE);
 
-    $fields['count_accepted'] = FieldDefinition::create('integer')
+    $fields['count_accepted'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Accepted count'))
       ->setSetting('unsigned', TRUE);
 
-    $fields['word_count'] = FieldDefinition::create('integer')
+    $fields['word_count'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Word count'))
       ->setSetting('unsigned', TRUE);
 

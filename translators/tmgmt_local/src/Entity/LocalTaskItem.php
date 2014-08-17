@@ -10,12 +10,10 @@ namespace Drupal\tmgmt_local\Entity;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Annotation\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\Entity;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\FieldDefinition;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 
 /**
@@ -45,73 +43,73 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['tltiid'] = FieldDefinition::create('integer')
+    $fields['tltiid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Local Task ID'))
       ->setDescription(t('The Local Task Item ID.'))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
 
-    $fields['tltid'] = FieldDefinition::create('entity_reference')
+    $fields['tltid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Local task'))
       ->setDescription(t('The local task.'))
       ->setReadOnly(TRUE)
       ->setSetting('target_type', 'tmgmt_local_task');
 
-    $fields['tjiid'] = FieldDefinition::create('entity_reference')
+    $fields['tjiid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Job Item'))
       ->setDescription(t('The Job Item.'))
       ->setReadOnly(TRUE)
       ->setSetting('target_type', 'tmgmt_job_item');
 
-    $fields['uuid'] = FieldDefinition::create('uuid')
+    $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
       ->setDescription(t('The job item UUID.'))
       ->setReadOnly(TRUE);
 
-    $fields['item_type'] = FieldDefinition::create('string')
+    $fields['item_type'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Item Type'))
       ->setDescription(t('The item type of this job item.'))
       ->setSettings(array(
         'max_length' => 255,
       ));
 
-    $fields['item_id'] = FieldDefinition::create('string')
+    $fields['item_id'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Item ID'))
       ->setDescription(t('The item ID of this job item.'))
       ->setSettings(array(
         'max_length' => 255,
       ));
 
-    $fields['data'] = FieldDefinition::create('string_long')
+    $fields['data'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Data'))
       ->setDescription(t('The source data'));
 
-    $fields['status'] = FieldDefinition::create('integer')
+    $fields['status'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Local task item status'))
       ->setDescription(t('The local task item status'))
       ->setDefaultValue(TMGMT_LOCAL_TASK_ITEM_STATUS_PENDING);
 
-    $fields['changed'] = FieldDefinition::create('changed')
+    $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the job was last edited.'));
 
-    $fields['count_pending'] = FieldDefinition::create('integer')
+    $fields['count_pending'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Pending count'))
       ->setSetting('unsigned', TRUE);
 
-    $fields['count_translated'] = FieldDefinition::create('integer')
+    $fields['count_translated'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Translated count'))
       ->setSetting('unsigned', TRUE);
 
-    $fields['count_reviewed'] = FieldDefinition::create('integer')
+    $fields['count_reviewed'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Reviewed count'))
       ->setSetting('unsigned', TRUE);
 
-    $fields['count_accepted'] = FieldDefinition::create('integer')
+    $fields['count_accepted'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Accepted count'))
       ->setSetting('unsigned', TRUE);
 
-    $fields['word_count'] = FieldDefinition::create('integer')
+    $fields['word_count'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Word count'))
       ->setSetting('unsigned', TRUE);
 
