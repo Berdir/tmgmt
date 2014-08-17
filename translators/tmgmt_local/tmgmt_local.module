@@ -781,7 +781,7 @@ function tmgmt_local_capabilities($source_language = NULL, $target_language = NU
   }
 
   // Join only active users.
-  $query->innerJoin('users', 'u', 'u.uid = ts.entity_id AND u.status = 1');
+  $query->innerJoin('users_field_data', 'u', 'u.uid = ts.entity_id AND u.status = 1');
   $query->fields('u', array('uid', 'name', 'mail'));
 
   if (!empty($uids)) {
