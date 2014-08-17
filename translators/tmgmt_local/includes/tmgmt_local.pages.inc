@@ -233,8 +233,7 @@ function tmgmt_local_translation_form_save_as_completed_submit($form, FormStateI
   }
   else {
     // If there are more task items, redirect back to the task.
-    $uri = $task->urlInfo();
-    $form_state['redirect_route'] = $uri;
+    $form_state->setRedirectUrl($task->urlInfo());
   }
 
   /**

@@ -218,7 +218,7 @@ class JobItemForm extends TmgmtFormBase {
       // Check if the item could be saved and accepted successfully and redirect
       // to the job item view if that is the case.
       if ($item->isAccepted()) {
-        $form_state['redirect_route'] = $item->getJob()->urlInfo();
+        $form_state->setRedirectUrl($item->getJob()->urlInfo());
       }
       // Print all messages that have been saved while accepting the reviewed
       // translation.
@@ -239,8 +239,7 @@ class JobItemForm extends TmgmtFormBase {
    * {@inheritdoc}
    */
   public function delete(array $form, FormStateInterface $form_state) {
-    $entity = $this->entity;
-    $form_state['redirect'] = 'admin/tmgmt/items/' . $entity->id() . '/delete';
+    $form_state->setRedirectUrl($this->entity->urlInfo('delete-form'));
   }
 
 

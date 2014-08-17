@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_content;
 
 use Drupal\Component\Utility\String;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\SourcePluginUiBase;
@@ -232,7 +233,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
    */
   public function overviewSearchFormRedirect(array $form, FormStateInterface $form_state, $type) {
     if ($form_state['triggering_element']['#id'] == 'edit-search-cancel') {
-      $form_state['redirect_route'] = new Url('tmgmt.source_overview', array('plugin' => 'content', 'item_type' => $type));
+      $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'content', 'item_type' => $type));
       return TRUE;
     }
     elseif ($form_state['triggering_element']['#id'] == 'edit-search-submit') {
@@ -241,7 +242,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
       foreach ($form_state['values']['search'] as $key => $value) {
         $query[$key] = $value;
       }
-      $form_state['redirect_route'] = new Url('tmgmt.source_overview', array('plugin' => 'content', 'item_type' => $type), array('query' => $query));
+      $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'content', 'item_type' => $type), array('query' => $query));
       return TRUE;
     }
   }
@@ -357,8 +358,9 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
    * {@inheritdoc}
    */
   public function overviewFormValidate(array $form, FormStateInterface $form_state, $type) {
-    if (!empty($form_state['values']['search']['target_language']) && $form_state['values']['search']['langcode'] == $form_state['values']['search']['target_language']) {
-      \Drupal::formBuilder()->setErrorByName('search[target_language]', $form_state, $this->t('The source and target languages must not be the same.'));
+    $target_language = $form_state->getValue(array('search', 'target_language'));
+    if (!empty($target_language) && $form_state->getValue(array('search', 'langcode')) == $target_language) {
+      $form_state->setErrorByName('search[target_language]', $this->t('The source and target languages must not be the same.'));
     }
   }
 
@@ -410,7 +412,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     $redirects = tmgmt_ui_job_checkout_multiple($jobs);
     if ($redirects) {
       tmgmt_ui_redirect_queue_set($redirects, current_path());
-      $form_state['redirect'] = tmgmt_ui_redirect_queue_dequeue();
+      $form_state->setRedirect(tmgmt_ui_redirect_queue_dequeue());
 
       drupal_set_message(format_plural(count($redirects), $this->t('One job needs to be checked out.'), $this->t('@count jobs need to be checked out.')));
     }

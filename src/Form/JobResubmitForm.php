@@ -53,7 +53,7 @@ class JobResubmitForm extends EntityConfirmFormBase {
       array('@url' => url('admin/tmgmt/jobs/' . $this->entity->id()), '@id' => $this->entity->id()));
 
     drupal_set_message(t('The aborted job has been duplicated. You can resubmit it now.'));
-    $form_state['redirect_route'] = $new_job->urlInfo();
+    $form_state->setRedirectUrl($new_job->urlInfo());
   }
 
 }

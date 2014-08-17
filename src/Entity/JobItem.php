@@ -26,7 +26,8 @@ use Drupal\tmgmt\TMGMTException;
  *   controllers = {
  *     "access" = "Drupal\tmgmt\Entity\Controller\JobItemAccessControlHandler",
  *     "form" = {
- *       "edit" = "Drupal\tmgmt\Form\JobItemForm"
+ *       "edit" = "Drupal\tmgmt\Form\JobItemForm",
+ *       "delete" = "Drupal\tmgmt\Form\JobItemDeleteForm"
  *     },
  *   },
  *   base_table = "tmgmt_job_item",
@@ -36,6 +37,7 @@ use Drupal\tmgmt\TMGMTException;
  *   },
  *   links = {
  *     "canonical" = "tmgmt.job_item_entity",
+ *     "delete-form" = "tmgmt.job_item_delete",
  *   }
  * )
  *

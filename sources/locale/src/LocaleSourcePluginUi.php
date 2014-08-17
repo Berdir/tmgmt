@@ -284,10 +284,9 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
       $job->addItem('locale', $type, $item);
     }
 
-    $form_state['redirect'] = array(
-      'admin/tmgmt/jobs/' . $job->id(),
-      array('query' => array('destination' => current_path()))
-    );
+    $url = $job->urlInfo();
+    $url->setOption('destination', current_path());
+    $form_state->setRedirectUrl($url);
     drupal_set_message(t('One job needs to be checked out.'));
   }
 
@@ -314,7 +313,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
         $query[$key] = $value;
       }
 
-      $form_state['redirect_route'] = new Url('tmgmt.source_overview', array('plugin' => 'locale', 'item_type' => $type), array('query' => $query));
+      $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'locale', 'item_type' => $type), array('query' => $query));
       return TRUE;
     }
   }

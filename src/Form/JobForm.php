@@ -425,10 +425,10 @@ class JobForm extends TmgmtFormBase {
     $translator = $job->getTranslator();
     // Check translator availability.
     if (!$translator->isAvailable()) {
-      \Drupal::formBuilder()->setErrorByName('translator', $form_state, $translator->getNotAvailableReason());
+      $form_state->setErrorByName('translator', $translator->getNotAvailableReason());
     }
     elseif (!$translator->canTranslate($job)) {
-      \Drupal::formBuilder()->setErrorByName('translator', $form_state, $translator->getNotCanTranslateReason($job));
+      $form_state->setErrorByName('translator', $translator->getNotCanTranslateReason($job));
     }
   }
 
@@ -458,8 +458,6 @@ class JobForm extends TmgmtFormBase {
     $entity = $this->entity;
     $status = $entity->save();
 
-    // Per default we want to redirect the user to the overview.
-    $form_state['redirect_route'] = new Url('view.tmgmt_ui_job_overview.page_1');
     // Everything below this line is only invoked if the 'Submit to translator'
     // button was clicked.
     if ($form_state['triggering_element']['#value'] == $form['actions']['submit']['#value']) {
@@ -467,17 +465,20 @@ class JobForm extends TmgmtFormBase {
         // Don't redirect the user if the translation request failed but retain
         // existing destination parameters so we can redirect once the request
         // finished successfully.
-        unset($form_state['redirect_route']);
         unset($_GET['destination']);
       }
       else if ($redirect = tmgmt_ui_redirect_queue_dequeue()) {
         // Proceed to the next redirect queue item, if there is one.
-        $form_state['redirect_route'] = $redirect;
+        $form_state->setRedirect($redirect);
       }
       else {
         // Proceed to the defined destination if there is one.
-        $form_state['redirect'] = tmgmt_ui_redirect_queue_destination($form_state['redirect']);
+        $form_state->setRedirect(tmgmt_ui_redirect_queue_destination($form_state->getRedirect()));
       }
+    }
+    else {
+      // Per default we want to redirect the user to the overview.
+      $form_state->setRedirect('view.tmgmt_ui_job_overview.page_1');
     }
   }
 
@@ -523,8 +524,7 @@ class JobForm extends TmgmtFormBase {
    * {@inheritdoc}
    */
   public function delete(array $form, FormStateInterface $form_state) {
-    $entity = $this->entity;
-    $form_state['redirect'] = 'admin/tmgmt/jobs/' . $entity->id() . '/delete';
+    $form_state->setRedirectUrl($this->entity->urlInfo('delete-form'));
   }
 
   /**

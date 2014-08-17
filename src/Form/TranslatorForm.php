@@ -195,15 +195,14 @@ class TranslatorForm extends EntityForm {
       drupal_set_message(format_string('%label configuration has been created.', array('%label' => $entity->label())));
     }
 
-    $form_state['redirect'] = 'admin/config/regional/tmgmt_translator';
+    $form_state->setRedirect('tmgmt.translator_list');
   }
 
   /**
    * {@inheritdoc}
    */
   public function delete(array $form, FormStateInterface $form_state) {
-    $entity = $this->entity;
-    $form_state['redirect'] = 'admin/config/regional/tmgmt_translator/manage/' . $entity->id() . '/delete';
+    $form_state->setRedirectUrl($this->entity->urlInfo('delete-form'));
   }
 
 

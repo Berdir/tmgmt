@@ -30,6 +30,7 @@ use Drupal\user\UserInterface;
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\JobForm",
  *       "abort" = "Drupal\tmgmt\Form\JobAbortForm",
+ *       "delete" = "Drupal\tmgmt\Form\JobDeleteForm",
  *       "resubmit" = "Drupal\tmgmt\Form\JobResubmitForm",
  *     }
  *   },
@@ -42,7 +43,8 @@ use Drupal\user\UserInterface;
  *   links = {
  *     "canonical" = "tmgmt.job_entity",
  *     "abort-form" = "tmgmt.job_entity_abort",
- *     "resubmit-form" = "tmgmt.job_entity_resubmi",
+ *     "delete-form" = "tmgmt.job_entity_delete",
+ *     "resubmit-form" = "tmgmt.job_entity_resubmit",
  *   }
  * )
  *

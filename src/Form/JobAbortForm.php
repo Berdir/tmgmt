@@ -54,7 +54,7 @@ class JobAbortForm extends EntityConfirmFormBase {
         }
       }
     }
-    $form_state['redirect_route'] = $this->entity->urlInfo();
+    $form_state->setRedirectUrl($this->entity->urlInfo());
   }
 
 }

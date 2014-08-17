@@ -112,9 +112,9 @@ class ContentTranslateForm extends FormBase {
    * {@inheritdoc}
    */
   function validateForm(array &$form, FormStateInterface $form_state) {
-    $selected = array_filter($form_state['values']['languages']);
+    $selected = array_filter($form_state->getValue('languages'));
     if (empty($selected)) {
-      \Drupal::formBuilder()->setErrorByName('languages', $form_state,$this->t('You have to select at least one language for requesting a translation.'));
+      $form_state->setErrorByName('languages', $this->t('You have to select at least one language for requesting a translation.'));
     }
   }
 
