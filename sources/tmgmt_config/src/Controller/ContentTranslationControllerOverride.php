@@ -23,7 +23,7 @@ class ContentTranslationControllerOverride extends ContentTranslationController 
    */
   public function overview(Request $request) {
     $build = parent::overview($request);
-    if (\Drupal::entityManager()->getAccessController('tmgmt_job')->createAccess()) {
+    if (\Drupal::entityManager()->getAccessControlHandler('tmgmt_job')->createAccess()) {
       $build = \Drupal::formBuilder()->getForm('Drupal\tmgmt_content\Form\ContentTranslateForm', $build);
     }
     return $build;

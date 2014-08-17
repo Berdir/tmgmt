@@ -2,21 +2,21 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\Entity\Controller\JobAccessController.
+ * Contains \Drupal\tmgmt\Entity\Controller\JobAccessControlHandler.
  */
 
 namespace Drupal\tmgmt\Entity\Controller;
 
-use Drupal\Core\Entity\EntityAccessController;
+use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Access controller for the tmgmt entity.
+ * Access control handler for the job entity.
  *
  * @see \Drupal\tmgmt\Plugin\Core\Entity\Job.
  */
-class JobAccessController extends EntityAccessController {
+class JobAccessControlHandler extends EntityAccessControlHandler {
 
   /**
    * {@inheritdoc}

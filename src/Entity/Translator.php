@@ -23,7 +23,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *       "add" = "Drupal\tmgmt\Form\TranslatorForm"
  *     },
  *     "list_builder" = "Drupal\tmgmt\Entity\Controller\TranslatorListBuilder",
- *     "access" = "Drupal\tmgmt\Entity\Controller\TranslatorAccessController",
+ *     "access" = "Drupal\tmgmt\Entity\Controller\TranslatorAccessControlHandler",
  *   },
  *   uri_callback = "tmgmt_translator_uri",
  *   config_prefix = "translator",

@@ -24,7 +24,7 @@ use Drupal\tmgmt\TMGMTException;
  *   label = @Translation("Translation Job Item"),
  *   module = "tmgmt",
  *   controllers = {
- *     "access" = "Drupal\tmgmt\Entity\Controller\JobItemAccessController",
+ *     "access" = "Drupal\tmgmt\Entity\Controller\JobItemAccessControlHandler",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\JobItemForm"
  *     },

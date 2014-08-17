@@ -2,23 +2,23 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\Entity\Controller\TranslatorAccessController
+ * Contains \Drupal\tmgmt\Entity\Controller\TranslatorAccessControlHandler
  */
 
 namespace Drupal\tmgmt\Entity\Controller;
 
-use Drupal\Core\Entity\EntityAccessController;
+use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Access controller for the translator entity.
+ * Access control handler for the translator entity.
  *
  * @see \Drupal\tmgmt\Plugin\Core\Entity\Translator.
  *
  * @ingroup tmgmt_translator
  */
-class TranslatorAccessController extends EntityAccessController {
+class TranslatorAccessControlHandler extends EntityAccessControlHandler {
 
   /**
    * {@inheritdoc}
