@@ -151,12 +151,12 @@ abstract class TMGMTTestBase extends WebTestBase {
    */
   function createTranslator() {
     $translator = entity_create('tmgmt_translator', array());
-    $translator->name = strtolower($this->randomName());
-    $translator->label = $this->randomName();
+    $translator->name = strtolower($this->randomMachineName());
+    $translator->label = $this->randomMachineName();
     $translator->plugin = 'test_translator';
     $translator->settings = array(
-      'key' => $this->randomName(),
-      'another_key' => $this->randomName(),
+      'key' => $this->randomMachineName(),
+      'another_key' => $this->randomMachineName(),
     );
     $this->assertEqual(SAVED_NEW, $translator->save());
     return $translator;

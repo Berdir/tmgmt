@@ -55,12 +55,12 @@ abstract class TMGMTUnitTestBase extends KernelTestBase {
    */
   function createTranslator() {
     $translator = entity_create('tmgmt_translator', array(
-      'name' => strtolower($this->randomName()),
-      'label' => $this->randomName(),
+      'name' => strtolower($this->randomMachineName()),
+      'label' => $this->randomMachineName(),
       'plugin' => 'test_translator',
       'settings' => array(
-        'key' => $this->randomName(),
-        'another_key' => $this->randomName(),
+        'key' => $this->randomMachineName(),
+        'another_key' => $this->randomMachineName(),
       )
     ));
     $this->assertEqual(SAVED_NEW, $translator->save());

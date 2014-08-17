@@ -89,7 +89,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
       'entity_type' => $this->entity_type,
       'field_name' => 'image_test',
       'bundle' => $this->entity_type,
-      'label' => $this->image_label = $this->randomName(),
+      'label' => $this->image_label = $this->randomMachineName(),
     ))->save();
     file_unmanaged_copy(DRUPAL_ROOT . '/core/misc/druplicon.png', 'public://example.jpg');
     $this->image = entity_create('file', array(
@@ -108,14 +108,14 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     );
     $entity_test = entity_create($this->entity_type, $values);
     $translation = $entity_test->getTranslation('en');
-    $translation->name->value = $this->randomName();
-    $translation->field_test_text->value = $this->randomName();
+    $translation->name->value = $this->randomMachineName();
+    $translation->field_test_text->value = $this->randomMachineName();
     $translation->field_test_text->format = 'text_plain';
-    $translation->field_test_text[1]->value = $this->randomName();
+    $translation->field_test_text[1]->value = $this->randomMachineName();
     $translation->field_test_text[1]->format = 'text_plain';
     $translation->image_test->target_id = $this->image->id();
-    $translation->image_test->alt = $alt = $this->randomName();
-    $translation->image_test->title = $title = $this->randomName();
+    $translation->image_test->alt = $alt = $this->randomMachineName();
+    $translation->image_test->title = $title = $this->randomMachineName();
     $entity_test->save();
 
     $job = tmgmt_job_create('en', 'de');
@@ -201,12 +201,12 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
       'type' => $type->id(),
       'langcode' => 'en',
     ));
-    $node->title->value = $this->randomName();
-    $node->body->value = $this->randomName();
-    $node->body->summary = $this->randomName();
+    $node->title->value = $this->randomMachineName();
+    $node->body->value = $this->randomMachineName();
+    $node->body->summary = $this->randomMachineName();
     $node->body->format = 'text_plain';
-    $node->body[1]->value = $this->randomName();
-    $node->body[1]->summary = $this->randomName();
+    $node->body[1]->value = $this->randomMachineName();
+    $node->body[1]->summary = $this->randomMachineName();
     $node->body[1]->format = 'text_plain';
     $node->save();
 
@@ -263,7 +263,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
    *   Created content type.
    */
   protected function drupalCreateContentType($settings = array()) {
-    $name = strtolower($this->randomName(8));
+    $name = strtolower($this->randomMachineName(8));
     $values = array(
       'type' => $name,
       'name' => $name,

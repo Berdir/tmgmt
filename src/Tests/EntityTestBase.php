@@ -106,7 +106,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
 
     for ($i = 0 ; $i <= 5; $i++) {
       $field_type = $field_types[array_rand($field_types, 1)];
-      $field_name = drupal_strtolower($this->randomName());
+      $field_name = drupal_strtolower($this->randomMachineName());
 
       // Create a field.
       $field = FieldStorageConfig::create(array(
@@ -123,7 +123,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
         'field_name' => $field_name,
         'entity_type' => $entity_name,
         'bundle' => $bundle,
-        'label' => $this->randomName(10),
+        'label' => $this->randomMachineName(10),
         'description' => $this->randomString(30),
         'widget' => array(
           'type' => $field_type == 'text' ? 'text_textfield' : 'text_textarea_with_summary',
@@ -163,9 +163,9 @@ abstract class EntityTestBase extends TMGMTTestBase {
 
         // Create two deltas for each field.
         for ($delta = 0; $delta <= $cardinality; $delta++) {
-          $node[$field_name][$delta]['value'] = $this->randomName(20);
+          $node[$field_name][$delta]['value'] = $this->randomMachineName(20);
           if ($field_storage_config->getType() == 'text_with_summary') {
-            $node[$field_name][$delta]['summary'] = $this->randomName(10);
+            $node[$field_name][$delta]['summary'] = $this->randomMachineName(10);
           }
         }
       }
@@ -189,8 +189,8 @@ abstract class EntityTestBase extends TMGMTTestBase {
    */
   function createTaxonomyTerm($vocabulary) {
     $term = entity_create('taxonomy_term', array(
-      'name' => $this->randomName(),
-      'description' => $this->randomName(),
+      'name' => $this->randomMachineName(),
+      'description' => $this->randomMachineName(),
       'vid' => $vocabulary->vid,
       'langcode' => 'en',
     ));
@@ -202,9 +202,9 @@ abstract class EntityTestBase extends TMGMTTestBase {
 
       // Create two deltas for each field.
       for ($delta = 0; $delta <= $cardinality; $delta++) {
-        $term->getTranslation($field_lang)->get($field_name)->get($delta)->value = $this->randomName(20);
+        $term->getTranslation($field_lang)->get($field_name)->get($delta)->value = $this->randomMachineName(20);
         if ($field_definition->getType() == 'text_with_summary') {
-          $term->getTranslation($field_lang)->get($field_name)->get($delta)->summary = $this->randomName(10);
+          $term->getTranslation($field_lang)->get($field_name)->get($delta)->summary = $this->randomMachineName(10);
         }
       }
     }

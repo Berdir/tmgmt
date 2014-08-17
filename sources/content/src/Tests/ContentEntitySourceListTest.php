@@ -60,24 +60,24 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     $vocabulary1 = entity_create('taxonomy_vocabulary', array(
       'vid' => 'vocab1',
-      'name' => $this->randomName(),
+      'name' => $this->randomMachineName(),
     ));
     $vocabulary1->save();
 
     $term1 = entity_create('taxonomy_term', array(
-      'name' => $this->randomName(),
+      'name' => $this->randomMachineName(),
       'vid' => $vocabulary1->vid,
     ));
     $term1->save();
 
     $vocabulary2 = entity_create('taxonomy_vocabulary', array(
       'vid' => 'vocab2',
-      'name' => $this->randomName(),
+      'name' => $this->randomMachineName(),
     ));
     $vocabulary2->save();
 
     $term2 = entity_create('taxonomy_term', array(
-      'name' => $this->randomName(),
+      'name' => $this->randomMachineName(),
       'vid' => $vocabulary2->vid,
     ));
     $term2->save();
@@ -240,9 +240,9 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     // We need a node with title composed of several words to test
     // "any words" search.
-    $title_part_1 = $this->randomName('4');
-    $title_part_2 = $this->randomName('4');
-    $title_part_3 = $this->randomName('4');
+    $title_part_1 = $this->randomMachineName('4');
+    $title_part_2 = $this->randomMachineName('4');
+    $title_part_3 = $this->randomMachineName('4');
 
     $this->nodes['article']['en'][0]->title = "$title_part_1 $title_part_2 $title_part_3";
     $this->nodes['article']['en'][0]->save();
@@ -266,8 +266,8 @@ class ContentEntitySourceListTest extends EntityTestBase {
       'entity_id' => $this->nodes['article']['en'][0]->id(),
       'field_name' => 'comment',
       'comment_type' => 'comment',
-      'comment_body' => $this->randomName(),
-      'subject' => $this->randomName(),
+      'comment_body' => $this->randomMachineName(),
+      'subject' => $this->randomMachineName(),
     );
     $comment = entity_create('comment', $values);
     $comment->save();

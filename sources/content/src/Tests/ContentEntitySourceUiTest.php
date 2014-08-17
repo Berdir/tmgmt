@@ -262,8 +262,8 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     // Add a comment.
     $this->drupalGet('node/' . $node->id());
     $edit = array(
-      'subject' => $this->randomName(),
-      'comment_body[en][0][value]' => $this->randomName(),
+      'subject' => $this->randomMachineName(),
+      'comment_body[en][0][value]' => $this->randomMachineName(),
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertText(t('Your comment has been posted.'));

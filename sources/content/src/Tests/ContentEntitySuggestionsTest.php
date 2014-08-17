@@ -56,7 +56,7 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
   protected function prepareTranslationSuggestions() {
     // Create a content type with fields.
     // Only the first field is a translatable reference.
-    $type = NodeType::create(['type' => $this->randomName()]);
+    $type = NodeType::create(['type' => $this->randomMachineName()]);
     $type->save();
 
     content_translation_set_config('node', $type->id(), 'enabled', TRUE);
@@ -103,8 +103,8 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
     $references = array();
     for ($i = 0; $i < 4; $i++) {
       $references[$i] = Node::create(array(
-        'title' => $this->randomName(),
-        'body' => $this->randomName(),
+        'title' => $this->randomMachineName(),
+        'body' => $this->randomMachineName(),
         'type' => $type->id(),
       ));
       $references[$i]->save();
@@ -114,7 +114,7 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
     $node = Node::create(array(
       'type' => $type->id(),
       'language' => 'en',
-      'body' => $this->randomName(),
+      'body' => $this->randomMachineName(),
       $field1->getName() => array(
         array(
           'target_id' => $references[0]->id(),
