@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt\TranslatorPluginControllerInterface.
+ * Contains \Drupal\tmgmt\TranslatorPluginControllerInterface.
  */
 
 namespace Drupal\tmgmt;

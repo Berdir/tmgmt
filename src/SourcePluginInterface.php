@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt\SourcePluginControllerInterface.
+ * Contains \Drupal\tmgmt\SourcePluginInterface.
  */
 
 namespace Drupal\tmgmt;

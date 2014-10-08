@@ -874,9 +874,9 @@ class JobItem extends ContentEntityBase {
           // language and links to the review form.
           $job_url = $this->getJob()->url();
           $variables = array(
-            '!source' => l($this->getSourceLabel(), $this->getSystemPath()),
+            '!source' => $this->link($this->getSourceLabel()),
             '@language' => $this->getJob()->getTargetLanguage()->getName(),
-            '!review_url' => url($this->getSystemPath(), array('query' => array('destination' => $job_url))),
+            '!review_url' => $this->url('canonical', array('query' => array('destination' => $job_url))),
           );
           $this->needsReview('The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.', $variables);
         }

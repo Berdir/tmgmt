@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Tests;
 
 use Drupal\Core\Language\Language;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\simpletest\KernelTestBase;
 
 /**
@@ -92,12 +93,8 @@ abstract class TMGMTUnitTestBase extends KernelTestBase {
    *   The language code.
    */
   function addLanguage($langcode) {
-    // Add the language.
-    $edit = array(
-      'id' => $langcode,
-    );
-    $language = new Language($edit);
-    language_save($language);
+    $language = ConfigurableLanguage::createFromLangcode($langcode);
+    $language->save();
   }
 
 }

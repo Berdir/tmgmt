@@ -35,7 +35,7 @@ class TranslatorManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/tmgmt/Translator', $namespaces, $module_handler, 'Drupal\tmgmt\Annotation\TranslatorPlugin');
+    parent::__construct('Plugin/tmgmt/Translator', $namespaces, $module_handler, 'Drupal\tmgmt\TranslatorPluginControllerInterface', 'Drupal\tmgmt\Annotation\TranslatorPlugin');
     $this->alterInfo('tmgmt_translator_info');
     $this->setCacheBackend($cache_backend, 'tmgmt_translator');
   }

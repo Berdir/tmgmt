@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt_file\Format\FormatInterface.
+ * Contains \Drupal\tmgmt_file\Format\FormatInterface.
  */
 
 namespace Drupal\tmgmt_file\Format;

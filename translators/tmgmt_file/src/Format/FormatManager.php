@@ -39,7 +39,7 @@ class FormatManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/tmgmt_file/Format', $namespaces, $module_handler, 'Drupal\tmgmt_file\Annotation\FormatPlugin');
+    parent::__construct('Plugin/tmgmt_file/Format', $namespaces, $module_handler, '\Drupal\tmgmt_file\Format\FormatInterface', 'Drupal\tmgmt_file\Annotation\FormatPlugin');
     $this->alterInfo('tmgmt_file_format_plugin_info');
     $this->setCacheBackend($cache_backend, 'tmgmt_file_format_plugin');
   }
