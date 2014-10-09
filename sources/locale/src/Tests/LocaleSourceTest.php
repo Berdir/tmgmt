@@ -8,6 +8,7 @@ namespace Drupal\tmgmt_locale\Tests;
 
 use Drupal\locale\Gettext;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
+use Drupal\tmgmt\Tests\TMGMTUnitTestBase;
 use Drupal\tmgmt\TMGMTException;
 
 /**
@@ -15,7 +16,7 @@ use Drupal\tmgmt\TMGMTException;
  *
  * @group tmgmt
  */
-class LocaleSourceTest extends TMGMTTestBase {
+class LocaleSourceTest extends TMGMTUnitTestBase {
 
   /**
    * Modules to enable.
@@ -31,12 +32,15 @@ class LocaleSourceTest extends TMGMTTestBase {
     parent::setUp();
     $this->langcode = 'de';
     $this->context = 'default';
+
+    \Drupal::service('router.builder')->rebuild();
+    $this->installSchema('locale', array('locales_source', 'locales_target'));
+
     file_unmanaged_copy(drupal_get_path('module', 'tmgmt_locale') . '/tests/test.de.po', 'translations://', FILE_EXISTS_REPLACE);
     $file = new \stdClass();
     $file->uri = drupal_realpath(drupal_get_path('module', 'tmgmt_locale') . '/tests/test.xx.po');
     $file->langcode = $this->langcode;
     Gettext::fileToDatabase($file, array());
-    $this->addLanguage($this->langcode);
     $this->addLanguage('es');
   }
 

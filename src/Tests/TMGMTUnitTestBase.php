@@ -10,6 +10,7 @@ namespace Drupal\tmgmt\Tests;
 use Drupal\Core\Language\Language;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\simpletest\KernelTestBase;
+use Drupal\tmgmt\Entity\JobItem;
 
 /**
  * Base class for tests.
@@ -94,6 +95,24 @@ abstract class TMGMTUnitTestBase extends KernelTestBase {
   function addLanguage($langcode) {
     $language = ConfigurableLanguage::createFromLangcode($langcode);
     $language->save();
+  }
+
+  /**
+   * Asserts job item language codes.
+   *
+   * @param TMGMTJobItem $job_item
+   *   Job item to check.
+   * @param string $expected_source_lang
+   *   Expected source language.
+   * @param array $actual_lang_codes
+   *   Expected existing language codes (translations).
+   */
+  function assertJobItemLangCodes(JobItem $job_item, $expected_source_lang, array $actual_lang_codes) {
+    $this->assertEqual($job_item->getSourceLangCode(), $expected_source_lang);
+    $existing = $job_item->getExistingLangCodes();
+    sort($existing);
+    sort($actual_lang_codes);
+    $this->assertEqual($existing, $actual_lang_codes);
   }
 
 }

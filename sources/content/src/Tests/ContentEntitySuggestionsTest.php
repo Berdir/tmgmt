@@ -8,8 +8,10 @@
 namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\Core\Language\Language;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldInstanceConfig;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\tmgmt\Tests\TMGMTUnitTestBase;
@@ -33,13 +35,6 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
    */
   public function setUp() {
     parent::setUp();
-
-    $edit = array(
-      'id' => 'de',
-    );
-    $language = new Language($edit);
-    language_save($language);
-
     $this->installEntitySchema('node');
   }
 
@@ -62,7 +57,7 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
     content_translation_set_config('node', $type->id(), 'enabled', TRUE);
 
     $field1 = FieldStorageConfig::create(array(
-      'name' => 'field1',
+      'field_name' => 'field1',
       'entity_type' => 'node',
       'type' => 'entity_reference',
       'cardinality' => -1,
@@ -70,7 +65,7 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
     ));
     $field1->save();
     $field2 = FieldStorageConfig::create(array(
-      'name' => 'field2',
+      'field_name' => 'field2',
       'entity_type' => 'node',
       'type' => 'entity_reference',
       'cardinality' => -1,
@@ -79,14 +74,14 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
     $field2->save();
 
     // Create field instances on the content type.
-    FieldInstanceConfig::create(array(
+    FieldConfig::create(array(
       'field_storage' => $field1,
       'bundle' => $type->id(),
       'label' => 'Field 1',
       'translatable' => FALSE,
       'settings' => array(),
     ))->save();
-    FieldInstanceConfig::create(array(
+    FieldConfig::create(array(
       'field_storage' => $field2,
       'bundle' => $type->id(),
       'label' => 'Field 2',
@@ -95,7 +90,7 @@ class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
     ))->save();
 
     // Make the body field translatable from node.
-    $field = FieldInstanceConfig::loadByName('node', $type->id(), 'body');
+    $field = FieldConfig::loadByName('node', $type->id(), 'body');
     $field->translatable = TRUE;
     $field->save();
 

@@ -524,7 +524,7 @@ class JobItem extends ContentEntityBase {
     if (!isset($message)) {
       $uri = $this->getSourceUri();
       $message = 'The translation for !source has been accepted.';
-      $variables = array('!source' => \Drupal::l($this->getSourceLabel(), Url::fromUri('base://' . $uri['path'])));
+      $variables = array('!source' => $uri['path'] ? \Drupal::l($this->getSourceLabel(), Url::fromUri('base://' . $uri['path'])) : '');
     }
     $return = $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED, $message, $variables, $type);
     // Check if this was the last unfinished job item in this job.
