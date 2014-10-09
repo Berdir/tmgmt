@@ -86,8 +86,8 @@ class FileTranslatorTest extends TMGMTTestBase {
     );
     $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
     // Reset caches and reload job.
-    entity_get_controller('tmgmt_job')->resetCache();
-    entity_get_controller('tmgmt_job_item')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
     $job = tmgmt_job_load($job->id());
 
     // Do the comparison of the translation text and the source. It must be the
@@ -118,8 +118,8 @@ class FileTranslatorTest extends TMGMTTestBase {
       'files[file]' => $translated_file,
     );
     $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
-    entity_get_controller('tmgmt_job')->resetCache();
-    entity_get_controller('tmgmt_job_item')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
     $job = tmgmt_job_load($job->id());
 
     $this->assertIntegrityCheck($job);

@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -33,7 +34,7 @@ class Cartform extends FormBase {
       $uri = $item->getSourceUri();
       $options[$item->id()] = array(
         $item->getSourceType(),
-        (!empty($uri['path']) ? \Drupal::l($item->label(), $uri['path']) : $item->label()),
+        (!empty($uri['path']) ? \Drupal::l($item->label(), Url::fromUri('base://' . $uri['path'])) : $item->label()),
         isset($languages[$item->getSourceLangCode()]) ? $languages[$item->getSourceLangCode()] : t('Unknown'),
       );
     }

@@ -37,7 +37,7 @@ class JobResubmitForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $new_job = $this->entity->cloneAsUnprocessed();
     $new_job->uid = $this->currentUser()->id();
     $new_job->save();
@@ -50,7 +50,7 @@ class JobResubmitForm extends EntityConfirmFormBase {
     $this->entity->addMessage('Job has been duplicated as a new job <a href="@url">#@id</a>.',
       array('@url' => $new_job->url(), '@id' => $new_job->id()));
     $new_job->addMessage('This job is a duplicate of the previously aborted job <a href="@url">#@id</a>',
-      array('@url' => $new_job->url(), '@id' => $this->entity->id()));
+      array('@url' => $this->entity->url(), '@id' => $this->entity->id()));
 
     drupal_set_message(t('The aborted job has been duplicated. You can resubmit it now.'));
     $form_state->setRedirectUrl($new_job->urlInfo());

@@ -301,9 +301,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save as completed'));
 
     // Review and accept the first item.
-    entity_get_controller('tmgmt_job_item')->resetCache(array(1));
-    entity_get_controller('tmgmt_local_task')->resetCache();
-    entity_get_controller('tmgmt_local_task_item')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_local_task')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     $item1 = tmgmt_job_item_load(1);
     $item1->acceptTranslation();
@@ -338,8 +338,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertText(t('Completed'));
     $this->assertText(t('Untranslated'));
 
-    entity_get_controller('tmgmt_local_task')->resetCache();
-    entity_get_controller('tmgmt_local_task_item')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_local_task')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     $task = tmgmt_local_task_load($task->id());
     $this->assertTrue($task->isPending());
@@ -361,8 +361,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->clickLink(t('translate'));
     $this->drupalPostForm(NULL, array(), t('✓'));
 
-    entity_get_controller('tmgmt_local_task')->resetCache();
-    entity_get_controller('tmgmt_local_task_item')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_local_task')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     $task = tmgmt_local_task_load($task->id());
     $this->assertTrue($task->isPending());
@@ -380,8 +380,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($second_task_item->getCountUntranslated(), 0);
 
     // Check the job data.
-    entity_get_controller('tmgmt_job')->resetCache(array($job->id()));
-    entity_get_controller('tmgmt_job_item')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
     $job = tmgmt_job_load($job->id());
     list($item1, $item2) = array_values($job->getItems());
     // The text in the first item should be available for review, the
@@ -399,9 +399,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, array(), t('Save as completed'));
 
     // Review and accept the second item.
-    entity_get_controller('tmgmt_job_item')->resetCache(array(2));
-    entity_get_controller('tmgmt_local_task')->resetCache();
-    entity_get_controller('tmgmt_local_task_item')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_local_task')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     $item1 = tmgmt_job_item_load(2);
     $item1->acceptTranslation();
@@ -431,8 +431,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertText($task->getJob()->label());
     $this->assertText(t('Completed'));
 
-    entity_get_controller('tmgmt_job')->resetCache(array($job->id()));
-    entity_get_controller('tmgmt_job_item')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
     $job = tmgmt_job_load($job->id());
     list($item1, $item2) = array_values($job->getItems());
     // Job was accepted and finished automatically due to the default approve

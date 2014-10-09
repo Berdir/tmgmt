@@ -460,11 +460,11 @@ class JobForm extends TmgmtFormBase {
       }
       else if ($redirect = tmgmt_ui_redirect_queue_dequeue()) {
         // Proceed to the next redirect queue item, if there is one.
-        $form_state->setRedirect(Url::fromUri('base://' . $redirect));
+        $form_state->setRedirectUrl(Url::fromUri('base://' . $redirect));
       }
-      else {
+      elseif ($destination = tmgmt_ui_redirect_queue_destination()) {
         // Proceed to the defined destination if there is one.
-        $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_ui_redirect_queue_destination($form_state->getRedirect())));
+        $form_state->setRedirectUrl(Url::fromUri('base://' . $destination));
       }
     }
     else {

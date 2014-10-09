@@ -9,8 +9,8 @@ namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
 use Drupal\Core\Language\Language;
 
@@ -39,21 +39,8 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     parent::setUp();
 
     // Add the languages.
-    $edit = array(
-      'id' => Language::LANGCODE_NOT_SPECIFIED,
-    );
-    $language = new Language($edit);
-    language_save($language);
-    $edit = array(
-      'id' => 'en',
-    );
-    $language = new Language($edit);
-    language_save($language);
-    $edit = array(
-      'id' => 'de',
-    );
-    $language = new Language($edit);
-    language_save($language);
+    $this->installConfig(['language']);
+    ConfigurableLanguage::createFromLangcode('de')->save();
 
     $this->installEntitySchema('node');
     $this->installEntitySchema('tmgmt_job');
@@ -66,12 +53,12 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     entity_test_install();
 
     // Make the test field translatable.
-    $field = FieldStorageConfig::loadByName('entity_test_mul', 'field_test_text');
-    $field->cardinality = 2;
+    $field_storage = FieldStorageConfig::loadByName('entity_test_mul', 'field_test_text');
+    $field_storage->cardinality = 2;
+    $field_storage->save();
+    $field = FieldConfig::loadByName('entity_test_mul', 'entity_test_mul', 'field_test_text');
+    $field->setTranslatable(TRUE);
     $field->save();
-    $instance = FieldInstanceConfig::loadByName('entity_test_mul', 'entity_test_mul', 'field_test_text');
-    $instance->setTranslatable(TRUE);
-    $instance->save();
 
     // Add an image field and make it translatable.
     $this->installEntitySchema('file');
@@ -132,26 +119,26 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     // Test the name property.
     $this->assertEqual($data['name']['#label'], 'Name');
     $this->assertEqual($data['name'][0]['#label'], 'Delta #0');
-    $this->assertEqual($data['name'][0]['value']['#label'], 'Text value');
+    $this->assertEqual((string) $data['name'][0]['value']['#label'], 'Text value');
     $this->assertEqual($data['name'][0]['value']['#text'], $entity_test->name->value);
     $this->assertEqual($data['name'][0]['value']['#translate'], TRUE);
 
     // Test the test field.
     $this->assertEqual($data['field_test_text']['#label'], 'Test text-field');
     $this->assertEqual($data['field_test_text'][0]['#label'], 'Delta #0');
-    $this->assertEqual($data['field_test_text'][0]['value']['#label'], 'Text value');
+    $this->assertEqual((string) $data['field_test_text'][0]['value']['#label'], 'Text');
     $this->assertEqual($data['field_test_text'][0]['value']['#text'], $entity_test->field_test_text->value);
     $this->assertEqual($data['field_test_text'][0]['value']['#translate'], TRUE);
-    $this->assertEqual($data['field_test_text'][0]['format']['#label'], 'Text format');
+    $this->assertEqual((string) $data['field_test_text'][0]['format']['#label'], 'Text format');
     $this->assertEqual($data['field_test_text'][0]['format']['#text'], $entity_test->field_test_text->format);
     $this->assertEqual($data['field_test_text'][0]['format']['#translate'], FALSE);
     $this->assertFalse(isset($data['field_test_text'][0]['processed']));
 
     $this->assertEqual($data['field_test_text'][1]['#label'], 'Delta #1');
-    $this->assertEqual($data['field_test_text'][1]['value']['#label'], 'Text value');
+    $this->assertEqual((string) $data['field_test_text'][1]['value']['#label'], 'Text');
     $this->assertEqual($data['field_test_text'][1]['value']['#text'], $entity_test->field_test_text[1]->value);
     $this->assertEqual($data['field_test_text'][1]['value']['#translate'], TRUE);
-    $this->assertEqual($data['field_test_text'][1]['format']['#label'], 'Text format');
+    $this->assertEqual((string) $data['field_test_text'][1]['format']['#label'], 'Text format');
     $this->assertEqual($data['field_test_text'][1]['format']['#text'], $entity_test->field_test_text[1]->format);
     $this->assertEqual($data['field_test_text'][1]['format']['#translate'], FALSE);
     $this->assertFalse(isset($data['field_test_text'][1]['processed']));
@@ -164,10 +151,10 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertFalse($image_item['width']['#translate']);
     $this->assertFalse($image_item['height']['#translate']);
     $this->assertTrue($image_item['alt']['#translate']);
-    $this->assertEqual($image_item['alt']['#label'], t("Alternative image text, for the image's 'alt' attribute."));
+    $this->assertEqual($image_item['alt']['#label'], t('Alternative text'));
     $this->assertEqual($image_item['alt']['#text'], $entity_test->image_test->alt);
     $this->assertTrue($image_item['title']['#translate']);
-    $this->assertEqual($image_item['title']['#label'], t("Image title text, for the image's 'title' attribute."));
+    $this->assertEqual($image_item['title']['#label'], t('Title'));
     $this->assertEqual($image_item['title']['#text'], $entity_test->image_test->title);
 
     // Now request a translation and save it back.
@@ -223,7 +210,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     // Test the title property.
     $this->assertEqual($data['title']['#label'], 'Title');
     $this->assertEqual($data['title'][0]['#label'], 'Delta #0');
-    $this->assertEqual($data['title'][0]['value']['#label'], 'Text value');
+    $this->assertEqual((string) $data['title'][0]['value']['#label'], 'Text value');
     $this->assertEqual($data['title'][0]['value']['#text'], $node->title->value);
     $this->assertEqual($data['title'][0]['value']['#translate'], TRUE);
 
@@ -231,25 +218,25 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     // @todo: Fields need better labels, needs to be fixed in core.
     $this->assertEqual($data['body']['#label'], 'Body');
     $this->assertEqual($data['body'][0]['#label'], 'Delta #0');
-    $this->assertEqual($data['body'][0]['value']['#label'], 'Text value');
+    $this->assertEqual((string) $data['body'][0]['value']['#label'], 'Text');
     $this->assertEqual($data['body'][0]['value']['#text'], $node->body->value);
     $this->assertEqual($data['body'][0]['value']['#translate'], TRUE);
-    $this->assertEqual($data['body'][0]['summary']['#label'], 'Summary text value');
+    $this->assertEqual((string) $data['body'][0]['summary']['#label'], 'Summary');
     $this->assertEqual($data['body'][0]['summary']['#text'], $node->body->summary);
     $this->assertEqual($data['body'][0]['summary']['#translate'], TRUE);
-    $this->assertEqual($data['body'][0]['format']['#label'], 'Text format');
+    $this->assertEqual((string) $data['body'][0]['format']['#label'], 'Text format');
     $this->assertEqual($data['body'][0]['format']['#text'], $node->body->format);
     $this->assertEqual($data['body'][0]['format']['#translate'], FALSE);
     $this->assertFalse(isset($data['body'][0]['processed']));
 
     $this->assertEqual($data['body'][1]['#label'], 'Delta #1');
-    $this->assertEqual($data['body'][1]['value']['#label'], 'Text value');
+    $this->assertEqual((string) $data['body'][1]['value']['#label'], 'Text');
     $this->assertEqual($data['body'][1]['value']['#text'], $node->body[1]->value);
     $this->assertEqual($data['body'][1]['value']['#translate'], TRUE);
-    $this->assertEqual($data['body'][1]['summary']['#label'], 'Summary text value');
+    $this->assertEqual((string) $data['body'][1]['summary']['#label'], 'Summary');
     $this->assertEqual($data['body'][1]['summary']['#text'], $node->body[1]->summary);
     $this->assertEqual($data['body'][1]['summary']['#translate'], TRUE);
-    $this->assertEqual($data['body'][1]['format']['#label'], 'Text format');
+    $this->assertEqual((string) $data['body'][1]['format']['#label'], 'Text format');
     $this->assertEqual($data['body'][1]['format']['#text'], $node->body[1]->format);
     $this->assertEqual($data['body'][1]['format']['#translate'], FALSE);
     $this->assertFalse(isset($data['body'][1]['processed']));

@@ -392,7 +392,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), array(), t('Abort job'));
     $this->drupalPostForm(NULL, array(), t('Confirm'));
     // Reload job and check its state.
-    entity_get_controller('tmgmt_job')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
     $job = tmgmt_job_load($job->id());
     $this->assertTrue($job->isAborted());
     foreach ($job->getItems() as $item) {
@@ -411,7 +411,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $resubmitted_job = tmgmt_job_load(array_pop($url_parts));
 
     $this->assertTrue($resubmitted_job->isUnprocessed());
-    $this->assertEqual($job->getTranslator(), $resubmitted_job->getTranslator());
+    $this->assertEqual($job->getTranslator()->id(), $resubmitted_job->getTranslator()->id());
     $this->assertEqual($job->getSourceLangcode(), $resubmitted_job->getSourceLangcode());
     $this->assertEqual($job->getTargetLangcode(), $resubmitted_job->getTargetLangcode());
     $this->assertEqual($job->get('settings')->getValue(), $resubmitted_job->get('settings')->getValue());
