@@ -404,7 +404,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, array(), t('Confirm'));
     // Test for the log message.
     $this->assertRaw(t('This job is a duplicate of the previously aborted job <a href="@url">#@id</a>',
-      array('@url' => url('admin/tmgmt/jobs/' . $job->id()), '@id' => $job->id())));
+      array('@url' => $job->url(), '@id' => $job->id())));
 
     // Load the resubmitted job and check for its status and values.
     $url_parts = explode('/', $this->getUrl());
@@ -438,7 +438,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Navigate back to the aborted job and check for the log message.
     $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
     $this->assertRaw(t('Job has been duplicated as a new job <a href="@url">#@id</a>.',
-      array('@url' => url('admin/tmgmt/jobs/' . $resubmitted_job->id()), '@id' => $resubmitted_job->id())));
+      array('@url' => $resubmitted_job->url(), '@id' => $resubmitted_job->id())));
 
     $this->drupalGet('admin/tmgmt');
     $elements = $this->xpath('//table[contains(@class, @view)]//td[contains(., @text)]',

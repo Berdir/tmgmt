@@ -56,8 +56,8 @@ class SettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->configFactory()->get('tmgmt.settings')
-      ->set('quick_checkout', $form_state['values']['tmgmt_quick_checkout'])
-      ->set('purge_finished', $form_state['values']['tmgmt_purge_finished'])
+      ->set('quick_checkout', $form_state->getValue('tmgmt_quick_checkout'))
+      ->set('purge_finished', $form_state->getValue('tmgmt_purge_finished'))
       ->save();
 
     parent::submitForm($form, $form_state);

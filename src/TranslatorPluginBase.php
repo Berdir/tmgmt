@@ -179,7 +179,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
    * {@inheritdoc}
    */
   public function getNotAvailableReason(Translator $translator) {
-    return t('@translator is not available. Make sure it is properly !configured.', array('@translator' => $this->pluginDefinition['label'], '!configured' => l(t('configured'), 'admin/config/regional/tmgmt_translator/manage/' . $translator->name)));
+    return t('@translator is not available. Make sure it is properly !configured.', array('@translator' => $this->pluginDefinition['label'], '!configured' => $translator->link(t('configured'))));
   }
 
   /**

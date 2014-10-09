@@ -30,7 +30,7 @@ class LanguageCombinationWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    if (isset($form_state['list_all_languages'])) {
+    if ($form_state->get('list_all_languages')) {
       $languages_options = tmgmt_language_combination_languages_predefined_list();
     }
     else {

@@ -83,7 +83,6 @@ abstract class TMGMTUnitTestBase extends KernelTestBase {
     return $job;
   }
 
-
   /**
    * Sets the proper environment.
    *

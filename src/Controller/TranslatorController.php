@@ -7,15 +7,14 @@
 
 namespace Drupal\tmgmt\Controller;
 
+use Drupal\Core\Controller\ControllerBase;
 use Drupal\tmgmt\Entity\Translator;
-use Drupal\Component\Utility\String;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Route controller class for the tmgmt translator entity.
  */
-class TranslatorController {
+class TranslatorController extends ControllerBase {
 
   /**
    * Enables a Translator object.

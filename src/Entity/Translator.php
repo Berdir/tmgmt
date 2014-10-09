@@ -17,7 +17,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  * @ConfigEntityType(
  *   id = "tmgmt_translator",
  *   label = @Translation("Translator"),
- *   controllers = {
+ *   handlers = {
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\TranslatorForm",
  *       "add" = "Drupal\tmgmt\Form\TranslatorForm"

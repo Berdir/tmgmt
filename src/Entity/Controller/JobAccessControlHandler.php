@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt\Entity\Controller;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -24,32 +25,32 @@ class JobAccessControlHandler extends EntityAccessControlHandler {
   protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
     if ($account->hasPermission('administer tmgmt')) {
       // Administrators can do everything.
-      return TRUE;
+      return AccessResult::allowed()->cachePerRole();
     }
 
     switch ($operation) {
       case 'view':
       case 'update':
-        return $account->hasPermission('create translation jobs') || $account->hasPermission('submit translation jobs') || $account->hasPermission('accept translation jobs');
+        return AccessResult::allowedIfHasPermission($account, 'create translation jobs')->orIf(AccessResult::allowedIfHasPermission($account, 'accept translation jobs'));
         break;
 
       case 'delete':
         // Only administrators can delete jobs.
-        return FALSE;
+        return AccessResult::forbidden();
         break;
 
       // Custom operations.
       case 'submit':
-        return $account->hasPermission('submit translation jobs');
+        return AccessResult::allowedIfHasPermission($account, 'submit translation jobs');
         break;
 
       case 'accept':
-        return $account->hasPermission('accept translation jobs');
+        return AccessResult::allowedIfHasPermission($account, 'accept translation jobs');
         break;
 
       case 'abort':
       case 'resubmit':
-        return $account->hasPermission('submit translation jobs');
+        return AccessResult::allowedIfHasPermission($account, 'submit translation jobs');
         break;
     }
   }
@@ -58,7 +59,7 @@ class JobAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return $account->hasPermission('administer tmgmt') || $account->hasPermission('create translation jobs');
+    return AccessResult::allowedIfHasPermission($account, 'create translation jobs')->orIf(AccessResult::allowedIfHasPermission($account, 'administer tmgmt'));
   }
 
 

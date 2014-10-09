@@ -270,8 +270,8 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
     if ($this->overviewSearchFormRedirect($form, $form_state, $type)) {
       return;
     }
-    $items = array_filter($form_state['values']['items']);
-    $type = $form_state['item_type'];
+    $items = array_filter($form_state->getValue('items'));
+    $type = $form_state->get('item_type');
 
     $source_lang = 'en';
 
@@ -305,11 +305,11 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
    *   Entity type.
    */
   public function overviewSearchFormRedirect(array $form, FormStateInterface $form_state, $type) {
-    if ($form_state['triggering_element']['#id'] == 'edit-search-submit') {
+    if ($form_state->getTriggeringElement()['#id'] == 'edit-search-submit') {
 
       $query = array();
 
-      foreach ($form_state['values']['search'] as $key => $value) {
+      foreach ($form_state->getValue('search') as $key => $value) {
         $query[$key] = $value;
       }
 

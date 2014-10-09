@@ -22,7 +22,7 @@ class JobItemAccessControlHandler extends JobAccessControlHandler {
    */
   protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
     if ($entity->getJob()) {
-      return $entity->getJob()->access($operation, $account);
+      return $entity->getJob()->access($operation, $account, TRUE);
     }
   }
 

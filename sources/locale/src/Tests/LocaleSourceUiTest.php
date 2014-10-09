@@ -6,6 +6,7 @@
 
 namespace Drupal\tmgmt_locale\Tests;
 
+use Drupal\Core\Url;
 use Drupal\locale\Gettext;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 
@@ -67,7 +68,7 @@ class LocaleSourceUiTest extends TMGMTTestBase {
       'items[' . $locale_object->lid . ']' => TRUE,
     );
     $this->drupalPostForm(NULL, $edit, t('Add to cart'));
-    $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => url('admin/tmgmt/cart'))));
+    $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => Url::fromRoute('tmgmt.cart'))));
     $edit['target_language[]'] = array('es');
     $this->drupalPostForm('admin/tmgmt/cart', $edit, t('Request translation'));
 

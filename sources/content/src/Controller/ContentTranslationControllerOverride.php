@@ -8,7 +8,6 @@
 namespace Drupal\tmgmt_content\Controller;
 
 use Drupal\content_translation\Controller\ContentTranslationController;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -16,13 +15,11 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ContentTranslationControllerOverride extends ContentTranslationController  {
 
-  use StringTranslationTrait;
-
   /**
    * {@inheritdoc}
    */
-  public function overview(Request $request) {
-    $build = parent::overview($request);
+  public function overview(Request $request, $entity_type_id = NULL) {
+    $build = parent::overview($request, $entity_type_id);
     if (\Drupal::entityManager()->getAccessControlHandler('tmgmt_job')->createAccess()) {
       $build = \Drupal::formBuilder()->getForm('Drupal\tmgmt_content\Form\ContentTranslateForm', $build);
     }

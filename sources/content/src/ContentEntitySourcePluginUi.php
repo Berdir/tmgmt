@@ -118,7 +118,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
 
     // Add entity type value into form array so that it is available in
     // the form alter hook.
-    $form_state['entity_type'] = $type;
+    $form_state->set('entity_type', $type);
 
     $form['search_wrapper'] = array(
       '#prefix' => '<div class="tmgmt-sources-wrapper tmgmt-entity-sources-wrapper">',
@@ -232,14 +232,14 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
    *   Entity type.
    */
   public function overviewSearchFormRedirect(array $form, FormStateInterface $form_state, $type) {
-    if ($form_state['triggering_element']['#id'] == 'edit-search-cancel') {
+    if ($form_state->getTriggeringElement()['#id'] == 'edit-search-cancel') {
       $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'content', 'item_type' => $type));
       return TRUE;
     }
-    elseif ($form_state['triggering_element']['#id'] == 'edit-search-submit') {
+    elseif ($form_state->getTriggeringElement()['#id'] == 'edit-search-submit') {
       $query = array();
 
-      foreach ($form_state['values']['search'] as $key => $value) {
+      foreach ($form_state->getValue('search') as $key => $value) {
         $query[$key] = $value;
       }
       $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'content', 'item_type' => $type), array('query' => $query));
@@ -294,7 +294,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
 
     $row = array(
       'id' => $data['entity_id'],
-      'title' => l($label, $data['entity_url']),
+      'title' => \Drupal::l($label, Url::fromUri('base://' . $data['entity_url'])),
     );
 
     if (isset($data['bundle'])) {
@@ -374,7 +374,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     }
 
     $jobs = array();
-    $entities = entity_load_multiple($type, $form_state['values']['items']);
+    $entities = entity_load_multiple($type, $form_state->getValue('items'));
     $source_lang_registry = array();
 
     // Loop through entities and create individual jobs for each source language.
@@ -412,7 +412,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     $redirects = tmgmt_ui_job_checkout_multiple($jobs);
     if ($redirects) {
       tmgmt_ui_redirect_queue_set($redirects, current_path());
-      $form_state['redirect'] = tmgmt_ui_redirect_queue_dequeue();
+      $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_ui_redirect_queue_dequeue()));
 
       drupal_set_message(format_plural(count($redirects), $this->t('One job needs to be checked out.'), $this->t('@count jobs need to be checked out.')));
     }

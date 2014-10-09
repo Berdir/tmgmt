@@ -35,7 +35,7 @@ class TmgmtContentRouteSubscriber extends RouteSubscriberBase {
   public static function getSubscribedEvents() {
     $events = parent::getSubscribedEvents();
     //  ContentTranslationRouteSubscriber is -100, make sure we are later.
-    $events[RoutingEvents::ALTER] = array('onAlterRoutes', -101);
+    $events[RoutingEvents::ALTER] = array('onAlterRoutes', -211);
     return $events;
   }
 

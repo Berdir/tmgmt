@@ -175,8 +175,8 @@ class TranslatorForm extends EntityForm {
    */
   public function validate(array $form, FormStateInterface $form_state) {
     parent::validate($form, $form_state);
-    if (empty($form_state['values']['plugin'])) {
-      form_set_error('plugin', t('You have to select a translator plugin.'));
+    if (!$form_state->getValue('plugin')) {
+      $form_state->setErrorByName('plugin', $this->t('You have to select a translator plugin.'));
     }
   }
 

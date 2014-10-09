@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Tests;
 
 use Drupal\Core\Language\Language;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\simpletest\WebTestBase;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
@@ -176,7 +177,6 @@ abstract class TMGMTTestBase extends WebTestBase {
     return $job;
   }
 
-
   /**
    * Sets the proper environment.
    *
@@ -186,13 +186,8 @@ abstract class TMGMTTestBase extends WebTestBase {
    *   The language code.
    */
   function addLanguage($langcode) {
-    // Add the language.
-    $edit = array(
-      'id' => $langcode,
-      'weight' => $this->languageWeight++,
-    );
-    $language = new Language($edit);
-    language_save($language);
+    $language = ConfigurableLanguage::createFromLangcode($langcode);
+    $language->save();
   }
 
   /**

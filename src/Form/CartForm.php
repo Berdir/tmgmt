@@ -33,7 +33,7 @@ class Cartform extends FormBase {
       $uri = $item->getSourceUri();
       $options[$item->id()] = array(
         $item->getSourceType(),
-        (!empty($uri['path']) ? l($item->label(), $uri['path']) : $item->label()),
+        (!empty($uri['path']) ? \Drupal::l($item->label(), $uri['path']) : $item->label()),
         isset($languages[$item->getSourceLangCode()]) ? $languages[$item->getSourceLangCode()] : t('Unknown'),
       );
     }
@@ -57,7 +57,7 @@ class Cartform extends FormBase {
       '#type' => 'submit',
       '#button_type' => 'primary',
       '#value' => t('Request translation'),
-      '#submit' => array(array($this, 'submitRequestTranslation')),
+      '#submit' => array('::submitRequestTranslation'),
       '#validate' => array('tmgmt_ui_cart_source_overview_validate'),
     );
 
@@ -65,7 +65,7 @@ class Cartform extends FormBase {
       '#type' => 'submit',
       '#button_type' => 'danger',
       '#value' => t('Remove selected'),
-      '#submit' => array(array($this, 'submitRemoveSelected')),
+      '#submit' => array('::submitRemoveSelected'),
       '#validate' => array('tmgmt_ui_cart_source_overview_validate'),
     );
 
@@ -73,7 +73,7 @@ class Cartform extends FormBase {
       '#type' => 'submit',
       '#button_type' => 'danger',
       '#value' => t('Empty cart'),
-      '#submit' => array(array($this, 'submitEmptyCart')),
+      '#submit' => array('::submitEmptyCart'),
     );
 
     return $form;
@@ -98,7 +98,7 @@ class Cartform extends FormBase {
    * Form submit callback to remove the selected items.
    */
   function submitRemoveSelected(array $form, FormStateInterface $form_state) {
-    $job_item_ids = array_filter($form_state['values']['items']);
+    $job_item_ids = array_filter($form_state->getValue('items'));
     tmgmt_ui_cart_get()->removeJobItems($job_item_ids);
     entity_delete_multiple('tmgmt_job_item', $job_item_ids);
     drupal_set_message(t('Job items were removed from the cart.'));
@@ -117,11 +117,11 @@ class Cartform extends FormBase {
    * Custom form submit callback for tmgmt_ui_cart_cart_form().
    */
   function submitRequestTranslation(array $form, FormStateInterface $form_state) {
-    $target_languages = array_filter($form_state['values']['target_language']);
+    $target_languages = array_filter($form_state->getValue('target_language'));
 
     $job_items_by_source_language = array();
     // Group the selected items by source language.
-    foreach (tmgmt_job_item_load_multiple(array_filter($form_state['values']['items'])) as $job_item) {
+    foreach (tmgmt_job_item_load_multiple(array_filter($form_state->getValue('items'))) as $job_item) {
       $job_items_by_source_language[$job_item->getSourceLangCode()][$job_item->id()] = $job_item;
     }
 

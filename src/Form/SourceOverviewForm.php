@@ -45,8 +45,8 @@ class SourceOverviewForm extends FormBase {
     );
 
     $source_ui = \Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($plugin);
-    $form_state['plugin'] = $plugin;
-    $form_state['item_type'] = $item_type;
+    $form_state->set('plugin', $plugin);
+    $form_state->set('item_type', $item_type);
     return $source_ui->overviewForm($form, $form_state, $item_type);
   }
 
@@ -61,7 +61,7 @@ class SourceOverviewForm extends FormBase {
     if (empty($cleaned['values'])) {
       form_set_error('items', t("You didn't select any source objects"));
     }
-    list($plugin, $item_type) = $form_state['build_info']['args'];
+    list($plugin, $item_type) = $form_state->getBuildInfo()['args'];
     // Execute the validation method on the source plugin controller.
     $source_ui = \Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($plugin);
     $source_ui->overviewFormValidate($form, $form_state, $item_type);
@@ -71,7 +71,7 @@ class SourceOverviewForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    list($plugin, $item_type) = $form_state['build_info']['args'];
+    list($plugin, $item_type) = $form_state->getBuildInfo()['args'];
     // Execute the submit method on the source plugin controller.
     $source_ui = \Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($plugin);
     $source_ui->overviewFormSubmit($form, $form_state, $item_type);

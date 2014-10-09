@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_content\Tests;
 
+use Drupal\Core\Url;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\tmgmt\Tests\EntityTestBase;
 
@@ -85,7 +86,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
 
     // Make sure that we're back on the translate tab.
-    $this->assertEqual(url('node/' . $node->id() . '/translations', array('absolute' => TRUE)), $this->getUrl());
+    $this->assertEqual($node->url('canonical', array('absolute' => TRUE)) . '/translations', $this->getUrl());
     $this->assertText(t('Test translation created.'));
     $this->assertText(t('The translation of @title to @language is finished and can now be reviewed.', array(
       '@title' => $node->getTitle(),
@@ -119,7 +120,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
 
     // Make sure that we're back on the originally defined destination URL.
-    $this->assertEqual(url('node', array('absolute' => TRUE)), $this->getUrl());
+    $this->assertEqual($node->url('canonical', array('absolute' => TRUE)), $this->getUrl());
 
     // Test the missing translation filter.
     $this->drupalGet('admin/tmgmt/sources/content/node');
@@ -197,7 +198,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
 
     // Make sure that we're back on the translate tab.
-    $this->assertEqual(url('node/' . $node->id() . '/translations', array('absolute' => TRUE)), $this->getUrl());
+    $this->assertEqual($node->url('canonical', array('absolute' => TRUE)) . '/translations', $this->getUrl());
     $this->assertText(t('Test translation created.'));
     $this->assertNoText(t('The translation of @title to @language is finished and can now be reviewed.', array(
       '@title' => $node->getTitle(),
@@ -295,7 +296,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
 
     // Make sure that we're back on the translate tab.
-    $this->assertEqual(url('comment/' . $comment->cid . '/translate', array('absolute' => TRUE)), $this->getUrl());
+    $this->assertEqual($comment->url('canonical', array('absolute' => TRUE)) . '/translations', $this->getUrl());
     $this->assertText(t('Test translation created.'));
     $this->assertNoText(t('The translation of @title to @language is finished and can now be reviewed.', array(
       '@title' => $comment->subject,
@@ -336,11 +337,11 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     // Test the translate tab.
     $this->drupalGet('node/' . $nodes[3]->id() . '/translations');
     $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a>.',
-        array('@count' => 2, '@url' => url('admin/tmgmt/cart'))));
+        array('@count' => 2, '@url' => Url::fromRoute('tmgmt.cart')->toString())));
 
     $this->drupalPostForm(NULL, array(), t('Add to cart'));
-    $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => url('admin/tmgmt/cart'))));
+    $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => Url::fromRoute('tmgmt.cart')->toString())));
     $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a> including the current item.',
-        array('@count' => 3, '@url' => url('admin/tmgmt/cart'))));
+        array('@count' => 3, '@url' => Url::fromRoute('tmgmt.cart')->toString())));
   }
 }

@@ -9,6 +9,7 @@ namespace Drupal\tmgmt\Tests;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 
 /**
@@ -109,17 +110,17 @@ abstract class EntityTestBase extends TMGMTTestBase {
       $field_name = drupal_strtolower($this->randomMachineName());
 
       // Create a field.
-      $field = FieldStorageConfig::create(array(
-        'name' => $field_name,
+      $field_storage = FieldStorageConfig::create(array(
+        'field_name' => $field_name,
         'entity_type' => $entity_name,
         'type' => $field_type,
         'cardinality' => mt_rand(1, 5),
         'translatable' => is_array($translatable) && isset($translatable[$i]) ? $translatable[$i] : (boolean) $translatable,
       ));
-      $field->save();
+      $field_storage->save();
 
       // Create an instance of the previously created field.
-      $instance = entity_create('field_instance_config', array(
+      $field = FieldConfig::create(array(
         'field_name' => $field_name,
         'entity_type' => $entity_name,
         'bundle' => $bundle,
@@ -130,7 +131,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
           'label' => $this->randomString(10),
         ),
       ));
-      $instance->save();
+      $field->save();
 
       // Store field names in case there are needed outside this method.
       $this->field_names[$entity_name][$bundle][] = $field_name;

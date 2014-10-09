@@ -36,11 +36,11 @@ class JobForm extends TmgmtFormBase {
     $job = $this->entity;
     // Handle source language.
     $available['source_language'] = tmgmt_available_languages();
-    $job->source_language = isset($form_state['values']['source_language']) ? $form_state['values']['source_language'] : $job->getSourceLangcode();
+    $job->source_language = $form_state->getValue('source_language') ?: $job->getSourceLangcode();
 
     // Handle target language.
     $available['target_language'] = tmgmt_available_languages();
-    $job->target_language = isset($form_state['values']['target_language']) ? $form_state['values']['target_language'] : $job->getTargetLangcode();
+    $job->target_language = $form_state->getValue('target_language') ?: $job->getTargetLangcode();
 
     // Remove impossible combinations so we don't end up with the same source and
     // target language in the dropdowns.
@@ -77,9 +77,10 @@ class JobForm extends TmgmtFormBase {
     );
 
     // Check for label value and set for dynamically change.
-    if (isset($form_state['values']['label']) && $form_state['values']['label'] == $job->label()) {
+    if ($form_state->getValue('label') && $form_state->getValue('label') == $job->label()) {
       $job->label = NULL;
-      $form_state['values']['label'] = $job->label = $job->label();
+      $job->label = $job->label();
+      $form_state->setValue('label', $job->label());
     }
 
     $form['label']['widget'][0]['value']['#description'] = t('You can provide a label for this job in order to identify it easily later on. Or leave it empty to use default one.');
@@ -204,7 +205,7 @@ class JobForm extends TmgmtFormBase {
     $form['job_items_wrapper']['suggestions']['load'] = array(
       '#type' => 'submit',
       '#value' => t('Load suggestions'),
-      '#submit' => array(array($this, 'loadSuggestionsSubmit')),
+      '#submit' => array('::loadSuggestionsSubmit'),
       '#limit_validation_errors' => array(),
       '#attributes' => array(
         'class' => array('tmgmt-ui-job-suggestions-load'),
@@ -232,7 +233,7 @@ class JobForm extends TmgmtFormBase {
     );
 
     // If this is an AJAX-Request, load all related nodes and fill the table.
-    if ($form_state['rebuild'] && !empty($form_state['rebuild_suggestions'])) {
+    if ($form_state->isRebuilding() && $form_state->get('rebuild_suggestions')) {
       $this->buildSuggestions($suggestions_table, $form_state);
 
       // A save button on bottom of the table is needed.
@@ -241,7 +242,7 @@ class JobForm extends TmgmtFormBase {
         'suggestions_add' => array(
           '#type' => 'submit',
           '#value' => t('Add suggestions'),
-          '#submit' => array(array($this, 'addSuggestionsSubmit')),
+          '#submit' => array('::addSuggestionsSubmit'),
           '#limit_validation_errors' => array(array('suggestions_table')),
           '#attributes' => array(
             'class' => array('tmgmt-ui-job-suggestions-add'),
@@ -270,10 +271,10 @@ class JobForm extends TmgmtFormBase {
       // Show a list of translators tagged by availability for the selected source
       // and target language combination.
       if (!$translators = tmgmt_translator_labels_flagged($job)) {
-        drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => l(t('configure'), 'admin/config/regional/tmgmt_translator'))), 'warning');
+        drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => \Drupal::l(t('configure'), Url::fromRoute('tmgmt.translator_list')))), 'warning');
       }
       $preselected_translator = $job->getTranslatorId() && isset($translators[$job->getTranslatorId()]) ? $job->getTranslatorId() : key($translators);
-      $job->translator = isset($form_state['values']['translator']) ? $form_state['values']['translator'] : $preselected_translator;
+      $job->translator = $form_state->getValue('translator') ?: $preselected_translator;
 
       $form['translator_wrapper']['translator'] = array(
         '#type' => 'select',
@@ -345,13 +346,8 @@ class JobForm extends TmgmtFormBase {
     $actions['save'] = array(
       '#type' => 'submit',
       '#value' => t('Save job'),
-      '#validate' => array(
-        array($this, 'validate'),
-      ),
-      '#submit' => array(
-        array($this, 'submit'),
-        array($this, 'save'),
-      ),
+      '#validate' => array('::validate'),
+      '#submit' => array('::submitForm', '::save'),
       '#weight' => 5,
     );
 
@@ -362,13 +358,8 @@ class JobForm extends TmgmtFormBase {
         '#value' => tmgmt_ui_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
         '#access' => $job->isSubmittable(),
         '#disabled' => !$job->getTranslatorId(),
-        '#validate' => array(
-          array($this, 'validate'),
-        ),
-        '#submit' => array(
-          array($this, 'submit'),
-          array($this, 'save'),
-        ),
+        '#validate' => array('::validate'),
+        '#submit' => array('::submitForm', '::save'),
         '#weight' => 0,
       );
       $actions['resubmit_job'] = array(
@@ -460,7 +451,7 @@ class JobForm extends TmgmtFormBase {
 
     // Everything below this line is only invoked if the 'Submit to translator'
     // button was clicked.
-    if ($form_state['triggering_element']['#value'] == $form['actions']['submit']['#value']) {
+    if ($form_state->getTriggeringElement()['#value'] == $form['actions']['submit']['#value']) {
       if (!tmgmt_ui_job_request_translation($entity)) {
         // Don't redirect the user if the translation request failed but retain
         // existing destination parameters so we can redirect once the request
@@ -469,11 +460,11 @@ class JobForm extends TmgmtFormBase {
       }
       else if ($redirect = tmgmt_ui_redirect_queue_dequeue()) {
         // Proceed to the next redirect queue item, if there is one.
-        $form_state->setRedirect($redirect);
+        $form_state->setRedirect(Url::fromUri('base://' . $redirect));
       }
       else {
         // Proceed to the defined destination if there is one.
-        $form_state->setRedirect(tmgmt_ui_redirect_queue_destination($form_state->getRedirect()));
+        $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_ui_redirect_queue_destination($form_state->getRedirect())));
       }
     }
     else {
@@ -532,14 +523,14 @@ class JobForm extends TmgmtFormBase {
    * target / source language dropdowns.
    */
   public function ajaxLanguageSelect(array $form, FormStateInterface $form_state) {
-    $replace = $form_state['input']['_triggering_element_name'] == 'source_language' ? 'target_language' : 'source_language';
+    $replace = $form_state->getUserInput()['_triggering_element_name'] == 'source_language' ? 'target_language' : 'source_language';
     $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand('#tmgmt-ui-translator-wrapper', drupal_render($form['translator_wrapper'])));
     $response->addCommand(new ReplaceCommand('#tmgmt-ui-' . str_replace('_', '-', $replace), drupal_render($form['info'][$replace])));
 
     // Replace value of the label field with ajax on language change.
     // @todo This manual overwrite is necessary because somehow an old job entity seems to be used.
-    $form['info']['label']['#value'] = $form_state['values']['label'];
+    $form['info']['label']['#value'] = $form_state->getValue('label');
     $response->addCommand(new ReplaceCommand('#tmgmt-ui-label', drupal_render($form['info']['label'])));
     return $response;
   }
@@ -556,20 +547,20 @@ class JobForm extends TmgmtFormBase {
    */
   function addSuggestionsSubmit(array $form, FormStateInterface $form_state) {
     // Save all selected suggestion items.
-    if (isset($form_state['values']['suggestions_table']) && is_array($form_state['values']['suggestions_table'])) {
-      $job = $form_state['controller']->getEntity();
-      foreach ($form_state['values']['suggestions_table'] as $id) {
+    if (is_array($form_state->getValue('suggestions_table'))) {
+      $job = $form_state->getFormObject()->getEntity();
+      foreach ($form_state->getValue('suggestions_table') as $id) {
         $key = (int)$id - 1; // Because in the tableselect we need an idx > 0.
-        if (isset($form_state['tmgmt_suggestions'][$key]['job_item'])) {
-          $item = $form_state['tmgmt_suggestions'][$key]['job_item'];
+        if (isset($form_state->get('tmgmt_suggestions')[$key]['job_item'])) {
+          $item = $form_state->get('tmgmt_suggestions')[$key]['job_item'];
           $job->addExistingItem($item);
         }
       }
     }
 
     // Force a rebuild of the form.
-    $form_state['rebuild'] = TRUE;
-    unset($form_state['tmgmt_suggestions']);
+    $form_state->setRebuild();
+    $form_state->set('tmgmt_suggestions', NULL);
   }
 
   /**
@@ -585,19 +576,19 @@ class JobForm extends TmgmtFormBase {
    */
   function buildSuggestions(array &$suggestions_table, FormStateInterface $form_state) {
     $options = array();
-    $job = $form_state['controller']->getEntity();
+    $job = $form_state->getFormObject()->getEntity();
     if ($job instanceof Job) {
       // Get all suggestions from all modules which implements
       // 'hook_tmgmt_source_suggestions' and cache them in $form_state.
-      if (!isset($form_state['tmgmt_suggestions'])) {
-        $form_state['tmgmt_suggestions'] = $job->getSuggestions();
+      if (!$form_state->get('tmgmt_suggestions')) {
+        $form_state->set('tmgmt_suggestions', $job->getSuggestions());
       }
 
       // Remove suggestions which are already processed, translated, ...
-      $job->cleanSuggestionsList($form_state['tmgmt_suggestions']);
+      $job->cleanSuggestionsList($form_state->get('tmgmt_suggestions'));
 
       // Process all valid entries.
-      foreach ($form_state['tmgmt_suggestions'] as $k => $result) {
+      foreach ($form_state->get('tmgmt_suggestions') as $k => $result) {
         if (is_array($result) && isset($result['job_item']) && ($result['job_item'] instanceof JobItem)) {
           $options[$k + 1] = $this->addSuggestionItem($result);
         }
@@ -654,8 +645,8 @@ class JobForm extends TmgmtFormBase {
    * Set a value in form_state to rebuild the form and fill with data.
    */
   function loadSuggestionsSubmit(array $form, FormStateInterface $form_state) {
-    $form_state['rebuild'] = TRUE;
-    $form_state['rebuild_suggestions'] = TRUE;
+    $form_state->setRebuild();
+    $form_state->set('rebuild_suggestions', TRUE);
   }
 
 }

@@ -25,7 +25,7 @@ use Drupal\user\UserInterface;
  *   id = "tmgmt_job",
  *   label = @Translation("Translation Job"),
  *   module = "tmgmt",
- *   controllers = {
+ *   handlers = {
  *     "access" = "Drupal\tmgmt\Entity\Controller\JobAccessControlHandler",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\JobForm",

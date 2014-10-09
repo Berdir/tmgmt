@@ -27,7 +27,7 @@ class ContentTranslateForm extends FormBase {
     // Store the entity in the form state so we can easily create the job in the
     // submit handler.
 
-    $form_state['entity'] = $build['#entity'];
+    $form_state->set('entity', $build['#entity']);
 
     $overview = $build['content_translation_overview'];
 
@@ -35,7 +35,7 @@ class ContentTranslateForm extends FormBase {
 
     $form['top_actions']['#type'] = 'actions';
     $form['top_actions']['#weight'] = -10;
-    tmgmt_ui_add_cart_form($form['top_actions'], $form_state, 'content', $form_state['entity']->getEntityTypeId(), $form_state['entity']->id());
+    tmgmt_ui_add_cart_form($form['top_actions'], $form_state, 'content', $form_state->get('entity')->getEntityTypeId(), $form_state->get('entity')->id());
 
     // Inject our additional column into the header.
     array_splice($overview['#header'], -1, 0, array(t('Pending Translations')));
@@ -47,8 +47,8 @@ class ContentTranslateForm extends FormBase {
     );
     $languages = \Drupal::languageManager()->getLanguages();
     // Check if there is a job / job item that references this translation.
-    $entity_langcode = $form_state['entity']->language()->id;
-    $items = tmgmt_job_item_load_latest('content', $form_state['entity']->getEntityTypeId(), $form_state['entity']->id(), $entity_langcode);
+    $entity_langcode = $form_state->get('entity')->language()->getId();
+    $items = tmgmt_job_item_load_latest('content', $form_state->get('entity')->getEntityTypeId(), $form_state->get('entity')->id(), $entity_langcode);
     foreach ($languages as $langcode => $language) {
       if ($langcode == LanguageInterface::LANGCODE_DEFAULT) {
         // Never show language neutral on the overview.
@@ -68,7 +68,7 @@ class ContentTranslateForm extends FormBase {
       elseif (isset($items[$langcode])) {
         $item = $items[$langcode];
         $states = tmgmt_job_item_states();
-        $additional = \Drupal::l($states[$item->getState()], $item->urlInfo()->getRouteName(), $item->urlInfo()->getRouteParameters() + array('destination' => current_path()));
+        $additional = \Drupal::l($states[$item->getState()], $item->urlInfo()->setOption('query', array('destination' => current_path())));
         // Disable the checkbox for this row since there is already a translation
         // in progress that has not yet been finished. This way we make sure that
         // we don't stack multiple active translations for the same item on top
@@ -102,8 +102,8 @@ class ContentTranslateForm extends FormBase {
     $form['actions']['request'] = array(
       '#type' => 'submit',
       '#value' =>$this->t('Request translation'),
-      '#validate' => array(array($this, 'validateForm')),
-      '#submit' => array(array($this, 'submitForm')),
+      '#validate' => array('::validateForm'),
+      '#submit' => array('::submitForm'),
     );
     return $form;
   }
@@ -123,8 +123,8 @@ class ContentTranslateForm extends FormBase {
    */
   function submitForm(array &$form, FormStateInterface $form_state) {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-    $entity = $form_state['entity'];
-    $values = $form_state['values'];
+    $entity = $form_state->get('entity');
+    $values = $form_state->getValues();
     $jobs = array();
     foreach (array_keys(array_filter($values['languages'])) as $langcode) {
       // Create the job object.

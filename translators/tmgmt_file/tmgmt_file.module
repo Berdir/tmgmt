@@ -3,7 +3,6 @@
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt_file\TMGMTFileFormatInterface;
 
 /**
  * @file
@@ -27,7 +26,7 @@ function tmgmt_file_theme() {
  */
 function tmgmt_file_import_form_submit(array $form, FormStateInterface $form_state) {
   // Ensure we have the file uploaded.
-  $job = $form_state['controller']->getEntity();
+  $job = $form_state->getFormObject()->getEntity();
   $supported_formats = array_keys(tmgmt_file_format_plugin_info());
   if ($file = file_save_upload('file', array('file_validate_extensions' => array(implode(' ', $supported_formats))), FALSE, 0)) {
     $extension = pathinfo($file->getFileUri(), PATHINFO_EXTENSION);

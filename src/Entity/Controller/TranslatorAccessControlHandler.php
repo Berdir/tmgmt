@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt\Entity\Controller;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -25,16 +26,16 @@ class TranslatorAccessControlHandler extends EntityAccessControlHandler {
    */
   protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
     if (!$entity->getController() && $operation != 'delete') {
-      return FALSE;
+      return AccessResult::forbidden();
     }
-    return $account->hasPermission('administer tmgmt');
+    return AccessResult::allowedIfHasPermission($account, 'administer tmgmt');
   }
 
   /**
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return $account->hasPermission('administer tmgmt');
+    return AccessResult::allowedIfHasPermission($account, 'administer tmgmt');
   }
 
 

@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
@@ -78,16 +79,17 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     \Drupal::service('router.builder')->rebuild();
 
-    FieldStorageConfig::create(array(
-      'name' => 'image_test',
+    $field_storage = FieldStorageConfig::create(array(
+      'field_name' => 'image_test',
       'entity_type' => $this->entity_type,
       'type' => 'image',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'translatable' => TRUE,
-    ))->save();
-    entity_create('field_instance_config', array(
+    ));
+    $field_storage->save();
+    FieldConfig::create(array(
       'entity_type' => $this->entity_type,
-      'field_name' => 'image_test',
+      'field_storage' => $field_storage,
       'bundle' => $this->entity_type,
       'label' => $this->image_label = $this->randomMachineName(),
     ))->save();

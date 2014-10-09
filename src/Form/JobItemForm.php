@@ -10,6 +10,7 @@ namespace Drupal\tmgmt\Form;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -42,7 +43,7 @@ class JobItemForm extends TmgmtFormBase {
     $form['info']['source'] = array(
       '#type' => 'item',
       '#title' => t('Source'),
-      '#markup' => l($item->getSourceLabel(), $uri['path'], $uri['options']),
+      '#markup' => \Drupal::l($item->getSourceLabel(), Url::fromUri('base://' . $uri['path'], $uri['options'])),
       '#prefix' => '<div class="tmgmt-ui-source tmgmt-ui-info-item">',
       '#suffix' => '</div>',
     );
@@ -76,7 +77,7 @@ class JobItemForm extends TmgmtFormBase {
     $form['info']['job'] = array(
       '#type' => 'item',
       '#title' => t('Job'),
-      '#markup' => \Drupal::l($job->label(), $url->getRouteName(), $url->getRouteParameters()),
+      '#markup' => \Drupal::l($job->label(), $url),
       '#prefix' => '<div class="tmgmt-ui-job tmgmt-ui-info-item">',
       '#suffix' => '</div>',
     );
@@ -140,25 +141,15 @@ class JobItemForm extends TmgmtFormBase {
       '#type' => 'submit',
       '#value' => t('Save as completed'),
       '#access' => $item->isNeedsReview(),
-      '#validate' => array(
-        array($this, 'validate'),
-      ),
-      '#submit' => array(
-        array($this, 'submit'),
-        array($this, 'save'),
-      ),
+      '#validate' => array('::validate'),
+      '#submit' => array('::submitForm', '::save'),
     );
     $actions['save'] = array(
       '#type' => 'submit',
       '#value' => t('Save'),
       '#access' => !$item->isAccepted(),
-      '#validate' => array(
-        array($this, 'validate'),
-      ),
-      '#submit' => array(
-        array($this, 'submit'),
-        array($this, 'save'),
-      ),
+      '#validate' => array('::validate'),
+      '#submit' => array('::submitForm', '::save'),
     );
     $url = $item->getJob()->url();
     $url = isset($_GET['destination']) ? $_GET['destination'] : $url;
@@ -201,7 +192,7 @@ class JobItemForm extends TmgmtFormBase {
       $translator_ui->reviewFormSubmit($form, $form_state, $item);
     }
     // Write changes back to item.
-    foreach ($form_state['values'] as $key => $value) {
+    foreach ($form_state->getValues() as $key => $value) {
       if (is_array($value) && isset($value['translation'])) {
         // Update the translation, this will only update the translation in case
         // it has changed.
@@ -213,7 +204,7 @@ class JobItemForm extends TmgmtFormBase {
       }
     }
     // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
-    if (!empty($form['actions']['accept']) && $form_state['triggering_element']['#value'] == $form['actions']['accept']['#value']) {
+    if (!empty($form['actions']['accept']) && $form_state->getTriggeringElement()['#value'] == $form['actions']['accept']['#value']) {
       $item->acceptTranslation();
       // Check if the item could be saved and accepted successfully and redirect
       // to the job item view if that is the case.
@@ -394,9 +385,9 @@ class JobItemForm extends TmgmtFormBase {
    * Ajax callback for the job item review form.
    */
   function ajaxReviewForm(array $form, FormStateInterface $form_state) {
-    $key = array_slice($form_state['triggering_element']['#array_parents'], 0, 2);
+    $key = array_slice($form_state->getTriggeringElement()['#array_parents'], 0, 2);
     $render_data = NestedArray::getValue($form, $key);
-    tmgmt_ui_write_request_messages($form_state['controller']->getEntity()->getJob());
+    tmgmt_ui_write_request_messages($form_state->getFormObject()->getEntity()->getJob());
     return drupal_render($render_data);
   }
 

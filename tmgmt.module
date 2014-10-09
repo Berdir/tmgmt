@@ -132,25 +132,6 @@ define('TMGMT_JOB_LABEL_MAX_LENGTH', 128);
 const TMGMT_ARRAY_DELIMITER = '][';
 
 /**
- * Implements hook_permission().
- */
-function tmgmt_permission() {
-  $perms['administer tmgmt'] = array(
-    'title' => t('Administer translation management'),
-  );
-  $perms['create translation jobs'] = array(
-    'title' => t('Create translation jobs'),
-  );
-  $perms['submit translation jobs'] = array(
-    'title' => t('Submit translation jobs'),
-  );
-  $perms['accept translation jobs'] = array(
-    'title' => t('Accept and reject translation jobs'),
-  );
-  return $perms;
-}
-
-/**
  * Implements hook_modules_installed().
  */
 function tmgmt_modules_installed($modules) {
@@ -363,7 +344,7 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
  *   TRUE if the job is finished, FALSE otherwise.
  */
 function tmgmt_job_check_finished($tjid) {
-  return !Drupal::entityQuery('tmgmt_job_item')
+  return !\Drupal::entityQuery('tmgmt_job_item')
     ->condition('tjid', $tjid)
     ->condition('state', TMGMT_JOB_ITEM_STATE_ACCEPTED, '<>')
     ->range(0, 1)

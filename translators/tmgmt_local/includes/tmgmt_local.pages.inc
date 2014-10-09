@@ -8,6 +8,7 @@
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\tmgmt_local\Entity\LocalTask;
 use Drupal\tmgmt_local\Entity\LocalTaskItem;
 
@@ -410,7 +411,7 @@ function tmgmt_local_translation_assign_form($form, FormStateInterface $form_sta
   $roles = tmgmt_local_translator_roles();
   if (empty($roles)) {
     drupal_set_message(t('No user role has the "provide translation services" permission. <a href="@url">Configure permissions</a> for the Local translator module.',
-      array('@url' => url('admin/people/permissions'))), 'warning');
+      array('@url' => Url::fromRoute('user.admin_permissions')->toString())), 'warning');
   }
 
   $form['tuid'] = array(
@@ -463,7 +464,7 @@ function tmgmt_local_translation_reassign_form($form, FormStateInterface $form_s
   $roles = tmgmt_local_translator_roles();
   if (empty($roles)) {
     drupal_set_message(t('No user role has the "provide translation services" permission. <a href="@url">Configure permissions</a> for the Local translator module.',
-      array('@url' => url('admin/people/permissions'))), 'warning');
+      array('@url' => Url::fromRoute('user.admin_permissions')->toString())), 'warning');
   }
 
   $form['tuid'] = array(

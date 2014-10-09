@@ -2,9 +2,11 @@
 
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobItemUiCart;
+use Drupal\tmgmt\TranslatorRejectDataInterface;
 
 /**
  * @file
@@ -192,21 +194,23 @@ function tmgmt_ui_review_form_element_ajaxid($parent_key) {
 function tmgmt_ui_translation_review_form_revert(array $form, FormStateInterface $form_state) {
 
   /** @var JobItem $item */
-  $item = $form_state['controller']->getEntity();
+  $item = $form_state->getFormObject()->getEntity();
 
-  $key = tmgmt_ensure_keys_array($form_state['triggering_element']['#data_item_key']);
+  $key = tmgmt_ensure_keys_array($form_state->getTriggeringElement()['#data_item_key']);
 
   if ($item->dataItemRevert($key)) {
     // Update the form_state input values so that the new default vale will be
     // shown.
-    $form_key = str_replace('][', '|', $form_state['triggering_element']['#data_item_key']);
-    unset($form_state['input'][$form_key]['translation']);
+    $form_key = str_replace('][', '|', $form_state->getTriggeringElement()['#data_item_key']);
+    $user_input = $form_state->getUserInput();
+    unset($user_input[$form_key]['translation']);
+    $form_state->setUserInput($user_input);
     $item->save();
   }
   else {
     drupal_set_message(t('No past revision found, translation was not reverted.'), 'warning');
   }
-  $form_state['rebuild'] = TRUE;
+  $form_state->setRebuild();
 }
 
 /**
@@ -217,21 +221,21 @@ function tmgmt_ui_translation_review_form_update_state(array $form, FormStateInt
   // We should have an #name element
   // and the name should beginn with approve-
   // and the $matches should now kontain an element with with name key.
-  preg_match("/^(?P<action>[^-]+)-(?P<key>.+)/i", $form_state['triggering_element']['#name'], $matches);
-  $values = $form_state['values'];
+  preg_match("/^(?P<action>[^-]+)-(?P<key>.+)/i", $form_state->getTriggeringElement()['#name'], $matches);
+  $values = $form_state->getValues();
   $data = array();
-  $job_item = $form_state['controller']->getEntity();
+  $job_item = $form_state->getFormObject()->getEntity();
 
   /* \Drupal\tmgmt\Entity\JobItem $job_item */
   $controller = $job_item->getTranslatorController();
   $success = TRUE;
   switch ($matches['action']) {
     case 'reviewed':
-      $form_state['rebuild'] = TRUE;
+      $form_state->setRebuild();
       $data['#status'] = TMGMT_DATA_ITEM_STATE_REVIEWED;
       break;
     case 'unreviewed':
-      $form_state['rebuild'] = TRUE;
+      $form_state->setRebuild();
       $data['#status'] = TMGMT_DATA_ITEM_STATE_TRANSLATED;
       break;
     case 'reject':
@@ -244,12 +248,12 @@ function tmgmt_ui_translation_review_form_update_state(array $form, FormStateInt
           $destination = '';
         }
         tmgmt_ui_redirect_queue_set(array(current_path()), $destination);
-        $form_state['redirect'] = current_path() . '/reject/' . $matches['key'];
+        $form_state->setRedirectUrl(Url::fromUri('base://' . current_path() . '/reject/' . $matches['key']));
         $success = FALSE;
       }
       else {
-        $form_state['redirect'] = array(tmgmt_ui_redirect_queue_dequeue(), array( 'query' => array('destination' => tmgmt_ui_redirect_queue_destination())));
-        if ($controller instanceof TranslatorRejectDataItem) {
+        $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_ui_redirect_queue_dequeue(), array('query' => array('destination' => tmgmt_ui_redirect_queue_destination()))));
+        if ($controller instanceof TranslatorRejectDataInterface) {
             $success = $job_item->getTranslatorController()->rejectDataItem($job_item, tmgmt_ensure_keys_array($matches['key']), $values);
         }
       }
@@ -282,7 +286,7 @@ function tmgmt_ui_translation_review_form_reject_confirm(array $form, FormStateI
   );
 
   $form = confirm_form( $form, t('Confirm rejection of @data_item in @job_item', $args), $path, '');
-  $form_state['item'] = $job_item;
+  $form_state->set('item', $job_item);
   $form['key'] = array('#type' => 'value', '#value' => $key);
   $form['actions']['submit']['#name'] = 'reject-' . $key;
   $form['actions']['submit']['#submit'] = array('tmgmt_ui_translation_review_form_update_state');
@@ -420,7 +424,7 @@ function tmgmt_ui_job_checkout_and_redirect(FormStateInterface $form_state, arra
     else {
       tmgmt_ui_redirect_queue_set($redirects, current_path());
     }
-    $form_state['redirect'] = tmgmt_ui_redirect_queue_dequeue();
+    $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_ui_redirect_queue_dequeue()));
 
     // Count of the job messages is one less due to the final redirect.
     drupal_set_message(format_plural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
@@ -443,8 +447,8 @@ function tmgmt_ui_help($path, $arg) {
  * Helper function for redirecting a form after a button has been clicked.
  */
 function tmgmt_ui_submit_redirect(array $form, FormStateInterface $form_state){
-  if (isset($form_state['triggering_element']['#redirect'])) {
-    $form_state['redirect'] = $form_state['triggering_element']['#redirect'];
+  if ($form_state->getTriggeringElement()['#redirect']) {
+    $form_state->setRedirectUrl(Url::fromUri('base://' . $form_state->getTriggeringElement()['#redirect']));
   }
 }
 
@@ -495,11 +499,11 @@ function tmgmt_ui_cart_get() {
  *   cart.
  */
 function tmgmt_ui_add_cart_form(&$form, FormStateInterface $form_state, $plugin, $item_type, $item_id = NULL) {
-  $form_state['tmgmt_cart'] = array(
+  $form_state->set('tmgmt_cart', array(
     'plugin' => $plugin,
     'item_type' => $item_type,
     'item_id' => $item_id,
-  );
+  ));
   $form['add_to_cart'] = array(
     '#type' => 'submit',
     '#value' => t('Add to cart'),
@@ -518,11 +522,11 @@ function tmgmt_ui_add_cart_form(&$form, FormStateInterface $form_state, $plugin,
     if (tmgmt_ui_cart_get()->isSourceItemAdded($plugin, $item_type, $item_id)) {
       $form['add_to_cart']['#disabled'] = TRUE;
       $message = format_plural($count, 'There is @count item in the <a href="@url">translation cart</a> including the current item.',
-        'There are @count items in the <a href="@url">translation cart</a> including the current item.', array('@url' => url('admin/tmgmt/cart')));
+        'There are @count items in the <a href="@url">translation cart</a> including the current item.', array('@url' => Url::fromRoute('tmgmt.cart')->toString()));
     }
     else {
       $message = format_plural($count, 'There is @count item in the <a href="@url">translation cart</a>.',
-        'There are @count items in the <a href="@url">translation cart</a>.', array('@url' => url('admin/tmgmt/cart')));
+        'There are @count items in the <a href="@url">translation cart</a>.', array('@url' => Url::fromRoute('tmgmt.cart')->toString()));
     }
 
     $form['add_to_cart']['#suffix'] = '<span class="tmgmt-ui-cart-status-message">' . $message . '</span>';
@@ -540,9 +544,9 @@ function tmgmt_ui_add_cart_form(&$form, FormStateInterface $form_state, $plugin,
  */
 function tmgmt_ui_source_add_to_cart_submit(array $form, FormStateInterface $form_state) {
 
-  $cart_info = $form_state['tmgmt_cart'];
-  if (!empty($cart_info['plugin']) && !empty($cart_info['item_type']) && !empty($form_state['values']['items'])) {
-    $source_items = array_filter($form_state['values']['items']);
+  $cart_info = $form_state->get('tmgmt_cart');
+  if (!empty($cart_info['plugin']) && !empty($cart_info['item_type']) && $form_state->getValue('items')) {
+    $source_items = array_filter($form_state->getValue('items'));
     $item_type = $cart_info['item_type'];
     $plugin = $cart_info['plugin'];
   }
@@ -564,14 +568,14 @@ function tmgmt_ui_source_add_to_cart_submit(array $form, FormStateInterface $for
   }
 
   drupal_set_message(format_plural($i, '@count content source was added into the <a href="@url">cart</a>.',
-    '@count content sources were added into the <a href="@url">cart</a>.', array('@url' => url('admin/tmgmt/cart'))));
+    '@count content sources were added into the <a href="@url">cart</a>.', array('@url' => Url::fromRoute('tmgmt.cart')->toString())));
 }
 
 /**
  * Cart form validation callback for the source overview.
  */
 function tmgmt_ui_cart_source_overview_validate(array $form, FormStateInterface $form_state) {
-  $items = array_filter($form_state['values']['items']);
+  $items = array_filter($form_state->getValue('items'));
   if (empty($items)) {
     form_set_error('items', t('No job items were selected.'));
   }

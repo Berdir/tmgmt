@@ -14,6 +14,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
+use Drupal\Core\Url;
 use Drupal\tmgmt\TMGMTException;
 
 /**
@@ -23,7 +24,7 @@ use Drupal\tmgmt\TMGMTException;
  *   id = "tmgmt_job_item",
  *   label = @Translation("Translation Job Item"),
  *   module = "tmgmt",
- *   controllers = {
+ *   handlers = {
  *     "access" = "Drupal\tmgmt\Entity\Controller\JobItemAccessControlHandler",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\JobItemForm",
@@ -506,7 +507,7 @@ class JobItem extends ContentEntityBase {
     if (!isset($message)) {
       $uri = $this->getSourceUri();
       $message = 'The translation for !source needs to be reviewed.';
-      $variables = array('!source' => l($this->getSourceLabel(), $uri['path']));
+      $variables = array('!source' => \Drupal::l($this->getSourceLabel(), Url::fromUri('base://' . $uri['path'])));
     }
     $return = $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW, $message, $variables, $type);
     // Auto accept the trganslation if the translator is configured for it.
@@ -523,7 +524,7 @@ class JobItem extends ContentEntityBase {
     if (!isset($message)) {
       $uri = $this->getSourceUri();
       $message = 'The translation for !source has been accepted.';
-      $variables = array('!source' => l($this->getSourceLabel(), $uri['path']));
+      $variables = array('!source' => \Drupal::l($this->getSourceLabel(), Url::fromUri('base://' . $uri['path'])));
     }
     $return = $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED, $message, $variables, $type);
     // Check if this was the last unfinished job item in this job.
@@ -541,7 +542,7 @@ class JobItem extends ContentEntityBase {
     if (!isset($message)) {
       $uri = $this->getSourceUri();
       $message = 'The translation for !source is now being processed.';
-      $variables = array('!source' => l($this->getSourceLabel(), $uri['path']));
+      $variables = array('!source' => \Drupal::l($this->getSourceLabel(), Url::fromUri('base://' . $uri['path'])));
     }
     return $this->setState(TMGMT_JOB_ITEM_STATE_ACTIVE, $message, $variables, $type);
   }
