@@ -12,7 +12,7 @@ namespace Drupal\tmgmt\Tests;
  *
  * @group tmgmt
  */
-class PluginsTest extends TMGMTUnitTestBase {
+class PluginsTest extends TMGMTKernelTestBase {
 
   /**
    * {@inheritdoc}

@@ -13,7 +13,7 @@ use Drupal\tmgmt\Entity\Job;
  *
  * @group tmgmt
  */
-class HelperTest extends TMGMTUnitTestBase {
+class HelperTest extends TMGMTKernelTestBase {
 
   /**
    * Tests tmgmt_job_match_item()

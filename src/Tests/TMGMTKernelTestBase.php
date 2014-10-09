@@ -2,7 +2,7 @@
 
 /*
  * @file
- * Contains Drupal\tmgmt\Tests\TMGMTUnitTestBase.
+ * Contains Drupal\tmgmt\Tests\TMGMTKernelTestBase.
  */
 
 namespace Drupal\tmgmt\Tests;
@@ -15,7 +15,7 @@ use Drupal\tmgmt\Entity\JobItem;
 /**
  * Base class for tests.
  */
-abstract class TMGMTUnitTestBase extends KernelTestBase {
+abstract class TMGMTKernelTestBase extends KernelTestBase {
 
   /**
    * A default translator using the test translator.

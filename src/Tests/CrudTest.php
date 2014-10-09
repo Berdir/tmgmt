@@ -14,7 +14,7 @@ use Drupal\tmgmt\Entity\RemoteMapping;
  *
  * @group tmgmt
  */
-class CrudTest extends TMGMTUnitTestBase {
+class CrudTest extends TMGMTKernelTestBase {
 
   /**
    * {@inheritdoc}

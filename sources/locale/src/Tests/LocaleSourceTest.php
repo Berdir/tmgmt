@@ -8,7 +8,7 @@ namespace Drupal\tmgmt_locale\Tests;
 
 use Drupal\locale\Gettext;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
-use Drupal\tmgmt\Tests\TMGMTUnitTestBase;
+use Drupal\tmgmt\Tests\TMGMTKernelTestBase;
 use Drupal\tmgmt\TMGMTException;
 
 /**
@@ -16,7 +16,7 @@ use Drupal\tmgmt\TMGMTException;
  *
  * @group tmgmt
  */
-class LocaleSourceTest extends TMGMTUnitTestBase {
+class LocaleSourceTest extends TMGMTKernelTestBase {
 
   /**
    * Modules to enable.

@@ -14,14 +14,14 @@ use Drupal\field\Entity\FieldInstanceConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\tmgmt\Tests\TMGMTUnitTestBase;
+use Drupal\tmgmt\Tests\TMGMTKernelTestBase;
 
 /**
  * Basic Source-Suggestions tests.
  *
  * @group tmgmt
  */
-class ContentEntitySuggestionsTest extends TMGMTUnitTestBase {
+class ContentEntitySuggestionsTest extends TMGMTKernelTestBase {
 
   /**
    * Modules to enable.

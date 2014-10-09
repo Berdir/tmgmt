@@ -7,10 +7,9 @@
 
 namespace Drupal\tmgmt_config\Tests;
 
-use Drupal\Core\Language\LanguageInterface;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\NodeType;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
-use Drupal\Core\Language\Language;
 
 /**
  * Unit tests for exporting translatable data from config entities and saving it back.
@@ -33,21 +32,8 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     parent::setUp();
 
     // Add the languages.
-    $edit = array(
-      'id' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
-    );
-    $language = new Language($edit);
-    language_save($language);
-    $edit = array(
-      'id' => 'en',
-    );
-    $language = new Language($edit);
-    language_save($language);
-    $edit = array(
-      'id' => 'de',
-    );
-    $language = new Language($edit);
-    language_save($language);
+    $this->installConfig(['language']);
+    ConfigurableLanguage::createFromLangcode('de')->save();
 
     $this->installEntitySchema('tmgmt_job');
     $this->installEntitySchema('tmgmt_job_item');
@@ -86,9 +72,6 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual($data['description']['#label'], 'Description');
     $this->assertEqual($data['description']['#text'], $node_type->description);
     $this->assertEqual($data['description']['#translate'], TRUE);
-    $this->assertEqual($data['title_label']['#label'], 'Title field label');
-    $this->assertEqual($data['title_label']['#text'], $node_type->title_label);
-    $this->assertEqual($data['title_label']['#translate'], TRUE);
 
     // Test item types.
     $this->assertEqual($source_plugin->getItemTypes()['node_type'], t('Content type'));
@@ -101,12 +84,12 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $data = $item->getData();
 
     // Check that the translations were saved correctly.
+    $language_manager = \Drupal::languageManager();
+    $language_manager->setConfigOverrideLanguage($language_manager->getLanguage('de'));
     $node_type = entity_load('node_type', $node_type->id());
-    $translation = $node_type->getTranslation('de');
 
-    $this->assertEqual($translation->name->value, $data['name'][0]['#translation']['#text']);
-    $this->assertEqual($translation->field_test_text[0]->value, $data['field_test_text'][0]['#translation']['#text']);
-    $this->assertEqual($translation->field_test_text[1]->value, $data['field_test_text'][1]['#translation']['#text']);
+    $this->assertEqual($node_type->name, $data['name']['#translation']['#text']);
+    $this->assertEqual($node_type->description, $data['description']['#translation']['#text']);
   }
 
 }
