@@ -195,7 +195,7 @@ function tmgmt_available_languages($exclude = array()) {
   $labels = array();
   foreach ($languages as $langcode => $language) {
     if (!in_array($langcode, $exclude)) {
-      $labels[$langcode] = $language->name;
+      $labels[$langcode] = $language->getName();
     }
   }
   return $labels;
