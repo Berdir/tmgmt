@@ -20,7 +20,8 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *   handlers = {
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\TranslatorForm",
- *       "add" = "Drupal\tmgmt\Form\TranslatorForm"
+ *       "add" = "Drupal\tmgmt\Form\TranslatorForm",
+ *       "delete" = "Drupal\tmgmt\Form\TranslatorDeleteForm"
  *     },
  *     "list_builder" = "Drupal\tmgmt\Entity\Controller\TranslatorListBuilder",
  *     "access" = "Drupal\tmgmt\Entity\Controller\TranslatorAccessControlHandler",

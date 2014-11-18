@@ -19,6 +19,13 @@ tmgmt.translator_add:
   requirements:
     _entity_create_access: tmgmt_translator
 
+tmgmt.translator_delete:
+  path: '/tmgmt_translator/{tmgmt_translator}/delete'
+  defaults:
+    _entity_form: tmgmt_translator.delete
+  requirements:
+    _entity_access: tmgmt_translator.delete
+
 tmgmt.translator_entity:
   path: '/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}'
   defaults:
