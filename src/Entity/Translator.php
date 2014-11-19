@@ -236,6 +236,7 @@ class Translator extends ConfigEntityBase {
    * Clears the language cache for this translator.
    */
   public function clearLanguageCache() {
+    $this->languageCache = array();
     \Drupal::cache('tmgmt')->delete('languages:' . $this->name);
     \Drupal::cache('tmgmt')->delete('language_pairs:' . $this->name);
   }
