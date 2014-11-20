@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt\Entity;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -263,7 +264,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
       // characters from the title and use it to recreate the label.
       if (strlen($label) > TMGMT_JOB_LABEL_MAX_LENGTH) {
         $max_length = strlen($source_label) - (strlen($label) - TMGMT_JOB_LABEL_MAX_LENGTH);
-        $source_label = truncate_utf8($source_label, $max_length, TRUE);
+        $source_label = Unicode::truncate($source_label, $max_length, TRUE);
         $t_args['!title'] = $source_label;
         $label = format_plural($count, '!title', '!title and !more more', $t_args);
       }

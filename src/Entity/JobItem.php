@@ -9,6 +9,7 @@ namespace Drupal\tmgmt\Entity;
 
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -268,7 +269,7 @@ class JobItem extends ContentEntityBase {
     }
 
     if (strlen($label) > TMGMT_JOB_LABEL_MAX_LENGTH) {
-      $label = truncate_utf8($label, TMGMT_JOB_LABEL_MAX_LENGTH, TRUE);
+      $label = Unicode::truncate($label, TMGMT_JOB_LABEL_MAX_LENGTH, TRUE);
     }
 
     return $label;
@@ -718,7 +719,7 @@ class JobItem extends ContentEntityBase {
             );
             // Add a message if the translation update is from remote.
             if ($translation['#origin'] == 'remote') {
-              $diff = drupal_strlen($translation['#text']) - drupal_strlen($data['#translation']['#text']);
+              $diff = Unicode::strlen($translation['#text']) - Unicode::strlen($data['#translation']['#text']);
               $this->addMessage('Updated translation for key @key, size difference: @diff characters.', array('@key' => tmgmt_ensure_keys_string($key), '@diff' => $diff));
             }
           }

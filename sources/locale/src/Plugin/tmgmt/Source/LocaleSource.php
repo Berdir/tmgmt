@@ -8,6 +8,7 @@
 
 namespace Drupal\tmgmt_locale\Plugin\tmgmt\Source;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\SourcePluginBase;
 use Drupal\tmgmt\TMGMTException;
@@ -161,7 +162,7 @@ class LocaleSource extends SourcePluginBase {
       else {
         $label = $locale_object->translation;
       }
-      return truncate_utf8(strip_tags($label), 30, FALSE, TRUE);
+      return Unicode::truncate(strip_tags($label), 30, FALSE, TRUE);
     }
   }
 

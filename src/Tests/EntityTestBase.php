@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt\Tests;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\field\Entity\FieldConfig;
@@ -107,7 +108,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
 
     for ($i = 0 ; $i <= 5; $i++) {
       $field_type = $field_types[array_rand($field_types, 1)];
-      $field_name = drupal_strtolower($this->randomMachineName());
+      $field_name = Unicode::strtolower($this->randomMachineName());
 
       // Create a field.
       $field_storage = FieldStorageConfig::create(array(
