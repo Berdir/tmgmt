@@ -52,7 +52,7 @@ class Html implements FormatInterface {
         $items[$item->id()][$this->encodeIdSafeBase64($item->id() . '][' . $key)] = $value;
       }
     }
-    return _theme('tmgmt_file_html_template', array(
+    return \Drupal::theme()->render('tmgmt_file_html_template', array(
       'tjid' => $job->id(),
       'source_language' => $job->getTranslator()->mapToRemoteLanguage($job->getSourceLangcode()),
       'target_language' => $job->getTranslator()->mapToRemoteLanguage($job->getTargetLangcode()),

@@ -56,10 +56,10 @@ class SourceOverviewForm extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     // Copy the form state so we are not removing important information from it
     // when sending it through form_state_values_clean().
-    $cleaned = $form_state;
+    $cleaned = clone $form_state;
     form_state_values_clean($cleaned);
-    if (empty($cleaned['values'])) {
-      form_set_error('items', t("You didn't select any source objects"));
+    if (!$form_state->getValue('values')) {
+      $form_state->setErrorByName('items', t("You didn't select any source objects"));
     }
     list($plugin, $item_type) = $form_state->getBuildInfo()['args'];
     // Execute the validation method on the source plugin controller.

@@ -42,7 +42,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->installConfig(['language']);
     ConfigurableLanguage::createFromLangcode('de')->save();
 
-    $this->installEntitySchema('node');
+    //$this->installEntitySchema('node');
     $this->installEntitySchema('tmgmt_job');
     $this->installEntitySchema('tmgmt_job_item');
     $this->installEntitySchema('tmgmt_message');
@@ -185,6 +185,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $field->cardinality = 2;
     $field->save();
 
+
     $node = entity_create('node', array(
       'uid' => $account->id(),
       'type' => $type->id(),
@@ -265,6 +266,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     $type = entity_create('node_type', $values);
     $saved = $type->save();
+    node_add_body_field($type);
 
     $this->assertEqual($saved, SAVED_NEW, t('Created content type %type.', array('%type' => $type->id())));
 

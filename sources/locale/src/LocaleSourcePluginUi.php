@@ -68,7 +68,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
     foreach ($this->getLanguages() as $langcode => $language) {
       $langcode = str_replace('-', '', $langcode);
       $languages['langcode-' . $langcode] = array(
-        'data' => String::checkPlain($language->name),
+        'data' => String::checkPlain($language->getName()),
       );
     }
 
@@ -171,7 +171,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
 
     $options = array();
     foreach (language_list() as $langcode => $language) {
-      $options[$langcode] = $language->name;
+      $options[$langcode] = $language->getName();
     }
 
     $default_values = $this->getSearchFormSubmittedParams();
