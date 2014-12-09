@@ -74,9 +74,9 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
     return $form;
   }
 
-  public function pluginSettin(array $form, FormStateInterfaceerface $form_state, Translator $translator, $busy = FALSE) {
+  public function pluginSetting(array $form, FormStateInterfaceerface $form_state, Translator $translator, $busy = FALSE) {
     $form['allow_all'] = array(
-      '#title' => t('Allow translations for enabled languages even if no translator has the necessary capabilities'),
+      '#title' => t('Allow translations for enabled languages even if no translator has the necessary abilities'),
       '#type' => 'checkbox',
       '#default_value' => $translator->getSetting('allow_all'),
     );

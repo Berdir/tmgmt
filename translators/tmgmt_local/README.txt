@@ -2,7 +2,7 @@ TMGMT Local Translator
 ----------------------
 
 A user interface to execute the actual translation of TMGMT source elements.
-Includes management capabilities for handling translations and users.
+Includes management tools for handling translations and users.
 
 Requirements
 ------------
@@ -13,7 +13,7 @@ Basic Concepts
 --------------
 
 Acts as a translator plugin for TMGMT. Can be used to do manual local
-translation. In addition it offers some management capabilities to handle the
+translation. In addition it offers some management tools to handle the
 assignment of jobs to users.
 
 The local translator adds two permissions:

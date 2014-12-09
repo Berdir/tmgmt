@@ -218,7 +218,7 @@ function tmgmt_local_translation_access(LocalTask $task, AccountInterface $accou
   // - User has 'provide translation services' permission.
   // - No modules say to deny access.
   // - At least one module says to grant access.
-  // - User has translation capabilities for this task.
+  // - User has translation abilities for this task.
   if (!\Drupal::currentUser()->hasPermission('provide translation services')) {
     $rights[$account->id()][$job->id()] = FALSE;
     return FALSE;
@@ -239,7 +239,7 @@ function tmgmt_local_translation_access(LocalTask $task, AccountInterface $accou
     return TRUE;
   }
 
-  // Lastly, check for the translation capabilities.
+  // Lastly, check for the translation abilities.
   $target_languages = tmgmt_local_supported_target_languages($job->getSourceLangcode(), array($account->id()));
   $rights[$account->id()][$job->id()] = in_array($job->getTargetLangcode(), $target_languages);
 
@@ -250,7 +250,7 @@ function tmgmt_local_translation_access(LocalTask $task, AccountInterface $accou
  * Helper function for clearing the languages cache of all local translators.
  *
  * Can be used in oder to clear the cache for supported target languages after
- * the translation capabilities of an local have changed.
+ * the translation abilities of an local have changed.
  */
 function tmgmt_local_clear_languages_cache() {
   $results = \Drupal::entityQuery('tmgmt_translator')
@@ -658,7 +658,7 @@ function tmgmt_local_supported_language_pairs($source_language = NULL, $uids = a
 
   $language_pairs[$cache_key] = array();
 
-  foreach (tmgmt_local_capabilities($source_language, NULL, $uids) as $row) {
+  foreach (tmgmt_local_abilities($source_language, NULL, $uids) as $row) {
     // Prevent duplicates.
     $pair_key = $row->tmgmt_translation_skills_language_from . '__' . $row->tmgmt_translation_skills_language_to;
     $language_pairs[$cache_key][$pair_key] = array(
@@ -713,18 +713,18 @@ function tmgmt_local_translators($source_language = NULL, array $target_language
     return $translators[$key];
   }
 
-  // Get all capabilities keyed by uids for given source language.
-  $translators_capabilities = array();
-  foreach (tmgmt_local_capabilities($source_language) as $row) {
-    $translators_capabilities[$row->uid][] = $row->tmgmt_translation_skills_language_to;
+  // Get all abilities keyed by uids for given source language.
+  $translators_abilities = array();
+  foreach (tmgmt_local_abilities($source_language) as $row) {
+    $translators_abilities[$row->uid][] = $row->tmgmt_translation_skills_language_to;
   }
 
-  // Filter out translator uids who's capabilities are not sufficient for given
+  // Filter out translator uids who's abilities are not sufficient for given
   // target languages.
   $translators_uids = array();
-  foreach ($translators_capabilities as $uid => $translator_capabilities) {
-    // In case provided target languages exceed users capabilities exclude.
-    if (!empty($target_languages) && count(array_diff($target_languages, $translator_capabilities)) > 0) {
+  foreach ($translators_abilities as $uid => $abilities) {
+    // In case provided target languages exceed users abilities, exclude.
+    if (!empty($target_languages) && count(array_diff($target_languages, $abilities)) > 0) {
       continue;
     }
     $translators_uids[] = $uid;
@@ -742,7 +742,7 @@ function tmgmt_local_translators($source_language = NULL, array $target_language
 }
 
 /**
- * Gets language capabilities.
+ * Gets language abilities.
  *
  * @param string $source_language
  *   (optional) Limit the source language.
@@ -752,14 +752,14 @@ function tmgmt_local_translators($source_language = NULL, array $target_language
  *   (optional) Limit to specific users.
  *
  * @return array
- *   Array of language capabilities with following data:
+ *   Array of language abilities with following data:
  *   - tmgmt_translation_skills_language_from
  *   - tmgmt_translation_skills_language_to
  *   - uid
  *   - name
  *   - mail
  */
-function tmgmt_local_capabilities($source_language = NULL, $target_language = NULL, $uids = array()) {
+function tmgmt_local_abilities($source_language = NULL, $target_language = NULL, $uids = array()) {
 
   $roles = tmgmt_local_translator_roles();
   // If there are no roles that have the required permission, return an empty

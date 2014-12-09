@@ -175,15 +175,15 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalGet($job->getSystemPath());
     $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Local Translator (auto created)', '@source' => 'English', '@target' => 'German')));
 
-    // Create another local translator with the required capabilities.
+    // Create another local translator with the required abilities.
     $other_translator_same = $this->drupalCreateUser($this->local_translator_permissions);
 
-    // And test again with two roles but still no capabilities.
+    // And test again with two roles but still no abilities.
     $this->drupalGet($job->getSystemPath());
     $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Local Translator (auto created)', '@source' => 'English', '@target' => 'German')));
 
     $this->drupalLogin($other_translator_same);
-    // Configure language capabilities.
+    // Configure language abilities.
     $edit = array(
       'tmgmt_translation_skills[0][language_from]' => 'en',
       'tmgmt_translation_skills[0][language_to]' => 'de',
@@ -198,7 +198,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertNoText($this->local_translator->getUsername());
 
     $this->drupalLogin($this->local_translator);
-    // Configure language capabilities.
+    // Configure language abilities.
     $edit = array(
       'tmgmt_translation_skills[0][language_from]' => 'en',
       'tmgmt_translation_skills[0][language_to]' => 'de',
@@ -218,11 +218,11 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     $this->drupalLogin($this->local_translator);
 
-    // Create a second local translator with different language capabilities,
+    // Create a second local translator with different language abilities,
     // make sure that he does not see the task.
     $other_translator = $this->drupalCreateUser($this->local_translator_permissions);
     $this->drupalLogin($other_translator);
-    // Configure language capabilities.
+    // Configure language abilities.
     $edit = array(
       'tmgmt_translation_skills[0][language_from]' => 'de',
       'tmgmt_translation_skills[0][language_to]' => 'en',
@@ -254,7 +254,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Now test the assign link.
     $this->clickLink(t('assign'));
 
-    // Log in with the translator with the same capabilities, make sure that he
+    // Log in with the translator with the same abilities, make sure that he
     // does not see the assigned task.
     $this->drupalLogin($other_translator_same);
     $this->drupalGet('translate');
@@ -481,7 +481,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertTrue($job->isActive());
   }
 
-  function testCapabilitiesAPI() {
+  function testAbilitiesAPI() {
 
     $this->addLanguage('fr');
     $this->addLanguage('ru');
@@ -591,7 +591,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
       }
     }
 
-    // Only translator2 has such capabilities.
+    // Only translator2 has such abilities.
     $translators = tmgmt_local_translators('en', array('ru', 'fr'));
     $this->assertTrue(isset($translators[$translator2->id()]));
   }
@@ -607,9 +607,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $job->addItem('test_source', 'test', '1');
     $job->addItem('test_source', 'test', '2');
 
-    // Create another local translator with the required capabilities.
+    // Create another local translator with the required abilities.
     $local_translator = $this->loginAsTranslator($this->local_translator_permissions);
-    // Configure language capabilities.
+    // Configure language abilities.
     $edit = array(
       'tmgmt_translation_skills[und][0][language_from]' => 'en',
       'tmgmt_translation_skills[und][0][language_to]' => 'de',
