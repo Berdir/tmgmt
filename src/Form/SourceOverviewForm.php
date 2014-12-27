@@ -31,10 +31,9 @@ class SourceOverviewForm extends FormBase {
 
     $form['#title'] = $this->t('@type overview (@plugin)', array('@type' => $source->getItemTypeLabel($item_type), '@plugin' => $definition['label']));
     $form['actions'] = array(
-      '#type' => 'fieldset',
+      '#type' => 'details',
       '#title' => t('Operations'),
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
+      '#open' => TRUE,
       '#weight' => -10,
       '#attributes' => array('class' => array('tmgmt-source-operations-wrapper'))
     );

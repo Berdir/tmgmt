@@ -114,7 +114,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
   public function overviewSearchFormPart(array $form, FormStateInterface $form_state, $type) {
 
     // Add search form specific styling.
-    $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_content') . '/css/tmgmt_content.admin.entity_source_search_form.css';
+    $form['#attached']['library'][] = 'tmgmt_content/entity_source_search_form';
 
     // Add entity type value into form array so that it is available in
     // the form alter hook.
@@ -324,7 +324,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
 
     $form += $this->overviewSearchFormPart($form, $form_state, $type);
 
-    $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
+    $form['#attached']['library'][] = 'tmgmt_ui/admin';
 
     $form['items'] = array(
       '#type' => 'tableselect',

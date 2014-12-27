@@ -15,6 +15,7 @@ use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\views\Entity\View;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\Views;
 
 /**
  * Form controller for the job edit forms.
@@ -173,23 +174,23 @@ class JobForm extends TmgmtFormBase {
       );
     }
 
-    if ($view =  entity_load('view', 'tmgmt_ui_job_items')) {
+    if ($view = Views::getView('tmgmt_ui_job_items')) {
       $form['job_items_wrapper'] = array(
-        '#type' => 'fieldset',
+        '#type' => 'details',
         '#title' => t('Job items'),
-        '#collapsible' => TRUE,
+        '#open' => FALSE,
         '#weight' => 10,
-        '#prefix' => '<div class="tmgmt-ui-job-checkout-fieldset">',
+        '#prefix' => '<div class="tmgmt-ui-job-checkout-details">',
         '#suffix' => '</div>',
       );
 
       // Translation jobs.
-      /* @var $view View */
+      $output = $view->preview($job->isSubmittable() ? 'submitted' : 'checkout', array($job->id()));
       $form['job_items_wrapper']['items'] = array(
         '#type' => 'markup',
-        '#title' => $view->label(),
+        '#title' => $view->storage->label(),
         '#prefix' => '<div class="' . 'tmgmt-ui-job-items ' . ($job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage') . '">',
-        'view' => $view->getExecutable()->preview($job->isSubmittable() ? 'submit' : 'block', array($job->id())),
+        'view' => ['#markup' => drupal_render($output)],
         '#attributes' => array('class' => array('tmgmt-ui-job-items', $job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage')),
         '#suffix' => '</div>',
       );
@@ -251,10 +252,11 @@ class JobForm extends TmgmtFormBase {
         ),
       );
       $form['job_items_wrapper']['suggestions']['container']['suggestions_list'] = array(
-        '#type' => 'fieldset',
+        '#type' => 'details',
         '#title' => t('Suggestions'),
         '#prefix' => '<div id="tmgmt-ui-job-items-suggestions">',
         '#suffix' => '</div>',
+        '#open' => FALSE,
       ) + $suggestions_table;
     }
 
@@ -264,7 +266,6 @@ class JobForm extends TmgmtFormBase {
       $form['translator_wrapper'] = array(
         '#type' => 'fieldset',
         '#title' => t('Configure translator'),
-        '#collapsible' => FALSE,
         '#weight' => 20,
       );
 
@@ -294,20 +295,21 @@ class JobForm extends TmgmtFormBase {
         $settings = array();
       }
       $form['translator_wrapper']['settings'] = array(
-          '#type' => 'fieldset',
+          '#type' => 'details',
           '#title' => t('Checkout settings'),
           '#prefix' => '<div id="tmgmt-ui-translator-settings">',
           '#suffix' => '</div>',
           '#tree' => TRUE,
+          '#open' => TRUE,
         ) + $settings;
     }
     // Otherwise display the checkout info.
     elseif ($job->getTranslatorId()) {
 
       $form['translator_wrapper'] = array(
-        '#type' => 'fieldset',
+        '#type' => 'details',
         '#title' => t('Translator information'),
-        '#collapsible' => TRUE,
+        '#open' => FALSE,
         '#weight' => 20,
       );
 
@@ -326,17 +328,18 @@ class JobForm extends TmgmtFormBase {
       '#weight' => 45,
     );
 
-    if ($view = entity_load('view', 'tmgmt_ui_job_messages')) {
+    if ($view = Views::getView('tmgmt_ui_job_messages')) {
       $form['messages'] = array(
-        '#type' => 'fieldset',
-        '#title' => $view->label(),
-        '#collapsible' => TRUE,
+        '#type' => 'details',
+        '#title' => $view->storage->label(),
+        '#open' => FALSE,
         '#weight' => 50,
       );
-      $form['messages']['view'] = $view->getExecutable()->preview('block', array($job->id()));
+      $output = $view->preview('embed', array($job->id()));
+      $form['messages']['view']['#markup'] = drupal_render($output);
     }
 
-    $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
+    $form['#attached']['library'][] = 'tmgmt_ui/admin';
     return $form;
   }
 

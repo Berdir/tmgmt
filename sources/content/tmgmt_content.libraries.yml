@@ -1,0 +1,4 @@
+entity_source_search_form:
+  css:
+    theme:
+      css/tmgmt_content.admin.entity_source_search_form.css: {}

@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -189,7 +190,7 @@ function tmgmt_ui_write_request_messages(Job $job) {
  *   The ajax id.
  */
 function tmgmt_ui_review_form_element_ajaxid($parent_key) {
-  return 'tmgmt-ui-element-' . drupal_clean_css_identifier($parent_key) . '-wrapper';
+  return 'tmgmt-ui-element-' . Html::cleanCssIdentifier($parent_key) . '-wrapper';
 }
 
 /**
@@ -251,8 +252,8 @@ function tmgmt_ui_translation_review_form_update_state(array $form, FormStateInt
         else {
           $destination = '';
         }
-        tmgmt_ui_redirect_queue_set(array(current_path()), $destination);
-        $form_state->setRedirectUrl(Url::fromUri('base://' . current_path() . '/reject/' . $matches['key']));
+        tmgmt_ui_redirect_queue_set(array(Url::fromRoute('<current>')->getInternalPath()), $destination);
+        $form_state->setRedirectUrl(Url::fromUri('base://' . Url::fromRoute('<current>')->getInternalPath() . '/reject/' . $matches['key']));
         $success = FALSE;
       }
       else {
@@ -281,7 +282,7 @@ function tmgmt_ui_translation_review_form_update_state(array $form, FormStateInt
  */
 function tmgmt_ui_translation_review_form_reject_confirm(array $form, FormStateInterface $form_state, JobItem $job_item, $key) {
   // Path of job item review form.
-  $path = explode('/', current_path());
+  $path = explode('/', Url::fromRoute('<current>')->getInternalPath());
   $path = implode('/', array_slice($path, 0, count($path) - 2));
 
   $args = array(
@@ -426,7 +427,7 @@ function tmgmt_ui_job_checkout_and_redirect(FormStateInterface $form_state, arra
       $request->query->remove('destination');
     }
     else {
-      tmgmt_ui_redirect_queue_set($redirects, current_path());
+      tmgmt_ui_redirect_queue_set($redirects, Url::fromRoute('<current>')->getInternalPath());
     }
     $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_ui_redirect_queue_dequeue()));
 

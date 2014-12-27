@@ -7,6 +7,9 @@ tmgmt.translator.settings.test_translator:
     auto_accept:
       type: boolean
       label: Automatically accept
+    action:
+      type: string
+      label: Action
     key:
       type: string
       label: Key

@@ -109,15 +109,15 @@ class JobItemForm extends TmgmtFormBase {
 
     if ($view =  entity_load('view', 'tmgmt_ui_job_item_messages')) {
       $form['messages'] = array(
-        '#type' => 'fieldset',
+        '#type' => 'details',
         '#title' => $view->label(),
-        '#collapsible' => TRUE,
+        '#open' => FALSE,
         '#weight' => 50,
       );
       $form['messages']['view'] = $view->getExecutable()->preview('block', array($item->id()));
     }
 
-    $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
+    $form['#attached']['library'][] = 'tmgmt_ui/admin';
     // The reject functionality has to be implement by the translator plugin as
     // that process is completely unique and custom for each translation service.
 
@@ -347,10 +347,9 @@ class JobItemForm extends TmgmtFormBase {
             ));
           }
           $form[$target_key]['below']['revisions_wrapper'] = array(
-            '#type' => 'fieldset',
+            '#type' => 'details',
             '#title' => t('Translation revisions'),
-            '#collapsed' => TRUE,
-            '#collapsible' => TRUE,
+            '#open' => TRUE,
           );
           $form[$target_key]['below']['revisions_wrapper']['revisions'] = array(
             '#theme' => 'item_list',

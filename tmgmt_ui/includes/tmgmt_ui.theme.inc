@@ -7,6 +7,7 @@
 
 use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
+use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
 
 /**
@@ -115,7 +116,7 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
 
     $job_status = sprintf('<div class="%s" title="%s"><span></span></div>', implode(' ', $classes), $label);
 
-    $status .= \Drupal::l($job_status, $uri->getRouteName(), $uri->getRouteParameters() + array('destination' => current_path()), array(
+    $status .= \Drupal::l($job_status, $uri->getRouteName(), $uri->getRouteParameters() + array('destination' => Url::fromRoute('<current>')->getInternalPath()), array(
       'html' => TRUE,
       'attributes' => array('title' => $label),
     ));

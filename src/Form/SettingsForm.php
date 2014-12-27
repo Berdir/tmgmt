@@ -28,8 +28,9 @@ class SettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->configFactory()->get('tmgmt.settings');
     $form['workflow'] = array(
-      '#type' => 'fieldset',
+      '#type' => 'details',
       '#title' => t('Workflow settings'),
+      '#open' => TRUE,
     );
     $form['workflow']['tmgmt_quick_checkout'] = array(
       '#type' => 'checkbox',
@@ -38,8 +39,9 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('quick_checkout'),
     );
     $form['performance'] = array(
-      '#type' => 'fieldset',
+      '#type' => 'details',
       '#title' => t('Performance settings'),
+      '#open' => TRUE,
     );
     $form['performance']['tmgmt_purge_finished'] = array(
       '#type' => 'select',

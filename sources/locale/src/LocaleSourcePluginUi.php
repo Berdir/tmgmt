@@ -91,7 +91,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
       '#empty' => t('No strings matching given criteria have been found.')
     );
 
-    $form['#attached']['css'][] = drupal_get_path('module', 'tmgmt_ui') . '/css/tmgmt_ui.admin.css';
+    $form['#attached']['library'][] = 'tmgmt_ui/admin';
 
     $search_data = $this->getSearchFormSubmittedParams();
 

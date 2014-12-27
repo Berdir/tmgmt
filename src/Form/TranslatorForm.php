@@ -103,7 +103,8 @@ class TranslatorForm extends EntityForm {
       '#maxlength' => 255,
     );
     $form['settings'] = array(
-      '#type' => 'fieldset',
+      '#type' => 'details',
+      '#open' => TRUE,
       '#title' => t('Translator settings'),
       '#tree' => TRUE,
     );
@@ -139,9 +140,10 @@ class TranslatorForm extends EntityForm {
         ),
       );
       $form['plugin_wrapper']['settings'] = array(
-        '#type' => 'fieldset',
+        '#type' => 'details',
         '#title' => t('@plugin plugin settings', array('@plugin' => $definition['label'])),
         '#tree' => TRUE,
+        '#open' => TRUE,
       );
       // Add the translator plugin settings form.
       $plugin_ui = $this->translatorManager->createUIInstance($entity->plugin);

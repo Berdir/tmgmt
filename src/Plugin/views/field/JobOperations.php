@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt\Plugin\views\field;
 
+use Drupal\Core\Url;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 
@@ -25,7 +26,7 @@ class JobOperations extends FieldPluginBase {
     $uri = $job->urlInfo();
     if ($job->isSubmittable() && $job->access('submit')) {
       $element['#links']['submit'] = array(
-        'query' => array('destination' => current_path()),
+        'query' => array('destination' => Url::fromRoute('<current>')->getInternalPath()),
         'title' => t('submit'),
       ) + $uri->toArray();
     }
@@ -38,7 +39,7 @@ class JobOperations extends FieldPluginBase {
       $element['#links']['cancel'] = array(
         'route_name' => 'tmgmt.job_entity_abort',
         'route_parameters' => array('tmgmt_job' => $job->id()),
-        'query' => array('destination' => current_path()),
+        'query' => array('destination' => Url::fromRoute('<current>')->getInternalPath()),
         'title' => t('abort'),
       );
     }
@@ -46,7 +47,7 @@ class JobOperations extends FieldPluginBase {
       $element['#links']['delete'] = array(
         'route_name' => 'tmgmt.job_entity_delete',
         'route_parameters' => array('tmgmt_job' => $job->id()),
-        'query' => array('destination' => current_path()),
+        'query' => array('destination' => Url::fromRoute('<current>')->getInternalPath()),
         'title' => t('delete'),
       );
     }

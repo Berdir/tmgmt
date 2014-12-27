@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Plugin\views\field;
 
 use Drupal\Component\Annotation\PluginID;
+use Drupal\Core\Url;
 use Drupal\views\Plugin\views\area\Result;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
@@ -27,14 +28,14 @@ class JobItemOperations extends FieldPluginBase {
     $url = $item->urlInfo();
     if ($item->getCountTranslated() > 0 && $item->access('accept')) {
       $element['#links']['review'] = array(
-        'query' => array('destination' => current_path()),
+        'query' => array('destination' => Url::fromRoute('<current>')->getInternalPath()),
         'title' => t('review'),
       ) + $url->toArray();
     }
     // Do not display view on unprocessed jobs.
     elseif (!$item->getJob()->isUnprocessed()) {
       $element['#links']['view'] = array(
-        'query' => array('destination' => current_path()),
+        'query' => array('destination' => Url::fromRoute('<current>')->getInternalPath()),
         'title' => t('view'),
       ) + $url->toArray();
     }
@@ -42,7 +43,7 @@ class JobItemOperations extends FieldPluginBase {
       $element['#links']['delete'] = array(
         'route_name' => 'tmgmt.job_item_delete',
         'route_parameters' => array('tmgmt_job_item' => $item->id()),
-        'query' => array('destination' => current_path()),
+        'query' => array('destination' => Url::fromRoute('<current>')->getInternalPath()),
         'title' => t('delete'),
       );
     }

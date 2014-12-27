@@ -32,11 +32,10 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
 
       $form['remote_languages_mappings'] = array(
         '#tree' => TRUE,
-        '#type' => 'fieldset',
+        '#type' => 'details',
         '#title' => t('Remote languages mappings'),
         '#description' => t('Here you can specify mappings of your local language codes to the translator language codes.'),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
+        '#open' => TRUE,
       );
 
       $options = array();
@@ -99,8 +98,9 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
     $label = $job->getTranslator()->label();
     $form += array(
       '#title' => t('@translator translation job information', array('@translator' => $label)),
-      '#type' => 'fieldset',
-      '#collapsible' => TRUE,
+      '#type' => 'details',
+      '#open' => FALSE,
+
     );
     return $form;
   }
