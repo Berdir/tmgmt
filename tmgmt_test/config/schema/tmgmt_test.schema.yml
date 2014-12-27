@@ -1,0 +1,23 @@
+tmgmt.translator.settings.test_translator:
+  type: mapping
+  mapping:
+    expose_settings:
+      type: boolean
+      label: Expose settings
+    auto_accept:
+      type: boolean
+      label: Automatically accept
+    key:
+      type: string
+      label: Key
+    new_key:
+      type: string
+      label: New key
+    another_key:
+      type: string
+      label: Another key
+    remote_languages_mappings:
+      type: sequence
+      sequence:
+        - type: string
+          label: Language key

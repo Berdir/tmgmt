@@ -91,7 +91,7 @@ class Translator extends ConfigEntityBase {
    *
    * @var array
    */
-  public $settings;
+  public $settings = array();
 
   /**
    * The supported target languages caches.

@@ -233,7 +233,7 @@ class TMGMTUiTest extends TMGMTTestBase {
   /**
    * Tests the tmgmt_ui_job_checkout() function.
    */
-  function testCheckoutFunction() {
+  function dtestCheckoutFunction() {
     $job = $this->createJob();
 
     // Check out a job when only the test translator is available. That one has
@@ -279,7 +279,7 @@ class TMGMTUiTest extends TMGMTTestBase {
   /**
    * Tests of the job item review process.
    */
-  public function testReview() {
+  public function dtestReview() {
     $job = $this->createJob();
     $job->translator = $this->default_translator->name;
     $job->settings = array();
@@ -308,7 +308,7 @@ class TMGMTUiTest extends TMGMTTestBase {
   /**
    * Tests the UI of suggestions.
    */
-  public function testSuggestions() {
+  public function dtestSuggestions() {
     // Prepare a job and a node for testing.
     $job = $this->createJob();
     $job->addItem('test_source', 'test', 1);
@@ -376,7 +376,7 @@ class TMGMTUiTest extends TMGMTTestBase {
   /**
    * Test the process of aborting and resubmitting the job.
    */
-  function testAbortJob() {
+  function dtestAbortJob() {
     $job = $this->createJob();
     $job->addItem('test_source', 'test', 1);
     $job->addItem('test_source', 'test', 2);
@@ -451,7 +451,7 @@ class TMGMTUiTest extends TMGMTTestBase {
   /**
    * Test the cart functionality.
    */
-  function testCart() {
+  function dtestCart() {
 
     $this->addLanguage('fr');
     $job_items = array();

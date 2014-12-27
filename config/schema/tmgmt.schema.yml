@@ -23,7 +23,7 @@ tmgmt.translator.*:
       type: label
       label: 'Machine readable name of the translator'
     label:
-      type: tabel
+      type: label
       label: 'Translator label'
     description:
       type: string
@@ -35,4 +35,4 @@ tmgmt.translator.*:
       type: string
       label: 'Translator plugin'
     settings:
-      type: tmgmt.translator.[%parent.plugin].settings
+        type: tmgmt.translator.settings.[%parent.plugin]

@@ -326,7 +326,7 @@ class JobForm extends TmgmtFormBase {
       '#weight' => 45,
     );
 
-    if ($view =  entity_load('view', 'tmgmt_ui_job_messages')) {
+    if ($view = entity_load('view', 'tmgmt_ui_job_messages')) {
       $form['messages'] = array(
         '#type' => 'fieldset',
         '#title' => $view->label(),
