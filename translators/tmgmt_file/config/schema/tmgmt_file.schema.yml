@@ -1,0 +1,15 @@
+tmgmt.translator.settings.file_translator:
+  type: mapping
+  mapping:
+    export_format:
+      type: string
+      label: Default export format
+    allow_override:
+      type: boolean
+      label: Allow override of export format
+    scheme:
+      type: string
+      label: Stream wrapper scheme
+    xliff_processing:
+      type: boolean
+      label: Xliff HTML processing

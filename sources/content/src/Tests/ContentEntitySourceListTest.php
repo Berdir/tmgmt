@@ -37,8 +37,9 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $this->createNodeType('page', 'Page', TRUE);
 
     // Enable entity translations for nodes and comments.
-    content_translation_set_config('node', 'article', 'enabled', TRUE);
-    content_translation_set_config('node', 'page', 'enabled', FALSE);
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    $content_translation_manager->setEnabled('node', 'article', TRUE);
+    $content_translation_manager->setEnabled('node', 'page', TRUE);
 
 
     // Create nodes that will be used during tests.
@@ -66,7 +67,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     $term1 = entity_create('taxonomy_term', array(
       'name' => $this->randomMachineName(),
-      'vid' => $vocabulary1->vid,
+      'vid' => $vocabulary1->id(),
     ));
     $term1->save();
 
@@ -78,12 +79,13 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     $term2 = entity_create('taxonomy_term', array(
       'name' => $this->randomMachineName(),
-      'vid' => $vocabulary2->vid,
+      'vid' => $vocabulary2->id(),
     ));
     $term2->save();
 
-    content_translation_set_config('taxonomy_term', $vocabulary1->id(), 'enabled', TRUE);
-    content_translation_set_config('taxonomy_term', $vocabulary2->id(), 'enabled', TRUE);
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    $content_translation_manager->setEnabled('taxonomy_term', $vocabulary1->id(), TRUE);
+    $content_translation_manager->setEnabled('taxonomy_term', $vocabulary2->id(), TRUE);
 
     $this->drupalGet('admin/tmgmt/sources/content/taxonomy_term');
     // Both terms should be displayed with their bundle.
@@ -199,8 +201,9 @@ class ContentEntitySourceListTest extends EntityTestBase {
   function testNodeEntityListings() {
 
     // Turn off the entity translation.
-    content_translation_set_config('node', 'article', 'enabled', FALSE);
-    content_translation_set_config('node', 'page', 'enabled', FALSE);
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    $content_translation_manager->setEnabled('node', 'article', FALSE);
+    $content_translation_manager->setEnabled('node', 'page', FALSE);
 
     // Check if we have appropriate message in case there are no entity
     // translatable content types.
@@ -209,8 +212,8 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     // Turn on the entity translation for both - article and page - to test
     // search form.
-    content_translation_set_config('node', 'article', 'enabled', TRUE);
-    content_translation_set_config('node', 'page', 'enabled', TRUE);
+    $content_translation_manager->setEnabled('node', 'article', TRUE);
+    $content_translation_manager->setEnabled('node', 'page', TRUE);
 
     // Create page node after entity translation is enabled.
     $page_node_translatable = $this->createNode('page');
@@ -259,7 +262,8 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     // To test if other entity types work go for simple comment search.
     \Drupal::service('comment.manager')->addDefaultField('node', 'article');
-    content_translation_set_config('comment', 'comment', 'enabled', TRUE);
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    $content_translation_manager->setEnabled('comment', 'comment', TRUE);
     \Drupal::entityManager()->clearCachedDefinitions();
     $values = array(
       'entity_type' => 'node',

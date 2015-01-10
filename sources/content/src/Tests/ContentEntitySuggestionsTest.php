@@ -7,11 +7,8 @@
 
 namespace Drupal\tmgmt_content\Tests;
 
-use Drupal\Core\Language\Language;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\field\Entity\FieldInstanceConfig;
-use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\tmgmt\Tests\TMGMTKernelTestBase;
@@ -28,7 +25,7 @@ class ContentEntitySuggestionsTest extends TMGMTKernelTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt_content', 'tmgmt_test', 'content_translation', 'node', 'entity', 'filter');
+  public static $modules = array('tmgmt_content', 'tmgmt_test', 'content_translation', 'node', 'entity', 'filter', 'entity_reference');
 
   /**
    * {@inheritdoc}
@@ -36,6 +33,8 @@ class ContentEntitySuggestionsTest extends TMGMTKernelTestBase {
   public function setUp() {
     parent::setUp();
     $this->installEntitySchema('node');
+    $this->installSchema('content_translation', ['content_translation']);
+    $this->installConfig(['node']);
   }
 
   /**
@@ -54,7 +53,8 @@ class ContentEntitySuggestionsTest extends TMGMTKernelTestBase {
     $type = NodeType::create(['type' => $this->randomMachineName()]);
     $type->save();
 
-    content_translation_set_config('node', $type->id(), 'enabled', TRUE);
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    $content_translation_manager->setEnabled('node', $type->id(), TRUE);
 
     $field1 = FieldStorageConfig::create(array(
       'field_name' => 'field1',
@@ -89,7 +89,8 @@ class ContentEntitySuggestionsTest extends TMGMTKernelTestBase {
       'settings' => array(),
     ))->save();
 
-    // Make the body field translatable from node.
+    // Create a translatable body field.
+    node_add_body_field($type);
     $field = FieldConfig::loadByName('node', $type->id(), 'body');
     $field->translatable = TRUE;
     $field->save();

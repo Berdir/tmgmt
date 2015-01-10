@@ -285,7 +285,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
     }
 
     $url = $job->urlInfo();
-    $url->setOption('destination', current_path());
+    $url->setOption('destination', Url::fromRoute('<current>')->getInternalPath());
     $form_state->setRedirectUrl($url);
     drupal_set_message(t('One job needs to be checked out.'));
   }

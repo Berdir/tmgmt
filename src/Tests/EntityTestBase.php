@@ -12,6 +12,8 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\taxonomy\VocabularyInterface;
 
 /**
  * Utility test case class with helper methods to create entities and their
@@ -79,12 +81,12 @@ abstract class EntityTestBase extends TMGMTTestBase {
    *   Created vocabulary object.
    */
   function createTaxonomyVocab($machine_name, $human_name, $fields_translatable = TRUE) {
-    $vocabulary = entity_create('taxonomy_vocabulary', array());
-    $vocabulary->name = $human_name;
-    $vocabulary->vid = $machine_name;
+    $vocabulary = entity_create('taxonomy_vocabulary', array(
+      'name' => $human_name,
+      'vid' => $machine_name));
     $vocabulary->save();
 
-    $this->attachFields('taxonomy_term', $vocabulary->vid, $fields_translatable);
+    $this->attachFields('taxonomy_term', $vocabulary->id(), $fields_translatable);
 
     return $vocabulary;
   }
@@ -184,7 +186,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
    *
    * It uses $this->field_names to populate content of attached fields. You can
    * access fields values using
-   * $this->field_names['taxonomy_term'][$vocabulary->vid].
+   * $this->field_names['taxonomy_term'][$vocabulary->id(].
    *
    * @param object $vocabulary
    *   Vocabulary object for which the term should be created.
@@ -192,11 +194,11 @@ abstract class EntityTestBase extends TMGMTTestBase {
    * @return object
    *   Newly created node object.
    */
-  function createTaxonomyTerm($vocabulary) {
-    $term = entity_create('taxonomy_term', array(
+  function createTaxonomyTerm(VocabularyInterface $vocabulary) {
+    $term = Term::create(array(
       'name' => $this->randomMachineName(),
       'description' => $this->randomMachineName(),
-      'vid' => $vocabulary->vid,
+      'vid' => $vocabulary->id(),
       'langcode' => 'en',
     ));
 

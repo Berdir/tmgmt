@@ -118,6 +118,7 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
 
     $uri->setOption('query', array('destination' => Url::fromRoute('<current>')->getInternalPath()));
     $uri->setOption('attributes', array('title' => $label));
+    $uri->setOption('html', TRUE);
     $status .= \Drupal::l(['#markup' => $job_status], $uri);
   }
   return $status;
