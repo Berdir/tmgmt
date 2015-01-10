@@ -31,25 +31,23 @@ class CrudTest extends TMGMTKernelTestBase {
   function testTranslators() {
     $translator = $this->createTranslator();
 
-    $loaded_translator = tmgmt_translator_load($translator->name);
-
-    $this->assertEqual($translator->name, $loaded_translator->name);
-    $this->assertEqual($translator->label, $loaded_translator->label);
-    $this->assertEqual($translator->settings, $loaded_translator->settings);
+    $loaded_translator = tmgmt_translator_load($translator->id());
+    $this->assertEqual($translator->id(), $loaded_translator->id());
+    $this->assertEqual($translator->label(), $loaded_translator->label());
+    $this->assertEqual($translator->getSettings(), $loaded_translator->getSettings());
 
     // Update the settings.
-    $translator->settings['new_key'] = $this->randomString();
+    $translator->setSetting('new_key', $this->randomString());
     $translator->save();
 
-    $loaded_translator = tmgmt_translator_load($translator->name);
-
-    $this->assertEqual($translator->name, $loaded_translator->name);
-    $this->assertEqual($translator->label, $loaded_translator->label);
-    $this->assertEqual($translator->settings, $loaded_translator->settings);
+    $loaded_translator = tmgmt_translator_load($translator->id());
+    $this->assertEqual($translator->id(), $loaded_translator->id());
+    $this->assertEqual($translator->label(), $loaded_translator->label());
+    $this->assertEqual($translator->getSettings(), $loaded_translator->getSettings());
 
     // Delete the translator, make sure the translator is gone.
     $translator->delete();
-    $this->assertFalse(tmgmt_translator_load($translator->name));
+    $this->assertNull(tmgmt_translator_load($translator->id()));
   }
 
   /**
@@ -103,7 +101,7 @@ class CrudTest extends TMGMTKernelTestBase {
 
     $translator = $this->createTranslator();
     $job = $this->createJob();
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
     $job->save();
     $item1 = $job->addItem('test_source', 'type', 5);
     $item2 = $job->addItem('test_source', 'type', 4);
@@ -207,7 +205,7 @@ class CrudTest extends TMGMTKernelTestBase {
   function testAddingTranslatedData() {
     $translator = $this->createTranslator();
     $job = $this->createJob();
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
     $job->save();
 
     // Add some test items.

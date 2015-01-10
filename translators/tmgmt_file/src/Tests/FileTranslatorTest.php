@@ -38,13 +38,13 @@ class FileTranslatorTest extends TMGMTTestBase {
    * Test the content processing for XLIFF export and import.
    */
   function testXLIFFTextProcessing() {
-    $translator = $this->createTranslator();
-    $translator->plugin = 'file';
-    $translator->settings = array(
-      'export_format' => 'xlf',
-      'xliff_processing' => TRUE,
-    );
-    $translator->save();
+    $translator = $this->createTranslator([
+      'plugin' => 'file',
+      'settings' => [
+        'export_format' => 'xlf',
+        'xliff_processing' => TRUE,
+      ]
+    ]);
 
     // Get the source text.
     $source_text = trim(file_get_contents(drupal_get_path('module', 'tmgmt') . '/tests/testing_html/sample.html'));
@@ -55,7 +55,7 @@ class FileTranslatorTest extends TMGMTTestBase {
 
     // ==== First test the whole cycle ==== //
     $job = $this->createJob();
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
     $job->addItem('test_html_source', 'test', '1');
 
     // Requesting translation will mask the html.
@@ -103,7 +103,7 @@ class FileTranslatorTest extends TMGMTTestBase {
 
     // ==== Test integrity check ==== //
     $job = $this->createJob();
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
     $job->addItem('test_html_source', 'test', '1');
     $job->requestTranslation();
 
@@ -126,10 +126,10 @@ class FileTranslatorTest extends TMGMTTestBase {
 
     // Set the XLIFF processing to FALSE and test it results in the source
     // text not being XLIFF processed.
-    $translator->settings['xliff_processing'] = FALSE;
+    $translator->setSetting('xliff_processing', FALSE);
     $translator->save();
     $job = $this->createJob();
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
     $job->addItem('test_html_source', 'test', '1');
     $job->requestTranslation();
     $targets = $this->getTransUnitsContent($job);
@@ -171,13 +171,13 @@ class FileTranslatorTest extends TMGMTTestBase {
    */
   function testHTML() {
     $translator = tmgmt_translator_load('file');
-    $translator->settings = array(
-      'export_format' => 'html',
-    );
-    $translator->save();
+    $translator
+      ->setSetting('export_format', 'html')
+      ->save();
+
 
     $job = $this->createJob();
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
     $job->addItem('test_source', 'test', '1');
     $job->addItem('test_source', 'test', '2');
 
@@ -209,10 +209,9 @@ class FileTranslatorTest extends TMGMTTestBase {
    */
   function testXLIFF() {
     $translator = tmgmt_translator_load('file');
-    $translator->settings = array(
-      'export_format' => 'xlf',
-    );
-    $translator->save();
+    $translator
+      ->setSetting('export_format', 'xlf')
+      ->save();
 
     // Set multiple data items for the source.
     \Drupal::state()->set('tmgmt.test_source_data', array(
@@ -229,7 +228,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     ));
 
     $job = $this->createJob();
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
     $first_item = $job->addItem('test_source', 'test', '1');
     // Keep the first item data for later use.
     $first_item_data = tmgmt_flatten_data($first_item->getData());
@@ -275,7 +274,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     // Change the job id to a wrong one and try to import it.
     $wrong_xml = clone $xml;
     $second_job = $this->createJob();
-    $second_job->translator = $translator->name;
+    $second_job->translator = $translator->id();
     // We need to add the elements count value into settings, otherwise the
     // validation will fail on integrity check.
     $xliff_validation = array(
@@ -330,7 +329,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     // Create a job, assign to the file translator and delete before attaching
     // a file.
     $other_job = $this->createJob();
-    $other_job->translator = $translator->name;
+    $other_job->translator = $translator->id();
     $other_job->save();
     $other_job->delete();
     // Make sure the file of the other job still exists.
@@ -355,16 +354,17 @@ class FileTranslatorTest extends TMGMTTestBase {
   function testPrivate() {
     // Create a translator using the private file system.
     // @todo: Test the configuration UI.
-    $translator = $this->createTranslator();
-    $translator->plugin = 'file';
-    $translator->settings = array(
-      'export_format' => 'xlf',
-      'scheme' => 'private',
-    );
-    $translator->save();
+    $translator = $this->createTranslator([
+      'plugin' => 'file',
+      'settings' => [
+        'export_format' => 'xlf',
+        'xliff_processing' => TRUE,
+        'scheme' => 'private://',
+      ]
+    ]);
 
     $job = $this->createJob();
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
     $job->addItem('test_source', 'test', '1');
     $job->addItem('test_source', 'test', '2');
 

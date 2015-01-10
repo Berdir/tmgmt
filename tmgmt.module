@@ -689,7 +689,7 @@ function tmgmt_translator_auto_create(array $definition) {
     $label = $definition['label'] . ' (auto created)';
     $translator = tmgmt_translator_create($plugin, $plugin, $label, (string) $definition['description']);
     // Append some default settings from the translator plugin definition.
-    $translator->settings = $translator->getController()->defaultSettings();
+    $translator->setSettings($translator->getController()->defaultSettings());
     $translator->save();
   }
 }
@@ -703,7 +703,7 @@ function tmgmt_translator_auto_create(array $definition) {
 function tmgmt_translator_labels() {
   $labels = array();
   foreach (tmgmt_translator_load_multiple() as $translator) {
-    $labels[$translator->name] = $translator->label();
+    $labels[$translator->id()] = $translator->label();
   }
   return $labels;
 }
@@ -724,13 +724,13 @@ function tmgmt_translator_labels_flagged($job = NULL) {
   $labels = array();
   foreach (tmgmt_translator_load_multiple() as $translator) {
     if (!$translator->isAvailable()) {
-      $labels[$translator->name] = t('@label (not available)', array('@label' => $translator->label()));
+      $labels[$translator->id()] = t('@label (not available)', array('@label' => $translator->label()));
     }
     elseif (isset($job) && !$translator->canTranslate($job)) {
-      $labels[$translator->name] = t('@label (unsupported)', array('@label' => $translator->label()));
+      $labels[$translator->id()] = t('@label (unsupported)', array('@label' => $translator->label()));
     }
     else {
-      $labels[$translator->name] = $translator->label();
+      $labels[$translator->id()] = $translator->label();
     }
   }
   return $labels;
@@ -747,7 +747,7 @@ function tmgmt_translator_labels_flagged($job = NULL) {
  *   mapping feature it will return TRUE.
  */
 function tmgmt_provide_remote_languages_mappings(Translator $translator) {
-  $definition = \Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($translator->plugin);
+  $definition = \Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($translator->getPluginId());
 
   if (!isset($definition['map_remote_languages'])) {
     return TRUE;
@@ -766,7 +766,7 @@ function tmgmt_provide_remote_languages_mappings(Translator $translator) {
  *   If job settings are to be handled by the plugin.
  */
 function tmgmt_job_settings_custom_handling(Translator $translator) {
-  $definition = \Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($translator->plugin);
+  $definition = \Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($translator->getPluginId());
 
   if (isset($definition['job_settings_custom_handling'])) {
     return $definition['job_settings_custom_handling'];

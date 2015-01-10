@@ -103,8 +103,8 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
       return $language;
     }
 
-    if (isset($translator->settings['remote_languages_mappings'][$language])) {
-      return $translator->settings['remote_languages_mappings'][$language];
+    if ($mappings = $translator->getSetting(['remote_languages_mappings', $language])) {
+      return $mappings;
     }
 
     $default_mappings = $this->getDefaultRemoteLanguagesMappings();
@@ -124,10 +124,8 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
       return $language;
     }
 
-    if (isset($translator->settings['remote_languages_mappings']) && is_array($translator->settings['remote_languages_mappings'])) {
-      $mappings = $translator->settings['remote_languages_mappings'];
-    }
-    else {
+    $mappings = $translator->getSetting('remote_languages_mappings');
+    if (is_null($mappings)) {
       $mappings = $this->getDefaultRemoteLanguagesMappings();
     }
 

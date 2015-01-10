@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Entity;
 
 use Drupal\Component\Plugin\Exception\PluginException;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -50,49 +51,49 @@ class Translator extends ConfigEntityBase {
    *
    * @var string
    */
-  public $name;
+  protected $name;
 
   /**
    * The UUID of this translator.
    *
    * @var string
    */
-  public $uuid;
+  protected $uuid;
 
   /**
    * Label of the translator.
    *
    * @var string
    */
-  public $label;
+  protected $label;
 
   /**
    * Description of the translator.
    *
    * @var string
    */
-  public $description;
+  protected $description;
 
   /**
    * Weight of the translator.
    *
    * @var int
    */
-  public $weight;
+  protected $weight;
 
   /**
    * Plugin name of the translator.
    *
    * @type string
    */
-  public $plugin;
+  protected $plugin;
 
   /**
    * Translator type specific settings.
    *
    * @var array
    */
-  public $settings = array();
+  protected $settings = array();
 
   /**
    * The supported target languages caches.
@@ -118,15 +119,95 @@ class Translator extends ConfigEntityBase {
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $values = array(), $type = 'tmgmt_translator') {
-    parent::__construct($values, $type);
+  public function id() {
+    return $this->name;
   }
 
   /**
-   * {@inheritdoc}
+   * Returns the array of settings.
+   *
+   * See the documentation of the translator plugin for supported or
+   * required settings.
+   *
+   * @return array
+   *   The array of settings.
    */
-  public function id() {
-    return $this->name;
+  public function getSettings() {
+    return $this->settings;
+  }
+
+  /**
+   * Sets the array of settings.
+   *
+   * @param array $settings
+   *   The array of settings.
+   *
+   * @return static
+   *   The object itself for chaining.
+   */
+  public function setSettings(array $settings) {
+    $this->settings = $settings;
+    return $this;
+  }
+
+  /**
+   * Retrieves a setting value from the translator settings. Pulls the default
+   * values (if defined) from the plugin controller.
+   *
+   * @param string|array $name
+   *   The name of the setting, an array with multiple keys for nested settings.
+   *
+   * @return
+   *   The setting value or $default if the setting value is not set. Returns
+   *   NULL if the setting does not exist at all.
+   */
+  public function getSetting($name) {
+    if (is_array($name)) {
+      if (NestedArray::keyExists($this->settings, $name)) {
+        return NestedArray::getValue($this->settings, $name);
+      }
+      elseif ($controller = $this->getController()) {
+        $defaults = $controller->defaultSettings();
+        return NestedArray::getValue($defaults, $name);
+      }
+    }
+    else {
+      if (isset($this->settings[$name])) {
+        return $this->settings[$name];
+      }
+      elseif ($controller = $this->getController()) {
+        $defaults = $controller->defaultSettings();
+        if (isset($defaults[$name])) {
+          return $defaults[$name];
+        }
+      }
+    }
+  }
+
+  /**
+   * Sets a definition setting.
+   *
+   * @param string $setting_name
+   *   The definition setting to set.
+   * @param mixed $value
+   *   The value to set.
+   *
+   * @return static
+   *   The object itself for chaining.
+   */
+  public function setSetting($setting_name, $value) {
+    $this->settings[$setting_name] = $value;
+    return $this;
+  }
+
+  /**
+   * Returns the translator plugin ID.
+   *
+   * @return string
+   *   The translator plugin ID used by this translator.
+   */
+  public function getPluginId() {
+    return $this->plugin;
   }
 
   /**
@@ -288,29 +369,6 @@ class Translator extends ConfigEntityBase {
       return $controller->getNotCanTranslateReason($job);
     }
     return FALSE;
-  }
-
-  /**
-   * Retrieves a setting value from the translator settings. Pulls the default
-   * values (if defined) from the plugin controller.
-   *
-   * @param $name
-   *   The name of the setting.
-   *
-   * @return
-   *   The setting value or $default if the setting value is not set. Returns
-   *   NULL if the setting does not exist at all.
-   */
-  public function getSetting($name) {
-    if (isset($this->settings[$name])) {
-      return $this->settings[$name];
-    }
-    elseif ($controller = $this->getController()) {
-      $defaults = $controller->defaultSettings();
-      if (isset($defaults[$name])) {
-        return $defaults[$name];
-      }
-    }
   }
 
   /**

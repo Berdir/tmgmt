@@ -117,7 +117,7 @@ function tmgmt_file_tmgmt_job_delete(Job $job) {
   $translator = $job->getTranslator();
 
   // Ignore jobs that don't have a file translator.
-  if (!$translator || $translator->plugin != 'file') {
+  if (!$translator || $translator->getPluginId() != 'file') {
     return;
   }
   // Check if there are any files that need to be deleted.

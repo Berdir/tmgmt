@@ -158,7 +158,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Create a job and request a local translation.
     $this->loginAsTranslator();
     $job = $this->createJob();
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
     $job->settings->job_comment = $job_comment = 'Dummy job comment';
     $job->addItem('test_source', 'test', '1');
     $job->addItem('test_source', 'test', '2');
@@ -467,14 +467,14 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Create a job and request a local translation.
     $this->loginAsTranslator();
     $job = $this->createJob();
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
     $job->addItem('test_source', 'test', '1');
     $job->addItem('test_source', 'test', '2');
 
     $this->assertFalse($job->requestTranslation(), 'Translation request was denied.');
 
     // Now enable the setting.
-    $translator->settings->allow_all = TRUE;
+    $translator->setSetting('allow_all', TRUE);
     $translator->save();
 
     $this->assertIdentical(NULL, $job->requestTranslation(), 'Translation request was successfull');
@@ -602,7 +602,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
   function testVBOPermissions() {
     $translator = tmgmt_translator_load('local');
     $job = $this->createJob();
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
     $job->settings->job_comment = $job_comment = 'Dummy job comment';
     $job->addItem('test_source', 'test', '1');
     $job->addItem('test_source', 'test', '2');

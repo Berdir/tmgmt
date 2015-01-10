@@ -128,7 +128,7 @@ function tmgmt_ui_job_needs_checkout_form(Job $job) {
       return TRUE;
     }
     $translator = reset($translators);
-    $job->translator = $translator->name;
+    $job->translator = $translator->id();
   }
   // If that translator has settings, the checkout is mandatory.
   if ($job->getTranslator()->hasCheckoutSettings($job)) {
