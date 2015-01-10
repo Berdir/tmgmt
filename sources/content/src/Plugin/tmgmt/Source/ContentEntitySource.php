@@ -8,7 +8,7 @@
 namespace Drupal\tmgmt_content\Plugin\tmgmt\Source;
 
 use Drupal\Core\Field\FieldItemInterface;
-use Drupal\Core\TypedData\AllowedValuesInterface;
+use Drupal\Core\TypedData\OptionsProviderInterface;
 use Drupal\Core\TypedData\Type\StringInterface;
 use Drupal\Core\TypedData\PrimitiveInterface;
 use Drupal\tmgmt\SourcePluginBase;
@@ -79,7 +79,7 @@ class ContentEntitySource extends SourcePluginBase {
 
           $translate = TRUE;
           // Ignore properties with limited allowed values or if they're not strings.
-          if ($property instanceof AllowedValuesInterface || !($property instanceof StringInterface)) {
+          if ($property instanceof OptionsProviderInterface || !($property instanceof StringInterface)) {
             $translate = FALSE;
           }
           $data[$key][$index][$property_key] = array(
@@ -130,8 +130,9 @@ class ContentEntitySource extends SourcePluginBase {
   public function getItemTypes() {
     $entity_types = \Drupal::entityManager()->getDefinitions();
     $types = array();
+    $content_translation_manager = \Drupal::service('content_translation.manager');
     foreach ($entity_types as $entity_type_name => $entity_type) {
-      if (content_translation_enabled($entity_type_name)) {
+      if ($content_translation_manager->isEnabled($entity_type->id())) {
         $types[$entity_type_name] = $entity_type->getLabel();
       }
     }
@@ -168,7 +169,7 @@ class ContentEntitySource extends SourcePluginBase {
    */
   public function getSourceLangCode(JobItem $job_item) {
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
-    return $entity->getUntranslated()->language()->id;
+    return $entity->getUntranslated()->language()->getId();
   }
 
   /**

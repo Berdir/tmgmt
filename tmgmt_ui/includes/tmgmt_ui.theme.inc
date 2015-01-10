@@ -116,10 +116,9 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
 
     $job_status = sprintf('<div class="%s" title="%s"><span></span></div>', implode(' ', $classes), $label);
 
-    $status .= \Drupal::l($job_status, $uri->getRouteName(), $uri->getRouteParameters() + array('destination' => Url::fromRoute('<current>')->getInternalPath()), array(
-      'html' => TRUE,
-      'attributes' => array('title' => $label),
-    ));
+    $uri->setOption('query', array('destination' => Url::fromRoute('<current>')->getInternalPath()));
+    $uri->setOption('attributes', array('title' => $label));
+    $status .= \Drupal::l(['#markup' => $job_status], $uri);
   }
   return $status;
 }

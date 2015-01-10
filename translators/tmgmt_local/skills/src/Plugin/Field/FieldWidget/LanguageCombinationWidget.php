@@ -36,7 +36,7 @@ class LanguageCombinationWidget extends WidgetBase {
     else {
       $languages_options = array();
       foreach (language_list() as $code => $language) {
-        $languages_options[$code] = $language->name;
+        $languages_options[$code] = $language->getName();
       }
     }
 

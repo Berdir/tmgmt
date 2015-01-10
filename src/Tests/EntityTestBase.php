@@ -45,14 +45,17 @@ abstract class EntityTestBase extends TMGMTTestBase {
 
     // Push in also the body field.
     $this->field_names['node'][$machine_name][] = 'body';
-    content_translation_set_config('node', $machine_name, 'enabled', $entity_translation);
+
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    $content_translation_manager->setEnabled('node', $machine_name, TRUE);
+
     if ($attach_fields) {
       $this->attachFields('node', $machine_name, $entity_translation);
     }
     else {
     // Change body field to be translatable.
-      $body = FieldStorageConfig::loadByName('node', 'body');
-      $body->translatable = TRUE;
+      $body = FieldConfig::loadByName('node', $machine_name, 'body');
+      $body->setTranslatable(TRUE);
       $body->save();
     }
   }

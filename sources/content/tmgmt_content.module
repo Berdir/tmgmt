@@ -51,8 +51,9 @@ function tmgmt_content_get_translatable_bundles($entity_type) {
   }
 
   $translatable_bundle_types = array();
+  $content_translation_manager = \Drupal::service('content_translation.manager');
   foreach (entity_get_bundles($entity_type) as $bundle_type => $bundle_definition) {
-    if (content_translation_enabled($entity_type, $bundle_type)) {
+    if ($content_translation_manager->isEnabled($entity_type, $bundle_type)) {
       $translatable_bundle_types[$bundle_type] = $bundle_definition['label'];
     }
   }
@@ -150,8 +151,9 @@ function tmgmt_content_get_translatable_entities($entity_type_id, $property_cond
 
   if ($bundle_key = $entity_type->getKey('bundle')) {
     $bundles = array();
+    $content_translation_manager = \Drupal::service('content_translation.manager');
     foreach (array_keys(entity_get_bundles($entity_type_id)) as $bundle) {
-      if (content_translation_enabled($entity_type_id, $bundle)) {
+      if ($content_translation_manager->isEnabled($entity_type_id, $bundle)) {
         $bundles[] = $bundle;
       }
     }

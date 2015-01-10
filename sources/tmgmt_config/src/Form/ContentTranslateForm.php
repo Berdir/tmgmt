@@ -47,7 +47,7 @@ class ContentTranslateForm extends FormBase {
     );
     $languages = \Drupal::languageManager()->getLanguages();
     // Check if there is a job / job item that references this translation.
-    $entity_langcode = $form_state->get('entity')->language()->id;
+    $entity_langcode = $form_state->get('entity')->language()->getId();
     $items = tmgmt_job_item_load_latest('content', $form_state->get('entity')->getEntityTypeId(), $form_state->get('entity')->id(), $entity_langcode);
     foreach ($languages as $langcode => $language) {
       if ($langcode == LanguageInterface::LANGCODE_DEFAULT) {

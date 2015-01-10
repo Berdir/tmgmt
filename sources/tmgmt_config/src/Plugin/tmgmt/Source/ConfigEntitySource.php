@@ -99,7 +99,7 @@ class ConfigEntitySource extends SourcePluginBase {
    */
   public function getSourceLangCode(JobItem $job_item) {
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
-    return $entity->language()->id;
+    return $entity->language()->getId();
   }
 
   /**

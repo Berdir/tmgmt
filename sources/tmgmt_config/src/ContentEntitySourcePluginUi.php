@@ -59,7 +59,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
       // Get existing translations and current job items for the entity
       // to determine translation statuses
       $translations = $entity->getTranslationLanguages();
-      $source_lang = $entity->language()->id;
+      $source_lang = $entity->language()->getId();
       $current_job_items = tmgmt_job_item_load_latest('content', $type, $entity->id(), $source_lang);
 
       // Load basic entity data.
@@ -155,7 +155,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
 
     $language_options = array();
     foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
-      $language_options[$langcode] = $language->name;
+      $language_options[$langcode] = $language->getName();
     }
 
     $form['search_wrapper']['search']['langcode'] = array(
@@ -188,7 +188,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
 
     $options = array();
     foreach (language_list() as $langcode => $language) {
-      $options[$langcode] = $language->name;
+      $options[$langcode] = $language->getName();
     }
 
     $form['search_wrapper']['search']['target_language'] = array(
@@ -380,7 +380,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     // Loop through entities and create individual jobs for each source language.
     foreach ($entities as $entity) {
       /* @var $entity \Drupal\Core\Entity\EntityInterface */
-      $source_lang = $entity->language()->id;
+      $source_lang = $entity->language()->getId();
 
       try {
         // For given source lang no job exists yet.

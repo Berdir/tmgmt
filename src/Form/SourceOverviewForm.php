@@ -53,13 +53,9 @@ class SourceOverviewForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // Copy the form state so we are not removing important information from it
-    // when sending it through form_state_values_clean().
-    $cleaned = clone $form_state;
-    form_state_values_clean($cleaned);
-    if (!$form_state->getValue('values')) {
+    /*if (!$form_state->getValue('values')) {
       $form_state->setErrorByName('items', t("You didn't select any source objects"));
-    }
+    }*/
     list($plugin, $item_type) = $form_state->getBuildInfo()['args'];
     // Execute the validation method on the source plugin controller.
     $source_ui = \Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($plugin);
