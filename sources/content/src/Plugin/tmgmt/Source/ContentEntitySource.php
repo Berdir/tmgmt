@@ -27,18 +27,21 @@ use Drupal\tmgmt\TMGMTException;
  */
 class ContentEntitySource extends SourcePluginBase {
 
+  /**
+   * {@inheritdoc}
+   */
   public function getLabel(JobItem $job_item) {
     if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
       return $entity->label();
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getUrl(JobItem $job_item) {
     if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
-      // @todo: Use routes.
-      $uri['path'] = $entity->getSystemPath();
-      $uri += $entity->urlInfo()->toArray();
-      return $uri;
+      return $entity->urlInfo();
     }
   }
 

@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Entity;
 
 use Drupal\Component\Plugin\Exception\PluginException;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 
@@ -131,14 +132,6 @@ class Translator extends ConfigEntityBase {
   /**
    * {@inheritdoc}
    */
-  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
-    // Clear the languages cache.
-    \Drupal::cache('tmgmt')->delete('languages:' . $this->name);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public static function preDelete(EntityStorageInterface $storage, array $entities) {
     // We are never going to have many entities here, so we can risk a loop.
     foreach ($entities as $key => $name) {
@@ -146,10 +139,6 @@ class Translator extends ConfigEntityBase {
         // The translator can't be deleted because it is currently busy. Remove
         // it from the ids so it wont get deleted in the parent implementation.
         unset($entities[$key]);
-      }
-      else {
-        // Clear the language cache for the deleted translators.
-        \Drupal::cache('tmgmt')->delete('languages:' . $key);
       }
     }
     parent::preDelete($storage, $entities);
@@ -185,7 +174,7 @@ class Translator extends ConfigEntityBase {
       }
       else {
         // Retrieve the supported languages from the cache.
-        if (empty($this->languageCache) && $cache = \Drupal::cache('tmgmt')->get('languages:' . $this->name)) {
+        if (empty($this->languageCache) && $cache = \Drupal::cache('data')->get('tmgmt_languages:' . $this->name)) {
           $this->languageCache = $cache->data;
         }
         // Even if we successfully queried the cache it might not have an entry
@@ -218,7 +207,7 @@ class Translator extends ConfigEntityBase {
       }
       else {
         // Retrieve the supported languages from the cache.
-        if (empty($this->languagePairsCache) && $cache = \Drupal::cache('tmgmt')->get('language_pairs:' . $this->name)) {
+        if (empty($this->languagePairsCache) && $cache = \Drupal::cache('data')->get('tmgmt_language_pairs:' . $this->name)) {
           $this->languagePairsCache = $cache->data;
         }
         // Even if we successfully queried the cache data might not be yet
@@ -237,8 +226,8 @@ class Translator extends ConfigEntityBase {
    */
   public function clearLanguageCache() {
     $this->languageCache = array();
-    \Drupal::cache('tmgmt')->delete('languages:' . $this->name);
-    \Drupal::cache('tmgmt')->delete('language_pairs:' . $this->name);
+    \Drupal::cache('data')->delete('tmgmt_languages:' . $this->name);
+    \Drupal::cache('data')->delete('tmgmt_language_pairs:' . $this->name);
   }
 
 
@@ -376,8 +365,8 @@ class Translator extends ConfigEntityBase {
     if ($controller = $this->getController()) {
       $info = $controller->getPluginDefinition();
       if (!isset($info['language cache']) || !empty($info['language cache'])) {
-        \Drupal::cache('tmgmt')->set('languages:' . $this->name, $this->languageCache);
-        \Drupal::cache('tmgmt')->set('language_pairs:' . $this->name, $this->languagePairsCache);
+        \Drupal::cache('data')->set('tmgmt_languages:' . $this->name, $this->languageCache, Cache::PERMANENT, $this->getEntityType()->getListCacheTags());
+        \Drupal::cache('data')->set('tmgmt_language_pairs:' . $this->name, $this->languagePairsCache, Cache::PERMANENT, $this->getEntityType()->getListCacheTags());
       }
     }
   }
