@@ -5,3 +5,6 @@ services:
   plugin.manager.tmgmt.source:
     class: Drupal\tmgmt\SourceManager
     parent: default_plugin_manager
+  tmgmt.cart:
+    class: Drupal\tmgmt\JobItemCart
+

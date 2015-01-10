@@ -14,7 +14,6 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
-use Drupal\tmgmt\JobItemUiCart;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
 
 /**
@@ -1463,13 +1462,13 @@ function tmgmt_submit_redirect(array $form, FormStateInterface $form_state){
  */
 
 /**
- * Gets the tmgmt cart singleton object.
+ * Returns the cart service.
  *
- * @return JobItemUiCart
+ * @return \Drupal\tmgmt\JobItemCart
  *   The cart object.
  */
 function tmgmt_cart_get() {
-  return JobItemUiCart::getInstance();
+  return \Drupal::service('tmgmt.cart');
 }
 
 /**

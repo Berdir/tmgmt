@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\JobItemUiCart.
+ * Contains \Drupal\tmgmt\JobItemCart.
  */
 
 namespace Drupal\tmgmt;
@@ -14,12 +14,7 @@ use Drupal\tmgmt\Entity\JobItem;
  *
  * @ingroup tmgmt_cart
  */
-class JobItemUiCart {
-
-  /**
-   * Singleton instance of cart.
-   */
-  protected static $instance;
+class JobItemCart {
 
   /**
    * Array key to store the contents of $this->cart into the $_SESSION variable.
@@ -36,7 +31,7 @@ class JobItemUiCart {
   protected $cart;
 
   /**
-   * Set up a new JobItemUiCart instance.
+   * Set up a new JobItemCart instance.
    *
    * Will load the cart from the session or initialize a new one if nothing has
    * been stored yet.
@@ -46,19 +41,6 @@ class JobItemUiCart {
       $_SESSION[$this->session_key] = array();
     }
     $this->cart = &$_SESSION[$this->session_key];
-  }
-
-  /**
-   * Returns the singleton cart.
-   *
-   * @return JobItemUiCart
-   *   An instance of the cart.
-   */
-  public static function getInstance() {
-    if (!isset(self::$instance)) {
-      self::$instance = new self();
-    }
-    return self::$instance;
   }
 
   /**
