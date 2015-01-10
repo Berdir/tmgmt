@@ -30,7 +30,7 @@ class Cartform extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state, $plugin = NULL, $item_type = NULL) {
     $languages = tmgmt_available_languages();
     $options = array();
-    foreach (tmgmt_ui_cart_get()->getJobItemsFromCart() as $item) {
+    foreach (tmgmt_cart_get()->getJobItemsFromCart() as $item) {
       $url = $item->getSourceUrl();
       $options[$item->id()] = array(
         $item->getSourceType(),
@@ -59,7 +59,7 @@ class Cartform extends FormBase {
       '#button_type' => 'primary',
       '#value' => t('Request translation'),
       '#submit' => array('::submitRequestTranslation'),
-      '#validate' => array('tmgmt_ui_cart_source_overview_validate'),
+      '#validate' => array('tmgmt_cart_source_overview_validate'),
     );
 
     $form['remove_selected'] = array(
@@ -67,7 +67,7 @@ class Cartform extends FormBase {
       '#button_type' => 'danger',
       '#value' => t('Remove selected'),
       '#submit' => array('::submitRemoveSelected'),
-      '#validate' => array('tmgmt_ui_cart_source_overview_validate'),
+      '#validate' => array('tmgmt_cart_source_overview_validate'),
     );
 
     $form['empty_cart'] = array(
@@ -100,7 +100,7 @@ class Cartform extends FormBase {
    */
   function submitRemoveSelected(array $form, FormStateInterface $form_state) {
     $job_item_ids = array_filter($form_state->getValue('items'));
-    tmgmt_ui_cart_get()->removeJobItems($job_item_ids);
+    tmgmt_cart_get()->removeJobItems($job_item_ids);
     entity_delete_multiple('tmgmt_job_item', $job_item_ids);
     drupal_set_message(t('Job items were removed from the cart.'));
   }
@@ -109,13 +109,13 @@ class Cartform extends FormBase {
    * Form submit callback to remove the selected items.
    */
   function submitEmptyCart(array $form, FormStateInterface $form_state) {
-    entity_delete_multiple('tmgmt_job_item', array_keys(tmgmt_ui_cart_get()->getJobItemsFromCart()));
-    tmgmt_ui_cart_get()->emptyCart();
+    entity_delete_multiple('tmgmt_job_item', array_keys(tmgmt_cart_get()->getJobItemsFromCart()));
+    tmgmt_cart_get()->emptyCart();
     drupal_set_message(t('All job items were removed from the cart.'));
   }
 
   /**
-   * Custom form submit callback for tmgmt_ui_cart_cart_form().
+   * Custom form submit callback for tmgmt_cart_cart_form().
    */
   function submitRequestTranslation(array $form, FormStateInterface $form_state) {
     $target_languages = array_filter($form_state->getValue('target_language'));
@@ -166,13 +166,13 @@ class Cartform extends FormBase {
 
     // Remove job items from the cart.
     if ($remove_job_item_ids) {
-      tmgmt_ui_cart_get()->removeJobItems($remove_job_item_ids);
+      tmgmt_cart_get()->removeJobItems($remove_job_item_ids);
       entity_delete_multiple('tmgmt_job_item', $remove_job_item_ids);
     }
 
     // Start the checkout process if any jobs were created.
     if ($jobs) {
-      tmgmt_ui_job_checkout_and_redirect($form_state, $jobs);
+      tmgmt_job_checkout_and_redirect($form_state, $jobs);
     }
   }
 

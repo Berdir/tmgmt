@@ -8,7 +8,7 @@
 /**
  * Implements hook_default_rules_configuration().
  */
-function tmgmt_ui_default_rules_configuration() {
+function tmgmt_default_rules_configuration() {
   $data = '{ "rules_tmgmt_job_accept_translation" : {
       "LABEL" : "Accept Translation",
       "PLUGIN" : "rule",
@@ -42,7 +42,7 @@ function tmgmt_ui_default_rules_configuration() {
   $data = '{ "tmgmt_node_ui_tmgmt_nodes_add_items_to_cart" : {
       "LABEL" : "Add to cart",
       "PLUGIN" : "rule",
-      "REQUIRES" : [ "tmgmt", "rules", "tmgmt_ui" ],
+      "REQUIRES" : [ "tmgmt", "rules", "tmgmt" ],
       "USES VARIABLES" : { "nodes" : { "label" : "Nodes", "type" : "list\u003Cnode\u003E" } },
       "DO" : [
         { "tmgmt_get_first_from_node_list" : {
@@ -54,7 +54,7 @@ function tmgmt_ui_default_rules_configuration() {
             "USING" : { "list" : [ "nodes" ] },
             "ITEM" : { "node" : "Node" },
             "DO" : [
-              { "tmgmt_ui_rules_source_add_item_to_cart" : { "plugin" : "node", "item_type" : "node", "item_id" : "[node:nid]" } }
+              { "tmgmt_rules_source_add_item_to_cart" : { "plugin" : "node", "item_type" : "node", "item_id" : "[node:nid]" } }
             ]
           }
         }

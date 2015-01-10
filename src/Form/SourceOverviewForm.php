@@ -37,7 +37,7 @@ class SourceOverviewForm extends FormBase {
       '#weight' => -10,
       '#attributes' => array('class' => array('tmgmt-source-operations-wrapper'))
     );
-    tmgmt_ui_add_cart_form($form['actions'], $form_state, $plugin, $item_type);
+    tmgmt_add_cart_form($form['actions'], $form_state, $plugin, $item_type);
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Request translation'),

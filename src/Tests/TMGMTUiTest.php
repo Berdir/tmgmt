@@ -15,13 +15,6 @@ namespace Drupal\tmgmt\Tests;
 class TMGMTUiTest extends TMGMTTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
-   */
-  public static $modules = array('tmgmt_ui');
-
-  /**
    * {@inheritdoc}
    */
   function setUp() {
@@ -51,7 +44,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->drupalGet(reset($redirects));
 
     // Check checkout form.
@@ -62,7 +55,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $job->addItem('test_source', 'test', 3);
 
     // Go to checkout form.
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->drupalGet(reset($redirects));
 
     // Check checkout form.
@@ -110,7 +103,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertNotEqual($job->id(), $previous_tjid);
 
     // Go to checkout form.
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->drupalGet(reset($redirects));
 
      // Check checkout form.
@@ -131,7 +124,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->drupalGet(reset($redirects));
 
      // Check checkout form.
@@ -170,7 +163,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->drupalGet(reset($redirects));
 
      // Check checkout form.
@@ -193,7 +186,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->drupalGet(reset($redirects));
 
     // Check checkout form.
@@ -210,13 +203,13 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertTrue($job->isUnprocessed());
 
     // Test default settings.
-    $this->default_translator->settings['action'] = 'reject';
+    $this->default_translator->setSEtting('action', 'reject');
     $this->default_translator->save();
     $job = tmgmt_job_match_item('en', 'es');
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->drupalGet(reset($redirects));
 
      // Check checkout form.
@@ -231,33 +224,30 @@ class TMGMTUiTest extends TMGMTTestBase {
   }
 
   /**
-   * Tests the tmgmt_ui_job_checkout() function.
+   * Tests the tmgmt_job_checkout() function.
    */
   function testCheckoutFunction() {
     $job = $this->createJob();
 
     // Check out a job when only the test translator is available. That one has
     // settings, so a checkout is necessary.
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->assertEqual($job->getSystemPath(), $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
     $job->delete();
 
     // Hide settings on the test translator.
     $default_translator = tmgmt_translator_load('test_translator');
-    $default_translator->settings = array(
-      'expose_settings' => FALSE,
-    );
-    $default_translator->save();
+    $default_translator->setSetting('expose_settings', TRUE);
     $job = $this->createJob();
 
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->assertFalse($redirects);
     $this->assertTrue($job->isActive());
 
     // A job without target language needs to be checked out.
     $job = $this->createJob('en', '');
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->assertEqual($job->getSystemPath(), $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
 
@@ -266,12 +256,11 @@ class TMGMTUiTest extends TMGMTTestBase {
     $job = $this->createJob();
 
     $second_translator = $this->createTranslator();
-    $second_translator->settings = array(
-      'expose_settings' => FALSE,
-    );
-    $second_translator->save();
+    $second_translator
+      ->setSetting('expose_settings', FALSE)
+      ->save();
 
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->assertEqual($job->getSystemPath(), $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
   }
@@ -281,7 +270,7 @@ class TMGMTUiTest extends TMGMTTestBase {
    */
   public function testReview() {
     $job = $this->createJob();
-    $job->translator = $this->default_translator->name;
+    $job->translator = $this->default_translator->id();
     $job->settings = array();
     $job->save();
     $item = $job->addItem('test_source', 'test', 1);
@@ -315,7 +304,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $job->addItem('test_source', 'test', 7);
 
     // Go to checkout form.
-    $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+    $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->drupalGet(reset($redirects));
 
     $this->assertRaw('20');

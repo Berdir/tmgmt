@@ -12,7 +12,7 @@ use Drupal\tmgmt\Entity\JobItem;
 /**
  * Represents a job item cart.
  *
- * @ingroup tmgmt_ui_cart
+ * @ingroup tmgmt_cart
  */
 class JobItemUiCart {
 

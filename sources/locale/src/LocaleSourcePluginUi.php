@@ -91,7 +91,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
       '#empty' => t('No strings matching given criteria have been found.')
     );
 
-    $form['#attached']['library'][] = 'tmgmt_ui/admin';
+    $form['#attached']['library'][] = 'tmgmt/admin';
 
     $search_data = $this->getSearchFormSubmittedParams();
 
@@ -252,7 +252,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
     foreach (language_list() as $langcode => $language) {
       $langcode = str_replace('-', '', $langcode);
       $array = array(
-        '#theme' => 'tmgmt_ui_translation_language_status_single',
+        '#theme' => 'tmgmt_translation_language_status_single',
         '#translation_status' => $data['translation_statuses'][$langcode],
         '#job_item' => isset($data['current_job_items'][$langcode]) ? $data['current_job_items'][$langcode] : NULL,
       );

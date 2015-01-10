@@ -13,7 +13,7 @@ use Drupal\tmgmt\Entity\Job;
  * Alters comment node type select box to filter out comment types that belongs
  * to non entity translatable node types.
  */
-function tmgmt_content_form_tmgmt_ui_entity_source_comment_overview_form_alter(&$form, FormStateInterface $form_state) {
+function tmgmt_content_form_tmgmt_entity_source_comment_overview_form_alter(&$form, FormStateInterface $form_state) {
 
   if (!isset($form['search_wrapper']['search']['node_type'])) {
     return;

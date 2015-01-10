@@ -23,7 +23,7 @@ class FileTranslatorTest extends TMGMTTestBase {
    *
    * @var array
    */
-  static public $modules = array('tmgmt_file', 'tmgmt_ui');
+  static public $modules = array('tmgmt_file', 'tmgmt');
 
   /**
    * {@inheritdoc}

@@ -54,7 +54,7 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
 
     // Create the new job and job item.
     $job = $this->createJob();
-    $job->translator = $this->default_translator->name;
+    $job->translator = $this->default_translator->id();
     $job->settings = array();
     $job->save();
 
@@ -81,7 +81,7 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
     // Translate the german translation to spanish.
     $target_langcode = 'es';
     $job = $this->createJob('de', $target_langcode);
-    $job->translator = $this->default_translator->name;
+    $job->translator = $this->default_translator->id();
     $job->settings = array();
     $job->save();
 
@@ -114,7 +114,7 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
       ))
       ->execute();
     $job = $this->createJob('en', 'de');
-    $job->translator = $this->default_translator->name;
+    $job->translator = $this->default_translator->id();
     $job->settings = array();
     $job->save();
 
@@ -151,7 +151,7 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
 
     // Create the job.
     $job = $this->createJob();
-    $job->translator = $this->default_translator->name;
+    $job->translator = $this->default_translator->id();
     $job->settings = array();
     $job->save();
 
@@ -173,7 +173,7 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
       ))
       ->execute();
     $job = $this->createJob('de', 'fr');
-    $job->translator = $this->default_translator->name;
+    $job->translator = $this->default_translator->id();
     $job->settings = array();
     $job->save();
 

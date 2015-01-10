@@ -163,10 +163,9 @@ class ContentEntitySourceUiTest extends EntityTestBase {
   function testNodeTranslateTabMultipeCheckout() {
     // Allow auto-accept.
     $default_translator = tmgmt_translator_load('test_translator');
-    $default_translator->settings = array(
-      'auto_accept' => TRUE,
-    );
-    $default_translator->save();
+    $default_translator
+      ->setSetting('auto_accept', TRUE)
+      ->save();
 
     $this->loginAsTranslator(array('translate any entity', 'create content translations'));
 

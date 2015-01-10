@@ -15,13 +15,6 @@ namespace Drupal\tmgmt\Tests;
 class TranslatorTest extends TMGMTTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
-   */
-  public static $modules = array('tmgmt_ui');
-
-  /**
    * {@inheritdoc}
    */
   function setUp() {

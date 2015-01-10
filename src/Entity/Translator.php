@@ -187,7 +187,7 @@ class Translator extends ConfigEntityBase {
   /**
    * Sets a definition setting.
    *
-   * @param string $setting_name
+   * @param string|array $setting_name
    *   The definition setting to set.
    * @param mixed $value
    *   The value to set.
@@ -196,7 +196,7 @@ class Translator extends ConfigEntityBase {
    *   The object itself for chaining.
    */
   public function setSetting($setting_name, $value) {
-    $this->settings[$setting_name] = $value;
+    NestedArray::setValue($this->settings, (array) $setting_name, $value);
     return $this;
   }
 

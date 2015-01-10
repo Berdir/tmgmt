@@ -1,0 +1,9 @@
+admin:
+  css:
+    theme:
+      css/tmgmt.admin.css: {}
+
+admin.seven:
+  css:
+    theme:
+      css/tmgmt.admin.css: {}

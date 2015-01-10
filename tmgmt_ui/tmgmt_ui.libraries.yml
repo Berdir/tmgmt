@@ -1,4 +1,0 @@
-admin:
-  css:
-    theme:
-      css/tmgmt_ui.admin.css: {}

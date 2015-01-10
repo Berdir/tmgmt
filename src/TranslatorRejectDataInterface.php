@@ -41,7 +41,7 @@ interface TranslatorRejectDataInterface {
   /**
    * Reject form.
    *
-   * This method gets call by tmgmt_ui_translation_review_form_reject_confirm
+   * This method gets call by tmgmt_translation_review_form_reject_confirm
    * and allows the translator to add aditional form elements in order to
    * collect data needed for the reject prozess.
    *

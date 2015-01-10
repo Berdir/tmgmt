@@ -33,7 +33,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt_language_combination', 'tmgmt_local', 'tmgmt_ui');
+  public static $modules = array('tmgmt_language_combination', 'tmgmt_local');
 
   /**
    * {@inheritdoc}

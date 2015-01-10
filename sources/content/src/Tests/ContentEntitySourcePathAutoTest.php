@@ -38,7 +38,7 @@ class ContentEntitySourcePathAutoTest extends WebTestBase {
 
     // Create a translation job.
     $job = $this->createJob();
-    $job->translator = $this->default_translator->name;
+    $job->translator = $this->default_translator->id();
     $job->settings = array();
     $job->save();
 

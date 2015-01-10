@@ -174,7 +174,7 @@ class JobForm extends TmgmtFormBase {
       );
     }
 
-    if ($view = Views::getView('tmgmt_ui_job_items')) {
+    if ($view = Views::getView('tmgmt_job_items')) {
       $form['job_items_wrapper'] = array(
         '#type' => 'details',
         '#title' => t('Job items'),
@@ -328,7 +328,7 @@ class JobForm extends TmgmtFormBase {
       '#weight' => 45,
     );
 
-    if ($view = Views::getView('tmgmt_ui_job_messages')) {
+    if ($view = Views::getView('tmgmt_job_messages')) {
       $form['messages'] = array(
         '#type' => 'details',
         '#title' => $view->storage->label(),
@@ -339,7 +339,7 @@ class JobForm extends TmgmtFormBase {
       $form['messages']['view']['#markup'] = drupal_render($output);
     }
 
-    $form['#attached']['library'][] = 'tmgmt_ui/admin';
+    $form['#attached']['library'][] = 'tmgmt/admin';
     return $form;
   }
 
@@ -358,7 +358,7 @@ class JobForm extends TmgmtFormBase {
       $actions['submit'] = array(
         '#type' => 'submit',
         '#button_type' => 'primary',
-        '#value' => tmgmt_ui_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
+        '#value' => tmgmt_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
         '#access' => $job->isSubmittable(),
         '#disabled' => !$job->getTranslatorId(),
         '#validate' => array('::validate'),
@@ -367,7 +367,7 @@ class JobForm extends TmgmtFormBase {
       );
       $actions['resubmit_job'] = array(
         '#type' => 'submit',
-        '#submit' => array('tmgmt_ui_submit_redirect'),
+        '#submit' => array('tmgmt_submit_redirect'),
         '#redirect' => 'admin/tmgmt/jobs/' . $job->id() . '/resubmit',
         '#value' => t('Resubmit'),
         '#access' => $job->isAborted(),
@@ -377,7 +377,7 @@ class JobForm extends TmgmtFormBase {
         '#type' => 'submit',
         '#value' => t('Abort job'),
         '#redirect' => 'admin/tmgmt/jobs/' . $job->id() . '/abort',
-        '#submit' => array('tmgmt_ui_submit_redirect'),
+        '#submit' => array('tmgmt_submit_redirect'),
         '#access' => $job->isAbortable(),
         '#weight' => 15,
       );
@@ -390,7 +390,7 @@ class JobForm extends TmgmtFormBase {
       $actions['delete'] = array(
         '#type' => 'submit',
         '#value' => t('Delete'),
-        '#submit' => array('tmgmt_ui_submit_redirect'),
+        '#submit' => array('tmgmt_submit_redirect'),
         '#redirect' => 'admin/tmgmt/jobs/' . $job->id() . '/delete',
         // Don't run validations, so the user can always delete the job.
         '#limit_validation_errors' => array(),
@@ -401,7 +401,7 @@ class JobForm extends TmgmtFormBase {
     $actions['cancel'] = array(
       '#type' => 'button',
       '#value' => t('Cancel'),
-      '#submit' => array('tmgmt_ui_submit_redirect'),
+      '#submit' => array('tmgmt_submit_redirect'),
       '#redirect' => 'admin/tmgmt/jobs',
       '#access' => $job->isActive(),
     );
@@ -456,18 +456,18 @@ class JobForm extends TmgmtFormBase {
     // button was clicked.
     debug($form_state->getTriggeringElement()['#value'] . '==' . $form['actions']['submit']['#value']);
     if ($form_state->getTriggeringElement()['#value'] == $form['actions']['submit']['#value']) {
-      if (!tmgmt_ui_job_request_translation($entity)) {
+      if (!tmgmt_job_request_translation($entity)) {
         // Don't redirect the user if the translation request failed but retain
         // existing destination parameters so we can redirect once the request
         // finished successfully.
         unset($_GET['destination']);
       }
-      else if ($redirect = tmgmt_ui_redirect_queue_dequeue()) {
+      else if ($redirect = tmgmt_redirect_queue_dequeue()) {
         debug($redirect);
         // Proceed to the next redirect queue item, if there is one.
         $form_state->setRedirectUrl(Url::fromUri('base://' . $redirect));
       }
-      elseif ($destination = tmgmt_ui_redirect_queue_destination()) {
+      elseif ($destination = tmgmt_redirect_queue_destination()) {
         debug($destination);
         // Proceed to the defined destination if there is one.
         $form_state->setRedirectUrl(Url::fromUri('base://' . $destination));
@@ -475,7 +475,7 @@ class JobForm extends TmgmtFormBase {
     }
     else {
       // Per default we want to redirect the user to the overview.
-      $form_state->setRedirect('view.tmgmt_ui_job_overview.page_1');
+      $form_state->setRedirect('view.tmgmt_job_overview.page_1');
     }
   }
 

@@ -215,7 +215,7 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  */
 
 /**
- * @defgroup tmgmt_ui_cart Translation cart
+ * @defgroup tmgmt_cart Translation cart
  *
  * The translation cart can collect multiple source items of different types
  * which are meant for translation into a list. The list then provides
@@ -223,6 +223,41 @@ function hook_tmgmt_translator_plugin_info_alter(&$info) {
  * languages.
  *
  * Each source can easily plug into the cart system utilising the
- * tmgmt_ui_add_cart_form() on either the source overview page as well as the
+ * tmgmt_add_cart_form() on either the source overview page as well as the
  * translate tab.
  */
+
+/**
+ * Allows to alter job checkout workflow before the default behavior kicks in.
+ *
+ * Note: The default behavior will ignore jobs that have already been checked
+ * out. Remove jobs from the array to prevent the default behavior for them.
+ *
+ * @param $redirects
+ *   List of redirects the user is supposed to be redirected to.
+ * @param $jobs
+ *   Array with the translation jobs to be checked out.
+ */
+function hook_tmgmt_job_checkout_before_alter(&$redirects, &$jobs) {
+  foreach ($jobs as $job) {
+    // Automatically check out all jobs using the default settings.
+    $job->translator = 'example';
+    $job->translator_context = $job->getTranslator()->getController()->defaultCheckoutSettings();
+  }
+}
+
+/**
+ * Allows to alter job checkout workflow after the default behavior.
+ *
+ * @param $redirects
+ *   List of redirects the user is supposed to be redirected to.
+ * @param $jobs
+ *   Array with the translation jobs to be checked out.
+ */
+function hook_tmgmt_job_checkout_after_alter(&$redirects, &$jobs) {
+  // Redirect to custom multi-checkout form if there are multple redirects.
+  if (count($redirects) > 2) {
+    $redirects = array('/my/custom/checkout/form/' . implode(',', array_keys($jobs)));
+  }
+}
+

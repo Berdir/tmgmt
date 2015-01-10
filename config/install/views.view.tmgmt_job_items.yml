@@ -3,7 +3,7 @@ status: true
 dependencies:
   module:
     - tmgmt
-id: tmgmt_ui_job_items
+id: tmgmt_job_items
 label: 'Translation Job Items'
 module: views
 description: ''

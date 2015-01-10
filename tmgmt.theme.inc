@@ -15,7 +15,7 @@ use Drupal\tmgmt\Entity\Job;
  *
  * Renders the #title and #attributes properties if they are present.
  */
-function theme_tmgmt_ui_element($variables) {
+function theme_tmgmt_element($variables) {
   $element = $variables['element'];
 
   // Use the #title attribute.
@@ -53,7 +53,7 @@ function theme_tmgmt_ui_element($variables) {
  *   Icon or a link icon that explains the translation status and possibly
  *   links to an active translation job.
  */
-function theme_tmgmt_ui_translation_language_status_single($variables) {
+function theme_tmgmt_translation_language_status_single($variables) {
   switch ($variables['translation_status']) {
     case 'original':
       $label = t('Source language');
@@ -127,7 +127,7 @@ function theme_tmgmt_ui_translation_language_status_single($variables) {
 /**
  * Renders a data item status as an HTML/CSS icon.
  */
-function theme_tmgmt_ui_translator_review_form_element_status($variables) {
+function theme_tmgmt_translator_review_form_element_status($variables) {
   $classes = array();
   $classes[] = 'tmgmt-ui-icon';
   $classes[] = 'tmgmt-ui-icon-32'; // Icon size 32px square.
@@ -168,7 +168,7 @@ function theme_tmgmt_ui_translator_review_form_element_status($variables) {
 /**
  * Render one single data item as a table row.
  */
-function theme_tmgmt_ui_translator_review_form_element($variables) {
+function theme_tmgmt_translator_review_form_element($variables) {
   $element = $variables['element'];
   // Label of all element groups.
   if (!isset($element['#top_label'])) {
@@ -203,7 +203,7 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
     'class' => 'tmgmt-ui-data-item-actions',
   );
   foreach ($row as $cell) {
-    $result .= tmgmt_ui_build_table_cell($cell);
+    $result .= tmgmt_build_table_cell($cell);
   }
   $result .= '</tr>';
 
@@ -213,7 +213,7 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
       'data' => drupal_render($element['below']),
       'colspan' => '4',
     );
-    $result .= tmgmt_ui_build_table_cell($cell);
+    $result .= tmgmt_build_table_cell($cell);
     $result .= '</tr>';
   }
 
@@ -229,7 +229,7 @@ function theme_tmgmt_ui_translator_review_form_element($variables) {
  * @return string
  *   The table cell.
  */
-function tmgmt_ui_build_table_cell($cell) {
+function tmgmt_build_table_cell($cell) {
   if (!is_array($cell)) {
     $cell_content = $cell;
     $cell_attributes = array();
@@ -258,7 +258,7 @@ function tmgmt_ui_build_table_cell($cell) {
 /**
  * Renders a table containing a group of data items belonging to the same field.
  */
-function theme_tmgmt_ui_translator_review_form($variables) {
+function theme_tmgmt_translator_review_form($variables) {
   $element = $variables['element'];
   $result = '';
   $labels = '';
@@ -285,7 +285,7 @@ function theme_tmgmt_ui_translator_review_form($variables) {
           'colspan' => 4,
           'header' => TRUE,
         );
-        $element_group = '<tr>' . tmgmt_ui_build_table_cell($cell, TRUE) . '</tr>';
+        $element_group = '<tr>' . tmgmt_build_table_cell($cell, TRUE) . '</tr>';
       }
     }
     $element_group .= drupal_render($element[$key]);
@@ -301,7 +301,7 @@ function theme_tmgmt_ui_translator_review_form($variables) {
       'colspan' => 5,
       'header' => TRUE,
     );
-    $result = '<thead><tr>' . tmgmt_ui_build_table_cell($cell) . '</tr></thead>' . implode('', $element_groups);
+    $result = '<thead><tr>' . tmgmt_build_table_cell($cell) . '</tr></thead>' . implode('', $element_groups);
   }
   $table = '<table class="tmgmt-ui-review"><colgroup width="100" /><colgroup width="*" span="2" /><colgroup width="100" />' . $result . '</table>';
   return '<div id="' . $element['#ajaxid'] . '">' . $table . '</div>';

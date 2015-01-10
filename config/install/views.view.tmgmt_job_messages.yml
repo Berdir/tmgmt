@@ -4,7 +4,7 @@ dependencies:
   module:
     - tmgmt
     - user
-id: tmgmt_ui_job_messages
+id: tmgmt_job_messages
 label: 'Translation Job messages'
 module: views
 description: ''

@@ -304,7 +304,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     $languages = \Drupal::languageManager()->getLanguages();
     foreach ($languages as $langcode => $language) {
       $array = array(
-        '#theme' => 'tmgmt_ui_translation_language_status_single',
+        '#theme' => 'tmgmt_translation_language_status_single',
         '#translation_status' => $data['translation_statuses'][$langcode],
         '#job_item' => isset($data['current_job_items'][$langcode]) ? $data['current_job_items'][$langcode] : NULL,
       );
@@ -324,7 +324,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
 
     $form += $this->overviewSearchFormPart($form, $form_state, $type);
 
-    $form['#attached']['library'][] = 'tmgmt_ui/admin';
+    $form['#attached']['library'][] = 'tmgmt/admin';
 
     $form['items'] = array(
       '#type' => 'tableselect',
@@ -409,10 +409,10 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     }
 
     // If necessary, do a redirect.
-    $redirects = tmgmt_ui_job_checkout_multiple($jobs);
+    $redirects = tmgmt_job_checkout_multiple($jobs);
     if ($redirects) {
-      tmgmt_ui_redirect_queue_set($redirects, Url::fromRoute('<current>')->getInternalPath());
-      $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_ui_redirect_queue_dequeue()));
+      tmgmt_redirect_queue_set($redirects, Url::fromRoute('<current>')->getInternalPath());
+      $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_redirect_queue_dequeue()));
 
       drupal_set_message(format_plural(count($redirects), $this->t('One job needs to be checked out.'), $this->t('@count jobs need to be checked out.')));
     }

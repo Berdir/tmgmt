@@ -22,7 +22,7 @@ class LocaleSourceUiTest extends TMGMTTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt_ui', 'tmgmt_locale');
+  public static $modules = array('tmgmt_locale');
 
   /**
    * {@inheritdoc}

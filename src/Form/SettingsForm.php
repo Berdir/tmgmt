@@ -19,7 +19,7 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function getFormID() {
-    return 'tmgmt_ui_settings_form';
+    return 'tmgmt_settings_form';
   }
 
   /**

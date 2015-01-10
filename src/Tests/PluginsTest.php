@@ -42,7 +42,7 @@ class PluginsTest extends TMGMTKernelTestBase {
     }
 
     // Manually specify the translator for now.
-    $job->translator = $this->default_translator->name;
+    $job->translator = $this->default_translator->id();
     $job->settings = array('action' => $action);
 
     return $job;
@@ -153,8 +153,8 @@ class PluginsTest extends TMGMTKernelTestBase {
     $this->assertEqual($controller->mapToLocalLanguage($this->default_translator, 'en-us'), 'en');
     $this->assertEqual($controller->mapToLocalLanguage($this->default_translator, 'de-ch'), 'de');
 
-    $this->default_translator->settings['remote_languages_mappings']['de'] = 'de-de';
-    $this->default_translator->settings['remote_languages_mappings']['en'] = 'en-uk';
+    $this->default_translator->setSetting(['remote_languages_mappings', 'de'], 'de-de');
+    $this->default_translator->setSetting(['remote_languages_mappings', 'en'], 'en-uk');
     $this->default_translator->save();
 
     $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en-uk');

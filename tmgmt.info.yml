@@ -3,10 +3,12 @@ description: 'Core functionality for the Translation Management Suite.'
 package: 'Translation Management'
 core: 8.x
 type: module
-configure: admin/config/regional/tmgmt_settings
+configure: tmgmt.settings
 
 dependencies:
- - locale
+ - language
+ - views
+ - block
 
 simplytest_dependencies:
  - tmgmt_demo

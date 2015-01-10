@@ -389,7 +389,7 @@ function tmgmt_local_translation_form_update_state_ajax($form, FormStateInterfac
   $commands = array();
   $render_data = NestedArray::getValue($form, $key);
   $commands[] = ajax_command_replace(NULL, drupal_render($render_data));
-  tmgmt_ui_write_request_messages($form_state['job_item']->getJob());
+  tmgmt_write_request_messages($form_state['job_item']->getJob());
   $commands[] = ajax_command_html('#tmgmt-status-messages-' . strtolower($render_data['#parent_label'][0]), theme('status_messages'));
   return array('#type' => 'ajax', '#commands' => $commands);
 }

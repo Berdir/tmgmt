@@ -36,7 +36,7 @@ class ContentTranslateForm extends FormBase {
 
     $form['top_actions']['#type'] = 'actions';
     $form['top_actions']['#weight'] = -10;
-    tmgmt_ui_add_cart_form($form['top_actions'], $form_state, 'content', $form_state->get('entity')->getEntityTypeId(), $form_state->get('entity')->id());
+    tmgmt_add_cart_form($form['top_actions'], $form_state, 'content', $form_state->get('entity')->getEntityTypeId(), $form_state->get('entity')->id());
 
     // Inject our additional column into the header.
     array_splice($overview['#header'], -1, 0, array(t('Pending Translations')));
@@ -144,7 +144,7 @@ class ContentTranslateForm extends FormBase {
         drupal_set_message(t('Unable to add job item for target language %name. Make sure the source content is not empty.', array('%name' => $target_lang_name)), 'error');
       }
     }
-    tmgmt_ui_job_checkout_and_redirect($form_state, $jobs);
+    tmgmt_job_checkout_and_redirect($form_state, $jobs);
   }
 
 }

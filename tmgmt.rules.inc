@@ -175,11 +175,11 @@ function tmgmt_rules_job_abort_translation(Job $job) {
  * Rules callback to redirect to a translation job.
  */
 function tmgmt_rules_job_checkout(Job $job) {
-  $redirects = tmgmt_ui_job_checkout_multiple(array($job));
+  $redirects = tmgmt_job_checkout_multiple(array($job));
   // If necessary, do a redirect.
   if ($redirects) {
-    tmgmt_ui_redirect_queue_set($redirects, current_path());
-    drupal_goto(tmgmt_ui_redirect_queue_dequeue());
+    tmgmt_redirect_queue_set($redirects, current_path());
+    drupal_goto(tmgmt_redirect_queue_dequeue());
 
     // Count of the job messages is one less due to the final redirect.
     drupal_set_message(format_plural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));

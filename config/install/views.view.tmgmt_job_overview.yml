@@ -4,7 +4,7 @@ status: true
 dependencies:
   module:
     - tmgmt
-id: tmgmt_ui_job_overview
+id: tmgmt_job_overview
 label: 'Job overview'
 module: views
 description: 'Gives a bulk operation overview of translation jobs in the system.'

@@ -159,7 +159,7 @@ class TranslatorForm extends EntityForm {
     $form['actions']['delete'] = array(
       '#type' => 'submit',
       '#value' => t('Delete'),
-      '#submit' => array('tmgmt_ui_submit_redirect'),
+      '#submit' => array('tmgmt_submit_redirect'),
       '#redirect' => 'admin/tmgmt/translators/manage/' . $entity->id() . '/delete',
       '#access' => !$entity->isNew(),
     );

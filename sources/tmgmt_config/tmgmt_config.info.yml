@@ -5,6 +5,6 @@ core: 8.x
 type: module
 
 dependencies:
- - tmgmt_ui
+ - tmgmt
  - config_translation
  - block

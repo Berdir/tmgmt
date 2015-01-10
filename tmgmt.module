@@ -9,6 +9,13 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Unicode;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
+use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\Xss;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\JobItemUiCart;
+use Drupal\tmgmt\TranslatorRejectDataInterface;
 
 /**
  * @addtogroup tmgmt_job
@@ -1001,3 +1008,585 @@ function tmgmt_word_count($text) {
   // That is what we need.
   return $count;
 }
+
+/**
+ * Implements hook_theme().
+ */
+function tmgmt_theme() {
+  return array(
+    'tmgmt_translator_review_form' => array(
+      'render element' => 'element',
+      'file' => 'tmgmt.theme.inc',
+      'function' => 'theme_tmgmt_translator_review_form',
+    ),
+    'tmgmt_translator_review_form_element' => array(
+      'render element' => 'element',
+      'file' => 'tmgmt.theme.inc',
+      'function' => 'theme_tmgmt_translator_review_form_element',
+    ),
+    'tmgmt_translator_review_form_element_status' => array(
+      'render element' => 'status',
+      'file' => 'tmgmt.theme.inc',
+      'function' => 'theme_tmgmt_translator_review_form_element_status',
+    ),
+    'tmgmt_translation_language_status_single' => array(
+      'file' => 'tmgmt.theme.inc',
+      'variables' => array('translation_status' => NULL, 'job_item' => NULL),
+      'function' => 'theme_tmgmt_translation_language_status_single',
+    ),
+  );
+}
+
+/**
+ * Attempts to check out a number of jobs. Performs a number of checks on each
+ * job and also allows to alter the behavior through hooks.
+ *
+ * @param \Drupal\tmgmt\Entity\Job[] $jobs
+ *   The jobs to be checked out.
+ *
+ * @return
+ *   Array of redirect url's if there are any jobs that need manual checkout.
+ *
+ * @ingroup tmgmt_job
+ *
+ * @see tmgmt_redirect_queue()
+ * @see tmgmt_job_checkout_and_redirect()
+ */
+function tmgmt_job_checkout_multiple(array $jobs) {
+  $redirects = array();
+  // Allow other modules to jump in and eg. auto-checkout with rules or use a
+  // customized checkout form.
+  \Drupal::moduleHandler()->alter('tmgmt_job_checkout_before', $redirects, $jobs);
+  $denied = 0;
+  foreach ($jobs as $job) {
+    if (!$job->isUnprocessed()) {
+      // Job is already checked out, just ignore that one. This could happen
+      // if jobs have already been submitted in the before hook.
+      continue;
+    }
+    if (!\Drupal::config('tmgmt.settings')->get('quick_checkout') || tmgmt_job_needs_checkout_form($job)) {
+
+      if (!$job->access('submit')) {
+        // Ignore jobs if the user is not allowed to submit, ignore.
+        $denied++;
+        // Make sure that the job is saved.
+        $job->save();
+        continue;
+      }
+
+      $redirects[] = $job->getSystemPath();
+    }
+    else {
+      // @todo this is dangerous because we don't catch request fails at all.
+      // Normally I would expect this to catch all failed requests and
+      // afterwards send the user through a multistep form which contains the
+      // failed elements.
+      // No manual checkout required. Request translations now.
+      tmgmt_job_request_translation($job);
+    }
+  }
+  // Allow other modules to jump in and eg. auto-checkout with rules or use a
+  // customized checkout form.
+  \Drupal::moduleHandler()->alter('tmgmt_job_checkout_after', $redirects, $jobs);
+
+  // Display message for created jobs that can not be checked out.
+  if ($denied) {
+    drupal_set_message(format_plural($denied, 'One job has been created.', '@count jobs have been created.'));
+  }
+
+  return $redirects;
+}
+
+/**
+ * Check if a job needs a checkout form. The current checks include if there is
+ * more than one translator available, if he has settings and if the job has a
+ * fixed target language.
+ *
+ * @param \Drupal\tmgmt\Entity\Job $job
+ *   The job item
+ *
+ * @return
+ *   TRUE if the job needs a checkout form.
+ */
+function tmgmt_job_needs_checkout_form(Job $job) {
+  // If the job has no target language (or source language, even though this
+  // should never be the case in our use case), checkout is mandatory.
+  if (!$job->getTargetLangcode() || !$job->getSourceLangcode()) {
+    return TRUE;
+  }
+  // If no translator is pre-selected, try to pick one automatically.
+  if (!$job->getTranslator()) {
+    // If there is more than a single translator available or if there are no
+    // translators available at all checkout is mandatory.
+    $translators = tmgmt_translator_load_available($job);
+    if (empty($translators) || count($translators) > 1) {
+      return TRUE;
+    }
+    $translator = reset($translators);
+    $job->translator = $translator->id();
+  }
+  // If that translator has settings, the checkout is mandatory.
+  if ($job->getTranslator()->hasCheckoutSettings($job)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Requests translations for a job and prints messages which have happened since
+ * then.
+ *
+ * @param \Drupal\tmgmt\Entity\Job $job
+ *   The job object for which translations should be requested.
+ *
+ * @return
+ *   TRUE if it worked, FALSE if there were any errors of the type error which
+ *   means that something did go wrong.
+ */
+function tmgmt_job_request_translation(Job $job) {
+  // Process the translation request.
+  $job->requestTranslation();
+  return tmgmt_write_request_messages($job);
+}
+
+/**
+ * Print all messages that occurred since our request to the screen.
+ *
+ * @param $job
+ *    The translation job for which the message should be written.
+ *
+ * @return
+ *   FALSE if there are message with severity error, TRUE otherwise.
+ */
+function tmgmt_write_request_messages(Job $job) {
+  $errors = FALSE;
+  foreach ($job->getMessagesSince() as $message) {
+    // Ignore debug messages.
+    if ($message->getType() == 'debug') {
+      continue;
+    }
+    if ($message->getType() == 'error') {
+      $errors = TRUE;
+    }
+    if ($text = $message->getMessage()) {
+      drupal_set_message(Xss::filter($text), $message->getType());
+    }
+  }
+  return !$errors;
+}
+
+/**
+ * Helper function to output ajaxid.
+ *
+ * @param string $parent_key
+ *   Parent element key.
+ *
+ * @return string
+ *   The ajax id.
+ */
+function tmgmt_review_form_element_ajaxid($parent_key) {
+  return 'tmgmt-ui-element-' . Html::cleanCssIdentifier($parent_key) . '-wrapper';
+}
+
+/**
+ * Review form revert action callback.
+ */
+function tmgmt_translation_review_form_revert(array $form, FormStateInterface $form_state) {
+
+  /** @var JobItem $item */
+  $item = $form_state->getFormObject()->getEntity();
+
+  $key = tmgmt_ensure_keys_array($form_state->getTriggeringElement()['#data_item_key']);
+
+  if ($item->dataItemRevert($key)) {
+    // Update the form_state input values so that the new default vale will be
+    // shown.
+    $form_key = str_replace('][', '|', $form_state->getTriggeringElement()['#data_item_key']);
+    $user_input = $form_state->getUserInput();
+    unset($user_input[$form_key]['translation']);
+    $form_state->setUserInput($user_input);
+    $item->save();
+  }
+  else {
+    drupal_set_message(t('No past revision found, translation was not reverted.'), 'warning');
+  }
+  $form_state->setRebuild();
+}
+
+/**
+ * Callback for the action at the job item review form.
+ */
+function tmgmt_translation_review_form_update_state(array $form, FormStateInterface $form_state) {
+  $matches = array();
+  // We should have an #name element
+  // and the name should beginn with approve-
+  // and the $matches should now kontain an element with with name key.
+  preg_match("/^(?P<action>[^-]+)-(?P<key>.+)/i", $form_state->getTriggeringElement()['#name'], $matches);
+  $values = $form_state->getValues();
+  $data = array();
+  $job_item = $form_state->getFormObject()->getEntity();
+
+  /* \Drupal\tmgmt\Entity\JobItem $job_item */
+  $controller = $job_item->getTranslatorController();
+  $success = TRUE;
+  switch ($matches['action']) {
+    case 'reviewed':
+      $form_state->setRebuild();
+      $data['#status'] = TMGMT_DATA_ITEM_STATE_REVIEWED;
+      break;
+    case 'unreviewed':
+      $form_state->setRebuild();
+      $data['#status'] = TMGMT_DATA_ITEM_STATE_TRANSLATED;
+      break;
+    case 'reject':
+      if (empty($values['confirm'])) {
+        if (isset($_GET['destination'])) {
+          $destination = $_GET['destination'];
+          unset($_GET['destination']);
+        }
+        else {
+          $destination = '';
+        }
+        tmgmt_redirect_queue_set(array(Url::fromRoute('<current>')->getInternalPath()), $destination);
+        $form_state->setRedirectUrl(Url::fromUri('base://' . Url::fromRoute('<current>')->getInternalPath() . '/reject/' . $matches['key']));
+        $success = FALSE;
+      }
+      else {
+        $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_redirect_queue_dequeue(), array('query' => array('destination' => tmgmt_redirect_queue_destination()))));
+        if ($controller instanceof TranslatorRejectDataInterface) {
+          $success = $job_item->getTranslatorController()->rejectDataItem($job_item, tmgmt_ensure_keys_array($matches['key']), $values);
+        }
+      }
+    default:
+      $data['#status'] = TMGMT_DATA_ITEM_STATE_PENDING;
+      break;
+  }
+  if ($success) {
+    $job_item->updateData($matches['key'], $data);
+    // If a data item has been rejected and the job is in needs review state,
+    // set back to active.
+    if ($matches['action'] == 'reject' && $job_item->isNeedsReview()) {
+      $job_item->active(FALSE);
+    }
+  }
+  tmgmt_write_request_messages($job_item->getJob());
+}
+
+/**
+ * Form callback for the reject confirm form.
+ */
+function tmgmt_translation_review_form_reject_confirm(array $form, FormStateInterface $form_state, JobItem $job_item, $key) {
+  // Path of job item review form.
+  $path = explode('/', Url::fromRoute('<current>')->getInternalPath());
+  $path = implode('/', array_slice($path, 0, count($path) - 2));
+
+  $args = array(
+    '@data_item' => $job_item->getData(tmgmt_ensure_keys_array($key), '#label'),
+    '@job_item' => $job_item->label(),
+  );
+
+  $form = confirm_form( $form, t('Confirm rejection of @data_item in @job_item', $args), $path, '');
+  $form_state->set('item', $job_item);
+  $form['key'] = array('#type' => 'value', '#value' => $key);
+  $form['actions']['submit']['#name'] = 'reject-' . $key;
+  $form['actions']['submit']['#submit'] = array('tmgmt_translation_review_form_update_state');
+
+  $form = $job_item->getTranslatorController()->rejectForm($form, $form_state);
+
+  return $form;
+}
+
+/**
+ * @addtogroup tmgmt_redirect_queue
+ * @{
+ */
+/**
+ * Set a redirect queue that can then be worked through.
+ *
+ * @param $redirects
+ *   An array of redirect url's to be processed. For example checkout pages as
+ *   returned by tmgmt_job_checkout_multiple().
+ * @param $destination
+ *   A final destination to go to after the queue has been processed.
+ */
+function tmgmt_redirect_queue_set(array $redirects, $destination = NULL) {
+  $_SESSION['tmgmt']['redirect_queue'] = $redirects;
+  $_SESSION['tmgmt']['destination'] = $destination;
+}
+
+/**
+ * Returns the redirect queue destination.
+ *
+ * This is the final destination after all queue items have been processed.
+ *
+ * @param $destination
+ *   The default destination that should be returned if none exists.
+ *
+ * @return
+ *   The stored destination if defined, otherwise the passed in default
+ *   destination.
+ */
+function tmgmt_redirect_queue_destination($destination = NULL) {
+  if (!empty($_SESSION['tmgmt']['destination'])) {
+    $destination = $_SESSION['tmgmt']['destination'];
+    unset($_SESSION['tmgmt']['destination']);
+    return $destination;
+  }
+  return $destination;
+}
+
+/**
+ * Returns the amount of entries in the redirect queue.
+ *
+ * @return
+ *   The amount of entries in the redirect queue.
+ */
+function tmgmt_redirect_queue_count() {
+  if (!empty($_SESSION['tmgmt']['redirect_queue'])) {
+    return count($_SESSION['tmgmt']['redirect_queue']);
+  }
+  return 0;
+}
+
+/**
+ * Dequeues one redirect in the queue and returns that.
+ *
+ * @return
+ *   A redirect URL or NULL if the queue is empty.
+ */
+function tmgmt_redirect_queue_dequeue() {
+  if (!empty($_SESSION['tmgmt']['redirect_queue'])) {
+    return array_shift($_SESSION['tmgmt']['redirect_queue']);
+  }
+}
+/**
+ * @} End of "addtogroup tmgmt_redirect_queue".
+ */
+
+/**
+ * Provides color legends for source statuses.
+ *
+ * @return array
+ *   Color legend render array.
+ */
+function tmgmt_color_legend() {
+  $output = [
+    '#attached' => [
+      'library' => ['tmgmt/admin'],
+    ]
+  ];
+  if (\Drupal::theme()->getActiveTheme() == 'seven') {
+    $output['#attached']['library'][] = 'tmgmt/admin.seven';
+  }
+
+  $legends = array();
+  $legends[] = array('legend' => t('Source Language'), 'color' => 'tmgmt-ui-icon-white');
+  $legends[] = array('legend' => t('Not translated'), 'color' => 'tmgmt-ui-icon-grey');
+  $legends[] = array('legend' => t('In progress'), 'color' => 'tmgmt-ui-icon-blue');
+  $legends[] = array('legend' => t('Ready for review'), 'color' => 'tmgmt-ui-icon-yellow');
+  $legends[] = array('legend' => t('Translated'), 'color' => 'tmgmt-ui-icon-green');
+  $legends[] = array('legend' => t('Translation Outdated'), 'color' => 'tmgmt-ui-icon-orange');
+
+  $output['#markup'] = '<div class="tmgmt-color-legend clearfix">';
+
+  foreach ($legends as $legend){
+    $output['#markup'] .= '<div class="tmgmt-one-legend">
+        <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 ' .
+      $legend['color'] . '"><span></span></div>
+        <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
+        </div>';
+  }
+
+  $output['#markup'] .= '</div>';
+
+  return $output;
+}
+
+/**
+ * Attempts to checkout a number of jobs and prepare the necessary redirects.
+ *
+ * @param array $form_state
+ *   Form state array, used to set the initial redirect.
+ * @param array $jobs
+ *   Array of jobs to attempt checkout
+ *
+ * @ingroup tmgmt_job
+ *
+ * @see tmgmt_job_checkout_multiple()
+ */
+function tmgmt_job_checkout_and_redirect(FormStateInterface $form_state, array $jobs) {
+  $redirects = tmgmt_job_checkout_multiple($jobs);
+  // If necessary, do a redirect.
+  if ($redirects) {
+    $request = \Drupal::request();
+    if ($request->query->has('destination')) {
+      // Remove existing destination, as that will prevent us from being
+      // redirect to the job checkout page. Set the destination as the final
+      // redirect instead.
+      tmgmt_redirect_queue_set($redirects, $request->query->get('destination'));
+      $request->query->remove('destination');
+    }
+    else {
+      tmgmt_redirect_queue_set($redirects, Url::fromRoute('<current>')->getInternalPath());
+    }
+    $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_redirect_queue_dequeue()));
+
+    // Count of the job messages is one less due to the final redirect.
+    drupal_set_message(format_plural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
+  }
+}
+
+/**
+ * Implements hook_help().
+ */
+function tmgmt_help($path, $arg) {
+  $output = '';
+  if (strpos($path, 'admin/tmgmt/sources') !== FALSE) {
+    $output = drupal_render(tmgmt_color_legend());
+  }
+
+  return $output;
+}
+
+/**
+ * Helper function for redirecting a form after a button has been clicked.
+ */
+function tmgmt_submit_redirect(array $form, FormStateInterface $form_state){
+  if ($form_state->getTriggeringElement()['#redirect']) {
+    $form_state->setRedirectUrl(Url::fromUri('base://' . $form_state->getTriggeringElement()['#redirect']));
+  }
+}
+
+/**
+ * @addtogroup tmgmt_cart
+ * @{
+ */
+
+/**
+ * Gets the tmgmt cart singleton object.
+ *
+ * @return JobItemUiCart
+ *   The cart object.
+ */
+function tmgmt_cart_get() {
+  return JobItemUiCart::getInstance();
+}
+
+/**
+ * Adds add to cart form elements.
+ *
+ * There are two use cases for this function:
+ *
+ * 1) Add the "Add to cart" submit action to the source overview form. In this
+ * case the $item_id should not be provided and only the action button will be
+ * displayed. The form is expected to submit job items ids as items[] which is
+ * being validated via tmgmt_source_add_to_cart_validate().
+ *
+ * 2) Add the "Add to cart" submit action to the translate tab. For this case
+ * the $item_id is required and with the add to cart button also the cart
+ * information is displayed. In this case there is no validation as the caller
+ * needs to provide valid $item_id value.
+ *
+ * The "Add to cart" action submits the form by calling
+ * tmgmt_source_add_to_cart_submit() submit callback which processes either
+ * one job item or multiple.
+ *
+ * @param array $form
+ *   Form to which to add the add to cart form elements.
+ * @param array $form_state
+ *   The current form state object.
+ * @param string $plugin
+ *   Current plugin name.
+ * @param string $item_type
+ *   Type of the source item.
+ * @param mixed $item_id
+ *   (Optional) It is required in case a single source is being added into the
+ *   cart.
+ */
+function tmgmt_add_cart_form(&$form, FormStateInterface $form_state, $plugin, $item_type, $item_id = NULL) {
+  $form_state->set('tmgmt_cart', array(
+    'plugin' => $plugin,
+    'item_type' => $item_type,
+    'item_id' => $item_id,
+  ));
+  $form['add_to_cart'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add to cart'),
+    '#submit' => array('tmgmt_source_add_to_cart_submit'),
+    '#attributes' => array('title' => t('Add marked items to the cart for later processing')),
+  );
+
+  if (empty($item_id)) {
+    $form['add_to_cart']['#validate'] = array('tmgmt_cart_source_overview_validate');
+  }
+  else {
+    //
+    $form['add_to_cart']['#limit_validation_errors'] = array();
+    // Compose the cart info message for the translate tab.
+    $count = tmgmt_cart_get()->count();
+    if (tmgmt_cart_get()->isSourceItemAdded($plugin, $item_type, $item_id)) {
+      $form['add_to_cart']['#disabled'] = TRUE;
+      $message = format_plural($count, 'There is @count item in the <a href="@url">translation cart</a> including the current item.',
+        'There are @count items in the <a href="@url">translation cart</a> including the current item.', array('@url' => Url::fromRoute('tmgmt.cart')->toString()));
+    }
+    else {
+      $message = format_plural($count, 'There is @count item in the <a href="@url">translation cart</a>.',
+        'There are @count items in the <a href="@url">translation cart</a>.', array('@url' => Url::fromRoute('tmgmt.cart')->toString()));
+    }
+
+    $form['add_to_cart']['#suffix'] = '<span class="tmgmt-ui-cart-status-message">' . $message . '</span>';
+  }
+}
+
+/**
+ * Submit handler to add items into the cart.
+ *
+ * Based on the submitted data it will create job items and add them into the
+ * cart. Use it in combination with tmgmt_add_cart_form() as that function
+ * sets all the necessary values needed to crate a job an add it into the cart.
+ *
+ * @see tmgmt_add_cart_form()
+ */
+function tmgmt_source_add_to_cart_submit(array $form, FormStateInterface $form_state) {
+
+  $cart_info = $form_state->get('tmgmt_cart');
+  if (!empty($cart_info['plugin']) && !empty($cart_info['item_type']) && $form_state->getValue('items')) {
+    $source_items = array_filter($form_state->getValue('items'));
+    $item_type = $cart_info['item_type'];
+    $plugin = $cart_info['plugin'];
+  }
+  elseif (!empty($cart_info['plugin']) && !empty($cart_info['item_type']) && !empty($cart_info['item_id'])) {
+    $source_items = array($cart_info['item_id']);
+    $item_type = $cart_info['item_type'];
+    $plugin = $cart_info['plugin'];
+  }
+  else {
+    drupal_set_message(t('Unable to add the content into the cart.'), 'error');
+    return;
+  }
+
+  $i = 0;
+  foreach ($source_items as $source_id) {
+    if (tmgmt_cart_get()->addJobItem($plugin, $item_type, $source_id)) {
+      $i++;
+    }
+  }
+
+  drupal_set_message(format_plural($i, '@count content source was added into the <a href="@url">cart</a>.',
+    '@count content sources were added into the <a href="@url">cart</a>.', array('@url' => Url::fromRoute('tmgmt.cart')->toString())));
+}
+
+/**
+ * Cart form validation callback for the source overview.
+ */
+function tmgmt_cart_source_overview_validate(array $form, FormStateInterface $form_state) {
+  $items = array_filter($form_state->getValue('items'));
+  if (empty($items)) {
+    form_set_error('items', t('No job items were selected.'));
+  }
+}
+
+/**
+ * @} End of "addtogroup tmgmt_cart".
+ */
+

@@ -135,7 +135,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     // Test status: Active job item.
     $job = $this->createJob('en', 'de');
-    $job->translator = $this->default_translator->name;
+    $job->translator = $this->default_translator->id();
     $job->settings = array();
     $job->save();
 

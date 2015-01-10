@@ -43,7 +43,7 @@ interface SourcePluginUiInterface extends PluginInspectionInterface {
   /**
    * {@inheritdoc}
    *
-   * @see tmgmt_ui_views_default_views().
+   * @see tmgmt_views_default_views().
    */
   public function hook_views_default_views();
 

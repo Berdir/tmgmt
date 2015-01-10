@@ -107,7 +107,7 @@ class JobItemForm extends TmgmtFormBase {
       $form['review'][$key] = $this->reviewFormElement($form_state, tmgmt_flatten_data($data[$key], $key), $item, $zebra, $key);
     }
 
-    if ($view =  entity_load('view', 'tmgmt_ui_job_item_messages')) {
+    if ($view =  entity_load('view', 'tmgmt_job_item_messages')) {
       $form['messages'] = array(
         '#type' => 'details',
         '#title' => $view->label(),
@@ -117,7 +117,7 @@ class JobItemForm extends TmgmtFormBase {
       $form['messages']['view'] = $view->getExecutable()->preview('block', array($item->id()));
     }
 
-    $form['#attached']['library'][] = 'tmgmt_ui/admin';
+    $form['#attached']['library'][] = 'tmgmt/admin';
     // The reject functionality has to be implement by the translator plugin as
     // that process is completely unique and custom for each translation service.
 
@@ -258,8 +258,8 @@ class JobItemForm extends TmgmtFormBase {
       'odd' => 'even',
     );
     $form = array(
-      '#theme' => 'tmgmt_ui_translator_review_form',
-      '#ajaxid' => tmgmt_ui_review_form_element_ajaxid($parent_key),
+      '#theme' => 'tmgmt_translator_review_form',
+      '#ajaxid' => tmgmt_review_form_element_ajaxid($parent_key),
     );
 
     foreach (element_children($data) as $key) {
@@ -269,12 +269,12 @@ class JobItemForm extends TmgmtFormBase {
         $zebra = $flip[$zebra];
         $form[$target_key] = array(
           '#tree' => TRUE,
-          '#theme' => 'tmgmt_ui_translator_review_form_element',
+          '#theme' => 'tmgmt_translator_review_form_element',
           '#parent_label' => $data[$key]['#parent_label'],
           '#zebra' => $zebra,
         );
         $form[$target_key]['status'] = array(
-          '#theme' => 'tmgmt_ui_translator_review_form_element_status',
+          '#theme' => 'tmgmt_translator_review_form_element_status',
           '#value' => $job_item->isAccepted() ? TMGMT_DATA_ITEM_STATE_ACCEPTED : $data[$key]['#status'],
         );
         $form[$target_key]['actions'] = array(
@@ -288,7 +288,7 @@ class JobItemForm extends TmgmtFormBase {
               '#value' => '✓',
               '#attributes' => array('title' => t('Reviewed')),
               '#name' => 'reviewed-' . $target_key,
-              '#submit' => array('tmgmt_ui_translation_review_form_update_state'),
+              '#submit' => array('tmgmt_translation_review_form_update_state'),
               '#ajax' => array(
                 'callback' => array($this, 'ajaxReviewForm'),
                 'wrapper' => $form['#ajaxid'],
@@ -302,7 +302,7 @@ class JobItemForm extends TmgmtFormBase {
               '#value' => '✓',
               '#attributes' => array('title' => t('Not reviewed'), 'class' => array('unreviewed')),
               '#name' => 'unreviewed-' . $target_key,
-              '#submit' => array('tmgmt_ui_translation_review_form_update_state'),
+              '#submit' => array('tmgmt_translation_review_form_update_state'),
               '#ajax' => array(
                 'callback' => array($this, 'ajaxReviewForm'),
                 'wrapper' => $form['#ajaxid'],
@@ -316,7 +316,7 @@ class JobItemForm extends TmgmtFormBase {
               '#value' => '✗',
               '#attributes' => array('title' => t('Reject')),
               '#name' => 'reject-' . $target_key,
-              '#submit' => array('tmgmt_ui_translation_review_form_update_state'),
+              '#submit' => array('tmgmt_translation_review_form_update_state'),
             );
           }
 
@@ -328,7 +328,7 @@ class JobItemForm extends TmgmtFormBase {
               '#attributes' => array('title' => t('Revert to previous revision')),
               '#name' => 'revert-' . $target_key,
               '#data_item_key' => $key,
-              '#submit' => array('tmgmt_ui_translation_review_form_revert'),
+              '#submit' => array('tmgmt_translation_review_form_revert'),
               '#ajax' => array(
                 'callback' => array(array($this, 'ajaxReviewForm')),
                 'wrapper' => $form['#ajaxid'],
@@ -386,7 +386,7 @@ class JobItemForm extends TmgmtFormBase {
   function ajaxReviewForm(array $form, FormStateInterface $form_state) {
     $key = array_slice($form_state->getTriggeringElement()['#array_parents'], 0, 2);
     $render_data = NestedArray::getValue($form, $key);
-    tmgmt_ui_write_request_messages($form_state->getFormObject()->getEntity()->getJob());
+    tmgmt_write_request_messages($form_state->getFormObject()->getEntity()->getJob());
     return drupal_render($render_data);
   }
 
