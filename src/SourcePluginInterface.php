@@ -51,8 +51,11 @@ interface SourcePluginInterface extends PluginInspectionInterface {
    *
    * @param \Drupal\tmgmt\Entity\JobItem $job_item
    *   The job item entity.
+   *
+   * @return \Drupal\Core\Url
+   *   The URL object for the source object.
    */
-  public function getUri(JobItem $job_item);
+  public function getUrl(JobItem $job_item);
 
   /**
    * Returns an array of translatable source item types.

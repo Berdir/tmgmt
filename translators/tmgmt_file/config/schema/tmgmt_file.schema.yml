@@ -1,4 +1,4 @@
-tmgmt.translator.settings.file_translator:
+tmgmt.translator.settings.file:
   type: mapping
   mapping:
     export_format:

@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_test\Plugin\tmgmt\Source;
 
+use Drupal\Core\Url;
 use Drupal\tmgmt\SourcePluginBase;
 use Drupal\tmgmt\Entity\JobItem;
 
@@ -24,16 +25,17 @@ class TestSource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getUri(JobItem $job_item) {
+  public function getUrl(JobItem $job_item) {
     // Provide logic which allows to test for source which is either accessible
     // or not accessible to anonymous user. This is may then be used to test if
     // the source url is attached to the job comment sent to a translation
     // service.
-    $path = 'node';
     if ($job_item->getItemType() == 'test_not_accessible') {
-      $path = 'admin';
+      return Url::fromRoute('system.admin');
     }
-    return array('path' => $path, 'options' => array());
+    else {
+      return Url::fromRoute('<front>');
+    }
   }
 
   /**

@@ -28,11 +28,8 @@ abstract class SourcePluginBase extends PluginBase implements SourcePluginInterf
   /**
    * {@inheritdoc}
    */
-  public function getUri(JobItem $job_item) {
-    return array(
-      'path' => '',
-      'options' => array(),
-    );
+  public function getUrl(JobItem $job_item) {
+    return NULL;
   }
 
   /**

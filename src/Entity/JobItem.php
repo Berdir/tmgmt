@@ -319,12 +319,12 @@ class JobItem extends ContentEntityBase {
   /**
    * Retrieves the path to the source object via the source controller.
    *
-   * @return
-   *   The path to the source object.
+   * @return \Drupal\Core\Url
+   *   The URL object for the source object.
    */
-  public function getSourceUri() {
+  public function getSourceUrl() {
     if ($controller = $this->getSourceController()) {
-      return $controller->getUri($this);
+      return $controller->getUrl($this);
     }
     return FALSE;
   }
@@ -506,9 +506,9 @@ class JobItem extends ContentEntityBase {
    */
   public function needsReview($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
-      $uri = $this->getSourceUri();
+      $url = $this->getSourceUrl();
       $message = 'The translation for !source needs to be reviewed.';
-      $variables = array('!source' => \Drupal::l($this->getSourceLabel(), Url::fromUri('base://' . $uri['path'])));
+      $variables = array('!source' => \Drupal::l($this->getSourceLabel(), $url));
     }
     $return = $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW, $message, $variables, $type);
     // Auto accept the trganslation if the translator is configured for it.
@@ -523,9 +523,9 @@ class JobItem extends ContentEntityBase {
    */
   public function accepted($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
-      $uri = $this->getSourceUri();
+      $url = $this->getSourceUrl();
       $message = 'The translation for !source has been accepted.';
-      $variables = array('!source' => $uri['path'] ? \Drupal::l($this->getSourceLabel(), Url::fromUri('base://' . $uri['path'])) : '');
+      $variables = array('!source' => $url ? \Drupal::l($this->getSourceLabel(), $url) : $this->getSourceLabel());
     }
     $return = $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED, $message, $variables, $type);
     // Check if this was the last unfinished job item in this job.
@@ -541,9 +541,9 @@ class JobItem extends ContentEntityBase {
    */
   public function active($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
-      $uri = $this->getSourceUri();
+      $url = $this->getSourceUrl();
       $message = 'The translation for !source is now being processed.';
-      $variables = array('!source' => \Drupal::l($this->getSourceLabel(), Url::fromUri('base://' . $uri['path'])));
+      $variables = array('!source' => $url ? \Drupal::l($this->getSourceLabel(), $url) : $this->getSourceLabel());
     }
     return $this->setState(TMGMT_JOB_ITEM_STATE_ACTIVE, $message, $variables, $type);
   }

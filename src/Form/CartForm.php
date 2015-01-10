@@ -31,10 +31,10 @@ class Cartform extends FormBase {
     $languages = tmgmt_available_languages();
     $options = array();
     foreach (tmgmt_ui_cart_get()->getJobItemsFromCart() as $item) {
-      $uri = $item->getSourceUri();
+      $url = $item->getSourceUrl();
       $options[$item->id()] = array(
         $item->getSourceType(),
-        (!empty($uri['path']) ? \Drupal::l($item->label(), Url::fromUri('base://' . $uri['path'])) : $item->label()),
+        $url ? \Drupal::l($item->label(), $url) : $item->label(),
         isset($languages[$item->getSourceLangCode()]) ? $languages[$item->getSourceLangCode()] : t('Unknown'),
       );
     }

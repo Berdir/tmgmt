@@ -10,8 +10,6 @@ namespace Drupal\tmgmt_file\Plugin\tmgmt\Translator;
 use Drupal\tmgmt\TranslatorPluginBase;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
-use Drupal\tmgmt\Annotation\TranslatorPlugin;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * File translator.

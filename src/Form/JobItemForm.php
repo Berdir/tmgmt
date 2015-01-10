@@ -39,11 +39,11 @@ class JobItemForm extends TmgmtFormBase {
       '#weight' => 0,
     );
 
-    $uri = $item->getSourceUri();
+    $url = $item->getSourceUrl();
     $form['info']['source'] = array(
       '#type' => 'item',
       '#title' => t('Source'),
-      '#markup' => empty($uri['path']) ? $item->getSourceLabel() : \Drupal::l($item->getSourceLabel(), Url::fromUri('base://' . $uri['path'], $uri['options'])),
+      '#markup' => $url ? \Drupal::l($item->getSourceLabel(),$url) : $item->getSourceLabel(),
       '#prefix' => '<div class="tmgmt-ui-source tmgmt-ui-info-item">',
       '#suffix' => '</div>',
     );
