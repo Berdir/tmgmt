@@ -155,10 +155,10 @@ abstract class TMGMTTestBase extends WebTestBase {
       'name' => strtolower($this->randomMachineName()),
       'label' => $this->randomMachineName(),
       'plugin' => 'test_translator',
-      'settings' => [
+      'settings' => empty($values['plugin']) ? [
         'key' => $this->randomMachineName(),
         'another_key' => $this->randomMachineName(),
-      ]
+      ] : []
     ]);
     $this->assertEqual(SAVED_NEW, $translator->save());
     return $translator;

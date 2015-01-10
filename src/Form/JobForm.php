@@ -498,7 +498,7 @@ class JobForm extends TmgmtFormBase {
       $form['#description'] = Xss::filter($job->getTranslator()->getNotCanTranslateReason($job));
     }
     else {
-      $plugin_ui = $this->translatorManager->createUIInstance($translator->plugin);
+      $plugin_ui = $this->translatorManager->createUIInstance($translator->getPluginId());
       $form = $plugin_ui->checkoutSettingsForm($form, $form_state, $job);
     }
     return $form;
@@ -513,7 +513,7 @@ class JobForm extends TmgmtFormBase {
     if (!$translator) {
       return array();
     }
-    $plugin_ui = $this->translatorManager->createUIInstance($translator->plugin);
+    $plugin_ui = $this->translatorManager->createUIInstance($translator->getPluginId());
     return $plugin_ui->checkoutInfo($job);
   }
 
