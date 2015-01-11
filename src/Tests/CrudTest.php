@@ -7,7 +7,10 @@
 
 namespace Drupal\tmgmt\Tests;
 
+use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\RemoteMapping;
+use Drupal\tmgmt\Entity\Translator;
 
 /**
  * Basic crud operations for jobs and translators
@@ -31,7 +34,7 @@ class CrudTest extends TMGMTKernelTestBase {
   function testTranslators() {
     $translator = $this->createTranslator();
 
-    $loaded_translator = tmgmt_translator_load($translator->id());
+    $loaded_translator = Translator::load($translator->id());
     $this->assertEqual($translator->id(), $loaded_translator->id());
     $this->assertEqual($translator->label(), $loaded_translator->label());
     $this->assertEqual($translator->getSettings(), $loaded_translator->getSettings());
@@ -40,14 +43,14 @@ class CrudTest extends TMGMTKernelTestBase {
     $translator->setSetting('new_key', $this->randomString());
     $translator->save();
 
-    $loaded_translator = tmgmt_translator_load($translator->id());
+    $loaded_translator = Translator::load($translator->id());
     $this->assertEqual($translator->id(), $loaded_translator->id());
     $this->assertEqual($translator->label(), $loaded_translator->label());
     $this->assertEqual($translator->getSettings(), $loaded_translator->getSettings());
 
     // Delete the translator, make sure the translator is gone.
     $translator->delete();
-    $this->assertNull(tmgmt_translator_load($translator->id()));
+    $this->assertNull(Translator::load($translator->id()));
   }
 
   /**
@@ -56,7 +59,7 @@ class CrudTest extends TMGMTKernelTestBase {
   function testJobs() {
     $job = $this->createJob();
 
-    $loaded_job = tmgmt_job_load($job->id());
+    $loaded_job = Job::load($job->id());
 
     $this->assertEqual($job->getSourceLangcode(), $loaded_job->getSourceLangcode());
     $this->assertEqual($job->getTargetLangcode(), $loaded_job->getTargetLangcode());
@@ -71,7 +74,7 @@ class CrudTest extends TMGMTKernelTestBase {
     $job->reference = 7;
     $this->assertEqual(SAVED_UPDATED, $job->save());
 
-    $loaded_job = tmgmt_job_load($job->id());
+    $loaded_job = Job::load($job->id());
 
     $this->assertEqual($job->getReference(), $loaded_job->getReference());
 
@@ -92,7 +95,7 @@ class CrudTest extends TMGMTKernelTestBase {
 
     // Delete the job and make sure it is gone.
     $job->delete();
-    $this->assertFalse(tmgmt_job_load($job->id()));
+    $this->assertFalse(Job::load($job->id()));
   }
 
   function testRemoteMappings() {
@@ -178,13 +181,13 @@ class CrudTest extends TMGMTKernelTestBase {
     $item2 = $job->addItem('test_source', 'test_with_long_label', 4);
 
     // Test single load callback.
-    $item = tmgmt_job_item_load($item1->id());
+    $item = JobItem::load($item1->id());
     $this->assertEqual($item1->getPlugin(), $item->getPlugin());
     $this->assertEqual($item1->getItemType(), $item->getItemType());
     $this->assertEqual($item1->getItemId(), $item->getItemId());
 
     // Test multiple load callback.
-    $items = tmgmt_job_item_load_multiple(array($item1->id(), $item2->id()));
+    $items = JobItem::loadMultiple(array($item1->id(), $item2->id()));
 
     $this->assertEqual(2, count($items));
 
@@ -382,8 +385,8 @@ class CrudTest extends TMGMTKernelTestBase {
     $job_item1->save();
 
     // No pending, translated and confirmed data items.
-    $job = tmgmt_job_load($job->id());
-    $job_item1 = tmgmt_job_item_load($job_item1->id());
+    $job = Job::load($job->id());
+    $job_item1 = JobItem::load($job_item1->id());
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(0, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
@@ -399,8 +402,8 @@ class CrudTest extends TMGMTKernelTestBase {
     $job_item1->save();
 
     // One pending data items.
-    $job = tmgmt_job_load($job->id());
-    $job_item1 = tmgmt_job_item_load($job_item1->id());
+    $job = Job::load($job->id());
+    $job_item1 = JobItem::load($job_item1->id());
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(1, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
@@ -418,8 +421,8 @@ class CrudTest extends TMGMTKernelTestBase {
     $job_item1->save();
 
     // One pending data items.
-    $job = tmgmt_job_load($job->id());
-    $job_item1 = tmgmt_job_item_load($job_item1->id());
+    $job = Job::load($job->id());
+    $job_item1 = JobItem::load($job_item1->id());
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(1, $job_item1->getCountPending());
     $this->assertEqual(0, $job_item1->getCountTranslated());
@@ -453,8 +456,8 @@ class CrudTest extends TMGMTKernelTestBase {
     $this->assertEqual(1, $job->getCountReviewed());
 
     // Add a translated and an untranslated and a confirmed data item
-    $job = tmgmt_job_load($job->id());
-    $job_item1 = tmgmt_job_item_load($job_item1->id());
+    $job = Job::load($job->id());
+    $job_item1 = JobItem::load($job_item1->id());
     $job_item1->updateData('data_item1', $data1, TRUE);
     $job_item1->updateData('data_item2', $data3, TRUE);
     $job_item1->updateData('data_item3', $data4, TRUE);
@@ -472,8 +475,8 @@ class CrudTest extends TMGMTKernelTestBase {
     $job_item1->save();
 
     // One pending data items.
-    $job = tmgmt_job_load($job->id());
-    $job_item1 = tmgmt_job_item_load($job_item1->id());
+    $job = Job::load($job->id());
+    $job_item1 = JobItem::load($job_item1->id());
     $this->assertEqual('label', $job_item1->getData()['data_item1']['#label']);
     $this->assertEqual(3, count($job_item1->getData()['data_item1']));
 
@@ -510,7 +513,7 @@ class CrudTest extends TMGMTKernelTestBase {
     $job_item2->save();
 
     // 3 pending and 7 translated data items each.
-    $job = tmgmt_job_load($job->id());
+    $job = Job::load($job->id());
     drupal_static_reset('tmgmt_job_statistics_load');
     $this->assertEqual(7, $job->getCountPending());
     $this->assertEqual(15, $job->getCountTranslated());

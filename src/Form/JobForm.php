@@ -633,7 +633,7 @@ class JobForm extends TmgmtFormBase {
     );
 
     if (!empty($result['from_item'])) {
-      $from_item = tmgmt_job_item_load($result['from_item']);
+      $from_item = JobItem::load($result['from_item']);
       if ($from_item) {
         $option['reason'] = t('%reason in %job', array('%reason' => $option['reason'], '%job' => $from_item->label()));
       }

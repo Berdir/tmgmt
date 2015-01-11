@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_file\Tests;
 
 use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 use GuzzleHttp\Exception\RequestException;
 
@@ -88,7 +89,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     // Reset caches and reload job.
     \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
     \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
-    $job = tmgmt_job_load($job->id());
+    $job = Job::load($job->id());
 
     // Do the comparison of the translation text and the source. It must be the
     // same as there was no change done to the translation.
@@ -120,7 +121,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
     \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
     \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
-    $job = tmgmt_job_load($job->id());
+    $job = Job::load($job->id());
 
     $this->assertIntegrityCheck($job);
 
@@ -170,7 +171,7 @@ class FileTranslatorTest extends TMGMTTestBase {
    * Tests export and import for the HTML format.
    */
   function testHTML() {
-    $translator = tmgmt_translator_load('file');
+    $translator = Translator::load('file');
     $translator
       ->setSetting('export_format', 'html')
       ->save();
@@ -208,7 +209,7 @@ class FileTranslatorTest extends TMGMTTestBase {
    * Tests import and export for the XLIFF format.
    */
   function testXLIFF() {
-    $translator = tmgmt_translator_load('file');
+    $translator = Translator::load('file');
     $translator
       ->setSetting('export_format', 'xlf')
       ->save();

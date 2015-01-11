@@ -1,6 +1,7 @@
 <?php
 use Drupal\Core\Session\AccountInterface;
 use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt_local\Entity\LocalTask;
 
 /**
@@ -257,7 +258,7 @@ function tmgmt_local_clear_languages_cache() {
     ->condition('plugin', 'local')
     ->execute();
   if ($results) {
-    foreach (tmgmt_translator_load_multiple($results) as $translator) {
+    foreach (Translator::loadMultiple($results) as $translator) {
       $translator->clearLanguageCache();
     }
   }

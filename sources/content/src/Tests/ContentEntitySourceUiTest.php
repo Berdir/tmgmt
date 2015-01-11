@@ -9,6 +9,7 @@ namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\EntityTestBase;
 
 /**
@@ -162,7 +163,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
    */
   function testNodeTranslateTabMultipeCheckout() {
     // Allow auto-accept.
-    $default_translator = tmgmt_translator_load('test_translator');
+    $default_translator = Translator::load('test_translator');
     $default_translator
       ->setSetting('auto_accept', TRUE)
       ->save();

@@ -210,7 +210,7 @@ class LocaleSource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function saveTranslation(JobItem $job_item) {
-    $job = tmgmt_job_load($job_item->getJobId());
+    $job = $job_item->getJob();
     $data = $job_item->getData();
     if (isset($data['singular'])) {
       $translation = $data['singular']['#translation']['#text'];

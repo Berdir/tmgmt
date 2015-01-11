@@ -7,6 +7,9 @@
 
 namespace Drupal\tmgmt_local\Tests;
 
+use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 use Drupal\tmgmt_local\Entity\LocalTask;
 
@@ -153,7 +156,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
    * Test the basic translation workflow
    */
   function testBasicWorkflow() {
-    $translator = tmgmt_translator_load('local');
+    $translator = Translator::load('local');
 
     // Create a job and request a local translation.
     $this->loginAsTranslator();
@@ -305,7 +308,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     \Drupal::entityManager()->getStorage('tmgmt_local_task')->resetCache();
     \Drupal::entityManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
-    $item1 = tmgmt_job_item_load(1);
+    $item1 = JobItem::load(1);
     $item1->acceptTranslation();
 
     // The first item should be accepted now, the second still in progress.
@@ -382,7 +385,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Check the job data.
     \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
     \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
-    $job = tmgmt_job_load($job->id());
+    $job = Job::load($job->id());
     list($item1, $item2) = array_values($job->getItems());
     // The text in the first item should be available for review, the
     // translation of the second item not.
@@ -403,7 +406,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     \Drupal::entityManager()->getStorage('tmgmt_local_task')->resetCache();
     \Drupal::entityManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
-    $item1 = tmgmt_job_item_load(2);
+    $item1 = JobItem::load(2);
     $item1->acceptTranslation();
 
     // Refresh the page.
@@ -433,7 +436,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
     \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
-    $job = tmgmt_job_load($job->id());
+    $job = Job::load($job->id());
     list($item1, $item2) = array_values($job->getItems());
     // Job was accepted and finished automatically due to the default approve
     // setting.
@@ -462,7 +465,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
    * Test the allow all setting.
    */
   function testAllowAll() {
-    $translator = tmgmt_translator_load('local');
+    $translator = Translator::load('local');
 
     // Create a job and request a local translation.
     $this->loginAsTranslator();
@@ -600,7 +603,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
    * Test permissions for the tmgmt_local VBO actions.
    */
   function testVBOPermissions() {
-    $translator = tmgmt_translator_load('local');
+    $translator = Translator::load('local');
     $job = $this->createJob();
     $job->translator = $translator->id();
     $job->settings->job_comment = $job_comment = 'Dummy job comment';

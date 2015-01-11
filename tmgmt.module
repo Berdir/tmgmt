@@ -212,25 +212,6 @@ function tmgmt_available_languages($exclude = array()) {
  * @addtogroup tmgmt_job
  * @{
  */
-/**
- * Loads a translation job.
- *
- * @param int $tjid
- *   Translation job id.
- *
- * @return \Drupal\tmgmt\Entity\Job
- *   Loaded translation job entity.
- */
-function tmgmt_job_load($tjid) {
-  return entity_load('tmgmt_job', $tjid);
-}
-
-/**
- * Loads translation jobs.
- */
-function tmgmt_job_load_multiple(array $tjids = array(), $conditions = array()) {
-  return entity_load_multiple('tmgmt_job', $tjids, $conditions);
-}
 
 /**
  * Loads active job entities that have a job item with the identifiers.
@@ -267,7 +248,7 @@ function tmgmt_job_item_load_latest($plugin, $item_type, $item_id, $source_langu
     ->execute();
   if ($items = $result->fetchAllKeyed()) {
     $return = array();
-    foreach (tmgmt_job_item_load_multiple(array_keys($items)) as $key => $item) {
+    foreach (JobItem::loadMultiple(array_keys($items)) as $key => $item) {
       $return[$items[$key]] = $item;
     }
     return $return;
@@ -306,7 +287,7 @@ function tmgmt_job_item_load_all_latest($plugin, $item_type, $item_id, $source_l
     ->execute();
   if ($items = $result->fetchAllKeyed()) {
     $return = array();
-    foreach (tmgmt_job_item_load_multiple(array_keys($items)) as $key => $item) {
+    foreach (JobItem::loadMultiple(array_keys($items)) as $key => $item) {
       $return[$items[$key]] = $item;
     }
     return $return;
@@ -337,7 +318,7 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
     ->condition('state', TMGMT_JOB_STATE_UNPROCESSED)
     ->execute();
   if (!empty($tjid)) {
-    return tmgmt_job_load(reset($tjid));
+    return Job::load(reset($tjid));
   }
   return tmgmt_job_create($source_language, $target_language, $account->id());
 }
@@ -482,35 +463,6 @@ function tmgmt_job_item_states() {
 }
 
 /**
- * Loads a translation job item.
- *
- * @param $tjiid
- *   A job item id.
- *
- * @return \Drupal\tmgmt\Entity\JobItem
- *   The loaded job item or FALSE if the query returned no results.
- */
-function tmgmt_job_item_load($tjiid) {
-  return entity_load('tmgmt_job_item', $tjiid);
-}
-
-/**
- * Loads translation job items.
- *
- * @param $tjiids
- *   An array of job item ids.
- * @param $conditions
- *   An array of additional conditions.
- *
- * @return \Drupal\tmgmt\Entity\JobItem[]
- *   An array of job item entities or an empty array if the query returned no
- *   results.
- */
-function tmgmt_job_item_load_multiple($tjiids = array(), $conditions = array()) {
-  return entity_load_multiple('tmgmt_job_item', $tjiids, $conditions);
-}
-
-/**
  * Creates a translation job item.
  *
  * @param $plugin
@@ -531,30 +483,6 @@ function tmgmt_job_item_create($plugin, $item_type, $item_id, array $values = ar
     'item_type' => $item_type,
     'item_id' => $item_id,
   )));
-}
-
-/**
- * Loads a translation job message.
- *
- * @param $mid
- *   A job message id.
- *
- * @return TMGMTMessage
- *   A job message entity or FALSE if the query didn't yield any results.
- */
-function tmgmt_message_load($mid) {
-  // Avoid collision with the message module because this looks like the module
-  // implements hook_ENTITY_TYPE_load() for message.
-  if (!is_array($mid)) {
-    return entity_load('tmgmt_message', $mid);
-  }
-}
-
-/**
- * Loads translation job messages.
- */
-function tmgmt_message_load_multiple($mids = array()) {
-  return entity_load_multiple('tmgmt_message', $mids);
 }
 
 /**
@@ -586,34 +514,6 @@ function tmgmt_message_create($message = '', $variables = array(), $values = arr
  */
 
 /**
- * Loads a translator based on the name.
- *
- * @param $name
- *   The machine-readable name of the translator entity to load.
- *
- * @return \Drupal\tmgmt\Entity\Translator
- *   A translator entity.
- */
-function tmgmt_translator_load($name) {
-  return entity_load('tmgmt_translator', $name);
-}
-
-/**
- * Loads multiple translators based on their name.
- *
- * @param $names
- *   (Optional) An array of machine-readable names of the translator entities to
- *   load or FALSE to load all available translator entities.
- *
- * @return array
- *   An array of translators with the machine-readable name of the translators
- *   as array keys.
- */
-function tmgmt_translator_load_multiple($names = NULL) {
-  return entity_load_multiple('tmgmt_translator', $names);
-}
-
-/**
  * Loads all translators that are available and, if a translation job is given,
  * support translations for that job with its current configuration.
  *
@@ -625,7 +525,7 @@ function tmgmt_translator_load_multiple($names = NULL) {
  *   as array keys.
  */
 function tmgmt_translator_load_available($job) {
-  $translators = tmgmt_translator_load_multiple();
+  $translators = Translator::loadMultiple();
   foreach ($translators as $name => $translator) {
     if (!$translator->isAvailable() || (isset($job) && !$translator->canTranslate($job))) {
       unset($translators[$name]);
@@ -655,35 +555,6 @@ function tmgmt_translator_busy($translator) {
 }
 
 /**
- * Creates a translator entity.
- *
- * @param $plugin
- *   The plugin of the translator.
- * @param $name
- *   The machine-readable name of the translator.
- * @param $label
- *   The label of the translator.
- * @param $description
- *   (Optional) The description of the translator. Defaults to an empty string.
- * @param $settings
- *   (Optional) An array of settings for the translator.
- * @param $values
- *   (Optional) Array of additional entity values.
- *
- * @return Translator
- *   The created, not yet saved, translator entity.
- */
-function tmgmt_translator_create($plugin, $name, $label, $description = '', $settings = array(), $values = array()) {
-  return entity_create('tmgmt_translator', array_merge($values, array(
-    'plugin' => $plugin,
-    'name' => $name,
-    'label' => $label,
-    'description' => $description,
-    'settings' => $settings,
-  )));
-}
-
-/**
  * Auto creates a translator from a translator plugin definition.
  *
  * @param array $definition
@@ -691,10 +562,14 @@ function tmgmt_translator_create($plugin, $name, $label, $description = '', $set
  */
 function tmgmt_translator_auto_create(array $definition) {
   $plugin = $definition['id'];
-  if (!tmgmt_translator_load($plugin)) {
-    $label = $definition['label'] . ' (auto created)';
-    $translator = tmgmt_translator_create($plugin, $plugin, $label, (string) $definition['description']);
-    // Append some default settings from the translator plugin definition.
+  if (!Translator::load($plugin)) {
+    $translator = Translator::create([
+      'name' => $plugin,
+      'plugin' => $plugin,
+      'label' => $definition['label'] . ' (auto created)',
+      'description' => (string) $definition['description'],
+    ]);
+    // Append default settings from the translator plugin definition.
     $translator->setSettings($translator->getController()->defaultSettings());
     $translator->save();
   }
@@ -708,7 +583,7 @@ function tmgmt_translator_auto_create(array $definition) {
  */
 function tmgmt_translator_labels() {
   $labels = array();
-  foreach (tmgmt_translator_load_multiple() as $translator) {
+  foreach (Translator::loadMultiple() as $translator) {
     $labels[$translator->id()] = $translator->label();
   }
   return $labels;
@@ -728,7 +603,7 @@ function tmgmt_translator_labels() {
  */
 function tmgmt_translator_labels_flagged($job = NULL) {
   $labels = array();
-  foreach (tmgmt_translator_load_multiple() as $translator) {
+  foreach (Translator::loadMultiple() as $translator) {
     if (!$translator->isAvailable()) {
       $labels[$translator->id()] = t('@label (not available)', array('@label' => $translator->label()));
     }

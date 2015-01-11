@@ -6,6 +6,9 @@
  */
 
 namespace Drupal\tmgmt\Tests;
+use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\Entity\Translator;
 
 /**
  * Verifies basic functionality of the user interface
@@ -237,7 +240,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $job->delete();
 
     // Hide settings on the test translator.
-    $default_translator = tmgmt_translator_load('test_translator');
+    $default_translator = Translator::load('test_translator');
     $default_translator
       ->setSetting('expose_settings', FALSE)
       ->save();
@@ -384,7 +387,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, array(), t('Confirm'));
     // Reload job and check its state.
     \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
-    $job = tmgmt_job_load($job->id());
+    $job = Job::load($job->id());
     $this->assertTrue($job->isAborted());
     foreach ($job->getItems() as $item) {
       $this->assertTrue($item->isAborted());
@@ -399,7 +402,7 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Load the resubmitted job and check for its status and values.
     $url_parts = explode('/', $this->getUrl());
-    $resubmitted_job = tmgmt_job_load(array_pop($url_parts));
+    $resubmitted_job = Job::load(array_pop($url_parts));
 
     $this->assertTrue($resubmitted_job->isUnprocessed());
     $this->assertEqual($job->getTranslator()->id(), $resubmitted_job->getTranslator()->id());
@@ -474,7 +477,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText(t('Job items were removed from the cart.'));
 
     // Test that removed job items from cart were deleted as well.
-    $existing_items = tmgmt_job_item_load_multiple(NULL);
+    $existing_items = JobItem::loadMultiple();
     $this->assertTrue(!isset($existing_items[$job_items[1]->id()]));
     $this->assertTrue(!isset($existing_items[$job_items[4]->id()]));
 
@@ -486,7 +489,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText(t('All job items were removed from the cart.'));
 
     // No remaining job items.
-    $existing_items = tmgmt_job_item_load_multiple(NULL);
+    $existing_items = JobItem::loadMultiple();
     $this->assertTrue(empty($existing_items));
 
     $language_sequence = array('en', 'en', 'fr', 'fr', 'de', 'de');

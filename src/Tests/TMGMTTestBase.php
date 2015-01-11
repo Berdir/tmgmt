@@ -73,7 +73,7 @@ abstract class TMGMTTestBase extends WebTestBase {
    */
   function setUp() {
     parent::setUp();
-    $this->default_translator = tmgmt_translator_load('test_translator');
+    $this->default_translator = Translator::load('test_translator');
 
     // Load default admin permissions.
     $this->admin_permissions = array(

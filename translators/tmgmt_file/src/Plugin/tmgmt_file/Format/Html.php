@@ -103,7 +103,7 @@ class Html implements FormatInterface {
     }
 
     // Attempt to load job.
-    if (!$job = tmgmt_job_load($meta['JobID'])) {
+    if (!$job = Job::load($meta['JobID'])) {
       return FALSE;
     }
 

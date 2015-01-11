@@ -206,7 +206,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     $this->getImportedXML($imported_file);
     $phase = $this->importedXML->xpath("//xliff:phase[@phase-name='extraction']");
     $phase = reset($phase);
-    $job = tmgmt_job_load((string) $phase['job-id']);
+    $job = Job::load((string) $phase['job-id']);
     return tmgmt_unflatten_data($this->getImportedTargets($job));
   }
 
@@ -230,7 +230,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     }
 
     // Check if the job can be loaded.
-    if (!isset($phase['job-id']) || (!$job = tmgmt_job_load((string) $phase['job-id']))) {
+    if (!isset($phase['job-id']) || (!$job = Job::load((string) $phase['job-id']))) {
       return FALSE;
     }
 
@@ -261,7 +261,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
 
     foreach ($targets as $id => $target) {
       $array_key = tmgmt_ensure_keys_array($id);
-      $job_item = tmgmt_job_item_load(array_shift($array_key));
+      $job_item = JobItem::load(array_shift($array_key));
       $count = 0;
       $reader->XML('<translation>' . $target['#text'] . '</translation>');
       while ($reader->read()) {

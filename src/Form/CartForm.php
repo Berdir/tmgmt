@@ -122,7 +122,7 @@ class Cartform extends FormBase {
 
     $job_items_by_source_language = array();
     // Group the selected items by source language.
-    foreach (tmgmt_job_item_load_multiple(array_filter($form_state->getValue('items'))) as $job_item) {
+    foreach (JobItem::loadMultiple(array_filter($form_state->getValue('items'))) as $job_item) {
       $job_items_by_source_language[$job_item->getSourceLangCode()][$job_item->id()] = $job_item;
     }
 
