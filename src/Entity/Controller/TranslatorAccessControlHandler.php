@@ -25,7 +25,7 @@ class TranslatorAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
-    if (!$entity->getController() && $operation != 'delete') {
+    if (!$entity->getPlugin() && $operation != 'delete') {
       return AccessResult::forbidden();
     }
     return AccessResult::allowedIfHasPermission($account, 'administer tmgmt');

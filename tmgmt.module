@@ -570,7 +570,7 @@ function tmgmt_translator_auto_create(array $definition) {
       'description' => (string) $definition['description'],
     ]);
     // Append default settings from the translator plugin definition.
-    $translator->setSettings($translator->getController()->defaultSettings());
+    $translator->setSettings($translator->getPlugin()->defaultSettings());
     $translator->save();
   }
 }

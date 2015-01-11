@@ -166,7 +166,7 @@ class Translator extends ConfigEntityBase {
       if (NestedArray::keyExists($this->settings, $name)) {
         return NestedArray::getValue($this->settings, $name);
       }
-      elseif ($controller = $this->getController()) {
+      elseif ($controller = $this->getPlugin()) {
         $defaults = $controller->defaultSettings();
         return NestedArray::getValue($defaults, $name);
       }
@@ -175,7 +175,7 @@ class Translator extends ConfigEntityBase {
       if (isset($this->settings[$name])) {
         return $this->settings[$name];
       }
-      elseif ($controller = $this->getController()) {
+      elseif ($controller = $this->getPlugin()) {
         $defaults = $controller->defaultSettings();
         if (isset($defaults[$name])) {
           return $defaults[$name];
@@ -226,11 +226,11 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Returns the translator plugin controller of this translator.
+   * Returns the translator plugin of this translator.
    *
    * @return \Drupal\tmgmt\TranslatorPluginInterface
    */
-  public function getController() {
+  public function getPlugin() {
     try {
       if (!empty($this->plugin)) {
         return \Drupal::service('plugin.manager.tmgmt.translator')->createInstance($this->plugin);
@@ -248,7 +248,7 @@ class Translator extends ConfigEntityBase {
    *   An array of supported target languages in ISO format.
    */
   public function getSupportedTargetLanguages($source_language) {
-    if ($controller = $this->getController()) {
+    if ($controller = $this->getPlugin()) {
       if (isset($this->pluginInfo['cache languages']) && empty($this->pluginInfo['cache languages'])) {
         // This plugin doesn't support language caching.
         return $controller->getSupportedTargetLanguages($this, $source_language);
@@ -281,7 +281,7 @@ class Translator extends ConfigEntityBase {
    *   )
    */
   public function getSupportedLanguagePairs() {
-    if ($controller = $this->getController()) {
+    if ($controller = $this->getPlugin()) {
       if (isset($this->pluginInfo['cache languages']) && empty($this->pluginInfo['cache languages'])) {
         // This plugin doesn't support language caching.
         return $controller->getSupportedLanguagePairs($this);
@@ -322,7 +322,7 @@ class Translator extends ConfigEntityBase {
    *   TRUE if the job can be processed and translated, FALSE otherwise.
    */
   public function canTranslate(Job $job) {
-    if ($controller = $this->getController()) {
+    if ($controller = $this->getPlugin()) {
       return $controller->canTranslate($this, $job);
     }
     return FALSE;
@@ -335,7 +335,7 @@ class Translator extends ConfigEntityBase {
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
   public function isAvailable() {
-    if ($controller = $this->getController()) {
+    if ($controller = $this->getPlugin()) {
       return $controller->isAvailable($this);
     }
     return FALSE;
@@ -345,7 +345,7 @@ class Translator extends ConfigEntityBase {
    * Returns if the plugin has any settings for this job.
    */
   public function hasCheckoutSettings(Job $job) {
-    if ($controller = $this->getController()) {
+    if ($controller = $this->getPlugin()) {
       return $controller->hasCheckoutSettings($job);
     }
     return FALSE;
@@ -355,7 +355,7 @@ class Translator extends ConfigEntityBase {
    * @todo Remove this once http://drupal.org/node/1420364 is done.
    */
   public function getNotAvailableReason() {
-    if ($controller = $this->getController()) {
+    if ($controller = $this->getPlugin()) {
       return $controller->getNotAvailableReason($this);
     }
     return FALSE;
@@ -365,7 +365,7 @@ class Translator extends ConfigEntityBase {
    * @todo Remove this once http://drupal.org/node/1420364 is done.
    */
   public function getNotCanTranslateReason(Job $job) {
-    if ($controller = $this->getController()) {
+    if ($controller = $this->getPlugin()) {
       return $controller->getNotCanTranslateReason($job);
     }
     return FALSE;
@@ -383,7 +383,7 @@ class Translator extends ConfigEntityBase {
    * @ingroup tmgmt_remote_languages_mapping
    */
   public function mapToRemoteLanguage($language) {
-    return $this->getController()->mapToRemoteLanguage($this, $language);
+    return $this->getPlugin()->mapToRemoteLanguage($this, $language);
   }
 
   /**
@@ -398,14 +398,14 @@ class Translator extends ConfigEntityBase {
    * @ingroup tmgmt_remote_languages_mapping
    */
   public function mapToLocalLanguage($language) {
-    return $this->getController()->mapToLocalLanguage($this, $language);
+    return $this->getPlugin()->mapToLocalLanguage($this, $language);
   }
 
   /**
    * Updates the language cache.
    */
   protected function updateCache() {
-    if ($controller = $this->getController()) {
+    if ($controller = $this->getPlugin()) {
       $info = $controller->getPluginDefinition();
       if (!isset($info['language cache']) || !empty($info['language cache'])) {
         \Drupal::cache('data')->set('tmgmt_languages:' . $this->name, $this->languageCache, Cache::PERMANENT, $this->getEntityType()->getListCacheTags());

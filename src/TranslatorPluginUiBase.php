@@ -25,7 +25,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
    */
   public function pluginSettingsForm(array $form, FormStateInterface $form_state, Translator $translator, $busy = FALSE) {
 
-    $controller = $translator->getController();
+    $controller = $translator->getPlugin();
     // If current translator is configured to provide remote language mapping
     // provide the form to configure mappings, unless it does not exists yet.
     if (!empty($controller) && $translator->providesRemoteLanguageMappings()) {

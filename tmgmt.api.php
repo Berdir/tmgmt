@@ -242,7 +242,7 @@ function hook_tmgmt_job_checkout_before_alter(&$redirects, &$jobs) {
   foreach ($jobs as $job) {
     // Automatically check out all jobs using the default settings.
     $job->translator = 'example';
-    $job->translator_context = $job->getTranslator()->getController()->defaultCheckoutSettings();
+    $job->translator_context = $job->getTranslator()->getPlugin()->defaultCheckoutSettings();
   }
 }
 

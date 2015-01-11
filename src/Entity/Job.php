@@ -784,7 +784,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    */
   public function getTranslatorController() {
     if ($translator = $this->getTranslator($this)) {
-      return $translator->getController();
+      return $translator->getPlugin();
     }
     return FALSE;
   }

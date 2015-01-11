@@ -141,7 +141,7 @@ class PluginsTest extends TMGMTKernelTestBase {
    */
   function testRemoteLanguagesMappings() {
     $this->addLanguage('en');
-    $controller = $this->default_translator->getController();
+    $controller = $this->default_translator->getPlugin();
 
     $mappings = $controller->getRemoteLanguagesMappings($this->default_translator);
     $this->assertEqual($mappings, array(
@@ -173,7 +173,7 @@ class PluginsTest extends TMGMTKernelTestBase {
    * Tests escaping and unescaping text.
    */
   function testEscaping() {
-    $controller = $this->default_translator->getController();
+    $controller = $this->default_translator->getPlugin();
 
     $tests = array(
       array(
