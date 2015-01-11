@@ -9,6 +9,7 @@ use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\Entity\JobItem;
 
 /**
  * Generic theme function for use with Render API.
@@ -94,7 +95,7 @@ function theme_tmgmt_translation_language_status_single($variables) {
     $job = $variables['job_item']->getJob();
 
     switch ($variables['job_item']->getState()) {
-      case TMGMT_JOB_ITEM_STATE_ACTIVE:
+      case JobItem::STATE_ACTIVE:
         if ($job->isUnprocessed()) {
           $uri = $job->urlInfo();
           $label = t('Active job item: @state', array('@state' => $state_label));
@@ -102,7 +103,7 @@ function theme_tmgmt_translation_language_status_single($variables) {
         $icon_color = 'tmgmt-ui-icon-blue';
         break;
 
-      case TMGMT_JOB_ITEM_STATE_REVIEW:
+      case JobItem::STATE_REVIEW:
         $icon_color = 'tmgmt-ui-icon-yellow';
         break;
     }

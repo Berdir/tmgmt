@@ -30,7 +30,7 @@ class Progress extends FieldPluginBase {
       $tjids = array();
       foreach ($values as $value) {
         // Do not load statistics for aborted jobs.
-        if ($value->tmgmt_job_state == TMGMT_JOB_STATE_ABORTED) {
+        if ($value->tmgmt_job_state == Job::STATE_ABORTED) {
           continue;
         }
         $tjids[] = $value->tjid;

@@ -20,90 +20,6 @@ use Drupal\tmgmt\TranslatorRejectDataInterface;
  * @addtogroup tmgmt_job
  * @{
  */
-/**
- * A new translation job.
- *
- * In the default user interface, jobs with this state are so called cart jobs.
- * Each user gets his cart jobs listed in a block and can check them out.
- */
-define('TMGMT_JOB_STATE_UNPROCESSED', 0);
-
-/**
- * A translation job that has been submitted to the translator.
- *
- * Translator plugins are responsible for setting this state in their
- * implementation of
- * TranslatorPluginControllerInterface::requestTranslation().
- */
-define('TMGMT_JOB_STATE_ACTIVE', 1);
-
-/**
- * A translation job that has been rejected by the translator.
- *
- * The translator plugin can use this state if the job has been actively
- * rejected. However, this should be avoided by doing the necessary checks
- * in the canTranslate() method and in the job configuration settings.
- *
- * A rejected job can be re-submitted.
- */
-define('TMGMT_JOB_STATE_REJECTED', 2);
-
-/**
- * The translation has been accepted and the job is finished.
- *
- * Once the job has been accepted, the source plugins are called to update their
- * sources with the translated data.
- */
-define('TMGMT_JOB_STATE_ACCEPTED', 3);
-
-/**
- * The translation job has been aborted.
- *
- * A job can be aborted at any time. If he is currently in the submitted state
- * the translator plugin is asked if this translation can be aborted and needs
- * to confirm it by returning TRUE in abortTranslation().
- */
-define('TMGMT_JOB_STATE_ABORTED', 4);
-
-/**
- * The translation job has been finished.
- *
- * A job is marked as 'finished' after every single attached job item has been
- * reviewed, accepted and saved.
- */
-define('TMGMT_JOB_STATE_FINISHED', 5);
-
-/**
- * The translation job item is active and waiting to be translated.
- *
- * A job item is marked as 'active' until every translatable piece of text in
- * the job item has been translated and cached on the job item entity.
- */
-define('TMGMT_JOB_ITEM_STATE_ACTIVE', 1);
-
-/**
- * The translation job item needs to be reviewed.
- *
- * A job item is marked as 'needs review' after every single piece of text in
- * the job item has been translated by the translation provider. After the
- * review procedure is finished the job item can be accepted and saved.
- */
-define('TMGMT_JOB_ITEM_STATE_REVIEW', 2);
-
-/**
- * The translation job item has been reviewed and accepted.
- *
- * After reviewing a job item it can be accepted by the reviewer. Once the user
- * has accepted the job item, the translated data will be propagated to the
- * source controller which will also take care of flagging the job item as
- * 'accepted' if the translated object could be saved successfully.
- */
-define('TMGMT_JOB_ITEM_STATE_ACCEPTED', 3);
-
-/**
- * The translation process of the job item is aborted.
- */
-define('TMGMT_JOB_ITEM_STATE_ABORTED', 4);
 
 /**
  * The translation data item has not been translated.
@@ -162,7 +78,7 @@ function tmgmt_cron() {
     // Delete all finished translation jobs that haven't been changed for a
     // time span longer than the given offset.
     $tjid = \Drupal::entityQuery('tmgmt_job')
-      ->condition('state', TMGMT_JOB_STATE_FINISHED)
+      ->condition('state', Job::STATE_FINISHED)
       ->condition('changed', REQUEST_TIME - $offset, '<=')
       ->execute();
     if (!empty($tjid)) {
@@ -233,9 +149,9 @@ function tmgmt_job_item_load_latest($plugin, $item_type, $item_id, $source_langu
   $query->innerJoin('tmgmt_job', 'tj', 'tj.tjid = tji.tjid');
   $result = $query->condition('tj.source_language', $source_language)
     // Only query for jobs that are currently active.
-    ->condition('tj.state', array(TMGMT_JOB_STATE_UNPROCESSED, TMGMT_JOB_STATE_ACTIVE))
+    ->condition('tj.state', array(Job::STATE_UNPROCESSED, Job::STATE_ACTIVE))
     // And only query for job items that are not yet finished.
-    ->condition('tji.state', TMGMT_JOB_ITEM_STATE_ACCEPTED, '<>')
+    ->condition('tji.state', JobItem::STATE_ACCEPTED, '<>')
     ->condition('tji.plugin', $plugin)
     ->condition('tji.item_type', $item_type)
     ->condition('tji.item_id', $item_id)
@@ -275,7 +191,7 @@ function tmgmt_job_item_load_all_latest($plugin, $item_type, $item_id, $source_l
   $query = db_select('tmgmt_job_item', 'tji');
   $query->innerJoin('tmgmt_job', 'tj', 'tj.tjid = tji.tjid');
   $result = $query->condition('tj.source_language', $source_language)
-    ->condition('tji.state', TMGMT_JOB_ITEM_STATE_ACCEPTED, '<>')
+    ->condition('tji.state', JobItem::STATE_ACCEPTED, '<>')
     ->condition('tji.plugin', $plugin)
     ->condition('tji.item_type', $item_type)
     ->condition('tji.item_id', $item_id)
@@ -315,7 +231,7 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
     ->condition('source_language', $source_language)
     ->condition('target_language', $target_language)
     ->condition('uid', $account->id())
-    ->condition('state', TMGMT_JOB_STATE_UNPROCESSED)
+    ->condition('state', Job::STATE_UNPROCESSED)
     ->execute();
   if (!empty($tjid)) {
     return Job::load(reset($tjid));
@@ -335,7 +251,7 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
 function tmgmt_job_check_finished($tjid) {
   return !\Drupal::entityQuery('tmgmt_job_item')
     ->condition('tjid', $tjid)
-    ->condition('state', TMGMT_JOB_ITEM_STATE_ACCEPTED, '<>')
+    ->condition('state', JobItem::STATE_ACCEPTED, '<>')
     ->range(0, 1)
     ->count()
     ->execute();
@@ -439,11 +355,11 @@ function tmgmt_job_statistic(Job $job, $key) {
  */
 function tmgmt_job_states() {
   return array(
-    TMGMT_JOB_STATE_UNPROCESSED => t('Unprocessed'),
-    TMGMT_JOB_STATE_ACTIVE => t('Active'),
-    TMGMT_JOB_STATE_REJECTED => t('Rejected'),
-    TMGMT_JOB_STATE_ABORTED => t('Aborted'),
-    TMGMT_JOB_STATE_FINISHED => t('Finished'),
+    Job::STATE_UNPROCESSED => t('Unprocessed'),
+    Job::STATE_ACTIVE => t('Active'),
+    Job::STATE_REJECTED => t('Rejected'),
+    Job::STATE_ABORTED => t('Aborted'),
+    Job::STATE_FINISHED => t('Finished'),
   );
 }
 
@@ -455,10 +371,10 @@ function tmgmt_job_states() {
  */
 function tmgmt_job_item_states() {
   return array(
-    TMGMT_JOB_ITEM_STATE_ACTIVE => t('In progress'),
-    TMGMT_JOB_ITEM_STATE_REVIEW => t('Needs review'),
-    TMGMT_JOB_ITEM_STATE_ACCEPTED => t('Accepted'),
-    TMGMT_JOB_ITEM_STATE_ABORTED => t('Aborted'),
+    JobItem::STATE_ACTIVE => t('In progress'),
+    JobItem::STATE_REVIEW => t('Needs review'),
+    JobItem::STATE_ACCEPTED => t('Accepted'),
+    JobItem::STATE_ABORTED => t('Aborted'),
   );
 }
 
@@ -547,7 +463,7 @@ function tmgmt_translator_load_available($job) {
  */
 function tmgmt_translator_busy($translator) {
   return (bool) \Drupal::entityQuery('tmgmt_job')
-    ->condition('state', TMGMT_JOB_STATE_ACTIVE)
+    ->condition('state', Job::STATE_ACTIVE)
     ->condition('translator', $translator)
     ->range(0, 1)
     ->count()

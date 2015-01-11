@@ -48,7 +48,7 @@ class TranslatorTest extends TMGMTTestBase {
     $job->translator = $translator;
     $job->settings = array();
     $job->save();
-    $job->setState(TMGMT_JOB_STATE_ACTIVE);
+    $job->setState(Job::STATE_ACTIVE);
 
     // Try to delete the translator, should fail because of active job.
     $delete_url = 'tmgmt_translator/' . $translator->id() . '/delete';
@@ -59,7 +59,7 @@ class TranslatorTest extends TMGMTTestBase {
     $this->assertText(t('This translator cannot be deleted as long as there are active jobs using it.'));
 
     // Change job state, delete again.
-    $job->setState(TMGMT_JOB_STATE_FINISHED);
+    $job->setState(Job::STATE_FINISHED);
     $this->drupalPostForm(NULL, array(), 'Delete');
     $this->assertText(t('Add translator'));
     $this->assertNoText($translator->label());

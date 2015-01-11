@@ -48,6 +48,38 @@ use Drupal\tmgmt\TMGMTException;
 class JobItem extends ContentEntityBase {
 
   /**
+   * The translation job item is active and waiting to be translated.
+   *
+   * A job item is marked as 'active' until every translatable piece of text in
+   * the job item has been translated and cached on the job item entity.
+   */
+  const STATE_ACTIVE = 1;
+
+  /**
+   * The translation job item needs to be reviewed.
+   *
+   * A job item is marked as 'needs review' after every single piece of text in
+   * the job item has been translated by the translation provider. After the
+   * review procedure is finished the job item can be accepted and saved.
+   */
+  const STATE_REVIEW = 2;
+
+  /**
+   * The translation job item has been reviewed and accepted.
+   *
+   * After reviewing a job item it can be accepted by the reviewer. Once the user
+   * has accepted the job item, the translated data will be propagated to the
+   * source controller which will also take care of flagging the job item as
+   * 'accepted' if the translated object could be saved successfully.
+   */
+  const STATE_ACCEPTED = 3;
+
+  /**
+   * The translation process of the job item is aborted.
+   */
+  const STATE_ABORTED = 4;
+
+  /**
    * Holds the unserialized source data.
    *
    * @var array
@@ -104,7 +136,7 @@ class JobItem extends ContentEntityBase {
     $fields['state'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Job item state'))
       ->setDescription(t('The job item state'))
-      ->setDefaultValue(TMGMT_JOB_ITEM_STATE_ACTIVE);
+      ->setDefaultValue(static::STATE_ACTIVE);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
@@ -147,7 +179,7 @@ class JobItem extends ContentEntityBase {
     $clone->count_pending->value = NULL;
     $clone->count_translated->value = NULL;
     $clone->count_reviewed->value = NULL;
-    $clone->state->value = TMGMT_JOB_ITEM_STATE_ACTIVE;
+    $clone->state->value = static::STATE_ACTIVE;
     return $clone;
   }
 
@@ -510,7 +542,7 @@ class JobItem extends ContentEntityBase {
       $message = 'The translation for !source needs to be reviewed.';
       $variables = array('!source' => \Drupal::l($this->getSourceLabel(), $url));
     }
-    $return = $this->setState(TMGMT_JOB_ITEM_STATE_REVIEW, $message, $variables, $type);
+    $return = $this->setState(static::STATE_REVIEW, $message, $variables, $type);
     // Auto accept the trganslation if the translator is configured for it.
     if ($this->getTranslator()->getSetting('auto_accept')) {
       $this->acceptTranslation();
@@ -527,7 +559,7 @@ class JobItem extends ContentEntityBase {
       $message = 'The translation for !source has been accepted.';
       $variables = array('!source' => $url ? \Drupal::l($this->getSourceLabel(), $url) : $this->getSourceLabel());
     }
-    $return = $this->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED, $message, $variables, $type);
+    $return = $this->setState(static::STATE_ACCEPTED, $message, $variables, $type);
     // Check if this was the last unfinished job item in this job.
     if (tmgmt_job_check_finished($this->getJobId()) && $job = $this->getJob()) {
       // Mark the job as finished.
@@ -545,7 +577,7 @@ class JobItem extends ContentEntityBase {
       $message = 'The translation for !source is now being processed.';
       $variables = array('!source' => $url ? \Drupal::l($this->getSourceLabel(), $url) : $this->getSourceLabel());
     }
-    return $this->setState(TMGMT_JOB_ITEM_STATE_ACTIVE, $message, $variables, $type);
+    return $this->setState(static::STATE_ACTIVE, $message, $variables, $type);
   }
 
   /**
@@ -609,7 +641,7 @@ class JobItem extends ContentEntityBase {
    *   TRUE if the state is 'accepted', FALSE otherwise.
    */
   public function isAccepted() {
-    return $this->isState(TMGMT_JOB_ITEM_STATE_ACCEPTED);
+    return $this->isState(static::STATE_ACCEPTED);
   }
 
   /**
@@ -619,7 +651,7 @@ class JobItem extends ContentEntityBase {
    *   TRUE if the state is 'active', FALSE otherwise.
    */
   public function isActive() {
-    return $this->isState(TMGMT_JOB_ITEM_STATE_ACTIVE);
+    return $this->isState(static::STATE_ACTIVE);
   }
 
   /**
@@ -629,7 +661,7 @@ class JobItem extends ContentEntityBase {
    *   TRUE if the state is 'needs review', FALSE otherwise.
    */
   public function isNeedsReview() {
-    return $this->isState(TMGMT_JOB_ITEM_STATE_REVIEW);
+    return $this->isState(static::STATE_REVIEW);
   }
 
   /**
@@ -639,7 +671,7 @@ class JobItem extends ContentEntityBase {
    *   TRUE if the state is 'aborted', FALSE otherwise.
    */
   public function isAborted() {
-    return $this->isState(TMGMT_JOB_ITEM_STATE_ABORTED);
+    return $this->isState(static::STATE_ABORTED);
   }
 
   /**

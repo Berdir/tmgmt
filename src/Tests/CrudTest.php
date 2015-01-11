@@ -523,7 +523,7 @@ class CrudTest extends TMGMTKernelTestBase {
     foreach ($job->getItems() as $item) {
       // Set the state directly to avoid triggering translator and source
       // controllers that do not exist.
-      $item->setState(TMGMT_JOB_ITEM_STATE_ACCEPTED);
+      $item->setState(JobItem::STATE_ACCEPTED);
       $item->save();
     }
     drupal_static_reset('tmgmt_job_statistics_load');

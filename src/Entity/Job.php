@@ -54,6 +54,59 @@ use Drupal\user\UserInterface;
 class Job extends ContentEntityBase implements EntityOwnerInterface {
 
   /**
+   * A new translation job.
+   *
+   * In the default user interface, jobs with this state are so called cart jobs.
+   * Each user gets his cart jobs listed in a block and can check them out.
+   */
+   const STATE_UNPROCESSED = 0;
+
+  /**
+   * A translation job that has been submitted to the translator.
+   *
+   * Translator plugins are responsible for setting this state in their
+   * implementation of
+   * TranslatorPluginControllerInterface::requestTranslation().
+   */
+   const STATE_ACTIVE = 1;
+
+  /**
+   * A translation job that has been rejected by the translator.
+   *
+   * The translator plugin can use this state if the job has been actively
+   * rejected. However, this should be avoided by doing the necessary checks
+   * in the canTranslate() method and in the job configuration settings.
+   *
+   * A rejected job can be re-submitted.
+   */
+   const STATE_REJECTED = 2;
+
+  /**
+   * The translation has been accepted and the job is finished.
+   *
+   * Once the job has been accepted, the source plugins are called to update their
+   * sources with the translated data.
+   */
+   const STATE_ACCEPTED = 3;
+
+  /**
+   * The translation job has been aborted.
+   *
+   * A job can be aborted at any time. If he is currently in the submitted state
+   * the translator plugin is asked if this translation can be aborted and needs
+   * to confirm it by returning TRUE in abortTranslation().
+   */
+   const STATE_ABORTED = 4;
+
+  /**
+   * The translation job has been finished.
+   *
+   * A job is marked as 'finished' after every single attached job item has been
+   * reviewed, accepted and saved.
+   */
+   const STATE_FINISHED = 5;
+
+  /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
@@ -121,7 +174,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
     $fields['state'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Job state'))
       ->setDescription(t('The job state.'))
-      ->setDefaultValue(TMGMT_JOB_STATE_UNPROCESSED);
+      ->setDefaultValue(Job::STATE_UNPROCESSED);
 
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
@@ -211,7 +264,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
     $clone->uid->value = 0;
     $clone->reference->value = '';
     $clone->created->value = REQUEST_TIME;
-    $clone->state->value = TMGMT_JOB_STATE_UNPROCESSED;
+    $clone->state->value = Job::STATE_UNPROCESSED;
     return $clone;
   }
 
@@ -560,7 +613,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    *   TRUE if the state is 'unprocessed', FALSE otherwise.
    */
   public function isUnprocessed() {
-    return $this->isState(TMGMT_JOB_STATE_UNPROCESSED);
+    return $this->isState(Job::STATE_UNPROCESSED);
   }
 
   /**
@@ -570,7 +623,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    *   TRUE if the state is 'aborted', FALSE otherwise.
    */
   public function isAborted() {
-    return $this->isState(TMGMT_JOB_STATE_ABORTED);
+    return $this->isState(static::STATE_ABORTED);
   }
 
   /**
@@ -580,7 +633,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    *   TRUE if the state is 'active', FALSE otherwise.
    */
   public function isActive() {
-    return $this->isState(TMGMT_JOB_STATE_ACTIVE);
+    return $this->isState(static::STATE_ACTIVE);
   }
 
   /**
@@ -590,7 +643,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    *   TRUE if the state is 'rejected', FALSE otherwise.
    */
   public function isRejected() {
-    return $this->isState(TMGMT_JOB_STATE_REJECTED);
+    return $this->isState(static::STATE_REJECTED);
   }
 
   /**
@@ -600,7 +653,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    *   TRUE if the state is 'finished', FALSE otherwise.
    */
   public function isFinished() {
-    return $this->isState(TMGMT_JOB_STATE_FINISHED);
+    return $this->isState(static::STATE_FINISHED);
   }
 
   /**
@@ -662,13 +715,13 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    * @return \Drupal\tmgmt\Entity\Job
    *   The job entity.
    *
-   * @see Job::addMessage()
+   * @see static::addMessage()
    */
   public function submitted($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
       $message = 'The translation job has been submitted.';
     }
-    $this->setState(TMGMT_JOB_STATE_ACTIVE, $message, $variables, $type);
+    $this->setState(static::STATE_ACTIVE, $message, $variables, $type);
   }
 
   /**
@@ -688,7 +741,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
     if (!isset($message)) {
       $message = 'The translation job has been finished.';
     }
-    return $this->setState(TMGMT_JOB_STATE_FINISHED, $message, $variables, $type);
+    return $this->setState(static::STATE_FINISHED, $message, $variables, $type);
   }
 
   /**
@@ -712,9 +765,9 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
     }
     /** @var JobItem $item */
     foreach ($this->getItems() as $item) {
-      $item->setState(TMGMT_JOB_ITEM_STATE_ABORTED);
+      $item->setState(JobItem::STATE_ABORTED);
     }
-    return $this->setState(TMGMT_JOB_STATE_ABORTED, $message, $variables, $type);
+    return $this->setState(static::STATE_ABORTED, $message, $variables, $type);
   }
 
   /**
@@ -734,7 +787,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
     if (!isset($message)) {
       $message = 'The translation job has been rejected by the translation provider.';
     }
-    return $this->setState(TMGMT_JOB_STATE_REJECTED, $message, $variables, $type);
+    return $this->setState(static::STATE_REJECTED, $message, $variables, $type);
   }
 
   /**
