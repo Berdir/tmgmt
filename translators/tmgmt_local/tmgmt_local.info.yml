@@ -8,4 +8,4 @@ dependencies:
  - tmgmt
  - tmgmt_language_combination
 
-configure: admin/config/regional/tmgmt_translator
+configure: entity.tmgmt_translator.list

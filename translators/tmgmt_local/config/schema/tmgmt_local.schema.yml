@@ -1,0 +1,6 @@
+tmgmt.translator.settings.local:
+  type: mapping
+  mapping:
+    auto_accept:
+      type: boolean
+      label: Automatically accept

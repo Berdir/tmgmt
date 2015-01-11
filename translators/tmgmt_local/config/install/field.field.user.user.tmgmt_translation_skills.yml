@@ -12,5 +12,5 @@ default_value_function: ''
 settings: {  }
 field_type: tmgmt_language_combination
 dependencies:
-  entity:
+  config:
     - field.storage.user.tmgmt_translation_skills
