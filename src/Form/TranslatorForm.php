@@ -197,7 +197,7 @@ class TranslatorForm extends EntityForm {
       drupal_set_message(format_string('%label configuration has been created.', array('%label' => $entity->label())));
     }
 
-    $form_state->setRedirect('tmgmt.translator_list');
+    $form_state->setRedirect('entity.tmgmt_translator.list');
   }
 
   /**

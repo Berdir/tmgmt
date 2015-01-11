@@ -38,8 +38,8 @@ use Drupal\tmgmt\TMGMTException;
  *     "uuid" = "uuid"
  *   },
  *   links = {
- *     "canonical" = "tmgmt.job_item_entity",
- *     "delete-form" = "tmgmt.job_item_delete",
+ *     "canonical" = "entity.tmgmt_job_item.canonical",
+ *     "delete-form" = "entity.tmgmt_job_item.delete-form",
  *   }
  * )
  *

@@ -5,70 +5,70 @@ tmgmt.settings:
   requirements:
     _permission: 'administer tmgmt'
 
-tmgmt.translator_list:
+entity.tmgmt_translator.list:
   path: '/admin/config/regional/tmgmt_translator'
   defaults:
     _entity_list: 'tmgmt_translator'
   requirements:
     _permission: 'administer tmgmt'
 
-tmgmt.translator_add:
+entity.tmgmt_translator.add_form:
   path: '/admin/config/regional/tmgmt_translator/add'
   defaults:
     _entity_form: tmgmt_translator.add
   requirements:
     _entity_create_access: tmgmt_translator
 
-tmgmt.translator_delete:
+entity.tmgmt_translator.delete_form:
   path: '/tmgmt_translator/{tmgmt_translator}/delete'
   defaults:
     _entity_form: tmgmt_translator.delete
   requirements:
     _entity_access: tmgmt_translator.delete
 
-tmgmt.translator_entity:
+entity.tmgmt_translator.edit_form:
   path: '/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}'
   defaults:
     _entity_form: tmgmt_translator.edit
   requirements:
     _entity_access: tmgmt_translator.update
 
-tmgmt.job_entity:
+entity.tmgmt_job.canonical:
   path: '/admin/tmgmt/jobs/{tmgmt_job}'
   defaults:
     _entity_form: tmgmt_job.edit
   requirements:
     _entity_access: tmgmt_job.update
 
-tmgmt.job_entity_delete:
+entity.tmgmt_job.delete_form:
   path: '/admin/tmgmt/jobs/{tmgmt_job}/delete'
   defaults:
     _entity_form: tmgmt_job.delete
   requirements:
     _entity_access: tmgmt_job.delete
 
-tmgmt.job_entity_resubmit:
+entity.tmgmt_job.resubmit_form:
   path: '/admin/tmgmt/jobs/{tmgmt_job}/resubmit'
   defaults:
     _entity_form: tmgmt_job.resubmit
   requirements:
     _entity_access: tmgmt_job.update
 
-tmgmt.job_entity_abort:
+entity.tmgmt_job.abort_form:
   path: '/admin/tmgmt/jobs/{tmgmt_job}/abort'
   defaults:
     _entity_form: tmgmt_job.abort
   requirements:
     _entity_access: tmgmt_job.update
 
-tmgmt.job_item_entity:
+entity.tmgmt_job_item.canonical:
   path: '/admin/tmgmt/items/{tmgmt_job_item}'
   defaults:
     _entity_form: tmgmt_job_item.edit
   requirements:
     _entity_access: tmgmt_job_item.update
 
-tmgmt.job_item_delete:
+entity.tmgmt_job_item.delete-form:
   path: '/admin/tmgmt/items/{tmgmt_job_item}/delete'
   defaults:
     _entity_form: tmgmt_job_item.delete

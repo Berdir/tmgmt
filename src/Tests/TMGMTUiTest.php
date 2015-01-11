@@ -140,7 +140,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertTrue($job->isRejected());
 
     // Check displayed job messages.
-    $args = array('@view' => 'view-tmgmt-ui-job-messages');
+    $args = array('@view' => 'view-tmgmt-job-messages');
     $this->assertEqual(2, count($this->xpath('//div[contains(@class, @view)]//tbody/tr', $args)));
 
     // Check that the author for each is the current user.
@@ -203,7 +203,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertTrue($job->isUnprocessed());
 
     // Test default settings.
-    $this->default_translator->setSEtting('action', 'reject');
+    $this->default_translator->setSetting('action', 'reject');
     $this->default_translator->save();
     $job = tmgmt_job_match_item('en', 'es');
     $job->addItem('test_source', 'test', 1);
@@ -238,7 +238,9 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Hide settings on the test translator.
     $default_translator = tmgmt_translator_load('test_translator');
-    $default_translator->setSetting('expose_settings', TRUE);
+    $default_translator
+      ->setSetting('expose_settings', FALSE)
+      ->save();
     $job = $this->createJob();
 
     $redirects = tmgmt_job_checkout_multiple(array($job));

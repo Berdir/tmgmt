@@ -10,7 +10,6 @@ namespace Drupal\tmgmt\Form;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Xss;
-use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -126,7 +125,7 @@ class JobItemForm extends TmgmtFormBase {
     $form = $source->reviewForm($form, $form_state, $item);
     // Give the translator ui controller a chance to affect the review form.
     if ($item->getTranslator()) {
-      $plugin_ui = $this->translatorManager->createUIInstance($item->getTranslator()->plugin);
+      $plugin_ui = $this->translatorManager->createUIInstance($item->getTranslator()->getPluginId());
       $form = $plugin_ui->reviewForm($form, $form_state, $item);
     }
 
@@ -173,7 +172,7 @@ class JobItemForm extends TmgmtFormBase {
     $source_ui->reviewFormValidate($form, $form_state, $item);
     // Invoke the validation method on the translator controller (if available).
     if($item->getTranslator()){
-      $translator_ui = $this->translatorManager->createUIInstance($item->getTranslator()->plugin);
+      $translator_ui = $this->translatorManager->createUIInstance($item->getTranslator()->getPluginId());
       $translator_ui->reviewFormValidate($form, $form_state, $item);
     }
   }
@@ -188,7 +187,7 @@ class JobItemForm extends TmgmtFormBase {
     $source_ui->reviewFormSubmit($form, $form_state, $item);
     // Invoke the submit method on the translator controller (if available).
     if ($item->getTranslator()){
-      $translator_ui = $this->translatorManager->createUIInstance($item->getTranslator()->plugin);
+      $translator_ui = $this->translatorManager->createUIInstance($item->getTranslator()->getPluginId());
       $translator_ui->reviewFormSubmit($form, $form_state, $item);
     }
     // Write changes back to item.
@@ -370,7 +369,7 @@ class JobItemForm extends TmgmtFormBase {
         );
 
         // Give the translator ui controller a chance to affect the data item element.
-        $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.translator')->createUiInstance($job_item->getTranslator()->plugin)
+        $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.translator')->createUiInstance($job_item->getTranslator()->getPluginId())
           ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
         // Give the source ui controller a chance to affect the data item element.
         $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($job_item->getPlugin())

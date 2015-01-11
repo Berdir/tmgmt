@@ -13,7 +13,6 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
-use Drupal\views\Entity\View;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Views;
 
@@ -212,7 +211,7 @@ class JobForm extends TmgmtFormBase {
         'class' => array('tmgmt-ui-job-suggestions-load'),
       ),
       '#ajax' => array(
-        'callback' => array($this, 'ajaxLoadSuggestions'),
+        'callback' => '::ajaxLoadSuggestions',
         'wrapper' => 'tmgmt-ui-job-items-suggestions',
         'method' => 'replace',
         'effect' => 'fade',
@@ -272,7 +271,7 @@ class JobForm extends TmgmtFormBase {
       // Show a list of translators tagged by availability for the selected source
       // and target language combination.
       if (!$translators = tmgmt_translator_labels_flagged($job)) {
-        drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => \Drupal::l(t('configure'), Url::fromRoute('tmgmt.translator_list')))), 'warning');
+        drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => \Drupal::l(t('configure'), Url::fromRoute('entity.tmgmt_translator.list')))), 'warning');
       }
       $preselected_translator = $job->getTranslatorId() && isset($translators[$job->getTranslatorId()]) ? $job->getTranslatorId() : key($translators);
       $job->translator = $form_state->getValue('translator') ?: $preselected_translator;
@@ -449,14 +448,12 @@ class JobForm extends TmgmtFormBase {
    * Overrides Drupal\Core\Entity\EntityForm::save().
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $entity = $this->entity;
-    $status = $entity->save();
+    parent::save($form, $form_state);
 
     // Everything below this line is only invoked if the 'Submit to translator'
     // button was clicked.
-    debug($form_state->getTriggeringElement()['#value'] . '==' . $form['actions']['submit']['#value']);
     if ($form_state->getTriggeringElement()['#value'] == $form['actions']['submit']['#value']) {
-      if (!tmgmt_job_request_translation($entity)) {
+      if (!tmgmt_job_request_translation($this->entity)) {
         // Don't redirect the user if the translation request failed but retain
         // existing destination parameters so we can redirect once the request
         // finished successfully.
@@ -471,6 +468,10 @@ class JobForm extends TmgmtFormBase {
         debug($destination);
         // Proceed to the defined destination if there is one.
         $form_state->setRedirectUrl(Url::fromUri('base://' . $destination));
+      }
+      else {
+        // Per default we want to redirect the user to the overview.
+        $form_state->setRedirect('view.tmgmt_job_overview.page_1');
       }
     }
     else {

@@ -36,9 +36,9 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *     "weight" = "weight"
  *   },
  *   links = {
- *     "edit-form" = "tmgmt.translator_entity",
- *     "add-form" = "tmgmt.translator_add",
- *     "delete-form" = "tmgmt.translator_delete",
+ *     "edit-form" = "entity.tmgmt_translator.edit_form",
+ *     "add-form" = "entity.tmgmt_translator.add_form",
+ *     "delete-form" = "entity.tmgmt_translator.delete_form",
  *   }
  * )
  *

@@ -29,7 +29,7 @@ class TranslatorDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelURL() {
-    return new Url('tmgmt.translator_list');
+    return new Url('entity.tmgmt_translator.list');
   }
 
   /**
@@ -54,7 +54,7 @@ class TranslatorDeleteForm extends EntityConfirmFormBase {
         '%title' => $this->entity->label(),
       ));
 
-    $form_state->setRedirect('tmgmt.translator_list');
+    $form_state->setRedirect('entity.tmgmt_translator.list');
   }
 
   /**

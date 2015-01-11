@@ -42,10 +42,10 @@ use Drupal\user\UserInterface;
  *     "uuid" = "uuid"
  *   },
  *   links = {
- *     "canonical" = "tmgmt.job_entity",
- *     "abort-form" = "tmgmt.job_entity_abort",
- *     "delete-form" = "tmgmt.job_entity_delete",
- *     "resubmit-form" = "tmgmt.job_entity_resubmit",
+ *     "canonical" = "entity.tmgmt_job.canonical",
+ *     "abort-form" = "entity.tmgmt_job.abort_form",
+ *     "delete-form" = "entity.tmgmt_job.delete_form",
+ *     "resubmit-form" = "entity.tmgmt_job.resubmit_form",
  *   }
  * )
  *

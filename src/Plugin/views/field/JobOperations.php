@@ -23,31 +23,27 @@ class JobOperations extends FieldPluginBase {
     $element = array();
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('inline'));
-    $uri = $job->urlInfo();
     if ($job->isSubmittable() && $job->access('submit')) {
       $element['#links']['submit'] = array(
-        'query' => array('destination' => Url::fromRoute('<current>')->getInternalPath()),
+        'url' => $job->urlInfo()->setOption('query', array('destination' => Url::fromRoute('<current>')->getInternalPath())),
         'title' => t('submit'),
-      ) + $uri->toArray();
+      );
     }
     else {
       $element['#links']['manage'] = array(
+        'url' => $job->urlInfo()->setOption('query', array('destination' => Url::fromRoute('<current>')->getInternalPath())),
         'title' => t('manage'),
-      ) + $uri->toArray();;
+      );
     }
     if ($job->isAbortable() && $job->access('submit')) {
       $element['#links']['cancel'] = array(
-        'route_name' => 'tmgmt.job_entity_abort',
-        'route_parameters' => array('tmgmt_job' => $job->id()),
-        'query' => array('destination' => Url::fromRoute('<current>')->getInternalPath()),
+        'url' => $job->urlInfo('abort-form')->setOption('query', array('destination' => Url::fromRoute('<current>')->getInternalPath())),
         'title' => t('abort'),
       );
     }
     if ($job->isDeletable() && \Drupal::currentUser()->hasPermission('administer tmgmt')) {
       $element['#links']['delete'] = array(
-        'route_name' => 'tmgmt.job_entity_delete',
-        'route_parameters' => array('tmgmt_job' => $job->id()),
-        'query' => array('destination' => Url::fromRoute('<current>')->getInternalPath()),
+        'url' => $job->urlInfo('delete-form')->setOption('query', array('destination' => Url::fromRoute('<current>')->getInternalPath())),
         'title' => t('delete'),
       );
     }

@@ -36,7 +36,7 @@ class JobItemCart {
    * Will load the cart from the session or initialize a new one if nothing has
    * been stored yet.
    */
-  protected function __construct() {
+  public function __construct() {
     if (!isset($_SESSION[$this->session_key])) {
       $_SESSION[$this->session_key] = array();
     }

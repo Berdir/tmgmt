@@ -1,5 +1,5 @@
-tmgmt.translator_add:
-  route_name: tmgmt.translator_add
+entity.tmgmt_translator.add_form:
+  route_name: entity.tmgmt_translator.add_form
   title: 'Add translator'
   appears_on:
-    - tmgmt.translator_list
+    - entity.tmgmt_translator.list

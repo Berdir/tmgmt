@@ -3,8 +3,8 @@ tmgmt.settings:
   route_name: tmgmt.settings
   parent: system.admin_config_regional
   weight: 10
-tmgmt.translator_list:
+entity.tmgmt_translator.list:
   title: 'Translation Management translators'
-  route_name: tmgmt.translator_list
+  route_name: entity.tmgmt_translator.list
   parent: system.admin_config_regional
   weight: 15
