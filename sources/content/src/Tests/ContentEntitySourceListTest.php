@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\comment\Entity\CommentType;
+use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Tests\EntityTestBase;
 
 /**
@@ -146,7 +147,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $langstatus_de = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]/a');
 
     $items = $job->getItems();
-    $states = tmgmt_job_item_states();
+    $states = JobItem::getStates();
     $label = t('Active job item: @state', array('@state' => $states[reset($items)->getState()]));
 
     $this->assertEqual((string)$langstatus_de[0]->div['title'], $label);

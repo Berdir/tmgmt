@@ -199,7 +199,7 @@ class CrudTest extends TMGMTKernelTestBase {
     $this->assertEqual($item2->getItemId(), $items[$item2->id()]->getItemId());
     // Test the second item label length - it must not exceed the
     // TMGMT_JOB_LABEL_MAX_LENGTH.
-    $this->assertTrue(TMGMT_JOB_LABEL_MAX_LENGTH >= strlen($items[$item2->id()]->label()));
+    $this->assertTrue(Job::LABEL_MAX_LENGTH >= strlen($items[$item2->id()]->label()));
   }
 
   /**
@@ -214,7 +214,7 @@ class CrudTest extends TMGMTKernelTestBase {
     // Add some test items.
     $item1 = $job->addItem('test_source', 'test_with_long_label', 5);
     // Test the job label - it must not exceed the TMGMT_JOB_LABEL_MAX_LENGTH.
-    $this->assertTrue(TMGMT_JOB_LABEL_MAX_LENGTH >= strlen($job->label()));
+    $this->assertTrue(Job::LABEL_MAX_LENGTH >= strlen($job->label()));
 
     $key = array('dummy', 'deep_nesting');
 

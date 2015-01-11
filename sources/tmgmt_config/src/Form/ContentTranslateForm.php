@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_content\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
+use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -68,7 +69,7 @@ class ContentTranslateForm extends FormBase {
       }
       elseif (isset($items[$langcode])) {
         $item = $items[$langcode];
-        $states = tmgmt_job_item_states();
+        $states = JobItem::getStates();
         $additional = \Drupal::l($states[$item->getState()], $item->urlInfo()->setOption('query', array('destination' => Url::fromRoute('<current>')->getInternalPath())));
         // Disable the checkbox for this row since there is already a translation
         // in progress that has not yet been finished. This way we make sure that

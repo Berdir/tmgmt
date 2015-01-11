@@ -42,10 +42,6 @@ define('TMGMT_DATA_ITEM_STATE_TRANSLATED', 2);
 define('TMGMT_DATA_ITEM_STATE_ACCEPTED', 3);
 
 /**
- * Maximum length of a job or job item label.
- */
-define('TMGMT_JOB_LABEL_MAX_LENGTH', 128);
-/**
  * @} End of "addtogroup tmgmt_job".
  */
 
@@ -348,37 +344,6 @@ function tmgmt_job_statistic(Job $job, $key) {
 }
 
 /**
- * Static method to retrieve a labeled list of all available states.
- *
- * @return array
- *   A list of all available states.
- */
-function tmgmt_job_states() {
-  return array(
-    Job::STATE_UNPROCESSED => t('Unprocessed'),
-    Job::STATE_ACTIVE => t('Active'),
-    Job::STATE_REJECTED => t('Rejected'),
-    Job::STATE_ABORTED => t('Aborted'),
-    Job::STATE_FINISHED => t('Finished'),
-  );
-}
-
-/**
- * Static method to retrieve a labeled list of all available states.
- *
- * @return array
- *   A list of all available states.
- */
-function tmgmt_job_item_states() {
-  return array(
-    JobItem::STATE_ACTIVE => t('In progress'),
-    JobItem::STATE_REVIEW => t('Needs review'),
-    JobItem::STATE_ACCEPTED => t('Accepted'),
-    JobItem::STATE_ABORTED => t('Aborted'),
-  );
-}
-
-/**
  * Creates a translation job item.
  *
  * @param $plugin
@@ -536,24 +501,6 @@ function tmgmt_translator_labels_flagged($job = NULL) {
 
 /**
  * @} End of "addtogroup tmgmt_translator".
- */
-/**
- * @addtogroup tmgmt_source
- * @{
- */
-
-/**
- * @param $plugin
- * @param $item_type
- * @return bool
- */
-function tmgmt_source_is_translatable_item_type($plugin, $item_type) {
-  $instance = \Drupal::service('plugin.manager.tmgmt.source')->createInstance($plugin);
-  return array_key_exists($item_type, $instance->getItemTypes());
-}
-
-/**
- * @} End of "addtogroup tmgmt_source".
  */
 
 /**
@@ -1030,7 +977,7 @@ function tmgmt_translation_review_form_reject_confirm(array $form, FormStateInte
   $form['actions']['submit']['#name'] = 'reject-' . $key;
   $form['actions']['submit']['#submit'] = array('tmgmt_translation_review_form_update_state');
 
-  $form = $job_item->getTranslatorController()->rejectForm($form, $form_state);
+  $form = $job_item->getTranslatorPlugin()->rejectForm($form, $form_state);
 
   return $form;
 }

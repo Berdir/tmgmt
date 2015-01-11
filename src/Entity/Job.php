@@ -107,6 +107,11 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    const STATE_FINISHED = 5;
 
   /**
+   * Maximum length of a job or job item label.
+   */
+  const LABEL_MAX_LENGTH = 128;
+
+  /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
@@ -315,8 +320,8 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
 
       // If the label length exceeds maximum allowed then cut off exceeding
       // characters from the title and use it to recreate the label.
-      if (strlen($label) > TMGMT_JOB_LABEL_MAX_LENGTH) {
-        $max_length = strlen($source_label) - (strlen($label) - TMGMT_JOB_LABEL_MAX_LENGTH);
+      if (strlen($label) > Job::LABEL_MAX_LENGTH) {
+        $max_length = strlen($source_label) - (strlen($label) - Job::LABEL_MAX_LENGTH);
         $source_label = Unicode::truncate($source_label, $max_length, TRUE);
         $t_args['!title'] = $source_label;
         $label = format_plural($count, '!title', '!title and !more more', $t_args);
@@ -508,7 +513,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
         return $setting;
       }
     }
-    if ($controller = $this->getTranslatorController()) {
+    if ($controller = $this->getTranslatorPlugin()) {
       $defaults = $controller->defaultSettings();
       if (isset($defaults[$name])) {
         return $defaults[$name];
@@ -568,7 +573,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    */
   public function setState($state, $message = NULL, $variables = array(), $type = 'debug') {
     // Return TRUE if the state could be set. Return FALSE otherwise.
-    if (array_key_exists($state, tmgmt_job_states())) {
+    if (array_key_exists($state, Job::getStates())) {
       $this->state = $state;
       $this->save();
       // If a message is attached to this state change add it now.
@@ -797,7 +802,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    *   The updated job status.
    */
   public function requestTranslation() {
-    if (!$this->canRequestTranslation() || !$controller = $this->getTranslatorController()) {
+    if (!$this->canRequestTranslation() || !$controller = $this->getTranslatorPlugin()) {
       return FALSE;
     }
     // We don't know if the translator plugin already processed our
@@ -815,7 +820,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
    *   TRUE if the translation job was aborted, FALSE otherwise.
    */
   public function abortTranslation() {
-    if (!$this->isAbortable() || !$controller = $this->getTranslatorController()) {
+    if (!$this->isAbortable() || !$controller = $this->getTranslatorPlugin()) {
       return FALSE;
     }
     // We don't know if the translator plugin was able to abort the translation
@@ -830,12 +835,12 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Returns the translator plugin controller of the translator of this job.
+   * Returns the translator plugin of the translator of this job.
    *
    * @return \Drupal\tmgmt\TranslatorPluginInterface
-   *   The controller of the translator plugin.
+   *   The translator plugin instance.
    */
-  public function getTranslatorController() {
+  public function getTranslatorPlugin() {
     if ($translator = $this->getTranslator($this)) {
       return $translator->getPlugin();
     }
@@ -1093,6 +1098,22 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   public function setOwner(UserInterface $account) {
     $this->set('uid', $account->id());
     return $this;
+  }
+
+  /**
+   * Returns a labeled list of all available states.
+   *
+   * @return array
+   *   A list of all available states.
+   */
+  public static function getStates() {
+    return array(
+      static::STATE_UNPROCESSED => t('Unprocessed'),
+      static::STATE_ACTIVE => t('Active'),
+      static::STATE_REJECTED => t('Rejected'),
+      static::STATE_ABORTED => t('Aborted'),
+      static::STATE_FINISHED => t('Finished'),
+    );
   }
 
 }

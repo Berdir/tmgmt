@@ -11,6 +11,7 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
+use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -69,7 +70,7 @@ class ContentTranslateForm extends FormBase {
       }
       elseif (isset($items[$langcode])) {
         $item = $items[$langcode];
-        $states = tmgmt_job_item_states();
+        $states = JobItem::getStates();
         $path = \Drupal::routeMatch()->getRouteName() ? Url::fromRouteMatch(\Drupal::routeMatch())->getInternalPath() : '';
         $destination = array('destination' => $path);
         $additional = \Drupal::l($states[$item->getState()], $item->urlInfo()->setOption('query', $destination));

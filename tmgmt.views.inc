@@ -82,14 +82,14 @@ function tmgmt_views_data() {
         'id' => 'machine_name',
         'click sortable' => TRUE,
         'float' => FALSE,
-        'options callback' => 'tmgmt_job_states',
+        'options callback' => 'Drupal\tmgmt\Entity\Job::getStates',
       ),
       'sort' => array(
         'id' => 'standard',
       ),
       'filter' => array(
         'id' => 'in_operator',
-        'options callback' => 'tmgmt_job_states',
+        'options callback' => 'Drupal\tmgmt\Entity\Job::getStates',
       ),
       'argument' => array(
         'id' => 'numeric',
@@ -417,14 +417,14 @@ function tmgmt_views_data() {
         'id' => 'machine_name',
         'click sortable' => TRUE,
         'float' => FALSE,
-        'options callback' => 'tmgmt_job_item_states',
+        'options callback' => 'Drupal\tmgmt\Entity\JobItem::getStates',
       ),
       'sort' => array(
         'id' => 'standard',
       ),
       'filter' => array(
         'id' => 'in_operator',
-        'options callback' => 'tmgmt_job_item_states',
+        'options callback' => 'Drupal\tmgmt\Entity\JobItem::getStates',
       ),
       'argument' => array(
         'id' => 'numeric',

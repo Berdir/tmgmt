@@ -293,15 +293,15 @@ class JobItem extends ContentEntityBase {
    * {@inheritdoc}
    */
   public function label($langcode = NULL) {
-    if ($controller = $this->getSourceController()) {
+    if ($controller = $this->getSourcePlugin()) {
       $label = $controller->getLabel($this);
     }
     else {
       $label = parent::Label();
     }
 
-    if (strlen($label) > TMGMT_JOB_LABEL_MAX_LENGTH) {
-      $label = Unicode::truncate($label, TMGMT_JOB_LABEL_MAX_LENGTH, TRUE);
+    if (strlen($label) > Job::LABEL_MAX_LENGTH) {
+      $label = Unicode::truncate($label, Job::LABEL_MAX_LENGTH, TRUE);
     }
 
     return $label;
@@ -342,7 +342,7 @@ class JobItem extends ContentEntityBase {
    *   The label of the source object.
    */
   public function getSourceLabel() {
-    if ($controller = $this->getSourceController()) {
+    if ($controller = $this->getSourcePlugin()) {
       return $controller->getLabel($this);
     }
     return FALSE;
@@ -355,7 +355,7 @@ class JobItem extends ContentEntityBase {
    *   The URL object for the source object.
    */
   public function getSourceUrl() {
-    if ($controller = $this->getSourceController()) {
+    if ($controller = $this->getSourcePlugin()) {
       return $controller->getUrl($this);
     }
     return FALSE;
@@ -368,7 +368,7 @@ class JobItem extends ContentEntityBase {
    *   A type that describes the job item.
    */
   public function getSourceType() {
-    if ($controller = $this->getSourceController()) {
+    if ($controller = $this->getSourcePlugin()) {
       return $controller->getType($this);
     }
     return ucfirst($this->get('item_type')->value);
@@ -399,14 +399,14 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Returns the translator plugin controller of the translator of this job item.
+   * Returns the translator plugin of the translator of this job item.
    *
-   * @return \Drupal\tmgmt\TranslatorPluginInterface
-   *   The controller of the translator plugin or NULL if there is none.
+   * @return \Drupal\tmgmt\TranslatorPluginInterface|null
+   *   The translator plugin instance or NULL if there is none.
    */
-  public function getTranslatorController() {
+  public function getTranslatorPlugin() {
     if ($job = $this->getJob()) {
-      return $job->getTranslatorController();
+      return $job->getTranslatorPlugin();
     }
     return NULL;
   }
@@ -461,18 +461,18 @@ class JobItem extends ContentEntityBase {
    * Loads the structured source data array from the source.
    */
   public function getSourceData() {
-    if ($controller = $this->getSourceController()) {
+    if ($controller = $this->getSourcePlugin()) {
       return $controller->getData($this);
     }
     return array();
   }
 
   /**
-   * Returns the plugin controller of the configured plugin.
+   * Returns an instance of the configured source plugin.
    *
    * @return \Drupal\tmgmt\SourcePluginInterface
    */
-  public function getSourceController() {
+  public function getSourcePlugin() {
     if ($this->get('plugin')->value) {
       try {
         return \Drupal::service('plugin.manager.tmgmt.source')->createInstance($this->get('plugin')->value);
@@ -597,7 +597,7 @@ class JobItem extends ContentEntityBase {
    */
   public function setState($state, $message = NULL, $variables = array(), $type = 'debug') {
     // Return TRUE if the state could be set. Return FALSE otherwise.
-    if (array_key_exists($state, tmgmt_job_item_states()) && $this->get('state')->value != $state) {
+    if (array_key_exists($state, JobItem::getStates()) && $this->get('state')->value != $state) {
       $this->state = $state;
       $this->save();
       // If a message is attached to this state change add it now.
@@ -927,7 +927,7 @@ class JobItem extends ContentEntityBase {
    *   be saved, FALSE otherwise.
    */
   public function acceptTranslation() {
-    if (!$this->isNeedsReview() || !$controller = $this->getSourceController()) {
+    if (!$this->isNeedsReview() || !$controller = $this->getSourcePlugin()) {
       return FALSE;
     }
     // We don't know if the source plugin was able to save the translation after
@@ -1057,7 +1057,7 @@ class JobItem extends ContentEntityBase {
    *   Language code.
    */
   public function getSourceLangCode() {
-    return $this->getSourceController()->getSourceLangCode($this);
+    return $this->getSourcePlugin()->getSourceLangCode($this);
   }
 
   /**
@@ -1067,7 +1067,7 @@ class JobItem extends ContentEntityBase {
    *   Array of language codes.
    */
   public function getExistingLangCodes() {
-    return $this->getSourceController()->getExistingLangCodes($this);
+    return $this->getSourcePlugin()->getExistingLangCodes($this);
   }
 
   /**
@@ -1153,6 +1153,21 @@ class JobItem extends ContentEntityBase {
    */
   public function language() {
     return new Language(array('id' => Language::LANGCODE_NOT_SPECIFIED));
+  }
+
+  /**
+   * Returns a labeled list of all available states.
+   *
+   * @return array
+   *   A list of all available states.
+   */
+  public static function getStates() {
+    return array(
+      static::STATE_ACTIVE => t('In progress'),
+      static::STATE_REVIEW => t('Needs review'),
+      static::STATE_ACCEPTED => t('Accepted'),
+      static::STATE_ABORTED => t('Aborted'),
+    );
   }
 
 }

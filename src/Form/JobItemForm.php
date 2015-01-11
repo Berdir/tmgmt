@@ -62,7 +62,7 @@ class JobItemForm extends TmgmtFormBase {
       '#prefix' => '<div class="tmgmt-ui-changed tmgmt-ui-info-item">',
       '#suffix' => '</div>',
     );
-    $states = tmgmt_job_item_states();
+    $states = JobItem::getStates();
     $form['info']['state'] = array(
       '#type' => 'item',
       '#title' => t('State'),
@@ -308,7 +308,7 @@ class JobItemForm extends TmgmtFormBase {
               ),
             );
           }
-          if ($job_item->getTranslatorController() instanceof TranslatorRejectDataInterface && $data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_PENDING) {
+          if ($job_item->getTranslatorPlugin() instanceof TranslatorRejectDataInterface && $data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_PENDING) {
             $form[$target_key]['actions']['reject'] = array(
               '#type' => 'submit',
               // Unicode character &#x2717 BALLOT X

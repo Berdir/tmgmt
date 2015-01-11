@@ -59,7 +59,7 @@ class JobForm extends TmgmtFormBase {
       $target = $job->getTargetLanguage()->getName();
     }
 
-    $states = tmgmt_job_states();
+    $states = Job::getStates();
     // Set the title of the page to the label and the current state of the job.
     $form['#title'] = (t('@title (@source to @target, @state)', array(
       '@title' => $job->label(),

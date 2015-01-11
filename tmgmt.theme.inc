@@ -87,7 +87,7 @@ function theme_tmgmt_translation_language_status_single($variables) {
 
   // If we have an active job item, wrap it in a link.
   if (!empty($variables['job_item'])) {
-    $states_labels = tmgmt_job_item_states();
+    $states_labels = JobItem::getStates();
     $state_label = $states_labels[$variables['job_item']->getState()];
     $label = t('Active job item: @state', array('@state' => $state_label));
     $uri = $variables['job_item']->urlInfo();
