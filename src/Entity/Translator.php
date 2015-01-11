@@ -372,21 +372,6 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Determines if the translator plugin supports remote language mappings.
-   *
-   * @return bool
-   *   In case translator does not explicitly state that it does not provide the
-   *   mapping feature it will return TRUE.
-   */
-  public function provideRemoteLanguagesMapping() {
-    if (!isset($this->settings['map_remote_languages'])) {
-      return TRUE;
-    }
-
-    return $this->settings['map_remote_languages'];
- }
-
-  /**
    * Maps local language to remote language.
    *
    * @param $language
@@ -427,6 +412,37 @@ class Translator extends ConfigEntityBase {
         \Drupal::cache('data')->set('tmgmt_language_pairs:' . $this->name, $this->languagePairsCache, Cache::PERMANENT, $this->getEntityType()->getListCacheTags());
       }
     }
+  }
+
+  /**
+   * Determines if this translator supports remote language mappings.
+   *
+   * @return bool
+   *   In case translator does not explicitly state that it does not provide the
+   *   mapping feature it will return TRUE.
+   */
+  function providesRemoteLanguageMappings() {
+    $definition = \Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($this->getPluginId());
+    if (!isset($definition['map_remote_languages'])) {
+      return TRUE;
+    }
+    return $definition['map_remote_languages'];
+  }
+
+  /**
+   * Determines if job settings of the translator will be handled by its plugin.
+   *
+   * @return bool
+   *   If job settings are to be handled by the plugin.
+   */
+  function hasCustomSettingsHandling() {
+    $definition = \Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($this->getPluginId());
+
+    if (isset($definition['job_settings_custom_handling'])) {
+      return $definition['job_settings_custom_handling'];
+    }
+
+    return FALSE;
   }
 
 }

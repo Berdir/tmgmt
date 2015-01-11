@@ -28,7 +28,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
     $controller = $translator->getController();
     // If current translator is configured to provide remote language mapping
     // provide the form to configure mappings, unless it does not exists yet.
-    if (!empty($controller) && tmgmt_provide_remote_languages_mappings($translator)) {
+    if (!empty($controller) && $translator->providesRemoteLanguageMappings()) {
 
       $form['remote_languages_mappings'] = array(
         '#tree' => TRUE,

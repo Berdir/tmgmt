@@ -617,44 +617,7 @@ function tmgmt_translator_labels_flagged($job = NULL) {
   return $labels;
 }
 
-/**
- * Determines if the translator plugin supports remote language mappings.
- *
- * @param \Drupal\tmgmt\Entity\Translator $translator
- *   Translator entity.
- *
- * @return bool
- *   In case translator does not explicitly state that it does not provide the
- *   mapping feature it will return TRUE.
- */
-function tmgmt_provide_remote_languages_mappings(Translator $translator) {
-  $definition = \Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($translator->getPluginId());
 
-  if (!isset($definition['map_remote_languages'])) {
-    return TRUE;
-  }
-
-  return $definition['map_remote_languages'];
-}
-
-/**
- * Determines if job settings of the translator will be handled by its plugin.
- *
- * @param \Drupal\tmgmt\Entity\Translator $translator
- *   Translator entity.
- *
- * @return bool
- *   If job settings are to be handled by the plugin.
- */
-function tmgmt_job_settings_custom_handling(Translator $translator) {
-  $definition = \Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($translator->getPluginId());
-
-  if (isset($definition['job_settings_custom_handling'])) {
-    return $definition['job_settings_custom_handling'];
-  }
-
-  return FALSE;
-}
 /**
  * @} End of "addtogroup tmgmt_translator".
  */
@@ -664,29 +627,15 @@ function tmgmt_job_settings_custom_handling(Translator $translator) {
  */
 
 /**
- * Returns an array of translatable item types of a source plugin.
- *
- * @param $plugin
- *   The machine-readable name of a source plugin.
- *
- * @return array
- *   The array of translatable item types.
- *
- * @see TMGMTSourcePluginControllerInterface::getItemTypes()
- */
-function tmgmt_source_translatable_item_types($plugin) {
-  $instance = \Drupal::service('plugin.manager.tmgmt.source')->createInstance($plugin);
-  return $instance->getItemTypes();
-}
-
-/**
  * @param $plugin
  * @param $item_type
  * @return bool
  */
 function tmgmt_source_is_translatable_item_type($plugin, $item_type) {
-  return array_key_exists($item_type, tmgmt_source_translatable_item_types($plugin));
+  $instance = \Drupal::service('plugin.manager.tmgmt.source')->createInstance($plugin);
+  return array_key_exists($item_type, $instance->getItemTypes());
 }
+
 /**
  * @} End of "addtogroup tmgmt_source".
  */

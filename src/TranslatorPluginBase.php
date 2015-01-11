@@ -99,7 +99,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
    * {@inheritdoc}
    */
   public function mapToRemoteLanguage(Translator $translator, $language) {
-    if (!tmgmt_provide_remote_languages_mappings($translator)) {
+    if (!$translator->providesRemoteLanguageMappings()) {
       return $language;
     }
 
@@ -120,7 +120,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
    * {@inheritdoc}
    */
   public function mapToLocalLanguage(Translator $translator, $language) {
-    if (!tmgmt_provide_remote_languages_mappings($translator)) {
+    if (!$translator->providesRemoteLanguageMappings()) {
       return $language;
     }
 
