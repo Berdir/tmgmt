@@ -6,6 +6,7 @@
  */
 
 namespace Drupal\tmgmt\Tests;
+use Drupal\tmgmt\Entity\Job;
 
 /**
  * Verifies functionality of translator handling

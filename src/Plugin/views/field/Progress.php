@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Plugin\views\field;
 
 use Drupal\Component\Annotation\PluginID;
+use Drupal\tmgmt\Entity\Job;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 
