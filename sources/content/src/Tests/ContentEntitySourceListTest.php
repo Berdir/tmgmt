@@ -14,7 +14,7 @@ use Drupal\tmgmt\Tests\EntityTestBase;
 /**
  * Tests the user interface for entity translation lists.
  *
- * @group Translation Management
+ * @group tmgmt
  */
 class ContentEntitySourceListTest extends EntityTestBase {
 
