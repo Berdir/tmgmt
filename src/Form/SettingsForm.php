@@ -18,6 +18,13 @@ class SettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
+  public function getEditableConfigNames() {
+   return array('tmgmt.settings');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getFormID() {
     return 'tmgmt_settings_form';
   }
@@ -26,7 +33,7 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->configFactory()->get('tmgmt.settings');
+    $config = $this->config('tmgmt.settings');
     $form['workflow'] = array(
       '#type' => 'details',
       '#title' => t('Workflow settings'),
@@ -57,7 +64,7 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->configFactory()->get('tmgmt.settings')
+    $this->config('tmgmt.settings')
       ->set('quick_checkout', $form_state->getValue('tmgmt_quick_checkout'))
       ->set('purge_finished', $form_state->getValue('tmgmt_purge_finished'))
       ->save();
