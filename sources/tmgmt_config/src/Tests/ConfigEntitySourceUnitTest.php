@@ -67,10 +67,10 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
 
     // Test the name property.
     $this->assertEqual($data['name']['#label'], 'Name');
-    $this->assertEqual($data['name']['#text'], $node_type->name);
+    $this->assertEqual($data['name']['#text'], $node_type->id());
     $this->assertEqual($data['name']['#translate'], TRUE);
     $this->assertEqual($data['description']['#label'], 'Description');
-    $this->assertEqual($data['description']['#text'], $node_type->description);
+    $this->assertEqual($data['description']['#text'], $node_type->getDescription());
     $this->assertEqual($data['description']['#translate'], TRUE);
 
     // Test item types.
@@ -88,8 +88,8 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $language_manager->setConfigOverrideLanguage($language_manager->getLanguage('de'));
     $node_type = entity_load('node_type', $node_type->id());
 
-    $this->assertEqual($node_type->name, $data['name']['#translation']['#text']);
-    $this->assertEqual($node_type->description, $data['description']['#translation']['#text']);
+    $this->assertEqual($node_type->id(), $data['name']['#translation']['#text']);
+    $this->assertEqual($node_type->getDescription(), $data['description']['#translation']['#text']);
   }
 
 }

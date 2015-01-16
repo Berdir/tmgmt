@@ -107,12 +107,12 @@ class HelperTest extends TMGMTKernelTestBase {
         'count' => 4,
       ),
     );
-    $config = \Drupal::config('tmgmt.settings');
+    $config = $this->config('tmgmt.settings');
     foreach ($unit_tests as $id => $test_data) {
       // Set the exclude_tags flag. In case not provided the TRUE is default.
       $test_data += array('exclude_tags' => TRUE);
       if ($config->get('word_count_exclude_tags') != $test_data['exclude_tags']) {
-        $config->set('word_count_exclude_tags', $test_data['exclude_tags']);
+        $config->set('word_count_exclude_tags', $test_data['exclude_tags'])->save();
       }
       $this->assertEqual($real_count = tmgmt_word_count($test_data['text']), $desirable_count = $test_data['count'], t('!test_id: Real count (=!real_count) should be equal to desirable (=!desirable_count)', array('!test_id' => $id, '!real_count' => $real_count, '!desirable_count' => $desirable_count)));
     }

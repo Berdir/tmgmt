@@ -777,7 +777,7 @@ function tmgmt_job_checkout_multiple(array $jobs) {
 
   // Display message for created jobs that can not be checked out.
   if ($denied) {
-    drupal_set_message(format_plural($denied, 'One job has been created.', '@count jobs have been created.'));
+    drupal_set_message(\Drupal::translation()->formatPlural($denied, 'One job has been created.', '@count jobs have been created.'));
   }
 
   return $redirects;
@@ -1118,7 +1118,7 @@ function tmgmt_job_checkout_and_redirect(FormStateInterface $form_state, array $
     $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_redirect_queue_dequeue()));
 
     // Count of the job messages is one less due to the final redirect.
-    drupal_set_message(format_plural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
+    drupal_set_message(\Drupal::translation()->formatPlural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
   }
 }
 
@@ -1212,11 +1212,11 @@ function tmgmt_add_cart_form(&$form, FormStateInterface $form_state, $plugin, $i
     $count = tmgmt_cart_get()->count();
     if (tmgmt_cart_get()->isSourceItemAdded($plugin, $item_type, $item_id)) {
       $form['add_to_cart']['#disabled'] = TRUE;
-      $message = format_plural($count, 'There is @count item in the <a href="@url">translation cart</a> including the current item.',
+      $message = \Drupal::translation()->formatPlural($count, 'There is @count item in the <a href="@url">translation cart</a> including the current item.',
         'There are @count items in the <a href="@url">translation cart</a> including the current item.', array('@url' => Url::fromRoute('tmgmt.cart')->toString()));
     }
     else {
-      $message = format_plural($count, 'There is @count item in the <a href="@url">translation cart</a>.',
+      $message = \Drupal::translation()->formatPlural($count, 'There is @count item in the <a href="@url">translation cart</a>.',
         'There are @count items in the <a href="@url">translation cart</a>.', array('@url' => Url::fromRoute('tmgmt.cart')->toString()));
     }
 
@@ -1258,7 +1258,7 @@ function tmgmt_source_add_to_cart_submit(array $form, FormStateInterface $form_s
     }
   }
 
-  drupal_set_message(format_plural($i, '@count content source was added into the <a href="@url">cart</a>.',
+  drupal_set_message(\Drupal::translation()->formatPlural($i, '@count content source was added into the <a href="@url">cart</a>.',
     '@count content sources were added into the <a href="@url">cart</a>.', array('@url' => Url::fromRoute('tmgmt.cart')->toString())));
 }
 

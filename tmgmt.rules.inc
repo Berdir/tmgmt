@@ -182,7 +182,7 @@ function tmgmt_rules_job_checkout(Job $job) {
     drupal_goto(tmgmt_redirect_queue_dequeue());
 
     // Count of the job messages is one less due to the final redirect.
-    drupal_set_message(format_plural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
+    drupal_set_message(\Drupal::translation()->formatPlural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
   }
 }
 

@@ -68,7 +68,7 @@ entity.tmgmt_job_item.canonical:
   requirements:
     _entity_access: tmgmt_job_item.update
 
-entity.tmgmt_job_item.delete-form:
+entity.tmgmt_job_item.delete_form:
   path: '/admin/tmgmt/items/{tmgmt_job_item}/delete'
   defaults:
     _entity_form: tmgmt_job_item.delete

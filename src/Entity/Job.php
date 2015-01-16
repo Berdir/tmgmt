@@ -42,10 +42,10 @@ use Drupal\user\UserInterface;
  *     "uuid" = "uuid"
  *   },
  *   links = {
- *     "canonical" = "entity.tmgmt_job.canonical",
- *     "abort-form" = "entity.tmgmt_job.abort_form",
- *     "delete-form" = "entity.tmgmt_job.delete_form",
- *     "resubmit-form" = "entity.tmgmt_job.resubmit_form",
+ *     "canonical" = "/admin/tmgmt/jobs/{tmgmt_job}",
+ *     "abort-form" = "/admin/tmgmt/jobs/{tmgmt_job}/abort",
+ *     "delete-form" = "/admin/tmgmt/jobs/{tmgmt_job}/delete",
+ *     "resubmit-form" = "/admin/tmgmt/jobs/{tmgmt_job}/resubmit",
  *   }
  * )
  *
@@ -316,7 +316,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
     if ($count > 0) {
       $source_label = reset($items)->getSourceLabel();
       $t_args = array('!title' => $source_label, '!more' => $count - 1);
-      $label = format_plural($count, '!title', '!title and !more more', $t_args);
+      $label = \Drupal::translation()->formatPlural($count, '!title', '!title and !more more', $t_args);
 
       // If the label length exceeds maximum allowed then cut off exceeding
       // characters from the title and use it to recreate the label.
@@ -324,7 +324,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
         $max_length = strlen($source_label) - (strlen($label) - Job::LABEL_MAX_LENGTH);
         $source_label = Unicode::truncate($source_label, $max_length, TRUE);
         $t_args['!title'] = $source_label;
-        $label = format_plural($count, '!title', '!title and !more more', $t_args);
+        $label = \Drupal::translation()->formatPlural($count, '!title', '!title and !more more', $t_args);
       }
     }
     else {
