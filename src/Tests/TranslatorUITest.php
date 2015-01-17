@@ -34,7 +34,7 @@ class TranslatorUITest extends TMGMTTestBase {
       'description' => 'Test translator description',
       'name' => 'translator_test',
     ), t('Save'));
-    $this->assertText('testTranslator configuration has been created.');
+    $this->assertText('Test translator configuration has been created.');
 
     // Test translator edit page.
     $this->drupalGet('admin/config/regional/tmgmt_translator/manage/translator_test');
@@ -42,14 +42,14 @@ class TranslatorUITest extends TMGMTTestBase {
     $this->assertFieldByName('description', 'Test translator description');
     $this->assertFieldByName('name', 'translator_test');
     $this->drupalPostForm(NULL, array(
-      'label' => 'testTranslatorChanged',
-      'description' => 'testTranslatorDescriptionChanged',
+      'label' => 'Test translator changed',
+      'description' => 'Test translator description changed',
     ), t('Save'));
-    $this->assertText('testTranslatorChanged configuration has been updated.');
+    $this->assertText('Test translator changed configuration has been updated.');
 
     // Test translator overview page.
     $this->drupalGet('admin/config/regional/tmgmt_translator');
-    $this->assertText('testTranslatorChanged');
+    $this->assertText('Test translator changed');
     $this->assertLink(t('Edit'));
     $this->assertLink(t('Delete'));
   }
