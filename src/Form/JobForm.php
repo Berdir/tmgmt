@@ -9,11 +9,13 @@ namespace Drupal\tmgmt\Form;
 
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Views;
 
 /**
@@ -266,6 +268,8 @@ class JobForm extends TmgmtFormBase {
         '#type' => 'fieldset',
         '#title' => t('Configure translator'),
         '#weight' => 20,
+        '#prefix' => '<div id="tmgmt-ui-translator-wrapper">',
+        '#suffix' => '</div>',
       );
 
       // Show a list of translators tagged by availability for the selected source
@@ -532,13 +536,13 @@ class JobForm extends TmgmtFormBase {
   public function ajaxLanguageSelect(array $form, FormStateInterface $form_state) {
     $replace = $form_state->getUserInput()['_triggering_element_name'] == 'source_language' ? 'target_language' : 'source_language';
     $response = new AjaxResponse();
-    $response->addCommand(new ReplaceCommand('#tmgmt-ui-translator-wrapper', drupal_render($form['translator_wrapper'])));
-    $response->addCommand(new ReplaceCommand('#tmgmt-ui-' . str_replace('_', '-', $replace), drupal_render($form['info'][$replace])));
+    $response->addCommand(new ReplaceCommand('#tmgmt-ui-translator-wrapper', $this->renderer->render($form['translator_wrapper'])));
+    $response->addCommand(new ReplaceCommand('#tmgmt-ui-' . str_replace('_', '-', $replace), $this->renderer->render($form['info'][$replace])));
 
     // Replace value of the label field with ajax on language change.
     // @todo This manual overwrite is necessary because somehow an old job entity seems to be used.
     $form['info']['label']['#value'] = $form_state->getValue('label');
-    $response->addCommand(new ReplaceCommand('#tmgmt-ui-label', drupal_render($form['info']['label'])));
+    $response->addCommand(new ReplaceCommand('#tmgmt-ui-label', $this->renderer->render($form['info']['label'])));
     return $response;
   }
 
