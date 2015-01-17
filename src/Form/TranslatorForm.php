@@ -65,18 +65,21 @@ class TranslatorForm extends EntityForm {
     $form = parent::form($form, $form_state);
     $entity = $this->entity;
     // Check if the translator is currently in use.
-    if ($busy = !$entity->isNew() ? tmgmt_translator_busy($entity->name) : FALSE) {
+    if ($busy = !$entity->isNew() ? tmgmt_translator_busy($entity->id()) : FALSE) {
       drupal_set_message(t("This translator is currently in use. It cannot be deleted. The chosen Translation Plugin cannot be changed."), 'warning');
     }
     $available = $this->translatorManager->getLabels();
     // If the translator plugin is not set, pick the first available plugin as the
     // default.
-    $entity->plugin = empty($entity->plugin) ? key($available) : $entity->plugin;
+    $plugin_id = $entity->getPlugin();
+    if (empty($plugin_id)) {
+      $entity->setPluginID(key($available));
+    }
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),
       '#description' => t('The label of the translator.'),
-      '#default_value' => $entity->label,
+      '#default_value' => $entity->label(),
       '#required' => TRUE,
       '#size' => 32,
       '#maxlength' => 64,
@@ -85,9 +88,9 @@ class TranslatorForm extends EntityForm {
       '#type' => 'machine_name',
       '#title' => t('Machine name'),
       '#description' => t('The machine readable name of this translator. It must be unique, and it must contain only alphanumeric characters and underscores. Once created, you will not be able to change this value!'),
-      '#default_value' => $entity->name,
+      '#default_value' => $entity->id(),
       '#machine_name' => array(
-        'exists' => 'tmgmt_translator_load',
+        'exists' => '\Drupal\tmgmt\Entity\Translator::load',
         'source' => array('label'),
       ),
       '#disabled' => !$entity->isNew(),
@@ -98,7 +101,7 @@ class TranslatorForm extends EntityForm {
       '#type' => 'textarea',
       '#title' => t('Description'),
       '#description' => t('The description of the translator.'),
-      '#default_value' => $entity->description,
+      '#default_value' => $entity->getDescription(),
       '#size' => 32,
       '#maxlength' => 255,
     );
@@ -124,14 +127,14 @@ class TranslatorForm extends EntityForm {
       '#suffix' => '</div>',
     );
     // Pull the translator plugin info if any.
-    if ($entity->plugin) {
-      $definition = $this->translatorManager->getDefinition($entity->plugin);
+    if ($entity->getPluginID()) {
+      $definition = $this->translatorManager->getDefinition($entity->getPluginID());
       $form['plugin_wrapper']['plugin'] = array(
         '#type' => 'select',
         '#title' => t('Translator plugin'),
         '#description' => isset($definition['description']) ? Xss::filter($definition['description']) : '',
         '#options' => $available,
-        '#default_value' => $entity->plugin,
+        '#default_value' => $entity->getPluginID(),
         '#required' => TRUE,
         '#disabled' => $busy,
         '#ajax' => array(
@@ -146,7 +149,7 @@ class TranslatorForm extends EntityForm {
         '#open' => TRUE,
       );
       // Add the translator plugin settings form.
-      $plugin_ui = $this->translatorManager->createUIInstance($entity->plugin);
+      $plugin_ui = $this->translatorManager->createUIInstance($entity->getPluginID());
       $form['plugin_wrapper']['settings'] += $plugin_ui->pluginSettingsForm($form['plugin_wrapper']['settings'], $form_state, $entity, $busy);
     }
     // Add a submit button and a cancel link to the form.

@@ -211,6 +211,26 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
+   * Returns the translator plugin ID.
+   *
+   * @return string
+   *   The translator plugin ID used by this translator.
+   */
+  public function getDescription() {
+    return $this->description;
+  }
+
+  /**
+   * Sets the plugin ID.
+   *
+   * @param string $plugin_id
+   *   The plugin ID.
+   */
+  public function setPluginID($plugin_id) {
+    $this->plugin = $plugin_id;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public static function preDelete(EntityStorageInterface $storage, array $entities) {
