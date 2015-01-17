@@ -184,12 +184,12 @@ class JobForm extends TmgmtFormBase {
       );
 
       // Translation jobs.
-      $output = $view->preview($job->isSubmittable() ? 'submitted' : 'checkout', array($job->id()));
+      $output = $view->preview($job->isSubmittable() ? 'checkout' : 'submitted', array($job->id()));
       $form['job_items_wrapper']['items'] = array(
         '#type' => 'markup',
         '#title' => $view->storage->label(),
         '#prefix' => '<div class="' . 'tmgmt-ui-job-items ' . ($job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage') . '">',
-        'view' => ['#markup' => drupal_render($output)],
+        'view' => ['#markup' => $this->renderer->render($output)],
         '#attributes' => array('class' => array('tmgmt-ui-job-items', $job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage')),
         '#suffix' => '</div>',
       );

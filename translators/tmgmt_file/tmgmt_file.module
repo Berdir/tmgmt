@@ -2,6 +2,7 @@
 
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\file\Entity\File;
 use Drupal\tmgmt\Entity\Job;
 
 /**
@@ -120,6 +121,7 @@ function tmgmt_file_tmgmt_job_delete(Job $job) {
   if (!$translator || $translator->getPluginId() != 'file') {
     return;
   }
+
   // Check if there are any files that need to be deleted.
   // @todo There doesn't seem to be an API function for this...
   $args = array(
@@ -130,8 +132,18 @@ function tmgmt_file_tmgmt_job_delete(Job $job) {
   $result = db_query('SELECT fid FROM {file_usage} WHERE module = :module and type = :type and id = :id', $args);
   $fids = $result->fetchCol();
   if (!empty($fids)) {
-    foreach (file_load_multiple($fids) as $file) {
-      \Drupal::service('file.usage')->delete($file, 'tmgmt_file', 'tmgmt_job', $job->id());
+    // Remove file usage record.
+    /** @var \Drupal\file\FileUsage\FileUsageInterface $file_usage */
+    $file_usage = \Drupal::service('file.usage');
+    foreach (File::loadMultiple($fids) as $file) {
+      $file_usage->delete($file, 'tmgmt_file', 'tmgmt_job', $job->id());
+      // If this was the last usage, FileUsageBase marks the file as temporary
+      // for delayed deletion. Because we know it is not needed, delete the file
+      // immediately.
+      $usage = $file_usage->listUsage($file);
+      if (empty($usage)) {
+        $file->delete();
+      }
     }
   }
 }

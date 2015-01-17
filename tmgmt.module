@@ -912,8 +912,8 @@ function tmgmt_translation_review_form_update_state(array $form, FormStateInterf
   $data = array();
   $job_item = $form_state->getFormObject()->getEntity();
 
-  /* \Drupal\tmgmt\Entity\JobItem $job_item */
-  $controller = $job_item->getTranslatorController();
+  /** @var \Drupal\tmgmt\Entity\JobItem $job_item */
+  $controller = $job_item->getTranslatorPlugin();
   $success = TRUE;
   switch ($matches['action']) {
     case 'reviewed':
