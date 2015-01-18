@@ -360,7 +360,7 @@ class FileTranslatorTest extends TMGMTTestBase {
       'settings' => [
         'export_format' => 'xlf',
         'xliff_processing' => TRUE,
-        'scheme' => 'private://',
+        'scheme' => 'private',
       ]
     ]);
 
