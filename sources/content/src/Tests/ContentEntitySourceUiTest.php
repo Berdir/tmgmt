@@ -107,7 +107,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
 
     // Test that the destination query argument does not break the redirect
     // and we are redirected back to the correct page.
-    $this->drupalGet('node/' . $node->id() . '/translations', array('query' => array('destination' => 'node')));
+    $this->drupalGet('node/' . $node->id() . '/translations', array('query' => array('destination' => 'node/' . $node->id())));
 
     // Request a spanish translation.
     $edit = array(
