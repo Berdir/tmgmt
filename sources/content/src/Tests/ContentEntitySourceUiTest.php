@@ -7,8 +7,9 @@
 
 namespace Drupal\tmgmt_content\Tests;
 
+use Drupal\comment\Entity\Comment;
 use Drupal\Core\Url;
-use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\EntityTestBase;
 
@@ -219,67 +220,59 @@ class ContentEntitySourceUiTest extends EntityTestBase {
 
   /**
    * Test translating comments.
-   *
-   * @todo: Disabled pending resolution of http://drupal.org/node/1760270.
    */
-  function dtestCommentTranslateTab() {
+  function testCommentTranslateTab() {
+    // Allow auto-accept.
+    $default_translator = Translator::load('test_translator');
+    $default_translator
+      ->setSetting('auto_accept', TRUE)
+      ->save();
 
-    // Login as admin to be able to submit config page.
-    $this->loginAsAdmin(array('translate any entity', 'create comment translations'));
+    // Add default comment type.
+    \Drupal::service('comment.manager')->addDefaultField('node', 'article');
+
     // Enable comment translation.
-    $edit = array(
-      'entity_translation_entity_types[comment]' => TRUE
-    );
-    $this->drupalPostForm('admin/config/regional/entity_translation', $edit, t('Save configuration'));
+    /** @var \Drupal\content_translation\ContentTranslationManagerInterface $content_translation_manager */
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    $content_translation_manager->setEnabled('comment', 'comment', TRUE);
 
     // Change comment_body field to be translatable.
-    $comment_body = FieldStorageConfig::loadByName('comment', 'comment_body');
-    $comment_body->translatable = TRUE;
-    $comment_body->save();
+    $comment_body = FieldConfig::loadByName('comment', 'comment', 'comment_body');
+    $comment_body->setTranslatable(TRUE)->save();
 
     // Create a user that is allowed to translate comments.
-    $permissions = array(
-      'translate comment entities',
-      'create translation jobs',
-      'submit translation jobs',
-      'accept translation jobs',
+    $permissions = array_merge($this->translator_permissions, array(
+      'translate comment',
       'post comments',
       'skip comment approval',
       'edit own comments',
-      'access comments'
-    );
-    $entity_translation_permissions = entity_translation_permission();
-    // The new translation edit form of entity_translation requires a new
-    // permission that does not yet exist in older versions. Add it
-    // conditionally.
-    if (isset($entity_translation_permissions['edit original values'])) {
-      $permissions[] = 'edit original values';
-    }
+      'access comments',
+    ));
     $this->loginAsTranslator($permissions, TRUE);
 
-    // Create an english source term.
+    // Create an english source article.
     $node = $this->createNode('article', 'en');
 
     // Add a comment.
     $this->drupalGet('node/' . $node->id());
     $edit = array(
-      'subject' => $this->randomMachineName(),
-      'comment_body[en][0][value]' => $this->randomMachineName(),
+      'subject[0][value]' => $this->randomMachineName(),
+      'comment_body[0][value]' => $this->randomMachineName(),
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertText(t('Your comment has been posted.'));
 
     // Go to the translate tab.
-    $this->clickLink('edit');
+    $this->clickLink('Edit');
     $this->assertTrue(preg_match('|comment/(\d+)/edit$|', $this->getUrl(), $matches), 'Comment found');
-    $comment = comment_load($matches[1]);
+    $comment = Comment::load($matches[1]);
     $this->clickLink('Translate');
 
     // Assert some basic strings on that page.
-    $this->assertText(t('Translations of @title', array('@title' => $comment->subject)));
+    $this->assertText(t('Translations of @title', array('@title' => $comment->getSubject())));
     $this->assertText(t('Pending Translations'));
 
-    // Request a translation for german.
+    // Request translations.
     $edit = array(
       'languages[de]' => TRUE,
       'languages[es]' => TRUE,
@@ -290,27 +283,27 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertText(t('2 jobs need to be checked out.'));
 
     // Submit all jobs.
-    $this->assertText($comment->subject);
+    $this->assertText($comment->getSubject());
     $this->drupalPostForm(NULL, array(), t('Submit to translator and continue'));
-    $this->assertText($comment->subject);
+    $this->assertText($comment->getSubject());
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
 
     // Make sure that we're back on the translate tab.
-    $this->assertEqual($comment->url('canonical', array('absolute' => TRUE)) . '/translations', $this->getUrl());
+    $this->assertUrl($comment->url('canonical', array('absolute' => TRUE)) . '/translations');
     $this->assertText(t('Test translation created.'));
     $this->assertNoText(t('The translation of @title to @language is finished and can now be reviewed.', array(
-      '@title' => $comment->subject,
-      '@language' => t('Spanish')
+      '@title' => $comment->getSubject(),
+      '@language' => t('Spanish'),
     )));
-    $this->assertText(t('The translation for @title has been accepted.', array('@title' => $comment->subject)));
+    $this->assertText(t('The translation for @title has been accepted.', array('@title' => $comment->getSubject())));
 
-    // @todo Use links on translate tab.
-    $this->drupalGet('de/comment/' . $comment->cid);
-    $this->assertText('de_' . $comment->comment_body['en'][0]['value']);
-
-    // @todo Use links on translate tab.
-    $this->drupalGet('es/node/' . $comment->cid);
-    $this->assertText('es_' . $comment->comment_body['en'][0]['value']);
+    // The translated content should be in place.
+    $this->clickLink('de_' . $comment->getSubject());
+    $this->assertText('de_' . $comment->get('comment_body')->value);
+    $this->drupalGet('comment/1/translations');
+    $this->clickLink('es_' . $comment->getSubject());
+    $this->drupalGet('es/node/' . $comment->id());
+    $this->assertText('es_' . $comment->get('comment_body')->value);
   }
 
   /**
