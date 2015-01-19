@@ -437,9 +437,10 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalGet('admin/tmgmt');
     $elements = $this->xpath('//table[contains(@class, @view)]//td[contains(., @text)]',
       array('@view' => 'views-table', '@text' => t('N/A')));
-    $status = $elements[0];
-    $this->assertEqual(trim((string)$status), t('N/A'));
-
+    if(isset($elements[0])) {
+      $status = $elements[0];
+      $this->assertEqual(trim((string) $status), t('N/A'));
+    }
   }
 
   /**

@@ -98,6 +98,9 @@ function tmgmt_local_tasks_alter(&$local_tasks) {
       return;
     }
   }
+  // If this point was reached, then no sources are enabled, prevent any error
+  // by removing the sources local task completely.
+  unset($local_tasks['tmgmt.sources_parent']);
 }
 
 /**

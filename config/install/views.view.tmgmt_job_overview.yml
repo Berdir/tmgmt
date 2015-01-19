@@ -2,6 +2,8 @@ uuid: eb6c9264-4314-462e-aca6-2e1b922faef8
 langcode: en
 status: true
 dependencies:
+  config:
+    - system.menu.admin
   module:
     - tmgmt
 id: tmgmt_job_overview
@@ -378,11 +380,13 @@ display:
     display_options:
       path: admin/tmgmt/jobs
       menu:
-        type: 'default tab'
-        title: Jobs
+        type: normal
+        title: Translation
         description: ''
+        parent: system.admin
         weight: 0
         context: '0'
+        menu_name: admin
       tab_options:
         type: normal
         title: Translation
