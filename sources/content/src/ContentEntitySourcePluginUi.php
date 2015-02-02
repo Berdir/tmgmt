@@ -412,7 +412,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     $redirects = tmgmt_job_checkout_multiple($jobs);
     if ($redirects) {
       tmgmt_redirect_queue_set($redirects, Url::fromRoute('<current>')->getInternalPath());
-      $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_redirect_queue_dequeue()));
+      $form_state->setRedirectUrl(Url::fromUri('base:' . tmgmt_redirect_queue_dequeue()));
 
       drupal_set_message(\Drupal::translation()->formatPlural(count($redirects), $this->t('One job needs to be checked out.'), $this->t('@count jobs need to be checked out.')));
     }

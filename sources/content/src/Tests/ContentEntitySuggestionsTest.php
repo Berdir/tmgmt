@@ -33,7 +33,6 @@ class ContentEntitySuggestionsTest extends TMGMTKernelTestBase {
   public function setUp() {
     parent::setUp();
     $this->installEntitySchema('node');
-    $this->installSchema('content_translation', ['content_translation']);
     $this->installConfig(['node']);
   }
 

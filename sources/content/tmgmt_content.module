@@ -104,9 +104,9 @@ function tmgmt_content_get_translatable_entities($entity_type_id, $property_cond
   // Searching for sources with missing translation.
   if (!empty($property_conditions['target_status']) && !empty($property_conditions['target_language']) && in_array($property_conditions['target_language'], $languages)) {
 
-    $translation_table_alias = db_escape_field('et_' . $property_conditions['target_language']);
-    $query->leftJoin('content_translation', $translation_table_alias, "%alias.entity_type = :entity_type AND %alias.entity_id = e.$id_key AND %alias.langcode = :language",
-        array(':entity_type' => $entity_type_id, ':language' => $property_conditions['target_language']));
+    $translation_table_alias = db_escape_field('translation_' . $property_conditions['target_language']);
+    $query->leftJoin($data_table, $translation_table_alias, "%alias.$id_key= e.$id_key AND %alias.langcode = :language",
+        array(':language' => $property_conditions['target_language']));
 
     // Exclude entities with having source language same as the target language
     // we search for.
@@ -115,11 +115,11 @@ function tmgmt_content_get_translatable_entities($entity_type_id, $property_cond
     if ($property_conditions['target_status'] == 'untranslated_or_outdated') {
       $or = db_or();
       $or->isNull("$translation_table_alias.langcode");
-      $or->condition("$translation_table_alias.outdated", 1);
+      $or->condition("$translation_table_alias.content_translation_outdated", 1);
       $query->condition($or);
     }
     elseif ($property_conditions['target_status'] == 'outdated') {
-      $query->condition("$translation_table_alias.outdated", 1);
+      $query->condition("$translation_table_alias.content_translation_outdated", 1);
     }
     elseif ($property_conditions['target_status'] == 'untranslated') {
       $query->isNull("$translation_table_alias.langcode");

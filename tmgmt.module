@@ -937,11 +937,11 @@ function tmgmt_translation_review_form_update_state(array $form, FormStateInterf
           $destination = '';
         }
         tmgmt_redirect_queue_set(array(Url::fromRoute('<current>')->getInternalPath()), $destination);
-        $form_state->setRedirectUrl(Url::fromUri('base://' . Url::fromRoute('<current>')->getInternalPath() . '/reject/' . $matches['key']));
+        $form_state->setRedirectUrl(Url::fromUri('base:' . Url::fromRoute('<current>')->getInternalPath() . '/reject/' . $matches['key']));
         $success = FALSE;
       }
       else {
-        $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_redirect_queue_dequeue(), array('query' => array('destination' => tmgmt_redirect_queue_destination()))));
+        $form_state->setRedirectUrl(Url::fromUri('base:' . tmgmt_redirect_queue_dequeue(), array('query' => array('destination' => tmgmt_redirect_queue_destination()))));
         if ($controller instanceof TranslatorRejectDataInterface) {
           $success = $job_item->getTranslatorController()->rejectDataItem($job_item, tmgmt_ensure_keys_array($matches['key']), $values);
         }
@@ -1118,7 +1118,7 @@ function tmgmt_job_checkout_and_redirect(FormStateInterface $form_state, array $
     else {
       tmgmt_redirect_queue_set($redirects, Url::fromRoute('<current>')->getInternalPath());
     }
-    $form_state->setRedirectUrl(Url::fromUri('base://' . tmgmt_redirect_queue_dequeue()));
+    $form_state->setRedirectUrl(Url::fromUri('base:' . tmgmt_redirect_queue_dequeue()));
 
     // Count of the job messages is one less due to the final redirect.
     drupal_set_message(\Drupal::translation()->formatPlural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
@@ -1142,7 +1142,7 @@ function tmgmt_help($path, $arg) {
  */
 function tmgmt_submit_redirect(array $form, FormStateInterface $form_state){
   if ($form_state->getTriggeringElement()['#redirect']) {
-    $form_state->setRedirectUrl(Url::fromUri('base://' . $form_state->getTriggeringElement()['#redirect']));
+    $form_state->setRedirectUrl(Url::fromUri('base:' . $form_state->getTriggeringElement()['#redirect']));
   }
 }
 

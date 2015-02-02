@@ -51,6 +51,8 @@ abstract class EntityTestBase extends TMGMTTestBase {
     $content_translation_manager = \Drupal::service('content_translation.manager');
     $content_translation_manager->setEnabled('node', $machine_name, TRUE);
 
+    $this->applySchemaUpdates();
+
     if ($attach_fields) {
       $this->attachFields('node', $machine_name, $entity_translation);
     }
@@ -218,5 +220,15 @@ abstract class EntityTestBase extends TMGMTTestBase {
 
     $term->save();
     return $term;
+  }
+
+  /**
+   * Resets caches and applies schema updates.
+   */
+  protected function applySchemaUpdates() {
+    drupal_static_reset();
+    \Drupal::entityManager()->clearCachedDefinitions();
+    \Drupal::service('router.builder')->rebuild();
+    \Drupal::service('entity.definition_update_manager')->applyUpdates();
   }
 }

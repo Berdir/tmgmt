@@ -137,11 +137,8 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertText($node_not_translated->getTitle());
     // Update the the outdated flag of the translated node and test if it is
     // listed among sources with missing translation.
-    db_update('content_translation')
-      ->fields(array('outdated' => 1))
-      ->condition('entity_type', 'node')
-      ->condition('entity_id', $node->id())
-      ->execute();
+    $node->content_translation_outdated->value = 1;
+    $node->save();
     $this->drupalPostForm(NULL, array(
       'search[target_language]' => 'de',
       'search[target_status]' => 'outdated',
@@ -235,6 +232,8 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     /** @var \Drupal\content_translation\ContentTranslationManagerInterface $content_translation_manager */
     $content_translation_manager = \Drupal::service('content_translation.manager');
     $content_translation_manager->setEnabled('comment', 'comment', TRUE);
+
+    $this->applySchemaUpdates();
 
     // Change comment_body field to be translatable.
     $comment_body = FieldConfig::loadByName('comment', 'comment', 'comment_body');
