@@ -46,6 +46,10 @@ class LocalTasksTests extends TMGMTTestBase {
     $content_translation_manager->setEnabled('node', 'article', TRUE);
     $content_translation_manager->setEnabled('user', 'user', TRUE);
 
+    drupal_static_reset();
+    \Drupal::entityManager()->clearCachedDefinitions();
+    \Drupal::service('router.builder')->rebuild();
+    \Drupal::service('entity.definition_update_manager')->applyUpdates();
 
     // Check the translator menu link.
     $this->drupalGet('admin');
