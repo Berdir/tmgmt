@@ -326,7 +326,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       // Other commands must be from type "insert".
       else if ($command['command'] == 'insert') {
         // This should be the tableselect javascript file for the header.
-        if (($command['method'] == 'prepend') && ($command['selector'] == 'head')) {
+        if (($command['method'] == 'append') && ($command['selector'] == 'body')) {
           $this->assertTrue(substr_count($command['data'], 'misc/tableselect.js'), 'Javascript for Tableselect found.');
         }
         // Check for the main content, the tableselect with the suggestions.

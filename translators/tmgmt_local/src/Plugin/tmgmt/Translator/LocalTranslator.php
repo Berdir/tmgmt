@@ -91,7 +91,7 @@ class LocalTranslator extends TranslatorPluginBase {
 
     if (!in_array(DRUPAL_AUTHENTICATED_RID, array_keys($roles))) {
       $query->join('users_roles', 'ur', 'ur.uid = u.uid AND ur.rid');
-      $or_conditions = db_or()->condition('ur.rid', array_keys($roles))
+      $or_conditions = db_or()->condition('ur.rid', array_keys($roles), 'IN')
         ->condition('u.uid', 1);
       $query->condition($or_conditions);
     }

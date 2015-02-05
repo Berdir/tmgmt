@@ -98,13 +98,19 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $entity_test = entity_create($this->entity_type, $values);
     $translation = $entity_test->getTranslation('en');
     $translation->name->value = $this->randomMachineName();
-    $translation->field_test_text->value = $this->randomMachineName();
-    $translation->field_test_text->format = 'text_plain';
-    $translation->field_test_text[1]->value = $this->randomMachineName();
-    $translation->field_test_text[1]->format = 'text_plain';
-    $translation->image_test->target_id = $this->image->id();
-    $translation->image_test->alt = $alt = $this->randomMachineName();
-    $translation->image_test->title = $title = $this->randomMachineName();
+    $values = array(
+      'value' => $this->randomMachineName(),
+      'format' => 'text_plain'
+    );
+    $translation->field_test_text->appendItem($values);
+    $translation->field_test_text->appendItem($values);
+
+    $values = array(
+      'target_id' => $this->image->id(),
+      'alt' => $this->randomMachineName(),
+      'title' => $this->randomMachineName(),
+    );
+    $translation->image_test->appendItem($values);
     $entity_test->save();
 
     $job = tmgmt_job_create('en', 'de');
@@ -191,13 +197,15 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
       'type' => $type->id(),
       'langcode' => 'en',
     ));
-    $node->title->value = $this->randomMachineName();
-    $node->body->value = $this->randomMachineName();
-    $node->body->summary = $this->randomMachineName();
-    $node->body->format = 'text_plain';
-    $node->body[1]->value = $this->randomMachineName();
-    $node->body[1]->summary = $this->randomMachineName();
-    $node->body[1]->format = 'text_plain';
+
+    $node->title->appendItem(array('value' => $this->randomMachineName()));
+    $value = array(
+      'value' => $this->randomMachineName(),
+      'summary' => $this->randomMachineName(),
+      'format' => 'text_plain'
+    );
+    $node->body->appendItem($value);
+    $node->body->appendItem($value);
     $node->save();
 
     $job = tmgmt_job_create('en', 'de');

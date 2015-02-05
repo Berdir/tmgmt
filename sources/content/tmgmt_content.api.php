@@ -19,7 +19,7 @@ use Drupal\Core\Entity\Query\QueryInterface;
  * @see TMGMTEntityDefaultSourceUIController
  */
 function hook_tmgmt_content_list_query_alter(QueryInterface $query) {
-  $query->condition('type', array('article', 'page'));
+  $query->condition('type', array('article', 'page'), 'IN');
 }
 
 /**

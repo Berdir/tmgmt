@@ -256,8 +256,6 @@ display:
           not: false
           plugin_id: numeric
       display_extenders: {  }
-      field_langcode: '***LANGUAGE_language_content***'
-      field_langcode_add_to_query: null
   embed:
     display_plugin: embed
     id: embed
@@ -265,5 +263,3 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      field_langcode: '***LANGUAGE_language_content***'
-      field_langcode_add_to_query: null

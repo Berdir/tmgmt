@@ -443,7 +443,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   public static function postDelete(EntityStorageInterface $storage_controller, array $entities) {
     parent::postDelete($storage_controller, $entities);
     $ids = \Drupal::entityQuery('tmgmt_local_task_item')
-      ->condition('tltid', array_keys($entities))
+      ->condition('tltid', array_keys($entities), 'IN')
       ->execute();
     if (!empty($ids)) {
       entity_delete_multiple('tmgmt_local_task_item', $ids);

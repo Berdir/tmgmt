@@ -148,7 +148,7 @@ function tmgmt_job_item_load_latest($plugin, $item_type, $item_id, $source_langu
   $query->innerJoin('tmgmt_job', 'tj', 'tj.tjid = tji.tjid');
   $result = $query->condition('tj.source_language', $source_language)
     // Only query for jobs that are currently active.
-    ->condition('tj.state', array(Job::STATE_UNPROCESSED, Job::STATE_ACTIVE))
+    ->condition('tj.state', array(Job::STATE_UNPROCESSED, Job::STATE_ACTIVE), 'IN')
     // And only query for job items that are not yet finished.
     ->condition('tji.state', JobItem::STATE_ACCEPTED, '<>')
     ->condition('tji.plugin', $plugin)
@@ -316,7 +316,7 @@ function tmgmt_job_statistics_load(array $tjids) {
     $query->addExpression('SUM(count_pending)', 'count_pending');
     $query->addExpression('SUM(count_translated)', 'count_translated');
     $result = $query->groupBy('tjid')
-      ->condition('tjid', $tjids_to_load)
+      ->condition('tjid', (array) $tjids_to_load, 'IN')
       ->execute();
 
     foreach ($result as $row) {

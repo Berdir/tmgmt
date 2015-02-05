@@ -281,21 +281,21 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
     // Since we are deleting one or multiple jobs here we also need to delete
     // the attached job items and messages.
     $tjiids = \Drupal::entityQuery('tmgmt_job_item')
-      ->condition('tjid', array_keys($entities))
+      ->condition('tjid', array_keys($entities), 'IN')
       ->execute();
     if (!empty($tjiids)) {
       entity_delete_multiple('tmgmt_job_item', $tjiids);
     }
 
     $mids = \Drupal::entityQuery('tmgmt_message')
-      ->condition('tjid', array_keys($entities))
+      ->condition('tjid', array_keys($entities), 'IN')
       ->execute();
     if (!empty($mids)) {
       entity_delete_multiple('tmgmt_message', $mids);
     }
 
     $trids = \Drupal::entityQuery('tmgmt_remote')
-      ->condition('tjid', array_keys($entities))
+      ->condition('tjid', array_keys($entities), 'IN')
       ->execute();
     if (!empty($trids)) {
       entity_delete_multiple('tmgmt_remote', $trids);

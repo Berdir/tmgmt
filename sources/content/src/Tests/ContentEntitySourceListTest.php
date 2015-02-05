@@ -265,7 +265,10 @@ class ContentEntitySourceListTest extends EntityTestBase {
     \Drupal::service('comment.manager')->addDefaultField('node', 'article');
     $content_translation_manager = \Drupal::service('content_translation.manager');
     $content_translation_manager->setEnabled('comment', 'comment', TRUE);
+    drupal_static_reset();
     \Drupal::entityManager()->clearCachedDefinitions();
+    \Drupal::service('router.builder')->rebuild();
+    \Drupal::service('entity.definition_update_manager')->applyUpdates();
     $values = array(
       'entity_type' => 'node',
       'entity_id' => $this->nodes['article']['en'][0]->id(),

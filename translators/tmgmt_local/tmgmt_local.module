@@ -388,7 +388,7 @@ function tmgmt_local_task_statistics_load(array $tltids) {
     $query->addExpression('SUM(tlti.count_translated)', 'count_translated');
     $query->addExpression('SUM(tlti.count_completed)', 'count_completed');
     $result = $query->groupBy('tlt.tltid')
-      ->condition('tlt.tltid', $tltids_to_load)
+      ->condition('tlt.tltid', (array) $tltids_to_load, 'IN')
       ->execute();
 
     foreach ($result as $row) {
@@ -461,7 +461,7 @@ function tmgmt_local_task_item_statuses() {
  */
 function tmgmt_local_tasks_languages($tasks) {
   $query = db_select('tmgmt_local_task', 't');
-  $query->condition('tltid', $tasks);
+  $query->condition('tltid', $tasks, 'IN');
   $query->join('tmgmt_job', 'j', 't.tjid = j.tjid');
   $query->fields('j', array('source_language', 'target_language'));
   $query->groupBy('target_language');
@@ -755,7 +755,7 @@ function tmgmt_local_abilities($source_language = NULL, $target_language = NULL,
   $query->fields('u', array('uid', 'name', 'mail'));
 
   if (!empty($uids)) {
-    $query->condition('u.uid', $uids);
+    $query->condition('u.uid', (array) $uids, 'IN');
   }
 
   // If the authenticated user role has the required permission we do not have

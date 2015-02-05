@@ -1,4 +1,3 @@
-uuid: eb6c9264-4314-462e-aca6-2e1b922faef8
 langcode: en
 status: true
 dependencies:
@@ -370,8 +369,6 @@ display:
         groups:
           1: AND
       display_extenders: {  }
-      field_langcode: '***LANGUAGE_language_content***'
-      field_langcode_add_to_query: null
   page_1:
     display_plugin: page
     id: page_1
@@ -393,5 +390,3 @@ display:
         description: ''
         weight: 0
       display_extenders: {  }
-      field_langcode: '***LANGUAGE_language_content***'
-      field_langcode_add_to_query: null

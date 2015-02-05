@@ -169,7 +169,7 @@ function tmgmt_content_get_translatable_entities($entity_type_id, $property_cond
     }
     // If not, query db only for translatable node types.
     else {
-      $query->condition('e.' . $bundle_key, $bundles);
+      $query->condition('e.' . $bundle_key, $bundles, 'IN');
     }
   }
 

@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_content\Tests;
 use Drupal\comment\Entity\Comment;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\node\Entity\Node;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\EntityTestBase;
 
@@ -137,7 +138,9 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertText($node_not_translated->getTitle());
     // Update the the outdated flag of the translated node and test if it is
     // listed among sources with missing translation.
-    $node->content_translation_outdated->value = 1;
+    \Drupal::entityManager()->getStorage('node')->resetCache();
+    $node = Node::load($node->id());
+    $node->getTranslation('de')->content_translation_outdated->value = 1;
     $node->save();
     $this->drupalPostForm(NULL, array(
       'search[target_language]' => 'de',
@@ -232,7 +235,10 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     /** @var \Drupal\content_translation\ContentTranslationManagerInterface $content_translation_manager */
     $content_translation_manager = \Drupal::service('content_translation.manager');
     $content_translation_manager->setEnabled('comment', 'comment', TRUE);
-
+    drupal_static_reset();
+    \Drupal::entityManager()->clearCachedDefinitions();
+    \Drupal::service('router.builder')->rebuild();
+    \Drupal::service('entity.definition_update_manager')->applyUpdates();
     $this->applySchemaUpdates();
 
     // Change comment_body field to be translatable.

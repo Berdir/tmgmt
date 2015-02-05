@@ -225,14 +225,14 @@ class JobItem extends ContentEntityBase {
     // Since we are deleting one or multiple job items here we also need to
     // delete the attached messages.
     $mids = \Drupal::entityQuery('tmgmt_message')
-      ->condition('tjiid', array_keys($entities))
+      ->condition('tjiid', array_keys($entities), 'IN')
       ->execute();
     if (!empty($mids)) {
       entity_delete_multiple('tmgmt_message', $mids);
     }
 
     $trids = \Drupal::entityQuery('tmgmt_remote')
-      ->condition('tjiid', array_keys($entities))
+      ->condition('tjiid', array_keys($entities), 'IN')
       ->execute();
     if (!empty($trids)) {
       entity_delete_multiple('tmgmt_remote', $trids);
