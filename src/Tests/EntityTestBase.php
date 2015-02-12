@@ -7,6 +7,8 @@
 
 namespace Drupal\tmgmt\Tests;
 
+use Drupal\comment\CommentTranslationHandler;
+use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -21,6 +23,8 @@ use Drupal\taxonomy\VocabularyInterface;
  * tests in which you need Drupal entities and/or fields.
  */
 abstract class EntityTestBase extends TMGMTTestBase {
+
+  use CommentTestTrait;
 
   public $field_names = array();
 
@@ -168,7 +172,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
     foreach ($this->field_names['node'][$bundle] as $field_name) {
       // @todo: Why are some missing?
       if ($field_storage_config = FieldStorageConfig::loadByName('node', $field_name)) {
-        $cardinality = $field_storage_config->cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_storage_config->cardinality;
+        $cardinality = $field_storage_config->getCardinality() == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED ? 1 : $field_storage_config->getCardinality();
 
         // Create two deltas for each field.
         for ($delta = 0; $delta <= $cardinality; $delta++) {

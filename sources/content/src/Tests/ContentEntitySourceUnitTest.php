@@ -54,7 +54,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     // Make the test field translatable.
     $field_storage = FieldStorageConfig::loadByName('entity_test_mul', 'field_test_text');
-    $field_storage->cardinality = 2;
+    $field_storage->setCardinality(2);
     $field_storage->save();
     $field = FieldConfig::loadByName('entity_test_mul', 'entity_test_mul', 'field_test_text');
     $field->setTranslatable(TRUE);
@@ -187,8 +187,8 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $account = $this->createUser();
     $type = $this->drupalCreateContentType();
     $field = FieldStorageConfig::loadByName('node', 'body');
-    $field->translatable = TRUE;
-    $field->cardinality = 2;
+    $field->setTranslatable(TRUE);
+    $field->setCardinality(2);
     $field->save();
 
 

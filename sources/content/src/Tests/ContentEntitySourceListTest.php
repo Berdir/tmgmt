@@ -262,7 +262,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $this->assert(count($search_result_rows) == 1, 'The search result must return only one row.');
 
     // To test if other entity types work go for simple comment search.
-    \Drupal::service('comment.manager')->addDefaultField('node', 'article');
+    $this->addDefaultCommentField('node', 'article');
     $content_translation_manager = \Drupal::service('content_translation.manager');
     $content_translation_manager->setEnabled('comment', 'comment', TRUE);
     drupal_static_reset();

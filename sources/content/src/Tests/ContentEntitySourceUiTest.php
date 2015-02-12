@@ -229,7 +229,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
       ->save();
 
     // Add default comment type.
-    \Drupal::service('comment.manager')->addDefaultField('node', 'article');
+    $this->addDefaultCommentField('node', 'article');
 
     // Enable comment translation.
     /** @var \Drupal\content_translation\ContentTranslationManagerInterface $content_translation_manager */
