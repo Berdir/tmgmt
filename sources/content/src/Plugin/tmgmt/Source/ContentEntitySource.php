@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_content\Plugin\tmgmt\Source;
 
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\TypedData\OptionsProviderInterface;
 use Drupal\Core\TypedData\Type\StringInterface;
@@ -57,8 +58,11 @@ class ContentEntitySource extends SourcePluginBase {
       throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), $job_item->getItemId())));
     }
     $field_definitions = $entity->getFieldDefinitions();
-    $translatable_fields = array_filter($field_definitions, function ($field_definition) {
-      return $field_definition->isTranslatable();
+    // @todo Expand this list or find a better solution to exclude fields like
+    //   content_translation_source.
+    $exclude_field_types = ['language'];
+    $translatable_fields = array_filter($field_definitions, function (FieldDefinitionInterface $field_definition) use ($exclude_field_types) {
+      return $field_definition->isTranslatable() && !in_array($field_definition->getType(), $exclude_field_types);
     });
 
     $data = array();
