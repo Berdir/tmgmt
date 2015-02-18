@@ -94,6 +94,7 @@ function tmgmt_content_get_translatable_entities($entity_type_id, $property_cond
 
   $id_key = $entity_type->getKey('id');
   $query = db_select($entity_type->getBaseTable(), 'e');
+  $query->addTag('tmgmt_entity_get_translatable_entities');
   $query->addField('e', $id_key);
 
   $langcode_table_alias = 'e';
