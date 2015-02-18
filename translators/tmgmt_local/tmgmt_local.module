@@ -761,7 +761,7 @@ function tmgmt_local_abilities($source_language = NULL, $target_language = NULL,
   // If the authenticated user role has the required permission we do not have
   // to do the role check.
   if (!in_array('authenticated user', $roles)) {
-    $query->leftJoin('user__roles', 'ur', "ur.entity_id = u.uid AND ur.roles_target_id IN (:roles)", array(':roles' => array_keys($roles)));
+    $query->leftJoin('user__roles', 'ur', "ur.entity_id = u.uid AND ur.roles_target_id IN (:roles[])", array(':roles[]' => array_keys($roles)));
   }
 
   // Add a tag so other modules can alter this query at will.

@@ -355,17 +355,29 @@ class JobItemForm extends TmgmtFormBase {
             '#items' => $revisions,
           );
         }
+
+        // Manage the height of the texteareas, depending on the lenght of the
+        // description. The minimum number of rows is 3 and the maximum is 15.
+        $rows = ceil(strlen($data[$key]['#text']) / 100);
+        if ($rows < 3) {
+          $rows = 3;
+        } elseif ($rows > 15) {
+          $rows = 15;
+        }
         $form[$target_key]['translation'] = array(
           '#type' => 'textarea',
           '#default_value' => isset($data[$key]['#translation']['#text']) ? $data[$key]['#translation']['#text'] : NULL,
           '#title' => t('Translation'),
           '#disabled' => $job_item->isAccepted(),
+          '#rows' => $rows,
         );
+
         $form[$target_key]['source'] = array(
           '#type' => 'textarea',
           '#default_value' => $data[$key]['#text'],
           '#title' => t('Source'),
           '#disabled' => TRUE,
+          '#rows' => $rows,
         );
 
         // Give the translator ui controller a chance to affect the data item element.

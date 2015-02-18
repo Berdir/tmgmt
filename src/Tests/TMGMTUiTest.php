@@ -297,6 +297,43 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalGet('admin/tmgmt/items/' . $item->id());
     // Check if translation has been saved.
     $this->assertFieldByName('dummy|deep_nesting[translation]', $data[$key]['#text'] . 'translated');
+
+    // Tests for the minimum height of the textareas.
+    $rows = $this->xpath('//textarea[@name="dummy|deep_nesting[source]"]');
+    $this->assertEqual((string) $rows[0]['rows'], 3);
+
+    $rows2 = $this->xpath('//textarea[@name="dummy|deep_nesting[translation]"]');
+    $this->assertEqual((string) $rows2[0]['rows'], 3);
+
+    // Test for the dynamical height of the source textarea.
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'dummy' => array(
+        'deep_nesting' => array(
+          '#text' => str_repeat('Text for job item', 20),
+          '#label' => 'Label',
+        ),
+      ),
+    ));
+    $item2 = $job->addItem('test_source', 'test', 2);
+    $this->drupalGet('admin/tmgmt/items/' . $item2->id());
+
+    $rows3 = $this->xpath('//textarea[@name="dummy|deep_nesting[source]"]');
+    $this->assertEqual((string) $rows3[0]['rows'], 4);
+
+    // Test for the maximum height of the source textarea.
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'dummy' => array(
+        'deep_nesting' => array(
+          '#text' => str_repeat('Text for job item', 100),
+          '#label' => 'Label',
+        ),
+      ),
+    ));
+    $item3 = $job->addItem('test_source', 'test', 3);
+    $this->drupalGet('admin/tmgmt/items/' . $item3->id());
+
+    $rows4 = $this->xpath('//textarea[@name="dummy|deep_nesting[source]"]');
+    $this->assertEqual((string) $rows4[0]['rows'], 15);
   }
 
   /**
