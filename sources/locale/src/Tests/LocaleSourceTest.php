@@ -197,10 +197,11 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
    *   The expected translation.
    */
   public function assertTranslation($lid, $target_langcode, $expected_translation) {
-    $actual_translation = db_query('SELECT translation FROM {locales_target} WHERE lid = :lid AND language = :language', array(
+    $actual_translation = db_query('SELECT * FROM {locales_target} WHERE lid = :lid AND language = :language', array(
       ':lid' => $lid,
       ':language' => $target_langcode
-    ))->fetchField();
-    $this->assertEqual($actual_translation, $expected_translation);
+    ))->fetch();
+    $this->assertEqual($actual_translation->translation, $expected_translation);
+    $this->assertEqual($actual_translation->customized, LOCALE_CUSTOMIZED);
   }
 }

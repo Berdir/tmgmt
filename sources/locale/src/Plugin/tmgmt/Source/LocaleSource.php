@@ -65,6 +65,7 @@ class LocaleSource extends SourcePluginBase {
         'lid' => $lid,
         'language' => $target_language,
         'translation' => $translation,
+        'customized' => LOCALE_CUSTOMIZED,
       );
       db_insert('locales_target')
         ->fields($fields)
@@ -73,6 +74,7 @@ class LocaleSource extends SourcePluginBase {
     else {
       $fields = array(
         'translation' => $translation,
+        'customized' => LOCALE_CUSTOMIZED,
       );
       db_update('locales_target')
         ->fields($fields)
