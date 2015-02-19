@@ -107,7 +107,7 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
    * {@inheritdoc}
    */
   public function getSupportedTargetLanguages(Translator $translator, $source_language) {
-    $languages = array('en', 'de', 'es', 'it', 'zh-hans');
+    $languages = array('en', 'de', 'es', 'it', 'zh-hans', 'gsw-berne');
     $languages = array_combine($languages, $languages);
     unset($languages[$source_language]);
     return $languages;
