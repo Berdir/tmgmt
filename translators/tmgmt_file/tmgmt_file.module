@@ -157,7 +157,7 @@ function tmgmt_file_file_download($uri) {
     ->condition('uri', $uri)
     ->execute();
   if ($fids) {
-    $files = file_load_multiple($fids);
+    $files = \Drupal\file\Entity\File::loadMultiple($fids);
     foreach ($files as $item) {
       // Since some database servers sometimes use a case-insensitive comparison
       // by default, double check that the filename is an exact match.

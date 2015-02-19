@@ -15,6 +15,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
+use \Drupal\Core\Render\Element;
 
 /**
  * @addtogroup tmgmt_job
@@ -110,7 +111,7 @@ function tmgmt_local_tasks_alter(&$local_tasks) {
  *   An array of languages in ISO format.
  */
 function tmgmt_available_languages($exclude = array()) {
-  $languages = language_list();
+  $languages = \Drupal::languageManager()->getLanguages();
   // Remove the language in $exclude from the list of available languages and
   // then apply a filter that only leaves the supported target languages on
   // the list.
@@ -539,7 +540,7 @@ function tmgmt_flatten_data($data, $prefix = NULL, $label = array()) {
   }
   else {
     $prefix = isset($prefix) ? $prefix . TMGMT_ARRAY_DELIMITER : '';
-    foreach (element_children($data) as $key) {
+    foreach (Element::children($data) as $key) {
       $flattened_data += tmgmt_flatten_data($data[$key], $prefix . $key, $label);
     }
   }
@@ -1131,7 +1132,7 @@ function tmgmt_job_checkout_and_redirect(FormStateInterface $form_state, array $
 function tmgmt_help($path, $arg) {
   $output = '';
   if (strpos($path, 'admin/tmgmt/sources') !== FALSE) {
-    $output = drupal_render(tmgmt_color_legend());
+    $output = \Drupal::service('renderer')->render(tmgmt_color_legend());
   }
 
   return $output;

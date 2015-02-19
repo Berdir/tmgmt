@@ -13,6 +13,7 @@ use Drupal\tmgmt\SourceManager;
 use Drupal\tmgmt\TranslatorManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 
 /**
  * Form controller for the translator edit forms.
@@ -118,7 +119,7 @@ class TranslatorForm extends EntityForm {
       '#default_value' => $entity->getSetting('auto_accept'),
       '#weight' => -1,
     );
-    if (!element_children($form['settings'])) {
+    if (!Element::children($form['settings'])) {
       unset($form['settings']);
     }
     $form['plugin_wrapper'] = array(

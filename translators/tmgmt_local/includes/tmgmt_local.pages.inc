@@ -11,6 +11,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt_local\Entity\LocalTask;
 use Drupal\tmgmt_local\Entity\LocalTaskItem;
+use Drupal\Core\Render\Element;
+use Drupal\user\Entity\User;
 
 /**
  * Simple page callback for viewing a task.
@@ -163,7 +165,7 @@ function tmgmt_local_translation_form($form, FormStateInterface $form_state, TMG
   // of the foreach loop.
   $zebra = 'even';
   // Reverse the order to get the correct order.
-  foreach (array_reverse(element_children($data)) as $key) {
+  foreach (array_reverse(Element::children($data)) as $key) {
     $flattened = tmgmt_flatten_data($data[$key], $key);
     $form['translation'][$key] = tmgmt_local_translation_form_element($flattened, $task_item, $zebra);
   }
@@ -285,7 +287,7 @@ function tmgmt_local_translation_form_element($data, LocalTaskItem $item, &$zebr
 
   $job = $item->getJobItem()->getJob();
 
-  foreach (element_children($data) as $key) {
+  foreach (Element::children($data) as $key) {
     if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
       // The char sequence '][' confuses the form API so we need to replace it.
       $target_key = str_replace('][', '|', $key);
@@ -388,7 +390,7 @@ function tmgmt_local_translation_form_update_state_ajax($form, FormStateInterfac
   $key = array_slice($form_state['triggering_element']['#array_parents'], 0, 3);
   $commands = array();
   $render_data = NestedArray::getValue($form, $key);
-  $commands[] = ajax_command_replace(NULL, drupal_render($render_data));
+  $commands[] = ajax_command_replace(NULL, \Drupal::service('renderer')->render($render_data));
   tmgmt_write_request_messages($form_state['job_item']->getJob());
   $commands[] = ajax_command_html('#tmgmt-status-messages-' . strtolower($render_data['#parent_label'][0]), theme('status_messages'));
   return array('#type' => 'ajax', '#commands' => $commands);
@@ -435,7 +437,7 @@ function tmgmt_local_translation_assign_form($form, FormStateInterface $form_sta
  * Submit handler for form for assigning multiple tasks to translator.
  */
 function tmgmt_local_translation_assign_form_submit($form, FormStateInterface $form_state) {
-  $translator = user_load($form_state['values']['tuid']);
+  $translator = User::load($form_state['values']['tuid']);
 
   $how_many = 0;
   foreach ($form_state['tasks'] as $task_id) {
@@ -489,7 +491,7 @@ function tmgmt_local_translation_reassign_form($form, FormStateInterface $form_s
 function tmgmt_local_translation_reassign_form_submit($form, FormStateInterface $form_state) {
 
   if (!empty($form_state['values']['tuid'])) {
-    $translator = user_load($form_state['values']['tuid']);
+    $translator = User::load($form_state['values']['tuid']);
   }
   else {
     $translator = (object) array('uid' => 0, 'name' => t('none'));

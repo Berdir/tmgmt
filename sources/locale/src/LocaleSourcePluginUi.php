@@ -184,7 +184,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
   public function overviewSearchFormPart(array $form, FormStateInterface $form_state, $type) {
 
     $options = array();
-    foreach (language_list() as $langcode => $language) {
+    foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
       $options[$langcode] = $language->getName();
     }
 
@@ -263,13 +263,13 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
     );
 
 
-    foreach (language_list() as $langcode => $language) {
+    foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
       $array = array(
         '#theme' => 'tmgmt_translation_language_status_single',
         '#translation_status' => $data['translation_statuses'][$langcode],
         '#job_item' => isset($data['current_job_items'][$langcode]) ? $data['current_job_items'][$langcode] : NULL,
       );
-      $row['langcode-' . $langcode] = drupal_render($array);
+      $row['langcode-' . $langcode] = \Drupal::service('renderer')->render($array);
     }
 
     return $row;

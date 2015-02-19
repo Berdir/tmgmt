@@ -15,6 +15,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
+use Drupal\user\Entity\User;
 
 /**
  * Entity class for the local task entity.
@@ -163,10 +164,10 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
     }
     else {
       if (empty($this->title)) {
-        return t('Task for @job assigned to @translator', array('@job' => $this->getJob()->label(), '@translator' => user_load($this->tuid->getUsername())));
+        return t('Task for @job assigned to @translator', array('@job' => $this->getJob()->label(), '@translator' => User::load($this->tuid->getUsername())));
       }
       else {
-        return t('@title assigned to @translator', array('@title' => $this->title, '@translator' => user_load($this->tuid->getUsername())));
+        return t('@title assigned to @translator', array('@title' => $this->title, '@translator' => User::load($this->tuid->getUsername())));
       }
     }
   }

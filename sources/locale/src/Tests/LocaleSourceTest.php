@@ -38,7 +38,7 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
 
     file_unmanaged_copy(drupal_get_path('module', 'tmgmt_locale') . '/tests/test.de.po', 'translations://', FILE_EXISTS_REPLACE);
     $file = new \stdClass();
-    $file->uri = drupal_realpath(drupal_get_path('module', 'tmgmt_locale') . '/tests/test.xx.po');
+    $file->uri =  \Drupal::service('file_system')->realpath(drupal_get_path('module', 'tmgmt_locale') . '/tests/test.xx.po');
     $file->langcode = $this->langcode;
     Gettext::fileToDatabase($file, array());
     $this->addLanguage('es');

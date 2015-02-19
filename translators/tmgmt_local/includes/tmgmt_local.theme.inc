@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Render\Element;
 /**
  * Renders a tables containing a group of data items belonging to the same field.
  */
@@ -8,9 +9,9 @@ function theme_tmgmt_local_translation_form($variables) {
 
   // Get through all available translations.
   $translation = $variables['element']['translation'];
-  foreach (element_children($translation) as $children_name) {
+  foreach (Element::children($translation) as $children_name) {
     $children = $translation[$children_name];
-    $result .= drupal_render($children);
+    $result .= \Drupal::service('renderer')->render($children);
   }
 
   // We have rendered translation children so lets remove them.
@@ -44,9 +45,9 @@ function theme_tmgmt_local_translation_form_element($variables) {
     'rows' => array(
       array(
         'data' => array(
-          drupal_render($element['source']),
-          drupal_render($element['translation']),
-          drupal_render($element['actions']),
+          \Drupal::service('renderer')->render($element['source']),
+          \Drupal::service('renderer')->render($element['translation']),
+          \Drupal::service('renderer')->render($element['actions']),
         ),
       ),
     ),

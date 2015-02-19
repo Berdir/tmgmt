@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_test\Plugin\tmgmt\Source;
 use Drupal\Core\Url;
 use Drupal\tmgmt\SourcePluginBase;
 use Drupal\tmgmt\Entity\JobItem;
+use Drupal\Core\Render\Element;
 
 /**
  * Test source plugin implementation.
@@ -87,7 +88,7 @@ class TestSource extends SourcePluginBase {
    *   Key value pairs.
    */
   protected function replacePlaceholders(&$data, $variables) {
-    foreach (element_children($data) as $key) {
+    foreach (Element::children($data) as $key) {
       if (isset($data[$key]['#text'])) {
         $data[$key]['#text'] = format_string($data[$key]['#text'], $variables);
       }

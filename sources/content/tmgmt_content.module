@@ -86,7 +86,7 @@ function tmgmt_content_get_translatable_entities($entity_type_id, $property_cond
     return array();
   }
 
-  $langcodes = array_keys(language_list());
+  $langcodes = array_keys(\Drupal::languageManager()->getLanguages());
   $languages = array_combine($langcodes, $langcodes);
 
   $entity_type = \Drupal::entityManager()->getDefinition($entity_type_id);
