@@ -15,7 +15,6 @@ use Drupal\Core\TypedData\PrimitiveInterface;
 use Drupal\tmgmt\SourcePluginBase;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TMGMTException;
-use Drupal\Core\Render\Element;
 
 /**
  * Content entity source plugin controller.
@@ -117,9 +116,9 @@ class ContentEntitySource extends SourcePluginBase {
     $translation = $entity->getTranslation($job->getTargetLangcode());
     $data = $job_item->getData();
     foreach ($data as $name => $field_data) {
-      foreach (Element::children($field_data) as $delta) {
+      foreach (element_children($field_data) as $delta) {
         $field_item = $field_data[$delta];
-        foreach (Element::children($field_item) as $property) {
+        foreach (element_children($field_item) as $property) {
           $property_data = $field_item[$property];
           if (isset($property_data['#translation']['#text'])) {
             $translation->get($name)->offsetGet($delta)->set($property, $property_data['#translation']['#text']);

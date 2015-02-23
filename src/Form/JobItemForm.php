@@ -13,7 +13,6 @@ use Drupal\Component\Utility\Xss;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element;
 
 /**
  * Form controller for the job item edit forms.
@@ -103,7 +102,7 @@ class JobItemForm extends TmgmtFormBase {
     // Need to keep the first hierarchy. So flatten must take place inside
     // of the foreach loop.
     $zebra = 'even';
-    foreach (Element::children($data) as $key) {
+    foreach (element_children($data) as $key) {
       $form['review'][$key] = $this->reviewFormElement($form_state, tmgmt_flatten_data($data[$key], $key), $item, $zebra, $key);
     }
 
@@ -262,7 +261,7 @@ class JobItemForm extends TmgmtFormBase {
       '#ajaxid' => tmgmt_review_form_element_ajaxid($parent_key),
     );
 
-    foreach (Element::children($data) as $key) {
+    foreach (element_children($data) as $key) {
       // The char sequence '][' confuses the form API so we need to replace it.
       $target_key = str_replace('][', '|', $key);
       if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
@@ -399,7 +398,7 @@ class JobItemForm extends TmgmtFormBase {
     $key = array_slice($form_state->getTriggeringElement()['#array_parents'], 0, 2);
     $render_data = NestedArray::getValue($form, $key);
     tmgmt_write_request_messages($form_state->getFormObject()->getEntity()->getJob());
-    return \Drupal::service('renderer')->render($render_data);
+    return drupal_render($render_data);
   }
 
 }

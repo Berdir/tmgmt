@@ -88,7 +88,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
       return $this->remoteLanguagesMappings;
     }
 
-    foreach (\Drupal::languageManager()->getLanguages() as $language => $info) {
+    foreach (language_list() as $language => $info) {
       $this->remoteLanguagesMappings[$language] = $this->mapToRemoteLanguage($translator, $language);
     }
 

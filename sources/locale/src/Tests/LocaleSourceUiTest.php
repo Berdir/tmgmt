@@ -33,11 +33,11 @@ class LocaleSourceUiTest extends TMGMTTestBase {
     $this->context = 'default';
     file_unmanaged_copy(drupal_get_path('module', 'tmgmt_locale') . '/tests/test.de.po', 'translations://', FILE_EXISTS_REPLACE);
     $file = new \stdClass();
-    $file->uri =  \Drupal::service('file_system')->realpath(drupal_get_path('module', 'tmgmt_locale') . '/tests/test.xx.po');
+    $file->uri = drupal_realpath(drupal_get_path('module', 'tmgmt_locale') . '/tests/test.xx.po');
     $file->langcode = $this->langcode;
     Gettext::fileToDatabase($file, array());
     $this->addLanguage($this->langcode);
-    $this->addLanguage('gsw-berne');
+    $this->addLanguage('es');
   }
 
   public function testOverview() {
@@ -69,14 +69,14 @@ class LocaleSourceUiTest extends TMGMTTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Add to cart'));
     $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => Url::fromRoute('tmgmt.cart'))));
-    $edit['target_language[]'] = array('gsw-berne');
+    $edit['target_language[]'] = array('es');
     $this->drupalPostForm('admin/tmgmt/cart', $edit, t('Request translation'));
 
     // Assert that the job item is displayed.
     $this->assertText('Hello World');
     $this->assertText(t('Locale'));
     $this->assertText('2');
-    $this->drupalPostForm(NULL, array('target_language' => 'gsw-berne'), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array('target_language' => 'es'), t('Submit to translator'));
 
     // Test for the translation flag title.
     $this->drupalGet('admin/tmgmt/sources/locale/default');
@@ -84,8 +84,8 @@ class LocaleSourceUiTest extends TMGMTTestBase {
 
     // Review and accept the job item.
     $job_items = tmgmt_job_item_load_latest('locale', 'default', $locale_object->lid, 'en');
-    $this->drupalGet('admin/tmgmt/items/' . $job_items['gsw-berne']->id());
-    $this->assertRaw('gsw-berne_Hello World');
+    $this->drupalGet('admin/tmgmt/items/' . $job_items['es']->id());
+    $this->assertRaw('es_Hello World');
     $this->drupalPostForm(NULL, array(), t('Save as completed'));
     $this->drupalGet('admin/tmgmt/sources/locale/default');
 
@@ -106,10 +106,10 @@ class LocaleSourceUiTest extends TMGMTTestBase {
     $this->assertTrue(empty($elements));
 
     // Filter on the "Not translated to".
-    $edit = array('search[missing_target_language]' => 'gsw-berne');
+    $edit = array('search[missing_target_language]' => 'es');
     $this->drupalPostForm(NULL, $edit, t('Search'));
-    // Hello world is translated to "gsw-berne" therefore it must not show up
-    // in the list.
+    // Hello World is translated to "es" therefore it must not show up in the
+    // list.
     $this->assertNoText('Hello World');
   }
 }

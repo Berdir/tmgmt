@@ -35,7 +35,7 @@ class LanguageCombinationWidget extends WidgetBase {
     }
     else {
       $languages_options = array();
-      foreach (\Drupal::languageManager()->getLanguages() as $code => $language) {
+      foreach (language_list() as $code => $language) {
         $languages_options[$code] = $language->getName();
       }
     }

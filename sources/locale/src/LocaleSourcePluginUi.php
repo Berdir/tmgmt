@@ -33,7 +33,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
    *   List of i18n strings data.
    */
   function getStrings($search_label = NULL, $missing_target_language = NULL) {
-    $langcodes = array_keys( \Drupal::languageManager()->getLanguages());
+    $langcodes = array_keys(language_list());
     $languages = array_combine($langcodes, $langcodes);
     $select = db_select('locales_source', 'ls')
       ->fields('ls', array('lid', 'source'));
@@ -45,32 +45,16 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
       $select->isNull("lt_$missing_target_language.language");
     }
 
-    // Join locale targets for each language.
-    // We want all joined fields to be named as langcodes, but langcodes could
-    // contain hyphens in their names, which is not allowed by the most database
-    // engines. So we create a langcode-to-filed_alias map, and rename fields
-    // later.
-    $langcode_to_filed_alias_map = array();
     foreach ($languages as $langcode) {
-      $table_alias = $select->leftJoin('locales_target', db_escape_field("lt_$langcode"), "ls.lid = %alias.lid AND %alias.language = '$langcode'");
-      $langcode_to_filed_alias_map[$langcode] = $select->addField($table_alias, 'language');
+      $langcode = str_replace('-', '', $langcode);
+      $select->leftJoin('locales_target', "lt_$langcode", "ls.lid = %alias.lid AND %alias.language = '$langcode'");
+      $select->addField("lt_$langcode", 'language', "lang_$langcode");
     }
-    unset($field_alias);
-
-    $rows = $select
+    return $select
       ->extend('Drupal\Core\Database\Query\PagerSelectExtender')
       ->limit( \Drupal::config('tmgmt.settings')->get('source_list_limit', 20))
       ->execute()
       ->fetchAll();
-    foreach ($rows as $row) {
-      foreach ($langcode_to_filed_alias_map as $langcode => $field_alias) {
-        $row->{$langcode} = $row->{$field_alias};
-        unset($row->{$field_alias});
-      }
-    }
-    unset($row);
-
-    return $rows;
   }
 
   /**
@@ -82,6 +66,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
   public function overviewFormHeader() {
     $languages = array();
     foreach ($this->getLanguages() as $langcode => $language) {
+      $langcode = str_replace('-', '', $langcode);
       $languages['langcode-' . $langcode] = array(
         'data' => String::checkPlain($language->getName()),
       );
@@ -150,13 +135,14 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
       );
       // Load entity translation specific data.
       foreach ($this->getLanguages() as $langcode => $language) {
+        $langcode = str_replace('-', '', $langcode);
 
         $translation_status = 'current';
 
         if ($langcode == $source_language) {
           $translation_status = 'original';
         }
-        elseif ($string->{$langcode} === NULL) {
+        elseif ($string->{'lang_' . $langcode} === NULL) {
           $translation_status = 'missing';
         }
 
@@ -184,7 +170,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
   public function overviewSearchFormPart(array $form, FormStateInterface $form_state, $type) {
 
     $options = array();
-    foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
+    foreach (language_list() as $langcode => $language) {
       $options[$langcode] = $language->getName();
     }
 
@@ -263,13 +249,14 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
     );
 
 
-    foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
+    foreach (language_list() as $langcode => $language) {
+      $langcode = str_replace('-', '', $langcode);
       $array = array(
         '#theme' => 'tmgmt_translation_language_status_single',
         '#translation_status' => $data['translation_statuses'][$langcode],
         '#job_item' => isset($data['current_job_items'][$langcode]) ? $data['current_job_items'][$langcode] : NULL,
       );
-      $row['langcode-' . $langcode] = \Drupal::service('renderer')->render($array);
+      $row['langcode-' . $langcode] = drupal_render($array);
     }
 
     return $row;
@@ -290,7 +277,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
 
     // Create only single job for all items as the source language is just
     // the same for all.
-    $job = tmgmt_job_create($source_lang, NULL, \Drupal::currentUser()->id());
+    $job = tmgmt_job_create($source_lang, NULL, $GLOBALS['user']->uid);
 
     // Loop through entities and create individual jobs for each source language.
     foreach ($items as $item) {

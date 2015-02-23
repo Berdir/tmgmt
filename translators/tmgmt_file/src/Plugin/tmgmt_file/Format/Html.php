@@ -78,8 +78,7 @@ class Html implements FormatInterface {
   }
 
   /**
-   *
-   * @param type $imported_file
+   * {@inheritdoc}
    */
   public function validateImport($imported_file) {
     $dom = new \DOMDocument();
@@ -102,11 +101,13 @@ class Html implements FormatInterface {
       }
     }
 
-    // Attempt to load job.
+    // Attempt to load the job.
     if (!$job = Job::load($meta['JobID'])) {
+      drupal_set_message(t('The imported file job id @file_id is not available.', array(
+        '@file_id' => $job->id(),
+      )), 'error');
       return FALSE;
     }
-
 
     // Check language.
     if ($meta['languageSource'] != $job->getTranslator()->mapToRemoteLanguage($job->getSourceLangcode()) ||

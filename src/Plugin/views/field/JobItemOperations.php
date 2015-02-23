@@ -42,7 +42,7 @@ class JobItemOperations extends FieldPluginBase {
         'title' => t('delete'),
       );
     }
-    return \Drupal::service('renderer')->render($element);
+    return drupal_render($element);
   }
 
 }

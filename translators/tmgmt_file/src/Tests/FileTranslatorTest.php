@@ -291,8 +291,10 @@ class FileTranslatorTest extends TMGMTTestBase {
       'files[file]' => $wrong_file,
     );
     $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
-    $label = $second_job->label();
-    $this->assertRaw(t('Import file is from job <a href="@url">@label</a>, import aborted.', array('@url' => $second_job->url(), '@label' => $label)));
+    $this->assertRaw(t('The imported file job id @file_id does not match the job id @job_id.', array(
+      '@file_id' => $second_job->id(),
+      '@job_id' => $job->id(),
+    )));
 
 
     $translated_file = 'public://tmgmt_file/translated file.xlf';

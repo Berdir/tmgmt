@@ -10,7 +10,6 @@ use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
-use Drupal\Core\Render\Element;
 
 /**
  * Generic theme function for use with Render API.
@@ -189,19 +188,19 @@ function theme_tmgmt_translator_review_form_element($variables) {
   $leaf_label = '<label>' . $element['#leave_label'] . '</label>';
   $leaf_label = '<div class="form-item form-type-label">' . $leaf_label . '</div>';
   $row[] = array(
-    'data' => $leaf_label . '<div class="tmgmt-ui-state">' . \Drupal::service('renderer')->render($element['status']) . '</div>',
+    'data' => $leaf_label . '<div class="tmgmt-ui-state">' . drupal_render($element['status']) . '</div>',
     'class' => 'tmgmt-ui-data-item-label',
   );
   $row[] = array(
-    'data' => \Drupal::service('renderer')->render($element['source']),
+    'data' => drupal_render($element['source']),
     'class' => 'tmgmt-ui-data-item-source',
   );
   $row[] = array(
-    'data' => \Drupal::service('renderer')->render($element['translation']),
+    'data' => drupal_render($element['translation']),
     'class' => 'tmgmt-ui-data-item-translation',
   );
   $row[] = array(
-    'data' => \Drupal::service('renderer')->render($element['actions']),
+    'data' => drupal_render($element['actions']),
     'class' => 'tmgmt-ui-data-item-actions',
   );
   foreach ($row as $cell) {
@@ -212,7 +211,7 @@ function theme_tmgmt_translator_review_form_element($variables) {
   if (!empty($element['below'])) {
     $result .= '<tr' . new Attribute(array('class' => $element['#zebra'])) . '>';
     $cell = array(
-      'data' => \Drupal::service('renderer')->render($element['below']),
+      'data' => drupal_render($element['below']),
       'colspan' => '4',
     );
     $result .= tmgmt_build_table_cell($cell);
@@ -250,7 +249,7 @@ function tmgmt_build_table_cell($cell) {
     $cell_attributes = $cell;
 
     if (is_array($cell_content)) {
-      $cell_content = \Drupal::service('renderer')->render($cell_content);
+      $cell_content = drupal_render($cell_content);
     }
   }
   $cell_tag = $is_header ? 'th' : 'td';
@@ -267,7 +266,7 @@ function theme_tmgmt_translator_review_form($variables) {
   $parent_label = '';
   $element_groups = array();
   $element_group = '';
-  foreach (Element::children($element) as $key) {
+  foreach (element_children($element) as $key) {
     // Label of all element groups.
     $parent_label = array_shift($element[$key]['#parent_label']);
     $element[$key]['#top_label'] = $parent_label;
@@ -290,7 +289,7 @@ function theme_tmgmt_translator_review_form($variables) {
         $element_group = '<tr>' . tmgmt_build_table_cell($cell, TRUE) . '</tr>';
       }
     }
-    $element_group .= \Drupal::service('renderer')->render($element[$key]);
+    $element_group .= drupal_render($element[$key]);
   }
 
   // Append the last group to the group collection.
