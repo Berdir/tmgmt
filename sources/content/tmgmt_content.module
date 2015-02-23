@@ -102,6 +102,8 @@ function tmgmt_content_get_translatable_entities($entity_type_id, $property_cond
     $langcode_table_alias = $query->innerJoin($data_table, 'data_table', '%alias.' . $id_key . ' = e.' . $id_key . ' AND %alias.default_langcode = 1');
   }
 
+  $property_conditions += array('langcode' => $langcodes);
+
   // Searching for sources with missing translation.
   if (!empty($property_conditions['target_status']) && !empty($property_conditions['target_language']) && in_array($property_conditions['target_language'], $languages)) {
 
@@ -178,7 +180,7 @@ function tmgmt_content_get_translatable_entities($entity_type_id, $property_cond
   // generic way.
   foreach ($property_conditions as $property_name => $property_value) {
     $alias = $property_name == 'langcode' ? $langcode_table_alias : 'e';
-    $query->condition($alias . '.' . $property_name, $property_value);
+    $query->condition($alias . '.' . $property_name, (array) $property_value, 'IN');
   }
 
   if ($pager) {

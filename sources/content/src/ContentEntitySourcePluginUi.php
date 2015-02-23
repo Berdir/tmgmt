@@ -294,7 +294,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
 
     $row = array(
       'id' => $data['entity_id'],
-      'title' => \Drupal::l($label, Url::fromUri('base:/' . $data['entity_url'])),
+      'title' => \Drupal::l($label, Url::fromUri('entity:' . $data['entity_type'] . '/' . $data['entity_id'])),
     );
 
     if (isset($data['bundle'])) {

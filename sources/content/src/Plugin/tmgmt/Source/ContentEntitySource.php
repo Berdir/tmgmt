@@ -9,9 +9,11 @@ namespace Drupal\tmgmt_content\Plugin\tmgmt\Source;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\TypedData\OptionsProviderInterface;
 use Drupal\Core\TypedData\Type\StringInterface;
 use Drupal\Core\TypedData\PrimitiveInterface;
+use Drupal\taxonomy\Plugin\views\field\Language;
 use Drupal\tmgmt\SourcePluginBase;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TMGMTException;
@@ -57,6 +59,11 @@ class ContentEntitySource extends SourcePluginBase {
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     if (!$entity) {
       throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), $job_item->getItemId())));
+    }
+    $languages = \Drupal::languageManager()->getLanguages();
+    $id = $entity->language()->getId();
+    if (!isset($languages[$id])) {
+      throw new TMGMTException(t('Entity %entity could not be translated because the language %language is not applicable', array('%entity' => $entity->language()->getId(), '%language' => $entity->language()->getName())));
     }
     $field_definitions = $entity->getFieldDefinitions();
     // @todo Expand this list or find a better solution to exclude fields like

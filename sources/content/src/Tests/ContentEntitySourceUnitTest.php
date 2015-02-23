@@ -8,11 +8,13 @@
 namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
 use Drupal\Core\Language\Language;
+use Drupal\tmgmt\TMGMTException;
 
 /**
  * Content entity Source unit tests.
@@ -249,6 +251,24 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual($data['body'][1]['format']['#text'], $node->body[1]->format);
     $this->assertEqual($data['body'][1]['format']['#translate'], FALSE);
     $this->assertFalse(isset($data['body'][1]['processed']));
+
+    // Test if language neutral entities can't be added to a translation job.
+    $node = entity_create('node', array(
+      'uid' => $account->id(),
+      'type' => $type->id(),
+      'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
+    ));
+    $node->save();
+    try {
+      $job = tmgmt_job_create(LanguageInterface::LANGCODE_NOT_SPECIFIED, 'de');
+      $job->save();
+      $job_item = tmgmt_job_item_create('content', 'node', $node->id(), array('tjid' => $job->id()));
+      $job_item->save();
+      $this->fail("Adding of language neutral to a translation job did not fail.");
+    }
+    catch (\Exception $e){
+      $this->pass("Adding of language neutral to a translation job did fail.");
+    }
   }
 
   /**

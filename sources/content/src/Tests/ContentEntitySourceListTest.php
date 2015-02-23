@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_content\Tests;
 use Drupal\comment\Entity\CommentType;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Tests\EntityTestBase;
+use Drupal\Core\Language\LanguageInterface;
 
 /**
  * Tests the user interface for entity translation lists.
@@ -53,6 +54,8 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $this->nodes['article']['en'][2] = $this->createNode('article', 'en');
     $this->nodes['article']['en'][1] = $this->createNode('article', 'en');
     $this->nodes['article']['en'][0] = $this->createNode('article', 'en');
+    $this->nodes['article'][LanguageInterface::LANGCODE_NOT_SPECIFIED][0] = $this->createNode('article', LanguageInterface::LANGCODE_NOT_SPECIFIED);
+    $this->nodes['article'][LanguageInterface::LANGCODE_NOT_APPLICABLE][0] = $this->createNode('article', LanguageInterface::LANGCODE_NOT_APPLICABLE);
   }
 
   /**
@@ -122,6 +125,10 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $this->assertText($this->nodes['article']['en'][0]->label());
     // Page node type should not be listed as it is not entity translatable.
     $this->assertNoText($this->nodes['page']['en'][0]->label());
+    // If the source language is not defined, don't display it.
+    $this->assertNoText($this->nodes['article'][LanguageInterface::LANGCODE_NOT_SPECIFIED][0]->label());
+    // If the source language is not applicable, don't display it.
+    $this->assertNoText($this->nodes['article'][LanguageInterface::LANGCODE_NOT_APPLICABLE][0]->label());
   }
 
   function testTranslationStatuses() {
