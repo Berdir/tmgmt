@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\TranslatorPluginUiBase;
+use Drupal\user\Entity\User;
 
 /**
  * Local translator plugin UI.
@@ -48,7 +49,7 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
     $form['#type'] = 'fieldset';
 
     $tuid = $job->getSetting('translator');
-    if ($tuid && $translator = user_load($tuid)) {
+    if ($tuid && $translator = User::load($tuid)) {
       $form['job_status'] = array(
         '#type' => 'item',
         '#title' => t('Job status'),

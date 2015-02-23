@@ -41,7 +41,7 @@ function tmgmt_language_combination_field_widget_error($element, $error, $form, 
  * Implements hook_field_update().
  */
 function tmgmt_language_combination_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  $languages = language_list();
+  $languages = \Drupal::languageManager()->getLanguages();
   $added_languages = array();
 
   // In case the skill languages is not know to the system, install them.
@@ -99,7 +99,7 @@ function tmgmt_language_combination_languages_predefined_list() {
     }
 
     // Add custom languages that are not part of the iso.inc definition.
-    $installed_languages = language_list();
+    $installed_languages = \Drupal::languageManager()->getLanguages();
     foreach ($installed_languages as $lang => $info) {
       if (!isset($predefined[$lang])) {
         $predefined[$lang] = $info->name;

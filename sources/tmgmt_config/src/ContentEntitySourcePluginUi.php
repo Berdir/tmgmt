@@ -75,7 +75,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
       }
 
       // Load entity translation specific data.
-      foreach (language_list() as $langcode => $language) {
+      foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
 
         $translation_status = 'current';
 
@@ -187,7 +187,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     }
 
     $options = array();
-    foreach (language_list() as $langcode => $language) {
+    foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
       $options[$langcode] = $language->getName();
     }
 
@@ -256,7 +256,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
    */
   public function overviewFormHeader($type) {
     $languages = array();
-    foreach (language_list() as $langcode => $language) {
+    foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
       $languages['langcode-' . $langcode] = array(
         'data' => String::checkPlain($language->getName()),
       );
@@ -309,7 +309,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
         '#job_item' => isset($data['current_job_items'][$langcode]) ? $data['current_job_items'][$langcode] : NULL,
       );
       $row['langcode-' . $langcode] = array(
-        'data' => drupal_render($array),
+        'data' => \Drupal::service('renderer')->render($array),
         'class' => array('langstatus-' . $langcode),
       );
     }

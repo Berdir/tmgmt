@@ -47,7 +47,7 @@ class JobOperations extends FieldPluginBase {
         'title' => t('delete'),
       );
     }
-    return drupal_render($element);
+    return \Drupal::service('renderer')->render($element);
   }
 
 }

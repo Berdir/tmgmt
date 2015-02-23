@@ -72,7 +72,7 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
         'title' => t('delete'),
       );
     }
-    return drupal_render($element);
+    return \Drupal::service('renderer')->render($element);
   }
 
 }

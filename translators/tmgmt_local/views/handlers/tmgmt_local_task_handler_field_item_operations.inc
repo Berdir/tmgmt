@@ -27,7 +27,7 @@ class tmgmt_local_task_handler_field_item_operations extends views_handler_field
         'title' => $item->isPending() ? t('translate') : t('view'),
       );
     }
-    return drupal_render($element);
+    return \Drupal::service('renderer')->render($element);
   }
 
 }

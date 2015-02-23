@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
+use Drupal\Core\Render\Element;
 
 /**
  * Default ui controller class for translator plugins.
@@ -60,7 +61,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
       }
     }
 
-    if (!element_children($form)) {
+    if (!Element::children($form)) {
       $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginDefinition['label']));
     }
     return $form;
@@ -70,7 +71,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
    * {@inheritdoc}
    */
   public function checkoutSettingsForm(array $form, FormStateInterface $form_state, Job $job) {
-    if (!element_children($form)) {
+    if (!Element::children($form)) {
       $form['#description'] = t("The @translator translator doesn't provide any checkout settings.", array('@translator' => $job->getTranslator()->label()));
     }
     return $form;

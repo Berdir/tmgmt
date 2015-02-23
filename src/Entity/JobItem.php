@@ -17,6 +17,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Url;
 use Drupal\tmgmt\TMGMTException;
+use Drupal\Core\Render\Element;
 
 /**
  * Entity class for the tmgmt_job_item entity.
@@ -766,7 +767,7 @@ class JobItem extends ContentEntityBase {
       return;
     }
 
-    foreach (element_children($translation) as $item) {
+    foreach (Element::children($translation) as $item) {
       $this->addTranslatedDataRecursive($translation[$item], array_merge($key, array($item)));
     }
   }
@@ -1142,7 +1143,7 @@ class JobItem extends ContentEntityBase {
       }
     }
     elseif (is_array($item)) {
-      foreach (element_children($item) as $key) {
+      foreach (Element::children($item) as $key) {
         $this->count($item[$key]);
       }
     }

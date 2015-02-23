@@ -211,15 +211,14 @@ class Xliff extends \XMLWriter implements FormatInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * Validates imported XLIFF file.
+   *
+   * Checks:
+   * - Job ID.
+   * - Target ans source languages
+   * - Content integrity by
    */
   public function validateImport($imported_file) {
-    // Validates imported XLIFF file.
-    // Checks:
-    // - Job ID
-    // - Target ans source languages
-    // - Content integrity.
-
     $xml = $this->getImportedXML($imported_file);
     // Check if our phase information is there.
     $phase = $xml->xpath("//xliff:phase[@phase-name='extraction']");
@@ -227,47 +226,27 @@ class Xliff extends \XMLWriter implements FormatInterface {
       $phase = reset($phase);
     }
     else {
-      drupal_set_message(t('The imported file is missing required XLIFF phase information.'), 'error');
       return FALSE;
     }
 
-    // Check if the job has a valid job reference.
-    if (!isset($phase['job-id'])) {
-      drupal_set_message(t('The imported file does not contain a job reference.'), 'error');
-      return FALSE;
-    }
-
-    // Attempt to load the job if none passed.
-    $job = (Job::load((int) $phase['job-id']));
-    if (empty($job)) {
-      drupal_set_message(t('The imported file job id @file_tjid is not available.', array(
-        '@file_tjid' => $phase['job-id'],
-      )), 'error');
+    // Check if the job can be loaded.
+    if (!isset($phase['job-id']) || (!$job = Job::load((string) $phase['job-id']))) {
       return FALSE;
     }
 
     // Compare source language.
     if (!isset($xml->file['source-language']) || $job->getTranslator()->mapToRemoteLanguage($job->getSourceLangcode()) != $xml->file['source-language']) {
-      $job->addMessage('The imported file source language @file_language does not match the job source language @job_language.', array(
-        '@file_language' => empty($xml->file['source-language']) ? t('none') : $xml->file['source-language'],
-        '@job_language' => $job->source_language,
-      ), 'error');
       return FALSE;
     }
 
     // Compare target language.
     if (!isset($xml->file['target-language']) || $job->getTranslator()->mapToRemoteLanguage($job->getTargetLangcode()) != $xml->file['target-language']) {
-      $job->addMessage('The imported file target language @file_language does not match the job target language @job_language.', array(
-        '@file_language' => empty($xml->file['target-language']) ? t('none') : $xml->file['target-language'],
-        '@job_language' => $job->target_language,
-      ), 'error');
       return FALSE;
     }
 
     $targets = $this->getImportedTargets($job);
 
     if (empty($targets)) {
-      $job->addMessage('The imported file seems to be missing translation.', 'error');
       return FALSE;
     }
 
@@ -327,7 +306,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
         $reader->XML($unit->target->asXML());
         $reader->read();
         $this->importedTransUnits[(string) $unit['id']]['#text'] =
-          $this->processForImport($reader->readInnerXML(), $job);
+            $this->processForImport($reader->readInnerXML(), $job);
       }
     }
 

@@ -14,6 +14,7 @@ use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Render\Element;
 
 
 /**
@@ -338,7 +339,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
       }
     }
     else {
-      foreach (element_children($item) as $key) {
+      foreach (Element::children($item) as $key) {
         $this->count($item[$key]);
       }
     }

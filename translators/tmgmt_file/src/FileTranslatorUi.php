@@ -45,7 +45,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
 
     // Any visible, writeable wrapper can potentially be used for the files
     // directory, including a remote file system that integrates with a CDN.
-    foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
+    foreach (\Drupal::service('stream_wrapper_manager')->getWrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
       $options[$scheme] = String::checkPlain($info['description']);
     }
 
