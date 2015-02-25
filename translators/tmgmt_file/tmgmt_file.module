@@ -33,15 +33,16 @@ function tmgmt_file_import_form_submit(array $form, FormStateInterface $form_sta
     $extension = pathinfo($file->getFileUri(), PATHINFO_EXTENSION);
     $controller = tmgmt_file_format_controller($extension);
     if ($controller) {
-      // Validate the file.
-      $validated_job = $controller->validateImport($file->getFileUri());
+      // Validate the file on job.
+      $validated_job = $controller->validateImport($file->getFileUri(), $job);
       if (!$validated_job) {
         $job->addMessage('Failed to validate file, import aborted.', array(), 'error');
       }
       elseif ($validated_job->id() != $job->id()) {
-        $url = $validated_job->url();
-        $label = $validated_job->label();
-        $job->addMessage('Import file is from job <a href="@url">@label</a>, import aborted.', array('@url' => $url, '@label' => $label));
+        $job->addMessage('The imported file job id @file_id does not match the job id @job_id.', array(
+          '@file_id' => $validated_job->id(),
+          '@job_id' => $job->id(),
+        ), 'error');
       }
       else {
         try {
@@ -152,7 +153,7 @@ function tmgmt_file_tmgmt_job_delete(Job $job) {
  * Implements hook_file_download().
  */
 function tmgmt_file_file_download($uri) {
-   // Get the file record based on the URI. If not in the database just return.
+  // Get the file record based on the URI. If not in the database just return.
   $fids = \Drupal::entityQuery('file')
     ->condition('uri', $uri)
     ->execute();
