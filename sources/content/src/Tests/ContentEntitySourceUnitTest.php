@@ -12,6 +12,7 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\node\Entity\Node;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
 use Drupal\Core\Language\Language;
 use Drupal\tmgmt\TMGMTException;
@@ -43,6 +44,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     // Add the languages.
     $this->installConfig(['language']);
     ConfigurableLanguage::createFromLangcode('de')->save();
+    ConfigurableLanguage::createFromLangcode('cs')->save();
 
     //$this->installEntitySchema('node');
     $this->installEntitySchema('tmgmt_job');
@@ -269,6 +271,46 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     catch (\Exception $e){
       $this->pass("Adding of language neutral to a translation job did fail.");
     }
+  }
+
+  /**
+    * Test if the source is able to pull content in requested language.
+   */
+  public function testRequestDataForSpecificLanguage() {
+    // Create an english node.
+    $account = $this->createUser();
+    $type = $this->drupalCreateContentType();
+    $field = FieldStorageConfig::loadByName('node', 'body');
+    $field->setTranslatable(TRUE);
+    $field->setCardinality(2);
+    $field->save();
+
+    $node = Node::create(array(
+      'uid' => $account->id(),
+      'type' => $type->id(),
+      'langcode' => 'cs',
+    ));
+
+    $node = $node->getTranslation('en');
+
+    $node->title->appendItem(array('value' => $this->randomMachineName()));
+    $value = array(
+      'value' => $this->randomMachineName(),
+      'summary' => $this->randomMachineName(),
+      'format' => 'text_plain'
+    );
+    $node->body->appendItem($value);
+    $node->body->appendItem($value);
+    $node->save();
+
+    $job = tmgmt_job_create('en', 'de');
+    $job->save();
+    $job_item = tmgmt_job_item_create('content', 'node', $node->id(), array('tjid' => $job->id()));
+    $job_item->save();
+
+    $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('content');
+    $data = $source_plugin->getData($job_item);
+    $this->assertEqual($data['body'][0]['value']['#text'], $value['value']);
   }
 
   /**

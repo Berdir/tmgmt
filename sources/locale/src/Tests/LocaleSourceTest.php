@@ -1,7 +1,8 @@
 <?php
 
 /**
- * @file Contains \Drupal\tmgmt_locale\Tests\LocaleSourceTest.php.
+ * @file
+ * Contains \Drupal\tmgmt_locale\Tests\LocaleSourceTest.
  */
 
 namespace Drupal\tmgmt_locale\Tests;
@@ -104,6 +105,45 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
   }
 
   /**
+  +   * Test if the source is able to pull content in requested language.
+  +   */
+  function testRequestDataForSpecificLanguage() {
+    $this->addLanguage('cs');
+
+    $locale_object = db_query('SELECT * FROM {locales_source} WHERE source = :source LIMIT 1', array(':source' => 'Hello World'))->fetchObject();
+
+    $plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('locale');
+    $reflection_plugin = new \ReflectionClass('\Drupal\tmgmt_locale\Plugin\tmgmt\Source\LocaleSource');
+    $updateTranslation = $reflection_plugin->getMethod('updateTranslation');
+    $updateTranslation->setAccessible(TRUE);
+
+    $updateTranslation->invoke($plugin, $locale_object->lid, 'de', 'de translation');
+
+    // Create the new job and job item.
+    $job = $this->createJob('de', 'cs');
+    $job->save();
+    $job->addItem('locale', 'default', $locale_object->lid);
+
+    $data = $job->getData();
+    $this->assertEqual($data[1]['singular']['#text'], 'de translation');
+
+    // Create new job item with a source language for which the translation
+    // does not exit.
+    $job = $this->createJob('es', 'cs');
+    $job->save();
+    try {
+      $job->addItem('locale', 'default', $locale_object->lid);
+      $this->fail('The job item should not be added as there is no translation for language "es"');
+    }
+    catch (\Exception $e) {
+      $languages = \Drupal::languageManager()->getLanguages();
+      // @todo Job item id missing because it is not saved yet.
+      $this->assertEqual(t('Unable to load %language translation for the locale %id',
+        array('%language' => $languages['es']->getName(), '%id' => $locale_object->lid)), $e->getMessage());
+    }
+  }
+
+  /**
    * Verifies that strings that need escaping are correctly identified.
    */
   function testEscaping() {
@@ -181,7 +221,7 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
       $job->addItem('locale', 'default', $lid);
       $this->fail('Job item add with an non-existing locale did not fail.');
     }
-    catch (TMGMTException $e) {
+    catch (\Exception $e) {
       $this->pass('Job item add with an non-existing locale did fail.');
     }
   }

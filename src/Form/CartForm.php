@@ -46,6 +46,24 @@ class Cartform extends FormBase {
       '#options' => $options,
     );
 
+    $form['enforced_source_language'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enforce source language'),
+      '#description' => t('The source language is determined from the item\'s source language. If you wish to enforce a different language you can select one after ticking this checkbox. In such case the translation of the language you selected will be used as the source for the translation job.')
+    );
+
+    $form['source_language'] = array(
+      '#type' => 'select',
+      '#title' => t('Source language'),
+      '#description' => t('Select a language that will be enforced as the translation job source language.'),
+      '#options' => $languages,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="enforced_source_language"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+
     $form['target_language'] = array(
       '#type' => 'select',
       '#title' => t('Request translation into language/s'),
@@ -119,11 +137,22 @@ class Cartform extends FormBase {
    */
   function submitRequestTranslation(array $form, FormStateInterface $form_state) {
     $target_languages = array_filter($form_state->getValue('target_language'));
+    $enforced_source_language = NULL;
+    if ($form_state->getValue('enforced_source_language')) {
+      $enforced_source_language = $form_state->getValue('source_language');
+    }
 
+    $skipped_count = 0;
     $job_items_by_source_language = array();
     // Group the selected items by source language.
     foreach (JobItem::loadMultiple(array_filter($form_state->getValue('items'))) as $job_item) {
-      $job_items_by_source_language[$job_item->getSourceLangCode()][$job_item->id()] = $job_item;
+      $source_language = $enforced_source_language ? $enforced_source_language : $job_item->getSourceLangCode();
+      if (in_array($source_language, $job_item->getExistingLangCodes())) {
+        $job_items_by_source_language[$source_language][$job_item->id()] = $job_item;
+      }
+      else {
+        $skipped_count++;
+      }
     }
 
     $jobs = array();
@@ -172,7 +201,21 @@ class Cartform extends FormBase {
 
     // Start the checkout process if any jobs were created.
     if ($jobs) {
+      if ($enforced_source_language) {
+
+        drupal_set_message(t('You have enforced the the job source language which most likely resulted in having a translation of your original content as the job source text. You should review the job translation received from the translator carefully to prevent the content quality loss.'), 'warning');
+
+        if ($skipped_count) {
+          $languages = \Drupal::languageManager()->getLanguages();
+          drupal_set_message(\Drupal::translation()->formatPlural($skipped_count, 'One item skipped as for the language @language it was not possible to retrieve a translation.',
+            '@count items skipped as for the language @language it was not possible to retrieve a translations.', array('@language' => $languages[$enforced_source_language]->getName())));
+        }
+      }
+
       tmgmt_job_checkout_and_redirect($form_state, $jobs);
+    }
+    else {
+      drupal_set_message(t('From the selection you made it was not possible to create any translation job.'));
     }
   }
 

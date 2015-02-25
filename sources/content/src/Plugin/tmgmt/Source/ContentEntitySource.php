@@ -66,6 +66,11 @@ class ContentEntitySource extends SourcePluginBase {
       throw new TMGMTException(t('Entity %entity could not be translated because the language %language is not applicable', array('%entity' => $entity->language()->getId(), '%language' => $entity->language()->getName())));
     }
     $field_definitions = $entity->getFieldDefinitions();
+
+    if (!$entity->hasTranslation($job_item->getJob()->getSourceLangcode())) {
+      throw new TMGMTException(t('The entity %id with translation %lang does not exist.', array('%id' => $entity->id(), '%lang' => $job_item->getJob()->getSourceLangcode())));
+    }
+
     // @todo Expand this list or find a better solution to exclude fields like
     //   content_translation_source.
     $exclude_field_types = ['language'];

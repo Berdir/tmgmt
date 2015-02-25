@@ -111,7 +111,7 @@ class TestSource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function getExistingLangCodes(JobItem $job_item) {
-    return array();
+    return array_keys(\Drupal::languageManager()->getLanguages());
   }
 
   /**
