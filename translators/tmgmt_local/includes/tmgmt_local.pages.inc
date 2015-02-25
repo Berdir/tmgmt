@@ -131,7 +131,7 @@ function tmgmt_local_task_item_view(LocalTaskItem $item) {
  * @param TMGMTLocalTask $task
  */
 function tmgmt_local_translation_assign_to_me(TMGMTLocalTask $task) {
-  $task->assign($GLOBALS['user']);
+  $task->assign(\Drupal::currentUser());
   $task->save();
   drupal_goto('translate');
 }

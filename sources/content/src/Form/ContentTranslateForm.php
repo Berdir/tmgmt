@@ -133,7 +133,7 @@ class ContentTranslateForm extends FormBase {
     $jobs = array();
     foreach (array_keys(array_filter($values['languages'])) as $langcode) {
       // Create the job object.
-      $job = tmgmt_job_create($entity->language()->getId(), $langcode, $GLOBALS['user']->id());
+      $job = tmgmt_job_create($entity->language()->getId(), $langcode, \Drupal::currentUser()->id());
       try {
         // Add the job item.
         $job->addItem('content', $entity->getEntityTypeId(), $entity->id());

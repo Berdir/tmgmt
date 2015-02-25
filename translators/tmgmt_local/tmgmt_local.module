@@ -174,7 +174,7 @@ function tmgmt_local_translation_access(LocalTask $task, AccountInterface $accou
 
   // If no user object is supplied, the access check is for the current user.
   if (empty($account)) {
-    $account = $GLOBALS['user'];
+    $account = \Drupal::currentUser();
   }
 
   // If we've already checked access for this job and user, return from cache.
@@ -553,7 +553,7 @@ function tmgmt_local_tmgmt_job_delete(Job $job) {
  */
 function tmgmt_local_field_access($op, $field, $entity_type, $entity = NULL, $account = NULL) {
   if ($field['field_name'] == 'tmgmt_translation_skills' && $entity_type == 'user') {
-    $account = !empty($account) ? $account : $GLOBALS['user'];
+    $account = !empty($account) ? $account : \Drupal::currentUser();
 
     // If the field is just being viewed, grant access.
     if ($op == 'view') {
