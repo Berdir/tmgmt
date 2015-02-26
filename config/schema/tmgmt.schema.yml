@@ -36,3 +36,7 @@ tmgmt.translator.*:
       label: 'Translator plugin'
     settings:
         type: tmgmt.translator.settings.[%parent.plugin]
+
+views.access.tmgmt_job:
+  type: mapping
+  label: View translation jobs'

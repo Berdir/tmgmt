@@ -21,7 +21,7 @@ display:
     position: 1
     display_options:
       access:
-        type: none
+        type: tmgmt_job
         options: {  }
       cache:
         type: none
@@ -31,7 +31,7 @@ display:
         options:
           disable_sql_rewrite: false
           distinct: false
-          query_comment: false
+          query_comment: ''
           query_tags: {  }
       exposed_form:
         type: basic
@@ -100,7 +100,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -153,7 +153,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: ''
+            max_length: null
             word_boundary: true
             ellipsis: true
             more_link: false
