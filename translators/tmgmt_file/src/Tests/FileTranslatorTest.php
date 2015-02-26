@@ -232,7 +232,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $job->translator = $translator->id();
     $first_item = $job->addItem('test_source', 'test', '1');
     // Keep the first item data for later use.
-    $first_item_data = tmgmt_flatten_data($first_item->getData());
+    $first_item_data = \Drupal::service('tmgmt.data')->flatten($first_item->getData());
     $job->addItem('test_source', 'test', '2');
 
     $job->requestTranslation();

@@ -47,7 +47,7 @@ class Html implements FormatInterface {
   public function export(Job $job) {
     $items = array();
     foreach ($job->getItems() as $item) {
-      $data = array_filter(tmgmt_flatten_data($item->getData()), '_tmgmt_filter_data');
+      $data = \Drupal::service('tmgmt.data')->filterTranslatable($item->getData());
       foreach ($data as $key => $value) {
         $items[$item->id()][$this->encodeIdSafeBase64($item->id() . '][' . $key)] = $value;
       }
@@ -74,7 +74,7 @@ class Html implements FormatInterface {
       $key = $this->decodeIdSafeBase64((string) $atom['id']);
       $data[$key]['#text'] = (string) $atom;
     }
-    return tmgmt_unflatten_data($data);
+    return \Drupal::service('tmgmt.data')->unflatten($data);
   }
 
   /**

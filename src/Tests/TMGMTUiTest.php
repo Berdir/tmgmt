@@ -280,7 +280,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $job->save();
     $item = $job->addItem('test_source', 'test', 1);
 
-    $data = tmgmt_flatten_data($item->getData());
+    $data = \Drupal::service('tmgmt.data')->flatten($item->getData());
     $keys = array_keys($data);
     $key = $keys[0];
 

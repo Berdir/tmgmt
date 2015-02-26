@@ -166,7 +166,7 @@ function tmgmt_local_translation_form($form, FormStateInterface $form_state, TMG
   $zebra = 'even';
   // Reverse the order to get the correct order.
   foreach (array_reverse(Element::children($data)) as $key) {
-    $flattened = tmgmt_flatten_data($data[$key], $key);
+    $flattened = \Drupal::service('tmgmt.data')->flatten($data[$key], $key);
     $form['translation'][$key] = tmgmt_local_translation_form_element($flattened, $task_item, $zebra);
   }
 
@@ -288,7 +288,7 @@ function tmgmt_local_translation_form_element($data, LocalTaskItem $item, &$zebr
   $job = $item->getJobItem()->getJob();
 
   foreach (Element::children($data) as $key) {
-    if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
+    if (isset($data[$key]['#text']) && \Drupal::service('tmgmt.data')->filterData($data[$key])) {
       // The char sequence '][' confuses the form API so we need to replace it.
       $target_key = str_replace('][', '|', $key);
       $zebra = $flip[$zebra];
@@ -310,14 +310,14 @@ function tmgmt_local_translation_form_element($data, LocalTaskItem $item, &$zebr
       $form[$target_key]['translation'] = array(
         '#type' => 'textarea',
         '#title' => $job->getTargetLanguage()->getName(),
-        '#default_value' => $item->getData(tmgmt_ensure_keys_array($key), '#text'),
+        '#default_value' => $item->getData(\Drupal::service('tmgmt.data')->ensureArrayKey($key), '#text'),
         //'#required' => TRUE,
       );
 
       $form[$target_key]['actions'] = array(
         '#type' => 'container',
       );
-      $status = $item->getData(tmgmt_ensure_keys_array($key), '#status');
+      $status = $item->getData(\Drupal::service('tmgmt.data')->ensureArrayKey($key), '#status');
       $completed = $status == TMGMT_DATA_ITEM_STATE_TRANSLATED;
       if ($completed) {
         $form[$target_key]['actions']['reject-' . $target_key] = array(

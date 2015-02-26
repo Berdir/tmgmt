@@ -104,7 +104,7 @@ class JobItemForm extends TmgmtFormBase {
     // of the foreach loop.
     $zebra = 'even';
     foreach (Element::children($data) as $key) {
-      $form['review'][$key] = $this->reviewFormElement($form_state, tmgmt_flatten_data($data[$key], $key), $item, $zebra, $key);
+      $form['review'][$key] = $this->reviewFormElement($form_state, \Drupal::service('tmgmt.data')->flatten($data[$key], $key), $item, $zebra, $key);
     }
 
     if ($view =  entity_load('view', 'tmgmt_job_item_messages')) {
@@ -265,7 +265,7 @@ class JobItemForm extends TmgmtFormBase {
     foreach (Element::children($data) as $key) {
       // The char sequence '][' confuses the form API so we need to replace it.
       $target_key = str_replace('][', '|', $key);
-      if (isset($data[$key]['#text']) && _tmgmt_filter_data($data[$key])) {
+      if (isset($data[$key]['#text']) && \Drupal::service('tmgmt.data')->filterData($data[$key])) {
         $zebra = $flip[$zebra];
         $form[$target_key] = array(
           '#tree' => TRUE,

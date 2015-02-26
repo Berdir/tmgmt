@@ -214,11 +214,11 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
       // at once. We need to apply each containing value on its own.
       // If $value is an array we need to advance the hierarchy level.
       if (is_array($value)) {
-        $this->updateData(array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+        $this->updateData(array_merge(\Drupal::service('tmgmt.data')->ensureArrayKey($key), array($index)), $value);
       }
       // Apply the value.
       else {
-        NestedArray::setValue($this->data, array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+        NestedArray::setValue($this->data, array_merge(\Drupal::service('tmgmt.data')->tmgmt_ensure_keys_array($key), array($index)), $value);
       }
     }
   }
@@ -291,22 +291,23 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
     parent::preSave($storage_controller);
     // @todo Eliminate the need to flatten and unflatten the TaskItem data.
     // Consider everything translated when the job item is translated.
+    $data_service = \Drupal::service('tmgmt.data');
     if ($this->isCompleted()) {
       $this->count_untranslated = 0;
-      $this->count_translated = count(tmgmt_flatten_data($this->data));
+      $this->count_translated = count($data_service->flattenData($this->data));
       $this->count_completed = 0;
     }
     // Consider everything completed if the job is completed.
     elseif ($this->isClosed()) {
       $this->count_untranslated = 0;
       $this->count_translated = 0;
-      $this->count_completed = count(tmgmt_flatten_data($this->data));
+      $this->count_completed = count($data_service->flattenData($this->data));
     }
     // Count the data item states.
     else {
       // Start with assuming that all data is untranslated, then go through it
       // and count translated data.
-      $this->count_untranslated = count(array_filter(tmgmt_flatten_data($this->getJobItem()->getData()), '_tmgmt_filter_data'));
+      $this->count_untranslated = count(\Drupal::service('tmgmt.data')->filterTranslatable($this->getData()));
       $this->count_translated = 0;
       $this->count_completed = 0;
       $this->count($this->data);
@@ -324,7 +325,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
    */
   protected function count(&$item) {
     if (!empty($item['#text'])) {
-      if (_tmgmt_filter_data($item)) {
+      if (\Drupal::service('tmgmt.data')->filterData($item)) {
 
         // Set default states if no state is set.
         if (!isset($item['#status'])) {

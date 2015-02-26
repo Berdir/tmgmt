@@ -86,7 +86,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     $this->writeElement('note', $item->getSourceLabel());
 
     // @todo: Write in nested groups instead of flattening it.
-    $data = array_filter(tmgmt_flatten_data($item->getData()), '_tmgmt_filter_data');
+    $data = \Drupal::service('tmgmt.data')->filterTranslatable($item->getData());
     foreach ($data as $key => $element) {
       $this->addTransUnit($item->id() . '][' . $key, $element, $this->job);
     }
@@ -105,7 +105,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
    */
   protected function addTransUnit($key, $element, Job $job) {
 
-    $key_array = tmgmt_ensure_keys_array($key);
+    $key_array = \Drupal::service('tmgmt.data')->ensureArrayKey($key);
 
     $this->startElement('trans-unit');
     $this->writeAttribute('id', $key);
@@ -207,7 +207,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     $phase = $this->importedXML->xpath("//xliff:phase[@phase-name='extraction']");
     $phase = reset($phase);
     $job = Job::load((string) $phase['job-id']);
-    return tmgmt_unflatten_data($this->getImportedTargets($job));
+    return \Drupal::service('tmgmt.data')->unflatten($this->getImportedTargets($job));
   }
 
   /**
@@ -281,7 +281,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     $xliff_validation = $job->getSetting('xliff_validation');
 
     foreach ($targets as $id => $target) {
-      $array_key = tmgmt_ensure_keys_array($id);
+      $array_key = \Drupal::service('tmgmt.data')->ensureArrayKey($id);
       $job_item = JobItem::load(array_shift($array_key));
       $count = 0;
       $reader->XML('<translation>' . $target['#text'] . '</translation>');
@@ -294,7 +294,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
 
       if (!isset($xliff_validation[$id]) || $xliff_validation[$id] != $count) {
         $job_item->addMessage('Failed to validate semantic integrity of %key element. Please check also the HTML code of the element in the review process.',
-          array('%key' => tmgmt_ensure_keys_string($array_key)));
+          array('%key' => \Drupal::service('tmgmt.data')->ensureStringKey($array_key)));
       }
     }
 
@@ -393,7 +393,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
    */
   protected function processForExport($source, array $key_array) {
     $tjiid = $key_array[0];
-    $key_string = tmgmt_ensure_keys_string($key_array);
+    $key_string = \Drupal::service('tmgmt.data')->ensureStringKey($key_array);
     // The reason why we use DOMDocument object here and not just XMLReader
     // is the DOMDocument's ability to deal with broken HTML.
     $dom = new \DOMDocument();

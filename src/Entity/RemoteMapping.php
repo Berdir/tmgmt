@@ -150,7 +150,7 @@ class RemoteMapping extends ContentEntityBase implements RemoteMappingInterface 
    * {@inheritdoc}
    */
   static public function loadByLocalData($tjid = NULL, $tjiid = NULL, $data_item_key = NULL) {
-    $data_item_key = tmgmt_ensure_keys_string($data_item_key);
+    $data_item_key = \Drupal::service('tmgmt.data')->ensureStringKey($data_item_key);
 
     $query = \Drupal::entityQuery('tmgmt_remote');
     if (!empty($tjid)) {

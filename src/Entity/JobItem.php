@@ -535,7 +535,8 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    */
   protected function addTranslatedDataRecursive($translation, $key = array()) {
     if (isset($translation['#text'])) {
-      $data = $this->getData(tmgmt_ensure_keys_array($key));
+      $data_service = \Drupal::service('tmgmt.data');
+      $data = $this->getData($data_service->ensureArrayKey($key));
       if (empty($data['#status']) || $data['#status'] != TMGMT_DATA_ITEM_STATE_ACCEPTED) {
 
         // In case the origin is not set consider it to be remote.
@@ -570,7 +571,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
               '#origin' => $translation['#origin'],
               '#timestamp' => $translation['#timestamp'],
             );
-            $this->addMessage('Translation for customized @key received. Revert your changes if you wish to use it.', array('@key' => tmgmt_ensure_keys_string($key)));
+            $this->addMessage('Translation for customized @key received. Revert your changes if you wish to use it.', array('@key' => $data_service->ensureStringKey($key)));
             // Unset text and origin so that the current translation does not
             // get overridden.
             unset($translation['#text'], $translation['#origin'], $translation['#timestamp']);
@@ -583,7 +584,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
               '#origin' => $translation['#origin'],
               '#timestamp' => $translation['#timestamp'],
             );
-            $this->addMessage('Translation for already reviewed @key received and stored as a new revision. Revert to it if you wish to use it.', array('@key' => tmgmt_ensure_keys_string($key)));
+            $this->addMessage('Translation for already reviewed @key received and stored as a new revision. Revert to it if you wish to use it.', array('@key' => $data_service->ensureStringKey($key)));
             // Unset text and origin so that the current translation does not
             // get overridden.
             unset($translation['#text'], $translation['#origin'], $translation['#timestamp']);
@@ -597,7 +598,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
             // Add a message if the translation update is from remote.
             if ($translation['#origin'] == 'remote') {
               $diff = Unicode::strlen($translation['#text']) - Unicode::strlen($data['#translation']['#text']);
-              $this->addMessage('Updated translation for key @key, size difference: @diff characters.', array('@key' => tmgmt_ensure_keys_string($key), '@diff' => $diff));
+              $this->addMessage('Updated translation for key @key, size difference: @diff characters.', array('@key' => $data_service->ensureStringKey($key), '@diff' => $diff));
             }
           }
         }
@@ -634,7 +635,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
       $data['#translation']['#timestamp'] = $prev_revision['#timestamp'];
 
       $this->updateData($key, $data);
-      $this->addMessage('Translation for @key reverted to the latest version.', array('@key' => tmgmt_ensure_keys_string($key)));
+      $this->addMessage('Translation for @key reverted to the latest version.', array('@key' => \Drupal::service('tmgmt.data')->ensureStringKey($key)));
       return TRUE;
     }
 
@@ -652,21 +653,21 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
           $this->unserializedData = array();
         }
       }
-      NestedArray::setValue($this->unserializedData, tmgmt_ensure_keys_array($key), $values);
+      NestedArray::setValue($this->unserializedData, \Drupal::service('tmgmt.data')->ensureArrayKey($key), $values);
     }
     foreach ($values as $index => $value) {
       // In order to preserve existing values, we can not aplly the values array
       // at once. We need to apply each containing value on its own.
       // If $value is an array we need to advance the hierarchy level.
       if (is_array($value)) {
-        $this->updateData(array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+        $this->updateData(array_merge(\Drupal::service('tmgmt.data')->ensureArrayKey($key), array($index)), $value);
       }
       // Apply the value.
       else {
         if (!is_array($this->unserializedData)) {
           $this->unserializedData = unserialize($this->get('data')->value);
         }
-        NestedArray::setValue($this->unserializedData, array_merge(tmgmt_ensure_keys_array($key), array($index)), $value);
+        NestedArray::setValue($this->unserializedData, array_merge(\Drupal::service('tmgmt.data')->ensureArrayKey($key), array($index)), $value);
       }
     }
   }
@@ -680,8 +681,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
     // Only attempt to change the status to needs review if it is currently
     // active.
     if ($this->isActive()) {
-      $data = tmgmt_flatten_data($this->getData());
-      $data = array_filter($data, '_tmgmt_filter_data');
+      $data = \Drupal::service('tmgmt.data')->filterTranslatable($this->getData());
       $finished = TRUE;
       foreach ($data as $item) {
         if (empty($item['#status']) || $item['#status'] == TMGMT_DATA_ITEM_STATE_PENDING) {
@@ -843,7 +843,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
       $this->count_pending = 0;
       $this->count_translated = 0;
       $this->count_reviewed = 0;
-      $this->count_accepted = count(array_filter(tmgmt_flatten_data($this->unserializedData), '_tmgmt_filter_data'));
+      $this->count_accepted = count(array_filter(\Drupal::service('tmgmt.data')->flatten($this->unserializedData), array(\Drupal::service('tmgmt.data'), 'filterData')));
     }
     // Count the data item states.
     else {
@@ -865,10 +865,10 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    */
   protected function count(&$item) {
     if (!empty($item['#text'])) {
-      if (_tmgmt_filter_data($item)) {
+      if (\Drupal::service('tmgmt.data')->filterData($item)) {
 
         // Count words of the data item.
-        $this->word_count->value += tmgmt_word_count($item['#text']);
+        $this->word_count->value += \Drupal::service('tmgmt.data')->wordCount($item['#text']);
 
         // Set default states if no state is set.
         if (!isset($item['#status'])) {

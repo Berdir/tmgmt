@@ -82,13 +82,13 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
       case 'translate':
       default:
         // The dummy translation prefixes strings with the target language.
-        $data = array_filter(tmgmt_flatten_data($job->getData()), '_tmgmt_filter_data');
+        $data = array_filter(\Drupal::service('tmgmt.data')->flatten($job->getData()), array(\Drupal::service('tmgmt.data'), 'filterData'));
         $tdata = array();
         foreach ($data as $key => $value) {
           $tdata[$key]['#text'] = $job->getTargetLangcode() . '_' . $value['#text'];
         }
         $job->submitted('Test translation created.');
-        $job->addTranslatedData(tmgmt_unflatten_data($tdata));
+        $job->addTranslatedData(\Drupal::service('tmgmt.data')->unflatten($tdata));
         break;
     }
   }

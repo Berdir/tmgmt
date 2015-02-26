@@ -7,4 +7,6 @@ services:
     parent: default_plugin_manager
   tmgmt.cart:
     class: Drupal\tmgmt\JobItemCart
-
+  tmgmt.data:
+    class: Drupal\tmgmt\Data
+    arguments: ['@config.factory']

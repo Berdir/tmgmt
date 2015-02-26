@@ -669,7 +669,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    * {@inheritdoc}
    */
   public function addTranslatedData(array $data, $key = NULL) {
-    $key = tmgmt_ensure_keys_array($key);
+    $key = \Drupal::service('tmgmt.data')->ensureArrayKey($key);
     $items = $this->getItems();
     // If there is a key, get the specific item and forward the call.
     if (!empty($key)) {
