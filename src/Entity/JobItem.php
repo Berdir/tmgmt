@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * @file
  * Contains Drupal\tmgmt\Plugin\Core\Entity\JobItem.
  */
@@ -15,7 +15,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
-use Drupal\Core\Url;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Render\Element;
 
@@ -46,39 +46,7 @@ use Drupal\Core\Render\Element;
  *
  * @ingroup tmgmt_job
  */
-class JobItem extends ContentEntityBase {
-
-  /**
-   * The translation job item is active and waiting to be translated.
-   *
-   * A job item is marked as 'active' until every translatable piece of text in
-   * the job item has been translated and cached on the job item entity.
-   */
-  const STATE_ACTIVE = 1;
-
-  /**
-   * The translation job item needs to be reviewed.
-   *
-   * A job item is marked as 'needs review' after every single piece of text in
-   * the job item has been translated by the translation provider. After the
-   * review procedure is finished the job item can be accepted and saved.
-   */
-  const STATE_REVIEW = 2;
-
-  /**
-   * The translation job item has been reviewed and accepted.
-   *
-   * After reviewing a job item it can be accepted by the reviewer. Once the user
-   * has accepted the job item, the translated data will be propagated to the
-   * source controller which will also take care of flagging the job item as
-   * 'accepted' if the translated object could be saved successfully.
-   */
-  const STATE_ACCEPTED = 3;
-
-  /**
-   * The translation process of the job item is aborted.
-   */
-  const STATE_ABORTED = 4;
+class JobItem extends ContentEntityBase implements JobItemInterface {
 
   /**
    * Holds the unserialized source data.
@@ -167,7 +135,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Clones as active.
+   * {@inheritdoc}
    */
   public function cloneAsActive() {
     $clone = $this->createDuplicate();
@@ -241,52 +209,37 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Returns the Job ID.
-   *
-   * @return int
-   *   The job ID.
+   * {@inheritdoc}
    */
   public function getJobId() {
     return $this->get('tjid')->target_id;
   }
 
   /**
-   * Returns the plugin.
-   *
-   * @return string
-   *   The plugin ID.
+   * {@inheritdoc}
    */
   public function getPlugin() {
     return $this->get('plugin')->value;
   }
 
   /**
-   * Returns the item type.
-   *
-   * @return string
-   *   The item type.
+   * {@inheritdoc}
    */
   public function getItemType() {
     return $this->get('item_type')->value;
   }
 
   /**
-   * Returns the item ID.
-   *
-   * @return string
-   *   The item ID.
+   * {@inheritdoc}
    */
   public function getItemId() {
     return $this->get('item_id')->value;
   }
 
   /**
-   * Returns the created time.
-   *
-   * @return int
-   *   The time when the job was last changed.
+   * {@inheritdoc}
    */
-  function getChangedTime() {
+  public function getChangedTime() {
     return $this->get('changed')->value;
   }
 
@@ -309,22 +262,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Add a log message for this job item.
-   *
-   * @param string $message
-   *   The message to store in the log. Keep $message translatable by not
-   *   concatenating dynamic values into it! Variables in the message should be
-   *   added by using placeholder strings alongside the variables argument to
-   *   declare the value of the placeholders. See t() for documentation on how
-   *   $message and $variables interact.
-   * @param array $variables
-   *   (Optional) An array of variables to replace in the message on display.
-   * @param string $type
-   *   (Optional) The type of the message. Can be one of 'status', 'error',
-   *   'warning' or 'debug'. Messages of the type 'debug' will not get printed
-   *   to the screen.
-   *
-   * @return \Drupal\tmgmt\Entity\Message
+   * {@inheritdoc}
    */
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job item if it hasn't yet been saved.
@@ -337,10 +275,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Retrieves the label of the source object via the source controller.
-   *
-   * @return
-   *   The label of the source object.
+   * {@inheritdoc}
    */
   public function getSourceLabel() {
     if ($controller = $this->getSourcePlugin()) {
@@ -350,10 +285,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Retrieves the path to the source object via the source controller.
-   *
-   * @return \Drupal\Core\Url
-   *   The URL object for the source object.
+   * {@inheritdoc}
    */
   public function getSourceUrl() {
     if ($controller = $this->getSourcePlugin()) {
@@ -363,10 +295,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Returns the user readable type of job item.
-   *
-   * @param string
-   *   A type that describes the job item.
+   * {@inheritdoc}
    */
   public function getSourceType() {
     if ($controller = $this->getSourcePlugin()) {
@@ -376,21 +305,14 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Loads the job entity that this job item is attached to.
-   *
-   * @return \Drupal\tmgmt\Entity\Job
-   *   The job entity that this job item is attached to or NULL if there is
-   *   no job.
+   * {@inheritdoc}
    */
   public function getJob() {
     return $this->get('tjid')->entity;
   }
 
   /**
-   * Returns the translator for this job item.
-   *
-   * @return \Drupal\tmgmt\Entity\Translator
-   *   The translator entity or NULL if there is none.
+   * {@inheritdoc}
    */
   public function getTranslator() {
     if ($job = $this->getJob()) {
@@ -400,10 +322,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Returns the translator plugin of the translator of this job item.
-   *
-   * @return \Drupal\tmgmt\TranslatorPluginInterface|null
-   *   The translator plugin instance or NULL if there is none.
+   * {@inheritdoc}
    */
   public function getTranslatorPlugin() {
     if ($job = $this->getJob()) {
@@ -413,34 +332,9 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Array of the data to be translated.
-   *
-   * The structure is similar to the form API in the way that it is a possibly
-   * nested array with the following properties whose presence indicate that the
-   * current element is a text that might need to be translated.
-   *
-   * - #text: The text to be translated.
-   * - #label: (Optional) The label that might be shown to the translator.
-   * - #comment: (Optional) A comment with additional information.
-   * - #translate: (Optional) If set to FALSE the text will not be translated.
-   * - #translation: The translated data. Set by the translator plugin.
-   * - #escape: (Optional) List of arrays with a required string key, keyed by
-   *   the position key. Translators must use this list to prevent translation
-   *   of these strings if possible.
-   *
-   *
-   * @todo: Move data item documentation to a new, separate api group.
-   *
-   * The key can be an alphanumeric string.
-   * @param $key
-   *   If present, only the subarray identified by key is returned.
-   * @param $index
-   *   Optional index of an attribute below $key.
-   *
-   * @return array
-   *   A structured data array.
+   * {@inheritdoc}
    */
-  public function getData(array $key = array(), $index = NULL) {
+  public function getData($key = array(), $index = NULL) {
     if (empty($this->unserializedData) && $this->get('data')->value) {
       $this->unserializedData = unserialize($this->get('data')->value);
     }
@@ -459,7 +353,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Loads the structured source data array from the source.
+   * {@inheritdoc}
    */
   public function getSourceData() {
     if ($controller = $this->getSourcePlugin()) {
@@ -469,15 +363,14 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Returns an instance of the configured source plugin.
-   *
-   * @return \Drupal\tmgmt\SourcePluginInterface
+   * {@inheritdoc}
    */
   public function getSourcePlugin() {
     if ($this->get('plugin')->value) {
       try {
         return \Drupal::service('plugin.manager.tmgmt.source')->createInstance($this->get('plugin')->value);
-      } catch (PluginException $e) {
+      }
+      catch (PluginException $e) {
         // Ignore exceptions due to missing source plugins.
       }
     }
@@ -485,57 +378,42 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Count of all pending data items.
-   *
-   * @return int
-   *   Pending counts.
+   * {@inheritdoc}
    */
   public function getCountPending() {
     return $this->get('count_pending')->value;
   }
 
   /**
-   * Count of all translated data items.
-   *
-   * @return int
-   *   Translated count.
+   * {@inheritdoc}
    */
   public function getCountTranslated() {
     return $this->get('count_translated')->value;
   }
 
   /**
-   * Count of all accepted data items.
-   *
-   * @return int
-   *   Accepted count.
+   * {@inheritdoc}
    */
   public function getCountAccepted() {
     return $this->get('count_accepted')->value;
   }
 
   /**
-   * Count of all accepted data items.
-   *
-   * @return int
-   *   Accepted count
+   * {@inheritdoc}
    */
   public function getCountReviewed() {
     return $this->get('count_reviewed')->value;
   }
 
   /**
-   * Word count of all data items.
-   *
-   * @return int
-   *   Word count
+   * {@inheritdoc}
    */
   public function getWordCount() {
     return (int) $this->get('word_count')->value;
   }
 
   /**
-   * Sets the state of the job item to 'needs review'.
+   * {@inheritdoc}
    */
   public function needsReview($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
@@ -552,7 +430,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Sets the state of the job item to 'accepted'.
+   * {@inheritdoc}
    */
   public function accepted($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
@@ -570,7 +448,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Sets the state of the job item to 'active'.
+   * {@inheritdoc}
    */
   public function active($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
@@ -582,19 +460,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Updates the state of the job item.
-   *
-   * @param $state
-   *   The new state of the job item. Has to be one of the job state constants.
-   * @param $message
-   *   (Optional) The log message to be saved along with the state change.
-   * @param $variables
-   *   (Optional) An array of variables to replace in the message on display.
-   *
-   * @return int
-   *   The updated state of the job if it could be set.
-   *
-   * @see Job::addMessage()
+   * {@inheritdoc}
    */
   public function setState($state, $message = NULL, $variables = array(), $type = 'debug') {
     // Return TRUE if the state could be set. Return FALSE otherwise.
@@ -610,11 +476,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Returns the state of the job item. Can be one of the job item state
-   * constants.
-   *
-   * @return int
-   *   The state of the job item.
+   * {@inheritdoc}
    */
   public function getState() {
     // We don't need to check if the state is actually set because we always set
@@ -623,53 +485,35 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Checks whether the passed value matches the current state.
-   *
-   * @param $state
-   *   The value to check the current state against.
-   *
-   * @return bool
-   *   TRUE if the passed state matches the current state, FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isState($state) {
     return $this->getState() == $state;
   }
 
   /**
-   * Checks whether the state of this transaction is 'accepted'.
-   *
-   * @return bool
-   *   TRUE if the state is 'accepted', FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isAccepted() {
     return $this->isState(static::STATE_ACCEPTED);
   }
 
   /**
-   * Checks whether the state of this transaction is 'active'.
-   *
-   * @return bool
-   *   TRUE if the state is 'active', FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isActive() {
     return $this->isState(static::STATE_ACTIVE);
   }
 
   /**
-   * Checks whether the state of this transaction is 'needs review'.
-   *
-   * @return bool
-   *   TRUE if the state is 'needs review', FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isNeedsReview() {
     return $this->isState(static::STATE_REVIEW);
   }
 
   /**
-   * Checks whether the state of this transaction is 'aborted'.
-   *
-   * @return bool
-   *   TRUE if the state is 'aborted', FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isAborted() {
     return $this->isState(static::STATE_ABORTED);
@@ -773,13 +617,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Reverts data item translation to the latest existing revision.
-   *
-   * @param array $key
-   *   Data item key that should be reverted.
-   *
-   * @return bool
-   *   Result of the revert action.
+   * {@inheritdoc}
    */
   public function dataItemRevert(array $key) {
     $data = $this->getData($key);
@@ -804,19 +642,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Updates the values for a specific substructure in the data array.
-   *
-   * The values are either set or updated but never deleted.
-   *
-   * @param string|array $key
-   *   Key pointing to the item the values should be applied.
-   *   The key can be either be an array containing the keys of a nested array
-   *   hierarchy path or a string with '][' or '|' as delimiter.
-   * @param array $values
-   *   Nested array of values to set.
-   * @param bool $replace
-   *   (optional) When TRUE, replaces the structure at the provided key instead
-   *   of writing into it.
+   * {@inheritdoc}
    */
   public function updateData($key, $values = array(), $replace = FALSE) {
     if ($replace) {
@@ -846,43 +672,9 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Adds translated data to a job item.
-   *
-   * This function calls for JobItem::addTranslatedDataRecursive() which
-   * sets the status of each added data item to TMGMT_DATA_ITEM_STATE_TRANSLATED.
-   *
-   * Following rules apply while adding translated data:
-   *
-   * 1) Updated are only items that are changed. In case there is local
-   * modification the translation is added as a revision with a message stating
-   * this fact.
-   *
-   * 2) Merging happens at the data items level, so updating only those that are
-   * changed. If a data item is in review/reject status and is being updated
-   * with translation originating from remote the status is updated to
-   * 'translated' no matter if it is changed or not.
-   *
-   * 3) Each time a data item is updated the previous translation becomes a
-   * revision.
-   *
-   * If all data items are translated, the status of the job item is updated to
-   * needs review.
-   *
-   * @todo
-   * To update the job item status to needs review we could take advantage of
-   * the JobItem::getCountPending() and JobItem::getCountTranslated().
-   * The catch is, that this counter gets updated while saveing which not yet
-   * hapened.
-   *
-   * @param $translation
-   *   Nested array of translated data. Can either be a single text entry, the
-   *   whole data structure or parts of it.
-   * @param $key
-   *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a nested
-   *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
-   *   means that it will replace the whole translated data array.
+   * {@inheritdoc}
    */
-  public function addTranslatedData($translation, $key = array()) {
+  public function addTranslatedData(array $translation, $key = array()) {
     $this->addTranslatedDataRecursive($translation, $key);
     // Check if the job item has all the translated data that it needs now.
     // Only attempt to change the status to needs review if it is currently
@@ -921,11 +713,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Propagates the returned job item translations to the sources.
-   *
-   * @return boolean
-   *   TRUE if we were able to propagate the translated data and the item could
-   *   be saved, FALSE otherwise.
+   * {@inheritdoc}
    */
   public function acceptTranslation() {
     if (!$this->isNeedsReview() || !$controller = $this->getSourcePlugin()) {
@@ -938,10 +726,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Returns all job messages attached to this job item.
-   *
-   * @return array
-   *   An array of translation job messages.
+   * {@inheritdoc}
    */
   public function getMessages($conditions = array()) {
     $query = \Drupal::entityQuery('tmgmt_message')
@@ -963,10 +748,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Retrieves all siblings of this job item.
-   *
-   * @return array
-   *   An array of job items that are the siblings of this job item.
+   * {@inheritdoc}
    */
   public function getSiblings() {
     $ids = \Drupal::entityQuery('tmgmt_job_item')
@@ -980,15 +762,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Returns all job messages attached to this job item with timestamp newer
-   * than $time.
-   *
-   * @param int $time
-   *   (Optional) Messages need to have a newer timestamp than $time. Defaults
-   *   to REQUEST_TIME.
-   *
-   * @return array
-   *   An array of translation job messages.
+   * {@inheritdoc}
    */
   public function getMessagesSince($time = NULL) {
     $time = isset($time) ? $time : REQUEST_TIME;
@@ -998,18 +772,7 @@ class JobItem extends ContentEntityBase {
 
 
   /**
-   * Adds remote mapping entity to this job item.
-   *
-   * @param string $data_item_key
-   *   Job data item key.
-   * @param int $remote_identifier_1
-   *   Array of remote identifiers. In case you need to save
-   *   remote_identifier_2/3 set it into $mapping_data argument.
-   * @param array $mapping_data
-   *   Additional data to be added.
-   *
-   * @return int|bool
-   * @throws TMGMTException
+   * {@inheritdoc}
    */
   public function addRemoteMapping($data_item_key = NULL, $remote_identifier_1 = NULL, $mapping_data = array()) {
 
@@ -1034,10 +797,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Gets remote mappings for current job item.
-   *
-   * @return array
-   *   List of TMGMTRemote entities.
+   * {@inheritdoc}
    */
   public function getRemoteMappings() {
     $trids = \Drupal::entityQuery('tmgmt_remote')
@@ -1052,31 +812,24 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Gets language code of the job item source.
-   *
-   * @return string
-   *   Language code.
+   * {@inheritdoc}
    */
   public function getSourceLangCode() {
     return $this->getSourcePlugin()->getSourceLangCode($this);
   }
 
   /**
-   * Gets existing translation language codes of the job item source.
-   *
-   * @return array
-   *   Array of language codes.
+   * {@inheritdoc}
    */
   public function getExistingLangCodes() {
     return $this->getSourcePlugin()->getExistingLangCodes($this);
   }
 
   /**
-   * Recalculate statistical word-data: pending, translated, reviewed, accepted.
+   * {@inheritdoc}
    */
   public function recalculateStatistics() {
     // Set translatable data from the current entity to calculate words.
-
     if (empty($this->unserializedData) && $this->get('data')->value) {
       $this->unserializedData = unserialize($this->get('data')->value);
     }
@@ -1105,10 +858,9 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Parse all data items recursively and sums up the counters for
-   * accepted, translated and pending items.
+   * Sums up the counters for accepted, translated and pending items.
    *
-   * @param $item
+   * @param string $item
    *   The current data item.
    */
   protected function count(&$item) {
@@ -1133,9 +885,11 @@ class JobItem extends ContentEntityBase {
           case TMGMT_DATA_ITEM_STATE_REVIEWED:
             $this->count_reviewed->value++;
             break;
+
           case TMGMT_DATA_ITEM_STATE_TRANSLATED:
             $this->count_translated->value++;
             break;
+
           default:
             $this->count_pending->value++;
             break;
@@ -1157,10 +911,7 @@ class JobItem extends ContentEntityBase {
   }
 
   /**
-   * Returns a labeled list of all available states.
-   *
-   * @return array
-   *   A list of all available states.
+   * {@inheritdoc}
    */
   public static function getStates() {
     return array(

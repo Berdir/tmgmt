@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * @file
  * Contains Drupal\tmgmt\Plugin\Core\Entity\RemoteMapping.
  */
@@ -10,6 +10,7 @@ namespace Drupal\tmgmt\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\tmgmt\RemoteMappingInterface;
 
 /**
  * Entity class for the tmgmt_remote entity.
@@ -26,7 +27,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *
  * @ingroup tmgmt_job
  */
-class RemoteMapping extends ContentEntityBase {
+class RemoteMapping extends ContentEntityBase implements RemoteMappingInterface {
 
   /**
    * {@inheritdoc}
@@ -68,120 +69,85 @@ class RemoteMapping extends ContentEntityBase {
     return $fields;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getJobId() {
     return $this->get('tjid')->target_id;
   }
 
   /**
-   * Gets translation job.
-   *
-   * @return \Drupal\tmgmt\Entity\Job
+   * {@inheritdoc}
    */
-  function getJob() {
+  public function getJob() {
     return $this->get('tjid')->entity;
   }
 
   /**
-   * Gets translation job item.
-   *
-   * @return \Drupal\tmgmt\Entity\JobItem
+   * {@inheritdoc}
    */
-  function getJobItem() {
+  public function getJobItem() {
     return $this->get('tjiid')->entity;
   }
 
   /**
-   * Adds data to the remote_data storage.
-   *
-   * @param string $key
-   *   Key through which the data will be accessible.
-   * @param $value
-   *   Value to store.
+   * {@inheritdoc}
    */
-  function addRemoteData($key, $value) {
+  public function addRemoteData($key, $value) {
     $this->remote_data->$key = $value;
   }
 
   /**
-   * Gets data from remote_data storage.
-   *
-   * @param string $key
-   *   Access key for the data.
-   *
-   * @return mixed
-   *   Stored data.
+   * {@inheritdoc}
    */
-  function getRemoteData($key) {
+  public function getRemoteData($key) {
     return $this->remote_data->$key;
   }
 
   /**
-   * Removes data from remote_data storage.
-   *
-   * @param string $key
-   *   Access key for the data that are to be removed.
+   * {@inheritdoc}
    */
-  function removeRemoteData($key) {
+  public function removeRemoteData($key) {
     unset($this->remote_data->$key);
   }
 
   /**
-   * Returns the amount.
-   *
-   * @return int
+   * {@inheritdoc}
    */
-  function getAmount() {
+  public function getAmount() {
     return $this->get('amount')->value;
   }
 
   /**
-   * Returns the currency.
-   *
-   * @return int
+   * {@inheritdoc}
    */
-  function getCurrency() {
+  public function getCurrency() {
     return $this->get('currency')->value;
   }
 
   /**
-   * Returns the remote identifier 1.
-   *
-   * @return string
+   * {@inheritdoc}
    */
-  function getRemoteIdentifier1() {
+  public function getRemoteIdentifier1() {
     return $this->get('remote_identifier_1')->value;
   }
 
   /**
-   * Returns the remote identifier 2.
-   *
-   * @return string
+   * {@inheritdoc}
    */
-  function getRemoteIdentifier2() {
+  public function getRemoteIdentifier2() {
     return $this->get('remote_identifier_1')->value;
   }
 
   /**
-   * Returns the remote identifier 3.
-   *
-   * @return string
+   * {@inheritdoc}
    */
-  function getRemoteIdentifier3() {
+  public function getRemoteIdentifier3() {
     return $this->get('remote_identifier_3')->value;
   }
 
   /**
-   * Loads remote mappings based on local data.
-   *
-   * @param int $tjid
-   *   Translation job id.
-   * @param int $tjiid
-   *   Translation job item id.
-   * @param int $data_item_key
-   *   Data item key.
-   *
-   * @return static[]
-   *   Array of TMGMTRemote entities.
+   * {@inheritdoc}
    */
   static public function loadByLocalData($tjid = NULL, $tjiid = NULL, $data_item_key = NULL) {
     $data_item_key = tmgmt_ensure_keys_string($data_item_key);
@@ -206,14 +172,7 @@ class RemoteMapping extends ContentEntityBase {
   }
 
   /**
-   * Loads remote mapping entities based on remote identifier.
-   *
-   * @param int $remote_identifier_1
-   * @param int $remote_identifier_2
-   * @param int $remote_identifier_3
-   *
-   * @return static[]
-   *   Array of TMGMTRemote entities.
+   * {@inheritdoc}
    */
   static public function loadByRemoteIdentifier($remote_identifier_1 = NULL, $remote_identifier_2 = NULL, $remote_identifier_3 = NULL) {
     $query = \Drupal::entityQuery('tmgmt_remote');

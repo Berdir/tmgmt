@@ -10,6 +10,7 @@ namespace Drupal\tmgmt\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\tmgmt\MessageInterface;
 
 /**
  * Entity class for the tmgmt_message entity.
@@ -27,7 +28,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *
  * @ingroup tmgmt_job
  */
-class Message extends ContentEntityBase {
+class Message extends ContentEntityBase implements MessageInterface {
   /**
    * {@inheritdoc}
    */
@@ -72,20 +73,20 @@ class Message extends ContentEntityBase {
     switch ($this->type->value) {
       case 'error':
         return t('Error message from @time', array('@time' => $created));
+
       case 'status':
         return t('Status message from @time', array('@time' => $created));
+
       case 'warning':
         return t('Warning message from @time', array('@time' => $created));
+
       case 'debug':
         return t('Debug message from @time', array('@time' => $created));
     }
   }
 
   /**
-   * Returns the translated message.
-   *
-   * @return
-   *   The translated message.
+   * {@inheritdoc}
    */
   public function getMessage() {
     $text = $this->message->value;
@@ -96,31 +97,21 @@ class Message extends ContentEntityBase {
   }
 
   /**
-   * Loads the job entity that this job message is attached to.
-   *
-   * @return \Drupal\tmgmt\Entity\Job
-   *   The job entity that this job message is attached to or FALSE if there was
-   *   a problem.
+   * {@inheritdoc}
    */
   public function getJob() {
     return $this->get('tjid')->entity;
   }
 
   /**
-   * Loads the job entity that this job message is attached to.
-   *
-   * @return \Drupal\tmgmt\Entity\JobItem
-   *   The job item entity that this job message is attached to or FALSE if
-   *   there was a problem.
+   * {@inheritdoc}
    */
   public function getJobItem() {
     return $this->get('tjid')->entity;
   }
 
   /**
-   * Returns the message type.
-   *
-   * @return string
+   * {@inheritdoc}
    */
   public function getType() {
     return $this->get('type')->value;

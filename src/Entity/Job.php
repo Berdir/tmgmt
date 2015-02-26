@@ -15,6 +15,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
@@ -51,65 +52,7 @@ use Drupal\user\UserInterface;
  *
  * @ingroup tmgmt_job
  */
-class Job extends ContentEntityBase implements EntityOwnerInterface {
-
-  /**
-   * A new translation job.
-   *
-   * In the default user interface, jobs with this state are so called cart jobs.
-   * Each user gets his cart jobs listed in a block and can check them out.
-   */
-   const STATE_UNPROCESSED = 0;
-
-  /**
-   * A translation job that has been submitted to the translator.
-   *
-   * Translator plugins are responsible for setting this state in their
-   * implementation of
-   * TranslatorPluginControllerInterface::requestTranslation().
-   */
-   const STATE_ACTIVE = 1;
-
-  /**
-   * A translation job that has been rejected by the translator.
-   *
-   * The translator plugin can use this state if the job has been actively
-   * rejected. However, this should be avoided by doing the necessary checks
-   * in the canTranslate() method and in the job configuration settings.
-   *
-   * A rejected job can be re-submitted.
-   */
-   const STATE_REJECTED = 2;
-
-  /**
-   * The translation has been accepted and the job is finished.
-   *
-   * Once the job has been accepted, the source plugins are called to update their
-   * sources with the translated data.
-   */
-   const STATE_ACCEPTED = 3;
-
-  /**
-   * The translation job has been aborted.
-   *
-   * A job can be aborted at any time. If he is currently in the submitted state
-   * the translator plugin is asked if this translation can be aborted and needs
-   * to confirm it by returning TRUE in abortTranslation().
-   */
-   const STATE_ABORTED = 4;
-
-  /**
-   * The translation job has been finished.
-   *
-   * A job is marked as 'finished' after every single attached job item has been
-   * reviewed, accepted and saved.
-   */
-   const STATE_FINISHED = 5;
-
-  /**
-   * Maximum length of a job or job item label.
-   */
-  const LABEL_MAX_LENGTH = 128;
+class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterface {
 
   /**
    * {@inheritdoc}
@@ -192,77 +135,56 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Returns the target language.
-   *
-   * @return \Drupal\Core\Language\LanguageInterface
-   *   The target language.
+   * {@inheritdoc}
    */
-  function getTargetLanguage() {
+  public function getTargetLanguage() {
     return $this->get('target_language')->language;
   }
 
   /**
-   * Returns the target language code.
-   *
-   * @return string
-   *   The target language code
+   * {@inheritdoc}
    */
-  function getTargetLangcode() {
+  public function getTargetLangcode() {
     return $this->get('target_language')->value;
   }
 
   /**
-   * Returns the source language.
-   *
-   * @return \Drupal\Core\Language\LanguageInterface
-   *   The source language.
+   * {@inheritdoc}
    */
-  function getSourceLanguage() {
+  public function getSourceLanguage() {
     return $this->get('source_language')->language;
   }
 
   /**
-   * Returns the source language code.
-   *
-   * @return string
-   *   The source language code
+   * {@inheritdoc}
    */
-  function getSourceLangcode() {
+  public function getSourceLangcode() {
     return $this->get('source_language')->value;
   }
 
   /**
-   * Returns the created time.
-   *
-   * @return int
-   *   The time when the job was last changed.
+   * {@inheritdoc}
    */
-  function getChangedTime() {
+  public function getChangedTime() {
     return $this->get('changed')->value;
   }
 
   /**
-   * Returns the created time.
-   *
-   * @return int
-   *   The time when the job was last changed.
+   * {@inheritdoc}
    */
-  function getCreatedTime() {
+  public function getCreatedTime() {
     return $this->get('created')->value;
   }
 
   /**
-   * Returns the reference.
-   *
-   * @return string
-   *   The reference set by the translator.
+   * {@inheritdoc}
    */
-  function getReference() {
+  public function getReference() {
     return $this->get('reference')->value;
   }
 
   /**
-   * Clones job as unprocessed.
+   * {@inheritdoc}
    */
   public function cloneAsUnprocessed() {
     $clone = $this->createDuplicate();
@@ -303,7 +225,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * {inheritdoc}
+   * {@inheritdoc}
    */
   public function label($langcode = NULL) {
     // In some cases we might have a user-defined label.
@@ -337,19 +259,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Adds an item to the translation job.
-   *
-   * @param $plugin
-   *   The plugin name.
-   * @param $item_type
-   *   The source item type.
-   * @param $item_id
-   *   The source item id.
-   *
-   * @return JobItem
-   *   The job item that was added to the job or FALSE if it couldn't be saved.
-   * @throws \Drupal\tmgmt\TMGMTException
-   *   On zero item word count.
+   * {@inheritdoc}
    */
   public function addItem($plugin, $item_type, $item_id) {
 
@@ -382,31 +292,15 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Add a givenJobItem to this job.
-   *
-   * @param \Drupal\tmgmt\Entity\JobItem $item
-   *   The job item to add.
+   * {@inheritdoc}
    */
-  function addExistingItem(JobItem $item) {
+  public function addExistingItem(JobItem $item) {
     $item->tjid = $this->id();
     $item->save();
   }
 
   /**
-   * Add a log message for this job.
-   *
-   * @param $message
-   *   The message to store in the log. Keep $message translatable by not
-   *   concatenating dynamic values into it! Variables in the message should be
-   *   added by using placeholder strings alongside the variables argument to
-   *   declare the value of the placeholders. See t() for documentation on how
-   *   $message and $variables interact.
-   * @param $variables
-   *   (Optional) An array of variables to replace in the message on display.
-   * @param $type
-   *   (Optional) The type of the message. Can be one of 'status', 'error',
-   *   'warning' or 'debug'. Messages of the type 'debug' will not get printed
-   *   to the screen.
+   * {@inheritdoc}
    */
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job if it hasn't yet been saved.
@@ -420,13 +314,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Returns all job items attached to this job.
-   *
-   * @param array $conditions
-   *   Additional conditions.
-   *
-   * @return \Drupal\tmgmt\Entity\JobItem[]
-   *   An array of translation job items.
+   * {@inheritdoc}
    */
   public function getItems($conditions = array()) {
     $query = \Drupal::entityQuery('tmgmt_job_item')
@@ -448,13 +336,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Returns all job messages attached to this job.
-   *
-   * @param array $conditions
-   *   Additional conditions.
-   *
-   * @return \Drupal\tmgmt\Entity\Message[]
-   *   An array of translation job messages.
+   * {@inheritdoc}
    */
   public function getMessages($conditions = array()) {
     $query = \Drupal::entityQuery('tmgmt_message')
@@ -476,15 +358,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Returns all job messages attached to this job with timestamp newer than
-   * $time.
-   *
-   * @param int $time
-   *   (Optional) Messages need to have a newer timestamp than $time. Defaults
-   *   to REQUEST_TIME.
-   *
-   * @return \Drupal\tmgmt\Entity\Message[]
-   *   An array of translation job messages.
+   * {@inheritdoc}
    */
   public function getMessagesSince($time = NULL) {
     $time = isset($time) ? $time : REQUEST_TIME;
@@ -493,15 +367,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Retrieves a setting value from the job settings. Pulls the default values
-   * (if defined) from the plugin controller.
-   *
-   * @param string $name
-   *   The name of the setting.
-   *
-   * @return
-   *   The setting value or $default if the setting value is not set. Returns
-   *   NULL if the setting does not exist at all.
+   * {@inheritdoc}
    */
   public function getSetting($name) {
     if (isset($this->settings->$name)) {
@@ -522,20 +388,14 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Returns the translator ID for this job.
-   *
-   * @return int
-   *   The translator ID or NULL if there is none.
+   * {@inheritdoc}
    */
   public function getTranslatorId() {
     return $this->get('translator')->target_id;
   }
 
   /**
-   * Returns the translator for this job.
-   *
-   * @return Translator
-   *   The translator entity or NULL if there is none.
+   * {@inheritdoc}
    */
   public function getTranslator() {
     if ($this->translator->target_id) {
@@ -545,31 +405,14 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Returns the state of the job. Can be one of the job state constants.
-   *
-   * @return integer
-   *   The state of the job or NULL if it hasn't been set yet.
+   * {@inheritdoc}
    */
   public function getState() {
     return $this->get('state')->value;
   }
 
   /**
-   * Updates the state of the job.
-   *
-   * @param int $state
-   *   The new state of the job. Has to be one of the job state constants.
-   * @param string $message
-   *   (optional) The log message to be saved along with the state change.
-   * @param array $variables
-   *   (optional) An array of variables to replace in the message on display.
-   * @param string $type
-   *   (optional) The message type.
-   *
-   * @return int
-   *   The updated state of the job if it could be set.
-   *
-   * @see Job::addMessage()
+   * {@inheritdoc}
    */
   public function setState($state, $message = NULL, $variables = array(), $type = 'debug') {
     // Return TRUE if the state could be set. Return FALSE otherwise.
@@ -585,13 +428,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Checks whether the passed value matches the current state.
-   *
-   * @param int $state
-   *   The value to check the current state against.
-   *
-   * @return bool
-   *   TRUE if the passed state matches the current state, FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isState($state) {
     return $this->getState() == $state;
@@ -612,60 +449,42 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Returns whether the state of this job is 'unprocessed'.
-   *
-   * @return bool
-   *   TRUE if the state is 'unprocessed', FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isUnprocessed() {
     return $this->isState(Job::STATE_UNPROCESSED);
   }
 
   /**
-   * Returns whether the state of this job is 'aborted'.
-   *
-   * @return bool
-   *   TRUE if the state is 'aborted', FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isAborted() {
     return $this->isState(static::STATE_ABORTED);
   }
 
   /**
-   * Returns whether the state of this job is 'active'.
-   *
-   * @return bool
-   *   TRUE if the state is 'active', FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isActive() {
     return $this->isState(static::STATE_ACTIVE);
   }
 
   /**
-   * Returns whether the state of this job is 'rejected'.
-   *
-   * @return bool
-   *   TRUE if the state is 'rejected', FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isRejected() {
     return $this->isState(static::STATE_REJECTED);
   }
 
   /**
-   * Returns whether the state of this jon is 'finished'.
-   *
-   * @return bool
-   *   TRUE if the state is 'finished', FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isFinished() {
     return $this->isState(static::STATE_FINISHED);
   }
 
   /**
-   * Checks whether a job is translatable.
-   *
-   * @return boolean
-   *   TRUE if the job can be translated, FALSE otherwise.
+   * {@inheritdoc}
    */
   public function canRequestTranslation() {
     if ($translator = $this->getTranslator()) {
@@ -677,10 +496,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Checks whether a job is abortable.
-   *
-   * @return bool
-   *   TRUE if the job can be aborted, FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isAbortable() {
     // Only non-submitted translation jobs can be aborted.
@@ -688,39 +504,21 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Checks whether a job is submittable.
-   *
-   * @return bool
-   *   TRUE if the job can be submitted, FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isSubmittable() {
     return $this->isUnprocessed() || $this->isRejected();
   }
 
   /**
-   * Checks whether a job is deletable.
-   *
-   * @return bool
-   *   TRUE if the job can be deleted, FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isDeletable() {
     return !$this->isActive();
   }
 
   /**
-   * Set the state of the job to 'submitted'.
-   *
-   * @param string $message
-   *   (optional) The log message to be saved along with the state change.
-   * @param array $variables
-   *   (optional) An array of variables to replace in the message on display.
-   * @param string $type
-   *   (optional) The message type.
-   *
-   * @return \Drupal\tmgmt\Entity\Job
-   *   The job entity.
-   *
-   * @see static::addMessage()
+   * {@inheritdoc}
    */
   public function submitted($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
@@ -730,17 +528,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Set the state of the job to 'finished'.
-   *
-   * @param $message
-   *   The log message to be saved along with the state change.
-   * @param $variables
-   *   (Optional) An array of variables to replace in the message on display.
-   *
-   * @return \Drupal\tmgmt\Entity\Job
-   *   The job entity.
-   *
-   * @see Job::addMessage()
+   * {@inheritdoc}
    */
   public function finished($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
@@ -750,19 +538,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Sets the state of the job to 'aborted'.
-   *
-   * @param $message
-   *   The log message to be saved along with the state change.
-   * @param $variables
-   *   (Optional) An array of variables to replace in the message on display.
-   *
-   * Use Job::abortTranslation() to abort a translation.
-   *
-   * @return \Drupal\tmgmt\Entity\Job
-   *   The job entity.
-   *
-   * @see Job::addMessage()
+   * {@inheritdoc}
    */
   public function aborted($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
@@ -776,17 +552,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Sets the state of the job to 'rejected'.
-   *
-   * @param $message
-   *   The log message to be saved along with the state change.
-   * @param $variables
-   *   (Optional) An array of variables to replace in the message on display.
-   *
-   * @return \Drupal\tmgmt\Entity\Job
-   *   The job entity.
-   *
-   * @see Job::addMessage()
+   * {@inheritdoc}
    */
   public function rejected($message = NULL, $variables = array(), $type = 'error') {
     if (!isset($message)) {
@@ -796,10 +562,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Request the translation of a job from the translator.
-   *
-   * @return integer
-   *   The updated job status.
+   * {@inheritdoc}
    */
   public function requestTranslation() {
     if (!$this->canRequestTranslation() || !$controller = $this->getTranslatorPlugin()) {
@@ -812,12 +575,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Attempts to abort the translation job. Already accepted jobs can not be
-   * aborted, submitted jobs only if supported by the translator plugin.
-   * Always use this method if you want to abort a translation job.
-   *
-   * @return boolean
-   *   TRUE if the translation job was aborted, FALSE otherwise.
+   * {@inheritdoc}
    */
   public function abortTranslation() {
     if (!$this->isAbortable() || !$controller = $this->getTranslatorPlugin()) {
@@ -835,10 +593,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Returns the translator plugin of the translator of this job.
-   *
-   * @return \Drupal\tmgmt\TranslatorPluginInterface
-   *   The translator plugin instance.
+   * {@inheritdoc}
    */
   public function getTranslatorPlugin() {
     if ($translator = $this->getTranslator($this)) {
@@ -848,17 +603,9 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Returns the source data of all job items.
-   *
-   * @param $key
-   *   If present, only the subarray identified by key is returned.
-   * @param $index
-   *   Optional index of an attribute below $key.
-   * @return array
-   *   A nested array with the source data where the most upper key is the job
-   *   item id.
+   * {@inheritdoc}
    */
-  public function getData(array $key = array(), $index = NULL) {
+  public function getData($key = array(), $index = NULL) {
     $data = array();
     if (!empty($key)) {
       $tjiid = array_shift($key);
@@ -884,68 +631,44 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Sums up all pending counts of this jobs job items.
-   *
-   * @return
-   *   The sum of all pending counts
+   * {@inheritdoc}
    */
   public function getCountPending() {
     return tmgmt_job_statistic($this, 'count_pending');
   }
 
   /**
-   * Sums up all translated counts of this jobs job items.
-   *
-   * @return
-   *   The sum of all translated counts
+   * {@inheritdoc}
    */
   public function getCountTranslated() {
     return tmgmt_job_statistic($this, 'count_translated');
   }
 
   /**
-   * Sums up all accepted counts of this jobs job items.
-   *
-   * @return
-   *   The sum of all accepted data items.
+   * {@inheritdoc}
    */
   public function getCountAccepted() {
     return tmgmt_job_statistic($this, 'count_accepted');
   }
 
   /**
-   * Sums up all accepted counts of this jobs job items.
-   *
-   * @return
-   *   The sum of all accepted data items.
+   * {@inheritdoc}
    */
   public function getCountReviewed() {
     return tmgmt_job_statistic($this, 'count_reviewed');
   }
 
   /**
-   * Sums up all word counts of this jobs job items.
-   *
-   * @return
-   *   The total word count of this job.
+   * {@inheritdoc}
    */
   public function getWordCount() {
     return tmgmt_job_statistic($this, 'word_count');
   }
 
   /**
-   * Store translated data back into the items.
-   *
-   * @param $data
-   *   Partially or complete translated data, the most upper key needs to be
-   *   the translation job item id.
-   * @param $key
-   *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a nested
-   *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
-   *   means that it will replace the whole translated data array. The most
-   *   upper key entry needs to be the job id (tjiid).
+   * {@inheritdoc}
    */
-  public function addTranslatedData($data, $key = NULL) {
+  public function addTranslatedData(array $data, $key = NULL) {
     $key = tmgmt_ensure_keys_array($key);
     $items = $this->getItems();
     // If there is a key, get the specific item and forward the call.
@@ -965,10 +688,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Propagates the returned job item translations to the sources.
-   *
-   * @return boolean
-   *   TRUE if we were able to propagate the translated data, FALSE otherwise.
+   * {@inheritdoc}
    */
   public function acceptTranslation() {
     foreach ($this->getItems() as $item) {
@@ -977,10 +697,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Gets remote mappings for current job.
-   *
-   * @return array
-   *   List of TMGMTRemote entities.
+   * {@inheritdoc}
    */
   public function getRemoteMappings() {
     $trids = \Drupal::entityQuery('tmgmt_remote')
@@ -995,16 +712,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Invoke the hook 'hook_tmgmt_source_suggestions' to get all suggestions.
-   *
-   * @param array $conditions
-   *   Conditions to pass only some and not all items to the hook.
-   *
-   * @return array
-   *   An array with all additional translation suggestions.
-   *   - job_item: AJobItem instance.
-   *   - referenced: A string which indicates where this suggestion comes from.
-   *   - from_job: The mainJob-ID which suggests this translation.
+   * {@inheritdoc}
    */
   public function getSuggestions(array $conditions = array()) {
     $suggestions = \Drupal::moduleHandler()->invokeAll('tmgmt_source_suggestions', array($this->getItems($conditions), $this));
@@ -1020,15 +728,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Removes all suggestions from the given list which should not be processed.
-   *
-   * This function removes all suggestions from the given list which are already
-   * assigned to a translation job or which should not be processed because
-   * there are no words, no translation is needed, ...
-   *
-   * @param array &$suggestions
-   *   Associative array of translation suggestions. It must contain at least:
-   *   - tmgmt_job: An instance of aJobItem.
+   * {@inheritdoc}
    */
   public function cleanSuggestionsList(array &$suggestions) {
     foreach ($suggestions as $k => $suggestion) {
@@ -1101,10 +801,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface {
   }
 
   /**
-   * Returns a labeled list of all available states.
-   *
-   * @return array
-   *   A list of all available states.
+   * {@inheritdoc}
    */
   public static function getStates() {
     return array(

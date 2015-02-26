@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * @file
  * Contains Drupal\tmgmt\Plugin\Core\Entity\Translator.
  */
@@ -12,6 +12,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\tmgmt\TranslatorInterface;
 
 /**
  * Entity class for the tmgmt_translator entity.
@@ -44,7 +45,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *
  * @ingroup tmgmt_translator
  */
-class Translator extends ConfigEntityBase {
+class Translator extends ConfigEntityBase implements TranslatorInterface {
 
   /**
    * Machine readable name of the translator.
@@ -124,26 +125,14 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Returns the array of settings.
-   *
-   * See the documentation of the translator plugin for supported or
-   * required settings.
-   *
-   * @return array
-   *   The array of settings.
+   * {@inheritdoc}
    */
   public function getSettings() {
     return $this->settings;
   }
 
   /**
-   * Sets the array of settings.
-   *
-   * @param array $settings
-   *   The array of settings.
-   *
-   * @return static
-   *   The object itself for chaining.
+   * {@inheritdoc}
    */
   public function setSettings(array $settings) {
     $this->settings = $settings;
@@ -151,15 +140,7 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Retrieves a setting value from the translator settings. Pulls the default
-   * values (if defined) from the plugin controller.
-   *
-   * @param string|array $name
-   *   The name of the setting, an array with multiple keys for nested settings.
-   *
-   * @return
-   *   The setting value or $default if the setting value is not set. Returns
-   *   NULL if the setting does not exist at all.
+   * {@inheritdoc}
    */
   public function getSetting($name) {
     if (is_array($name)) {
@@ -185,15 +166,7 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Sets a definition setting.
-   *
-   * @param string|array $setting_name
-   *   The definition setting to set.
-   * @param mixed $value
-   *   The value to set.
-   *
-   * @return static
-   *   The object itself for chaining.
+   * {@inheritdoc}
    */
   public function setSetting($setting_name, $value) {
     NestedArray::setValue($this->settings, (array) $setting_name, $value);
@@ -201,30 +174,21 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Returns the translator plugin ID.
-   *
-   * @return string
-   *   The translator plugin ID used by this translator.
+   * {@inheritdoc}
    */
   public function getPluginId() {
     return $this->plugin;
   }
 
   /**
-   * Returns the translator plugin ID.
-   *
-   * @return string
-   *   The translator plugin ID used by this translator.
+   * {@inheritdoc}
    */
   public function getDescription() {
     return $this->description;
   }
 
   /**
-   * Sets the plugin ID.
-   *
-   * @param string $plugin_id
-   *   The plugin ID.
+   * {@inheritdoc}
    */
   public function setPluginID($plugin_id) {
     $this->plugin = $plugin_id;
@@ -246,9 +210,7 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Returns the translator plugin of this translator.
-   *
-   * @return \Drupal\tmgmt\TranslatorPluginInterface
+   * {@inheritdoc}
    */
   public function getPlugin() {
     try {
@@ -262,10 +224,7 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Returns the supported target languages for this translator.
-   *
-   * @return array
-   *   An array of supported target languages in ISO format.
+   * {@inheritdoc}
    */
   public function getSupportedTargetLanguages($source_language) {
     if ($controller = $this->getPlugin()) {
@@ -289,16 +248,8 @@ class Translator extends ConfigEntityBase {
     }
   }
 
-  /** Gets the supported language pairs for this translator.
-   *
-   * @return array
-   *   List of language pairs where a pair is an associative array of
-   *   source_language and target_language.
-   *   Example:
-   *   array(
-   *     array('source_language' => 'en-US', 'target_language' => 'de-DE'),
-   *     array('source_language' => 'en-US', 'target_language' => 'de-CH'),
-   *   )
+  /**
+   * {@inheritdoc}
    */
   public function getSupportedLanguagePairs() {
     if ($controller = $this->getPlugin()) {
@@ -323,7 +274,7 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Clears the language cache for this translator.
+   * {@inheritdoc}
    */
   public function clearLanguageCache() {
     $this->languageCache = array();
@@ -333,13 +284,7 @@ class Translator extends ConfigEntityBase {
 
 
   /**
-   * Check whether this translator can handle a particular translation job.
-   *
-   * @param $job
-   *   The Job entity that should be translated.
-   *
-   * @return boolean
-   *   TRUE if the job can be processed and translated, FALSE otherwise.
+   * {@inheritdoc}
    */
   public function canTranslate(Job $job) {
     if ($controller = $this->getPlugin()) {
@@ -349,10 +294,7 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Checks whether a translator is available.
-   *
-   * @return boolean
-   *   TRUE if the translator plugin is available, FALSE otherwise.
+   * {@inheritdoc}
    */
   public function isAvailable() {
     if ($controller = $this->getPlugin()) {
@@ -362,7 +304,7 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Returns if the plugin has any settings for this job.
+   * {@inheritdoc}
    */
   public function hasCheckoutSettings(Job $job) {
     if ($controller = $this->getPlugin()) {
@@ -372,7 +314,7 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * @todo Remove this once http://drupal.org/node/1420364 is done.
+   * {@inheritdoc}
    */
   public function getNotAvailableReason() {
     if ($controller = $this->getPlugin()) {
@@ -382,7 +324,7 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * @todo Remove this once http://drupal.org/node/1420364 is done.
+   * {@inheritdoc}
    */
   public function getNotCanTranslateReason(Job $job) {
     if ($controller = $this->getPlugin()) {
@@ -392,30 +334,14 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Maps local language to remote language.
-   *
-   * @param $language
-   *   Local language code.
-   *
-   * @return string
-   *   Remote language code.
-   *
-   * @ingroup tmgmt_remote_languages_mapping
+   * {@inheritdoc}
    */
   public function mapToRemoteLanguage($language) {
     return $this->getPlugin()->mapToRemoteLanguage($this, $language);
   }
 
   /**
-   * Maps remote language to local language.
-   *
-   * @param $language
-   *   Remote language code.
-   *
-   * @return string
-   *   Local language code.
-   *
-   * @ingroup tmgmt_remote_languages_mapping
+   * {@inheritdoc}
    */
   public function mapToLocalLanguage($language) {
     return $this->getPlugin()->mapToLocalLanguage($this, $language);
@@ -435,13 +361,9 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Determines if this translator supports remote language mappings.
-   *
-   * @return bool
-   *   In case translator does not explicitly state that it does not provide the
-   *   mapping feature it will return TRUE.
+   * {@inheritdoc}
    */
-  function providesRemoteLanguageMappings() {
+  public function providesRemoteLanguageMappings() {
     $definition = \Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($this->getPluginId());
     if (!isset($definition['map_remote_languages'])) {
       return TRUE;
@@ -450,12 +372,9 @@ class Translator extends ConfigEntityBase {
   }
 
   /**
-   * Determines if job settings of the translator will be handled by its plugin.
-   *
-   * @return bool
-   *   If job settings are to be handled by the plugin.
+   * {@inheritdoc}
    */
-  function hasCustomSettingsHandling() {
+  public function hasCustomSettingsHandling() {
     $definition = \Drupal::service('plugin.manager.tmgmt.translator')->getDefinition($this->getPluginId());
 
     if (isset($definition['job_settings_custom_handling'])) {
