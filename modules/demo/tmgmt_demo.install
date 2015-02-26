@@ -1,0 +1,37 @@
+<?php
+/**
+ * @file
+ * Installation hooks for tmgmt_demo module.
+ */
+
+use Drupal\node\Entity\Node;
+
+
+/**
+ * Implements hook_install().
+ */
+function tmgmt_demo_install() {
+  // Ensure the translation fields are created in the database.
+  \Drupal::service('entity.definition_update_manager')->applyUpdates();
+
+  // Add demo content.
+  $node = Node::create(array(
+    'type' => 'translatable_node',
+    'title' => 'First node',
+    'langcode' => 'en',
+    'body' => 'Have another try. This text can be translated as well',
+    'uid' => '0',
+    'status' => 1,
+  ));
+  $node->save();
+
+  $node = Node::create(array(
+    'type' => 'translatable_node',
+    'title' => 'First node',
+    'langcode' => 'en',
+    'body' => 'This text can be translated with TMGMT.Use the "translate" Tab and choose "Request Translation" to get started',
+    'uid' => '0',
+    'status' => 1,
+  ));
+  $node->save();
+}
