@@ -5,7 +5,8 @@
  * Source plugin for the Translation Management system that handles entities.
  */
 use Drupal\Core\Entity\Plugin\DataType\EntityReference;
-use Drupal\tmgmt\Entity\Job;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\tmgmt\JobInterface;
 
 /**
  * Implements hook_form_ID_alter().
@@ -205,11 +206,11 @@ function tmgmt_content_get_translatable_entities($entity_type_id, $property_cond
 /**
  * Implements hook_tmgmt_source_suggestions()
  */
-function tmgmt_content_tmgmt_source_suggestions(array $items, Job $job) {
+function tmgmt_content_tmgmt_source_suggestions(array $items, JobInterface $job) {
   $suggestions = array();
 
   foreach ($items as $item) {
-    if ($item instanceof \Drupal\tmgmt\Entity\JobItem && $item->getPlugin() == 'content') {
+    if ($item instanceof \Drupal\tmgmt\JobItemInterface && $item->getPlugin() == 'content') {
       // Load the entity and extract the bundle name to get all fields from the
       // current entity.
       $entity = entity_load($item->getItemType(), $item->getItemId());

@@ -29,7 +29,7 @@ function hook_tmgmt_source_plugin_info_alter(&$info) {
  *   translations.
  *   - JobItem A JobItem to check for suggestions.
  *   - ...
- * @param \Drupal\tmgmt\Entity\Job $job
+ * @param \Drupal\tmgmt\JobInterface $job
  *   The current translation job to check for additional translation items.
  *
  * @return array
@@ -38,7 +38,7 @@ function hook_tmgmt_source_plugin_info_alter(&$info) {
  *   - referenced: A string which indicates where this suggestion comes from.
  *   - from_job: The main Job-ID which suggests this translation.
  */
-function hook_tmgmt_source_suggestions(array $items, Job $job) {
+function hook_tmgmt_source_suggestions(array $items, JobInterface $job) {
   return array(
     array(
       'job_item' => tmgmt_job_item_create('entity', 'node', 0),

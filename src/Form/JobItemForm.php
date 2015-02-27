@@ -11,6 +11,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Xss;
 use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
@@ -23,7 +24,7 @@ use Drupal\Core\Render\Element;
 class JobItemForm extends TmgmtFormBase {
 
   /**
-   * @var \Drupal\tmgmt\Entity\JobItem
+   * @var \Drupal\tmgmt\JobItemInterface
    */
   protected $entity;
 
@@ -252,7 +253,7 @@ class JobItemForm extends TmgmtFormBase {
    * @param $parent_key
    *   The key for $data.
    */
-  function reviewFormElement(FormStateInterface $form_state, $data, JobItem $job_item, &$zebra, $parent_key) {
+  function reviewFormElement(FormStateInterface $form_state, $data, JobItemInterface $job_item, &$zebra, $parent_key) {
     $flip = array(
       'even' => 'odd',
       'odd' => 'even',

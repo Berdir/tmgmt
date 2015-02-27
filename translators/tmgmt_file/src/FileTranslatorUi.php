@@ -9,9 +9,9 @@ namespace Drupal\tmgmt_file;
 
 use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\TranslatorInterface;
 use Drupal\tmgmt\TranslatorPluginUiBase;
-use Drupal\tmgmt\Entity\Translator;
-use Drupal\tmgmt\Entity\Job;
 
 /**
  * File translator UI.
@@ -21,7 +21,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function pluginSettingsForm(array $form, FormStateInterface $form_state, Translator $translator, $busy = FALSE) {
+  public function pluginSettingsForm(array $form, FormStateInterface $form_state, TranslatorInterface $translator, $busy = FALSE) {
     $form['export_format'] = array(
       '#type' => 'radios',
       '#title' => t('Export to'),
@@ -65,7 +65,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function checkoutSettingsForm(array $form, FormStateInterface $form_state, Job $job) {
+  public function checkoutSettingsForm(array $form, FormStateInterface $form_state, JobInterface $job) {
     if ($job->getTranslator()->getSetting('allow_override')) {
       $form['export_format'] = array(
         '#type' => 'radios',
@@ -81,7 +81,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function checkoutInfo(Job $job) {
+  public function checkoutInfo(JobInterface $job) {
     // If the job is finished, it's not possible to import translations anymore.
     if ($job->isFinished()) {
       return parent::checkoutInfo($job);

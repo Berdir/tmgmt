@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_file\Plugin\tmgmt_file\Format;
 
 use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt_file\Format\DOMDocument;
 use Drupal\tmgmt_file\Format\FormatInterface;
 use Drupal\tmgmt_file\Format\type;
@@ -44,7 +45,7 @@ class Html implements FormatInterface {
   /**
    * Implements TMGMTFileExportInterface::export().
    */
-  public function export(Job $job) {
+  public function export(JobInterface $job) {
     $items = array();
     foreach ($job->getItems() as $item) {
       $data = \Drupal::service('tmgmt.data')->filterTranslatable($item->getData());

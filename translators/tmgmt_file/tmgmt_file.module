@@ -4,6 +4,7 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
 use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\JobInterface;
 
 /**
  * @file
@@ -115,7 +116,7 @@ function tmgmt_file_format_controller($plugin = NULL) {
 /**
  * Implements hook_tmgmt_job_delete().
  */
-function tmgmt_file_tmgmt_job_delete(Job $job) {
+function tmgmt_file_tmgmt_job_delete(JobInterface $job) {
   $translator = $job->getTranslator();
 
   // Ignore jobs that don't have a file translator.

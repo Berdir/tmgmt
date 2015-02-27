@@ -135,7 +135,7 @@ interface TranslatorInterface extends ConfigEntityInterface {
    * @return bool
    *   TRUE if the job can be processed and translated, FALSE otherwise.
    */
-  public function canTranslate(Job $job);
+  public function canTranslate(JobInterface $job);
 
   /**
    * Checks whether a translator is available.
@@ -148,10 +148,10 @@ interface TranslatorInterface extends ConfigEntityInterface {
   /**
    * Returns if the plugin has any settings for this job.
    *
-   * @param \Drupal\tmgmt\Entity\Job $job
+   * @param \Drupal\tmgmt\JobInterface $job
    *   The Job entity that should be translated.
    */
-  public function hasCheckoutSettings(Job $job);
+  public function hasCheckoutSettings(JobInterface $job);
 
   /**
    * @todo Remove this once http://drupal.org/node/1420364 is done.
@@ -161,10 +161,10 @@ interface TranslatorInterface extends ConfigEntityInterface {
   /**
    * @todo Remove this once http://drupal.org/node/1420364 is done.
    *
-   * * @param \Drupal\tmgmt\Entity\Job $job
+   * * @param \Drupal\tmgmt\JobInterface $job
    *   The Job entity that should be translated.
    */
-  public function getNotCanTranslateReason(Job $job);
+  public function getNotCanTranslateReason(JobInterface $job);
 
   /**
    * Maps local language to remote language.

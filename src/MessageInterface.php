@@ -25,7 +25,7 @@ interface MessageInterface extends ContentEntityInterface {
   /**
    * Loads the job entity that this job message is attached to.
    *
-   * @return \Drupal\tmgmt\Entity\Job
+   * @return \Drupal\tmgmt\JobInterface
    *   The job entity that this job message is attached to or FALSE if there was
    *   a problem.
    */
@@ -34,7 +34,7 @@ interface MessageInterface extends ContentEntityInterface {
   /**
    * Loads the job entity that this job message is attached to.
    *
-   * @return \Drupal\tmgmt\Entity\JobItem
+   * @return \Drupal\tmgmt\JobItemInterface
    *   The job item entity that this job message is attached to or FALSE if
    *   there was a problem.
    */

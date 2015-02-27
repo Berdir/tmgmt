@@ -24,7 +24,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
   /**
    * {@inheritdoc}
    */
-  public function pluginSettingsForm(array $form, FormStateInterface $form_state, Translator $translator, $busy = FALSE) {
+  public function pluginSettingsForm(array $form, FormStateInterface $form_state, TranslatorInterface $translator, $busy = FALSE) {
 
     $controller = $translator->getPlugin();
     // If current translator is configured to provide remote language mapping
@@ -70,7 +70,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
   /**
    * {@inheritdoc}
    */
-  public function checkoutSettingsForm(array $form, FormStateInterface $form_state, Job $job) {
+  public function checkoutSettingsForm(array $form, FormStateInterface $form_state, JobInterface $job) {
     if (!Element::children($form)) {
       $form['#description'] = t("The @translator translator doesn't provide any checkout settings.", array('@translator' => $job->getTranslator()->label()));
     }
@@ -80,14 +80,14 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
   /**
    * {@inheritdoc}
    */
-  public function checkoutInfo(Job $job) {
+  public function checkoutInfo(JobInterface $job) {
     return array();
   }
 
   /**
    * Provides a simple wrapper for the checkout info fieldset.
    *
-   * @param \Drupal\tmgmt\Entity\Job $job
+   * @param \Drupal\tmgmt\JobInterface $job
    *   Translation job object.
    * @param $form
    *   Partial form structure to be wrapped in the fieldset.
@@ -95,7 +95,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
    * @return
    *   The provided form structure wrapped in a collapsed fieldset.
    */
-  public function checkoutInfoWrapper(Job $job, $form) {
+  public function checkoutInfoWrapper(JobInterface $job, $form) {
     $label = $job->getTranslator()->label();
     $form += array(
       '#title' => t('@translator translation job information', array('@translator' => $label)),
@@ -109,28 +109,28 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
   /**
    * {@inheritdoc}
    */
-  public function reviewForm(array $form, FormStateInterface $form_state, JobItem $item) {
+  public function reviewForm(array $form, FormStateInterface $form_state, JobItemInterface $item) {
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function reviewDataItemElement(array $form, FormStateInterface $form_state, $data_item_key, $parent_key, array $data_item, JobItem $item) {
+  public function reviewDataItemElement(array $form, FormStateInterface $form_state, $data_item_key, $parent_key, array $data_item, JobItemInterface $item) {
     return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function reviewFormValidate(array $form, FormStateInterface $form_state, JobItem $item) {
+  public function reviewFormValidate(array $form, FormStateInterface $form_state, JobItemInterface $item) {
     // Nothing to do here by default.
   }
 
   /**
    * {@inheritdoc}
    */
-  public function reviewFormSubmit(array $form, FormStateInterface $form_state, JobItem $item) {
+  public function reviewFormSubmit(array $form, FormStateInterface $form_state, JobItemInterface $item) {
     // Nothing to do here by default.
   }
 

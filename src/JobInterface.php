@@ -159,10 +159,10 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   /**
    * Add a givenJobItem to this job.
    *
-   * @param \Drupal\tmgmt\Entity\JobItem $item
+   * @param \Drupal\tmgmt\JobItemInterface $item
    *   The job item to add.
    */
-  public function addExistingItem(JobItem $item);
+  public function addExistingItem(JobItemInterface $item);
 
   /**
    * Add a log message for this job.
@@ -188,7 +188,7 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    * @param array $conditions
    *   Additional conditions.
    *
-   * @return \Drupal\tmgmt\Entity\JobItem[]
+   * @return \Drupal\tmgmt\JobItemInterface[]
    *   An array of translation job items.
    */
   public function getItems($conditions = array());
@@ -199,7 +199,7 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    * @param array $conditions
    *   Additional conditions.
    *
-   * @return \Drupal\tmgmt\Entity\Message[]
+   * @return \Drupal\tmgmt\MessageInterface[]
    *   An array of translation job messages.
    */
   public function getMessages($conditions = array());
@@ -213,7 +213,7 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    *   (Optional) Messages need to have a newer timestamp than $time. Defaults
    *   to REQUEST_TIME.
    *
-   * @return \Drupal\tmgmt\Entity\Message[]
+   * @return \Drupal\tmgmt\MessageInterface[]
    *   An array of translation job messages.
    */
   public function getMessagesSince($time = NULL);
@@ -379,7 +379,7 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    * @param string $type
    *   (optional) The message type.
    *
-   * @return \Drupal\tmgmt\Entity\Job
+   * @return \Drupal\tmgmt\JobInterface
    *   The job entity.
    *
    * @see static::addMessage()
@@ -396,7 +396,7 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    * @param string $type
    *    Statically set to status.
    *
-   * @return \Drupal\tmgmt\Entity\Job
+   * @return \Drupal\tmgmt\JobInterface
    *   The job entity.
    *
    * @see Job::addMessage()
@@ -415,7 +415,7 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    *
    *   Use Job::abortTranslation() to abort a translation.
    *
-   * @return \Drupal\tmgmt\Entity\Job
+   * @return \Drupal\tmgmt\JobInterface
    *   The job entity.
    *
    * @see Job::addMessage()
@@ -432,7 +432,7 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    * @param string $type
    *    Statically set to error.
    *
-   * @return \Drupal\tmgmt\Entity\Job
+   * @return \Drupal\tmgmt\JobInterface
    *   The job entity.
    *
    * @see Job::addMessage()

@@ -17,7 +17,7 @@ use Drupal\user\Entity\User;
 /**
  * Simple page callback for viewing a task.
  *
- * @param \Drupal\tmgmt\Entity\Job $task
+ * @param \Drupal\tmgmt\JobInterface $task
  *   The viewed task.
  *
  * @return array
@@ -240,7 +240,7 @@ function tmgmt_local_translation_form_save_as_completed_submit($form, FormStateI
   }
 
   /**
-   * @var \Drupal\tmgmt\Entity\JobItem $job_item.
+   * @var \Drupal\tmgmt\JobItemInterface $job_item.
    */
   $job_item = $form_state['job_item'];
 

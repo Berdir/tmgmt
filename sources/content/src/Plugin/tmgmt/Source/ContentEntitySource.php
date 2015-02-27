@@ -9,13 +9,11 @@ namespace Drupal\tmgmt_content\Plugin\tmgmt\Source;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemInterface;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\TypedData\OptionsProviderInterface;
 use Drupal\Core\TypedData\Type\StringInterface;
 use Drupal\Core\TypedData\PrimitiveInterface;
-use Drupal\taxonomy\Plugin\views\field\Language;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\SourcePluginBase;
-use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Render\Element;
 
@@ -34,7 +32,7 @@ class ContentEntitySource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getLabel(JobItem $job_item) {
+  public function getLabel(JobItemInterface $job_item) {
     if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
       return $entity->label();
     }
@@ -43,7 +41,7 @@ class ContentEntitySource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getUrl(JobItem $job_item) {
+  public function getUrl(JobItemInterface $job_item) {
     if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
       return $entity->urlInfo();
     }
@@ -55,7 +53,7 @@ class ContentEntitySource extends SourcePluginBase {
    * Returns the data from the fields as a structure that can be processed by
    * the Translation Management system.
    */
-  public function getData(JobItem $job_item) {
+  public function getData(JobItemInterface $job_item) {
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     if (!$entity) {
       throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), $job_item->getItemId())));
@@ -116,7 +114,7 @@ class ContentEntitySource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function saveTranslation(JobItem $job_item) {
+  public function saveTranslation(JobItemInterface $job_item) {
     /* @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     $job = $job_item->getJob();
@@ -169,7 +167,7 @@ class ContentEntitySource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getType(JobItem $job_item) {
+  public function getType(JobItemInterface $job_item) {
     if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
       $bundles = entity_get_bundles($job_item->getItemType());
       $entity_type = $entity->getEntityType();
@@ -187,7 +185,7 @@ class ContentEntitySource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getSourceLangCode(JobItem $job_item) {
+  public function getSourceLangCode(JobItemInterface $job_item) {
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     return $entity->getUntranslated()->language()->getId();
   }
@@ -195,7 +193,7 @@ class ContentEntitySource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getExistingLangCodes(JobItem $job_item) {
+  public function getExistingLangCodes(JobItemInterface $job_item) {
     if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
       return array_keys($entity->getTranslationLanguages());
     }

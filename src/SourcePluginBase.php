@@ -21,14 +21,14 @@ abstract class SourcePluginBase extends PluginBase implements SourcePluginInterf
   /**
    * {@inheritdoc}
    */
-  public function getLabel(JobItem $job_item) {
+  public function getLabel(JobItemInterface $job_item) {
     return t('@plugin item unavailable (@item)', array('@plugin' => $this->pluginDefinition['label'], '@item' => $job_item->getItemType() . ':' . $job_item->getItemId()));
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getUrl(JobItem $job_item) {
+  public function getUrl(JobItemInterface $job_item) {
     return NULL;
   }
 
@@ -53,14 +53,14 @@ abstract class SourcePluginBase extends PluginBase implements SourcePluginInterf
   /**
    * {@inheritdoc}
    */
-  public function getType(JobItem $job_item) {
+  public function getType(JobItemInterface $job_item) {
     return ucfirst($job_item->getItemType());
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getExistingLangCodes(JobItem $job_item) {
+  public function getExistingLangCodes(JobItemInterface $job_item) {
     return array();
   }
 

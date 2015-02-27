@@ -146,7 +146,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
   /**
    * Returns the translation job item.
    *
-   * @return \Drupal\tmgmt\Entity\JobItem
+   * @return \Drupal\tmgmt\JobItemInterface
    */
   public function getJobItem() {
     return $this->get('tjiid')->entity;

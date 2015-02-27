@@ -41,7 +41,7 @@ class JobResubmitForm extends EntityConfirmFormBase {
     $new_job = $this->entity->cloneAsUnprocessed();
     $new_job->uid = $this->currentUser()->id();
     $new_job->save();
-    /** @var TMGMTJobItem $item */
+    /** @var \Drupal\tmgmt\JobItemInterface $item */
     foreach ($this->entity->getItems() as $item) {
       $item_to_resubmit = $item->cloneAsActive();
       $new_job->addExistingItem($item_to_resubmit);

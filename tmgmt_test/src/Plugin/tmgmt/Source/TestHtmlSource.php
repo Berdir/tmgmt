@@ -7,7 +7,7 @@
 
 namespace Drupal\tmgmt_test\Plugin\tmgmt\Source;
 
-use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\JobItemInterface;
 
 /**
  * Test source plugin implementation.
@@ -23,7 +23,7 @@ class TestHtmlSource extends TestSource {
   /**
    * {@inheritdoc}
    */
-  public function getData(JobItem $job_item) {
+  public function getData(JobItemInterface $job_item) {
     return array(
       'dummy' => array(
         'deep_nesting' => array(

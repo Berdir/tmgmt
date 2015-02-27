@@ -46,7 +46,7 @@ class JobItemCart {
   /**
    * Adds existing job items into the cart.
    *
-   * @param JobItem[] $items
+   * @param \Drupal\tmgmt\JobItemInterface[] $items
    *   Job items to be added.
    */
   public function addExistingJobItems(array $items) {
@@ -116,7 +116,7 @@ class JobItemCart {
   /**
    * Gets job items in the cart.
    *
-   * @return \Drupal\tmgmt\Entity\JobItem[] $items
+   * @return \Drupal\tmgmt\JobItemInterface[] $items
    *   Job items in the cart.
    */
   public function getJobItemsFromCart() {

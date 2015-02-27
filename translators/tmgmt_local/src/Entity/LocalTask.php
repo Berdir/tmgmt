@@ -12,7 +12,7 @@ use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 use Drupal\user\Entity\User;
@@ -176,7 +176,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   /**
    * Return the corresponding translation job.
    *
-   * @return \Drupal\tmgmt\Entity\Job
+   * @return \Drupal\tmgmt\JobInterface
    */
   public function getJob() {
     return $this->get('tjid')->entity;
@@ -235,10 +235,10 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   /**
    * Create a task item for this task and the given job item.
    *
-   * @param \Drupal\tmgmt\Entity\JobItem $job_item
+   * @param \Drupal\tmgmt\JobItemInterface $job_item
    *   The job item.
    */
-  public function addTaskItem(JobItem $job_item) {
+  public function addTaskItem(JobItemInterface $job_item) {
     // Save the task to get an id.
     if (empty($this->tltid)) {
       $this->save();

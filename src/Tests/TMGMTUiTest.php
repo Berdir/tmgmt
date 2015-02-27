@@ -90,7 +90,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isActive());
     foreach ($job->getItems() as $job_item) {
-      /* @var $job_item TMGMTJobItem */
+      /* @var $job_item JobItemInterface */
       $this->assertTrue($job_item->isNeedsReview());
     }
     $this->assertText(t('Test translation created'));

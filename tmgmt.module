@@ -14,6 +14,8 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
 use \Drupal\Core\Render\Element;
 
@@ -217,7 +219,7 @@ function tmgmt_job_item_load_all_latest($plugin, $item_type, $item_id, $source_l
  * @param $account
  *   (Optional) A user object. Defaults to the currently logged in user.
  *
- * @return \Drupal\tmgmt\Entity\Job
+ * @return \Drupal\tmgmt\JobInterface
  *   The job entity.
  */
 function tmgmt_job_match_item($source_language, $target_language, $account = NULL) {
@@ -262,7 +264,7 @@ function tmgmt_job_check_finished($tjid) {
  * @param $values
  *   (Optional) An array of additional entity values.
  *
- * @return \Drupal\tmgmt\Entity\Job
+ * @return \Drupal\tmgmt\JobInterface
  *   The job entity.
  */
 function tmgmt_job_create($source_language, $target_language, $uid = 0, array $values = array()) {
@@ -334,7 +336,7 @@ function tmgmt_job_statistics_load(array $tjids) {
  * @return
  *   The requested information as an integer.
  */
-function tmgmt_job_statistic(Job $job, $key) {
+function tmgmt_job_statistic(JobInterface $job, $key) {
   $statistics = tmgmt_job_statistics_load(array($job->id()));
   if (isset($statistics[$job->id()]->$key)) {
     return $statistics[$job->id()]->$key;
@@ -354,7 +356,7 @@ function tmgmt_job_statistic(Job $job, $key) {
  * @param $values
  *   (Optional) An array of additional entity values to be set.
  *
- * @return \Drupal\tmgmt\Entity\JobItem
+ * @return \Drupal\tmgmt\JobItemInterface
  *   The created, not yet saved, job item entity.
  */
 function tmgmt_job_item_create($plugin, $item_type, $item_id, array $values = array()) {
@@ -375,7 +377,7 @@ function tmgmt_job_item_create($plugin, $item_type, $item_id, array $values = ar
  * @param $values
  *   (Optional) An array of additional entity values to be set.
  *
- * @return \Drupal\tmgmt\Entity\JobItem
+ * @return \Drupal\tmgmt\JobItemInterface
  *   The created, not yet saved, job item entity.
  */
 function tmgmt_message_create($message = '', $variables = array(), $values = array()) {
@@ -397,7 +399,7 @@ function tmgmt_message_create($message = '', $variables = array(), $values = arr
  * Loads all translators that are available and, if a translation job is given,
  * support translations for that job with its current configuration.
  *
- * @param \Drupal\tmgmt\Entity\Job $job
+ * @param \Drupal\tmgmt\JobInterface $job
  *   (Optional) A translation job.
  *
  * @return array
@@ -475,7 +477,7 @@ function tmgmt_translator_labels() {
  * This can either be because the configuration of the passed job is not
  * supported or because the translator service can't be reached.
  *
- * @param \Drupal\tmgmt\Entity\Job $job
+ * @param \Drupal\tmgmt\JobInterface $job
  *   (Optional) A translation job.
  *
  * @return array
@@ -534,7 +536,7 @@ function tmgmt_theme() {
  * Attempts to check out a number of jobs. Performs a number of checks on each
  * job and also allows to alter the behavior through hooks.
  *
- * @param \Drupal\tmgmt\Entity\Job[] $jobs
+ * @param \Drupal\tmgmt\JobInterface[] $jobs
  *   The jobs to be checked out.
  *
  * @return
@@ -595,13 +597,13 @@ function tmgmt_job_checkout_multiple(array $jobs) {
  * more than one translator available, if he has settings and if the job has a
  * fixed target language.
  *
- * @param \Drupal\tmgmt\Entity\Job $job
+ * @param \Drupal\tmgmt\JobInterface $job
  *   The job item
  *
  * @return
  *   TRUE if the job needs a checkout form.
  */
-function tmgmt_job_needs_checkout_form(Job $job) {
+function tmgmt_job_needs_checkout_form(JobInterface $job) {
   // If the job has no target language (or source language, even though this
   // should never be the case in our use case), checkout is mandatory.
   if (!$job->getTargetLangcode() || !$job->getSourceLangcode()) {
@@ -629,14 +631,14 @@ function tmgmt_job_needs_checkout_form(Job $job) {
  * Requests translations for a job and prints messages which have happened since
  * then.
  *
- * @param \Drupal\tmgmt\Entity\Job $job
+ * @param \Drupal\tmgmt\JobInterface $job
  *   The job object for which translations should be requested.
  *
  * @return
  *   TRUE if it worked, FALSE if there were any errors of the type error which
  *   means that something did go wrong.
  */
-function tmgmt_job_request_translation(Job $job) {
+function tmgmt_job_request_translation(JobInterface $job) {
   // Process the translation request.
   $job->requestTranslation();
   return tmgmt_write_request_messages($job);
@@ -651,7 +653,7 @@ function tmgmt_job_request_translation(Job $job) {
  * @return
  *   FALSE if there are message with severity error, TRUE otherwise.
  */
-function tmgmt_write_request_messages(Job $job) {
+function tmgmt_write_request_messages(JobInterface $job) {
   $errors = FALSE;
   foreach ($job->getMessagesSince() as $message) {
     // Ignore debug messages.
@@ -686,7 +688,7 @@ function tmgmt_review_form_element_ajaxid($parent_key) {
  */
 function tmgmt_translation_review_form_revert(array $form, FormStateInterface $form_state) {
 
-  /** @var JobItem $item */
+  /** @var \Drupal\tmgmt\JobItemInterface $item */
   $item = $form_state->getFormObject()->getEntity();
 
   $key = \Drupal::service('tmgmt.data')->ensureArrayKey($form_state->getTriggeringElement()['#data_item_key']);
@@ -719,7 +721,7 @@ function tmgmt_translation_review_form_update_state(array $form, FormStateInterf
   $data = array();
   $job_item = $form_state->getFormObject()->getEntity();
 
-  /** @var \Drupal\tmgmt\Entity\JobItem $job_item */
+  /** @var \Drupal\tmgmt\JobItemInterface $job_item */
   $controller = $job_item->getTranslatorPlugin();
   $success = TRUE;
   switch ($matches['action']) {
@@ -768,7 +770,7 @@ function tmgmt_translation_review_form_update_state(array $form, FormStateInterf
 /**
  * Form callback for the reject confirm form.
  */
-function tmgmt_translation_review_form_reject_confirm(array $form, FormStateInterface $form_state, JobItem $job_item, $key) {
+function tmgmt_translation_review_form_reject_confirm(array $form, FormStateInterface $form_state, JobItemInterface $job_item, $key) {
   // Path of job item review form.
   $path = explode('/', Url::fromRoute('<current>')->getInternalPath());
   $path = implode('/', array_slice($path, 0, count($path) - 2));

@@ -39,7 +39,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   /**
    * {@inheritdoc}
    */
-  public function isAvailable(Translator $translator) {
+  public function isAvailable(TranslatorInterface $translator) {
     // Assume that the translation service is always available.
     return TRUE;
   }
@@ -47,7 +47,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   /**
    * {@inheritdoc}
    */
-  public function canTranslate(Translator $translator, Job $job) {
+  public function canTranslate(TranslatorInterface $translator, JobInterface $job) {
     // The job is only translatable if the translator is available too.
     if ($this->isAvailable($translator) && array_key_exists($job->getTargetLangcode(), $translator->getSupportedTargetLanguages($job->getSourceLangcode()))) {
       // We can only translate this job if the target language of the job is in
@@ -60,7 +60,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   /**
    * {@inheritdoc}
    */
-  public function abortTranslation(Job $job) {
+  public function abortTranslation(JobInterface $job) {
     // Assume that we can abort a translation job at any time.
     $job->aborted();
     return TRUE;
@@ -76,14 +76,14 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   /**
    * {@inheritdoc}
    */
-  public function getSupportedRemoteLanguages(Translator $translator) {
+  public function getSupportedRemoteLanguages(TranslatorInterface $translator) {
     return array();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getRemoteLanguagesMappings(Translator $translator) {
+  public function getRemoteLanguagesMappings(TranslatorInterface $translator) {
     if (!empty($this->remoteLanguagesMappings)) {
       return $this->remoteLanguagesMappings;
     }
@@ -98,7 +98,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   /**
    * {@inheritdoc}
    */
-  public function mapToRemoteLanguage(Translator $translator, $language) {
+  public function mapToRemoteLanguage(TranslatorInterface $translator, $language) {
     if (!$translator->providesRemoteLanguageMappings()) {
       return $language;
     }
@@ -119,7 +119,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   /**
    * {@inheritdoc}
    */
-  public function mapToLocalLanguage(Translator $translator, $language) {
+  public function mapToLocalLanguage(TranslatorInterface $translator, $language) {
     if (!$translator->providesRemoteLanguageMappings()) {
       return $language;
     }
@@ -140,7 +140,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   /**
    * {@inheritdoc}
    */
-  public function getSupportedTargetLanguages(Translator $translator, $source_language) {
+  public function getSupportedTargetLanguages(TranslatorInterface $translator, $source_language) {
     $languages = entity_metadata_language_list();
     unset($languages[LANGUAGE_NONE], $languages[$source_language]);
     return drupal_map_assoc(array_keys($languages));
@@ -153,7 +153,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
    * This approach is ineffective and therefore it is advised that a plugin
    * should provide own implementation.
    */
-  public function getSupportedLanguagePairs(Translator $translator) {
+  public function getSupportedLanguagePairs(TranslatorInterface $translator) {
     $language_pairs = array();
 
     foreach ($this->getSupportedRemoteLanguages($translator) as $source_language) {
@@ -169,14 +169,14 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   /**
    * {@inheritdoc}
    */
-  public function getNotCanTranslateReason(Job $job) {
+  public function getNotCanTranslateReason(JobInterface $job) {
     return t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => $job->getSourceLanguage()->getName(), '@target' => $job->getTargetLanguage()->getName()));
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getNotAvailableReason(Translator $translator) {
+  public function getNotAvailableReason(TranslatorInterface $translator) {
     return t('@translator is not available. Make sure it is properly !configured.', array('@translator' => $this->pluginDefinition['label'], '!configured' => $translator->link(t('configured'))));
   }
 
@@ -195,14 +195,14 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   /**
    * {@inheritdoc}
    */
-  public function hasCheckoutSettings(Job $job) {
+  public function hasCheckoutSettings(JobInterface $job) {
     return TRUE;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function acceptedDataItem(JobItem $job_item, array $key) {
+  public function acceptedDataItem(JobItemInterface $job_item, array $key) {
     return TRUE;
   }
 

@@ -16,6 +16,7 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\JobInterface;
 use Drupal\views\Views;
 
 /**
@@ -26,7 +27,7 @@ use Drupal\views\Views;
 class JobForm extends TmgmtFormBase {
 
   /**
-   * @var \Drupal\tmgmt\Entity\Job
+   * @var \Drupal\tmgmt\JobInterface
    */
   protected $entity;
 
@@ -487,7 +488,7 @@ class JobForm extends TmgmtFormBase {
    *
    * @todo Make use of the response object here.
    */
-  function checkoutSettingsForm(FormStateInterface $form_state, Job $job) {
+  function checkoutSettingsForm(FormStateInterface $form_state, JobInterface $job) {
     $form = array();
     $translator = $job->getTranslator();
     if (!$translator) {
@@ -510,7 +511,7 @@ class JobForm extends TmgmtFormBase {
   /**
    * Helper function for retrieving the rendered job checkout information.
    */
-  function checkoutInfo(Job $job) {
+  function checkoutInfo(JobInterface $job) {
     $translator = $job->getTranslator();
     // The translator might have been disabled or removed.
     if (!$translator) {

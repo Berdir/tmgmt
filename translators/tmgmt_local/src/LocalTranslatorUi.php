@@ -11,6 +11,7 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
+use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\TranslatorPluginUiBase;
 use Drupal\user\Entity\User;
 
@@ -22,7 +23,7 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function checkoutSettingsForm(array $form, FormStateInterface $form_state, Job $job) {
+  public function checkoutSettingsForm(array $form, FormStateInterface $form_state, JobInterface $job) {
     if ($translators = tmgmt_local_translators($job->getSourceLangcode(), array($job->getTargetLangcode()))) {
       $form['translator'] = array(
         '#title' => t('Select translator for this job'),
@@ -43,7 +44,7 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function checkoutInfo(Job $job) {
+  public function checkoutInfo(JobInterface $job) {
     $label = $job->getTranslator()->label();
     $form['#title'] = t('@translator translation job information', array('@translator' => $label));
     $form['#type'] = 'fieldset';
@@ -75,7 +76,7 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
     return $form;
   }
 
-  public function pluginSetting(array $form, FormStateInterfaceerface $form_state, Translator $translator, $busy = FALSE) {
+  public function pluginSetting(array $form, FormStateInterfaceerface $form_state, TranslatorInterface $translator, $busy = FALSE) {
     $form['allow_all'] = array(
       '#title' => t('Allow translations for enabled languages even if no translator has the necessary abilities'),
       '#type' => 'checkbox',

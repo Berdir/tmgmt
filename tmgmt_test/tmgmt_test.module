@@ -5,7 +5,7 @@
  * Module file of the translation management test module.
  */
 
-use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\JobInterface;
 
 /**
  * Implements hook_tmgmt_translator_info_alter().
@@ -18,7 +18,7 @@ function tmgmt_test_tmgmt_translator_info_alter(&$definitions) {
 /**
  * Implements hook_tmgmt_source_suggestions().
  */
-function tmgmt_test_tmgmt_source_suggestions(array $items, Job $job) {
+function tmgmt_test_tmgmt_source_suggestions(array $items, JobInterface $job) {
   $suggestions = array();
   foreach ($items as $item) {
     if ($item->getPlugin() == 'test_source') {

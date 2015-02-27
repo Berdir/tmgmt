@@ -24,13 +24,13 @@ use Drupal\tmgmt\TMGMTException;
  */
 class ConfigEntitySource extends SourcePluginBase {
 
-  public function getLabel(JobItem $job_item) {
+  public function getLabel(JobItemInterface $job_item) {
     if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
       return $entity->label();
     }
   }
 
-  public function getUrl(JobItem $job_item) {
+  public function getUrl(JobItemInterface $job_item) {
     if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
       return $entity->urlInfo();
     }
@@ -42,7 +42,7 @@ class ConfigEntitySource extends SourcePluginBase {
    * Returns the data from the fields as a structure that can be processed by
    * the Translation Management system.
    */
-  public function getData(JobItem $job_item) {
+  public function getData(JobItemInterface $job_item) {
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     if (!$entity) {
       throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), $job_item->getItemId())));
@@ -59,7 +59,7 @@ class ConfigEntitySource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function saveTranslation(JobItem $job_item) {
+  public function saveTranslation(JobItemInterface $job_item) {
 
   }
 
@@ -87,14 +87,14 @@ class ConfigEntitySource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getType(JobItem $job_item) {
+  public function getType(JobItemInterface $job_item) {
     return \Drupal::entityManager()->getDefinition($job_item->getItemType())->getLabel();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getSourceLangCode(JobItem $job_item) {
+  public function getSourceLangCode(JobItemInterface $job_item) {
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     return $entity->language()->getId();
   }
@@ -102,7 +102,7 @@ class ConfigEntitySource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getExistingLangCodes(JobItem $job_item) {
+  public function getExistingLangCodes(JobItemInterface $job_item) {
     // @todo
     return array();
   }

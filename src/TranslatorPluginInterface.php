@@ -8,9 +8,6 @@
 namespace Drupal\tmgmt;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
-use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt\Entity\JobItem;
-use Drupal\tmgmt\Entity\Translator;
 
 /**
  * Interface for service plugin controllers.
@@ -22,18 +19,18 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
   /**
    * Checks whether a translator is available.
    *
-   * @param Translator $translator
+   * @param TranslatorInterface $translator
    *   The translator entity.
    *
    * @return boolean
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
-  public function isAvailable(Translator $translator);
+  public function isAvailable(TranslatorInterface $translator);
 
   /**
    * Return a reason why the translator is not available.
    *
-   * @param Translator $translator
+   * @param TranslatorInterface $translator
    *   The translator entity.
    *
    * Might be called when isAvailable() returns FALSE to get a reason that
@@ -41,25 +38,25 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *
    * @todo Remove this once http://drupal.org/node/1420364 is done.
    */
-  public function getNotAvailableReason(Translator $translator);
+  public function getNotAvailableReason(TranslatorInterface $translator);
 
   /**
    * Check whether this service can handle a particular translation job.
    *
-   * @param Translator $translator
+   * @param TranslatorInterface $translator
    *   The Translator entity that should handle the translation.
-   * @param Job $job
+   * @param \Drupal\tmgmt\JobInterface $job
    *   The Job entity that should be translated.
    *
    * @return boolean
    *   TRUE if the job can be processed and translated, FALSE otherwise.
    */
-  public function canTranslate(Translator $translator, Job $job);
+  public function canTranslate(TranslatorInterface $translator, JobInterface $job);
 
   /**
    * Return a reason why the translator is not able to translate this job.
    *
-   * @param Job $job
+   * @param \Drupal\tmgmt\JobInterface $job
    *   The job entity.
    *
    * Might be called when canTranslate() returns FALSE to get a reason that
@@ -67,7 +64,7 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *
    * @todo Remove this once http://drupal.org/node/1420364 is done.
    */
-  public function getNotCanTranslateReason(Job $job);
+  public function getNotCanTranslateReason(JobInterface $job);
 
   /**
    * Specifies default mappings for local to remote language codes.
@@ -90,7 +87,7 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    * for example in the translator settings form to select which remote language
    * code correspond to which local language code.
    *
-   * @param Translator $translator
+   * @param TranslatorInterface $translator
    *   Translator entity for which to get supported languages.
    *
    * @return array
@@ -99,14 +96,14 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *
    * @ingroup tmgmt_remote_languages_mapping
    */
-  public function getSupportedRemoteLanguages(Translator $translator);
+  public function getSupportedRemoteLanguages(TranslatorInterface $translator);
 
   /**
    * Gets existing remote languages mappings.
    *
    * This method is responsible to provide all local to remote language pairs.
    *
-   * @param \Drupal\tmgmt\Entity\Translator $translator
+   * @param \Drupal\tmgmt\TranslatorInterface $translator
    *   Translator entity for which to get mappings.
    *
    * @return array
@@ -114,10 +111,10 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *
    * @ingroup tmgmt_remote_languages_mapping
    */
-  public function getRemoteLanguagesMappings(Translator $translator);
+  public function getRemoteLanguagesMappings(TranslatorInterface $translator);
 
   /**
-   * @param Translator $translator
+   * @param TranslatorInterface $translator
    *   Translator entity for which to get remote language.
    * @param $language
    *   Local language code.
@@ -127,12 +124,12 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *
    * @ingroup tmgmt_remote_languages_mapping
    */
-  public function mapToRemoteLanguage(Translator $translator, $language);
+  public function mapToRemoteLanguage(TranslatorInterface $translator, $language);
 
   /**
    * Maps remote language to local language.
    *
-   * @param \Drupal\tmgmt\Entity\Translator $translator
+   * @param \Drupal\tmgmt\TranslatorInterface $translator
    *   Translator entity for which to get local language.
    * @param $language
    *   Remote language code.
@@ -142,13 +139,13 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *
    * @ingroup tmgmt_remote_languages_mapping
    */
-  public function mapToLocalLanguage(Translator $translator, $language);
+  public function mapToLocalLanguage(TranslatorInterface $translator, $language);
 
   /**
    * Returns all available target languages that are supported by this service
    * when given a source language.
    *
-   * @param Translator $translator
+   * @param TranslatorInterface $translator
    *   The translator entity.
    * @param $source_language
    *   The source language.
@@ -158,7 +155,7 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *
    * @ingroup tmgmt_remote_languages_mapping
    */
-  public function getSupportedTargetLanguages(Translator $translator, $source_language);
+  public function getSupportedTargetLanguages(TranslatorInterface $translator, $source_language);
 
   /**
    * Returns supported language pairs.
@@ -166,7 +163,7 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    * This info may be used by other plugins to find out what language pairs
    * can handle the translator.
    *
-   * @param \Drupal\tmgmt\Entity\Translator $translator
+   * @param \Drupal\tmgmt\TranslatorInterface $translator
    *   The translator entity.
    *
    * @return array
@@ -180,7 +177,7 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *
    * @ingroup tmgmt_remote_languages_mapping
    */
-  public function getSupportedLanguagePairs(Translator $translator);
+  public function getSupportedLanguagePairs(TranslatorInterface $translator);
 
 
   /**
@@ -188,23 +185,23 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *
    * Submits the translation request and sends it to the translation provider.
    *
-   * @param Job $job
+   * @param \Drupal\tmgmt\JobInterface $job
    *   The job that should be submitted.
    *
    * @ingroup tmgmt_remote_languages_mapping
    */
-  public function requestTranslation(Job $job);
+  public function requestTranslation(JobInterface $job);
 
   /**
    * Aborts a translation job.
    *
-   * @param Job $job
+   * @param \Drupal\tmgmt\JobInterface $job
    *   The job that should have its translation aborted.
    *
    * @return boolean
    *   TRUE if the job could be aborted, FALSE otherwise.
    */
-  public function abortTranslation(Job $job);
+  public function abortTranslation(JobInterface $job);
 
   /**
    * Defines default settings.
@@ -217,7 +214,7 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
   /**
    * Returns if the translator has any settings for the passed job.
    */
-  public function hasCheckoutSettings(Job $job);
+  public function hasCheckoutSettings(JobInterface $job);
 
   /**
    * Accept a single data item.
@@ -236,7 +233,7 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *   provide informations about the failure by adding a message to the job
    *   item.
    */
-  public function acceptedDataItem(JobItem $job_item, array $key);
+  public function acceptedDataItem(JobItemInterface $job_item, array $key);
 
   /**
    * Returns the escaped #text of a data item.

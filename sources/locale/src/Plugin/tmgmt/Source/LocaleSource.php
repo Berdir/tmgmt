@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_locale\Plugin\tmgmt\Source;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\SourcePluginBase;
 use Drupal\tmgmt\TMGMTException;
 
@@ -92,11 +93,11 @@ class LocaleSource extends SourcePluginBase {
   /**
    * Helper function to obtain a locale object for given job item.
    *
-   * @param TMGMTJobItem $job_item
+   * @param \Drupal\tmgmt\JobItemInterface $job_item
    *
    * @return locale object
    */
-  protected function getLocaleObject(JobItem $job_item) {
+  protected function getLocaleObject(JobItemInterface $job_item) {
     $locale_lid = $job_item->getItemId();
 
     // Check existence of assigned lid.
@@ -156,7 +157,7 @@ class LocaleSource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getLabel(JobItem $job_item) {
+  public function getLabel(JobItemInterface $job_item) {
     if ($locale_object = $this->getLocaleObject($job_item)) {
       if ($locale_object->origin == 'source') {
         $label = $locale_object->source;
@@ -171,14 +172,14 @@ class LocaleSource extends SourcePluginBase {
   /**
    * [@inheritdoc}
    */
-  public function getType(JobItem $job_item) {
+  public function getType(JobItemInterface $job_item) {
     return $this->getItemTypeLabel($job_item->getItemType());
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getData(JobItem $job_item) {
+  public function getData(JobItemInterface $job_item) {
     $locale_object = $this->getLocaleObject($job_item);
     if (empty($locale_object)) {
       throw new TMGMTException(t('Unable to load %language translation for the locale %id',
@@ -214,7 +215,7 @@ class LocaleSource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function saveTranslation(JobItem $job_item) {
+  public function saveTranslation(JobItemInterface $job_item) {
     $job = $job_item->getJob();
     $data = $job_item->getData();
     if (isset($data['singular'])) {
@@ -241,7 +242,7 @@ class LocaleSource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getSourceLangCode(JobItem $job_item) {
+  public function getSourceLangCode(JobItemInterface $job_item) {
     // For the locale source English is always the source language.
     return 'en';
   }
@@ -249,7 +250,7 @@ class LocaleSource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getExistingLangCodes(JobItem $job_item) {
+  public function getExistingLangCodes(JobItemInterface $job_item) {
     $query = db_select('locales_target', 'lt');
     $query->fields('lt', array('language'));
     $query->condition('lt.lid', $job_item->getItemId());

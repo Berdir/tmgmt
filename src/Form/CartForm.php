@@ -169,7 +169,7 @@ class Cartform extends FormBase {
 
         $job = tmgmt_job_create($source_language, $target_language, $this->currentUser()->id());
         $job_empty = TRUE;
-        /** @var JobItem $job_item */
+        /** @var \Drupal\tmgmt\JobItemInterface $job_item */
         foreach ($job_items as $id => $job_item) {
           try {
             // As the same item might be added to multiple jobs, we need to

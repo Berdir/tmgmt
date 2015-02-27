@@ -9,6 +9,7 @@ namespace Drupal\tmgmt_file\Tests;
 
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
+use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 use GuzzleHttp\Exception\RequestException;
 
@@ -141,7 +142,7 @@ class FileTranslatorTest extends TMGMTTestBase {
    * Gets trans-unit content from the XLIFF file that has been exported for the
    * given job as last.
    */
-  protected function getTransUnitsContent(Job $job) {
+  protected function getTransUnitsContent(JobInterface $job) {
     $messages = $job->getMessages();
     $message = reset($messages);
     $download_url = $message->variables->{'!link'};
@@ -388,7 +389,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $this->assertResponse(403);
   }
 
-  protected function importFile($translated_file, $translated_text, Job $job) {
+  protected function importFile($translated_file, $translated_text, JobInterface $job) {
     // To test the upload form functionality, navigate to the edit form.
     $edit = array(
       'files[file]' => $translated_file,
@@ -452,15 +453,15 @@ class FileTranslatorTest extends TMGMTTestBase {
   /**
    * Asserts import integrity for a job.
    *
-   * @param TMGMTJob $job
+   * @param \Drupal\tmgmt\JobInterface $job
    *   The job to check.
    * @param bool $expected
    *   (optional) If an integrity failed message is expected or not, defaults
    *   to FALSE.
    */
-  protected function assertIntegrityCheck(Job $job, $expected = TRUE) {
+  protected function assertIntegrityCheck(JobInterface $job, $expected = TRUE) {
     $integrity_check_failed = FALSE;
-    /** @var TMGMTMessage $message */
+    /** @var MessageInterface $message */
     foreach ($job->getMessages() as $message) {
       if ($message->getMessage() == t('Failed to validate semantic integrity of %key element. Please check also the HTML code of the element in the review process.', array('%key' => 'dummy][deep_nesting'))) {
         $integrity_check_failed = TRUE;

@@ -13,6 +13,7 @@ use Drupal\simpletest\WebTestBase;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
+use Drupal\tmgmt\JobItemInterface;
 
 /**
  * Base class for tests.
@@ -148,7 +149,7 @@ abstract class TMGMTTestBase extends WebTestBase {
   /**
    * Creates, saves and returns a translator.
    *
-   * @return \Drupal\tmgmt\Entity\Translator
+   * @return \Drupal\tmgmt\TranslatorInterface
    */
   function createTranslator(array $values = []) {
     $translator = Translator::create($values + [
@@ -167,7 +168,7 @@ abstract class TMGMTTestBase extends WebTestBase {
   /**
    * Creates, saves and returns a translation job.
    *
-   * @return \Drupal\tmgmt\Entity\Job
+   * @return \Drupal\tmgmt\JobInterface
    */
   function createJob($source = 'en', $target = 'de', $uid = 1)  {
     $job = tmgmt_job_create($source, $target, $uid);
@@ -194,14 +195,14 @@ abstract class TMGMTTestBase extends WebTestBase {
   /**
    * Asserts job item language codes.
    *
-   * @param TMGMTJobItem $job_item
+   * @param \Drupal\tmgmt\JobItemInterface $job_item
    *   Job item to check.
    * @param string $expected_source_lang
    *   Expected source language.
    * @param array $actual_lang_codes
    *   Expected existing language codes (translations).
    */
-  function assertJobItemLangCodes(JobItem $job_item, $expected_source_lang, array $actual_lang_codes) {
+  function assertJobItemLangCodes(JobItemInterface $job_item, $expected_source_lang, array $actual_lang_codes) {
     $this->assertEqual($job_item->getSourceLangCode(), $expected_source_lang);
     $existing = $job_item->getExistingLangCodes();
     sort($existing);

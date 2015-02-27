@@ -8,10 +8,11 @@
 namespace Drupal\tmgmt_test\Plugin\tmgmt\Translator;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\tmgmt\TranslatorPluginBase;
-use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
+use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\JobItemInterface;
+use Drupal\tmgmt\TranslatorInterface;
+use Drupal\tmgmt\TranslatorPluginBase;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
 
 /**
@@ -52,14 +53,14 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
   /**
    * {@inheritdoc}
    */
-  public function hasCheckoutSettings(Job $job) {
+  public function hasCheckoutSettings(JobInterface $job) {
     return $job->getTranslator()->getSetting('expose_settings');
   }
 
   /**
    * {@inheritdoc}
    */
-  function requestTranslation(Job $job) {
+  function requestTranslation(JobInterface $job) {
     // Add a debug message.
     $job->addMessage('Test translator called.', array(), 'debug');
 
@@ -96,7 +97,7 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
   /**
    * {@inheritdoc}
    */
-  function canTranslate(Translator $translator, Job $job) {
+  function canTranslate(TranslatorInterface $translator, JobInterface $job) {
     if ($job->getSetting('action') == 'not_translatable') {
       return FALSE;
     }
@@ -106,7 +107,7 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
   /**
    * {@inheritdoc}
    */
-  public function getSupportedTargetLanguages(Translator $translator, $source_language) {
+  public function getSupportedTargetLanguages(TranslatorInterface $translator, $source_language) {
     $languages = array('en', 'de', 'es', 'it', 'zh-hans', 'gsw-berne');
     $languages = array_combine($languages, $languages);
     unset($languages[$source_language]);
@@ -116,7 +117,7 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
   /**
    * {@inheritdoc}
    */
-  public function rejectDataItem(JobItem $job_item, array $key, array $values = NULL) {
+  public function rejectDataItem(JobItemInterface $job_item, array $key, array $values = NULL) {
     $key = '[' . implode('][', $key) . ']';
     $job_item->addMessage('Rejected data item @key for job item @item in job @job.', array('@key' => $key, '@item' => $job_item->id(), '@job' => $job_item->getJobId()));
     return TRUE;

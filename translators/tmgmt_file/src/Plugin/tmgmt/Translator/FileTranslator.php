@@ -7,9 +7,9 @@
 
 namespace Drupal\tmgmt_file\Plugin\tmgmt\Translator;
 
+use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\TranslatorInterface;
 use Drupal\tmgmt\TranslatorPluginBase;
-use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt\Entity\Translator;
 
 /**
  * File translator.
@@ -26,7 +26,7 @@ class FileTranslator extends TranslatorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function canTranslate(Translator $translator, Job $job) {
+  public function canTranslate(TranslatorInterface $translator, JobInterface $job) {
     // Anything can be exported.
     return TRUE;
   }
@@ -34,7 +34,7 @@ class FileTranslator extends TranslatorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function requestTranslation(Job $job) {
+  public function requestTranslation(JobInterface $job) {
     $name = "JobID" . $job->id() . '_' . $job->getSourceLangcode() . '_' . $job->getTargetLangcode();
 
     $export = tmgmt_file_format_controller($job->getSetting('export_format'));
@@ -51,7 +51,7 @@ class FileTranslator extends TranslatorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function hasCheckoutSettings(Job $job) {
+  public function hasCheckoutSettings(JobInterface $job) {
     return $job->getTranslator()->getSetting('allow_override');
   }
 

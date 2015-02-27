@@ -68,7 +68,7 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
     $job->requestTranslation();
 
     foreach ($job->getItems() as $item) {
-      /* @var $item TMGMTJobItem */
+      /* @var $item JobItemInterface */
       $item->acceptTranslation();
       $this->assertTrue($item->isAccepted());
       // The source is now available in en and de.
@@ -92,7 +92,7 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
     $job->requestTranslation();
 
     foreach ($job->getItems() as $item) {
-      /* @var $item TMGMTJobItem */
+      /* @var $item JobItemInterface */
       $item->acceptTranslation();
       $this->assertTrue($item->isAccepted());
 

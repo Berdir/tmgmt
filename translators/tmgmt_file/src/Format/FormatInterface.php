@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_file\Format;
 
 use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\JobInterface;
 
 /**
  * Interface for exporting to a given file format.
@@ -23,7 +24,7 @@ interface FormatInterface {
    * @return
    *   String with the file content.
    */
-  function export(Job $job);
+  function export(JobInterface $job);
 
   /**
    * Validates that the given file is valid and can be imported.

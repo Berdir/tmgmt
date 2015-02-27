@@ -36,7 +36,7 @@ interface TranslatorRejectDataInterface {
    *   In case of an error, it is the responsibility of the translator to
    *   provide informations about the faliure.
    */
-  public function rejectDataItem(JobItem $job_item, array $key, array $values = NULL);
+  public function rejectDataItem(JobItemInterface $job_item, array $key, array $values = NULL);
 
   /**
    * Reject form.

@@ -97,7 +97,7 @@ interface JobItemInterface extends ContentEntityInterface {
    *   to the screen.
    *
    * @return string
-   *    \Drupal\tmgmt\Entity\Message
+   *    \Drupal\tmgmt\MessageInterface
    */
   public function addMessage($message, $variables = array(), $type = 'status');
 
@@ -125,7 +125,7 @@ interface JobItemInterface extends ContentEntityInterface {
   /**
    * Loads the job entity that this job item is attached to.
    *
-   * @return \Drupal\tmgmt\Entity\Job
+   * @return \Drupal\tmgmt\JobInterface
    *   The job entity that this job item is attached to or NULL if there is
    *   no job.
    */
@@ -134,7 +134,7 @@ interface JobItemInterface extends ContentEntityInterface {
   /**
    * Returns the translator for this job item.
    *
-   * @return \Drupal\tmgmt\Entity\Translator
+   * @return \Drupal\tmgmt\TranslatorInterface
    *   The translator entity or NULL if there is none.
    */
   public function getTranslator();

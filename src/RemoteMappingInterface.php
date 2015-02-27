@@ -17,7 +17,7 @@ interface RemoteMappingInterface extends ContentEntityInterface {
   /**
    * Gets translation job.
    *
-   * @return \Drupal\tmgmt\Entity\Job
+   * @return \Drupal\tmgmt\JobInterface
    *   Returns the translation job.
    */
   public function getJob();
@@ -25,7 +25,7 @@ interface RemoteMappingInterface extends ContentEntityInterface {
   /**
    * Gets translation job item.
    *
-   * @return \Drupal\tmgmt\Entity\JobItem
+   * @return \Drupal\tmgmt\JobItemInterface
    *   Returns the job item.
    */
   public function getJobItem();

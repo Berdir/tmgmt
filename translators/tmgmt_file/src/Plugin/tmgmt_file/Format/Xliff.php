@@ -9,6 +9,8 @@ namespace Drupal\tmgmt_file\Plugin\tmgmt_file\Format;
 
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
+use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt_file\Format\FormatInterface;
 use Drupal\tmgmt_file\RecursiveDOMIterator;
 
@@ -78,7 +80,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
    * @param $item
    *   The job item entity.
    */
-  protected function addItem(JobItem $item) {
+  protected function addItem(JobItemInterface $item) {
     $this->startElement('group');
     $this->writeAttribute('id', $item->id());
 
@@ -100,10 +102,10 @@ class Xliff extends \XMLWriter implements FormatInterface {
    *   The unique identifier for this data element.
    * @param $element
    *   Array with the properties #text and optionally #label.
-   * @param TMGMTJob $job
+   * @param \Drupal\tmgmt\JobInterface $job
    *   Translation job.
    */
-  protected function addTransUnit($key, $element, Job $job) {
+  protected function addTransUnit($key, $element, JobInterface $job) {
 
     $key_array = \Drupal::service('tmgmt.data')->ensureArrayKey($key);
 
@@ -144,7 +146,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
   /**
    * {@inheritdoc}
    */
-  public function export(Job $job) {
+  public function export(JobInterface $job) {
 
     $this->job = $job;
 
@@ -316,7 +318,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     return $this->importedXML;
   }
 
-  protected function getImportedTargets(Job $job) {
+  protected function getImportedTargets(JobInterface $job) {
     if (empty($this->importedXML)) {
       return FALSE;
     }
@@ -339,12 +341,12 @@ class Xliff extends \XMLWriter implements FormatInterface {
    *
    * @param string $translation
    *   Job data array.
-   * @param TMGMTJob $job
+   * @param \Drupal\tmgmt\JobInterface $job
    *   Translation job.
    *
    * @return string
    */
-  protected function processForImport($translation, Job $job) {
+  protected function processForImport($translation, JobInterface $job) {
     // In case we do not want to do xliff processing return the translation as
     // is.
     if (!$job->getSetting('xliff_processing')) {

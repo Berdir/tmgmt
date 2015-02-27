@@ -92,7 +92,7 @@ function theme_tmgmt_translation_language_status_single($variables) {
     $state_label = $states_labels[$variables['job_item']->getState()];
     $label = t('Active job item: @state', array('@state' => $state_label));
     $uri = $variables['job_item']->urlInfo();
-    /** @var Job $job */
+    /** @var \Drupal\tmgmt\JobInterface $job */
     $job = $variables['job_item']->getJob();
 
     switch ($variables['job_item']->getState()) {

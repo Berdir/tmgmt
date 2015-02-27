@@ -16,6 +16,7 @@ use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
@@ -294,7 +295,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
   /**
    * {@inheritdoc}
    */
-  public function addExistingItem(JobItem $item) {
+  public function addExistingItem(JobItemInterface $item) {
     $item->tjid = $this->id();
     $item->save();
   }
@@ -544,7 +545,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
     if (!isset($message)) {
       $message = 'The translation job has been aborted.';
     }
-    /** @var JobItem $item */
+    /** @var \Drupal\tmgmt\JobItemInterface $item */
     foreach ($this->getItems() as $item) {
       $item->setState(JobItem::STATE_ABORTED);
     }

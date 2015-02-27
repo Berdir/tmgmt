@@ -32,7 +32,7 @@ class LocalTranslator extends TranslatorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function requestTranslation(Job $job) {
+  public function requestTranslation(JobInterface $job) {
     $tuid = $job->getSetting('translator');
 
     // Create local task for this job.
@@ -60,7 +60,7 @@ class LocalTranslator extends TranslatorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getSupportedTargetLanguages(Translator $translator, $source_language) {
+  public function getSupportedTargetLanguages(TranslatorInterface $translator, $source_language) {
     $languages = tmgmt_local_supported_target_languages($source_language);
     if ($translator->getSetting('allow_all')) {
       $languages += parent::getSupportedTargetLanguages($translator, $source_language);
@@ -71,7 +71,7 @@ class LocalTranslator extends TranslatorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getSupportedLanguagePairs(Translator $translator) {
+  public function getSupportedLanguagePairs(TranslatorInterface $translator) {
 
     if (!empty($this->language_pairs)) {
       return $this->language_pairs;

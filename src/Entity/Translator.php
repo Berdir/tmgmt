@@ -12,6 +12,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\TranslatorInterface;
 
 /**
@@ -286,7 +287,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
   /**
    * {@inheritdoc}
    */
-  public function canTranslate(Job $job) {
+  public function canTranslate(JobInterface $job) {
     if ($controller = $this->getPlugin()) {
       return $controller->canTranslate($this, $job);
     }
@@ -306,7 +307,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
   /**
    * {@inheritdoc}
    */
-  public function hasCheckoutSettings(Job $job) {
+  public function hasCheckoutSettings(JobInterface $job) {
     if ($controller = $this->getPlugin()) {
       return $controller->hasCheckoutSettings($job);
     }
@@ -326,7 +327,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
   /**
    * {@inheritdoc}
    */
-  public function getNotCanTranslateReason(Job $job) {
+  public function getNotCanTranslateReason(JobInterface $job) {
     if ($controller = $this->getPlugin()) {
       return $controller->getNotCanTranslateReason($job);
     }
