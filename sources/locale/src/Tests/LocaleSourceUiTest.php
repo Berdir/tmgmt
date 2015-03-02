@@ -68,7 +68,7 @@ class LocaleSourceUiTest extends TMGMTTestBase {
       'items[' . $locale_object->lid . ']' => TRUE,
     );
     $this->drupalPostForm(NULL, $edit, t('Add to cart'));
-    $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => Url::fromRoute('tmgmt.cart'))));
+    $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => \Drupal::url('tmgmt.cart'))));
     $edit['target_language[]'] = array('gsw-berne');
     $this->drupalPostForm('admin/tmgmt/cart', $edit, t('Request translation'));
 
