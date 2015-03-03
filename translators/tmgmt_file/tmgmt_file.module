@@ -29,10 +29,10 @@ function tmgmt_file_theme() {
 function tmgmt_file_import_form_submit(array $form, FormStateInterface $form_state) {
   // Ensure we have the file uploaded.
   $job = $form_state->getFormObject()->getEntity();
-  $supported_formats = array_keys(tmgmt_file_format_plugin_info());
+  $supported_formats = array_keys(Drupal::service('plugin.manager.tmgmt_file.format')->getDefinitions());
   if ($file = file_save_upload('file', array('file_validate_extensions' => array(implode(' ', $supported_formats))), FALSE, 0)) {
     $extension = pathinfo($file->getFileUri(), PATHINFO_EXTENSION);
-    $controller = tmgmt_file_format_controller($extension);
+    $controller = \Drupal::service('plugin.manager.tmgmt_file.format')->createInstance($extension);
     if ($controller) {
       // Validate the file on job.
       $validated_job = $controller->validateImport($file->getFileUri(), $job);
@@ -65,52 +65,6 @@ function tmgmt_file_import_form_submit(array $form, FormStateInterface $form_sta
       drupal_set_message(Xss::filter($text), $message->getType());
     }
   }
-}
-
-/**
- * Returns information about file format plugins.
- *
- * @param $plugin
- *   (Optional) Name of a plugin/extension.
- *
- * @return array
- *   If a plugin name is provided, information about that plugin, an array of
- *   plugin information otherwise. The information of each plugin consists of
- *   the label and plugin controller class, keyed by the plugin name which is
- *   also the extension for that file format.
- */
-function tmgmt_file_format_plugin_info($plugin = NULL) {
-  if ($plugin) {
-    return \Drupal::service('plugin.manager.tmgmt_file.format')->getDefinition($plugin);
-  }
-  else  {
-    return \Drupal::service('plugin.manager.tmgmt_file.format')->getDefinitions();
-  }
-}
-
-/**
- * Returns an array of file format plugin labels.
- */
-function tmgmt_file_format_plugin_labels() {
-  $labels = array();
-  foreach (Drupal::service('plugin.manager.tmgmt_file.format')->getDefinitions() as $id => $definition) {
-    $labels[$id] = $definition['label'];
-  }
-  return $labels;
-}
-
-/**
- * Returns the file format plugin controller.
- *
- * @param $plugin
- *   (Optional) Name of a plugin/extension.
- *
- * @return \Drupal\tmgmt_file\Format\FormatInterface
- *   Either a specific file format plugin controller instance or an array of
- *   available controllers.
- */
-function tmgmt_file_format_controller($plugin = NULL) {
-  return \Drupal::service('plugin.manager.tmgmt_file.format')->createInstance($plugin);
 }
 
 /**

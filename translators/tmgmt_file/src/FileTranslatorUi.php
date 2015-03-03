@@ -25,7 +25,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
     $form['export_format'] = array(
       '#type' => 'radios',
       '#title' => t('Export to'),
-      '#options' => tmgmt_file_format_plugin_labels(),
+      '#options' => \Drupal::service('plugin.manager.tmgmt_file.format')->getLabels(),
       '#default_value' => $translator->getSetting('export_format'),
       '#description' => t('Please select the format you want to export data.'),
     );
@@ -70,7 +70,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
       $form['export_format'] = array(
         '#type' => 'radios',
         '#title' => t('Export to'),
-        '#options' => tmgmt_file_format_plugin_labels(),
+        '#options' => \Drupal::service('plugin.manager.tmgmt_file.format')->getLabels(),
         '#default_value' => $job->getTranslator()->getSetting('export_format'),
         '#description' => t('Please select the format you want to export data.'),
       );
@@ -91,7 +91,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
       '#title' => t('Import translated file'),
     );
 
-    $supported_formats = array_keys(tmgmt_file_format_plugin_info());
+    $supported_formats = array_keys(\Drupal::service('plugin.manager.tmgmt_file.format')->getDefinitions());
     $form['file'] = array(
       '#type' => 'file',
       '#title' => t('File file'),

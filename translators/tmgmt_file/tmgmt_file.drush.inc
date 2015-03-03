@@ -54,7 +54,7 @@ function drush_tmgmt_file_tmgmt_translate_import($name = NULL) {
     $files = array($name => (object)array('name' => basename($name)));
   }
 
-  $controller = tmgmt_file_format_controller('xlf');
+  $controller = \Drupal::service('plugin.manager.tmgmt_file.format')->createInstance('xlf');
   foreach ($files as $path => $info) {
     $job = $controller->validateImport($path);
     if (empty($job)) {

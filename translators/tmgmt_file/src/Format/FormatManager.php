@@ -62,4 +62,15 @@ class FormatManager extends DefaultPluginManager {
     return $this->ui[$plugin];
   }
 
+  /**
+   * Returns an array of file format plugin labels.
+   */
+  public function getLabels() {
+    $labels = array();
+    foreach ($this->getDefinitions() as $id => $definition) {
+      $labels[$id] = $definition['label'];
+    }
+    return $labels;
+  }
+
 }

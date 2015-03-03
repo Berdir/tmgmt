@@ -37,7 +37,7 @@ class FileTranslator extends TranslatorPluginBase {
   public function requestTranslation(JobInterface $job) {
     $name = "JobID" . $job->id() . '_' . $job->getSourceLangcode() . '_' . $job->getTargetLangcode();
 
-    $export = tmgmt_file_format_controller($job->getSetting('export_format'));
+    $export = \Drupal::service('plugin.manager.tmgmt_file.format')->createInstance($job->getSetting('export_format'));
 
     $path = $job->getSetting('scheme') . '://tmgmt_file/' . $name . '.' .  $job->getSetting('export_format');
     $dirname = dirname($path);
