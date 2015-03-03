@@ -224,6 +224,16 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText(t('This is not supported.'));
     $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isRejected());
+
+    // Test for job checkout form, if the target language is supported,
+    // the test translator should say it is supported.
+    $job = tmgmt_job_create('en', 'de', 0);
+    $job->save();
+    $edit = array(
+      'target_language' => 'de',
+    );
+    $this->drupalPostAjaxForm('admin/tmgmt/jobs/' . $job->id(), $edit, 'target_language');
+    $this->assertFieldByXPath('//select[@id="edit-translator"]/option[1]', 'Test translator (auto created)');
   }
 
   /**
