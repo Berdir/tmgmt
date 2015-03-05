@@ -9,6 +9,8 @@ namespace Drupal\tmgmt_local\Plugin\tmgmt\Translator;
 
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
+use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\TranslatorInterface;
 use Drupal\tmgmt\TranslatorPluginBase;
 
 /**
