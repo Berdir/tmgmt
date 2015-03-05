@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\Entity\Controller\TranslatorListBuilder.
+ * Contains \Drupal\tmgmt\Entity\ListBuilder\TranslatorListBuilder.
  */
 
-namespace Drupal\tmgmt\Entity\Controller;
+namespace Drupal\tmgmt\Entity\ListBuilder;
 
 use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;

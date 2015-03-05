@@ -9,6 +9,7 @@ dependencies:
  - language
  - views
  - block
+ - options
 
 simplytest_dependencies:
  - tmgmt_demo

@@ -32,6 +32,9 @@ use Drupal\Core\Render\Element;
  *       "edit" = "Drupal\tmgmt\Form\JobItemForm",
  *       "delete" = "Drupal\tmgmt\Form\JobItemDeleteForm"
  *     },
+ *     "list_builder" = "Drupal\tmgmt\Entity\ListBuilder\JobItemListBuilder",
+ *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "views_data" = "Drupal\tmgmt\Entity\ViewsData\JobItemViewsData"
  *   },
  *   base_table = "tmgmt_job_item",
  *   entity_keys = {
@@ -102,9 +105,11 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
       ->setLabel(t('Data'))
       ->setDescription(t('The source data'));
 
-    $fields['state'] = BaseFieldDefinition::create('integer')
+    $states = static::getStates();
+    $fields['state'] = BaseFieldDefinition::create('list_integer')
       ->setLabel(t('Job item state'))
       ->setDescription(t('The job item state'))
+      ->setSetting('allowed_values', $states)
       ->setDefaultValue(static::STATE_ACTIVE);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')

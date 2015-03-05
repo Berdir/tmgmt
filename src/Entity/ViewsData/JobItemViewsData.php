@@ -1,0 +1,54 @@
+<?php
+/**
+ * @file
+ * Contains \Drupal\tmgmt\\JobItemViewsData.
+ */
+
+namespace Drupal\tmgmt\Entity\ViewsData;
+
+use Drupal\views\EntityViewsData;
+
+/**
+ * Provides the views data for the job entity type.
+ */
+class JobItemViewsData extends EntityViewsData {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getViewsData() {
+    $data = parent::getViewsData();
+
+    $data['tmgmt_job_item']['label'] = array(
+      'title' => 'Label',
+      'help' => 'Displays a label of the job item.',
+      'real field' => 'tjiid',
+      'field' => array(
+        'id' => 'tmgmt_entity_label',
+      ),
+    );
+    $data['tmgmt_job_item']['progress'] = array(
+      'title' => 'Progress',
+      'help' => 'Displays the progress of a job item.',
+      'real field' => 'tjiid',
+      'field' => array(
+        'id' => 'tmgmt_progress',
+      ),
+    );
+    $data['tmgmt_job_item']['type'] = array(
+      'title' => t('Type'),
+      'help' => t('Displays a type of the job item.'),
+      'real field' => 'tjiid',
+      'field' => array(
+        'id' => 'tmgmt_job_item_type',
+      ),
+    );
+
+    $data['tmgmt_job_item']['state']['field']['id'] = 'machine_name';
+    $data['tmgmt_job_item']['state']['field']['click sortable'] = TRUE;
+    $data['tmgmt_job_item']['state']['field']['float'] = FALSE;
+    $data['tmgmt_job_item']['state']['filter']['id'] = 'in_operator';
+
+    return $data;
+  }
+}

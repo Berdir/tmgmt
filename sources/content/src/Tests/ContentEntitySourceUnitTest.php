@@ -29,7 +29,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt', 'tmgmt_content', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language', 'content_translation', 'menu_link');
+  public static $modules = array('tmgmt', 'tmgmt_content', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language', 'content_translation', 'menu_link', 'options');
 
   protected $entity_type = 'entity_test_mul';
 

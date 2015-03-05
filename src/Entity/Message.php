@@ -19,6 +19,10 @@ use Drupal\tmgmt\MessageInterface;
  *   id = "tmgmt_message",
  *   label = @Translation("Translation Message"),
  *   uri_callback = "tmgmt_message_uri",
+ *  handlers = {
+ *    "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *    "views_data" = "Drupal\tmgmt\Entity\ViewsData\MessageViewsData",
+ *   },
  *   base_table = "tmgmt_message",
  *   entity_keys = {
  *     "id" = "mid",

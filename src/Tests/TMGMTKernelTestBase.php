@@ -29,7 +29,7 @@ abstract class TMGMTKernelTestBase extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = array('user', 'system', 'field', 'text', 'entity_test', 'language', 'locale', 'tmgmt', 'tmgmt_test', 'menu_link');
+  public static $modules = array('user', 'system', 'field', 'text', 'entity_test', 'language', 'locale', 'tmgmt', 'tmgmt_test', 'menu_link', 'options');
 
   /**
    * Overrides DrupalUnitTestBase::setUp().

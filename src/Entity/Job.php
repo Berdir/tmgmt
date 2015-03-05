@@ -35,7 +35,10 @@ use Drupal\user\UserInterface;
  *       "abort" = "Drupal\tmgmt\Form\JobAbortForm",
  *       "delete" = "Drupal\tmgmt\Form\JobDeleteForm",
  *       "resubmit" = "Drupal\tmgmt\Form\JobResubmitForm",
- *     }
+ *     },
+ *     "list_builder" = "Drupal\tmgmt\Entity\ListBuilder\JobListBuilder",
+ *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "views_data" = "Drupal\tmgmt\Entity\ViewsData\JobViewsData",
  *   },
  *   base_table = "tmgmt_job",
  *   entity_keys = {

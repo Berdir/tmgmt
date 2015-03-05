@@ -24,7 +24,7 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt', 'tmgmt_config', 'tmgmt_test', 'node', 'entity', 'filter', 'language', 'config_translation', 'locale', 'menu_link', 'views', 'views_ui');
+  public static $modules = array('tmgmt', 'tmgmt_config', 'tmgmt_test', 'node', 'entity', 'filter', 'language', 'config_translation', 'locale', 'menu_link', 'views', 'views_ui', 'options');
 
   /**
    * {@inheritdoc}

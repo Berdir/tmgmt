@@ -27,7 +27,7 @@ use Drupal\tmgmt\TranslatorInterface;
  *       "add" = "Drupal\tmgmt\Form\TranslatorForm",
  *       "delete" = "Drupal\tmgmt\Form\TranslatorDeleteForm"
  *     },
- *     "list_builder" = "Drupal\tmgmt\Entity\Controller\TranslatorListBuilder",
+ *     "list_builder" = "Drupal\tmgmt\Entity\ListBuilder\TranslatorListBuilder",
  *     "access" = "Drupal\tmgmt\Entity\Controller\TranslatorAccessControlHandler",
  *   },
  *   uri_callback = "tmgmt_translator_uri",
