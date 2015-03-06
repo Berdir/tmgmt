@@ -52,8 +52,10 @@ abstract class EntityTestBase extends TMGMTTestBase {
     // Push in also the body field.
     $this->field_names['node'][$machine_name][] = 'body';
 
-    $content_translation_manager = \Drupal::service('content_translation.manager');
-    $content_translation_manager->setEnabled('node', $machine_name, TRUE);
+    if (\Drupal::hasService('content_translation.manager')) {
+      $content_translation_manager = \Drupal::service('content_translation.manager');
+      $content_translation_manager->setEnabled('node', $machine_name, TRUE);
+    }
 
     $this->applySchemaUpdates();
 

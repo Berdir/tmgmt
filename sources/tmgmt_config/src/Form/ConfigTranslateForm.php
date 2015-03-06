@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_content\Form\ContentTranslateForm.
+ * Contains \Drupal\tmgmt_config\Form\ConfigTranslateForm.
  */
 
-namespace Drupal\tmgmt_content\Form;
+namespace Drupal\tmgmt_config\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Language\LanguageInterface;
@@ -13,8 +13,22 @@ use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\config_translation\ConfigMapperManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
-class ContentTranslateForm extends FormBase {
+/**
+ * Configuration translation overview form.
+ */
+class ConfigTranslateForm extends FormBase {
+
+  /**
+   * The configuration mapper manager.
+   *
+   * @var \Drupal\config_translation\ConfigMapperManagerInterface
+   */
+  protected $configMapperManager;
+
   /**
    * {@inheritdoc}
    */
@@ -23,21 +37,46 @@ class ContentTranslateForm extends FormBase {
   }
 
   /**
+   * Constructs a ConfigTranslationController.
+   *
+   * @param \Drupal\config_translation\ConfigMapperManagerInterface $config_mapper_manager
+   *   The configuration mapper manager.
+   */
+  public function __construct(ConfigMapperManagerInterface $config_mapper_manager) {
+    $this->configMapperManager = $config_mapper_manager;
+  }
+
+  /**
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   * @return static
+   */
+  public static function create(ContainerInterface $container) {
+    return new static($container->get('plugin.manager.config_translation.mapper'));
+  }
+
+  /**
    * {@inheritdoc}
    */
-  function buildForm(array $form, FormStateInterface $form_state, array $build = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, Request $request = NULL, array $build = NULL, $plugin_id = NULL) {
     // Store the entity in the form state so we can easily create the job in the
     // submit handler.
 
-    $form_state->set('entity', $build['#entity']);
+    /** @var \Drupal\config_translation\ConfigMapperInterface $mapper */
+    $mapper = $this->configMapperManager->createInstance($plugin_id);
+    $mapper->populateFromRequest($request);
 
-    $overview = $build['content_translation_overview'];
+    $form_state->set('mapper', $mapper);
+    $form_state->set('plugin_id', $plugin_id);
+    $entity = $request->attributes->get($plugin_id);
+    $id = $entity->id();
+    $form_state->set('id', $id);
 
-    $form['#title'] = $this->t('Translations of @title', array('@title' => $build['#entity']->label()));
+    $form['#title'] = $this->t('Translations of @title', array('@title' => $mapper->getTitle()));
+    $overview = $build['languages'];
 
     $form['top_actions']['#type'] = 'actions';
     $form['top_actions']['#weight'] = -10;
-    tmgmt_add_cart_form($form['top_actions'], $form_state, 'content', $form_state->get('entity')->getEntityTypeId(), $form_state->get('entity')->id());
+    tmgmt_add_cart_form($form['top_actions'], $form_state, 'config', $plugin_id, $id);
 
     // Inject our additional column into the header.
     array_splice($overview['#header'], -1, 0, array(t('Pending Translations')));
@@ -49,8 +88,7 @@ class ContentTranslateForm extends FormBase {
     );
     $languages = \Drupal::languageManager()->getLanguages();
     // Check if there is a job / job item that references this translation.
-    $entity_langcode = $form_state->get('entity')->language()->getId();
-    $items = tmgmt_job_item_load_latest('content', $form_state->get('entity')->getEntityTypeId(), $form_state->get('entity')->id(), $entity_langcode);
+    $items = tmgmt_job_item_load_latest('config', $plugin_id, $id, $mapper->getLangcode());
     foreach ($languages as $langcode => $language) {
       if ($langcode == LanguageInterface::LANGCODE_DEFAULT) {
         // Never show language neutral on the overview.
@@ -58,8 +96,8 @@ class ContentTranslateForm extends FormBase {
       }
       // Since the keys are numeric and in the same order we can shift one element
       // after the other from the original non-form rows.
-      $option = array_shift($overview['#rows']);
-      if ($langcode == $entity_langcode) {
+      $option = $overview[$langcode];
+      if ($langcode == $mapper->getLangcode()) {
         $additional = '<strong>' . t('Source') . '</strong>';
         // This is the source object so we disable the checkbox for this row.
         $form['languages'][$langcode] = array(
@@ -97,7 +135,11 @@ class ContentTranslateForm extends FormBase {
       else {
         array_splice($option, -1, 0, array($additional));
         // Append the current option array to the form.
-        $form['languages']['#options'][$langcode] = $option;
+        $form['languages']['#options'][$langcode] = array(
+          drupal_render($option['language']),
+          $additional,
+          drupal_render($option['operations']),
+        );
       }
     }
     $form['actions']['#type'] = 'actions';
@@ -124,16 +166,16 @@ class ContentTranslateForm extends FormBase {
    * {@inheritdoc}
    */
   function submitForm(array &$form, FormStateInterface $form_state) {
-    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-    $entity = $form_state->get('entity');
+    /** @var \Drupal\config_translation\ConfigMapperManagerInterface $mapper */
+    $mapper = $form_state->get('mapper');
     $values = $form_state->getValues();
     $jobs = array();
     foreach (array_keys(array_filter($values['languages'])) as $langcode) {
       // Create the job object.
-      $job = tmgmt_job_create($entity->language()->getId(), $langcode, \Drupal::currentUser()->id());
+      $job = tmgmt_job_create($mapper->getLangcode(), $langcode, \Drupal::currentUser()->id());
       try {
         // Add the job item.
-        $job->addItem('content', $entity->getEntityTypeId(), $entity->id());
+        $job->addItem('config', $form_state->get('plugin_id'), $form_state->get('id'));
         // Append this job to the array of created jobs so we can redirect the user
         // to a multistep checkout form if necessary.
         $jobs[$job->id()] = $job;

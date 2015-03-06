@@ -22,7 +22,7 @@ use Drupal\Core\Render\Element;
  *   id = "config",
  *   label = @Translation("Config Entity"),
  *   description = @Translation("Source handler for config entities."),
- *   ui = "Drupal\tmgmt_content\ContentEntitySourcePluginUi"
+ *   ui = "Drupal\tmgmt_config\ConfigEntitySourcePluginUi"
  * )
  */
 class ConfigEntitySource extends SourcePluginBase {
@@ -48,7 +48,7 @@ class ConfigEntitySource extends SourcePluginBase {
   public function getData(JobItemInterface $job_item) {
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     if (!$entity) {
-      throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), $job_item->getItemId())));
+      throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), '%id' => $job_item->getItemId())));
     }
     /* @var \Drupal\config_translation\ConfigMapperInterface $config_mapper */
     $config_mapper = \Drupal::service('plugin.manager.config_translation.mapper')->createInstance($job_item->getItemType());
@@ -66,7 +66,7 @@ class ConfigEntitySource extends SourcePluginBase {
 
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     if (!$entity) {
-      throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), $job_item->getItemId())));
+      throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), '%id' => $job_item->getItemId())));
     }
     /* @var \Drupal\config_translation\ConfigMapperInterface $config_mapper */
     $config_mapper = \Drupal::service('plugin.manager.config_translation.mapper')->createInstance($job_item->getItemType());
@@ -97,6 +97,14 @@ class ConfigEntitySource extends SourcePluginBase {
   }
 
   /**
+   * Converts a translated data structure. We convert it.
+   *
+   * @param array $data
+   *   The translated data structure.
+   *
+   * @return array
+   *   Returns a translation array as expected by
+   *   \Drupal\config_translation\FormElement\ElementInterface::setConfig().
    * Converts a translated data structure. We convert it.
    *
    * @param array $data

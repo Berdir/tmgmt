@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_content\ContentEntitySourcePluginUi.
+ * Contains \Drupal\tmgmt_config\ConfigEntitySourcePluginUi.
  */
 
-namespace Drupal\tmgmt_content;
+namespace Drupal\tmgmt_config;
 
 use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormStateInterface;
@@ -21,7 +21,7 @@ use Drupal\tmgmt\TMGMTException;
  *
  * @ingroup tmgmt_source
  */
-class ContentEntitySourcePluginUi extends SourcePluginUiBase {
+class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
 
   /**
    * Entity source list items limit.
