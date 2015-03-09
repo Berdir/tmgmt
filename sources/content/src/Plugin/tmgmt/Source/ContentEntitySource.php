@@ -83,6 +83,7 @@ class ContentEntitySource extends SourcePluginBase {
       $data[$key]['#label'] = $field_definition->getLabel();
       foreach ($field as $index => $field_item) {
         $data[$key][$index]['#label'] = t('Delta #@delta', array('@delta' => $index));
+        $format = NULL;
         /* @var FieldItemInterface $field_item */
         foreach ($field_item->getProperties() as $property_key => $property) {
           // Ignore computed values.
@@ -94,7 +95,6 @@ class ContentEntitySource extends SourcePluginBase {
           if (!($property instanceof PrimitiveInterface)) {
             continue;
           }
-
           $translate = TRUE;
           // Ignore properties with limited allowed values or if they're not strings.
           if ($property instanceof OptionsProviderInterface || !($property instanceof StringInterface)) {
@@ -105,6 +105,17 @@ class ContentEntitySource extends SourcePluginBase {
             '#text' => $property->getValue(),
             '#translate' => $translate,
           );
+          if($property_definition->getDataType() == 'filter_format'){
+            $format = $property->getValue();
+          }
+        }
+        // Add the format to the translatable properties.
+        if(!empty($format)) {
+          foreach ($data[$key][$index] as $name => $value) {
+            if (isset($value['#translate']) && $value['#translate'] == TRUE) {
+              $data[$key][$index][$name]['#format'] = $format;
+            }
+          }
         }
       }
     }

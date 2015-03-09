@@ -140,6 +140,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual($data['field_test_text'][0]['value']['#text'], $entity_test->field_test_text->value);
     $this->assertEqual($data['field_test_text'][0]['value']['#translate'], TRUE);
     $this->assertEqual((string) $data['field_test_text'][0]['format']['#label'], 'Text format');
+    $this->assertEqual($data['field_test_text'][0]['value']['#format'], 'text_plain');
     $this->assertEqual($data['field_test_text'][0]['format']['#text'], $entity_test->field_test_text->format);
     $this->assertEqual($data['field_test_text'][0]['format']['#translate'], FALSE);
     $this->assertFalse(isset($data['field_test_text'][0]['processed']));
@@ -149,6 +150,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual($data['field_test_text'][1]['value']['#text'], $entity_test->field_test_text[1]->value);
     $this->assertEqual($data['field_test_text'][1]['value']['#translate'], TRUE);
     $this->assertEqual((string) $data['field_test_text'][1]['format']['#label'], 'Text format');
+    $this->assertEqual($data['field_test_text'][0]['value']['#format'], 'text_plain');
     $this->assertEqual($data['field_test_text'][1]['format']['#text'], $entity_test->field_test_text[1]->format);
     $this->assertEqual($data['field_test_text'][1]['format']['#translate'], FALSE);
     $this->assertFalse(isset($data['field_test_text'][1]['processed']));
@@ -234,6 +236,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual((string) $data['body'][0]['value']['#label'], 'Text');
     $this->assertEqual($data['body'][0]['value']['#text'], $node->body->value);
     $this->assertEqual($data['body'][0]['value']['#translate'], TRUE);
+    $this->assertEqual($data['body'][0]['value']['#format'], 'text_plain');
     $this->assertEqual((string) $data['body'][0]['summary']['#label'], 'Summary');
     $this->assertEqual($data['body'][0]['summary']['#text'], $node->body->summary);
     $this->assertEqual($data['body'][0]['summary']['#translate'], TRUE);
@@ -249,6 +252,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual((string) $data['body'][1]['summary']['#label'], 'Summary');
     $this->assertEqual($data['body'][1]['summary']['#text'], $node->body[1]->summary);
     $this->assertEqual($data['body'][1]['summary']['#translate'], TRUE);
+    $this->assertEqual($data['body'][0]['summary']['#format'], 'text_plain');
     $this->assertEqual((string) $data['body'][1]['format']['#label'], 'Text format');
     $this->assertEqual($data['body'][1]['format']['#text'], $node->body[1]->format);
     $this->assertEqual($data['body'][1]['format']['#translate'], FALSE);
