@@ -66,7 +66,7 @@ class ConfigEntitySourceUiTest extends EntityTestBase {
 
     // Verify that we are on the translate tab.
     $this->assertText(t('One job needs to be checked out.'));
-    $this->assertText('Article (English to German, Unprocessed)');
+    $this->assertText('Article content type (English to German, Unprocessed)');
 
     // Submit.
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
@@ -97,7 +97,7 @@ class ConfigEntitySourceUiTest extends EntityTestBase {
 
     // Verify that we are on the checkout page.
     $this->assertText(t('One job needs to be checked out.'));
-    $this->assertText('Article (English to Spanish, Unprocessed)');
+    $this->assertText('Article content type (English to Spanish, Unprocessed)');
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
 
     // Make sure that we're back on the originally defined destination URL.
@@ -145,9 +145,9 @@ class ConfigEntitySourceUiTest extends EntityTestBase {
     $this->assertText(t('2 jobs need to be checked out.'));
 
     // Submit all jobs.
-    $this->assertText('Article (English to German, Unprocessed)');
+    $this->assertText('Article content type (English to German, Unprocessed)');
     $this->drupalPostForm(NULL, array(), t('Submit to translator and continue'));
-    $this->assertText('Article (English to Spanish, Unprocessed)');
+    $this->assertText('Article content type (English to Spanish, Unprocessed)');
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
 
     // Make sure that we're back on the translate tab.
@@ -191,7 +191,7 @@ class ConfigEntitySourceUiTest extends EntityTestBase {
 
     // Verify that we are on the translate tab.
     $this->assertText(t('One job needs to be checked out.'));
-    $this->assertText('Content (English to German, Unprocessed)');
+    $this->assertText('Content view (English to German, Unprocessed)');
 
     // Submit.
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
@@ -222,7 +222,7 @@ class ConfigEntitySourceUiTest extends EntityTestBase {
 
     // Verify that we are on the checkout page.
     $this->assertText(t('One job needs to be checked out.'));
-    $this->assertText('Content (English to Spanish, Unprocessed)');
+    $this->assertText('Content view (English to Spanish, Unprocessed)');
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
 
     // Make sure that we're back on the originally defined destination URL.
@@ -252,12 +252,82 @@ class ConfigEntitySourceUiTest extends EntityTestBase {
 
     // Test if the content and article are in the cart.
     $this->drupalGet('admin/tmgmt/cart');
-    $this->assertLink('Content');
-    $this->assertLink('Article');
+    $this->assertLink('Content view');
+    $this->assertLink('Article content type');
 
     // Test the label on the source overivew.
     $this->drupalGet('admin/structure/views/view/content/translate');
     $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a> including the current item.',
         array('@count' => 2, '@url' => Url::fromRoute('tmgmt.cart')->toString())));
   }
+
+  /**
+   * Test the node type for a single checkout.
+   */
+  function testSimpleConfiguration() {
+    $this->loginAsTranslator(array('translate configuration'));
+
+    // Go to the translate tab.
+    $this->drupalGet('admin/config/system/site-information/translate');
+
+    // Assert some basic strings on that page.
+    $this->assertText(t('Translations of System information'));
+
+    // Request a translation for german.
+    $edit = array(
+      'languages[de]' => TRUE,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Request translation'));
+
+    // Verify that we are on the translate tab.
+    $this->assertText(t('One job needs to be checked out.'));
+    $this->assertText('System information (English to German, Unprocessed)');
+
+    // Submit.
+    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+
+    // Make sure that we're back on the originally defined destination URL.
+    $this->assertUrl('admin/config/system/site-information/translate');
+
+    // We are redirected back to the correct page.
+    $this->drupalGet('admin/config/system/site-information/translate');
+
+    // Translated languages should now be listed as Needs review.
+    $rows = $this->xpath('//tbody/tr');
+    foreach ($rows as $value) {
+      if ($value->td[2]->a == 'Needs review') {
+        $this->assertEqual('German', (string) $value->td[1]);
+      }
+    }
+
+    // Verify that the pending translation is shown.
+    $this->clickLink(t('Needs review'));
+    $this->drupalPostForm(NULL, array(), t('Save'));
+
+    // Request a spanish translation.
+    $edit = array(
+      'languages[es]' => TRUE,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Request translation'));
+
+    // Verify that we are on the checkout page.
+    $this->assertText(t('One job needs to be checked out.'));
+    $this->assertText('System information (English to Spanish, Unprocessed)');
+    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+
+    // Make sure that we're back on the originally defined destination URL.
+    $this->assertUrl('admin/config/system/site-information/translate');
+
+    // Translated languages should now be listed as Needs review.
+    $rows = $this->xpath('//tbody/tr');
+    $counter = 0;
+    foreach ($rows as $value) {
+      if ($value->td[2]->a == 'Needs review') {
+        $this->assertEqual('Spanish' || 'German', (string) $value->td[1]);
+        $counter++;
+      }
+    }
+    $this->assertEqual($counter, 2);
+  }
+
 }

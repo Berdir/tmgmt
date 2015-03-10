@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_config\Tests;
 
+use Drupal\Core\Config\Config;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\NodeType;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
@@ -64,7 +65,7 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $job = tmgmt_job_create('en', 'de');
     $job->translator = 'test_translator';
     $job->save();
-    $job_item = tmgmt_job_item_create('config', 'node_type', $node_type->id(), array('tjid' => $job->id()));
+    $job_item = tmgmt_job_item_create('config', 'node_type', 'node.type.' . $node_type->id(), array('tjid' => $job->id()));
     $job_item->save();
 
     $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('config');
@@ -105,15 +106,16 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $job = tmgmt_job_create('en', 'de');
     $job->translator = 'test_translator';
     $job->save();
-    $job_item = tmgmt_job_item_create('config', 'view', 'tmgmt_job_overview', array('tjid' => $job->id()));
+    $job_item = tmgmt_job_item_create('config', 'view', 'views.view.tmgmt_job_overview', array('tjid' => $job->id()));
     $job_item->save();
+    $view = View::load('tmgmt_job_overview');
 
     $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('config');
     $data = $source_plugin->getData($job_item);
 
     // Test the name property.
     $this->assertEqual($data['label']['#label'], 'Label');
-    $this->assertEqual($data['label']['#text'], $job_item->label());
+    $this->assertEqual($data['label']['#text'], $view->label());
     $this->assertEqual($data['label']['#translate'], TRUE);
     $this->assertEqual($data['description']['#label'], 'Administrative description');
     $this->assertEqual($data['description']['#text'], 'Gives a bulk operation overview of translation jobs in the system.');
@@ -143,6 +145,47 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $display = $view->get('display');
     $this->assertEqual($display['default']['display_options']['title'], $data['label']['#translation']['#text']);
     $this->assertEqual($display['default']['display_options']['exposed_form']['options']['submit_button'], $data['display']['default']['display_options']['exposed_form']['options']['submit_button']['#translation']['#text']);
+  }
+
+  /**
+   * Tests the view of the system site.
+   */
+  public function testSystemSite() {
+    $this->installConfig(['system']);
+    $this->config('system.site')->set('slogan', 'Test slogan')->save();
+    $job = tmgmt_job_create('en', 'de');
+    $job->translator = 'test_translator';
+    $job->save();
+    $job_item = tmgmt_job_item_create('config', 'system.site_information_settings', 'system.site', array('tjid' => $job->id()));
+    $job_item->save();
+
+    $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('config');
+    $data = $source_plugin->getData($job_item);
+
+    // Test the name property.
+    $this->assertEqual($data['name']['#label'], 'Site name');
+    $this->assertEqual($data['name']['#text'], 'Drupal');
+    $this->assertEqual($data['name']['#translate'], TRUE);
+    $this->assertEqual($data['slogan']['#label'], 'Slogan');
+    $this->assertEqual($data['slogan']['#text'], 'Test slogan');
+    $this->assertEqual($data['slogan']['#translate'], TRUE);
+
+    // Test item types.
+    $this->assertEqual($source_plugin->getItemTypes()['view'], t('View'));
+
+    // Now request a translation and save it back.
+    $job->requestTranslation();
+    $items = $job->getItems();
+    $item = reset($items);
+    $item->acceptTranslation();
+    $data = $item->getData();
+
+    // Check that the translations were saved correctly.
+    $language_manager = \Drupal::languageManager();
+    $language_manager->setConfigOverrideLanguage($language_manager->getLanguage('de'));
+
+    $this->assertEqual(\Drupal::config('system.site')->get('name'), $data['name']['#translation']['#text']);
+    $this->assertEqual(\Drupal::config('system.site')->get('slogan'), $data['slogan']['#translation']['#text']);
   }
 
 }

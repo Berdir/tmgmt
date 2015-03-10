@@ -67,8 +67,12 @@ class ConfigTranslateForm extends FormBase {
 
     $form_state->set('mapper', $mapper);
     $form_state->set('plugin_id', $plugin_id);
-    $entity = $request->attributes->get($plugin_id);
-    $id = $entity->id();
+
+    // @todo: Support more than one config names.
+    if (count($mapper->getConfigNames()) > 1) {
+      drupal_set_message(t('There are more than one config names.'), 'warning');
+    }
+    $id = $mapper->getConfigNames()[0];
     $form_state->set('id', $id);
 
     $form['#title'] = $this->t('Translations of @title', array('@title' => $mapper->getTitle()));

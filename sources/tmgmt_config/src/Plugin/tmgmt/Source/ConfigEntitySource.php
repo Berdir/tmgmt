@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_config\Plugin\tmgmt\Source;
 use Drupal\config_translation\Form\ConfigTranslationFormBase;
 use Drupal\Core\Config\Schema\Mapping;
 use Drupal\Core\Config\Schema\Sequence;
+use Drupal\Core\Url;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\SourcePluginBase;
 use Drupal\tmgmt\TMGMTException;
@@ -27,16 +28,52 @@ use Drupal\Core\Render\Element;
  */
 class ConfigEntitySource extends SourcePluginBase {
 
-  public function getLabel(JobItemInterface $job_item) {
-    if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
-      return $entity->label();
+  /**
+   * Gets the mapper.
+   *
+   * @param \Drupal\tmgmt\JobItemInterface $job_item
+   *   Gets a job item as a parameter.
+   *
+   * @return \Drupal\config_translation\ConfigMapperInterface $config_mapper
+   *   Returns the config mapper.
+   *
+   * @throws \Drupal\tmgmt\TMGMTException
+   *   If there is no entity, throws an exception.
+   */
+  protected function getMapper(JobItemInterface $job_item) {
+    // @todo: Inject dependencies.
+    $mapper_manager = \Drupal::service('plugin.manager.config_translation.mapper');
+    $config_mapper = $mapper_manager->createInstance($job_item->getItemType());
+    $definition = $mapper_manager->getDefinition($job_item->getItemType());
+    if (!empty($definition['entity_type'])) {
+      $item_id = $job_item->getItemId();
+      $entity_type = \Drupal::entityManager()->getDefinition($job_item->getItemType());
+      $entity_type->getConfigPrefix();
+
+      $entity_id = str_replace($entity_type->getConfigPrefix() . '.', '', $job_item->getItemId());
+
+      $entity = entity_load($job_item->getItemType(), $entity_id);
+      if (!$entity) {
+        throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), '%id' => $entity_id)));
+      }
+      $config_mapper->setEntity($entity);
     }
+    return $config_mapper;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getLabel(JobItemInterface $job_item) {
+    return $this->getMapper($job_item)->getTitle();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getUrl(JobItemInterface $job_item) {
-    if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
-      return $entity->urlInfo();
-    }
+    $config_mapper = $this->getMapper($job_item);
+    return Url::fromRoute($config_mapper->getBaseRouteName(), $config_mapper->getBaseRouteParameters());
   }
 
   /**
@@ -46,31 +83,16 @@ class ConfigEntitySource extends SourcePluginBase {
    * the Translation Management system.
    */
   public function getData(JobItemInterface $job_item) {
-    $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
-    if (!$entity) {
-      throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), '%id' => $job_item->getItemId())));
-    }
-    /* @var \Drupal\config_translation\ConfigMapperInterface $config_mapper */
-    $config_mapper = \Drupal::service('plugin.manager.config_translation.mapper')->createInstance($job_item->getItemType());
-    $config_mapper->setEntity($entity);
-
-    $id = $entity->getEntityType()->getConfigPrefix() . '.' . $entity->id();
-    $schema = \Drupal::service('config.typed')->get($id);
-    return $this->extractTranslatables($schema, $config_mapper->getConfigData()[$id]);
+    $config_mapper = $this->getMapper($job_item);
+    $schema = \Drupal::service('config.typed')->get($job_item->getItemId());
+    return $this->extractTranslatables($schema, $config_mapper->getConfigData()[$job_item->getItemId()]);
   }
 
   /**
    * {@inheritdoc}
    */
   public function saveTranslation(JobItemInterface $job_item) {
-
-    $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
-    if (!$entity) {
-      throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), '%id' => $job_item->getItemId())));
-    }
-    /* @var \Drupal\config_translation\ConfigMapperInterface $config_mapper */
-    $config_mapper = \Drupal::service('plugin.manager.config_translation.mapper')->createInstance($job_item->getItemType());
-    $config_mapper->setEntity($entity);
+    $config_mapper = $this->getMapper($job_item);
 
     $data = $job_item->getData();
 
@@ -93,7 +115,6 @@ class ConfigEntitySource extends SourcePluginBase {
         $config_translation->save();
       }
     }
-
   }
 
   /**
@@ -148,22 +169,24 @@ class ConfigEntitySource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function getItemTypeLabel($type) {
-    return \Drupal::entityManager()->getDefinition($type)->getLabel();
+    $definition = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinition($type);
+    return $definition['title'];
   }
 
   /**
    * {@inheritdoc}
    */
   public function getType(JobItemInterface $job_item) {
-    return \Drupal::entityManager()->getDefinition($job_item->getItemType())->getLabel();
+    $definition = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinition($job_item->getItemType());
+    return $definition['title'];
   }
 
   /**
    * {@inheritdoc}
    */
   public function getSourceLangCode(JobItemInterface $job_item) {
-    $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
-    return $entity->language()->getId();
+    $config_mapper = $this->getMapper($job_item);
+    return $config_mapper->getLangcode();
   }
 
   /**
