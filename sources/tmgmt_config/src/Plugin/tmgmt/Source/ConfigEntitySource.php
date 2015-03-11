@@ -7,14 +7,21 @@
 
 namespace Drupal\tmgmt_config\Plugin\tmgmt\Source;
 
+use Drupal\config_translation\ConfigMapperManagerInterface;
 use Drupal\config_translation\Form\ConfigTranslationFormBase;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\Schema\Mapping;
 use Drupal\Core\Config\Schema\Sequence;
+use Drupal\Core\Config\TypedConfigManagerInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Url;
+use Drupal\language\ConfigurableLanguageManagerInterface;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\SourcePluginBase;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Render\Element;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Content entity source plugin controller.
@@ -26,7 +33,69 @@ use Drupal\Core\Render\Element;
  *   ui = "Drupal\tmgmt_config\ConfigEntitySourcePluginUi"
  * )
  */
-class ConfigEntitySource extends SourcePluginBase {
+class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * The configuration mapper manager.
+   *
+   * @var \Drupal\config_translation\ConfigMapperManagerInterface
+   */
+  protected $configMapperManager;
+
+  /**
+   * The injected entity manager.
+   *
+   * @var \Drupal\Core\Entity\EntityManagerInterface
+   */
+  protected $entityManager;
+
+  /**
+   * Configuration factory manager
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactoryManager;
+
+  /**
+   * @var \Drupal\language\ConfigurableLanguageManagerInterface
+   */
+  protected $languageManager;
+
+  /**
+   * Constructs a ConfigTranslationController.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\config_translation\ConfigMapperManagerInterface $config_mapper_manager
+   *   The configuration mapper manager.
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   * @param  \Drupal\Core\Config\TypedConfigManagerInterface $typedConfigManagerInterface
+   *   The typed config.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
+   * @param \Drupal\language\ConfigurableLanguageManagerInterface
+   *   Configurable language manager.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigMapperManagerInterface $config_mapper_manager, EntityManagerInterface $entity_manager, TypedConfigManagerInterface $typedConfigManagerInterface, ConfigFactoryInterface $config_factory, ConfigurableLanguageManagerInterface $language_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->configMapperManager = $config_mapper_manager;
+    $this->entityManager = $entity_manager;
+    $this->typedConfig = $typedConfigManagerInterface;
+    $this->configFactoryManager = $config_factory;
+    $this->languageManager = $language_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static($configuration, $plugin_id, $plugin_definition, $container->get('plugin.manager.config_translation.mapper'), $container->get('entity.manager'), $container->get('config.typed'), $container->get('config.factory'), $container->get('language_manager'));
+  }
 
   /**
    * Gets the mapper.
@@ -42,12 +111,10 @@ class ConfigEntitySource extends SourcePluginBase {
    */
   protected function getMapper(JobItemInterface $job_item) {
     // @todo: Inject dependencies.
-    $mapper_manager = \Drupal::service('plugin.manager.config_translation.mapper');
-    $config_mapper = $mapper_manager->createInstance($job_item->getItemType());
-    $definition = $mapper_manager->getDefinition($job_item->getItemType());
+    $config_mapper = $this->configMapperManager->createInstance($job_item->getItemType());
+    $definition = $this->configMapperManager->getDefinition($job_item->getItemType());
     if (!empty($definition['entity_type'])) {
-      $item_id = $job_item->getItemId();
-      $entity_type = \Drupal::entityManager()->getDefinition($job_item->getItemType());
+      $entity_type = $this->entityManager->getDefinition($job_item->getItemType());
       $entity_type->getConfigPrefix();
 
       $entity_id = str_replace($entity_type->getConfigPrefix() . '.', '', $job_item->getItemId());
@@ -84,7 +151,7 @@ class ConfigEntitySource extends SourcePluginBase {
    */
   public function getData(JobItemInterface $job_item) {
     $config_mapper = $this->getMapper($job_item);
-    $schema = \Drupal::service('config.typed')->get($job_item->getItemId());
+    $schema = $this->typedConfig->get($job_item->getItemId());
     return $this->extractTranslatables($schema, $config_mapper->getConfigData()[$job_item->getItemId()]);
   }
 
@@ -97,11 +164,11 @@ class ConfigEntitySource extends SourcePluginBase {
     $data = $job_item->getData();
 
     foreach ($config_mapper->getConfigNames() as $name) {
-      $schema = \Drupal::service('config.typed')->get($name);
+      $schema = $this->typedConfig->get($name);
 
       // Set configuration values based on form submission and source values.
-      $base_config = \Drupal::configFactory()->getEditable($name);
-      $config_translation = \Drupal::languageManager()->getLanguageConfigOverride($job_item->getJob()->getTargetLangcode(), $name);
+      $base_config = $this->configFactoryManager->getEditable($name);
+      $config_translation = $this->languageManager->getLanguageConfigOverride($job_item->getJob()->getTargetLangcode(), $name);
 
       $element = ConfigTranslationFormBase::createFormElement($schema);
       $element->setConfig($base_config, $config_translation, $this->convertToTranslation($data));
@@ -155,7 +222,7 @@ class ConfigEntitySource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function getItemTypes() {
-    $entity_types = \Drupal::entityManager()->getDefinitions();
+    $entity_types = $this->entityManager->getDefinitions();
     $types = array();
     foreach ($entity_types as $entity_type_name => $entity_type) {
       if ($entity_type->isSubclassOf('Drupal\Core\Config\Entity\ConfigEntityInterface')) {
@@ -169,7 +236,7 @@ class ConfigEntitySource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function getItemTypeLabel($type) {
-    $definition = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinition($type);
+    $definition = $this->configMapperManager->getDefinition($type);
     return $definition['title'];
   }
 
@@ -177,7 +244,7 @@ class ConfigEntitySource extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function getType(JobItemInterface $job_item) {
-    $definition = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinition($job_item->getItemType());
+    $definition = $this->configMapperManager->getDefinition($job_item->getItemType());
     return $definition['title'];
   }
 
