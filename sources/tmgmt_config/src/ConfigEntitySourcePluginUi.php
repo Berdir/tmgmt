@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_config;
 
 use Drupal\Component\Utility\String;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
@@ -31,81 +32,13 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
   public $pagerLimit = 25;
 
   /**
-   * Gets entities data of provided type needed to build overview form list.
-   *
-   * @param $type
-   *   Entity type for which to get list of entities.
-   * @param array $property_conditions
-   *   Array of key => $value pairs passed into
-   *   tmgmt_content_get_translatable_entities() as the second parameter.
-   *
-   * @return array
-   *   Array of entities.
-   */
-  public function getEntitiesTranslationData($type, $property_conditions = array()) {
-
-    $return_value = array();
-    $entities = tmgmt_content_get_translatable_entities($type, $property_conditions, TRUE);
-
-    $bundles = tmgmt_content_get_translatable_bundles($type);
-
-    // For retrieved entities add translation specific data.
-    foreach ($entities as $entity) {
-      // This occurs on user entity type.
-      if (!$entity->id()) {
-        continue;
-      }
-
-      // Get existing translations and current job items for the entity
-      // to determine translation statuses
-      $translations = $entity->getTranslationLanguages();
-      $source_lang = $entity->language()->getId();
-      $current_job_items = tmgmt_job_item_load_latest('content', $type, $entity->id(), $source_lang);
-
-      // Load basic entity data.
-      $return_value[$entity->id()] = array(
-        'entity_type' => $type,
-        'entity_id' => $entity->id(),
-        'entity_label' => $entity->label(),
-        'entity_url' => $entity->getSystemPath(),
-      );
-
-      if (count($bundles) > 1) {
-        $return_value[$entity->id()]['bundle'] = isset($bundles[$entity->bundle()]) ? $bundles[$entity->bundle()] : t('Unknown');
-      }
-
-      // Load entity translation specific data.
-      foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
-
-        $translation_status = 'current';
-
-        if ($langcode == $source_lang) {
-          $translation_status = 'original';
-        }
-        elseif (!isset($translations[$langcode])) {
-          $translation_status = 'missing';
-        }
-
-        elseif (!empty($translations->data[$langcode]['translate'])) {
-          $translation_status = 'outofdate';
-        }
-
-        $return_value[$entity->id()]['current_job_items'][$langcode] = isset($current_job_items[$langcode]) ? $current_job_items[$langcode] : NULL;
-        $return_value[$entity->id()]['translation_statuses'][$langcode] = $translation_status;
-      }
-    }
-
-    return $return_value;
-  }
-
-  /**
    * Builds search form for entity sources overview.
    *
    * @param array $form
    *   Drupal form array.
    * @param $form_state
    *   Drupal form_state array.
-   * @param $type
+   * @param string $type
    *   Entity type.
    *
    * @return array
@@ -166,26 +99,6 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       '#default_value' => isset($_GET['langcode']) ? $_GET['langcode'] : NULL,
     );
 
-    $bundle_key = $entity_type->getKey('bundle');
-    $bundle_options = tmgmt_content_get_translatable_bundles($type);
-
-    if (count($bundle_options) > 1) {
-      $form['search_wrapper']['search'][$bundle_key] = array(
-        '#type' => 'select',
-        '#title' => t('@entity_name type', array('@entity_name' => $entity_type->getLabel())),
-        '#options' => $bundle_options,
-        '#empty_option' => t('All'),
-        '#default_value' => isset($_GET[$bundle_key]) ? $_GET[$bundle_key] : NULL,
-      );
-    }
-    // In case entity translation is not enabled for any of bundles
-    // display appropriate message.
-    elseif (count($bundle_options) == 0) {
-      drupal_set_message($this->t('Entity translation is not enabled for any of existing content types. To use this functionality go to Content types administration and enable entity translation for desired content types.'), 'warning');
-      unset($form['search_wrapper']);
-      return $form;
-    }
-
     $options = array();
     foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
       $options[$langcode] = $language->getName();
@@ -230,6 +143,9 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
    *   Drupal form_state array.
    * @param $type
    *   Entity type.
+   *
+   * @return bool
+   *   Returns true, if redirect has been set.
    */
   public function overviewSearchFormRedirect(array $form, FormStateInterface $form_state, $type) {
     if ($form_state->getTriggeringElement()['#id'] == 'edit-search-cancel') {
@@ -245,6 +161,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'content', 'item_type' => $type), array('query' => $query));
       return TRUE;
     }
+    return FALSE;
   }
 
 
@@ -268,11 +185,6 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       'title' => array('data' => $this->t('Title (in source language)')),
     );
 
-    // Show the bundle if there is more than one for this entity type.
-    if (count(tmgmt_content_get_translatable_bundles($type)) > 1) {
-      $header['bundle'] = array('data' => $this->t('@entity_name type', array('@entity_name' => $entity_type->getLabel())));
-    }
-
     $header += $languages;
 
     return $header;
@@ -281,39 +193,52 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
   /**
    * Builds a table row for overview form.
    *
-   * @param array $data
+   * @param array ConfigEntityInterface $entity
    *   Data needed to build the list row.
    *
    * @return array
    */
-  public function overviewRow($data) {
-    $label = $data['entity_label'] ? $data['entity_label'] : $this->t('@type: @id', array(
-      '@type' => $data['entity_type'],
-      '@id' => $data['entity_id']
+  public function overviewRow(ConfigEntityInterface $entity) {
+    $label = $entity->label() ?: $this->t('@type: @id', array(
+      '@type' => $entity->getEntityTypeId(),
+      '@id' => $entity->id(),
     ));
 
+    // Get current job items for the entity to determine translation statuses.
+    $source_lang = $entity->language()->getId();
+    $current_job_items = tmgmt_job_item_load_latest('content', $entity->getEntityTypeId(), $entity->id(), $source_lang);
+
     $row = array(
-      'id' => $data['entity_id'],
-      'title' => \Drupal::l($label, Url::fromUri('base:' . $data['entity_url'])),
+      'id' => $entity->id(),
+      'title' => $entity->link($label),
     );
 
-    if (isset($data['bundle'])) {
-      $row['bundle'] = $data['bundle'];
-    }
+    // Load entity translation specific data.
+    foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
 
-    $languages = \Drupal::languageManager()->getLanguages();
-    foreach ($languages as $langcode => $language) {
+      $config = \Drupal::languageManager()->getLanguageConfigOverride($langcode, $entity->getConfigDependencyName());
+
+      $translation_status = 'current';
+
+      if ($langcode == $source_lang) {
+        $translation_status = 'original';
+      }
+      elseif ($config->isNew()) {
+        $translation_status = 'missing';
+      }
+
+      // @todo Find a way to support marking configuration translations as outdated.
+
       $array = array(
         '#theme' => 'tmgmt_translation_language_status_single',
-        '#translation_status' => $data['translation_statuses'][$langcode],
-        '#job_item' => isset($data['current_job_items'][$langcode]) ? $data['current_job_items'][$langcode] : NULL,
+        '#translation_status' => $translation_status,
+        '#job_item' => isset($current_job_items[$langcode]) ? $current_job_items[$langcode] : NULL,
       );
       $row['langcode-' . $langcode] = array(
         'data' => \Drupal::service('renderer')->render($array),
         'class' => array('langstatus-' . $langcode),
       );
     }
-
     return $row;
   }
 
@@ -321,8 +246,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
    * {@inheritdoc}
    */
   public function overviewForm(array $form, FormStateInterface $form_state, $type) {
-
-    $form += $this->overviewSearchFormPart($form, $form_state, $type);
+   // $form += $this->overviewSearchFormPart($form, $form_state, $type);
 
     $form['#attached']['library'][] = 'tmgmt/admin';
 
@@ -345,8 +269,9 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       $search_property_params[$key] = $value;
     }
 
-    foreach ($this->getEntitiesTranslationData($type, $search_property_params) as $data) {
-      $form['items']['#options'][$data['entity_id']] = $this->overviewRow($data);
+    foreach ($this->getTranslatableEntities($type, $search_property_params) as $entity) {
+      // This occurs on user entity type.
+      $form['items']['#options'][$entity->id()] = $this->overviewRow($entity);
     }
 
     $form['pager'] = array('#theme' => 'pager');
@@ -386,9 +311,9 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
         // For given source lang no job exists yet.
         if (!isset($source_lang_registry[$source_lang])) {
           // Create new job.
-          $job = tmgmt_job_create($source_lang, LanguageInterface::LANGCODE_NOT_SPECIFIED, $GLOBALS['user']->id());
+          $job = tmgmt_job_create($source_lang, LanguageInterface::LANGCODE_NOT_SPECIFIED, \Drupal::currentUser()->id());
           // Add initial job item.
-          $job->addItem('content', $type, $entity->id());
+          $job->addItem('config', $type, $entity->getConfigDependencyName());
           // Add job identifier into registry
           $source_lang_registry[$source_lang] = $job->id();
           // Add newly created job into jobs queue.
@@ -397,7 +322,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
         // We have a job for given source lang, so just add new job item for the
         // existing job.
         else {
-          $jobs[$source_lang_registry[$source_lang]]->addItem('content', $type, $entity->id());
+          $jobs[$source_lang_registry[$source_lang]]->addItem('config', $type, $entity->getConfigDependencyName());
         }
       } catch (TMGMTException $e) {
         watchdog_exception('tmgmt', $e);
@@ -412,10 +337,64 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
     $redirects = tmgmt_job_checkout_multiple($jobs);
     if ($redirects) {
       tmgmt_redirect_queue_set($redirects, Url::fromRoute('<current>')->getInternalPath());
-      $form_state->setRedirect(tmgmt_redirect_queue_dequeue());
+      $form_state->setRedirectUrl(Url::fromUri('base:' . tmgmt_redirect_queue_dequeue()));
 
       drupal_set_message(\Drupal::translation()->formatPlural(count($redirects), $this->t('One job needs to be checked out.'), $this->t('@count jobs need to be checked out.')));
     }
+  }
+
+  /**
+   * A function to get entity translatable bundles.
+   *
+   * Note that for comment entity type it will return the same as for node as
+   * comment bundles have no use (i.e. in queries).
+   *
+   * @param string $entity_type
+   *   Drupal entity type.
+   *
+   * @return array
+   *   Array of key => values, where key is type and value its label.
+   */
+  function getTranslatableBundles($entity_type) {
+
+    // If given entity type does not have entity translations enabled, no reason
+    // to continue.
+    $enabled_types = \Drupal::service('plugin.manager.tmgmt.source')->createInstance('content')->getItemTypes();
+    if (!isset($enabled_types[$entity_type])) {
+      return array();
+    }
+
+    $translatable_bundle_types = array();
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    foreach (\Drupal::entityManager()->getBundleInfo($entity_type) as $bundle_type => $bundle_definition) {
+      if ($content_translation_manager->isEnabled($entity_type, $bundle_type)) {
+        $translatable_bundle_types[$bundle_type] = $bundle_definition['label'];
+      }
+    }
+    return $translatable_bundle_types;
+  }
+
+  /**
+   * Gets translatable entities of a given type.
+   *
+   * Additionally you can specify entity property conditions, pager and limit.
+   *
+   * @param string $entity_type_id
+   *   Drupal entity type.
+   * @param array $property_conditions
+   *   Entity properties. There is no value processing so caller must make sure
+   *   the provided entity property exists for given entity type and its value
+   *   is processed.
+   * @param bool $pager
+   *   Flag to determine if pager will be used.
+   *
+   * @return array ConfigEntityInterface[]
+   *   Array of translatable entities.
+   */
+  function getTranslatableEntities($entity_type_id, $property_conditions = array(), $pager = FALSE) {
+
+    return \Drupal::entityManager()->getStorage($entity_type_id)->loadMultiple();
+
   }
 
 }

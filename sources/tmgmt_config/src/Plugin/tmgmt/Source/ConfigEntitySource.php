@@ -117,7 +117,13 @@ class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPlu
       $entity_type = $this->entityManager->getDefinition($job_item->getItemType());
       $entity_type->getConfigPrefix();
 
-      $entity_id = str_replace($entity_type->getConfigPrefix() . '.', '', $job_item->getItemId());
+      $pos = strpos($job_item->getItemId(), $entity_type->getConfigPrefix());
+      if (($pos !== false)) {
+        $entity_id = str_replace($entity_type->getConfigPrefix() . '.', '', $job_item->getItemId());
+      }
+      else {
+        throw new TMGMTException(t('Item ID does not contain the full config object name.'));
+      }
 
       $entity = entity_load($job_item->getItemType(), $entity_id);
       if (!$entity) {
@@ -237,7 +243,14 @@ class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPlu
    */
   public function getItemTypeLabel($type) {
     $definition = $this->configMapperManager->getDefinition($type);
-    return $definition['title'];
+    if (!empty($definition['entity_type'])) {
+      $entity_type = $this->entityManager->getDefinition($type);
+
+      return $entity_type->getLabel();
+    }
+    else {
+      return $definition['title'];
+    }
   }
 
   /**
