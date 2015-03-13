@@ -115,9 +115,8 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       '#type' => 'select',
       '#title' => $this->t('Target status'),
       '#options' => array(
-        'untranslated_or_outdated' => $this->t('Untranslated or outdated'),
         'untranslated' => $this->t('Untranslated'),
-        'outdated' => $this->t('Outdated'),
+        'translated' => $this->t('Translated'),
       ),
       '#default_value' => isset($_GET['target_status']) ? $_GET['target_status'] : NULL,
       '#states' => array(
@@ -149,7 +148,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
    */
   public function overviewSearchFormRedirect(array $form, FormStateInterface $form_state, $type) {
     if ($form_state->getTriggeringElement()['#id'] == 'edit-search-cancel') {
-      $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'content', 'item_type' => $type));
+      $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'config', 'item_type' => $type));
       return TRUE;
     }
     elseif ($form_state->getTriggeringElement()['#id'] == 'edit-search-submit') {
@@ -158,7 +157,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       foreach ($form_state->getValue('search') as $key => $value) {
         $query[$key] = $value;
       }
-      $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'content', 'item_type' => $type), array('query' => $query));
+      $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'config', 'item_type' => $type), array('query' => $query));
       return TRUE;
     }
     return FALSE;
@@ -216,14 +215,12 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
     // Load entity translation specific data.
     foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
 
-      $config = \Drupal::languageManager()->getLanguageConfigOverride($langcode, $entity->getConfigDependencyName());
-
       $translation_status = 'current';
 
       if ($langcode == $source_lang) {
         $translation_status = 'original';
       }
-      elseif ($config->isNew()) {
+      elseif (!$this->isTranslated($langcode, $entity->getConfigDependencyName())) {
         $translation_status = 'missing';
       }
 
@@ -243,10 +240,26 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
   }
 
   /**
+   * Checks, if an entity is translated.
+   *
+   * @param $langcode
+   *   Language code.
+   * @param $entity
+   *   Data needed to build dependency name.
+   *
+   * @return bool
+   *   Returns true, if it is translatable.
+   */
+  public function isTranslated($langcode, $id) {
+    $config = \Drupal::languageManager()->getLanguageConfigOverride($langcode, $id);
+    return !$config->isNew();
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function overviewForm(array $form, FormStateInterface $form_state, $type) {
-   // $form += $this->overviewSearchFormPart($form, $form_state, $type);
+    $form += $this->overviewSearchFormPart($form, $form_state, $type);
 
     $form['#attached']['library'][] = 'tmgmt/admin';
 
@@ -256,6 +269,8 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       '#empty' => $this->t('No entities matching given criteria have been found.'),
       '#attributes' => array('id' => 'tmgmt-entities-list'),
     );
+
+    $search_data = $this->getSearchFormSubmittedParams();
 
     // Load search property params which will be passed into
     $search_property_params = array();
@@ -274,9 +289,31 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       $form['items']['#options'][$entity->id()] = $this->overviewRow($entity);
     }
 
-    $form['pager'] = array('#theme' => 'pager');
+    $form['pager'] = array('#type' => 'pager');
 
     return $form;
+  }
+
+  /**
+   * Gets submitted search params.
+   *
+   * @return array
+   */
+  public function getSearchFormSubmittedParams() {
+
+    $params = array(
+      'label' => NULL,
+      'missing_target_language' => NULL,
+    );
+
+    if (isset($_GET['label'])) {
+      $params['label'] = $_GET['label'];
+    }
+    if (isset($_GET['target_language'])) {
+      $params['target_language'] = $_GET['target_language'];
+    }
+
+    return $params;
   }
 
   /**
@@ -344,37 +381,6 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
   }
 
   /**
-   * A function to get entity translatable bundles.
-   *
-   * Note that for comment entity type it will return the same as for node as
-   * comment bundles have no use (i.e. in queries).
-   *
-   * @param string $entity_type
-   *   Drupal entity type.
-   *
-   * @return array
-   *   Array of key => values, where key is type and value its label.
-   */
-  function getTranslatableBundles($entity_type) {
-
-    // If given entity type does not have entity translations enabled, no reason
-    // to continue.
-    $enabled_types = \Drupal::service('plugin.manager.tmgmt.source')->createInstance('content')->getItemTypes();
-    if (!isset($enabled_types[$entity_type])) {
-      return array();
-    }
-
-    $translatable_bundle_types = array();
-    $content_translation_manager = \Drupal::service('content_translation.manager');
-    foreach (\Drupal::entityManager()->getBundleInfo($entity_type) as $bundle_type => $bundle_definition) {
-      if ($content_translation_manager->isEnabled($entity_type, $bundle_type)) {
-        $translatable_bundle_types[$bundle_type] = $bundle_definition['label'];
-      }
-    }
-    return $translatable_bundle_types;
-  }
-
-  /**
    * Gets translatable entities of a given type.
    *
    * Additionally you can specify entity property conditions, pager and limit.
@@ -385,16 +391,54 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
    *   Entity properties. There is no value processing so caller must make sure
    *   the provided entity property exists for given entity type and its value
    *   is processed.
-   * @param bool $pager
-   *   Flag to determine if pager will be used.
    *
    * @return array ConfigEntityInterface[]
    *   Array of translatable entities.
    */
-  function getTranslatableEntities($entity_type_id, $property_conditions = array(), $pager = FALSE) {
+  function getTranslatableEntities($entity_type_id, $property_conditions = array()) {
 
-    return \Drupal::entityManager()->getStorage($entity_type_id)->loadMultiple();
+    $target_status = NULL;
+    $target_language = NULL;
 
+    // We unset the target_status and target_language, because we can't filter
+    // them this way.
+    if (isset($property_conditions['target_status']) && isset($property_conditions['target_language'])) {
+      $target_status = $property_conditions['target_status'];
+      $target_language = $property_conditions['target_language'];
+    }
+    unset($property_conditions['target_status']);
+    unset($property_conditions['target_language']);
+
+    $search = \Drupal::entityQuery($entity_type_id);
+    // unset($property_conditions['target_status']);
+
+    foreach ($property_conditions as $property_name => $property_value) {
+      $search->condition($property_name, $property_value, 'CONTAINS');
+    }
+
+    $result = $search->execute();
+    $entities = array();
+
+    if (!empty($result)) {
+      // Load the entities.
+      $entities = \Drupal::entityManager()->getStorage($entity_type_id)->loadMultiple($result);
+
+      // @todo Optimize the code below (code duplication).
+
+      // Remove all entities, that are already translated, because we are looking
+      // for untranslated entities.
+      if ($target_status == 'untranslated') {
+        $entities = array_filter($entities, function (ConfigEntityInterface $entity) use ($target_language) {
+          return !$this->isTranslated($target_language, $entity->getConfigDependencyName());
+        });
+      }
+      // Show just the translated entities, and remove the others.
+      elseif ($target_status == 'translated') {
+        $entities = array_filter($entities, function (ConfigEntityInterface $entity) use ($target_language) {
+          return $this->isTranslated($target_language, $entity->getConfigDependencyName());
+        });
+      }
+    }
+    return $entities;
   }
-
 }

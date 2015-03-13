@@ -44,6 +44,11 @@ class ConfigEntitySourceListTest extends EntityTestBase {
       'type' => 'page',
       'name' => 'Page',
     ));
+
+    $this->drupalCreateContentType(array(
+      'type' => 'simplenews_issue',
+      'name' => 'Newsletter issue',
+    ));
   }
 
   function testNodeTypeSubmissions() {
@@ -141,6 +146,65 @@ class ConfigEntitySourceListTest extends EntityTestBase {
     $this->assertText(t('The translation of Recent content view to German is finished and can now be reviewed.'));
     $this->assertText(t('The translation of Content view to German is finished and can now be reviewed.'));
     $this->assertText(t('The translation of Job overview view to German is finished and can now be reviewed.'));
-
   }
+
+  function testNodeTypeFilter() {
+
+    $this->drupalGet('admin/tmgmt/sources/config/node_type');
+    $this->assertText(t('Content type overview (Config Entity)'));
+
+    // Simple filtering.
+    $filters = array(
+      'search[name]' => '',
+      'search[langcode]' => '',
+      'search[target_language]' => '',
+    );
+    $this->drupalPostForm('admin/tmgmt/sources/config/node_type', $filters, t('Search'));
+
+    // Random text in the name label.
+    $filters = array(
+      'search[name]' => $this->randomMachineName(5),
+      'search[langcode]' => '',
+      'search[target_language]' => '',
+    );
+    $this->drupalPostForm('admin/tmgmt/sources/config/node_type', $filters, t('Search'));
+    $this->assertText(t('No entities matching given criteria have been found.'));
+
+    // Searching for article.
+    $filters = array(
+      'search[name]' => 'article',
+      'search[langcode]' => '',
+      'search[target_language]' => '',
+    );
+    $this->drupalPostForm('admin/tmgmt/sources/config/node_type', $filters, t('Search'));
+    $rows = $this->xpath('//tbody/tr');
+    foreach ($rows as $value) {
+      $this->assertEqual('Article', (string) $value->td[1]->a);
+    }
+
+    // Searching for article, with english source language and italian target language.
+    $filters = array(
+      'search[name]' => 'article',
+      'search[langcode]' => 'en',
+      'search[target_language]' => 'it',
+    );
+    $this->drupalPostForm('admin/tmgmt/sources/config/node_type', $filters, t('Search'));
+    $rows = $this->xpath('//tbody/tr');
+    foreach ($rows as $value) {
+      $this->assertEqual('Article', (string) $value->td[1]->a);
+    }
+
+    // Searching by keywords (shorter terms).
+    $filters = array(
+      'search[name]' => 'art',
+      'search[langcode]' => 'en',
+      'search[target_language]' => 'it',
+    );
+    $this->drupalPostForm('admin/tmgmt/sources/config/node_type', $filters, t('Search'));
+    $rows = $this->xpath('//tbody/tr');
+    foreach ($rows as $value) {
+      $this->assertEqual('Article', (string) $value->td[1]->a);
+    }
+  }
+
 }

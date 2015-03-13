@@ -315,7 +315,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
       }
     }
 
-    $form['pager'] = array('#theme' => 'pager');
+    $form['pager'] = array('#type' => 'pager');
 
     return $form;
   }

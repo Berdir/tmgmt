@@ -116,7 +116,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
       $form['items']['#options'][$id] = $this->overviewRow($type, $data);
     }
 
-    $form['pager'] = array('#theme' => 'pager');
+    $form['pager'] = array('#type' => 'pager');
 
     return $form;
   }
