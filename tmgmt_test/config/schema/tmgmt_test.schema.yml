@@ -22,5 +22,5 @@ tmgmt.translator.settings.test_translator:
     remote_languages_mappings:
       type: sequence
       sequence:
-        - type: string
-          label: Language key
+        type: string
+        label: Language key
