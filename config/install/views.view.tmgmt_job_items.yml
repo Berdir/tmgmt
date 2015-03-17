@@ -18,6 +18,7 @@ display:
     display_title: Master
     position: 1
     display_options:
+      rendering_language: '***LANGUAGE_entity_default***'
       access:
         type: none
         options: {  }
@@ -93,7 +94,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: null
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -115,13 +116,58 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          link_to_entity: false
-          plugin_id: entity_label
+          entity_type: tmgmt_job_item
+          plugin_id: tmgmt_entity_label
         type:
           id: type
           table: tmgmt_job_item
           field: type
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: Type
           exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          entity_type: tmgmt_job_item
+          plugin_id: tmgmt_job_item_type
         state:
           id: state
           table: tmgmt_job_item
@@ -148,7 +194,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: null
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -171,6 +217,8 @@ display:
           empty_zero: false
           hide_alter_empty: true
           machine_name: false
+          entity_type: tmgmt_job_item
+          entity_field: state
           plugin_id: machine_name
         progress:
           id: progress
@@ -198,7 +246,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: null
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -220,6 +268,7 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
+          entity_type: tmgmt_job_item
           plugin_id: tmgmt_progress
         word_count:
           id: word_count
@@ -247,7 +296,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: null
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -269,16 +318,24 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          set_precision: false
-          precision: 0
-          decimal: .
-          separator: ','
-          format_plural: false
-          format_plural_singular: '1'
-          format_plural_plural: '@count'
-          prefix: ''
-          suffix: ''
-          plugin_id: numeric
+          click_sort_column: value
+          type: number_integer
+          settings:
+            thousand_separator: ''
+            prefix_suffix: true
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          entity_type: tmgmt_job_item
+          entity_field: word_count
+          plugin_id: field
         changed:
           id: changed
           table: tmgmt_job_item
@@ -305,7 +362,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: null
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -327,9 +384,11 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          date_format: short
+          date_format: fallback
           custom_date_format: ''
           timezone: ''
+          entity_type: tmgmt_job_item
+          entity_field: changed
           plugin_id: date
         operations:
           id: operations
@@ -338,7 +397,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: Operations
+          label: 'Operations links'
           exclude: false
           alter:
             alter_text: false
@@ -357,7 +416,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: null
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -379,8 +438,9 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
+          destination: true
           entity_type: tmgmt_job_item
-          plugin_id: tmgmt_job_item_operations
+          plugin_id: entity_operations
       filters: {  }
       sorts: {  }
       title: 'Job Items'
@@ -409,7 +469,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          default_action: ignore
+          default_action: 'not found'
           exception:
             value: all
             title_enable: false
@@ -433,11 +493,18 @@ display:
           validate:
             type: none
             fail: 'not found'
-          validate_options: {  }
           break_phrase: false
           not: false
+          entity_type: tmgmt_job_item
+          entity_field: tjid
           plugin_id: numeric
       display_extenders: {  }
+    cache_metadata:
+      contexts:
+        - user
+        - cache.context.url
+        - language
+      cacheable: false
   checkout:
     display_plugin: embed
     id: checkout
@@ -446,6 +513,7 @@ display:
     display_options:
       display_extenders: {  }
       display_description: ''
+      rendering_language: '***LANGUAGE_entity_default***'
       fields:
         label:
           id: label
@@ -473,7 +541,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: null
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -495,13 +563,58 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          link_to_entity: false
-          plugin_id: entity_label
+          entity_type: tmgmt_job_item
+          plugin_id: tmgmt_entity_label
         type:
           id: type
           table: tmgmt_job_item
           field: type
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: Type
           exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          entity_type: tmgmt_job_item
+          plugin_id: tmgmt_job_item_type
         word_count:
           id: word_count
           table: tmgmt_job_item
@@ -528,7 +641,7 @@ display:
             suffix: ''
             target: ''
             nl2br: false
-            max_length: null
+            max_length: 0
             word_boundary: true
             ellipsis: true
             more_link: false
@@ -550,23 +663,44 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          set_precision: false
-          precision: 0
-          decimal: .
-          separator: ','
-          format_plural: false
-          format_plural_singular: '1'
-          format_plural_plural: '@count'
-          prefix: ''
-          suffix: ''
-          plugin_id: numeric
+          click_sort_column: value
+          type: number_integer
+          settings:
+            thousand_separator: ''
+            prefix_suffix: true
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          entity_type: tmgmt_job_item
+          entity_field: word_count
+          plugin_id: field
       defaults:
         fields: false
+    cache_metadata:
+      contexts:
+        - user
+        - cache.context.url
+        - language
+      cacheable: false
   submitted:
     display_plugin: embed
     id: submitted
     display_title: Submitted
     position: 1
     display_options:
+      rendering_language: "***LANGUAGE_entity_default***"
       display_extenders: {  }
       display_description: ''
+    cache_metadata:
+      contexts:
+        - user
+        - cache.context.url
+        - language
+      cacheable: false

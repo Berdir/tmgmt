@@ -123,9 +123,10 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
       ->setSettings(array(
         'max_length' => 255,
       ));
-    $fields['state'] = BaseFieldDefinition::create('integer')
+    $fields['state'] = BaseFieldDefinition::create('list_integer')
       ->setLabel(t('Job state'))
       ->setDescription(t('The job state.'))
+      ->setSetting('allowed_values', Job::getStates())
       ->setDefaultValue(Job::STATE_UNPROCESSED);
 
     $fields['created'] = BaseFieldDefinition::create('created')
