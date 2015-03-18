@@ -6,4 +6,4 @@ admin:
 admin.seven:
   css:
     theme:
-      css/tmgmt.admin.css: {}
+      css/tmgmt.admin.seven.css: {}
