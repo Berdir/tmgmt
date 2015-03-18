@@ -1,5 +1,5 @@
-tmgmt.sources_parent:
-  route_name: tmgmt.source_overview
+tmgmt.sources:
+  route_name: tmgmt.source_overview_default
   title: Sources
   base_route: view.tmgmt_job_overview.page_1
 
@@ -7,12 +7,6 @@ tmgmt.jobs:
   route_name: view.tmgmt_job_overview.page_1
   base_route: view.tmgmt_job_overview.page_1
   title: Jobs
-
-tmgmt.sources:
-  route_name: tmgmt.source_overview
-  base_route: view.tmgmt_job_overview.page_1
-  parent_id: tmgmt.sources_parent
-  deriver: 'Drupal\tmgmt\Plugin\Derivative\SourceLocalTasks'
 
 tmgmt.cart:
   route_name: tmgmt.cart

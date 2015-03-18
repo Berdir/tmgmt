@@ -82,26 +82,6 @@ function tmgmt_cron() {
 }
 
 /**
- * Implements hook_local_tasks_alter().
- */
-function tmgmt_local_tasks_alter(&$local_tasks) {
-  // Look for the first source overview local task and make the parent use the
-  // same route arguments.
-  // @todo: Find a nicer way to get the main source (usually entity:node), also,
-  //   this looses the trail because the parent points directly to the first
-  //   sub-task. Use a different route that doesn't require the arguments?
-  foreach ($local_tasks as $plugin_id => $local_task) {
-    if (strpos($plugin_id, 'tmgmt.sources:') !== FALSE) {
-      $local_tasks['tmgmt.sources_parent']['route_parameters'] = $local_task['route_parameters'];
-      return;
-    }
-  }
-  // If this point was reached, then no sources are enabled, prevent any error
-  // by removing the sources local task completely.
-  unset($local_tasks['tmgmt.sources_parent']);
-}
-
-/**
  * Returns an array of languages that are available for translation.
  *
  * @return array

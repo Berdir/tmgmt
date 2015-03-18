@@ -19,7 +19,8 @@ class LocalTasksTests extends TMGMTTestBase {
     'node',
     'views',
     'tmgmt_content',
-    'tmgmt_file'
+    'tmgmt_file',
+    'tmgmt_config'
   );
 
   /**
@@ -29,7 +30,6 @@ class LocalTasksTests extends TMGMTTestBase {
     parent::setUp();
     // Login as administrator to view Cart,Jobs and Sources.
     $this->loginAsAdmin(array('access administration pages'));
-
   }
 
   /**
@@ -61,18 +61,23 @@ class LocalTasksTests extends TMGMTTestBase {
     $this->clickLink(t('Sources'));
 
     // Assert the availability of the enabled content.
-    $this->assertLink(t('Content'));
-    $this->assertLink(t('User'));
+    $this->assertOptionSelected('edit-source', 'content:node');
+    $this->assertOption('edit-source', 'content:node');
+    $this->assertOption('edit-source', 'content:user');
+    $this->assertOption('edit-source', 'config:action');
+    $this->assertOption('edit-source', 'config:node_type');
+    $this->assertOption('edit-source', 'config:view');
   }
 
   /**
    * Tests UI for translator local tasks without sources.
    */
-  public function testTranslatorLocalTasksNoSource() {
+  public function dtestTranslatorLocalTasksNoSource() {
     // Login as administrator to view Cart,Jobs and Sources.
     $this->loginAsAdmin(array('access administration pages'));
     $this->drupalGet('admin');
     $this->clickLink(t('Translation'));
-    $this->assertNoLink(t('Sources'));
+    $this->clickLink(t('Sources'));
+    $this->assertText(t('No sources enabled.'));
   }
 }
