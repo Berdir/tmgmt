@@ -36,6 +36,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPluginInterface {
 
   /**
+   * Item type for simple configuration.
+   *
+   * @var string
+   */
+  const SIMPLE_CONFIG = '_simple_config';
+
+  /**
    * The configuration mapper manager.
    *
    * @var \Drupal\config_translation\ConfigMapperManagerInterface
@@ -111,9 +118,12 @@ class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPlu
    */
   protected function getMapper(JobItemInterface $job_item) {
     // @todo: Inject dependencies.
-    $config_mapper = $this->configMapperManager->createInstance($job_item->getItemType());
-    $definition = $this->configMapperManager->getDefinition($job_item->getItemType());
-    if (!empty($definition['entity_type'])) {
+    if ($job_item->getItemType() == static::SIMPLE_CONFIG) {
+      $config_mapper =$this->configMapperManager->createInstance($job_item->getItemId());
+    }
+    else {
+      $config_mapper = $this->configMapperManager->createInstance($job_item->getItemType());
+
       $entity_type = $this->entityManager->getDefinition($job_item->getItemType());
       $entity_type->getConfigPrefix();
 
@@ -125,7 +135,7 @@ class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPlu
         throw new TMGMTException(t('Item ID does not contain the full config object name.'));
       }
 
-      $entity = entity_load($job_item->getItemType(), $entity_id);
+      $entity = $this->entityManager->getStorage($job_item->getItemType())->load($entity_id);
       if (!$entity) {
         throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), '%id' => $entity_id)));
       }
@@ -157,8 +167,18 @@ class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPlu
    */
   public function getData(JobItemInterface $job_item) {
     $config_mapper = $this->getMapper($job_item);
-    $schema = $this->typedConfig->get($job_item->getItemId());
-    return $this->extractTranslatables($schema, $config_mapper->getConfigData()[$job_item->getItemId()]);
+    $data = array();
+    foreach ($config_mapper->getConfigData() as $config_id => $config_data) {
+      $schema = $this->typedConfig->get($config_id);
+      $data[$config_id] = $this->extractTranslatables($schema, $config_data);
+    }
+    // If there is only one, we simplify the data and return it.
+    if (count($data) == 1) {
+      return reset($data);
+    }
+    else {
+      return $data;
+    }
   }
 
   /**
@@ -169,6 +189,12 @@ class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPlu
 
     $data = $job_item->getData();
 
+    $config_names = $config_mapper->getConfigNames();
+
+    // We need to refactor the array just as we did in getData.
+    if (count($config_names) == 1) {
+      $data[$config_names[0]] = $job_item->getData();
+    }
     foreach ($config_mapper->getConfigNames() as $name) {
       $schema = $this->typedConfig->get($name);
 
@@ -177,7 +203,8 @@ class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPlu
       $config_translation = $this->languageManager->getLanguageConfigOverride($job_item->getJob()->getTargetLangcode(), $name);
 
       $element = ConfigTranslationFormBase::createFormElement($schema);
-      $element->setConfig($base_config, $config_translation, $this->convertToTranslation($data));
+
+      $element->setConfig($base_config, $config_translation, $this->convertToTranslation($data[$name]));
 
       // If no overrides, delete language specific configuration file.
       $saved_config = $config_translation->get();
@@ -228,13 +255,17 @@ class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPlu
    * {@inheritdoc}
    */
   public function getItemTypes() {
+    // Only entity types are exposed as their own item type, all others are
+    // grouped together in simple config.
     $entity_types = $this->entityManager->getDefinitions();
+    $definitions = $this->configMapperManager->getDefinitions();
     $types = array();
     foreach ($entity_types as $entity_type_name => $entity_type) {
-      if ($entity_type->isSubclassOf('Drupal\Core\Config\Entity\ConfigEntityInterface')) {
+      if (isset($definitions[$entity_type_name])) {
         $types[$entity_type_name] = (string) $entity_type->getLabel();
       }
     }
+    $types[static::SIMPLE_CONFIG] = t('Simple configuration');
     return $types;
   }
 
@@ -242,22 +273,20 @@ class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPlu
    * {@inheritdoc}
    */
   public function getItemTypeLabel($type) {
-    $definition = $this->configMapperManager->getDefinition($type);
-    if (!empty($definition['entity_type'])) {
-      $entity_type = $this->entityManager->getDefinition($type);
-
-      return $entity_type->getLabel();
-    }
-    else {
-      return $definition['title'];
-    }
+    $item_types = $this->getItemTypes();
+    return $item_types[$type];
   }
 
   /**
    * {@inheritdoc}
    */
   public function getType(JobItemInterface $job_item) {
-    $definition = $this->configMapperManager->getDefinition($job_item->getItemType());
+    if ($job_item->getItemType() == static::SIMPLE_CONFIG) {
+      $definition = $this->configMapperManager->getDefinition($job_item->getItemId());
+    }
+    else {
+      $definition = $this->configMapperManager->getDefinition($job_item->getItemType());
+    }
     return $definition['title'];
   }
 

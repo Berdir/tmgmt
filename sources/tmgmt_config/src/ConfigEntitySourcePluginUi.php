@@ -14,6 +14,7 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\SourcePluginUiBase;
 use Drupal\tmgmt\TMGMTException;
+use Drupal\tmgmt_config\Plugin\tmgmt\Source\ConfigEntitySource;
 
 /**
  * Abstract entity ui controller class for source plugin that provides
@@ -52,7 +53,6 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
     // Add entity type value into form array so that it is available in
     // the form alter hook.
     $form_state->set('entity_type', $type);
-
     $form['search_wrapper'] = array(
       '#prefix' => '<div class="tmgmt-sources-wrapper tmgmt-entity-sources-wrapper">',
       '#suffix' => '</div>',
@@ -73,14 +73,22 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       '#weight' => 11,
     );
 
-    $entity_type = \Drupal::entityManager()->getDefinition($type);
+    if ($type == ConfigEntitySource::SIMPLE_CONFIG) {
+      $label_key = 'name';
+      $label = t('Simple configuration');
+    }
+    else {
+      $entity_type = \Drupal::entityManager()->getDefinition($type);
 
-    $label_key = $entity_type->getKey('label');
+      $label_key = $entity_type->getKey('label');
+      $label = $entity_type->getLabel();
+    }
+
 
     if (!empty($label_key)) {
       $form['search_wrapper']['search'][$label_key] = array(
         '#type' => 'textfield',
-        '#title' => t('@entity_name title', array('@entity_name' => $entity_type->getLabel())),
+        '#title' => t('@entity_name title', array('@entity_name' => $label)),
         '#size' => 25,
         '#default_value' => isset($_GET[$label_key]) ? $_GET[$label_key] : NULL,
       );
@@ -178,8 +186,6 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       );
     }
 
-    $entity_type = \Drupal::entityManager()->getDefinition($type);
-
     $header = array(
       'title' => array('data' => $this->t('Title (in source language)')),
     );
@@ -192,10 +198,11 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
   /**
    * Builds a table row for overview form.
    *
-   * @param array ConfigEntityInterface $entity
+   * @param \Drupal\Core\Config\Entity\ConfigEntityInterface $entity
    *   Data needed to build the list row.
    *
    * @return array
+   *   A single table row for the overview.
    */
   public function overviewRow(ConfigEntityInterface $entity) {
     $label = $entity->label() ?: $this->t('@type: @id', array(
@@ -205,7 +212,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
 
     // Get current job items for the entity to determine translation statuses.
     $source_lang = $entity->language()->getId();
-    $current_job_items = tmgmt_job_item_load_latest('content', $entity->getEntityTypeId(), $entity->id(), $source_lang);
+    $current_job_items = tmgmt_job_item_load_latest('config', $entity->getEntityTypeId(), $entity->getConfigDependencyName(), $source_lang);
 
     $row = array(
       'id' => $entity->id(),
@@ -240,18 +247,65 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
   }
 
   /**
+   * Builds a table row for simple configuration.
+   *
+   * @param array $definition
+   *   A definition.
+   *
+   * @return array
+   *   A single table row for the overview.
+   */
+  public function overviewRowSimple(array $definition) {
+    // Get current job items for the entity to determine translation statuses.
+    $config_id = $definition['names'][0];
+    $source_lang = \Drupal::config($definition['names'][0])->get('langcode') ?: 'en';
+    $current_job_items = tmgmt_job_item_load_latest('config', ConfigEntitySource::SIMPLE_CONFIG, $definition['id'], $source_lang);
+
+    $row = array(
+      'id' => $definition['id'],
+      'title' => $definition['title'],
+    );
+
+    // Load entity translation specific data.
+    foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
+
+      $translation_status = 'current';
+
+      if ($langcode == $source_lang) {
+        $translation_status = 'original';
+      }
+      elseif (!$this->isTranslated($langcode, $config_id)) {
+        $translation_status = 'missing';
+      }
+
+      // @todo Find a way to support marking configuration translations as outdated.
+
+      $array = array(
+        '#theme' => 'tmgmt_translation_language_status_single',
+        '#translation_status' => $translation_status,
+        '#job_item' => isset($current_job_items[$langcode]) ? $current_job_items[$langcode] : NULL,
+      );
+      $row['langcode-' . $langcode] = array(
+        'data' => \Drupal::service('renderer')->render($array),
+        'class' => array('langstatus-' . $langcode),
+      );
+    }
+    return $row;
+  }
+
+  /**
    * Checks, if an entity is translated.
    *
-   * @param $langcode
+   * @param string $langcode
    *   Language code.
-   * @param $entity
-   *   Data needed to build dependency name.
+   * @param string $name
+   *   Configuration name.
    *
    * @return bool
    *   Returns true, if it is translatable.
    */
-  public function isTranslated($langcode, $id) {
-    $config = \Drupal::languageManager()->getLanguageConfigOverride($langcode, $id);
+  public function isTranslated($langcode, $name) {
+    $config = \Drupal::languageManager()->getLanguageConfigOverride($langcode, $name);
     return !$config->isNew();
   }
 
@@ -274,12 +328,10 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       '#attributes' => array('id' => 'tmgmt-entities-list'),
     );
 
-    $search_data = $this->getSearchFormSubmittedParams();
-
     // Load search property params which will be passed into
     $search_property_params = array();
     $exclude_params = array('q', 'page');
-    foreach ($_GET as $key => $value) {
+    foreach (\Drupal::request()->query->all() as $key => $value) {
       // Skip exclude params, and those that have empty values, as these would
       // make it into query condition instead of being ignored.
       if (in_array($key, $exclude_params) || $value === '') {
@@ -288,36 +340,24 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       $search_property_params[$key] = $value;
     }
 
-    foreach ($this->getTranslatableEntities($type, $search_property_params) as $entity) {
-      // This occurs on user entity type.
-      $form['items']['#options'][$entity->id()] = $this->overviewRow($entity);
+    // If the source is of type '_simple_config', we get all definitions that
+    // don't have an entity type and display them through overviewRowSimple().
+    if ($type == ConfigEntitySource::SIMPLE_CONFIG) {
+      $definitions = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinitions();
+      foreach ($definitions as $definition_id => $definition) {
+        if (!isset($definition['entity_type'])) {
+          $form['items']['#options'][$definition_id] = $this->overviewRowSimple($definition);
+        }
+      }
     }
-
-    $form['pager'] = array('#type' => 'pager');
+    // If there is an entity type, list all entities for that.
+    else {
+      foreach ($this->getTranslatableEntities($type, $search_property_params) as $entity) {
+        $form['items']['#options'][$entity->id()] = $this->overviewRow($entity);
+      }
+    }
 
     return $form;
-  }
-
-  /**
-   * Gets submitted search params.
-   *
-   * @return array
-   */
-  public function getSearchFormSubmittedParams() {
-
-    $params = array(
-      'label' => NULL,
-      'missing_target_language' => NULL,
-    );
-
-    if (isset($_GET['label'])) {
-      $params['label'] = $_GET['label'];
-    }
-    if (isset($_GET['target_language'])) {
-      $params['target_language'] = $_GET['target_language'];
-    }
-
-    return $params;
   }
 
   /**
@@ -340,13 +380,29 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
     }
 
     $jobs = array();
-    $entities = entity_load_multiple($type, $form_state->getValue('items'));
+    $items = array();
+    if ($type == ConfigEntitySource::SIMPLE_CONFIG) {
+      foreach (array_filter($form_state->getValue('items')) as $item) {
+        $definition = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinition($item);
+        $item_id = $definition['id'];
+        $items[$item_id]['label'] = $definition['title'];;
+        $items[$item_id]['langcode'] = \Drupal::config($definition['names'][0])->get('langcode') ?: 'en';
+      }
+    }
+    else {
+      $entities = entity_load_multiple($type, array_filter($form_state->getValue('items')));
+      foreach ($entities as $entity) {
+        /* @var $entity \Drupal\Core\Entity\EntityInterface */
+        $item_id = $entity->getConfigDependencyName();
+        $items[$item_id]['label'] = $entity->label();
+        $items[$item_id]['langcode'] = $entity->language()->getId();
+      }
+    }
     $source_lang_registry = array();
 
     // Loop through entities and create individual jobs for each source language.
-    foreach ($entities as $entity) {
-      /* @var $entity \Drupal\Core\Entity\EntityInterface */
-      $source_lang = $entity->language()->getId();
+    foreach ($items as $id => $extra) {
+      $source_lang = $extra['langcode'];
 
       try {
         // For given source lang no job exists yet.
@@ -354,7 +410,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
           // Create new job.
           $job = tmgmt_job_create($source_lang, LanguageInterface::LANGCODE_NOT_SPECIFIED, \Drupal::currentUser()->id());
           // Add initial job item.
-          $job->addItem('config', $type, $entity->getConfigDependencyName());
+          $job->addItem('config', $type, $id);
           // Add job identifier into registry
           $source_lang_registry[$source_lang] = $job->id();
           // Add newly created job into jobs queue.
@@ -363,12 +419,12 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
         // We have a job for given source lang, so just add new job item for the
         // existing job.
         else {
-          $jobs[$source_lang_registry[$source_lang]]->addItem('config', $type, $entity->getConfigDependencyName());
+          $jobs[$source_lang_registry[$source_lang]]->addItem('config', $type, $id);
         }
       } catch (TMGMTException $e) {
         watchdog_exception('tmgmt', $e);
         drupal_set_message($this->t('Unable to add job item for entity %name: %error.', array(
-          '%name' => $entity->label(),
+          '%name' => $extra['label'],
           '%error' => $e->getMessage()
         )), 'error');
       }
@@ -396,7 +452,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
    *   the provided entity property exists for given entity type and its value
    *   is processed.
    *
-   * @return array ConfigEntityInterface[]
+   * @return \Drupal\Core\Config\Entity\ConfigEntityInterface[]
    *   Array of translatable entities.
    */
   function getTranslatableEntities($entity_type_id, $property_conditions = array()) {

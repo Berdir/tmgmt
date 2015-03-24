@@ -13,6 +13,7 @@ use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\tmgmt_config\Plugin\tmgmt\Source\ConfigEntitySource;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\config_translation\ConfigMapperManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -60,27 +61,31 @@ class ConfigTranslateForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state, Request $request = NULL, array $build = NULL, $plugin_id = NULL) {
     // Store the entity in the form state so we can easily create the job in the
     // submit handler.
+    $mapper_definition = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinition($plugin_id);
 
     /** @var \Drupal\config_translation\ConfigMapperInterface $mapper */
     $mapper = $this->configMapperManager->createInstance($plugin_id);
     $mapper->populateFromRequest($request);
 
     $form_state->set('mapper', $mapper);
-    $form_state->set('plugin_id', $plugin_id);
 
-    // @todo: Support more than one config names.
-    if (count($mapper->getConfigNames()) > 1) {
-      drupal_set_message(t('There are more than one config names.'), 'warning');
+    if (!isset($mapper_definition['entity_type'])) {
+      $form_state->set('item_type', ConfigEntitySource::SIMPLE_CONFIG);
+      $form_state->set('item_id', $mapper_definition['id']);
     }
-    $id = $mapper->getConfigNames()[0];
-    $form_state->set('id', $id);
+    else {
+      $id = $mapper->getConfigNames()[0];
+      $form_state->set('id', $id);
+      $form_state->set('item_type', $plugin_id);
+      $form_state->set('item_id', $id);
+    }
 
     $form['#title'] = $this->t('Translations of @title', array('@title' => $mapper->getTitle()));
     $overview = $build['languages'];
 
     $form['top_actions']['#type'] = 'actions';
     $form['top_actions']['#weight'] = -10;
-    tmgmt_add_cart_form($form['top_actions'], $form_state, 'config', $plugin_id, $id);
+    tmgmt_add_cart_form($form['top_actions'], $form_state, 'config', $form_state->get('item_type'), $form_state->get('item_id'));
 
     // Inject our additional column into the header.
     array_splice($overview['#header'], -1, 0, array(t('Pending Translations')));
@@ -92,7 +97,7 @@ class ConfigTranslateForm extends FormBase {
     );
     $languages = \Drupal::languageManager()->getLanguages();
     // Check if there is a job / job item that references this translation.
-    $items = tmgmt_job_item_load_latest('config', $plugin_id, $id, $mapper->getLangcode());
+    $items = tmgmt_job_item_load_latest('config', $form_state->get('item_type'), $form_state->get('item_id'), $mapper->getLangcode());
     foreach ($languages as $langcode => $language) {
       if ($langcode == LanguageInterface::LANGCODE_DEFAULT) {
         // Never show language neutral on the overview.
@@ -173,13 +178,17 @@ class ConfigTranslateForm extends FormBase {
     /** @var \Drupal\config_translation\ConfigMapperManagerInterface $mapper */
     $mapper = $form_state->get('mapper');
     $values = $form_state->getValues();
+
+    $item_type = $form_state->get('item_type');
+    $item_id = $form_state->get('item_id');
+
     $jobs = array();
     foreach (array_keys(array_filter($values['languages'])) as $langcode) {
       // Create the job object.
       $job = tmgmt_job_create($mapper->getLangcode(), $langcode, \Drupal::currentUser()->id());
       try {
         // Add the job item.
-        $job->addItem('config', $form_state->get('plugin_id'), $form_state->get('id'));
+        $job->addItem('config', $item_type, $item_id);
         // Append this job to the array of created jobs so we can redirect the user
         // to a multistep checkout form if necessary.
         $jobs[$job->id()] = $job;

@@ -7,13 +7,13 @@
 
 namespace Drupal\tmgmt\Form;
 
-use Drupal\Core\Entity\EntityConfirmFormBase;
+use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a form for deleting a node.
  */
-class JobResubmitForm extends EntityConfirmFormBase {
+class JobResubmitForm extends ContentEntityConfirmFormBase {
 
   /**
    * {@inheritdoc}

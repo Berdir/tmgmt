@@ -68,6 +68,8 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->installEntitySchema('file');
     $this->installSchema('file', array('file_usage'));
 
+    $this->installConfig(array('node'));
+
     \Drupal::service('router.builder')->rebuild();
 
     $field_storage = FieldStorageConfig::create(array(
@@ -196,7 +198,6 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $field->setTranslatable(TRUE);
     $field->setCardinality(2);
     $field->save();
-
 
     $node = entity_create('node', array(
       'uid' => $account->id(),

@@ -64,9 +64,10 @@ class LocalTasksTests extends TMGMTTestBase {
     $this->assertOptionSelected('edit-source', 'content:node');
     $this->assertOption('edit-source', 'content:node');
     $this->assertOption('edit-source', 'content:user');
-    $this->assertOption('edit-source', 'config:action');
+    $this->assertOption('edit-source', 'config:block');
     $this->assertOption('edit-source', 'config:node_type');
-    $this->assertOption('edit-source', 'config:view');
+    $this->assertOption('edit-source', 'config:tmgmt_translator');
+    $this->assertNoOption('edit-source', 'config:base_field_override');
   }
 
   /**

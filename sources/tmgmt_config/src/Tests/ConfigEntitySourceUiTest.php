@@ -38,7 +38,7 @@ class ConfigEntitySourceUiTest extends EntityTestBase {
     ));
 
     $this->addLanguage('de');
-    $this->addLanguage('fr');
+    $this->addLanguage('it');
     $this->addLanguage('es');
     $this->addLanguage('el');
 

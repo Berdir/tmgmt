@@ -156,7 +156,7 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $job = tmgmt_job_create('en', 'de');
     $job->translator = 'test_translator';
     $job->save();
-    $job_item = tmgmt_job_item_create('config', 'system.site_information_settings', 'system.site', array('tjid' => $job->id()));
+    $job_item = tmgmt_job_item_create('config', '_simple_config', 'system.site_information_settings', array('tjid' => $job->id()));
     $job_item->save();
 
     $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('config');

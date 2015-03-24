@@ -7,8 +7,10 @@
 
 namespace Drupal\tmgmt_config\Tests;
 
+use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Core\Url;
+use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Tests\EntityTestBase;
-use Drupal\Core\Language\LanguageInterface;
 
 /**
  * Tests the user interface for entity translation lists.
@@ -205,6 +207,72 @@ class ConfigEntitySourceListTest extends EntityTestBase {
     foreach ($rows as $value) {
       $this->assertEqual('Article', (string) $value->td[1]->a);
     }
+  }
+
+  /**
+   * Test for simple configuration translation.
+   */
+  function testSimpleConfigTranslation() {
+    $this->loginAsTranslator(array('translate configuration'));
+
+    // Go to the translate tab.
+    $this->drupalGet('admin/tmgmt/sources/config/_simple_config');
+
+    // Assert some basic strings on that page.
+    $this->assertText(t('Simple configuration overview (Config Entity)'));
+
+    // Request a translation for Site information settings.
+    $edit = array(
+      'items[system.site_information_settings]' => TRUE,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Request translation'));
+
+    // Verify that we are on the translate tab.
+    $this->assertText(t('One job needs to be checked out.'));
+    $this->assertText('System information (English to ?, Unprocessed)');
+
+    // Submit.
+    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+
+    // Make sure that we're back on the originally defined destination URL.
+    $this->assertUrl('admin/tmgmt/sources/config/_simple_config');
+
+    $overview_url = Url::fromRoute('tmgmt.source_overview', array('plugin' => 'config', 'item_type' => '_simple_config'))->getInternalPath();
+
+    // Translated languages should now be listed as Needs review.
+    $this->assertRaw(SafeMarkup::format('href="@url" title="Active job item: Needs review"', array('@url' => JobItem::load(1)->urlInfo()->setOption('query',
+      ['destination' => $overview_url])->toString())));
+
+    $this->assertText(t('Test translation created.'));
+    $this->assertText('The translation of System information to German is finished and can now be reviewed.');
+
+    // Verify that the pending translation is shown.
+    $review = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[@class="even"][1]/td[@class="langstatus-de"]/a/@href');
+    $destination = $this->getAbsoluteUrl($review[0]['href']);
+    $this->drupalGet($destination);
+    $this->drupalPostForm(NULL, array(), t('Save'));
+
+    // Request a translation for Account settings
+    $edit = array(
+      'items[entity.user.admin_form]' => TRUE,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Request translation'));
+
+    // Verify that we are on the checkout page.
+    $this->assertText(t('One job needs to be checked out.'));
+    $this->assertText('Account settings (English to ?, Unprocessed)');
+    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+
+    // Make sure that we're back on the originally defined destination URL.
+    $this->assertUrl('admin/tmgmt/sources/config/_simple_config');
+
+    // Translated languages should now be listed as Needs review.
+    $links = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr/td/a');
+    $counter = 0;
+    foreach ($links as $subarray) {
+      $counter += count($subarray);
+    }
+    $this->assertEqual($counter, 2);
   }
 
 }
