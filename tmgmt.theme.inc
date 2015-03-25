@@ -59,32 +59,29 @@ function theme_tmgmt_translation_language_status_single($variables) {
   switch ($variables['translation_status']) {
     case 'original':
       $label = t('Source language');
-      $icon_color = 'tmgmt-ui-icon-white';
+      $icon = '/core/misc/icons/bebebe/house.svg';
       break;
 
     case 'missing':
       $label = t('Not translated');
-      $icon_color = 'tmgmt-ui-icon-grey';
+      $icon = '/core/misc/icons/bebebe/ex.svg';
      break;
 
     case 'outofdate':
       $label = t('Translation Outdated');
-      $icon_color = 'tmgmt-ui-icon-orange';
+      $icon = '/modules/tmgmt/icons/outdated.svg';
       break;
 
     default:
       $label = t('Translation up to date');
-      $icon_color = 'tmgmt-ui-icon-green';
+      $icon = '/core/misc/icons/73b355/check.svg';
   }
 
   // Add classes to show the correct html icon.
   $classes = array();
-  $classes[] = 'tmgmt-ui-icon';
-  // Icon size 10px square.
-  $classes[] = 'tmgmt-ui-icon-10';
-  $classes[] = $icon_color;
+  $classes[] = $icon;
 
-  $status = sprintf('<div class="%s" title="%s"><span></span></div>', implode(' ', $classes), $label);
+  $status = sprintf('<img src="%s" title="%s"><span></span></img>', implode(' ', $classes), $label);
 
   // If we have an active job item, wrap it in a link.
   if (!empty($variables['job_item'])) {
@@ -101,22 +98,19 @@ function theme_tmgmt_translation_language_status_single($variables) {
           $uri = $job->urlInfo();
           $label = t('Active job item: @state', array('@state' => $state_label));
         }
-        $icon_color = 'tmgmt-ui-icon-blue';
+        $icon = '/core/misc/icons/0074bd/chevron-right.svg';
         break;
 
       case JobItem::STATE_REVIEW:
-        $icon_color = 'tmgmt-ui-icon-yellow';
+        $icon = '/modules/tmgmt/icons/ready.svg';
         break;
     }
 
     // Add classes to show the correct html icon.
     $classes = array();
-    $classes[] = 'tmgmt-ui-icon';
-    // Icon size 10px square.
-    $classes[] = 'tmgmt-ui-icon-10';
-    $classes[] = $icon_color;
+    $classes[] = $icon;
 
-    $job_status = sprintf('<div class="%s" title="%s"><span></span></div>', implode(' ', $classes), $label);
+    $job_status = sprintf('<img src="%s" title="%s"><span></span></img>', implode(' ', $classes), $label);
 
     $uri->setOption('query', array('destination' => Url::fromRoute('<current>')->getInternalPath()));
     $uri->setOption('attributes', array('title' => $label));

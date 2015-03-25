@@ -267,7 +267,7 @@ class ConfigEntitySourceListTest extends EntityTestBase {
     $this->assertUrl('admin/tmgmt/sources/config/_simple_config');
 
     // Translated languages should now be listed as Needs review.
-    $links = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr/td/a');
+    $links = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr/td/a/@href');
     $counter = 0;
     foreach ($links as $subarray) {
       $counter += count($subarray);

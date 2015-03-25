@@ -854,25 +854,43 @@ function tmgmt_color_legend() {
     $output['#attached']['library'][] = 'tmgmt/admin.seven';
   }
 
-  $legends = array();
-  $legends[] = array('legend' => t('Source Language'), 'color' => 'tmgmt-ui-icon-white');
-  $legends[] = array('legend' => t('Not translated'), 'color' => 'tmgmt-ui-icon-grey');
-  $legends[] = array('legend' => t('In progress'), 'color' => 'tmgmt-ui-icon-blue');
-  $legends[] = array('legend' => t('Ready for review'), 'color' => 'tmgmt-ui-icon-yellow');
-  $legends[] = array('legend' => t('Translated'), 'color' => 'tmgmt-ui-icon-green');
-  $legends[] = array('legend' => t('Translation Outdated'), 'color' => 'tmgmt-ui-icon-orange');
+  $legends_left = array();
+  $legends_left[] = array('legend' => t('Source Language'), 'icon' => '/core/misc/icons/bebebe/house.svg');
+  $legends_left[] = array('legend' => t('Not translated'), 'icon' => '/core/misc/icons/bebebe/ex.svg');
+  $legends_left[] = array('legend' => t('Translated'), 'icon' => '/core/misc/icons/73b355/check.svg');
+  $legends_left[] = array('legend' => t('Translation Outdated'), 'icon' => '/modules/tmgmt/icons/outdated.svg');
+  $legends_right = array();
+  $legends_right[] = array('legend' => t('Ready for review'), 'icon' => '/modules/tmgmt/icons/ready.svg');
+  $legends_right[] = array('legend' => t('In progress'), 'icon' => '/core/misc/icons/0074bd/chevron-right.svg');
+
+  $source_status = 'Source status:';
+  $item_status = 'Item status:';
 
   $output['legends']['#markup'] = '<div class="tmgmt-color-legend clearfix">';
 
-  foreach ($legends as $legend){
-    $output['legends']['#markup'] .= '<div class="tmgmt-one-legend">
-        <div class="tmgmt-legend-icon tmgmt-ui-icon tmgmt-ui-icon-10 ' .
-      $legend['color'] . '"><span></span></div>
+  $output['legends']['#markup'] .= '<div class="tmgmt-source-status"><div class="tmgmt-status">' . $source_status . '</div>';
+
+  foreach ($legends_left as $legend) {
+    $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
+        <div class="tmgmt-legend-icon">
+            <img src="' . $legend['icon'] . '"<span></span>
+        </div>
         <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
         </div>';
   }
 
-  $output['legends']['#markup'] .= '</div>';
+  $output['legends']['#markup'] .= '</div><div class="clear"></div><div class="tmgmt-item-status"><div class="tmgmt-status">' . $item_status . '</div>';
+
+  foreach ($legends_right as $legend) {
+    $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
+        <div class="tmgmt-legend-icon">
+            <img src="' . $legend['icon'] . '"<span></span>
+        </div>
+        <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
+        </div>';
+  }
+
+  $output['legends']['#markup'] .= '</div></div>';
 
   return $output;
 }
@@ -909,20 +927,6 @@ function tmgmt_job_checkout_and_redirect(FormStateInterface $form_state, array $
     // Count of the job messages is one less due to the final redirect.
     drupal_set_message(\Drupal::translation()->formatPlural(count($redirects), t('One job needs to be checked out.'), t('@count jobs need to be checked out.')));
   }
-}
-
-/**
- * Implements hook_help().
- */
-function tmgmt_help($path, $arg) {
-  $output = '';
-
-  if (strpos($path, 'tmgmt.source_overview') !== FALSE) {
-    $legend = tmgmt_color_legend();
-    $output = \Drupal::service('renderer')->render($legend);
-  }
-
-  return $output;
 }
 
 /**

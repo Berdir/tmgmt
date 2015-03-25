@@ -49,8 +49,8 @@ class LocaleSourceUiTest extends TMGMTTestBase {
     $rows = $this->xpath('//tbody/tr');
     foreach ($rows as $row) {
       if ($row->td[1] == 'Hello World') {
-        $this->assertEqual((string) $row->td[3]->div['title'], t('Translation up to date'));
-        $this->assertEqual((string) $row->td[4]->div['title'], t('Not translated'));
+        $this->assertEqual((string) $row->td[3]->img['title'], t('Translation up to date'));
+        $this->assertEqual((string) $row->td[4]->img['title'], t('Not translated'));
       }
     }
 
@@ -93,8 +93,8 @@ class LocaleSourceUiTest extends TMGMTTestBase {
     $rows = $this->xpath('//tbody/tr');
     foreach ($rows as $row) {
       if ($row->td[1] == 'Hello World') {
-        $this->assertEqual((string) $row->td[3]->div['title'], t('Translation up to date'));
-        $this->assertEqual((string) $row->td[4]->div['title'], t('Translation up to date'));
+        $this->assertEqual((string) $row->td[3]->img['title'], t('Translation up to date'));
+        $this->assertEqual((string) $row->td[4]->img['title'], t('Translation up to date'));
       }
     }
 

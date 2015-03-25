@@ -135,11 +135,11 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     // Test statuses: Source, Missing.
     $this->drupalGet('admin/tmgmt/sources/content/node');
-    $langstatus_en = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-en"]');
-    $langstatus_de = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]');
+    $langstatus_en = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-en"]/img/@title');
+    $langstatus_de = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]/img/@title');
 
-    $this->assertEqual($langstatus_en[0]->div['title'], t('Source language'));
-    $this->assertEqual($langstatus_de[0]->div['title'], t('Not translated'));
+    $this->assertEqual($langstatus_en[0]['title'], t('Source language'));
+    $this->assertEqual($langstatus_de[0]['title'], t('Not translated'));
 
     // Test status: Active job item.
     $job = $this->createJob('en', 'de');
@@ -157,7 +157,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $states = JobItem::getStates();
     $label = t('Active job item: @state', array('@state' => $states[reset($items)->getState()]));
 
-    $this->assertEqual((string)$langstatus_de[0]->div['title'], $label);
+    $this->assertEqual((string)$langstatus_de[0]['title'], $label);
 
     // Test status: Current
     foreach ($job->getItems() as $job_item) {
@@ -165,9 +165,9 @@ class ContentEntitySourceListTest extends EntityTestBase {
     }
 
     $this->drupalGet('admin/tmgmt/sources/content/node');
-    $langstatus_de = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]');
+    $langstatus_de = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]/img/@title');
 
-    $this->assertEqual($langstatus_de[0]->div['title'], t('Translation up to date'));
+    $this->assertEqual($langstatus_de[0]['title'], t('Translation up to date'));
   }
 
   function testTranslationSubmissions() {

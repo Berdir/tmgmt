@@ -285,11 +285,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
   public function overviewForm(array $form, FormStateInterface $form_state, $type) {
     $form += $this->overviewSearchFormPart($form, $form_state, $type);
 
-     $form['#attached']['library'][] = 'tmgmt/admin';
-    // @todo: This should be added in tmgmt_color_legend().
-    if (\Drupal::theme()->getActiveTheme()->getName() == 'seven') {
-      $form['#attached']['library'][] = 'tmgmt/admin.seven';
-    }
+    $form['#attached']['library'][] = 'tmgmt/admin';
 
     $form['items'] = array(
       '#type' => 'tableselect',

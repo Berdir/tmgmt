@@ -165,17 +165,14 @@ table.tmgmt-ui-review tbody th {
   margin-left: 5px;
 }
 
-.tmgmt-one-legend{
-  float: left;
+.tmgmt-source-status div, .tmgmt-item-status div {
+    float: left;
 }
 
 .tmgmt-legend-icon{
   float: left;
-  margin: 4px 4px;
-}
-
-.tmgmt-legend-status{
-  width: 152px;
+  margin: 2px 4px;
+    margin-left: 20px;
 }
 
 .tmgmt-sources-wrapper div.form-item {
@@ -193,4 +190,13 @@ table.tmgmt-ui-review tbody th {
 
 .view-tmgmt-node-source-overview .view-filters, .tmgmt-sources-wrapper {
   margin-right: 310px;
+}
+
+.clear {
+    clear: both;
+}
+
+.tmgmt-status {
+    font-weight: 700;
+    width: 100px;
 }

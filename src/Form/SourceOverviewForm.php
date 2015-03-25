@@ -141,7 +141,12 @@ class SourceOverviewForm extends FormBase {
     $source_ui = $this->sourceManager->createUIInstance($plugin);
     $form_state->set('plugin', $plugin);
     $form_state->set('item_type', $item_type);
-    return $source_ui->overviewForm($form, $form_state, $item_type);
+
+    $form = $source_ui->overviewForm($form, $form_state, $item_type);
+
+    $form['legend'] = tmgmt_color_legend();
+
+    return $form;
   }
 
   /**

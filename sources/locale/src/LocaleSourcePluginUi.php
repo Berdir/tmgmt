@@ -107,10 +107,6 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
     );
 
     $form['#attached']['library'][] = 'tmgmt/admin';
-    // @todo: This should be added in tmgmt_color_legend().
-    if (\Drupal::theme()->getActiveTheme()->getName() == 'seven') {
-      $form['#attached']['library'][] = 'tmgmt/admin.seven';
-    }
 
     $search_data = $this->getSearchFormSubmittedParams();
 
