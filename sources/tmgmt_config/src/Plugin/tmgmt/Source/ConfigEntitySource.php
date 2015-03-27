@@ -312,7 +312,7 @@ class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPlu
   protected function extractTranslatables($schema, $config_data, $base_key = '') {
     $data = array();
     foreach ($schema as $key => $element) {
-      $element_key = implode('.', array_filter(array($base_key, $key)));
+      $element_key = isset($base_key) ? "$base_key.$key" : $key;
       $definition = $element->getDataDefinition();
         // + array('label' => t('N/A'));
       if ($element instanceof Mapping || $element instanceof Sequence) {
