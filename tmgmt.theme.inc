@@ -8,9 +8,9 @@
 use Drupal\Component\Utility\String;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
-use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\Core\Render\Element;
+use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Generic theme function for use with Render API.
@@ -59,29 +59,25 @@ function theme_tmgmt_translation_language_status_single($variables) {
   switch ($variables['translation_status']) {
     case 'original':
       $label = t('Source language');
-      $icon = '/core/misc/icons/bebebe/house.svg';
+      $icon = 'core/misc/icons/bebebe/house.svg';
       break;
 
     case 'missing':
       $label = t('Not translated');
-      $icon = '/core/misc/icons/bebebe/ex.svg';
+      $icon = 'core/misc/icons/bebebe/ex.svg';
      break;
 
     case 'outofdate':
       $label = t('Translation Outdated');
-      $icon = '/modules/tmgmt/icons/outdated.svg';
+      $icon = drupal_get_path('module', 'tmgmt') . '/icons/outdated.svg';
       break;
 
     default:
       $label = t('Translation up to date');
-      $icon = '/core/misc/icons/73b355/check.svg';
+      $icon = 'core/misc/icons/73b355/check.svg';
   }
 
-  // Add classes to show the correct html icon.
-  $classes = array();
-  $classes[] = $icon;
-
-  $status = sprintf('<img src="%s" title="%s"><span></span></img>', implode(' ', $classes), $label);
+  $status = SafeMarkup::format('<img src="@s" title="@l"><span></span></img>', array("@s" => file_create_url($icon), "@l" => $label));
 
   // If we have an active job item, wrap it in a link.
   if (!empty($variables['job_item'])) {
@@ -98,19 +94,15 @@ function theme_tmgmt_translation_language_status_single($variables) {
           $uri = $job->urlInfo();
           $label = t('Active job item: @state', array('@state' => $state_label));
         }
-        $icon = '/core/misc/icons/0074bd/chevron-right.svg';
+        $icon = drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg';
         break;
 
       case JobItem::STATE_REVIEW:
-        $icon = '/modules/tmgmt/icons/ready.svg';
+        $icon = drupal_get_path('module', 'tmgmt') . '/icons/ready.svg';
         break;
     }
 
-    // Add classes to show the correct html icon.
-    $classes = array();
-    $classes[] = $icon;
-
-    $job_status = sprintf('<img src="%s" title="%s"><span></span></img>', implode(' ', $classes), $label);
+    $job_status = SafeMarkup::format('<img src="@s" title="@l"><span></span></img>', array("@s" => file_create_url($icon), "@l" => $label));
 
     $uri->setOption('query', array('destination' => Url::fromRoute('<current>')->getInternalPath()));
     $uri->setOption('attributes', array('title' => $label));
@@ -130,35 +122,23 @@ function theme_tmgmt_translator_review_form_element_status($variables) {
   switch ($variables['status']['#value']) {
     case TMGMT_DATA_ITEM_STATE_ACCEPTED:
       $title = t('Accepted');
-      // Unicode character U+2611 BALLOT BOX WITH CHECK.
-      $icon = '&#x2611;';
-      $classes[] = 'tmgmt-ui-icon-darkgreen';
-      $classes[] = 'tmgmt-ui-state-accepted';
+      $icon = 'core/misc/icons/73b355/check.svg';
       break;
     case TMGMT_DATA_ITEM_STATE_REVIEWED:
       $title = t('Reviewed');
-      // Unicode character U+2611 BALLOT BOX WITH CHECK.
-      $icon = '&#x2611;';
-      $classes[] = 'tmgmt-ui-icon-green';
-      $classes[] = 'tmgmt-ui-state-reviewed';
+      $icon = 'core/misc/icons/73b355/check.svg';
       break;
     case TMGMT_DATA_ITEM_STATE_TRANSLATED:
       $title = t('Translated');
-      // Unicode character U+2610 BALLOT BOX.
-      $icon = '&#x2610;';
-      $classes[] = 'tmgmt-ui-icon-yellow';
-      $classes[] = 'tmgmt-ui-state-translated';
+      $icon = drupal_get_path('module', 'tmgmt') . '/icons/ready.svg';
       break;
     case TMGMT_DATA_ITEM_STATE_PENDING:
     default:
       $title = t('Pending');
-      // Just an empty icon without a sign.
-      $icon = '';
-      $classes[] = 'tmgmt-ui-icon-grey';
-      $classes[] = 'tmgmt-ui-state-pending';
+      $icon = drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg';
       break;
   }
-  return sprintf('<div class="%s" title="%s"><span>%s</span></div>', implode(' ', $classes), $title, $icon);
+  return SafeMarkup::format('<div class="@c"><img src="@s" alt="@t"/><span></span></div>', array("@c" => implode(' ', $classes), "@s" => file_create_url($icon), "@t" => $title));
 }
 
 /**

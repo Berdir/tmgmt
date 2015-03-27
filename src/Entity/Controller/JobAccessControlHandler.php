@@ -25,7 +25,7 @@ class JobAccessControlHandler extends EntityAccessControlHandler {
   protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
     if ($account->hasPermission('administer tmgmt')) {
       // Administrators can do everything.
-      return AccessResult::allowed()->cachePerRole();
+      return AccessResult::allowed()->cachePerPermissions();
     }
 
     switch ($operation) {

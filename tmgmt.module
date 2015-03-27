@@ -855,13 +855,13 @@ function tmgmt_color_legend() {
   }
 
   $legends_left = array();
-  $legends_left[] = array('legend' => t('Source Language'), 'icon' => '/core/misc/icons/bebebe/house.svg');
-  $legends_left[] = array('legend' => t('Not translated'), 'icon' => '/core/misc/icons/bebebe/ex.svg');
-  $legends_left[] = array('legend' => t('Translated'), 'icon' => '/core/misc/icons/73b355/check.svg');
-  $legends_left[] = array('legend' => t('Translation Outdated'), 'icon' => '/modules/tmgmt/icons/outdated.svg');
+  $legends_left[] = array('legend' => t('Source Language'), 'icon' => 'core/misc/icons/bebebe/house.svg');
+  $legends_left[] = array('legend' => t('Not translated'), 'icon' => 'core/misc/icons/bebebe/ex.svg');
+  $legends_left[] = array('legend' => t('Translated'), 'icon' => 'core/misc/icons/73b355/check.svg');
+  $legends_left[] = array('legend' => t('Translation Outdated'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/outdated.svg');
   $legends_right = array();
-  $legends_right[] = array('legend' => t('Ready for review'), 'icon' => '/modules/tmgmt/icons/ready.svg');
-  $legends_right[] = array('legend' => t('In progress'), 'icon' => '/core/misc/icons/0074bd/chevron-right.svg');
+  $legends_right[] = array('legend' => t('Ready for review'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
+  $legends_right[] = array('legend' => t('In progress'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg');
 
   $source_status = 'Source status:';
   $item_status = 'Item status:';
@@ -873,7 +873,7 @@ function tmgmt_color_legend() {
   foreach ($legends_left as $legend) {
     $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
         <div class="tmgmt-legend-icon">
-            <img src="' . $legend['icon'] . '"<span></span>
+            <img src="' . file_create_url($legend['icon']) . '"<span></span>
         </div>
         <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
         </div>';
@@ -884,7 +884,7 @@ function tmgmt_color_legend() {
   foreach ($legends_right as $legend) {
     $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
         <div class="tmgmt-legend-icon">
-            <img src="' . $legend['icon'] . '"<span></span>
+            <img src="' . file_create_url($legend['icon']) . '"<span></span>
         </div>
         <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
         </div>';

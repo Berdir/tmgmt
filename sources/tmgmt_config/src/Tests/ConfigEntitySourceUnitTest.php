@@ -41,7 +41,7 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $this->installEntitySchema('tmgmt_job_item');
     $this->installEntitySchema('tmgmt_message');
     $this->installSchema('system', array('router'));
-    $this->installSchema('locale', array('locales_location'));
+    $this->installSchema('locale', array('locales_location', 'locales_source', 'locales_target'));
 
     \Drupal::service('router.builder')->rebuild();
 
