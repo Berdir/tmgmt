@@ -234,6 +234,19 @@ class TMGMTUiTest extends TMGMTTestBase {
     );
     $this->drupalPostAjaxForm('admin/tmgmt/jobs/' . $job->id(), $edit, 'target_language');
     $this->assertFieldByXPath('//select[@id="edit-translator"]/option[1]', 'Test translator (auto created)');
+
+    // Login as administrator to delete a job.
+    $this->loginAsAdmin();
+    $this->drupalGet('admin/tmgmt/jobs');
+
+    // Translated languages should now be listed as Needs review.
+    $start_rows = $this->xpath('//tbody/tr');
+    $this->assertEqual(count($start_rows), 5);
+    $this->clickLink(t('Delete'), 0);
+    $this->assertText('Are you sure you want to delete the translation job test_source:test:1 and 2 more?');
+    $this->drupalPostForm(NULL, array(), t('Delete'));
+    $end_rows = $this->xpath('//tbody/tr');
+    $this->assertEqual(count($end_rows), 4);
   }
 
   /**

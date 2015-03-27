@@ -228,14 +228,6 @@ class JobItemForm extends TmgmtFormBase {
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function delete(array $form, FormStateInterface $form_state) {
-    $form_state->setRedirectUrl($this->entity->urlInfo('delete-form'));
-  }
-
-
-  /**
    * Build form elements for the review form using flatened data items.
    *
    * @todo Mention in the api documentation that the char '|' is not allowed in

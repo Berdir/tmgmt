@@ -33,7 +33,7 @@ use Drupal\user\UserInterface;
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\JobForm",
  *       "abort" = "Drupal\tmgmt\Form\JobAbortForm",
- *       "delete" = "Drupal\tmgmt\Form\JobDeleteForm",
+ *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *       "resubmit" = "Drupal\tmgmt\Form\JobResubmitForm",
  *     },
  *     "list_builder" = "Drupal\tmgmt\Entity\ListBuilder\JobListBuilder",
