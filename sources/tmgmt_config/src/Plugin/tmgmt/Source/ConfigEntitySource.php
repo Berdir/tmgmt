@@ -321,6 +321,7 @@ class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPlu
         $sub_data = $this->extractTranslatables($element, $config_data[$key], $element_key);
         if ($sub_data) {
           $data[$key] = $sub_data;
+          $data[$key]['#label'] = $definition->getLabel();
         }
       }
       else {

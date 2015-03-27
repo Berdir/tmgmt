@@ -126,6 +126,13 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual($data['display']['default']['display_options']['exposed_form']['options']['submit_button']['#label'], 'Submit button text');
     $this->assertEqual($data['display']['default']['display_options']['pager']['options']['expose']['items_per_page_label']['#label'], 'Items per page label');
 
+    // Tests for labels on more levels.
+    $this->assertEqual($data['display']['default']['display_options']['pager']['options']['expose']['#label'], 'Exposed options');
+    $this->assertEqual($data['display']['default']['display_options']['pager']['options']['#label'], 'Paged output, full pager');
+    $this->assertEqual($data['display']['default']['display_options']['pager']['#label'], 'Pager');
+    $this->assertEqual($data['display']['default']['display_options']['#label'], 'Default display options');
+    $this->assertEqual($data['display']['default']['#label'], 'Display settings');
+
     // Test item types.
     $this->assertEqual($source_plugin->getItemTypes()['view'], t('View'));
 
