@@ -111,3 +111,8 @@ table.tmgmt-ui-review tbody th {
   top: 50%;
   text-align: center;
 }
+
+.tmgmt_validation_message {
+  width: 50%;
+  float: right;
+}

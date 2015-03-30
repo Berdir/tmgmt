@@ -239,6 +239,7 @@ function theme_tmgmt_translator_review_form($variables) {
   $result = '';
   $labels = '';
   $parent_label = '';
+  $validation_message = '';
   $element_groups = array();
   $element_group = '';
   foreach (Element::children($element) as $key) {
@@ -264,6 +265,9 @@ function theme_tmgmt_translator_review_form($variables) {
         $element_group = '<tr>' . tmgmt_build_table_cell($cell, TRUE) . '</tr>';
       }
     }
+    if (isset($element[$key]['validation_message'])) {
+      $validation_message = '<div class="tmgmt_validation_message"> <p class="messages messages--warning">' . $element[$key]['validation_message']['#value'] . '</p> </div>';
+    }
     $element_group .= \Drupal::service('renderer')->render($element[$key]);
   }
 
@@ -279,6 +283,7 @@ function theme_tmgmt_translator_review_form($variables) {
     );
     $result = '<thead><tr>' . tmgmt_build_table_cell($cell) . '</tr></thead>' . implode('', $element_groups);
   }
-  $table = '<table class="tmgmt-ui-review"><colgroup width="100" /><colgroup width="*" span="2" /><colgroup width="100" />' . $result . '</table>';
+  $table = '<table class="tmgmt-ui-review"><colgroup width="100" /><colgroup width="*" span="2" /><colgroup width="100" />' . $result . '</table>' . $validation_message;
+
   return '<div id="' . $element['#ajaxid'] . '">' . $table . '</div>';
 }

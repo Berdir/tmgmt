@@ -10,6 +10,7 @@ namespace Drupal\tmgmt\Form;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
@@ -60,6 +61,7 @@ class JobItemForm extends TmgmtFormBase {
     $form['info']['changed'] = array(
       '#type' => 'item',
       '#title' => t('Last change'),
+      '#value' => $item->getChangedTime(),
       '#markup' => format_date($item->getChangedTime()),
       '#prefix' => '<div class="tmgmt-ui-changed tmgmt-ui-info-item">',
       '#suffix' => '</div>',
@@ -151,6 +153,11 @@ class JobItemForm extends TmgmtFormBase {
       '#access' => !$item->isAccepted(),
       '#validate' => array('::validate'),
       '#submit' => array('::submitForm', '::save'),
+    );
+    $actions['validate'] = array(
+      '#type' => 'submit',
+      '#value' => t('Validate HTML tags'),
+      '#submit' => array('::submitForm', '::validateTags'),
     );
     $url = $item->getJob()->url();
     $url = isset($_GET['destination']) ? $_GET['destination'] : $url;
@@ -374,6 +381,14 @@ class JobItemForm extends TmgmtFormBase {
           '#rows' => $rows,
         );
 
+        if(isset($form_state->get('validation_messages')[$target_key])) {
+          $form[$target_key]['validation_message'] = array(
+            '#title' => t('Validation message'),
+            '#type' => 'item',
+            '#value' =>  htmlspecialchars($form_state->get('validation_messages')[$target_key]),
+          );
+        }
+
         // Give the translator ui controller a chance to affect the data item element.
         $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.translator')->createUiInstance($job_item->getTranslator()->getPluginId())
           ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
@@ -395,4 +410,91 @@ class JobItemForm extends TmgmtFormBase {
     return \Drupal::service('renderer')->render($render_data);
   }
 
+  /**
+   * Submit handler for the HTML tag validation.
+   */
+  function validateTags(array $form, FormStateInterface $form_state) {
+    $validation_messages = array();
+    foreach ($form_state->getValues() as $field => $value) {
+      if (is_array($value) && isset($value['translation'])) {
+        if (!empty($value['translation'])) {
+          $tags_validated = $this->compareHTMLTags($value['source'], $value['translation']);
+          if ($tags_validated) {
+            $validation_messages[$field] = $tags_validated;
+            drupal_set_message(t('HTML tag validation failed for @field field.', array('@field' => substr($field, 0, strpos($field, '|')))), 'error');
+          }
+        }
+      }
+    }
+    $form_state->set('validation_messages', $validation_messages);
+    $request = \Drupal::request();
+    $url = $this->entity->urlInfo('canonical');
+    if ($request->query->has('destination')) {
+      $destination = $request->query->get('destination');
+      $request->query->remove('destination');
+      $url->setOption('query', array('destination' => $destination));
+    }
+    $form_state->setRedirectUrl($url);
+    $form_state->setRebuild();
+  }
+  /**
+   * Compare the HTML tags of source and translation.
+   * @param string $source
+   *  Source text.
+   * @param string $translation
+   *  Translated text.
+   */
+  function compareHTMLTags($source, $translation) {
+    $pattern = "/\<(.*?)\>/";
+    preg_match_all($pattern, $source, $source_tags);
+    preg_match_all($pattern, $translation, $translation_tags);
+    $message = '';
+    if ($source_tags != $translation_tags) {
+      if (count($source_tags[0]) == count($translation_tags[0])) {
+        $message .= 'Order of the HTML tags are incorrect. ';
+      }
+      else {
+        $tags = implode(',', array_diff($source_tags[0], $translation_tags[0]));
+        if (!empty($tags)) {
+          $message .= 'Expected tags ' . $tags . ' not found. ';
+        }
+        $source_tags_count = $this->htmlTagCount($source_tags[0]);
+        $translation_tags_count = $this->htmlTagCount($translation_tags[0]);
+        $difference = array_diff_assoc($source_tags_count, $translation_tags_count);
+        foreach ($difference as $tag => $count) {
+          if (!isset($translation_tags_count[$tag])) {
+            $translation_tags_count[$tag] = 0;
+          }
+          $message .= $tag . ' expected ' . $count . ', found ' . $translation_tags_count[$tag] . '.';
+        }
+        $unexpected_tags = array_diff_key($translation_tags_count, $source_tags_count);
+        foreach ($unexpected_tags as $tag => $count) {
+          if (!isset($translation_tags_count[$tag])) {
+            $translation_tags_count[$tag] = 0;
+          }
+          $message .= $count . ' unexpected ' . $tag . ' tag(s), found.';
+        }
+      }
+
+    }
+    return $message;
+  }
+
+  /**
+   * Compare the HTML tags of source and translation.
+   * @param array $tags
+   *  array containing all the HTML tags.
+   */
+  function htmlTagCount($tags) {
+    $counted_tags = array();
+    foreach ($tags as $tag) {
+      if (in_array($tag, array_keys($counted_tags))) {
+        $counted_tags[$tag]++;
+      }
+      else {
+        $counted_tags[$tag] = 1;
+      }
+    }
+    return $counted_tags;
+  }
 }
