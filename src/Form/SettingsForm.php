@@ -57,6 +57,17 @@ class SettingsForm extends ConfigFormBase {
       '#options' => array('_never' => t('Never'), '0' => t('Immediately'), '86400' => t('After 24 hours'), '604800' => t('After 7 days'), '2592000' => t('After 30 days'), '31536000' => t('After 365 days')),
       '#default_value' => $config->get('purge_finished'),
     );
+    $form['plaintext'] = array(
+      '#type' => 'details',
+      '#title' => t('Text settings'),
+      '#open' => TRUE,
+    );
+    $form['plaintext']['respect_text_format'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Respect text format'),
+      '#description' => t("Disabling will force all textareas to plaintext. No editors will be shown."),
+      '#default_value' => $config->get('respect_text_format'),
+    );
     return parent::buildForm($form, $form_state);
   }
 
@@ -67,6 +78,7 @@ class SettingsForm extends ConfigFormBase {
     $this->config('tmgmt.settings')
       ->set('quick_checkout', $form_state->getValue('tmgmt_quick_checkout'))
       ->set('purge_finished', $form_state->getValue('tmgmt_purge_finished'))
+      ->set('respect_text_format', $form_state->getValue('respect_text_format'))
       ->save();
 
     parent::submitForm($form, $form_state);

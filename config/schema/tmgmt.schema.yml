@@ -8,6 +8,9 @@ tmgmt.settings:
     purge_finished:
       type: string
       label: 'Purge finished jobs'
+    respect_text_format:
+      type: integer
+      label: 'Respect text format'
     word_count_exclude_tags:
       type: boolean
       label: 'Exclude tags from word count'

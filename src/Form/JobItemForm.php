@@ -365,21 +365,45 @@ class JobItemForm extends TmgmtFormBase {
         } elseif ($rows > 15) {
           $rows = 15;
         }
-        $form[$target_key]['translation'] = array(
-          '#type' => 'textarea',
-          '#default_value' => isset($data[$key]['#translation']['#text']) ? $data[$key]['#translation']['#text'] : NULL,
-          '#title' => t('Translation'),
-          '#disabled' => $job_item->isAccepted(),
-          '#rows' => $rows,
-        );
+        if (!empty($data[$key]['#format']) && \Drupal::config('tmgmt.settings')->get('respect_text_format') == '1') {
+          $form[$target_key]['translation'] = array(
+            '#type' => 'text_format',
+            '#default_value' => isset($data[$key]['#translation']['#text']) ? $data[$key]['#translation']['#text'] : NULL,
+            '#title' => t('Translation'),
+            '#disabled' => $job_item->isAccepted(),
+            '#rows' => $rows,
+            '#allowed_formats' => array($data[$key]['#format']),
+          );
+        }
+        else {
+          $form[$target_key]['translation'] = array(
+            '#type' => 'textarea',
+            '#default_value' => isset($data[$key]['#translation']['#text']) ? $data[$key]['#translation']['#text'] : NULL,
+            '#title' => t('Translation'),
+            '#disabled' => $job_item->isAccepted(),
+            '#rows' => $rows,
+          );
+        }
 
-        $form[$target_key]['source'] = array(
-          '#type' => 'textarea',
-          '#default_value' => $data[$key]['#text'],
-          '#title' => t('Source'),
-          '#disabled' => TRUE,
-          '#rows' => $rows,
-        );
+        if (!empty($data[$key]['#format']) && \Drupal::config('tmgmt.settings')->get('respect_text_format') == '1') {
+          $form[$target_key]['source'] = array(
+            '#type' => 'text_format',
+            '#default_value' => $data[$key]['#text'],
+            '#title' => t('Source'),
+            '#disabled' => TRUE,
+            '#rows' => $rows,
+            '#allowed_formats' => array($data[$key]['#format']),
+          );
+        }
+        else {
+          $form[$target_key]['source'] = array(
+            '#type' => 'textarea',
+            '#default_value' => $data[$key]['#text'],
+            '#title' => t('Source'),
+            '#disabled' => TRUE,
+            '#rows' => $rows,
+          );
+        }
 
         if(isset($form_state->get('validation_messages')[$target_key])) {
           $form[$target_key]['validation_message'] = array(

@@ -9,6 +9,7 @@ namespace Drupal\tmgmt\Tests;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
+use Drupal\filter\Entity\FilterFormat;
 
 /**
  * Verifies basic functionality of the user interface
@@ -17,11 +18,20 @@ use Drupal\tmgmt\Entity\Translator;
  */
 class TMGMTUiTest extends TMGMTTestBase {
 
+  public static $modules = array('ckeditor');
+
   /**
    * {@inheritdoc}
    */
   function setUp() {
     parent::setUp();
+
+    $filtered_html_format = FilterFormat::create(array(
+      'format' => 'filtered_html',
+      'name' => 'Filtered HTML',
+    ));
+    $filtered_html_format->save();
+    $filtered_html_format->getPermissionName();
 
     // Login as admin to be able to set environment variables.
     $this->loginAsAdmin();
@@ -399,6 +409,21 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText(t('@tag expected 1, found 2.', array('@tag' => '<em>')));
     $this->assertText(t('@tag expected 1, found 3.', array('@tag' => '</strong>')));
     $this->assertText(t('HTML tag validation failed for dummy field.'));
+
+    // Test for the text with format set.
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'dummy' => array(
+        'deep_nesting' => array(
+          '#text' => 'Text for job item',
+          '#label' => 'Label',
+          '#filtered_html' => 'text_plain',
+        ),
+      ),
+    ));
+    $item5 = $job->addItem('test_source', 'test', 5);
+    $this->drupalGet('admin/tmgmt/items/' . $item5->id());
+    $rows5 = $this->xpath('//textarea[@name="dummy|deep_nesting[source]"]');
+    $this->assertEqual((string) $rows5[0]['rows'], 3);
   }
 
   /**
