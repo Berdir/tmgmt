@@ -439,16 +439,20 @@ class JobItemForm extends TmgmtFormBase {
    */
   function validateTags(array $form, FormStateInterface $form_state) {
     $validation_messages = array();
+    $field_count = 0;
     foreach ($form_state->getValues() as $field => $value) {
       if (is_array($value) && isset($value['translation'])) {
         if (!empty($value['translation'])) {
           $tags_validated = $this->compareHTMLTags($value['source'], $value['translation']);
           if ($tags_validated) {
             $validation_messages[$field] = $tags_validated;
-            drupal_set_message(t('HTML tag validation failed for @field field.', array('@field' => substr($field, 0, strpos($field, '|')))), 'error');
+            $field_count++;
           }
         }
       }
+    }
+    if($field_count > 0){
+      drupal_set_message(t('HTML tag validation failed for @count field(s).', array('@count' => $field_count)), 'error');
     }
     $form_state->set('validation_messages', $validation_messages);
     $request = \Drupal::request();
@@ -461,6 +465,7 @@ class JobItemForm extends TmgmtFormBase {
     $form_state->setRedirectUrl($url);
     $form_state->setRebuild();
   }
+
   /**
    * Compare the HTML tags of source and translation.
    * @param string $source

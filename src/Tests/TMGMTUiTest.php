@@ -370,11 +370,17 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Tests the HTML tags validation.
     \Drupal::state()->set('tmgmt.test_source_data', array(
-      'dummy' => array(
+      'title' => array(
         'deep_nesting' => array(
           '#text' => '<p><em><strong>Source text bold and Italic</strong></em></p>',
-          '#label' => 'Label',
+          '#label' => 'Title',
         ),
+      ),
+      'body' => array(
+        'deep_nesting' => array(
+          '#text' => '<p><em><strong>Source body bold and Italic</strong></em></p>',
+          '#label' => 'Body',
+        )
       ),
     ));
     $item4 = $job->addItem('test_source', 'test', 4);
@@ -382,7 +388,7 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Drop <strong> tag in translated text.
     $edit = array(
-      'dummy|deep_nesting[translation]' => '<em>Translated italic text missing paragraph</em>',
+      'title|deep_nesting[translation]' => '<em>Translated italic text missing paragraph</em>',
     );
     $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
     $this->assertText(t('Expected tags @tags not found.', array('@tags' => '<p>,<strong>,</strong>,</p>')));
@@ -390,25 +396,33 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText(t('@tag expected 1, found 0.', array('@tag' => '<strong>')));
     $this->assertText(t('@tag expected 1, found 0.', array('@tag' => '</strong>')));
     $this->assertText(t('@tag expected 1, found 0.', array('@tag' => '</p>')));
-    $this->assertText(t('HTML tag validation failed for dummy field.'));
+    $this->assertText(t('HTML tag validation failed for 1 field(s).'));
 
     // Change the order of HTML tags.
     $edit = array(
-      'dummy|deep_nesting[translation]' => '<p><strong><em>Translated text Italic and bold</em></strong></p>',
+      'title|deep_nesting[translation]' => '<p><strong><em>Translated text Italic and bold</em></strong></p>',
     );
     $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
     $this->assertText(t('Order of the HTML tags are incorrect.'));
-    $this->assertText(t('HTML tag validation failed for dummy field.'));
+    $this->assertText(t('HTML tag validation failed for 1 field(s).'));
 
     // Add multiple tags incorrectly.
     $edit = array(
-      'dummy|deep_nesting[translation]' => '<p><p><p><p><strong><em><em>Translated text Italic and bold, many tags</em></strong></strong></strong></p>',
+      'title|deep_nesting[translation]' => '<p><p><p><p><strong><em><em>Translated text Italic and bold, many tags</em></strong></strong></strong></p>',
     );
     $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
     $this->assertText(t('@tag expected 1, found 4.', array('@tag' => '<p>')));
     $this->assertText(t('@tag expected 1, found 2.', array('@tag' => '<em>')));
     $this->assertText(t('@tag expected 1, found 3.', array('@tag' => '</strong>')));
-    $this->assertText(t('HTML tag validation failed for dummy field.'));
+    $this->assertText(t('HTML tag validation failed for 1 field(s).'));
+
+    // Check validation errors for two fields.
+    $edit = array(
+      'title|deep_nesting[translation]' => '<p><p><p><p><strong><em><em>Translated text Italic and bold, many tags</em></strong></strong></strong></p>',
+      'body|deep_nesting[translation]' => '<p>Source body bold and Italic</strong></em></p>',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
+    $this->assertText(t('HTML tag validation failed for 2 field(s).'));
 
     // Test for the text with format set.
     \Drupal::state()->set('tmgmt.test_source_data', array(
@@ -424,6 +438,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalGet('admin/tmgmt/items/' . $item5->id());
     $rows5 = $this->xpath('//textarea[@name="dummy|deep_nesting[source]"]');
     $this->assertEqual((string) $rows5[0]['rows'], 3);
+
   }
 
   /**
