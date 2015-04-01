@@ -431,7 +431,7 @@ class JobItemForm extends TmgmtFormBase {
     $key = array_slice($form_state->getTriggeringElement()['#array_parents'], 0, 2);
     $render_data = NestedArray::getValue($form, $key);
     tmgmt_write_request_messages($form_state->getFormObject()->getEntity()->getJob());
-    return \Drupal::service('renderer')->render($render_data);
+    return $render_data;
   }
 
   /**

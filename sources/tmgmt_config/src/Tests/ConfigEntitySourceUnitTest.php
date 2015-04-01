@@ -172,9 +172,6 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $data = $source_plugin->getData($job_item);
 
     // Test the name property.
-    $this->assertEqual($data['name']['#label'], 'Site name');
-    $this->assertEqual($data['name']['#text'], 'Drupal');
-    $this->assertEqual($data['name']['#translate'], TRUE);
     $this->assertEqual($data['slogan']['#label'], 'Slogan');
     $this->assertEqual($data['slogan']['#text'], 'Test slogan');
     $this->assertEqual($data['slogan']['#translate'], TRUE);
@@ -193,7 +190,6 @@ class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
     $language_manager = \Drupal::languageManager();
     $language_manager->setConfigOverrideLanguage($language_manager->getLanguage('de'));
 
-    $this->assertEqual(\Drupal::config('system.site')->get('name'), $data['name']['#translation']['#text']);
     $this->assertEqual(\Drupal::config('system.site')->get('slogan'), $data['slogan']['#translation']['#text']);
   }
 
