@@ -7,7 +7,7 @@
 
 namespace Drupal\tmgmt_config;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -182,7 +182,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
     $languages = array();
     foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
       $languages['langcode-' . $langcode] = array(
-        'data' => String::checkPlain($language->getName()),
+        'data' => SafeMarkup::checkPlain($language->getName()),
       );
     }
 

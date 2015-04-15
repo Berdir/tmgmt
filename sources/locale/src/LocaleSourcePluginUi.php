@@ -7,7 +7,7 @@
 
 namespace Drupal\tmgmt_locale;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\SourcePluginUiBase;
@@ -83,7 +83,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
     $languages = array();
     foreach ($this->getLanguages() as $langcode => $language) {
       $languages['langcode-' . $langcode] = array(
-        'data' => String::checkPlain($language->getName()),
+        'data' => SafeMarkup::checkPlain($language->getName()),
       );
     }
 
@@ -259,7 +259,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
 
     $row = array(
       'id' => $data['id'],
-      'source' => String::checkPlain($source->source),
+      'source' => SafeMarkup::checkPlain($source->source),
     );
 
 

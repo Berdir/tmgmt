@@ -5,12 +5,11 @@
  * Theme file stub for tmgmt.
  */
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\Core\Render\Element;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Generic theme function for use with Render API.
@@ -23,7 +22,7 @@ function theme_tmgmt_element($variables) {
   // Use the #title attribute.
   $title = '';
   if (!empty($element['#title'])) {
-    $title = '<h3>' . String::checkPlain($element['#title']) . '</h3>';
+    $title = '<h3>' . SafeMarkup::checkPlain($element['#title']) . '</h3>';
   }
 
   // Use #attributes to customize a wrapper <div>.
@@ -258,7 +257,7 @@ function theme_tmgmt_translator_review_form($variables) {
         // Header row for the current element group.
         $cell = array(
           // @todo: Deal with right to left languages.
-          'data' => String::checkPlain(implode(t(' > '), $labels)),
+          'data' => SafeMarkup::checkPlain(implode(t(' > '), $labels)),
           'colspan' => 4,
           'header' => TRUE,
         );

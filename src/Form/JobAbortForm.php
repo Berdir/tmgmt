@@ -7,7 +7,7 @@
 
 namespace Drupal\tmgmt\Form;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -50,7 +50,7 @@ class JobAbortForm extends ContentEntityConfirmFormBase {
         if ($text = $message->getMessage()) {
           // We want to persist also the type therefore we will set the
           // messages directly and not return them.
-          drupal_set_message(String::checkPlain($text), $message->getType());
+          drupal_set_message(SafeMarkup::checkPlain($text), $message->getType());
         }
       }
     }

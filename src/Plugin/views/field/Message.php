@@ -7,7 +7,7 @@
 
 namespace Drupal\tmgmt\Plugin\views\field;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\Component\Annotation\PluginID;
@@ -66,7 +66,7 @@ class Message extends FieldPluginBase {
 
     if ($this->options['replace_variables']) {
       $variables = unserialize($this->getvalue($values, 'variables'));
-      return String::format($value, (array) $variables);
+      return SafeMarkup::format($value, (array) $variables);
     }
     else {
       return $this->sanitizeValue($value);
