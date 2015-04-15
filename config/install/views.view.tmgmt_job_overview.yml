@@ -754,9 +754,8 @@ display:
       display_extenders: {  }
     cache_metadata:
       contexts:
-        0: user
-        3: cache.context.url
-        7: language
+        - 'languages:language_interface'
+        - url
       cacheable: false
   page_1:
     display_plugin: page
@@ -782,7 +781,6 @@ display:
       display_extenders: {  }
     cache_metadata:
       contexts:
-        0: user
-        3: cache.context.url
-        7: language
+        - 'languages:language_interface'
+        - url
       cacheable: false
