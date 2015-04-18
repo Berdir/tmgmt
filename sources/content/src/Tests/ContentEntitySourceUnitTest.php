@@ -14,8 +14,6 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
-use Drupal\Core\Language\Language;
-use Drupal\tmgmt\TMGMTException;
 
 /**
  * Content entity Source unit tests.
@@ -29,9 +27,9 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt', 'tmgmt_content', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language', 'content_translation', 'menu_link', 'options');
+  public static $modules = array('tmgmt', 'tmgmt_content', 'tmgmt_test', 'node', 'entity', 'filter', 'file', 'image', 'language', 'content_translation', 'menu_link', 'options', 'entity_reference');
 
-  protected $entity_type = 'entity_test_mul';
+  protected $entityTypeId = 'entity_test_mul';
 
   protected $image_label;
 
@@ -74,16 +72,16 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     $field_storage = FieldStorageConfig::create(array(
       'field_name' => 'image_test',
-      'entity_type' => $this->entity_type,
+      'entity_type' => $this->entityTypeId,
       'type' => 'image',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'translatable' => TRUE,
     ));
     $field_storage->save();
     FieldConfig::create(array(
-      'entity_type' => $this->entity_type,
+      'entity_type' => $this->entityTypeId,
       'field_storage' => $field_storage,
-      'bundle' => $this->entity_type,
+      'bundle' => $this->entityTypeId,
       'label' => $this->image_label = $this->randomMachineName(),
     ))->save();
     file_unmanaged_copy(DRUPAL_ROOT . '/core/misc/druplicon.png', 'public://example.jpg');
@@ -101,7 +99,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
       'langcode' => 'en',
       'user_id' => 1,
     );
-    $entity_test = entity_create($this->entity_type, $values);
+    $entity_test = entity_create($this->entityTypeId, $values);
     $translation = $entity_test->getTranslation('en');
     $translation->name->value = $this->randomMachineName();
     $values = array(
@@ -122,7 +120,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $job = tmgmt_job_create('en', 'de');
     $job->translator = 'test_translator';
     $job->save();
-    $job_item = tmgmt_job_item_create('content', $this->entity_type, $entity_test->id(), array('tjid' => $job->id()));
+    $job_item = tmgmt_job_item_create('content', $this->entityTypeId, $entity_test->id(), array('tjid' => $job->id()));
     $job_item->save();
 
     $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('content');
@@ -179,7 +177,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $data = $item->getData();
 
     // Check that the translations were saved correctly.
-    $entity_test = entity_load($this->entity_type, $entity_test->id());
+    $entity_test = entity_load($this->entityTypeId, $entity_test->id());
     $translation = $entity_test->getTranslation('de');
 
     $this->assertEqual($translation->name->value, $data['name'][0]['value']['#translation']['#text']);
@@ -346,6 +344,106 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual($saved, SAVED_NEW, t('Created content type %type.', array('%type' => $type->id())));
 
     return $type;
+  }
+
+  /**
+   * Test extraction and saving translation for embedded references.
+   */
+  public function testEmbeddedReferences() {
+    $field1 = FieldStorageConfig::create(array(
+      'field_name' => 'field1',
+      'entity_type' => $this->entityTypeId,
+      'type' => 'entity_reference',
+      'cardinality' => -1,
+      'settings' => array('target_type' => $this->entityTypeId),
+    ));
+    $field1->save();
+    $field2 = FieldStorageConfig::create(array(
+      'field_name' => 'field2',
+      'entity_type' => $this->entityTypeId,
+      'type' => 'entity_reference',
+      'cardinality' => -1,
+      'settings' => array('target_type' => $this->entityTypeId),
+    ));
+    $field2->save();
+
+    // Create field instances on the content type.
+    FieldConfig::create(array(
+      'field_storage' => $field1,
+      'bundle' => $this->entityTypeId,
+      'label' => 'Field 1',
+      'translatable' => FALSE,
+      'settings' => array(),
+    ))->save();
+    FieldConfig::create(array(
+      'field_storage' => $field2,
+      'bundle' => $this->entityTypeId,
+      'label' => 'Field 2',
+      'translatable' => FALSE,
+      'settings' => array(),
+    ))->save();
+
+    // Create a test entity that can be referenced.
+    $referenced_values = [
+      'langcode' => 'en',
+      'user_id' => 1,
+      'name' => $this->randomString(),
+    ];
+
+    $this->config('tmgmt_content.settings')
+      ->set('embedded_fields.' . $this->entityTypeId . '.field1', TRUE)
+      ->save();
+
+    $referenced_entity = entity_create($this->entityTypeId, $referenced_values);
+    $referenced_entity->save();
+
+    // Create an english test entity.
+    $values = array(
+      'langcode' => 'en',
+      'user_id' => 1,
+    );
+    $entity_test = entity_create($this->entityTypeId, $values);
+    $translation = $entity_test->getTranslation('en');
+    $translation->name->value = $this->randomMachineName();
+
+    $translation->field1->target_id = $referenced_entity->id();
+    $translation->field2->target_id = $referenced_entity->id();
+
+    $entity_test->save();
+
+    $job = tmgmt_job_create('en', 'de');
+    $job->translator = 'test_translator';
+    $job->save();
+    $job_item = tmgmt_job_item_create('content', $this->entityTypeId, $entity_test->id(), array('tjid' => $job->id()));
+    $job_item->save();
+
+    $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('content');
+    $data = $source_plugin->getData($job_item);
+
+    // Ensure that field 2 is not in the extracted data.
+    $this->assertFalse(isset($data['field2']));
+
+    // Ensure some labels and structure for field 1.
+    $this->assertEqual($data['field1']['#label'], 'Field 1');
+    $this->assertEqual($data['field1'][0]['#label'], 'Delta #0');
+    $this->assertEqual($data['field1'][0]['entity']['name']['#label'], 'Name');
+    $this->assertEqual($data['field1'][0]['entity']['name'][0]['value']['#text'], $referenced_values['name']);
+
+    // Now request a translation and save it back.
+    $job->requestTranslation();
+    $items = $job->getItems();
+    $item = reset($items);
+    $item->acceptTranslation();
+    $data = $item->getData();
+
+    // Check that the translations were saved correctly.
+    $entity_test = entity_load($this->entityTypeId, $entity_test->id());
+    $translation = $entity_test->getTranslation('de');
+
+    $referenced_entity = entity_load($this->entityTypeId, $referenced_entity->id());
+    $referenced_translation = $referenced_entity->getTranslation('de');
+    $this->assertEqual($referenced_translation->name->value, $data['field1'][0]['entity']['name'][0]['value']['#translation']['#text']);
+
   }
 
 }

@@ -7,6 +7,7 @@
 use Drupal\Core\Entity\Plugin\DataType\EntityReference;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\JobInterface;
+use \Drupal\field\FieldStorageConfigInterface;
 
 /**
  * Implements hook_tmgmt_source_suggestions()
@@ -53,4 +54,107 @@ function tmgmt_content_tmgmt_source_suggestions(array $items, JobInterface $job)
   }
 
   return $suggestions;
+}
+
+  /**
+   * Implements hook_form_FORM_ID_alter() for tmgmt_settings_form().
+   *
+   * @param array $form
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   */
+function tmgmt_content_form_tmgmt_settings_form_alter(array &$form, FormStateInterface $form_state) {
+  module_load_include('inc', 'views', 'views.views');
+  $entity_types = \Drupal::entityManager()->getDefinitions();
+
+  $form['content']['embedded_fields'] = array(
+    '#type' => 'details',
+    '#title' => t('Embedded references'),
+    '#description' => t('All checked reference fields will automatically add the translatable data of the reference to the job. This is only available when the reference is untranslatable and the target is enabled for translation.'),
+    '#tree' => TRUE,
+    '#open' => TRUE,
+  );
+
+  $content_translation_manager = \Drupal::service('content_translation.manager');
+
+  foreach ($entity_types as $entity_type) {
+    if ($content_translation_manager->isEnabled($entity_type->id())) {
+      $field_options = array();
+      $translatable_bundles = array_filter(array_keys(\Drupal::entityManager()->getBundleInfo($entity_type->id())), function ($bundle) use ($entity_type, $content_translation_manager) {
+        return $content_translation_manager->isEnabled($entity_type->id(), $bundle);
+      });
+      $storage_definitions = \Drupal::entityManager()->getFieldStorageDefinitions($entity_type->id());
+
+      foreach ($storage_definitions as $field_name => $storage_definition) {
+        // Filter out storage definitions that don't have at least one
+        // untranslatable field definition on a translatable bundle.
+        $allowed_option = FALSE;
+        foreach ($translatable_bundles as $bundle) {
+          $field_definitions = \Drupal::entityManager()->getFieldDefinitions($entity_type->id(), $bundle);
+          if (isset($field_definitions[$field_name]) && !$field_definitions[$field_name]->isTranslatable()) {
+            $allowed_option = TRUE;
+            break;
+          }
+        }
+
+        if (!$allowed_option) {
+          continue;
+        }
+
+        $property_definitions = $storage_definition->getPropertyDefinitions();
+        foreach ($property_definitions as $property_definition) {
+          // Look for entity_reference properties where the storage definition
+          // has a target type setting and that is enabled for content
+          // translation.
+          // @todo Support dynamic entity references and make this more flexible
+          //   in general.
+          if (in_array($property_definition->getDataType(), ['entity_reference', 'entity_revision_reference']) && $storage_definition->getSetting('target_type') && $content_translation_manager->isEnabled($storage_definition->getSetting('target_type'))) {
+            if ($storage_definition instanceof FieldStorageConfigInterface) {
+              list($label) = views_entity_field_label($entity_type->id(), $storage_definition->getName());
+              $field_options[$storage_definition->getName()] = $label;
+            }
+            else {
+              $field_options[$storage_definition->getName()] = $storage_definition->getLabel();
+            }
+            break;
+          }
+        }
+      }
+      if (!empty($field_options)) {
+        if (\Drupal::config('tmgmt_content.settings')->get('embedded_fields.' . $entity_type->id())) {
+          $form['content']['embedded_fields'][$entity_type->id()] = array(
+            '#type' => 'checkboxes',
+            '#title' => $entity_type->getLabel(),
+            '#options' => $field_options,
+            '#default_value' => array_keys(\Drupal::config('tmgmt_content.settings')->get('embedded_fields.' . $entity_type->id())),
+          );
+        }
+        else {
+          $form['content']['embedded_fields'][$entity_type->id()] = array(
+            '#type' => 'checkboxes',
+            '#title' => $entity_type->getLabel(),
+            '#options' => $field_options,
+          );
+        }
+
+      }
+    }
+  }
+
+  $form['#submit'][] = 'tmgmt_content_settings_submit';
+}
+
+/**
+ * Submit function set by tmgmt_content_form_tmgmt_settings_form_alter().
+ */
+function tmgmt_content_settings_submit(array &$form, FormStateInterface $form_state) {
+  $embedded_fields = array();
+  foreach ($form_state->getValue('embedded_fields') as $key => $fields) {
+    foreach (array_filter($fields) as $id => $label) {
+      $embedded_fields[$key][$id] = TRUE;
+    }
+  }
+
+  \Drupal::configFactory()->getEditable('tmgmt_content.settings')
+    ->set('embedded_fields', $embedded_fields)
+    ->save();
 }

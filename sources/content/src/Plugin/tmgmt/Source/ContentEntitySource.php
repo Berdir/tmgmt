@@ -7,6 +7,8 @@
 
 namespace Drupal\tmgmt_content\Plugin\tmgmt\Source;
 
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\Plugin\DataType\EntityReference;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\TypedData\OptionsProviderInterface;
@@ -63,35 +65,46 @@ class ContentEntitySource extends SourcePluginBase {
     if (!isset($languages[$id])) {
       throw new TMGMTException(t('Entity %entity could not be translated because the language %language is not applicable', array('%entity' => $entity->language()->getId(), '%language' => $entity->language()->getName())));
     }
-    $field_definitions = $entity->getFieldDefinitions();
 
     if (!$entity->hasTranslation($job_item->getJob()->getSourceLangcode())) {
       throw new TMGMTException(t('The entity %id with translation %lang does not exist.', array('%id' => $entity->id(), '%lang' => $job_item->getJob()->getSourceLangcode())));
     }
 
+    $translation = $entity->getTranslation($job_item->getJob()->getSourceLangcode());
+    $data = $this->extractTranslatableData($translation);
+    return $data;
+  }
+
+  /**
+   * Extracts translatable data from an entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity to get the the translatable data from.
+   *
+   * @return array $data
+   *   Translatable data.
+   */
+  public function extractTranslatableData(ContentEntityInterface $entity) {
+
     // @todo Expand this list or find a better solution to exclude fields like
     //   content_translation_source.
+
+    $field_definitions = $entity->getFieldDefinitions();
     $exclude_field_types = ['language'];
     $translatable_fields = array_filter($field_definitions, function (FieldDefinitionInterface $field_definition) use ($exclude_field_types) {
-      return $field_definition->isTranslatable() && !in_array($field_definition->getType(), $exclude_field_types);
+        return $field_definition->isTranslatable() && !in_array($field_definition->getType(), $exclude_field_types);
     });
 
     $data = array();
-    $translation = $entity->getTranslation($job_item->getJob()->getSourceLangcode());
     foreach ($translatable_fields as $key => $field_definition) {
-      $field = $translation->get($key);
-      $data[$key]['#label'] = $field_definition->getLabel();
+      $field = $entity->get($key);
       foreach ($field as $index => $field_item) {
-        $data[$key][$index]['#label'] = t('Delta #@delta', array('@delta' => $index));
         $format = NULL;
         /* @var FieldItemInterface $field_item */
         foreach ($field_item->getProperties() as $property_key => $property) {
           // Ignore computed values.
           $property_definition = $property->getDataDefinition();
-          if (($property_definition->isComputed())) {
-            continue;
-          }
-          // Ignore values that are not primitves.
+          // Ignore values that are not primitives.
           if (!($property instanceof PrimitiveInterface)) {
             continue;
           }
@@ -100,21 +113,50 @@ class ContentEntitySource extends SourcePluginBase {
           if ($property instanceof OptionsProviderInterface || !($property instanceof StringInterface)) {
             $translate = FALSE;
           }
+          // All the labels are here, to make sure we don't have empty labels in
+          // the UI because of no data.
+          if ($translate == TRUE) {
+            $data[$key]['#label'] = $field_definition->getLabel();
+            $data[$key][$index]['#label'] = t('Delta #@delta', array('@delta' => $index));
+          }
           $data[$key][$index][$property_key] = array(
             '#label' => $property_definition->getLabel(),
             '#text' => $property->getValue(),
             '#translate' => $translate,
           );
-          if($property_definition->getDataType() == 'filter_format'){
+
+          if ($property_definition->getDataType() == 'filter_format') {
             $format = $property->getValue();
           }
         }
         // Add the format to the translatable properties.
-        if(!empty($format)) {
+        if (!empty($format)) {
           foreach ($data[$key][$index] as $name => $value) {
             if (isset($value['#translate']) && $value['#translate'] == TRUE) {
               $data[$key][$index][$name]['#format'] = $format;
             }
+          }
+        }
+      }
+    }
+
+    $embeddable_field_names = \Drupal::config('tmgmt_content.settings')->get('embedded_fields');
+    $embeddable_fields = array_filter($field_definitions, function (FieldDefinitionInterface $field_definition) use ($embeddable_field_names) {
+      return !$field_definition->isTranslatable() && isset($embeddable_field_names[$field_definition->getTargetEntityTypeId()][$field_definition->getName()]);
+    });
+    foreach ($embeddable_fields as $key => $field_definition) {
+      $field = $entity->get($key);
+      foreach ($field as $index => $field_item) {
+        /* @var FieldItemInterface $field_item */
+        foreach ($field_item->getProperties(TRUE) as $property_key => $property) {
+          // If the property is a content entity reference and it's value is
+          // defined, than we call this method again to get all the data.
+          if ($property instanceof EntityReference && $property->getValue() instanceof ContentEntityInterface) {
+            // All the labels are here, to make sure we don't have empty
+            // labels in the UI because of no data.
+            $data[$key]['#label'] = $field_definition->getLabel();
+            $data[$key][$index]['#label'] = t('Delta #@delta', array('@delta' => $index));
+            $data[$key][$index][$property_key] = $this->extractTranslatableData($property->getValue());
           }
         }
       }
@@ -130,26 +172,8 @@ class ContentEntitySource extends SourcePluginBase {
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     $job = $job_item->getJob();
 
-    // If the translation for this language does not exist yet, initialize it.
-    if (!$entity->hasTranslation($job->getTargetLangcode())) {
-      $entity->addTranslation($job->getTargetLangcode(), $entity->toArray());
-    }
-
-    $translation = $entity->getTranslation($job->getTargetLangcode());
     $data = $job_item->getData();
-    foreach ($data as $name => $field_data) {
-      foreach (Element::children($field_data) as $delta) {
-        $field_item = $field_data[$delta];
-        foreach (Element::children($field_item) as $property) {
-          $property_data = $field_item[$property];
-          if (isset($property_data['#translation']['#text'])) {
-            $translation->get($name)->offsetGet($delta)->set($property, $property_data['#translation']['#text']);
-          }
-        }
-      }
-    }
-
-    $translation->save();
+    $this->doSaveTranslations($entity, $data, $job->getTargetLangcode());
     $job_item->accepted();
   }
 
@@ -212,5 +236,45 @@ class ContentEntitySource extends SourcePluginBase {
     return array();
   }
 
+  /**
+   * Saves translation data in an entity translation.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity for which the translation should be saved.
+   * @param array $data
+   *   The translation data for the fields.
+   * @param string $target_langcode
+   *   The target language.
+   */
+  protected function doSaveTranslations(ContentEntityInterface $entity, array $data, $target_langcode) {
+    // If the translation for this language does not exist yet, initialize it.
+    if (!$entity->hasTranslation($target_langcode)) {
+      $entity->addTranslation($target_langcode, $entity->toArray());
+    }
 
+    $embeded_fields = \Drupal::config('tmgmt_content.settings')->get('embedded_fields');
+
+    $translation = $entity->getTranslation($target_langcode);
+
+    foreach ($data as $name => $field_data) {
+      foreach (Element::children($field_data) as $delta) {
+        $field_item = $field_data[$delta];
+        foreach (Element::children($field_item) as $property) {
+          $property_data = $field_item[$property];
+          // If there is translation data for the field property, save it.
+          if (isset($property_data['#translation']['#text'])) {
+            $translation->get($name)
+              ->offsetGet($delta)
+              ->set($property, $property_data['#translation']['#text']);
+          }
+          // If the field is an embeddable reference, we assume that the
+          // property is a field reference.
+          elseif (isset($embeded_fields[$entity->getEntityTypeId()][$name])) {
+            $this->doSaveTranslations($translation->get($name)->offsetGet($delta)->$property, $property_data, $target_langcode);
+          }
+        }
+      }
+    }
+    $translation->save();
+  }
 }

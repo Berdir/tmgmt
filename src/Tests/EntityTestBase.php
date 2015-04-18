@@ -39,20 +39,19 @@ abstract class EntityTestBase extends TMGMTTestBase {
    *   Machine name of the node type.
    * @param string $human_name
    *   Human readable name of the node type.
-   * @param int $language_content_type
-   *   Either 0 (disabled), 1 (language enabled but no translations),
-   *   TRANSLATION_ENABLED or ENTITY_TRANSLATION_ENABLED.
+   * @param bool $translation
+   *   TRUE if translation for this enitty type should be enabled.
    * pparam bool $attach_fields
    *   (optional) If fields with the same translatability should automatically
    *   be attached to the node type.
    */
-  function createNodeType($machine_name, $human_name, $entity_translation = FALSE, $attach_fields = TRUE) {
+  function createNodeType($machine_name, $human_name, $translation = FALSE, $attach_fields = TRUE) {
     $type = $this->drupalCreateContentType(array('type' => $machine_name, 'name' => $human_name));
 
     // Push in also the body field.
     $this->field_names['node'][$machine_name][] = 'body';
 
-    if (\Drupal::hasService('content_translation.manager')) {
+    if (\Drupal::hasService('content_translation.manager') && $translation) {
       $content_translation_manager = \Drupal::service('content_translation.manager');
       $content_translation_manager->setEnabled('node', $machine_name, TRUE);
     }
@@ -60,7 +59,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
     $this->applySchemaUpdates();
 
     if ($attach_fields) {
-      $this->attachFields('node', $machine_name, $entity_translation);
+      $this->attachFields('node', $machine_name, $translation);
     }
     else {
     // Change body field to be translatable.

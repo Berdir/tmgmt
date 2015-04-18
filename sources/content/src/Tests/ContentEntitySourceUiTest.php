@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_content\Tests;
 use Drupal\comment\Entity\Comment;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\Node;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\EntityTestBase;
@@ -341,4 +342,85 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a> including the current item.',
         array('@count' => 3, '@url' => Url::fromRoute('tmgmt.cart')->toString())));
   }
+
+  /**
+   * Tests the embedded references.
+   */
+  function testEmbeddedReferences() {
+    // Create two reference fields, one to a translatable and untranslatable
+    // node type, one only for a untranslatable. Only the first one should be
+    // available.
+
+    $field1 = FieldStorageConfig::create(
+        array(
+          'field_name' => 'field1',
+          'entity_type' => 'node',
+          'type' => 'entity_reference',
+          'cardinality' => -1,
+          'settings' => array('target_type' => 'node'),
+        )
+      );
+    $field1->save();
+    $field2 = FieldStorageConfig::create(
+      array(
+        'field_name' => 'field2',
+        'entity_type' => 'node',
+        'type' => 'entity_reference',
+        'cardinality' => -1,
+        'settings' => array('target_type' => 'node'),
+      )
+    );
+    $field2->save();
+
+    $this->createNodeType('untranslatable', 'Untranslatable', FALSE);
+
+    // Create field instances on the content type.
+    FieldConfig::create(
+      array(
+        'field_storage' => $field1,
+        'bundle' => 'article',
+        'label' => 'Field 1',
+        'translatable' => FALSE,
+        'settings' => array(),
+      )
+    )->save();
+    FieldConfig::create(
+      array(
+        'field_storage' => $field1,
+        'bundle' => 'untranslatable',
+        'label' => 'Field 1',
+        'translatable' => FALSE,
+        'settings' => array(),
+      )
+    )->save();
+    FieldConfig::create(
+      array(
+        'field_storage' => $field2,
+        'bundle' => 'untranslatable',
+        'label' => 'Field 2',
+        'translatable' => FALSE,
+        'settings' => array(),
+      )
+    )->save();
+
+    $this->drupalGet('admin/config/regional/tmgmt_settings');
+
+    $checked_reference_fields = array(
+      'embedded_fields[node][field1]' => TRUE,
+    );
+
+    $this->assertNoField('embedded_fields[node][field_image]');
+    $this->assertNoField('embedded_fields[node][field_tags]');
+    $this->assertNoField('embedded_fields[node][title]');
+    $this->assertNoField('embedded_fields[node][uid]');
+    $this->assertNoField('embedded_fields[node][field2]');
+    $this->assertNoField('embedded_fields[node][type]');
+
+    $this->drupalPostForm(NULL, $checked_reference_fields, t('Save configuration'));
+
+    // Check if the save was successful.
+    $this->assertText(t('The configuration options have been saved.'));
+    $this->assertFieldChecked('edit-embedded-fields-node-field1');
+  }
+
 }

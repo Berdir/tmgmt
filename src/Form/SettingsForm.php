@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmjt\Controller\SettingsForm.
+ * Contains \Drupal\tmgmt\Controller\SettingsForm.
  */
 
 namespace Drupal\tmgmt\Form;

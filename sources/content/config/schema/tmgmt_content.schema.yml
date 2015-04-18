@@ -1,0 +1,10 @@
+tmgmt_content.settings:
+  type: mapping
+  mapping:
+    embedded_fields:
+      label: 'Embedded fields'
+      type: sequence
+      sequence:
+        type: sequence
+        sequence:
+          type: boolean
