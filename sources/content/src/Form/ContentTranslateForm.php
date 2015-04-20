@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_content\Form;
 
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Language\LanguageInterface;
@@ -61,7 +62,7 @@ class ContentTranslateForm extends FormBase {
       // after the other from the original non-form rows.
       $option = array_shift($overview['#rows']);
       if ($langcode == $entity_langcode) {
-        $additional = '<strong>' . t('Source') . '</strong>';
+        $additional = SafeMarkup::set('<strong>' . t('Source') . '</strong>');
         // This is the source object so we disable the checkbox for this row.
         $form['languages'][$langcode] = array(
           '#type' => 'checkbox',
