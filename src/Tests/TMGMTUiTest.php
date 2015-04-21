@@ -52,6 +52,10 @@ class TMGMTUiTest extends TMGMTTestBase {
    */
   function testCheckoutForm() {
 
+    // Test that there is no job at the beginning.
+    $this->drupalGet('admin/tmgmt/jobs');
+    $this->assertText('No jobs available.');
+
     // Add a first item to the job. This will auto-create the job.
     $job = tmgmt_job_match_item('en', '');
     $job->addItem('test_source', 'test', 1);
