@@ -57,7 +57,7 @@ class ConfigEntitySourceListTest extends EntityTestBase {
 
     // Simple submission.
     $edit = array(
-      'items[article]' => TRUE,
+      'items[node.type.article]' => TRUE,
     );
     $this->drupalPostForm('admin/tmgmt/sources/config/node_type', $edit, t('Request translation'));
 
@@ -76,8 +76,8 @@ class ConfigEntitySourceListTest extends EntityTestBase {
 
     // Submission of two different entity types.
     $edit = array(
-      'items[article]' => TRUE,
-      'items[page]' => TRUE,
+      'items[node.type.article]' => TRUE,
+      'items[node.type.page]' => TRUE,
     );
     $this->drupalPostForm('admin/tmgmt/sources/config/node_type', $edit, t('Request translation'));
 
@@ -106,7 +106,7 @@ class ConfigEntitySourceListTest extends EntityTestBase {
 
     // Request a translation for archive.
     $edit = array(
-      'items[archive]' => TRUE,
+      'items[views.view.archive]' => TRUE,
     );
     $this->drupalPostForm(NULL, $edit, t('Request translation'));
 
@@ -126,10 +126,10 @@ class ConfigEntitySourceListTest extends EntityTestBase {
     // Request a translation for more archive, recent comments, content and job
     // overview.
     $edit = array(
-      'items[archive]' => TRUE,
-      'items[content_recent]' => TRUE,
-      'items[content]' => TRUE,
-      'items[tmgmt_job_overview]' => TRUE,
+      'items[views.view.archive]' => TRUE,
+      'items[views.view.content_recent]' => TRUE,
+      'items[views.view.content]' => TRUE,
+      'items[views.view.tmgmt_job_overview]' => TRUE,
     );
     $this->drupalPostForm(NULL, $edit, t('Request translation'));
 
@@ -148,6 +148,19 @@ class ConfigEntitySourceListTest extends EntityTestBase {
     $this->assertText(t('The translation of Recent content view to German is finished and can now be reviewed.'));
     $this->assertText(t('The translation of Content view to German is finished and can now be reviewed.'));
     $this->assertText(t('The translation of Job overview view to German is finished and can now be reviewed.'));
+
+    // Make sure that the Cart page works.
+    $edit = array(
+      'items[views.view.tmgmt_job_items]' => TRUE,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Add to cart'));
+    $this->clickLink('cart');
+
+    // Verify that we are on the Cart page.
+    $cart_tab_active = $this->xpath('//ul[@class="tabs primary"]/li[@class="is-active"]')[0]->a;
+    $this->assertEqual((string) $cart_tab_active, 'Cart');
+    $this->assertTitle('Cart | Drupal');
+    $this->assertText('Request translation');
   }
 
   function testNodeTypeFilter() {

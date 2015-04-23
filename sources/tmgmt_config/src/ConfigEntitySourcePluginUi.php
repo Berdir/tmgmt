@@ -349,7 +349,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
     // If there is an entity type, list all entities for that.
     else {
       foreach ($this->getTranslatableEntities($type, $search_property_params) as $entity) {
-        $form['items']['#options'][$entity->id()] = $this->overviewRow($entity);
+        $form['items']['#options'][$entity->getConfigDependencyName()] = $this->overviewRow($entity);
       }
     }
 
@@ -386,7 +386,10 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       }
     }
     else {
-      $entities = entity_load_multiple($type, array_filter($form_state->getValue('items')));
+      $entity_type = \Drupal::entityManager()->getDefinition($type);
+      $entity_ids = str_replace($entity_type->getConfigPrefix() . '.', '', array_filter($form_state->getValue('items')));
+
+      $entities = entity_load_multiple($type, $entity_ids);
       foreach ($entities as $entity) {
         /* @var $entity \Drupal\Core\Entity\EntityInterface */
         $item_id = $entity->getConfigDependencyName();
