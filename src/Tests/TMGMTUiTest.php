@@ -31,7 +31,6 @@ class TMGMTUiTest extends TMGMTTestBase {
       'name' => 'Filtered HTML',
     ));
     $filtered_html_format->save();
-    $filtered_html_format->getPermissionName();
 
     // Login as admin to be able to set environment variables.
     $this->loginAsAdmin();
@@ -44,6 +43,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       'access administration pages',
       'create translation jobs',
       'submit translation jobs',
+      $filtered_html_format->getPermissionName(),
     ), TRUE);
   }
 
@@ -434,15 +434,29 @@ class TMGMTUiTest extends TMGMTTestBase {
         'deep_nesting' => array(
           '#text' => 'Text for job item',
           '#label' => 'Label',
-          '#filtered_html' => 'text_plain',
+          '#format' => 'filtered_html',
         ),
       ),
     ));
     $item5 = $job->addItem('test_source', 'test', 5);
+
+    $edit = array(
+      'target_language' => 'de',
+      'settings[action]' => 'translate',
+    );
+    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), $edit, t('Submit to translator'));
+
     $this->drupalGet('admin/tmgmt/items/' . $item5->id());
-    $rows5 = $this->xpath('//textarea[@name="dummy|deep_nesting[source]"]');
+    $rows5 = $this->xpath('//textarea[@name="dummy|deep_nesting[source][value]"]');
     $this->assertEqual((string) $rows5[0]['rows'], 3);
 
+    $edit = array(
+      'dummy|deep_nesting[translation][value]' => 'Translated text for job item',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertText('Translated text for job item');
+    $this->drupalPostForm(NULL, $edit, t('Save as completed'));
+    $this->assertEqual(\Drupal::state()->get('tmgmt_test_saved_translation_' . $item5->getItemType() . '_' . $item5->getItemId())['dummy']['deep_nesting']['#translation']['#text'], 'Translated text for job item');
   }
 
   /**

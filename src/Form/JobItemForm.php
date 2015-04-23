@@ -203,11 +203,21 @@ class JobItemForm extends TmgmtFormBase {
     foreach ($form_state->getValues() as $key => $value) {
       if (is_array($value) && isset($value['translation'])) {
         // Update the translation, this will only update the translation in case
-        // it has changed.
-        $data = array(
-          '#text' => $value['translation'],
-          '#origin' => 'local',
-        );
+        // it has changed. We have two different cases, the first is for nested
+        // texts.
+        if (is_array($value['translation'])) {
+          $data = array(
+            '#text' => $value['translation']['value'],
+            '#origin' => 'local',
+          );
+        }
+        else {
+          $data = array(
+            '#text' => $value['translation'],
+            '#origin' => 'local',
+          );
+        }
+
         $item->addTranslatedData($data, $key);
       }
     }
