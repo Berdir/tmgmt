@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt_config\ConfigEntitySource.
+ * Contains Drupal\tmgmt_config\ConfigSource.
  */
 
 namespace Drupal\tmgmt_config\Plugin\tmgmt\Source;
@@ -30,10 +30,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "config",
  *   label = @Translation("Config Entity"),
  *   description = @Translation("Source handler for config entities."),
- *   ui = "Drupal\tmgmt_config\ConfigEntitySourcePluginUi"
+ *   ui = "Drupal\tmgmt_config\ConfigSourcePluginUi"
  * )
  */
-class ConfigEntitySource extends SourcePluginBase implements ContainerFactoryPluginInterface {
+class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInterface {
 
   /**
    * Item type for simple configuration.

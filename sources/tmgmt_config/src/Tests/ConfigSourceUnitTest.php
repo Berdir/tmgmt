@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt_config\Tests\ConfigEntitySourceUnitTest.
+ * Contains Drupal\tmgmt_config\Tests\ConfigSourceUnitTest.
  */
 
 namespace Drupal\tmgmt_config\Tests;
@@ -18,7 +18,7 @@ use Drupal\views\Entity\View;
  *
  * @group tmgmt
  */
-class ConfigEntitySourceUnitTest extends EntityUnitTestBase {
+class ConfigSourceUnitTest extends EntityUnitTestBase {
 
   /**
    * Modules to enable.

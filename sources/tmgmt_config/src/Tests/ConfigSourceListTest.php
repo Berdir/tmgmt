@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_config\Tests\ConfigtEntitySourceListTest.
+ * Contains \Drupal\tmgmt_config\Tests\ConfigSourceListTest.
  */
 
 namespace Drupal\tmgmt_config\Tests;
@@ -17,7 +17,7 @@ use Drupal\tmgmt\Tests\EntityTestBase;
  *
  * @group tmgmt
  */
-class ConfigEntitySourceListTest extends EntityTestBase {
+class ConfigSourceListTest extends EntityTestBase {
 
   /**
    * Modules to enable.

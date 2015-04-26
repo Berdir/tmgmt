@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_config\ConfigEntitySourcePluginUi.
+ * Contains \Drupal\tmgmt_config\ConfigSourcePluginUi.
  */
 
 namespace Drupal\tmgmt_config;
@@ -14,7 +14,7 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\SourcePluginUiBase;
 use Drupal\tmgmt\TMGMTException;
-use Drupal\tmgmt_config\Plugin\tmgmt\Source\ConfigEntitySource;
+use Drupal\tmgmt_config\Plugin\tmgmt\Source\ConfigSource;
 
 /**
  * Abstract entity ui controller class for source plugin that provides
@@ -23,7 +23,7 @@ use Drupal\tmgmt_config\Plugin\tmgmt\Source\ConfigEntitySource;
  *
  * @ingroup tmgmt_source
  */
-class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
+class ConfigSourcePluginUi extends SourcePluginUiBase {
 
   /**
    * Entity source list items limit.
@@ -73,7 +73,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
       '#weight' => 11,
     );
 
-    if ($type == ConfigEntitySource::SIMPLE_CONFIG) {
+    if ($type == ConfigSource::SIMPLE_CONFIG) {
       $label_key = 'name';
       $label = t('Simple configuration');
     }
@@ -259,7 +259,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
     // Get current job items for the entity to determine translation statuses.
     $config_id = $definition['names'][0];
     $source_lang = \Drupal::config($definition['names'][0])->get('langcode') ?: 'en';
-    $current_job_items = tmgmt_job_item_load_latest('config', ConfigEntitySource::SIMPLE_CONFIG, $definition['id'], $source_lang);
+    $current_job_items = tmgmt_job_item_load_latest('config', ConfigSource::SIMPLE_CONFIG, $definition['id'], $source_lang);
 
     $row = array(
       'id' => $definition['id'],
@@ -338,7 +338,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
 
     // If the source is of type '_simple_config', we get all definitions that
     // don't have an entity type and display them through overviewRowSimple().
-    if ($type == ConfigEntitySource::SIMPLE_CONFIG) {
+    if ($type == ConfigSource::SIMPLE_CONFIG) {
       $definitions = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinitions();
       foreach ($definitions as $definition_id => $definition) {
         if (!isset($definition['entity_type'])) {
@@ -377,7 +377,7 @@ class ConfigEntitySourcePluginUi extends SourcePluginUiBase {
 
     $jobs = array();
     $items = array();
-    if ($type == ConfigEntitySource::SIMPLE_CONFIG) {
+    if ($type == ConfigSource::SIMPLE_CONFIG) {
       foreach (array_filter($form_state->getValue('items')) as $item) {
         $definition = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinition($item);
         $item_id = $definition['id'];

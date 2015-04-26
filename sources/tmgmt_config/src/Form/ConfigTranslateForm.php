@@ -13,7 +13,7 @@ use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\tmgmt_config\Plugin\tmgmt\Source\ConfigEntitySource;
+use Drupal\tmgmt_config\Plugin\tmgmt\Source\ConfigSource;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\config_translation\ConfigMapperManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -70,7 +70,7 @@ class ConfigTranslateForm extends FormBase {
     $form_state->set('mapper', $mapper);
 
     if (!isset($mapper_definition['entity_type'])) {
-      $form_state->set('item_type', ConfigEntitySource::SIMPLE_CONFIG);
+      $form_state->set('item_type', ConfigSource::SIMPLE_CONFIG);
       $form_state->set('item_id', $mapper_definition['id']);
     }
     else {

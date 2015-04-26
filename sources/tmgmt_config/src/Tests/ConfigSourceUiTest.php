@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_config\Tests\ConfigEntitySourceUiTest.
+ * Contains \Drupal\tmgmt_config\Tests\ConfigSourceUiTest.
  */
 
 namespace Drupal\tmgmt_config\Tests;
@@ -16,7 +16,7 @@ use Drupal\tmgmt\Tests\EntityTestBase;
  *
  * @group tmgmt
  */
-class ConfigEntitySourceUiTest extends EntityTestBase {
+class ConfigSourceUiTest extends EntityTestBase {
 
   /**
    * Modules to enable.
