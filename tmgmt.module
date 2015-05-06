@@ -177,6 +177,7 @@ function tmgmt_job_item_load_all_latest($plugin, $item_type, $item_id, $source_l
     ->orderBy('tji.changed', 'DESC')
     ->groupBy('tj.target_language')
     ->groupBy('tji.tjiid')
+    ->groupBy('tji.changed')
     ->execute();
   if ($items = $result->fetchAllKeyed()) {
     $return = array();
