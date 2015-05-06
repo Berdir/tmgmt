@@ -91,7 +91,7 @@ class ContentEntitySuggestionsTest extends TMGMTKernelTestBase {
     // Create a translatable body field.
     node_add_body_field($type);
     $field = FieldConfig::loadByName('node', $type->id(), 'body');
-    $field->translatable = TRUE;
+    $field->setTranslatable(TRUE);
     $field->save();
 
     // Create 4 nodes to be referenced.

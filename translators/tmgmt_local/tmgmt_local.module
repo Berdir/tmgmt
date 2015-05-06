@@ -1,7 +1,8 @@
 <?php
 use Drupal\Core\Session\AccountInterface;
-use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
+use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt_local\Entity\LocalTask;
 
 /**
@@ -540,7 +541,7 @@ function tmgmt_local_tmgmt_job_item_update(JobItemInterface $job_item) {
  */
 function tmgmt_local_tmgmt_job_delete(JobInterface $job) {
   $tltids = \Drupal::entityQuery('tmgmt_local_task')
-    ->conditionCondition('tjid', $job->id())
+    ->condition('tjid', $job->id())
     ->execute();
   if (!empty($tltids)) {
     entity_delete_multiple('tmgmt_local_task', $tltids);

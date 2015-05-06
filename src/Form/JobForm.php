@@ -422,11 +422,13 @@ class JobForm extends TmgmtFormBase {
     // Load the selected translator.
     $translator = $job->getTranslator();
     // Check translator availability.
-    if (!$translator->isAvailable()) {
-      $form_state->setErrorByName('translator', $translator->getNotAvailableReason());
-    }
-    elseif (!$translator->canTranslate($job)) {
-      $form_state->setErrorByName('translator', $translator->getNotCanTranslateReason($job));
+    if (!empty($translator)) {
+      if (!$translator->isAvailable()) {
+        $form_state->setErrorByName('translator', $translator->getNotAvailableReason());
+      }
+      elseif (!$translator->canTranslate($job)) {
+        $form_state->setErrorByName('translator', $translator->getNotCanTranslateReason($job));
+      }
     }
   }
 
@@ -435,12 +437,14 @@ class JobForm extends TmgmtFormBase {
    */
   public function buildEntity(array $form, FormStateInterface $form_state) {
     $job = parent::buildEntity($form, $form_state);
-    // If requested custom job settings handling, copy values from original job.
-    if ($job->getTranslator()->hasCustomSettingsHandling()) {
-      $original_job = entity_load_unchanged('tmgmt_job', $job->id());
-      $job->settings = $original_job->settings;
+    $translator = $job->getTranslator();
+    if (!empty($translator)) {
+      // If requested custom job settings handling, copy values from original job.
+      if ($translator->hasCustomSettingsHandling()) {
+        $original_job = entity_load_unchanged('tmgmt_job', $job->id());
+        $job->settings = $original_job->settings;
+      }
     }
-
     // Make sure that we always store a label as it can be a slow operation to
     // generate the default label.
     if (empty($job->label)) {
