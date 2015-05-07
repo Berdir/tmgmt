@@ -37,6 +37,14 @@ use Drupal\tmgmt\TranslatorInterface;
  *     "label" = "label",
  *     "weight" = "weight"
  *   },
+ *   config_export = {
+ *     "name",
+ *     "label",
+ *     "description",
+ *     "weight",
+ *     "plugin",
+ *     "settings",
+ *   },
  *   links = {
  *     "edit-form" = "/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}",
  *     "add-form" = "/admin/config/regional/tmgmt_translator/add",
