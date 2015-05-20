@@ -24,7 +24,7 @@ class ConfigSourceListTest extends EntityTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt_config', 'config_translation', 'views', 'views_ui');
+  public static $modules = array('tmgmt_config', 'tmgmt_content', 'config_translation', 'views', 'views_ui');
 
   protected $nodes = array();
 

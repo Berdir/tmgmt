@@ -25,7 +25,7 @@ class ContentEntitySuggestionsTest extends TMGMTKernelTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt_content', 'tmgmt_test', 'content_translation', 'node', 'entity', 'filter', 'entity_reference');
+  public static $modules = array('tmgmt_content', 'tmgmt_test', 'content_translation', 'node', 'filter', 'entity_reference');
 
   /**
    * {@inheritdoc}
