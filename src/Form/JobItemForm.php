@@ -35,6 +35,9 @@ class JobItemForm extends TmgmtFormBase {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $item = $this->entity;
+
+    $form['#title'] = $this->t('Job item @source_label', array('@source_label' => $item->getSourceLabel()));
+
     $form['info'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('tmgmt-ui-job-info', 'clearfix')),

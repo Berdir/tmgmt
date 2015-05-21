@@ -322,6 +322,10 @@ class TMGMTUiTest extends TMGMTTestBase {
     $key = $keys[0];
 
     $this->drupalGet('admin/tmgmt/items/' . $item->id());
+
+    // Testing the title of the preview page.
+    $this->assertText(t('Job item @source_label', array('@source_label' => $job->label())));
+
     // Testing the result of the
     // TMGMTTranslatorUIControllerInterface::reviewDataItemElement()
     $this->assertText(t('Testing output of review data item element @key from the testing translator.', array('@key' => $key)));
