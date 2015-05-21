@@ -589,11 +589,18 @@ class TMGMTUiTest extends TMGMTTestBase {
       $this->assertEqual($_item->getCountReviewed(), 0);
     }
 
+    $this->drupalLogin($this->admin_user);
     // Navigate back to the aborted job and check for the log message.
     $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
     $this->assertRaw(t('Job has been duplicated as a new job <a href="@url">#@id</a>.',
       array('@url' => $resubmitted_job->url(), '@id' => $resubmitted_job->id())));
-
+    $this->drupalPostForm(NULL, array(), t('Delete'));
+    $this->drupalPostForm(NULL, array(), t('Delete'));
+    $this->assertText('The translation job From English to Spanish has been deleted.');
+    $this->drupalGet('admin/tmgmt/jobs/2/delete');
+    $this->drupalPostForm(NULL, array(), t('Delete'));
+    $this->drupalGet('admin/tmgmt/jobs/');
+    $this->assertText('No jobs available.');
     $this->drupalGet('admin/tmgmt');
     $elements = $this->xpath('//table[contains(@class, @view)]//td[contains(., @text)]',
       array('@view' => 'views-table', '@text' => t('N/A')));
