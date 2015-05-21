@@ -236,8 +236,8 @@ class TMGMTUiTest extends TMGMTTestBase {
     // The action should now default to reject.
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
     $this->assertText(t('This is not supported.'));
-    $job = entity_load_unchanged('tmgmt_job', $job->id());
-    $this->assertTrue($job->isRejected());
+    $job4 = entity_load_unchanged('tmgmt_job', $job->id());
+    $this->assertTrue($job4->isRejected());
 
     // Test for job checkout form, if the target language is supported,
     // the test translator should say it is supported.
@@ -256,9 +256,10 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Translated languages should now be listed as Needs review.
     $start_rows = $this->xpath('//tbody/tr');
     $this->assertEqual(count($start_rows), 5);
-    $this->clickLink(t('Delete'), 0);
+    $this->drupalGet($job4->urlInfo('delete-form'));
     $this->assertText('Are you sure you want to delete the translation job test_source:test:1 and 2 more?');
     $this->drupalPostForm(NULL, array(), t('Delete'));
+    $this->drupalGet('admin/tmgmt/jobs');
     $end_rows = $this->xpath('//tbody/tr');
     $this->assertEqual(count($end_rows), 4);
   }
