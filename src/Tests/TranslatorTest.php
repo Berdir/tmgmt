@@ -64,5 +64,15 @@ class TranslatorTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, array(), 'Delete');
     $this->assertText(t('Add translator'));
     $this->assertNoText($translator->label());
+
+    // Testing the translators form with no installed translator plugins.
+    // Uninstall the test module (which provides a translator).
+    \Drupal::service('module_installer')->uninstall(array('tmgmt_test'), FALSE);
+
+    // Get the overview.
+    $this->drupalGet('admin/config/regional/tmgmt_translator');
+    $this->assertNoText(t('Add translator'));
+    $this->assertText(t('There are no translator plugins available. Please install a translator plugin.'));
   }
+
 }
