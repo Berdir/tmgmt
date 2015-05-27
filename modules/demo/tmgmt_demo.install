@@ -17,7 +17,7 @@ function tmgmt_demo_install() {
   // Add demo content.
   $node = Node::create(array(
     'type' => 'translatable_node',
-    'title' => 'First node',
+    'title' => 'Second node',
     'langcode' => 'en',
     'body' => 'Have another try. This text can be translated as well',
     'uid' => '0',

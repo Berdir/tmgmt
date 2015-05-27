@@ -3,11 +3,15 @@ type: module
 description: All elements for a functioning demo.
 package: Translation Management
 core: 8.x
-hidden: TRUE
+hidden: FALSE
 
 dependencies:
  - tmgmt
  - tmgmt_locale
  - tmgmt_content
  - tmgmt_file
+ - views
+ - path
+ - text
+ - menu_ui
 #@todo add the google_chart_tools dependancy
