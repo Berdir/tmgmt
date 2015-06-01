@@ -145,6 +145,10 @@ class CrudTest extends TMGMTKernelTestBase {
     $this->assertEqual(count(RemoteMapping::loadByRemoteIdentifier('id11', NULL, '')), 0);
     $this->assertEqual(count(RemoteMapping::loadByRemoteIdentifier(NULL, NULL, 'id13')), 1);
 
+    $this->assertEqual($remote_mapping->getRemoteIdentifier1(), 'id11');
+    $this->assertEqual($remote_mapping->getRemoteIdentifier2(), 'id12');
+    $this->assertEqual($remote_mapping->getRemoteIdentifier3(), 'id13');
+
     // Test remote data.
     $item_mapping->addRemoteData('test_data', 'test_value');
     $item_mapping->save();

@@ -136,7 +136,7 @@ class RemoteMapping extends ContentEntityBase implements RemoteMappingInterface 
    * {@inheritdoc}
    */
   public function getRemoteIdentifier2() {
-    return $this->get('remote_identifier_1')->value;
+    return $this->get('remote_identifier_2')->value;
   }
 
   /**
