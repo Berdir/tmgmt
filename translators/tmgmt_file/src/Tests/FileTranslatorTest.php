@@ -86,7 +86,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $edit = array(
       'files[file]' => $translated_file,
     );
-    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
+    $this->drupalPostForm($job->urlInfo(), $edit, t('Import'));
     // Reset caches and reload job.
     \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
     \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
@@ -119,7 +119,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $edit = array(
       'files[file]' => $translated_file,
     );
-    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
+    $this->drupalPostForm($job->urlInfo(), $edit, t('Import'));
     \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
     \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
     $job = Job::load($job->id());
@@ -270,7 +270,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $edit = array(
       'files[file]' => $wrong_file,
     );
-    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
+    $this->drupalPostForm($job->urlInfo(), $edit, t('Import'));
     $this->assertText(t('Failed to validate file, import aborted.'));
 
     // Change the job id to a wrong one and try to import it.
@@ -291,7 +291,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $edit = array(
       'files[file]' => $wrong_file,
     );
-    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
+    $this->drupalPostForm($job->urlInfo(), $edit, t('Import'));
     $this->assertRaw(t('The imported file job id @file_id does not match the job id @job_id.', array(
       '@file_id' => $second_job->id(),
       '@job_id' => $job->id(),
@@ -305,7 +305,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $edit = array(
         'files[file]' => $translated_file,
       );
-    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
+    $this->drupalPostForm($job->urlInfo(), $edit, t('Import'));
     $this->clickLink(t('review'));
     $this->drupalPostAjaxForm(NULL, NULL, array('reviewed-dummy|deep_nesting' => '✓'));
 
@@ -315,7 +315,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $edit = array(
         'files[file]' => $translated_file,
       );
-    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
+    $this->drupalPostForm($job->urlInfo(), $edit, t('Import'));
 
     // At this point we must have the "dummy" item accepted and intact. The
     // "another" item must have updated translation.
@@ -394,7 +394,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $edit = array(
       'files[file]' => $translated_file,
     );
-    $this->drupalPostForm($job->getSystemPath(), $edit, t('Import'));
+    $this->drupalPostForm($job->urlInfo(), $edit, t('Import'));
 
     // Make sure the translations have been imported correctly.
     $this->assertNoText(t('In progress'));

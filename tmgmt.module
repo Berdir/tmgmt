@@ -550,7 +550,7 @@ function tmgmt_job_checkout_multiple(array $jobs) {
         continue;
       }
 
-      $redirects[] = $job->getSystemPath();
+      $redirects[] = $job->urlInfo()->getInternalPath();
     }
     else {
       // @todo this is dangerous because we don't catch request fails at all.

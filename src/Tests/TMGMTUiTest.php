@@ -273,7 +273,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Check out a job when only the test translator is available. That one has
     // settings, so a checkout is necessary.
     $redirects = tmgmt_job_checkout_multiple(array($job));
-    $this->assertEqual($job->getSystemPath(), $redirects[0]);
+    $this->assertEqual($job->urlInfo()->getInternalPath(), $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
     $job->delete();
 
@@ -291,7 +291,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     // A job without target language needs to be checked out.
     $job = $this->createJob('en', '');
     $redirects = tmgmt_job_checkout_multiple(array($job));
-    $this->assertEqual($job->getSystemPath(), $redirects[0]);
+    $this->assertEqual($job->urlInfo()->getInternalPath(), $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
 
     // Create a second file translator. This should check
@@ -304,7 +304,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       ->save();
 
     $redirects = tmgmt_job_checkout_multiple(array($job));
-    $this->assertEqual($job->getSystemPath(), $redirects[0]);
+    $this->assertEqual($job->urlInfo()->getInternalPath(), $redirects[0]);
     $this->assertTrue($job->isUnprocessed());
   }
 
