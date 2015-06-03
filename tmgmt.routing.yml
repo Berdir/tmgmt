@@ -1,6 +1,7 @@
 tmgmt.settings:
   path: '/admin/config/regional/tmgmt_settings'
   defaults:
+    _title: 'Translation Management settings'
     _form: 'Drupal\tmgmt\Form\SettingsForm'
   requirements:
     _permission: 'administer tmgmt'
@@ -8,6 +9,7 @@ tmgmt.settings:
 entity.tmgmt_translator.list:
   path: '/admin/config/regional/tmgmt_translator'
   defaults:
+    _title: 'Translation Management translators'
     _entity_list: 'tmgmt_translator'
   requirements:
     _permission: 'administer tmgmt'
@@ -15,6 +17,7 @@ entity.tmgmt_translator.list:
 entity.tmgmt_translator.add_form:
   path: '/admin/config/regional/tmgmt_translator/add'
   defaults:
+    _title: 'Add Translator'
     _entity_form: tmgmt_translator.add
   requirements:
     _entity_create_access: tmgmt_translator
@@ -29,6 +32,7 @@ entity.tmgmt_translator.delete_form:
 entity.tmgmt_translator.edit_form:
   path: '/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}'
   defaults:
+    _title: 'Edit translator'
     _entity_form: tmgmt_translator.edit
   requirements:
     _entity_access: tmgmt_translator.update
@@ -64,6 +68,7 @@ entity.tmgmt_job.abort_form:
 entity.tmgmt_job_item.canonical:
   path: '/admin/tmgmt/items/{tmgmt_job_item}'
   defaults:
+    _title: 'Edit Job Item'
     _entity_form: tmgmt_job_item.edit
   requirements:
     _entity_access: tmgmt_job_item.update
@@ -85,6 +90,7 @@ tmgmt.source_overview:
 tmgmt.source_overview_default:
   path: '/admin/tmgmt/sources'
   defaults:
+    _title: 'Translation Sources'
     _form: 'Drupal\tmgmt\Form\SourceOverviewForm'
   requirements:
     _entity_create_access: tmgmt_job

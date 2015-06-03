@@ -721,4 +721,52 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText($job_items[6]->label());
   }
 
+  /**
+   * Test titles of various TMGMT pages.
+   */
+  function testPageTitles() {
+    $this->loginAsAdmin();
+    $translator = $this->createTranslator();
+    $job = $this->createJob();
+    $job->translator = $translator;
+    $job->settings = array();
+    $job->save();
+    $item = $job->addItem('test_source', 'test', 1);
+
+    // Tmgtm settings.
+    $this->drupalGet('/admin/config/regional/tmgmt_settings');
+    $this->assertTitle(t('Translation Management settings | Drupal'));
+    // Manage translators.
+    $this->drupalGet('/admin/config/regional/tmgmt_translator');
+    $this->assertTitle(t('Translation Management translators | Drupal'));
+    // Add Translator.
+    $this->drupalGet('/admin/config/regional/tmgmt_translator/add');
+    $this->assertTitle(t('Add Translator | Drupal'));
+    // Delete Translators.
+    $this->drupalGet('/tmgmt_translator/' . $translator->id() . '/delete');
+    $this->assertTitle(t('Are you sure you want to delete Translator @label? | Drupal', ['@label' => $translator->label()]));
+    // Edit Translators.
+    $this->drupalGet('/admin/config/regional/tmgmt_translator/manage/' . $translator->id());
+    $this->assertTitle(t('Edit translator | Drupal'));
+    // Delete Job.
+    $this->drupalGet('/admin/tmgmt/jobs/' . $job->id() . '/delete');
+    $this->assertTitle(t('Are you sure you want to delete the translation job @label? | Drupal', ['@label' => $job->label()]));
+    // Resubmit Job.
+    $this->drupalGet('/admin/tmgmt/jobs/' . $job->id() . '/resubmit');
+    $this->assertTitle(t('Resubmit as a new job? | Drupal'));
+    // Abort Job.
+    $this->drupalGet('/admin/tmgmt/jobs/' . $job->id() . '/abort');
+    $this->assertTitle(t('Abort this job? | Drupal'));
+    // Edit Job Item.
+    $this->drupalGet('/admin/tmgmt/items/' . $job->id());
+    $this->assertTitle(t('Job item @label | Drupal', ['@label' => $item->label()]));
+    // Translation Sources.
+    $this->drupalGet('admin');
+    $this->clickLink(t('Translation'));
+    $this->clickLink(t('Cart'));
+    $this->clickLink(t('Jobs'));
+    $this->clickLink(t('Sources'));
+    $this->assertTitle(t('Translation Sources | Drupal'));
+  }
+
 }
