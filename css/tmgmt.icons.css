@@ -1,0 +1,16 @@
+/* Grey earth icon for tmgmt. */
+#toolbar-link-view-tmgmt_job_overview-page_1:before {
+  background-image: url("../icons/earth.svg");
+}
+.toolbar-icon .toolbar-icon-views-view:before,
+.toolbar-icon .toolbar-icon-views-view:before {
+  background-image: url("../icons/earth.svg");
+}
+/* Black earth icon for tmgmt - hover. */
+#toolbar-link-view-tmgmt_job_overview-page_1.is-active:before {
+    background-image: url("../icons/earth_black.svg");
+}
+.toolbar-icon .toolbar-icon-views-view:active:before,
+.toolbar-icon .toolbar-icon-views-view.is-active:before {
+    background-image: url("../icons/earth_black.svg");
+}

@@ -1072,3 +1072,16 @@ function tmgmt_cart_source_overview_validate(array $form, FormStateInterface $fo
  * @} End of "addtogroup tmgmt_cart".
  */
 
+function tmgmt_toolbar() {
+  $items = [];
+  $items['tmgmt'] = [
+    '#type' => 'toolbar_item',
+    '#attached' => [
+      'library' => [
+        'tmgmt/drupal.tmgmt.toolbar',
+      ],
+    ],
+  ];
+
+  return $items;
+}

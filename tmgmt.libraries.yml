@@ -7,3 +7,9 @@ admin.seven:
   css:
     theme:
       css/tmgmt.admin.seven.css: {}
+
+drupal.tmgmt.toolbar:
+  version: VERSION
+  css:
+    theme:
+      css/tmgmt.icons.css: {}
