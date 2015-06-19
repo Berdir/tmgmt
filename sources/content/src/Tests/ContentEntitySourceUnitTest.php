@@ -52,6 +52,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->installEntitySchema('entity_test_mulrev');
     $this->installEntitySchema('entity_test_mul');
     $this->installSchema('system', array('router'));
+    \Drupal::moduleHandler()->loadInclude('entity_test', 'install');
     entity_test_install();
 
     // Make the test field translatable.
