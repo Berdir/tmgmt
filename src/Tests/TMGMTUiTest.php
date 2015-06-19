@@ -481,12 +481,12 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Load all suggestions.
     $commands = $this->drupalPostAjaxForm(NULL, array(), array('op' => t('Load suggestions')));
-    $this->assertEqual(count($commands), 3, 'Found 3 commands in AJAX-Request.');
+    $this->assertEqual(count($commands), 4, 'Found 4 commands in AJAX-Request.');
 
     // Check each command for success.
     foreach ($commands as $command) {
-      // No checks against the settings because we not use ajax to save.
-      if ($command['command'] == 'settings') {
+      // Ignore irrelevant commands.
+      if ($command['command'] == 'settings' || $command['command'] == 'update_build_id') {
       }
       // Other commands must be from type "insert".
       else if ($command['command'] == 'insert') {
