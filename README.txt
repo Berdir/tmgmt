@@ -178,3 +178,11 @@ Translators in separate projects:
 - One Hour Translation
   Human translation that integrates with http://www.onehourtranslation.com.
   http://drupal.org/project/tmgmt_oht
+
+Credits
+-------
+
+- The TMGMT icon in the menu bar (the globe) is from the IcoMoon's free icon pack.
+  Licenced by GNU General Public License / Creative Commons Attribution 4.0 International (CC BY 4.0).
+  It is available on the following URL: https://icomoon.io/#icons-icomoon
+  The only change made was the change of the color to grey.
