@@ -673,7 +673,7 @@ display:
           exposed: true
           expose:
             operator_id: target_language_op
-            label: 'Language code'
+            label: 'Target language'
             description: ''
             use_operator: false
             operator: target_language_op
@@ -714,7 +714,7 @@ display:
           exposed: true
           expose:
             operator_id: source_language_op
-            label: 'Language code'
+            label: 'Source language'
             description: ''
             use_operator: false
             operator: source_language_op

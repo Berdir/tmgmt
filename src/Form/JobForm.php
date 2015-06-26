@@ -437,6 +437,7 @@ class JobForm extends TmgmtFormBase {
    */
   public function buildEntity(array $form, FormStateInterface $form_state) {
     $job = parent::buildEntity($form, $form_state);
+
     $translator = $job->getTranslator();
     if (!empty($translator)) {
       // If requested custom job settings handling, copy values from original job.

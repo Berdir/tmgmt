@@ -74,12 +74,12 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
       ->setReadOnly(TRUE);
 
     $fields['source_language'] = BaseFieldDefinition::create('language')
-      ->setLabel(t('Language code'))
+      ->setLabel(t('Source language code'))
       ->setDescription(t('The source language.'))
       ->setDefaultValue(LanguageInterface::LANGCODE_NOT_SPECIFIED);
 
     $fields['target_language'] = BaseFieldDefinition::create('language')
-      ->setLabel(t('Language code'))
+      ->setLabel(t('Target language code'))
       ->setDescription(t('The target language.'))
       ->setDefaultValue(LanguageInterface::LANGCODE_NOT_SPECIFIED);
 
