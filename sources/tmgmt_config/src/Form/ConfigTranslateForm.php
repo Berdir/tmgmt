@@ -155,7 +155,6 @@ class ConfigTranslateForm extends FormBase {
     $form['actions']['request'] = array(
       '#type' => 'submit',
       '#value' =>$this->t('Request translation'),
-      '#validate' => array('::validateForm'),
       '#submit' => array('::submitForm'),
     );
     return $form;

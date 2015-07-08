@@ -179,8 +179,8 @@ class TranslatorForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, FormStateInterface $form_state) {
-    parent::validate($form, $form_state);
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
     if (!$form_state->getValue('plugin')) {
       $form_state->setErrorByName('plugin', $this->t('You have to select a translator plugin.'));
     }

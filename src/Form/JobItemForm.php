@@ -147,14 +147,12 @@ class JobItemForm extends TmgmtFormBase {
       '#type' => 'submit',
       '#value' => t('Save as completed'),
       '#access' => $item->isNeedsReview(),
-      '#validate' => array('::validate'),
       '#submit' => array('::submitForm', '::save'),
     );
     $actions['save'] = array(
       '#type' => 'submit',
       '#value' => t('Save'),
       '#access' => !$item->isAccepted(),
-      '#validate' => array('::validate'),
       '#submit' => array('::submitForm', '::save'),
     );
     $actions['validate'] = array(
@@ -176,8 +174,8 @@ class JobItemForm extends TmgmtFormBase {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, FormStateInterface $form_state) {
-    parent::validate($form, $form_state);
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
     $item = $this->buildEntity($form, $form_state);
     // First invoke the validation method on the source controller.
     $source_ui = $this->sourceManager->createUIInstance($item->getPlugin());

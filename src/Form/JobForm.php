@@ -353,7 +353,6 @@ class JobForm extends TmgmtFormBase {
     $actions['save'] = array(
       '#type' => 'submit',
       '#value' => t('Save job'),
-      '#validate' => array('::validate'),
       '#submit' => array('::submitForm', '::save'),
       '#weight' => 5,
     );
@@ -365,7 +364,6 @@ class JobForm extends TmgmtFormBase {
         '#value' => tmgmt_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
         '#access' => $job->isSubmittable(),
         '#disabled' => !$job->getTranslatorId(),
-        '#validate' => array('::validate'),
         '#submit' => array('::submitForm', '::save'),
         '#weight' => 0,
       );
@@ -416,8 +414,8 @@ class JobForm extends TmgmtFormBase {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, FormStateInterface $form_state) {
-    parent::validate($form, $form_state);
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
     $job = $this->buildEntity($form, $form_state);
     // Load the selected translator.
     $translator = $job->getTranslator();
