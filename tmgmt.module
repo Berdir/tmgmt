@@ -874,7 +874,7 @@ function tmgmt_color_legend() {
   foreach ($legends_left as $legend) {
     $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
         <div class="tmgmt-legend-icon">
-            <img src="' . file_create_url($legend['icon']) . '"<span></span>
+            <img src="' . file_create_url($legend['icon']) . '"><span></span>
         </div>
         <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
         </div>';
@@ -885,7 +885,7 @@ function tmgmt_color_legend() {
   foreach ($legends_right as $legend) {
     $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
         <div class="tmgmt-legend-icon">
-            <img src="' . file_create_url($legend['icon']) . '"<span></span>
+            <img src="' . file_create_url($legend['icon']) . '"><span></span>
         </div>
         <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
         </div>';
