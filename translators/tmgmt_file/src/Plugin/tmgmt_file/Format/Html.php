@@ -53,12 +53,14 @@ class Html implements FormatInterface {
         $items[$item->id()][$this->encodeIdSafeBase64($item->id() . '][' . $key)] = $value;
       }
     }
-    return \Drupal::theme()->render('tmgmt_file_html_template', array(
-      'tjid' => $job->id(),
-      'source_language' => $job->getTranslator()->mapToRemoteLanguage($job->getSourceLangcode()),
-      'target_language' => $job->getTranslator()->mapToRemoteLanguage($job->getTargetLangcode()),
-      'items' => $items,
-    ));
+    $elements = array(
+      '#theme' => 'tmgmt_file_html_template',
+      '#tjid' => $job->id(),
+      '#source_language' => $job->getTranslator()->mapToRemoteLanguage($job->getSourceLangcode()),
+      '#target_language' => $job->getTranslator()->mapToRemoteLanguage($job->getTargetLangcode()),
+      '#items' => $items,
+    );
+    return \Drupal::service('renderer')->renderPlain($elements);
   }
 
   /**
