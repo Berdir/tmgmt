@@ -20,7 +20,7 @@ display:
     display_options:
       rendering_language: '***LANGUAGE_entity_default***'
       access:
-        type: none
+        type: tmgmt_job
         options: {  }
       cache:
         type: none
@@ -501,9 +501,9 @@ display:
       display_extenders: {  }
     cache_metadata:
       contexts:
-        - user
-        - cache.context.url
-        - language
+        - 'languages:language_interface'
+        - url
+        - 'url.query_args.pagers:0'
       cacheable: false
   checkout:
     display_plugin: embed
@@ -685,9 +685,9 @@ display:
         fields: false
     cache_metadata:
       contexts:
-        - user
-        - cache.context.url
-        - language
+        - 'languages:language_interface'
+        - url
+        - 'url.query_args.pagers:0'
       cacheable: false
   submitted:
     display_plugin: embed
@@ -695,12 +695,12 @@ display:
     display_title: Submitted
     position: 1
     display_options:
-      rendering_language: "***LANGUAGE_entity_default***"
+      rendering_language: '***LANGUAGE_entity_default***'
       display_extenders: {  }
       display_description: ''
     cache_metadata:
       contexts:
-        - user
-        - cache.context.url
-        - language
+        - 'languages:language_interface'
+        - url
+        - 'url.query_args.pagers:0'
       cacheable: false

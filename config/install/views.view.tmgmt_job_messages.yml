@@ -20,7 +20,7 @@ display:
     position: 1
     display_options:
       access:
-        type: none
+        type: tmgmt_job
         options: {  }
       cache:
         type: none
@@ -273,6 +273,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
+        - 'url.query_args.pagers:0'
       cacheable: false
   embed:
     display_plugin: embed
@@ -286,4 +287,5 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
+        - 'url.query_args.pagers:0'
       cacheable: false
