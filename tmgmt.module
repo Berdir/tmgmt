@@ -6,6 +6,7 @@
  */
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Unicode;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
@@ -645,7 +646,8 @@ function tmgmt_write_request_messages(JobInterface $job) {
       $errors = TRUE;
     }
     if ($text = $message->getMessage()) {
-      drupal_set_message(Xss::filter($text), $message->getType());
+      // @todo Verify if this usage is correct.
+      drupal_set_message(SafeMarkup::xssFilter($text), $message->getType());
     }
   }
   return !$errors;
