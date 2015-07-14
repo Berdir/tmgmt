@@ -719,6 +719,10 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertNoText($job_items[5]->label());
     // One de item is in the cart as it was not selected for checkout.
     $this->assertText($job_items[6]->label());
+
+    // Check to see if no items are selected and the error message pops up.
+    $this->drupalPostForm('admin/tmgmt/cart', array(), t('Request translation'));
+    $this->assertUniqueText(t("No job items were selected."));
   }
 
   /**
