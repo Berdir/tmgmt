@@ -218,6 +218,12 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
       '#type' => 'submit',
       '#value' => t('Search'),
     );
+    $form['search_wrapper']['search_cancel'] = array(
+      '#type' => 'submit',
+      '#value' => t('Cancel'),
+      '#submit' => array('tmgmt_submit_redirect'),
+      '#redirect' => 'admin/tmgmt/sources/locale/default',
+    );
 
     return $form;
   }
