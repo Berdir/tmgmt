@@ -1,0 +1,8 @@
+.tmgmt-sources-wrapper .form-item {
+  float: left;
+  margin: 0 10px 0 0;
+}
+
+.tmgmt-sources-wrapper #edit-search-submit {
+  margin: 26px 10px 0 10px;
+}

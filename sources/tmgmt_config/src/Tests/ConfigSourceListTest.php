@@ -183,7 +183,7 @@ class ConfigSourceListTest extends EntityTestBase {
       'search[target_language]' => '',
     );
     $this->drupalPostForm('admin/tmgmt/sources/config/node_type', $filters, t('Search'));
-    $this->assertText(t('No entities matching given criteria have been found.'));
+    $this->assertText(t('No source items matching given criteria have been found.'));
 
     // Searching for article.
     $filters = array(
@@ -260,7 +260,7 @@ class ConfigSourceListTest extends EntityTestBase {
     $this->assertText('The translation of System information to German is finished and can now be reviewed.');
 
     // Verify that the pending translation is shown.
-    $review = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[@class="even"][1]/td[@class="langstatus-de"]/a/@href');
+    $review = $this->xpath('//table[@id="edit-items"]/tbody/tr[@class="even"][1]/td[@class="langstatus-de"]/a/@href');
     $destination = $this->getAbsoluteUrl($review[0]['href']);
     $this->drupalGet($destination);
     $this->drupalPostForm(NULL, array(), t('Save'));
@@ -280,7 +280,7 @@ class ConfigSourceListTest extends EntityTestBase {
     $this->assertUrl('admin/tmgmt/sources/config/_simple_config');
 
     // Translated languages should now be listed as Needs review.
-    $links = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr/td/a/@href');
+    $links = $this->xpath('//table[@id="edit-items"]/tbody/tr/td/a/@href');
     $counter = 0;
     foreach ($links as $subarray) {
       $counter += count($subarray);

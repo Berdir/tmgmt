@@ -13,9 +13,9 @@ use Drupal\Core\Url;
 use Drupal\tmgmt\SourcePluginUiBase;
 
 /**
- * Class TMGMTI18nStringDefaultSourceUIController
+ * Locale source plugin UI.
  *
- * UI Controller fo i18n strings translation jobs.
+ * Plugin UI for i18n strings translation jobs.
  */
 class LocaleSourcePluginUi extends SourcePluginUiBase {
 
@@ -98,17 +98,10 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
    * Implements TMGMTSourceUIControllerInterface::overviewForm().
    */
   public function overviewForm(array $form, FormStateInterface $form_state, $type) {
-    $form += $this->overviewSearchFormPart($form, $form_state, $type);
-
-    $form['items'] = array(
-      '#type' => 'tableselect',
-      '#header' => $this->overviewFormHeader($type),
-      '#empty' => t('No strings matching given criteria have been found.')
-    );
-
-    $form['#attached']['library'][] = 'tmgmt/admin';
-
+    $form = parent::overviewForm($form, $form_state, $type);
     $search_data = $this->getSearchFormSubmittedParams();
+
+    $form['items']['#empty'] = $this->t('No strings matching given criteria have been found.');
 
     $strings = $this->getStrings($search_data['label'], $search_data['missing_target_language']);
 
@@ -146,7 +139,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
 
       $objects[$id] = array(
         'id' => $id,
-        'object' => $string
+        'object' => $string,
       );
       // Load entity translation specific data.
       foreach ($this->getLanguages() as $langcode => $language) {
@@ -169,19 +162,10 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
   }
 
   /**
-   * Builds search form for entity sources overview.
-   *
-   * @param array $form
-   *   Drupal form array.
-   * @param $form_state
-   *   Drupal form_state array.
-   * @param $type
-   *   Entity type.
-   *
-   * @return array
-   *   Drupal form array.
+   * {@inheritdoc}
    */
   public function overviewSearchFormPart(array $form, FormStateInterface $form_state, $type) {
+    $form = parent::overviewSearchFormPart($form, $form_state, $type);
 
     $options = array();
     foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
@@ -190,14 +174,6 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
 
     $default_values = $this->getSearchFormSubmittedParams();
 
-    $form['search_wrapper'] = array(
-      '#prefix' => '<div class="tmgmt-sources-wrapper tmgmt-i18n_string-sources-wrapper">',
-      '#suffix' => '</div>',
-      '#weight' => -15,
-    );
-    $form['search_wrapper']['search'] = array(
-      '#tree' => TRUE,
-    );
     $form['search_wrapper']['search']['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Source text'),
@@ -213,16 +189,6 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
       '#options' => $options,
       '#empty_option' => '--',
       '#default_value' => isset($default_values['missing_target_language']) ? $default_values['missing_target_language'] : NULL,
-    );
-    $form['search_wrapper']['search_submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Search'),
-    );
-    $form['search_wrapper']['search_cancel'] = array(
-      '#type' => 'submit',
-      '#value' => t('Cancel'),
-      '#submit' => array('tmgmt_submit_redirect'),
-      '#redirect' => 'admin/tmgmt/sources/locale/default',
     );
 
     return $form;
@@ -307,34 +273,6 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
     $url->setOption('destination', Url::fromRoute('<current>')->getInternalPath());
     $form_state->setRedirectUrl($url);
     drupal_set_message(t('One job needs to be checked out.'));
-  }
-
-  /**
-   * Performs redirect with search params appended to the uri.
-   *
-   * In case of triggering element is edit-search-submit it redirects to
-   * current location with added query string containing submitted search form
-   * values.
-   *
-   * @param array $form
-   *   Drupal form array.
-   * @param $form_state
-   *   Drupal form_state array.
-   * @param $type
-   *   Entity type.
-   */
-  public function overviewSearchFormRedirect(array $form, FormStateInterface $form_state, $type) {
-    if ($form_state->getTriggeringElement()['#id'] == 'edit-search-submit') {
-
-      $query = array();
-
-      foreach ($form_state->getValue('search') as $key => $value) {
-        $query[$key] = $value;
-      }
-
-      $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'locale', 'item_type' => $type), array('query' => $query));
-      return TRUE;
-    }
   }
 
   /**

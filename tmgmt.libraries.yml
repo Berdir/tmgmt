@@ -13,3 +13,8 @@ drupal.tmgmt.toolbar:
   css:
     theme:
       css/tmgmt.icons.css: {}
+
+source_search_form:
+  css:
+    theme:
+      css/tmgmt.admin.source_search_form.css: {}

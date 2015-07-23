@@ -116,7 +116,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     // Check if we are at comments page.
     $this->assertText(t('Comment overview (Content Entity)'));
     // No comments yet - empty message is expected.
-    $this->assertText(t('No entities matching given criteria have been found.'));
+    $this->assertText(t('No source items matching given criteria have been found.'));
 
     $this->drupalGet('admin/tmgmt/sources/content/node');
     // Check if we are at nodes page.
@@ -135,8 +135,8 @@ class ContentEntitySourceListTest extends EntityTestBase {
 
     // Test statuses: Source, Missing.
     $this->drupalGet('admin/tmgmt/sources/content/node');
-    $langstatus_en = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-en"]/img/@title');
-    $langstatus_de = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]/img/@title');
+    $langstatus_en = $this->xpath('//table[@id="edit-items"]/tbody/tr[1]/td[@class="langstatus-en"]/img/@title');
+    $langstatus_de = $this->xpath('//table[@id="edit-items"]/tbody/tr[1]/td[@class="langstatus-de"]/img/@title');
 
     $this->assertEqual($langstatus_en[0]['title'], t('Source language'));
     $this->assertEqual($langstatus_de[0]['title'], t('Not translated'));
@@ -151,7 +151,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $job->requestTranslation();
 
     $this->drupalGet('admin/tmgmt/sources/content/node');
-    $langstatus_de = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]/a');
+    $langstatus_de = $this->xpath('//table[@id="edit-items"]/tbody/tr[1]/td[@class="langstatus-de"]/a');
 
     $items = $job->getItems();
     $states = JobItem::getStates();
@@ -165,7 +165,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     }
 
     $this->drupalGet('admin/tmgmt/sources/content/node');
-    $langstatus_de = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr[1]/td[@class="langstatus-de"]/img/@title');
+    $langstatus_de = $this->xpath('//table[@id="edit-items"]/tbody/tr[1]/td[@class="langstatus-de"]/img/@title');
 
     $this->assertEqual($langstatus_de[0]['title'], t('Translation up to date'));
   }
@@ -265,7 +265,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $this->assertText("$title_part_1 $title_part_2 $title_part_3", 'Searching on partial node title must return the result.');
 
     // Check if there is only one result in the list.
-    $search_result_rows = $this->xpath('//table[@id="tmgmt-entities-list"]/tbody/tr');
+    $search_result_rows = $this->xpath('//table[@id="edit-items"]/tbody/tr');
     $this->assert(count($search_result_rows) == 1, 'The search result must return only one row.');
 
     // To test if other entity types work go for simple comment search.

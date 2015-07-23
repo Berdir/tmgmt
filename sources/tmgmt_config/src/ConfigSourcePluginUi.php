@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt_config;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -17,9 +16,11 @@ use Drupal\tmgmt\TMGMTException;
 use Drupal\tmgmt_config\Plugin\tmgmt\Source\ConfigSource;
 
 /**
- * Abstract entity ui controller class for source plugin that provides
- * getEntity() method to retrieve list of entities of specific type. It also
- * allows to implement alter hook to alter the entity query for a specific type.
+ * Config source plugin UI.
+ *
+ * That provides getEntity() method to retrieve list of entities
+ * of specific type. It also allows to implement alter hook to alter
+ * the entity query for a specific type.
  *
  * @ingroup tmgmt_source
  */
@@ -33,45 +34,10 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
   public $pagerLimit = 25;
 
   /**
-   * Builds search form for entity sources overview.
-   *
-   * @param array $form
-   *   Drupal form array.
-   * @param $form_state
-   *   Drupal form_state array.
-   * @param string $type
-   *   Entity type.
-   *
-   * @return array
-   *   Drupal form array.
+   * {@inheritdoc}
    */
   public function overviewSearchFormPart(array $form, FormStateInterface $form_state, $type) {
-
-    // Add search form specific styling.
-    $form['#attached']['library'][] = 'tmgmt_content/entity_source_search_form';
-
-    // Add entity type value into form array so that it is available in
-    // the form alter hook.
-    $form_state->set('entity_type', $type);
-    $form['search_wrapper'] = array(
-      '#prefix' => '<div class="tmgmt-sources-wrapper tmgmt-entity-sources-wrapper">',
-      '#suffix' => '</div>',
-      '#weight' => -15,
-    );
-    $form['search_wrapper']['search'] = array(
-      '#tree' => TRUE,
-    );
-
-    $form['search_wrapper']['search_submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Search'),
-      '#weight' => 10,
-    );
-    $form['search_wrapper']['search_cancel'] = array(
-      '#type' => 'submit',
-      '#value' => t('Cancel'),
-      '#weight' => 11,
-    );
+    $form = parent::overviewSearchFormPart($form, $form_state, $type);
 
     if ($type == ConfigSource::SIMPLE_CONFIG) {
       $label_key = 'name';
@@ -83,7 +49,6 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
       $label_key = $entity_type->getKey('label');
       $label = $entity_type->getLabel();
     }
-
 
     if (!empty($label_key)) {
       $form['search_wrapper']['search'][$label_key] = array(
@@ -138,59 +103,17 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
   }
 
   /**
-   * Performs redirect with search params appended to the uri.
-   *
-   * In case of triggering element is edit-search-submit it redirects to
-   * current location with added query string containing submitted search form
-   * values.
-   *
-   * @param array $form
-   *   Drupal form array.
-   * @param $form_state
-   *   Drupal form_state array.
-   * @param $type
-   *   Entity type.
-   *
-   * @return bool
-   *   Returns true, if redirect has been set.
-   */
-  public function overviewSearchFormRedirect(array $form, FormStateInterface $form_state, $type) {
-    if ($form_state->getTriggeringElement()['#id'] == 'edit-search-cancel') {
-      $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'config', 'item_type' => $type));
-      return TRUE;
-    }
-    elseif ($form_state->getTriggeringElement()['#id'] == 'edit-search-submit') {
-      $query = array();
-
-      foreach ($form_state->getValue('search') as $key => $value) {
-        $query[$key] = $value;
-      }
-      $form_state->setRedirect('tmgmt.source_overview', array('plugin' => 'config', 'item_type' => $type), array('query' => $query));
-      return TRUE;
-    }
-    return FALSE;
-  }
-
-
-  /**
    * Gets overview form header.
    *
    * @return array
    *   Header array definition as expected by theme_tablesort().
    */
   public function overviewFormHeader($type) {
-    $languages = array();
-    foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
-      $languages['langcode-' . $langcode] = array(
-        'data' => SafeMarkup::checkPlain($language->getName()),
-      );
-    }
-
     $header = array(
       'title' => array('data' => $this->t('Title (in source language)')),
     );
 
-    $header += $languages;
+    $header += $this->getLanguageHeader();
 
     return $header;
   }
@@ -313,16 +236,7 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
    * {@inheritdoc}
    */
   public function overviewForm(array $form, FormStateInterface $form_state, $type) {
-    $form += $this->overviewSearchFormPart($form, $form_state, $type);
-
-    $form['#attached']['library'][] = 'tmgmt/admin';
-
-    $form['items'] = array(
-      '#type' => 'tableselect',
-      '#header' => $this->overviewFormHeader($type),
-      '#empty' => $this->t('No entities matching given criteria have been found.'),
-      '#attributes' => array('id' => 'tmgmt-entities-list'),
-    );
+    $form = parent::overviewForm($form, $form_state, $type);
 
     // Load search property params which will be passed into
     $search_property_params = array();
@@ -500,4 +414,5 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
     }
     return $entities;
   }
+
 }
