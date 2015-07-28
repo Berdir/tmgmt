@@ -249,6 +249,46 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostAjaxForm('admin/tmgmt/jobs/' . $job->id(), $edit, 'target_language');
     $this->assertFieldByXPath('//select[@id="edit-translator"]/option[1]', 'Test translator (auto created)');
 
+    // Test exposed filters.
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
+      'state' => '1',
+      'target_language' => 'de',
+      'source_language' => 'en',
+    )));
+
+    // Check if the list has 1 row.
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
+
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
+      'state' => '4',
+    )));
+
+    // Check if the list has no rows.
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 0);
+
+    $this->drupalGet('admin/tmgmt/jobs');
+
+    // Test if sources languages are correct.
+    $sources = $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr/td[@class="views-field views-field-source-language-1"][contains(., "English")]');
+    $this->assertEqual(count($sources), 5);
+
+    // Test if targets languages are correct.
+    $targets = $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr/td[@class="views-field views-field-target-language"][contains(., "Spanish") or contains(., "German")]');
+    $this->assertEqual(count($targets), 5);
+
+    // Test the abort link.
+    $this->clickLink(t('abort'));
+
+    // Verify that we are on the abort job page.
+    $this->assertText('Abort this job?');
+    $this->drupalPostForm(NULL, array(), t('Confirm'));
+
+    // Test the submit link.
+    $this->clickLink(t('submit'));
+
+    // Verify that we are on the submit job page.
+    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+
     // Login as administrator to delete a job.
     $this->loginAsAdmin();
     $this->drupalGet('admin/tmgmt/jobs');
