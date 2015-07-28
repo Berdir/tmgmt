@@ -1074,16 +1074,16 @@ function tmgmt_cart_source_overview_validate(array $form, FormStateInterface $fo
  * @} End of "addtogroup tmgmt_cart".
  */
 
-function tmgmt_toolbar() {
-  $items = [];
-  $items['tmgmt'] = [
-    '#type' => 'toolbar_item',
-    '#attached' => [
-      'library' => [
-        'tmgmt/drupal.tmgmt.toolbar',
-      ],
-    ],
-  ];
-
-  return $items;
+/**
+ * Implements hook_page_attachments().
+ */
+function tmgmt_page_attachments(array &$attachments) {
+  // Add CSS for the Translation icon in the toolbar if the user has access to it.
+  $permissions = ['administer tmgmt', 'create translation jobs', 'accept translation jobs'];
+  foreach ($permissions as $permission) {
+    if (\Drupal::currentUser()->hasPermission($permission) && \Drupal::currentUser()->hasPermission('access toolbar')) {
+      $attachments['#attached']['library'][] = 'tmgmt/drupal.tmgmt.toolbar';
+      break;
+    }
+  }
 }
