@@ -1,5 +1,5 @@
 tmgmt.translator.settings.file:
-  type: mapping
+  type: tmgmt.translator_base
   mapping:
     export_format:
       type: string

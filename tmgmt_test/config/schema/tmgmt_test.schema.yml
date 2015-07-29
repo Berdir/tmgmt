@@ -1,12 +1,9 @@
 tmgmt.translator.settings.test_translator:
-  type: mapping
+  type: tmgmt.translator_base
   mapping:
     expose_settings:
       type: boolean
       label: Expose settings
-    auto_accept:
-      type: boolean
-      label: Automatically accept
     action:
       type: string
       label: Action
@@ -19,8 +16,3 @@ tmgmt.translator.settings.test_translator:
     another_key:
       type: string
       label: Another key
-    remote_languages_mappings:
-      type: sequence
-      sequence:
-        type: string
-        label: Language key

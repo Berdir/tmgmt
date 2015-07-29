@@ -9,6 +9,7 @@ namespace Drupal\tmgmt_file;
 
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\TranslatorInterface;
 use Drupal\tmgmt\TranslatorPluginUiBase;
@@ -45,8 +46,8 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
 
     // Any visible, writeable wrapper can potentially be used for the files
     // directory, including a remote file system that integrates with a CDN.
-    foreach (\Drupal::service('stream_wrapper_manager')->getWrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
-      $options[$scheme] = SafeMarkup::checkPlain($info['description']);
+    foreach (\Drupal::service('stream_wrapper_manager')->getDescriptions(StreamWrapperInterface::WRITE_VISIBLE) as $scheme => $description) {
+      $options[$scheme] = SafeMarkup::checkPlain($description);
     }
 
     if (!empty($options)) {

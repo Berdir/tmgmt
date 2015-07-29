@@ -43,3 +43,15 @@ tmgmt.translator.*:
 views.access.tmgmt_job:
   type: mapping
   label: View translation jobs'
+
+tmgmt.translator_base:
+  type: mapping
+  mapping:
+    auto_accept:
+      type: boolean
+      label: Automatically accept
+    remote_languages_mappings:
+      type: sequence
+      sequence:
+        type: string
+        label: Language key
