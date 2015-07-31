@@ -226,17 +226,6 @@ class LocaleSource extends SourcePluginBase {
         $job_item->accepted();
       }
     }
-
-    // @todo: Temporary backwards compability with existing jobs, remove in next
-    //   release.
-    if (isset($data[$job_item->getItemId()])) {
-      $translation = $data[$job_item->getItemId()]['#translation']['#text'];
-      // Update the locale string in the system.
-      // @todo: Send error message to user if update fails.
-      if ($this->updateTranslation($job_item->getItemId(), $job->getTargetLangcode(), $translation)) {
-        $job_item->accepted();
-      }
-    }
   }
 
   /**
