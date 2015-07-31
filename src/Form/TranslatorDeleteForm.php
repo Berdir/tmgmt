@@ -53,7 +53,7 @@ class TranslatorDeleteForm extends EntityConfirmFormBase {
         '@type' => $this->entity->bundle(),
         '%title' => $this->entity->label(),
       ));
-
+    drupal_set_message(t('%label has been deleted.', array('%label' => $this->entity->label())));
     $form_state->setRedirect('entity.tmgmt_translator.list');
   }
 

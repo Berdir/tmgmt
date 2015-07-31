@@ -63,7 +63,7 @@ class TranslatorTest extends TMGMTTestBase {
     $job->setState(Job::STATE_FINISHED);
     $this->drupalPostForm(NULL, array(), 'Delete');
     $this->assertText(t('Add translator'));
-    $this->assertNoText($translator->label());
+    $this->assertText(t('@label has been deleted.', array('@label' => $translator->label())));
 
     // Testing the translators form with no installed translator plugins.
     // Uninstall the test module (which provides a translator).

@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilderInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\TranslatorManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -67,6 +68,7 @@ class TranslatorListBuilder extends DraggableListBuilder implements EntityListBu
       $container->get('plugin.manager.tmgmt.translator')
     );
   }
+
   /**
    * {@inheritdoc}
    */
@@ -92,6 +94,14 @@ class TranslatorListBuilder extends DraggableListBuilder implements EntityListBu
   public function buildRow(EntityInterface $entity) {
     $row['label'] = $this->getLabel($entity);
     return $row + parent::buildRow($entity);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    parent::submitForm($form, $form_state);
+    drupal_set_message(t('The order of the translators has been saved.'));
   }
 
 }
