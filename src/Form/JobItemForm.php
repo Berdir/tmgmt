@@ -425,11 +425,15 @@ class JobItemForm extends TmgmtFormBase {
         }
 
         // Give the translator ui controller a chance to affect the data item element.
-        $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.translator')->createUiInstance($job_item->getTranslator()->getPluginId())
-          ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
-        // Give the source ui controller a chance to affect the data item element.
-        $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.source')->createUIInstance($job_item->getPlugin())
-          ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
+        if ($job_item->getTranslator()) {
+          $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.translator')
+            ->createUIInstance($job_item->getTranslator()->getPluginId())
+            ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
+          // Give the source ui controller a chance to affect the data item element.
+          $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.source')
+            ->createUIInstance($job_item->getPlugin())
+            ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);
+        }
       }
     }
     return $form;

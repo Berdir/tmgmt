@@ -107,6 +107,20 @@ class ContentEntitySourceUiTest extends EntityTestBase {
 
     // Test that the destination query argument does not break the redirect
     // and we are redirected back to the correct page.
+
+    // Go to the translate tab.
+    $this->drupalGet('node/' . $node->id());
+    $this->clickLink(t('Translate'));
+    // Request a translation for french.
+    $edit = array(
+      'languages[fr]' => TRUE,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Request translation'));
+    $this->drupalGet('node/' . $node->id() . '/translations', array('query' => array('destination' => 'node/' . $node->id())));
+    // Test that the translation in progress is working.
+    $this->clickLink(t('In progress'));
+    $this->assertText($node->getTitle());
+    $this->assertRaw('<div data-drupal-selector="edit-actions" class="form-actions js-form-wrapper form-wrapper" id="edit-actions">');
     $this->drupalGet('node/' . $node->id() . '/translations', array('query' => array('destination' => 'node/' . $node->id())));
 
     // Request a spanish translation.
