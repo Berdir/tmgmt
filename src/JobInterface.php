@@ -48,14 +48,6 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   const STATE_REJECTED = 2;
 
   /**
-   * The translation has been accepted and the job is finished.
-   *
-   * Once the job has been accepted, the source plugins are called to update their
-   * sources with the translated data.
-   */
-  const STATE_ACCEPTED = 3;
-
-  /**
    * The translation job has been aborted.
    *
    * A job can be aborted at any time. If he is currently in the submitted state
