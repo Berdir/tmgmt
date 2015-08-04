@@ -50,6 +50,15 @@ class TMGMTDemoTest extends TMGMTTestBase {
     $this->clickLink(t('Translate'));
     $this->drupalPostForm(NULL, $edit, t('Request translation'));
     $this->assertText(t('2 jobs need to be checked out.'));
+    // Check to see if no items are selected and the error message pops up.
+    $this->drupalPostForm('admin/tmgmt/sources', [], t('Request translation'));
+    $this->assertUniqueText(t("You didn't select any source items."));
+    $this->drupalPostForm(NULL, [], t('Search'));
+    $this->assertNoText(t("You didn't select any source items."));
+    $this->drupalPostForm(NULL, [], t('Cancel'));
+    $this->assertNoText(t("You didn't select any source items."));
+    $this->drupalPostForm(NULL, [], t('Add to cart'));
+    $this->assertUniqueText(t("You didn't select any source items."));
   }
 
 }

@@ -1066,7 +1066,7 @@ function tmgmt_source_add_to_cart_submit(array $form, FormStateInterface $form_s
 function tmgmt_cart_source_overview_validate(array $form, FormStateInterface $form_state) {
   $items = array_filter($form_state->getValue('items'));
   if (empty($items)) {
-    $form_state->setError($form, t('No job items were selected.'));
+    $form_state->setError($form, t("You didn't select any source items."));
   }
 }
 

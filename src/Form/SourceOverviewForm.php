@@ -135,6 +135,7 @@ class SourceOverviewForm extends FormBase {
     tmgmt_add_cart_form($form['actions'], $form_state, $plugin, $item_type);
     $form['actions']['submit'] = array(
       '#type' => 'submit',
+      '#validate' => array('::validateItemsSelected'),
       '#value' => t('Request translation'),
     );
 
@@ -153,10 +154,7 @@ class SourceOverviewForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    /*if (!$form_state->getValue('values')) {
-      $form_state->setErrorByName('items', t("You didn't select any source objects"));
-    }*/
-    $plugin =  $form_state->get('plugin');
+    $plugin = $form_state->get('plugin');
     $item_type = $form_state->get('item_type');
     // Execute the validation method on the source plugin controller.
     $source_ui = $this->sourceManager->createUIInstance($plugin);
@@ -210,6 +208,18 @@ class SourceOverviewForm extends FormBase {
   public function getUrlForSource($source) {
     list($selected_plugin, $selected_item_type) = explode(':', $source);
     return Url::fromRoute('tmgmt.source_overview', array('plugin' => $selected_plugin, 'item_type' => $selected_item_type));
+  }
+
+  /**
+   * Validation for selected items.
+   *
+   * @param array $form
+   *   An associate array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   */
+  public function validateItemsSelected(array $form, FormStateInterface $form_state) {
+    tmgmt_cart_source_overview_validate($form, $form_state);
   }
 
 }

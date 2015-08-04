@@ -762,7 +762,7 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Check to see if no items are selected and the error message pops up.
     $this->drupalPostForm('admin/tmgmt/cart', array(), t('Request translation'));
-    $this->assertUniqueText(t("No job items were selected."));
+    $this->assertUniqueText(t("You didn't select any source items."));
   }
 
   /**
