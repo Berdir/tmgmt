@@ -788,7 +788,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertTitle(t('Add Translator | Drupal'));
     // Delete Translators.
     $this->drupalGet('/tmgmt_translator/' . $translator->id() . '/delete');
-    $this->assertTitle(t('Are you sure you want to delete Translator @label? | Drupal', ['@label' => $translator->label()]));
+    $this->assertTitle(t('Are you sure you want to delete the translator @label? | Drupal', ['@label' => $translator->label()]));
     // Edit Translators.
     $this->drupalGet('/admin/config/regional/tmgmt_translator/manage/' . $translator->id());
     $this->assertTitle(t('Edit translator | Drupal'));

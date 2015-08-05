@@ -6,7 +6,7 @@ tmgmt.settings:
   requirements:
     _permission: 'administer tmgmt'
 
-entity.tmgmt_translator.list:
+entity.tmgmt_translator.collection:
   path: '/admin/config/regional/tmgmt_translator'
   defaults:
     _title: 'Translation Management translators'

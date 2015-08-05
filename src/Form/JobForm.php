@@ -276,7 +276,7 @@ class JobForm extends TmgmtFormBase {
       // Show a list of translators tagged by availability for the selected source
       // and target language combination.
       if (!$translators = tmgmt_translator_labels_flagged($job)) {
-        drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => \Drupal::l(t('configure'), Url::fromRoute('entity.tmgmt_translator.list')))), 'warning');
+        drupal_set_message(t('There are no translators available. Before you can checkout you need to !configure at least one translator.', array('!configure' => \Drupal::l(t('configure'), Url::fromRoute('entity.tmgmt_translator.collection')))), 'warning');
       }
       $preselected_translator = $job->getTranslatorId() && isset($translators[$job->getTranslatorId()]) ? $job->getTranslatorId() : key($translators);
       $job->translator = $form_state->getValue('translator') ?: $preselected_translator;

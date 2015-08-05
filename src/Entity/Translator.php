@@ -25,7 +25,7 @@ use Drupal\tmgmt\TranslatorInterface;
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\TranslatorForm",
  *       "add" = "Drupal\tmgmt\Form\TranslatorForm",
- *       "delete" = "Drupal\tmgmt\Form\TranslatorDeleteForm"
+ *       "delete" = "Drupal\tmgmt\Form\TranslatorDeleteForm",
  *     },
  *     "list_builder" = "Drupal\tmgmt\Entity\ListBuilder\TranslatorListBuilder",
  *     "access" = "Drupal\tmgmt\Entity\Controller\TranslatorAccessControlHandler",
@@ -35,7 +35,7 @@ use Drupal\tmgmt\TranslatorInterface;
  *   entity_keys = {
  *     "id" = "name",
  *     "label" = "label",
- *     "weight" = "weight"
+ *     "weight" = "weight",
  *   },
  *   config_export = {
  *     "name",
@@ -46,6 +46,7 @@ use Drupal\tmgmt\TranslatorInterface;
  *     "settings",
  *   },
  *   links = {
+ *     "collection" = "/admin/config/regional/tmgmt_translator",
  *     "edit-form" = "/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}",
  *     "add-form" = "/admin/config/regional/tmgmt_translator/add",
  *     "delete-form" = "/tmgmt_translator/{tmgmt_translator}/delete",

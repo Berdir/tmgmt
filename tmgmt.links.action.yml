@@ -2,4 +2,4 @@ entity.tmgmt_translator.add_form:
   route_name: entity.tmgmt_translator.add_form
   title: 'Add translator'
   appears_on:
-    - entity.tmgmt_translator.list
+    - entity.tmgmt_translator.collection

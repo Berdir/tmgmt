@@ -7,55 +7,15 @@
 
 namespace Drupal\tmgmt\Form;
 
+use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
-use Drupal\Core\Entity\EntityConfirmFormBase;
 
 /**
  * Provides a form for deleting a content_entity_example entity.
  *
  * @ingroup content_entity_example
  */
-class TranslatorDeleteForm extends EntityConfirmFormBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getQuestion() {
-    return t('Are you sure you want to delete Translator %name?', array('%name' => $this->entity->label()));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCancelURL() {
-    return new Url('entity.tmgmt_translator.list');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getConfirmText() {
-    return t('Delete');
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * Delete the entity and log the event. log() replaces the watchdog.
-   */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-
-    $this->entity->delete();
-
-    \Drupal::logger('tmgmt')->info('@type: deleted %title.',
-      array(
-        '@type' => $this->entity->bundle(),
-        '%title' => $this->entity->label(),
-      ));
-    drupal_set_message(t('%label has been deleted.', array('%label' => $this->entity->label())));
-    $form_state->setRedirect('entity.tmgmt_translator.list');
-  }
+class TranslatorDeleteForm extends EntityDeleteForm {
 
   /**
    * {@inheritdoc}
