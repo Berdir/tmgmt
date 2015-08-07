@@ -1,5 +1,5 @@
 tmgmt_content.settings:
-  type: mapping
+  type: config_entity
   mapping:
     embedded_fields:
       label: 'Embedded fields'

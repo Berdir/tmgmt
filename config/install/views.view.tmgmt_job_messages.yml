@@ -19,6 +19,7 @@ display:
     display_title: Master
     position: 1
     display_options:
+      rendering_language: '***LANGUAGE_entity_default***'
       access:
         type: tmgmt_job
         options: {  }
@@ -205,6 +206,8 @@ display:
           expose:
             label: ''
           granularity: second
+          entity_type: tmgmt_message
+          entity_field: created
           plugin_id: date
       title: Messages
       header: {  }
@@ -273,7 +276,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
-        - 'url.query_args.pagers:0'
+        - url.query_args
       cacheable: false
   embed:
     display_plugin: embed
@@ -281,11 +284,12 @@ display:
     display_title: Embed
     position: 1
     display_options:
+      rendering_language: '***LANGUAGE_entity_default***'
       display_extenders: {  }
     cache_metadata:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
-        - 'url.query_args.pagers:0'
+        - url.query_args
       cacheable: false

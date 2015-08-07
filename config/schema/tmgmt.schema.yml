@@ -1,5 +1,5 @@
 tmgmt.settings:
-  type: mapping
+  type: config_entity
   label: 'TMGMT settings'
   mapping:
     quick_checkout:
@@ -45,7 +45,7 @@ views.access.tmgmt_job:
   label: View translation jobs'
 
 tmgmt.translator_base:
-  type: mapping
+  type: config_entity
   mapping:
     auto_accept:
       type: boolean

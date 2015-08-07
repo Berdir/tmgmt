@@ -1,5 +1,5 @@
 tmgmt.translator.settings.local:
-  type: mapping
+  type: config_entity
   mapping:
     auto_accept:
       type: boolean
