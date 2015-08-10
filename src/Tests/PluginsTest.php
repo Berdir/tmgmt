@@ -141,32 +141,29 @@ class PluginsTest extends TMGMTKernelTestBase {
    */
   function testRemoteLanguagesMappings() {
     $this->addLanguage('en');
-    $controller = $this->default_translator->getPlugin();
 
-    $mappings = $controller->getRemoteLanguagesMappings($this->default_translator);
+    $mappings = $this->default_translator->getRemoteLanguagesMappings();
     $this->assertEqual($mappings, array(
       'en' => 'en-us',
       'de' => 'de-ch',
     ));
 
-    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en-us');
-    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de-ch');
-    $this->assertEqual($controller->mapToLocalLanguage($this->default_translator, 'en-us'), 'en');
-    $this->assertEqual($controller->mapToLocalLanguage($this->default_translator, 'de-ch'), 'de');
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en-us');
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('de'), 'de-ch');
 
     $this->default_translator->setSetting(['remote_languages_mappings', 'de'], 'de-de');
     $this->default_translator->setSetting(['remote_languages_mappings', 'en'], 'en-uk');
     $this->default_translator->save();
 
-    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en-uk');
-    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de-de');
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en-uk');
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('de'), 'de-de');
 
     // Test the fallback.
     $this->container->get('state')->set('tmgmt_test_translator_map_languages', FALSE);
     $this->container->get('plugin.manager.tmgmt.translator')->clearCachedDefinitions();
 
-    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'en'), 'en');
-    $this->assertEqual($controller->mapToRemoteLanguage($this->default_translator, 'de'), 'de');
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en');
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('de'), 'de');
   }
 
   /**

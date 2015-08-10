@@ -374,6 +374,20 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
   /**
    * {@inheritdoc}
    */
+  public function getRemoteSourceLanguage() {
+    return $this->getTranslator()->mapToRemoteLanguage($this->getSourceLangcode());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRemoteTargetLanguage() {
+    return $this->getTranslator()->mapToRemoteLanguage($this->getTargetLangcode());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getSetting($name) {
     if (isset($this->settings->$name)) {
       return $this->settings->$name;

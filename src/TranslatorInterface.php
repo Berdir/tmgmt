@@ -108,7 +108,7 @@ interface TranslatorInterface extends ConfigEntityInterface {
    * Returns the supported target languages for this translator.
    *
    * @param string $source_language
-   *   The source language.
+   *   The local source language.
    *
    * @return array
    *   An array of supported target languages in ISO format.
@@ -175,6 +175,34 @@ interface TranslatorInterface extends ConfigEntityInterface {
   public function getNotCanTranslateReason(JobInterface $job);
 
   /**
+   * Gets existing remote languages mappings.
+   *
+   * This method is responsible to provide all local to remote language pairs.
+   *
+   * @return array
+   *   An array of local => remote language codes
+   *
+   * @ingroup tmgmt_remote_languages_mapping
+   */
+  public function getRemoteLanguagesMappings();
+
+  /**
+   * Maps remote languages to local languages.
+   *
+   * Returns a list of local languages that can be mapped to any of the
+   * remote languages.
+   *
+   * @param string[] $remote_languages
+   *   Remote language codes.
+   *
+   * @return string[]
+   *   Local language codes.
+   *
+   * @ingroup tmgmt_remote_languages_mapping
+   */
+  public function mapToLocalLanguages(array $remote_languages);
+
+  /**
    * Maps local language to remote language.
    *
    * @param string $language
@@ -186,19 +214,6 @@ interface TranslatorInterface extends ConfigEntityInterface {
    * @ingroup tmgmt_remote_languages_mapping
    */
   public function mapToRemoteLanguage($language);
-
-  /**
-   * Maps remote language to local language.
-   *
-   * @param string $language
-   *   Remote language code.
-   *
-   * @return string
-   *   Local language code.
-   *
-   * @ingroup tmgmt_remote_languages_mapping
-   */
-  public function mapToLocalLanguage($language);
 
   /**
    * Determines if this translator supports remote language mappings.

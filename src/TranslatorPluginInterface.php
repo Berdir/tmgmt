@@ -99,49 +99,6 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
   public function getSupportedRemoteLanguages(TranslatorInterface $translator);
 
   /**
-   * Gets existing remote languages mappings.
-   *
-   * This method is responsible to provide all local to remote language pairs.
-   *
-   * @param \Drupal\tmgmt\TranslatorInterface $translator
-   *   Translator entity for which to get mappings.
-   *
-   * @return array
-   *   An array of local => remote language codes.
-   *
-   * @ingroup tmgmt_remote_languages_mapping
-   */
-  public function getRemoteLanguagesMappings(TranslatorInterface $translator);
-
-  /**
-   * @param TranslatorInterface $translator
-   *   Translator entity for which to get remote language.
-   * @param $language
-   *   Local language code.
-   *
-   * @return string
-   *   Remote language code.
-   *
-   * @ingroup tmgmt_remote_languages_mapping
-   */
-  public function mapToRemoteLanguage(TranslatorInterface $translator, $language);
-
-  /**
-   * Maps remote language to local language.
-   *
-   * @param \Drupal\tmgmt\TranslatorInterface $translator
-   *   Translator entity for which to get local language.
-   * @param $language
-   *   Remote language code.
-   *
-   * @return string
-   *   Local language code.
-   *
-   * @ingroup tmgmt_remote_languages_mapping
-   */
-  public function mapToLocalLanguage(TranslatorInterface $translator, $language);
-
-  /**
    * Returns all available target languages that are supported by this service
    * when given a source language.
    *

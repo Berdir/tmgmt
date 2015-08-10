@@ -211,6 +211,30 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   public function getMessagesSince($time = NULL);
 
   /**
+   * Returns remote source language code.
+   *
+   * Maps the source langcode of the job from local to remote.
+   *
+   * @return string
+   *   Remote language code.
+   *
+   * @ingroup tmgmt_remote_languages_mapping
+   */
+  public function getRemoteSourceLanguage();
+
+  /**
+   * Returns remote target language code.
+   *
+   * Maps the target langcode of the job from local to remote.
+   *
+   * @return string
+   *   Remote language code.
+   *
+   * @ingroup tmgmt_remote_languages_mapping
+   */
+  public function getRemoteTargetLanguage();
+
+  /**
    * Retrieves a setting value from the job settings.
    *
    * Pulls the default values (if defined) from the plugin controller.

@@ -20,7 +20,6 @@ use Drupal\tmgmt\Entity\Translator;
 abstract class TranslatorPluginBase extends PluginBase implements TranslatorPluginInterface {
 
   protected $supportedRemoteLanguages = array();
-  protected $remoteLanguagesMappings = array();
 
   /**
    * Characters that indicate the beginning of an escaped string.
@@ -79,63 +78,6 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   public function getSupportedRemoteLanguages(TranslatorInterface $translator) {
     return array();
   }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getRemoteLanguagesMappings(TranslatorInterface $translator) {
-    if (!empty($this->remoteLanguagesMappings)) {
-      return $this->remoteLanguagesMappings;
-    }
-
-    foreach (\Drupal::languageManager()->getLanguages() as $language => $info) {
-      $this->remoteLanguagesMappings[$language] = $this->mapToRemoteLanguage($translator, $language);
-    }
-
-    return $this->remoteLanguagesMappings;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function mapToRemoteLanguage(TranslatorInterface $translator, $language) {
-    if (!$translator->providesRemoteLanguageMappings()) {
-      return $language;
-    }
-
-    if ($mappings = $translator->getSetting(['remote_languages_mappings', $language])) {
-      return $mappings;
-    }
-
-    $default_mappings = $this->getDefaultRemoteLanguagesMappings();
-
-    if (isset($default_mappings[$language])) {
-      return $default_mappings[$language];
-    }
-
-    return $language;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function mapToLocalLanguage(TranslatorInterface $translator, $language) {
-    if (!$translator->providesRemoteLanguageMappings()) {
-      return $language;
-    }
-
-    $mappings = $translator->getSetting('remote_languages_mappings');
-    if (is_null($mappings)) {
-      $mappings = $this->getDefaultRemoteLanguagesMappings();
-    }
-
-    if ($remote_language = array_search($language, $mappings)) {
-      return $remote_language;
-    }
-
-    return $language;
-  }
-
 
   /**
    * {@inheritdoc}

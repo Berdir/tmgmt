@@ -128,6 +128,13 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
   protected $languageCacheOutdated;
 
   /**
+   * The remote languages mappings.
+   *
+   * @var array
+   */
+  protected $remoteLanguagesMappings = array();
+
+  /**
    * {@inheritdoc}
    */
   public function id() {
@@ -243,7 +250,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
     if ($controller = $this->getPlugin()) {
       if (isset($this->pluginInfo['cache languages']) && empty($this->pluginInfo['cache languages'])) {
         // This plugin doesn't support language caching.
-        return $controller->getSupportedTargetLanguages($this, $source_language);
+        return $this->mapToLocalLanguages($controller->getSupportedTargetLanguages($this, $this->mapToRemoteLanguage($source_language)));
       }
       else {
         // Retrieve the supported languages from the cache.
@@ -253,7 +260,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
         // Even if we successfully queried the cache it might not have an entry
         // for our source language yet.
         if (!isset($this->languageCache[$source_language])) {
-          $this->languageCache[$source_language] = $controller->getSupportedTargetLanguages($this, $source_language);
+          $this->languageCache[$source_language] = $this->mapToLocalLanguages($controller->getSupportedTargetLanguages($this, $this->mapToRemoteLanguage($source_language)));
           $this->updateCache();
         }
       }
@@ -349,15 +356,61 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
   /**
    * {@inheritdoc}
    */
-  public function mapToRemoteLanguage($language) {
-    return $this->getPlugin()->mapToRemoteLanguage($this, $language);
+  public function getRemoteLanguagesMappings() {
+    if (!empty($this->remoteLanguagesMappings)) {
+      return $this->remoteLanguagesMappings;
+    }
+
+    foreach (\Drupal::languageManager()->getLanguages() as $language => $info) {
+      $this->remoteLanguagesMappings[$language] = $this->mapToRemoteLanguage($language);
+    }
+
+    return $this->remoteLanguagesMappings;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function mapToLocalLanguage($language) {
-    return $this->getPlugin()->mapToLocalLanguage($this, $language);
+  public function mapToLocalLanguages(array $remote_languages) {
+    $local_languages = array();
+    $remote_mappings = $this->getPlugin()->getDefaultRemoteLanguagesMappings();
+    foreach ($remote_languages as $language => $info) {
+      if (in_array($language, $remote_mappings)) {
+        $local_language = array_search($language, $remote_mappings);
+        $local_languages[$local_language] = $local_language;
+      }
+      else {
+        $local_languages[$language] = $this->mapToRemoteLanguage($language);
+      }
+    }
+    foreach (\Drupal::languageManager()->getLanguages() as $language => $info) {
+      $remote_language = $this->mapToRemoteLanguage($language);
+      if (isset($remote_languages[$remote_language])) {
+        $local_languages[$language] = $language;
+      }
+    }
+    return $local_languages;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function mapToRemoteLanguage($language) {
+    if (!$this->providesRemoteLanguageMappings()) {
+      return $language;
+    }
+
+    if ($mapping = $this->getSetting(['remote_languages_mappings', $language])) {
+      return $mapping;
+    }
+
+    $default_mappings = $this->getPlugin()->getDefaultRemoteLanguagesMappings();
+
+    if (isset($default_mappings[$language])) {
+      return $default_mappings[$language];
+    }
+
+    return $language;
   }
 
   /**

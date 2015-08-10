@@ -44,7 +44,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
         $options[$language] = $language;
       }
 
-      foreach ($controller->getRemoteLanguagesMappings($translator) as $local_language => $remote_language) {
+      foreach ($translator->getRemoteLanguagesMappings() as $local_language => $remote_language) {
         $form['remote_languages_mappings'][$local_language] = array(
           '#type' => 'textfield',
           '#title' => \Drupal::languageManager()->getLanguage($local_language)->getName() . ' (' . $local_language . ')',
