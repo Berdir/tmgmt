@@ -253,11 +253,9 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
     // If the source is of type '_simple_config', we get all definitions that
     // don't have an entity type and display them through overviewRowSimple().
     if ($type == ConfigSource::SIMPLE_CONFIG) {
-      $definitions = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinitions();
+      $definitions = $this->getFilteredSimpleConfigDefinitions($search_property_params);
       foreach ($definitions as $definition_id => $definition) {
-        if (!isset($definition['entity_type'])) {
-          $form['items']['#options'][$definition_id] = $this->overviewRowSimple($definition);
-        }
+        $form['items']['#options'][$definition_id] = $this->overviewRowSimple($definition);
       }
     }
     // If there is an entity type, list all entities for that.
@@ -413,6 +411,37 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
       }
     }
     return $entities;
+  }
+
+  /**
+   * Filter translatable definitions.
+   *
+   * @param array $search_properties
+   *   Search properties that are going to be used for the filter.
+   *
+   * @return \Drupal\Core\Entity\EntityTypeInterface[]
+   *   Array of translatable definitions.
+   */
+  public function getFilteredSimpleConfigDefinitions($search_properties = array()) {
+    $definitions = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinitions();
+    $definitions = array_filter($definitions, function ($definition) use ($search_properties) {
+      if (isset($definition['entity_type'])) {
+        return FALSE;
+      }
+      if (isset($search_properties['name']) && strpos(strtolower($definition['title']), strtolower($search_properties['name'])) === FALSE) {
+        return FALSE;
+      }
+      if (isset($search_properties['target_language'])) {
+        if ($search_properties['target_status'] == 'translated' && !$this->isTranslated($search_properties['target_language'], $definition['names'][0])) {
+          return FALSE;
+        }
+        if ($search_properties['target_status'] == 'untranslated' && $this->isTranslated($search_properties['target_language'], $definition['names'][0])) {
+          return FALSE;
+        }
+      }
+      return TRUE;
+    });
+    return $definitions;
   }
 
 }

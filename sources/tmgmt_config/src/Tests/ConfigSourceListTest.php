@@ -286,6 +286,48 @@ class ConfigSourceListTest extends EntityTestBase {
       $counter += count($subarray);
     }
     $this->assertEqual($counter, 2);
+
+    // Save one translation.
+    $this->drupalPostForm('admin/tmgmt/items/1', array(), t('Save as completed'));
+
+    // Test if the filter works.
+    $filters = array(
+      'search[name]' => 'system',
+    );
+    $this->drupalPostForm('admin/tmgmt/sources/config/_simple_config', $filters, t('Search'));
+
+    // Check if the list has 2 rows.
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 2);
+
+    $filters = array(
+      'search[target_language]' => 'de',
+      'search[target_status]' => 'translated',
+    );
+    $this->drupalPostForm('admin/tmgmt/sources/config/_simple_config', $filters, t('Search'));
+
+    // Just 1 simple configuration was translated.
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
+
+    // Filter with name and target_status.
+    $filters = array(
+      'search[name]' => 'settings',
+      'search[target_language]' => 'de',
+      'search[target_status]' => 'untranslated',
+    );
+    $this->drupalPostForm('admin/tmgmt/sources/config/_simple_config', $filters, t('Search'));
+
+    // There is 1 simple configuration untranslated with name 'settings'.
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
+
+    $filters = array(
+      'search[name]' => 'sys',
+      'search[target_language]' => 'de',
+      'search[target_status]' => 'translated',
+    );
+    $this->drupalPostForm('admin/tmgmt/sources/config/_simple_config', $filters, t('Search'));
+
+    // There are 2 simple configurations with name 'sys' but just 1 is translated.
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
   }
 
 }
