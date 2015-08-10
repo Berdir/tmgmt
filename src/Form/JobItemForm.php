@@ -320,7 +320,7 @@ class JobItemForm extends TmgmtFormBase {
               ),
             );
           }
-          if ($job_item->getTranslatorPlugin() instanceof TranslatorRejectDataInterface && $data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_PENDING) {
+          if ($job_item->hasTranslator() && $job_item->getTranslatorPlugin() instanceof TranslatorRejectDataInterface && $data[$key]['#status'] != TMGMT_DATA_ITEM_STATE_PENDING) {
             $form[$target_key]['actions']['reject'] = array(
               '#type' => 'submit',
               // Unicode character &#x2717 BALLOT X
@@ -425,7 +425,7 @@ class JobItemForm extends TmgmtFormBase {
         }
 
         // Give the translator ui controller a chance to affect the data item element.
-        if ($job_item->getTranslator()) {
+        if ($job_item->hasTranslator()) {
           $form[$target_key] = \Drupal::service('plugin.manager.tmgmt.translator')
             ->createUIInstance($job_item->getTranslator()->getPluginId())
             ->reviewDataItemElement($form[$target_key], $form_state, $key, $parent_key, $data[$key], $job_item);

@@ -23,6 +23,11 @@ use Drupal\Core\Render\Element;
 class TranslatorForm extends EntityForm {
 
   /**
+   * @var \Drupal\tmgmt\TranslatorInterface
+   */
+  protected $entity;
+
+  /**
    * Translator plugin manager.
    *
    * @var \Drupal\tmgmt\TranslatorManager
@@ -72,8 +77,7 @@ class TranslatorForm extends EntityForm {
     $available = $this->translatorManager->getLabels();
     // If the translator plugin is not set, pick the first available plugin as the
     // default.
-    $plugin_id = $entity->getPlugin();
-    if (empty($plugin_id)) {
+    if (!($entity->hasPlugin())) {
       $entity->setPluginID(key($available));
     }
     $form['label'] = array(

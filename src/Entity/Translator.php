@@ -223,14 +223,17 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    * {@inheritdoc}
    */
   public function getPlugin() {
-    try {
-      if (!empty($this->plugin)) {
-        return \Drupal::service('plugin.manager.tmgmt.translator')->createInstance($this->plugin);
-      }
+    return \Drupal::service('plugin.manager.tmgmt.translator')->createInstance($this->plugin);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasPlugin() {
+    if (!empty($this->plugin) && \Drupal::service('plugin.manager.tmgmt.translator')->hasDefinition($this->plugin)) {
+      return TRUE;
     }
-    catch (PluginException $e) {
-    }
-    return FALSE;
+   return FALSE;
   }
 
   /**

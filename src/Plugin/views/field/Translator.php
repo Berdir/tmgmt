@@ -18,10 +18,12 @@ use Drupal\views\ResultRow;
  */
 class Translator extends FieldPluginBase {
 
+  /**
+   * {@inheritdoc}
+   */
   function render(ResultRow $values) {
     if ($job = $values->_entity) {
-      $translator = $job->getTranslator();
-      return $translator ? $translator->label() : t('Missing translator');
+      return $job->hasTranslator() ? $job->getTranslator()->label() : t('Missing translator');
     }
   }
 }

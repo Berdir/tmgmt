@@ -320,10 +320,20 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    * {@inheritdoc}
    */
   public function getTranslator() {
-    if ($job = $this->getJob()) {
-      return $job->getTranslator();
+    if ($this->hasTranslator()) {
+      return $this->getJob()->getTranslator();
     }
     return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasTranslator() {
+    if ($this->getJob() && $this->getJob()->hasTranslator()) {
+      return TRUE;
+    }
+    return FALSE;
   }
 
   /**

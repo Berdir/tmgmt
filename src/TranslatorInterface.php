@@ -97,6 +97,14 @@ interface TranslatorInterface extends ConfigEntityInterface {
   public function getPlugin();
 
   /**
+   * Checks if the translator plugin of this translator exists.
+   *
+   * @return bool
+   *   Returns TRUE if it exists, FALSE otherwise.
+   */
+  public function hasPlugin();
+
+  /**
    * Returns the supported target languages for this translator.
    *
    * @param string $source_language

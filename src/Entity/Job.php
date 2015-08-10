@@ -379,13 +379,11 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
       return $this->settings->$name;
     }
     // The translator might provide default settings.
-    if ($translator = $this->getTranslator()) {
-      if (($setting = $translator->getSetting($name)) !== NULL) {
+    if ($this->hasTranslator()) {
+      if (($setting = $this->getTranslator()->getSetting($name)) !== NULL) {
         return $setting;
       }
-    }
-    if ($controller = $this->getTranslatorPlugin()) {
-      $defaults = $controller->defaultSettings();
+      $defaults = $this->getTranslatorPlugin()->defaultSettings();
       if (isset($defaults[$name])) {
         return $defaults[$name];
       }
@@ -403,10 +401,22 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    * {@inheritdoc}
    */
   public function getTranslator() {
-    if ($this->translator->target_id) {
+    if ($this->hasTranslator()) {
       return $this->translator->entity;
     }
-    return FALSE;
+    else if (!$this->translator->entity) {
+      throw new TMGMTException('The job has no translator assigned.');
+    }
+    else if (!$this->translator->entity->hasPlugin()) {
+      throw new TMGMTException('The translator assigned to this job is missing the plugin.');
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasTranslator() {
+    return $this->translator->entity && $this->translator->target_id && $this->translator->entity->hasPlugin();
   }
 
   /**
@@ -596,10 +606,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    * {@inheritdoc}
    */
   public function getTranslatorPlugin() {
-    if ($translator = $this->getTranslator($this)) {
-      return $translator->getPlugin();
-    }
-    return FALSE;
+    return $this->getTranslator()->getPlugin();
   }
 
   /**

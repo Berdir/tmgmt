@@ -236,9 +236,21 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    * Returns the translator for this job.
    *
    * @return Translator
-   *   The translator entity or NULL if there is none.
+   *   The translator entity.
+   *
+   * @throws \Drupal\tmgmt\TMGMTException
+   *   Throws an exception when there is no translator assigned or when the
+   *   translator is missing the plugin.
    */
   public function getTranslator();
+
+  /**
+   * Checks if the translator and the plugin exist.
+   *
+   * @return bool
+   *   TRUE if exists, FALSE otherwise.
+   */
+  public function hasTranslator();
 
   /**
    * Returns the state of the job. Can be one of the job state constants.
@@ -456,6 +468,10 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    *
    * @return \Drupal\tmgmt\TranslatorPluginInterface
    *   The translator plugin instance.
+   *
+   * @throws \Drupal\tmgmt\TMGMTException
+   *   Throws an exception when there is no translator assigned or when the
+   *   translator is missing the plugin.
    */
   public function getTranslatorPlugin();
 

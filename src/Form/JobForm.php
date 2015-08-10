@@ -515,11 +515,11 @@ class JobForm extends TmgmtFormBase {
    * Helper function for retrieving the rendered job checkout information.
    */
   function checkoutInfo(JobInterface $job) {
-    $translator = $job->getTranslator();
     // The translator might have been disabled or removed.
-    if (!$translator) {
-      return array();
+    if (!$job->hasTranslator()) {
+      return array('#markup' => t('The job has no translator assigned.'));
     }
+    $translator = $job->getTranslator();
     $plugin_ui = $this->translatorManager->createUIInstance($translator->getPluginId());
     return $plugin_ui->checkoutInfo($job);
   }

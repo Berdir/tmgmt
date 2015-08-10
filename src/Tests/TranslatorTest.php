@@ -43,6 +43,7 @@ class TranslatorTest extends TMGMTTestBase {
     // Does the translator exist in the listing?
     $this->drupalGet('admin/config/regional/tmgmt_translator');
     $this->assertText($translator->label());
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 2);
 
     // Create job, attach to the translator and activate.
     $job = $this->createJob();
@@ -50,6 +51,7 @@ class TranslatorTest extends TMGMTTestBase {
     $job->settings = array();
     $job->save();
     $job->setState(Job::STATE_ACTIVE);
+    $item = $job->addItem('test_source', 'test', 1);
 
     // Try to delete the translator, should fail because of active job.
     $delete_url = 'tmgmt_translator/' . $translator->id() . '/delete';
@@ -63,7 +65,18 @@ class TranslatorTest extends TMGMTTestBase {
     $job->setState(Job::STATE_FINISHED);
     $this->drupalPostForm(NULL, array(), 'Delete');
     $this->assertText(t('Add translator'));
+    // Check if the list of translators has 1 row.
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
     $this->assertText(t('@label has been deleted.', array('@label' => $translator->label())));
+
+    // Assert that the job works and there is a text saying that the translator
+    // is missing.
+    $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
+    $this->assertText(t('The job has no translator assigned.'));
+
+    // Assert that also the job items are working.
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $this->assertText(t('Missing translator'));
 
     // Testing the translators form with no installed translator plugins.
     // Uninstall the test module (which provides a translator).

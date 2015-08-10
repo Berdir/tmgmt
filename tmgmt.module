@@ -592,7 +592,7 @@ function tmgmt_job_needs_checkout_form(JobInterface $job) {
     return TRUE;
   }
   // If no translator is pre-selected, try to pick one automatically.
-  if (!$job->getTranslator()) {
+  if (!$job->hasTranslator()) {
     // If there is more than a single translator available or if there are no
     // translators available at all checkout is mandatory.
     $translators = tmgmt_translator_load_available($job);

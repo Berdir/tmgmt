@@ -140,6 +140,14 @@ interface JobItemInterface extends ContentEntityInterface {
   public function getTranslator();
 
   /**
+   * Checks if the translator exists.
+   *
+   * @return bool
+   *   TRUE if exists, FALSE otherwise.
+   */
+  public function hasTranslator();
+
+  /**
    * Returns the translator plugin of the translator of this job item.
    *
    * @return \Drupal\tmgmt\TranslatorPluginInterface|null
