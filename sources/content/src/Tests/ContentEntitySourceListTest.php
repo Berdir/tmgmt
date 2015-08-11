@@ -291,5 +291,16 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $edit['search[subject]'] = $comment->getSubject();
     $this->drupalPostForm('admin/tmgmt/sources/content/comment', $edit, t('Search'));
     $this->assertText($comment->getSubject(), 'Searching for a comment subject.');
+
+    // Tests that search bundle filter works.
+    $this->drupalPostAjaxForm('/admin/tmgmt/sources/content/node', ['search[title]' => $this->nodes['article']['en'][0]->label()], 'source');
+    $this->assertText(t('Content overview'));
+    $this->assertText($this->nodes['article']['en'][0]->label());
+    $this->drupalPostAjaxForm('/admin/tmgmt/sources/content/node', ['search[title]' => 'wrong_value'], 'source');
+    $this->assertText(t('Content overview'));
+    $this->assertText($this->nodes['article']['en'][0]->label());
+    $edit = array('any_key' => 'any_value');
+    $this->drupalGet('/admin/tmgmt/sources/content/node', $edit);
+    $this->assertResponse(200);
   }
 }

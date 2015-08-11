@@ -208,18 +208,13 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
   public function overviewForm(array $form, FormStateInterface $form_state, $type) {
     $form = parent::overviewForm($form, $form_state, $type);
 
-    // Load search property params which will be passed into
-    $search_property_params = array();
-    $exclude_params = array('q', 'page');
-    foreach ($_GET as $key => $value) {
-      // Skip exclude params, and those that have empty values, as these would
-      // make it into query condition instead of being ignored.
-      if (in_array($key, $exclude_params) || $value === '') {
-        continue;
-      }
-      $search_property_params[$key] = $value;
-    }
-
+    // Build a list of allowed search conditions and get their values from the request.
+    $entity_type = \Drupal::entityManager()->getDefinition($type);
+    $whitelist = array('langcode', 'target_language', 'target_status');
+    $whitelist[] = $entity_type->getKey('bundle');
+    $whitelist[] = $entity_type->getKey('label');
+    $search_property_params = array_filter(\Drupal::request()->query->all());
+    $search_property_params = array_intersect_key($search_property_params, array_flip($whitelist));
     $bundles = $this->getTranslatableBundles($type);
 
     foreach ($this->getTranslatableEntities($type, $search_property_params) as $entity) {
