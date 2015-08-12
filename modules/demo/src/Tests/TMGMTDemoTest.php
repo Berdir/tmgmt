@@ -27,7 +27,11 @@ class TMGMTDemoTest extends TMGMTTestBase {
    */
   function setUp() {
     parent::setUp();
-    $this->loginAsAdmin(['administer tmgmt', 'translate any entity']);
+    $this->loginAsAdmin([
+      'access content overview',
+      'administer tmgmt',
+      'translate any entity'
+    ]);
   }
 
   /**
@@ -36,6 +40,9 @@ class TMGMTDemoTest extends TMGMTTestBase {
   protected function testInstalled() {
     // Try and translate node 1.
     $this->drupalGet('node');
+    $this->assertText('First node');
+    $this->assertText('Second node');
+    $this->assertText('TMGMT Demo');
     $this->clickLink(t('First node'));
     $this->clickLink(t('Translate'));
     $edit = [
@@ -45,7 +52,7 @@ class TMGMTDemoTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, $edit, t('Request translation'));
     $this->assertText(t('2 jobs need to be checked out.'));
     // Try and translate node 2.
-    $this->drupalGet('node');
+    $this->drupalGet('admin/content');
     $this->clickLink(t('Second node'));
     $this->clickLink(t('Translate'));
     $this->drupalPostForm(NULL, $edit, t('Request translation'));

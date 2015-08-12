@@ -11,5 +11,5 @@ third_party_settings:
 id: node.translatable_node
 target_entity_type_id: node
 target_bundle: translatable_node
-default_langcode: en
+default_langcode: site_default
 language_alterable: true

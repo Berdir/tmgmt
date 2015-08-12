@@ -4,6 +4,7 @@
  * Installation hooks for tmgmt_demo module.
  */
 
+use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
 
 
@@ -14,12 +15,66 @@ function tmgmt_demo_install() {
   // Ensure the translation fields are created in the database.
   \Drupal::service('entity.definition_update_manager')->applyUpdates();
 
+  // Create an introduction node.
+  $description_node = Node::create([
+    'title' => t('TMGMT Demo'),
+    'type' => 'translatable_node',
+    'uid' => '0',
+    'sticky' => TRUE,
+    'body' => [
+      'value' => '<p>' . t('Welcome to the Translation Management Tool Demo module!') . '</p>'
+        . '<p>' . t('The Translation Management Tool (TMGMT) demo module provides the configuration needed for translating predefined content types - <a href="@content_language">translatable nodes</a>.', ['@content_language' => Url::fromUri('base:admin/config/regional/content-language')->toString()]) .'</p>'
+        . '<p>' . t('It enables three <a href="@languages_url">languages</a>. Besides English, it supports German and French.', ['@languages_url' => Url::fromUri('base:admin/config/regional/language')->toString()]) . '<p>'
+        . '<p>' . t('Content translation is enabled by default. This allows users to translate the content on their own. Also, Export / Import File translator enables exporting source data into a file and import the translated in return.') . '<p>'
+        . '<ul>'
+        .   '<li>'
+        .     '<span>' . t('To get started with the translation, two <a href="@translatable_nodes">translatable nodes</a> are created. The steps for translation are the following:', ['@translatable_nodes' => Url::fromUri('base:admin/content')->toString()]) . '</span>'
+        .     '<ul>'
+        .       '<li>' . t('On the node detail view use the <a href="@translate_url">"translate" Tab</a>, choose a language and click "Request Translation" to get started.', ['@translate_url' => Url::fromUri('base:node/3/translations')->toString()]) . '</li>'
+        .       '<li>' . t('After submitting the job, the status is changed to "In progress". In case of a machine translator, the translation is immediately returned. The status is then "Needs review".') . '</li>'
+        .       '<li>' . t('"In progress" is the state where we are awaiting the translations from the translator.') . '</li>'
+        .       '<li>' . t('Once the translations are provided by the translator, we can review the job items (and correct) the translated content. Some translators support feedback cycles. We can send an item that needs a better translation back to the translator with some comments. If the translation is fine, we can accept the job items (or the job). This is when the source items are updated/the translation is created.') . '</li>'
+        .       '<li>' . t('The job is finally in the state of being published') . '</li>'
+        .    '</ul>'
+        .   '</li>'
+        . '</ul>'
+        . '<ul>'
+        .   '<li>'
+        .   '<span>' . t('In the TMGMT demo module the <a href="@file_translator">File translator</a> is enabled by default. It allows users to export and import texts via xliff and HTML. The workflow is the following:', ['@file_translator' => Url::fromUri('base:admin/config/regional/tmgmt_translator')->toString()]) . '</span>'
+        .     '<ul>'
+        .       '<li>' . t('Submit a job to the File translator. The job is in "active" state.') . '</li>'
+        .       '<li>' . t('Export it as HTML/XLIFF format.') . '</li>'
+        .       '<li>' . t('Translate the content by editing the XLIFF files in plaintext or with a proper CAT tool.') . '</li>'
+        .       '<li>' . t('Import it back on the site.') . '</li>'
+        .       '<li>' . t('Review the job items/data items. XLIFF does not support a feedback loop or commenting an item. Improvements/fixings can only be done by the reviewer (or by reimporting the improved XLIFF).') . '</li>'
+        .       '<li>' . t('Job items can be accepted separately by clicking the check button - "Reviewed" and saving or finally as the whole job.') . '</li>'
+        .     '</ul>'
+        .   '</li>'
+        . '</ul>'
+        . '<p>' . t('TMGMT demo also supports translation of paragraphs. To do this, you first need to enable paragraphs_demo and tmgmt_demo after that.') . '</p>'
+        . '<ul>'
+        .   '<li>'
+        .   '<span>' . t('External translation services can be used for creating a foreign language version of the source text. These are the recommended translators:'). '</span>'
+        .     '<ul>'
+        .       '<li>' . t('<a href="@microsoft">Microsoft Translator</a>', ['@microsoft' => Url::fromUri('https://www.drupal.org/project/tmgmt_microsoft')->toString()]) . '</li>'
+        .       '<li>' . t('<a href="@google_translate">Google translate</a>', ['@google_translate' => Url::fromUri('https://www.drupal.org/project/tmgmt_google')->toString()]) . '</li>'
+        .       '<li>' . t('<a href="@gengo">Gengo</a>', ['@gengo' => Url::fromUri('https://www.drupal.org/project/tmgmt_mygengo')->toString()]) . '</li>'
+        .     '</ul>'
+        .   '</li>'
+        . '</ul>',
+      'format' => 'basic_html',
+    ],
+  ]);
+  $description_node->save();
+
+  // Set the node as the front page.
+  \Drupal::configFactory()->getEditable('system.site')->set('page.front', '/node');
+
   // Add demo content.
   $node = Node::create(array(
     'type' => 'translatable_node',
-    'title' => 'Second node',
-    'langcode' => 'en',
-    'body' => 'Have another try. This text can be translated as well',
+    'title' => t('Second node'),
+    'body' => t('Have another try. This text can be translated as well.'),
     'uid' => '0',
     'status' => 1,
   ));
@@ -27,9 +82,8 @@ function tmgmt_demo_install() {
 
   $node = Node::create(array(
     'type' => 'translatable_node',
-    'title' => 'First node',
-    'langcode' => 'en',
-    'body' => 'This text can be translated with TMGMT.Use the "translate" Tab and choose "Request Translation" to get started',
+    'title' => t('First node'),
+    'body' => t('This text can be translated with TMGMT. Use the "translate" Tab and choose "Request Translation" to get started.'),
     'uid' => '0',
     'status' => 1,
   ));
