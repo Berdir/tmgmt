@@ -164,8 +164,8 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
       if (NestedArray::keyExists($this->settings, $name)) {
         return NestedArray::getValue($this->settings, $name);
       }
-      elseif ($controller = $this->getPlugin()) {
-        $defaults = $controller->defaultSettings();
+      elseif ($plugin = $this->getPlugin()) {
+        $defaults = $plugin->defaultSettings();
         return NestedArray::getValue($defaults, $name);
       }
     }
@@ -173,8 +173,8 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
       if (isset($this->settings[$name])) {
         return $this->settings[$name];
       }
-      elseif ($controller = $this->getPlugin()) {
-        $defaults = $controller->defaultSettings();
+      elseif ($plugin = $this->getPlugin()) {
+        $defaults = $plugin->defaultSettings();
         if (isset($defaults[$name])) {
           return $defaults[$name];
         }
@@ -247,10 +247,10 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    * {@inheritdoc}
    */
   public function getSupportedTargetLanguages($source_language) {
-    if ($controller = $this->getPlugin()) {
+    if ($plugin = $this->getPlugin()) {
       if (isset($this->pluginInfo['cache languages']) && empty($this->pluginInfo['cache languages'])) {
         // This plugin doesn't support language caching.
-        return $this->mapToLocalLanguages($controller->getSupportedTargetLanguages($this, $this->mapToRemoteLanguage($source_language)));
+        return $this->mapToLocalLanguages($plugin->getSupportedTargetLanguages($this, $this->mapToRemoteLanguage($source_language)));
       }
       else {
         // Retrieve the supported languages from the cache.
@@ -260,7 +260,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
         // Even if we successfully queried the cache it might not have an entry
         // for our source language yet.
         if (!isset($this->languageCache[$source_language])) {
-          $this->languageCache[$source_language] = $this->mapToLocalLanguages($controller->getSupportedTargetLanguages($this, $this->mapToRemoteLanguage($source_language)));
+          $this->languageCache[$source_language] = $this->mapToLocalLanguages($plugin->getSupportedTargetLanguages($this, $this->mapToRemoteLanguage($source_language)));
           $this->updateCache();
         }
       }
@@ -272,10 +272,10 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    * {@inheritdoc}
    */
   public function getSupportedLanguagePairs() {
-    if ($controller = $this->getPlugin()) {
+    if ($plugin = $this->getPlugin()) {
       if (isset($this->pluginInfo['cache languages']) && empty($this->pluginInfo['cache languages'])) {
         // This plugin doesn't support language caching.
-        return $controller->getSupportedLanguagePairs($this);
+        return $plugin->getSupportedLanguagePairs($this);
       }
       else {
         // Retrieve the supported languages from the cache.
@@ -285,7 +285,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
         // Even if we successfully queried the cache data might not be yet
         // available.
         if (empty($this->languagePairsCache)) {
-          $this->languagePairsCache = $controller->getSupportedLanguagePairs($this);
+          $this->languagePairsCache = $plugin->getSupportedLanguagePairs($this);
           $this->updateCache();
         }
       }
@@ -307,8 +307,8 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    * {@inheritdoc}
    */
   public function canTranslate(JobInterface $job) {
-    if ($controller = $this->getPlugin()) {
-      return $controller->canTranslate($this, $job);
+    if ($plugin = $this->getPlugin()) {
+      return $plugin->canTranslate($this, $job);
     }
     return FALSE;
   }
@@ -317,8 +317,8 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    * {@inheritdoc}
    */
   public function isAvailable() {
-    if ($controller = $this->getPlugin()) {
-      return $controller->isAvailable($this);
+    if ($plugin = $this->getPlugin()) {
+      return $plugin->isAvailable($this);
     }
     return FALSE;
   }
@@ -327,8 +327,8 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    * {@inheritdoc}
    */
   public function hasCheckoutSettings(JobInterface $job) {
-    if ($controller = $this->getPlugin()) {
-      return $controller->hasCheckoutSettings($job);
+    if ($plugin = $this->getPlugin()) {
+      return $plugin->hasCheckoutSettings($job);
     }
     return FALSE;
   }
@@ -337,8 +337,8 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    * {@inheritdoc}
    */
   public function getNotAvailableReason() {
-    if ($controller = $this->getPlugin()) {
-      return $controller->getNotAvailableReason($this);
+    if ($plugin = $this->getPlugin()) {
+      return $plugin->getNotAvailableReason($this);
     }
     return FALSE;
   }
@@ -347,8 +347,8 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    * {@inheritdoc}
    */
   public function getNotCanTranslateReason(JobInterface $job) {
-    if ($controller = $this->getPlugin()) {
-      return $controller->getNotCanTranslateReason($job);
+    if ($plugin = $this->getPlugin()) {
+      return $plugin->getNotCanTranslateReason($job);
     }
     return FALSE;
   }
@@ -417,8 +417,8 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    * Updates the language cache.
    */
   protected function updateCache() {
-    if ($controller = $this->getPlugin()) {
-      $info = $controller->getPluginDefinition();
+    if ($plugin = $this->getPlugin()) {
+      $info = $plugin->getPluginDefinition();
       if (!isset($info['language cache']) || !empty($info['language cache'])) {
         \Drupal::cache('data')->set('tmgmt_languages:' . $this->name, $this->languageCache, Cache::PERMANENT, $this->getEntityType()->getListCacheTags());
         \Drupal::cache('data')->set('tmgmt_language_pairs:' . $this->name, $this->languagePairsCache, Cache::PERMANENT, $this->getEntityType()->getListCacheTags());

@@ -594,26 +594,26 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    * {@inheritdoc}
    */
   public function requestTranslation() {
-    if (!$this->canRequestTranslation() || !$controller = $this->getTranslatorPlugin()) {
+    if (!$this->canRequestTranslation() || !$plugin = $this->getTranslatorPlugin()) {
       return FALSE;
     }
     // We don't know if the translator plugin already processed our
     // translation request after this point. That means that the plugin has to
     // set the 'submitted', 'needs review', etc. states on its own.
-    $controller->requestTranslation($this);
+    $plugin->requestTranslation($this);
   }
 
   /**
    * {@inheritdoc}
    */
   public function abortTranslation() {
-    if (!$this->isAbortable() || !$controller = $this->getTranslatorPlugin()) {
+    if (!$this->isAbortable() || !$plugin = $this->getTranslatorPlugin()) {
       return FALSE;
     }
     // We don't know if the translator plugin was able to abort the translation
     // job after this point. That means that the plugin has to set the
     // 'aborted' state on its own.
-    return $controller->abortTranslation($this);
+    return $plugin->abortTranslation($this);
   }
 
   /**

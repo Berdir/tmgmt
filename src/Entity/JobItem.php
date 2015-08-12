@@ -252,8 +252,8 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    * {@inheritdoc}
    */
   public function label($langcode = NULL) {
-    if ($controller = $this->getSourcePlugin()) {
-      $label = $controller->getLabel($this);
+    if ($plugin = $this->getSourcePlugin()) {
+      $label = $plugin->getLabel($this);
     }
     else {
       $label = parent::Label();
@@ -283,8 +283,8 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    * {@inheritdoc}
    */
   public function getSourceLabel() {
-    if ($controller = $this->getSourcePlugin()) {
-      return $controller->getLabel($this);
+    if ($plugin = $this->getSourcePlugin()) {
+      return $plugin->getLabel($this);
     }
     return FALSE;
   }
@@ -293,8 +293,8 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    * {@inheritdoc}
    */
   public function getSourceUrl() {
-    if ($controller = $this->getSourcePlugin()) {
-      return $controller->getUrl($this);
+    if ($plugin = $this->getSourcePlugin()) {
+      return $plugin->getUrl($this);
     }
     return FALSE;
   }
@@ -303,8 +303,8 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    * {@inheritdoc}
    */
   public function getSourceType() {
-    if ($controller = $this->getSourcePlugin()) {
-      return $controller->getType($this);
+    if ($plugin = $this->getSourcePlugin()) {
+      return $plugin->getType($this);
     }
     return ucfirst($this->get('item_type')->value);
   }
@@ -371,8 +371,8 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    * {@inheritdoc}
    */
   public function getSourceData() {
-    if ($controller = $this->getSourcePlugin()) {
-      return $controller->getData($this);
+    if ($plugin = $this->getSourcePlugin()) {
+      return $plugin->getData($this);
     }
     return array();
   }
@@ -731,13 +731,13 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    * {@inheritdoc}
    */
   public function acceptTranslation() {
-    if (!$this->isNeedsReview() || !$controller = $this->getSourcePlugin()) {
+    if (!$this->isNeedsReview() || !$plugin = $this->getSourcePlugin()) {
       return FALSE;
     }
     // We don't know if the source plugin was able to save the translation after
     // this point. That means that the plugin has to set the 'accepted' states
     // on its own.
-    $controller->saveTranslation($this);
+    $plugin->saveTranslation($this);
   }
 
   /**

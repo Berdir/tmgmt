@@ -54,9 +54,9 @@ function drush_tmgmt_file_tmgmt_translate_import($name = NULL) {
     $files = array($name => (object)array('name' => basename($name)));
   }
 
-  $controller = \Drupal::service('plugin.manager.tmgmt_file.format')->createInstance('xlf');
+  $plugin = \Drupal::service('plugin.manager.tmgmt_file.format')->createInstance('xlf');
   foreach ($files as $path => $info) {
-    $job = $controller->validateImport($path);
+    $job = $plugin->validateImport($path);
     if (empty($job)) {
       drush_log(dt('No translation job found for @filename.', array('@filename' => $info->name)), 'error');
       continue;
@@ -69,7 +69,7 @@ function drush_tmgmt_file_tmgmt_translate_import($name = NULL) {
 
     try {
       // Validation successful, start import.
-      $job->addTranslatedData($controller->import($path));
+      $job->addTranslatedData($plugin->import($path));
       drush_log(dt('Successfully imported file @filename for translation job @name (#@id).', array('@filename' => $info->name, '@name' => $job->label(), '@id' => $job->id())), 'success');
     }
     catch (Exception $e) {

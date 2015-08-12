@@ -170,7 +170,7 @@ class PluginsTest extends TMGMTKernelTestBase {
    * Tests escaping and unescaping text.
    */
   function testEscaping() {
-    $controller = $this->default_translator->getPlugin();
+    $plugin = $this->default_translator->getPlugin();
 
     $tests = array(
       array(
@@ -219,12 +219,12 @@ class PluginsTest extends TMGMTKernelTestBase {
     );
 
     foreach ($tests as $test) {
-      $escaped = $controller->escapeText($test['item']);
+      $escaped = $plugin->escapeText($test['item']);
       // Assert that the string was escaped as expected.
       $this->assertEqual($escaped, $test['expected']);
 
       // Assert that the string is the same as the original when unescaped.
-      $this->assertEqual($controller->unescapeText($escaped), $test['item']['#text']);
+      $this->assertEqual($plugin->unescapeText($escaped), $test['item']['#text']);
     }
   }
 }

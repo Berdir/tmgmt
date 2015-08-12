@@ -26,10 +26,10 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
    */
   public function pluginSettingsForm(array $form, FormStateInterface $form_state, TranslatorInterface $translator, $busy = FALSE) {
 
-    $controller = $translator->getPlugin();
+    $plugin = $translator->getPlugin();
     // If current translator is configured to provide remote language mapping
     // provide the form to configure mappings, unless it does not exists yet.
-    if (!empty($controller) && $translator->providesRemoteLanguageMappings()) {
+    if (!empty($plugin) && $translator->providesRemoteLanguageMappings()) {
 
       $form['remote_languages_mappings'] = array(
         '#tree' => TRUE,
@@ -40,7 +40,7 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
       );
 
       $options = array();
-      foreach ($controller->getSupportedRemoteLanguages($translator) as $language) {
+      foreach ($plugin->getSupportedRemoteLanguages($translator) as $language) {
         $options[$language] = $language;
       }
 

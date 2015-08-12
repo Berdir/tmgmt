@@ -705,7 +705,7 @@ function tmgmt_translation_review_form_update_state(array $form, FormStateInterf
   $job_item = $form_state->getFormObject()->getEntity();
 
   /** @var \Drupal\tmgmt\JobItemInterface $job_item */
-  $controller = $job_item->getTranslatorPlugin();
+  $plugin = $job_item->getTranslatorPlugin();
   $success = TRUE;
   switch ($matches['action']) {
     case 'reviewed':
@@ -731,7 +731,7 @@ function tmgmt_translation_review_form_update_state(array $form, FormStateInterf
       }
       else {
         $form_state->setRedirectUrl(Url::fromUri('base:' . tmgmt_redirect_queue_dequeue(), array('query' => array('destination' => tmgmt_redirect_queue_destination()))));
-        if ($controller instanceof TranslatorRejectDataInterface) {
+        if ($plugin instanceof TranslatorRejectDataInterface) {
           $success = $job_item->getTranslatorController()->rejectDataItem($job_item, \Drupal::service('tmgmt.data')->ensureArrayKey($matches['key']), $values);
         }
       }
