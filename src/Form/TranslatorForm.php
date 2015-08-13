@@ -153,10 +153,47 @@ class TranslatorForm extends EntityForm {
         '#tree' => TRUE,
         '#open' => TRUE,
       );
+
       // Add the translator plugin settings form.
       $plugin_ui = $this->translatorManager->createUIInstance($entity->getPluginID());
       $form['plugin_wrapper']['settings'] += $plugin_ui->pluginSettingsForm($form['plugin_wrapper']['settings'], $form_state, $entity, $busy);
     }
+
+    $controller = $entity->getPlugin();
+
+    // If current translator is configured to provide remote language mapping
+    // provide the form to configure mappings, unless it does not exists yet.
+    if (!empty($controller) && $entity->providesRemoteLanguageMappings()) {
+      $form['remote_languages_mappings'] = array(
+        '#tree' => TRUE,
+        '#type' => 'details',
+        '#title' => t('Remote languages mappings'),
+        '#description' => t('Here you can specify mappings of your local language codes to the translator language codes.'),
+        '#open' => TRUE,
+      );
+
+      $options = array();
+      foreach ($controller->getSupportedRemoteLanguages($entity) as $language) {
+        $options[$language] = $language;
+      }
+
+      foreach ($entity->getRemoteLanguagesMappings() as $local_language => $remote_language) {
+        $form['remote_languages_mappings'][$local_language] = array(
+          '#type' => 'textfield',
+          '#title' => \Drupal::languageManager()->getLanguage($local_language)->getName() . ' (' . $local_language . ')',
+          '#default_value' => $remote_language,
+          '#size' => 6,
+        );
+
+        if (!empty($options)) {
+          $form['remote_languages_mappings'][$local_language]['#type'] = 'select';
+          $form['remote_languages_mappings'][$local_language]['#options'] = $options;
+          $form['remote_languages_mappings'][$local_language]['#empty_option'] = ' - ';
+          unset($form['remote_languages_mappings'][$local_language]['#size']);
+        }
+      }
+    }
+
     // Add a submit button and a cancel link to the form.
     $form['actions']['#type'] = 'actions';
     $form['actions']['submit'] = array(

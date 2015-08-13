@@ -38,7 +38,12 @@ tmgmt.translator.*:
       type: string
       label: 'Translator plugin'
     settings:
-        type: tmgmt.translator.settings.[%parent.plugin]
+      type: tmgmt.translator.settings.[%parent.plugin]
+    remote_languages_mappings:
+      type: sequence
+      sequence:
+        type: string
+        label: Language key
 
 views.access.tmgmt_job:
   type: mapping
@@ -50,8 +55,3 @@ tmgmt.translator_base:
     auto_accept:
       type: boolean
       label: Automatically accept
-    remote_languages_mappings:
-      type: sequence
-      sequence:
-        type: string
-        label: Language key

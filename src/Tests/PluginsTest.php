@@ -137,36 +137,6 @@ class PluginsTest extends TMGMTKernelTestBase {
   }
 
   /**
-   * Tests remote languages mappings support in the tmgmt core.
-   */
-  function testRemoteLanguagesMappings() {
-    $this->addLanguage('en');
-
-    $mappings = $this->default_translator->getRemoteLanguagesMappings();
-    $this->assertEqual($mappings, array(
-      'en' => 'en-us',
-      'de' => 'de-ch',
-    ));
-
-    $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en-us');
-    $this->assertEqual($this->default_translator->mapToRemoteLanguage('de'), 'de-ch');
-
-    $this->default_translator->setSetting(['remote_languages_mappings', 'de'], 'de-de');
-    $this->default_translator->setSetting(['remote_languages_mappings', 'en'], 'en-uk');
-    $this->default_translator->save();
-
-    $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en-uk');
-    $this->assertEqual($this->default_translator->mapToRemoteLanguage('de'), 'de-de');
-
-    // Test the fallback.
-    $this->container->get('state')->set('tmgmt_test_translator_map_languages', FALSE);
-    $this->container->get('plugin.manager.tmgmt.translator')->clearCachedDefinitions();
-
-    $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en');
-    $this->assertEqual($this->default_translator->mapToRemoteLanguage('de'), 'de');
-  }
-
-  /**
    * Tests escaping and unescaping text.
    */
   function testEscaping() {

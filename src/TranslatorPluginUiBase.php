@@ -25,42 +25,6 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
    * {@inheritdoc}
    */
   public function pluginSettingsForm(array $form, FormStateInterface $form_state, TranslatorInterface $translator, $busy = FALSE) {
-
-    $plugin = $translator->getPlugin();
-    // If current translator is configured to provide remote language mapping
-    // provide the form to configure mappings, unless it does not exists yet.
-    if (!empty($plugin) && $translator->providesRemoteLanguageMappings()) {
-
-      $form['remote_languages_mappings'] = array(
-        '#tree' => TRUE,
-        '#type' => 'details',
-        '#title' => t('Remote languages mappings'),
-        '#description' => t('Here you can specify mappings of your local language codes to the translator language codes.'),
-        '#open' => TRUE,
-      );
-
-      $options = array();
-      foreach ($plugin->getSupportedRemoteLanguages($translator) as $language) {
-        $options[$language] = $language;
-      }
-
-      foreach ($translator->getRemoteLanguagesMappings() as $local_language => $remote_language) {
-        $form['remote_languages_mappings'][$local_language] = array(
-          '#type' => 'textfield',
-          '#title' => \Drupal::languageManager()->getLanguage($local_language)->getName() . ' (' . $local_language . ')',
-          '#default_value' => $remote_language,
-          '#size' => 6,
-        );
-
-        if (!empty($options)) {
-          $form['remote_languages_mappings'][$local_language]['#type'] = 'select';
-          $form['remote_languages_mappings'][$local_language]['#options'] = $options;
-          $form['remote_languages_mappings'][$local_language]['#empty_option'] = ' - ';
-          unset($form['remote_languages_mappings'][$local_language]['#size']);
-        }
-      }
-    }
-
     if (!Element::children($form)) {
       $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginDefinition['label']));
     }

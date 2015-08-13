@@ -88,4 +88,34 @@ class TranslatorTest extends TMGMTTestBase {
     $this->assertText(t('There are no translator plugins available. Please install a translator plugin.'));
   }
 
+  /**
+   * Tests remote languages mappings support in the tmgmt core.
+   */
+  protected function testRemoteLanguagesMappings() {
+    $mappings = $this->default_translator->getRemoteLanguagesMappings();
+    $this->assertEqual($mappings, array(
+      'en' => 'en-us',
+      'de' => 'de-ch',
+      'el' => 'el',
+      'es' => 'es',
+    ));
+
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en-us');
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('de'), 'de-ch');
+
+    $this->default_translator->setSetting(['remote_languages_mappings', 'de'], 'de-de');
+    $this->default_translator->setSetting(['remote_languages_mappings', 'en'], 'en-uk');
+    $this->default_translator->save();
+
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en-uk');
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('de'), 'de-de');
+
+    // Test the fallback.
+    $this->container->get('state')->set('tmgmt_test_translator_map_languages', FALSE);
+    $this->container->get('plugin.manager.tmgmt.translator')->clearCachedDefinitions();
+
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en');
+    $this->assertEqual($this->default_translator->mapToRemoteLanguage('de'), 'de');
+  }
+
 }

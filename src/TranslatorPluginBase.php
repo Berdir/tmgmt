@@ -19,8 +19,6 @@ use Drupal\tmgmt\Entity\Translator;
  */
 abstract class TranslatorPluginBase extends PluginBase implements TranslatorPluginInterface {
 
-  protected $supportedRemoteLanguages = array();
-
   /**
    * Characters that indicate the beginning of an escaped string.
    *
