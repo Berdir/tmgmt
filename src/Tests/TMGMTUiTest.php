@@ -813,4 +813,38 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertTitle(t('Translation Sources | Drupal'));
   }
 
+  /**
+   * Test the deletion of job item.
+   */
+  function testJobItemDelete() {
+    $this->loginAsAdmin();
+
+    // Create a translator.
+    $translator = $this->createTranslator();
+    // Create a job and attach to the translator.
+    $job = $this->createJob();
+    $job->translator = $translator;
+    $job->settings = array();
+    $job->save();
+    $job->setState(Job::STATE_ACTIVE);
+
+    // Add item to the job.
+    $item = $job->addItem('test_source', 'test', 1);
+
+    $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
+
+    // Check for delete link.
+    $this->assertLink('Delete');
+
+    $this->clickLink('Delete');
+    $this->assertText(t('Are you sure you want to delete the translation job item @label?', ['@label' => $item->getSourceLabel()]));
+
+    // Check if cancel button is present or not.
+    $this->assertLink('Cancel');
+
+    // Delete the job item.
+    $this->drupalPostForm(NULL, [], t('Delete'));
+    $this->assertText(t('The translation job item @label has been deleted', ['@label' => $item->getSourceLabel()]));
+  }
+
 }
