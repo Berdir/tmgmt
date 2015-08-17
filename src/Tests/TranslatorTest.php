@@ -82,6 +82,13 @@ class TranslatorTest extends TMGMTTestBase {
     // Uninstall the test module (which provides a translator).
     \Drupal::service('module_installer')->uninstall(array('tmgmt_test'), FALSE);
 
+    // Assert that job deletion works correctly.
+    \Drupal::service('module_installer')->install(array('tmgmt_file'), FALSE);
+    $this->drupalPostForm('/admin/tmgmt/jobs/' . $job->id() . '/delete', [], t('Delete'));
+    $this->assertResponse(200);
+    $this->assertText(t('The translation job @value has been deleted.', array('@value' => $job->label())));
+    \Drupal::service('module_installer')->uninstall(array('tmgmt_file'), FALSE);
+
     // Get the overview.
     $this->drupalGet('admin/config/regional/tmgmt_translator');
     $this->assertNoText(t('Add translator'));

@@ -72,10 +72,8 @@ function tmgmt_file_import_form_submit(array $form, FormStateInterface $form_sta
  * Implements hook_tmgmt_job_delete().
  */
 function tmgmt_file_tmgmt_job_delete(JobInterface $job) {
-  $translator = $job->getTranslator();
-
   // Ignore jobs that don't have a file translator.
-  if (!$translator || $translator->getPluginId() != 'file') {
+  if (!$job->hasTranslator() || $job->getTranslator()->getPluginId() != 'file') {
     return;
   }
 
