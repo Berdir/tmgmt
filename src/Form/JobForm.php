@@ -540,11 +540,6 @@ class JobForm extends TmgmtFormBase {
     $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand('#tmgmt-ui-translator-wrapper', $this->renderer->render($form['translator_wrapper'])));
     $response->addCommand(new ReplaceCommand('#tmgmt-ui-' . str_replace('_', '-', $replace), $this->renderer->render($form['info'][$replace])));
-
-    // Replace value of the label field with ajax on language change.
-    // @todo This manual overwrite is necessary because somehow an old job entity seems to be used.
-    $form['info']['label']['#value'] = $form_state->getValue('label');
-    $response->addCommand(new ReplaceCommand('#tmgmt-ui-label', $this->renderer->render($form['info']['label'])));
     return $response;
   }
 
