@@ -199,12 +199,12 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $field->save();
 
     $node = entity_create('node', array(
+      'title' => $this->randomMachineName(),
       'uid' => $account->id(),
       'type' => $type->id(),
       'langcode' => 'en',
     ));
 
-    $node->title->appendItem(array('value' => $this->randomMachineName()));
     $value = array(
       'value' => $this->randomMachineName(),
       'summary' => $this->randomMachineName(),
@@ -260,6 +260,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     // Test if language neutral entities can't be added to a translation job.
     $node = entity_create('node', array(
+      'title' => $this->randomMachineName(),
       'uid' => $account->id(),
       'type' => $type->id(),
       'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
@@ -290,6 +291,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $field->save();
 
     $node = Node::create(array(
+      'title' => $this->randomMachineName(),
       'uid' => $account->id(),
       'type' => $type->id(),
       'langcode' => 'cs',
