@@ -433,8 +433,8 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
   public function needsReview($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
       $url = $this->getSourceUrl();
-      $message = 'The translation for !source needs to be reviewed.';
-      $variables = array('!source' => \Drupal::l($this->getSourceLabel(), $url));
+      $message = 'The translation for @source needs to be reviewed.';
+      $variables = array('@source' => \Drupal::l($this->getSourceLabel(), $url));
     }
     $return = $this->setState(static::STATE_REVIEW, $message, $variables, $type);
     // Auto accept the trganslation if the translator is configured for it.
@@ -450,8 +450,8 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
   public function accepted($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
       $url = $this->getSourceUrl();
-      $message = 'The translation for !source has been accepted.';
-      $variables = array('!source' => $url ? \Drupal::l($this->getSourceLabel(), $url) : $this->getSourceLabel());
+      $message = 'The translation for @source has been accepted.';
+      $variables = array('@source' => $url ? \Drupal::l($this->getSourceLabel(), $url) : $this->getSourceLabel());
     }
     $return = $this->setState(static::STATE_ACCEPTED, $message, $variables, $type);
     // Check if this was the last unfinished job item in this job.
@@ -468,8 +468,8 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
   public function active($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
       $url = $this->getSourceUrl();
-      $message = 'The translation for !source is now being processed.';
-      $variables = array('!source' => $url ? \Drupal::l($this->getSourceLabel(), $url) : $this->getSourceLabel());
+      $message = 'The translation for @source is now being processed.';
+      $variables = array('@source' => $url ? \Drupal::l($this->getSourceLabel(), $url) : $this->getSourceLabel());
     }
     return $this->setState(static::STATE_ACTIVE, $message, $variables, $type);
   }
@@ -716,11 +716,11 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
           // language and links to the review form.
           $job_url = $this->getJob()->url();
           $variables = array(
-            '!source' => $this->link($this->getSourceLabel()),
+            '@source' => $this->link($this->getSourceLabel()),
             '@language' => $this->getJob()->getTargetLanguage()->getName(),
-            '!review_url' => $this->url('canonical', array('query' => array('destination' => $job_url))),
+            '@review_url' => $this->url('canonical', array('query' => array('destination' => $job_url))),
           );
-          $this->needsReview('The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.', $variables);
+          $this->needsReview('The translation of @source to @language is finished and can now be <a href="@review_url">reviewed</a>.', $variables);
         }
       }
     }

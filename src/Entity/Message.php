@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt\Entity;
 
+use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -95,9 +96,11 @@ class Message extends ContentEntityBase implements MessageInterface {
   public function getMessage() {
     $text = $this->message->value;
     if ($this->variables->first()->toArray()) {
-      $text = t($text, $this->variables->first()->toArray());
+      return t($text, $this->variables->first()->toArray());
     }
-    return $text;
+    else {
+      return t($text);
+    }
   }
 
   /**

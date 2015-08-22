@@ -230,7 +230,7 @@ class CrudTest extends TMGMTKernelTestBase {
     $messages = $job->getMessages();
     $this->assertEqual(count($messages), 1);
     $last_message = end($messages);
-    $this->assertEqual($last_message->message->value, 'The translation of !source to @language is finished and can now be <a href="!review_url">reviewed</a>.');
+    $this->assertEqual($last_message->message->value, 'The translation of @source to @language is finished and can now be <a href="@review_url">reviewed</a>.');
 
     // Initial state - translation has been received for the first time.
     $this->assertEqual($data['#translation']['#text'], 'translated 1');

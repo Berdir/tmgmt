@@ -114,7 +114,7 @@ class HelperTest extends TMGMTKernelTestBase {
       if ($config->get('word_count_exclude_tags') != $test_data['exclude_tags']) {
         $config->set('word_count_exclude_tags', $test_data['exclude_tags'])->save();
       }
-      $this->assertEqual($real_count = \Drupal::service('tmgmt.data')->wordCount($test_data['text']), $desirable_count = $test_data['count'], t('!test_id: Real count (=!real_count) should be equal to desirable (=!desirable_count)', array('!test_id' => $id, '!real_count' => $real_count, '!desirable_count' => $desirable_count)));
+      $this->assertEqual($real_count = \Drupal::service('tmgmt.data')->wordCount($test_data['text']), $desirable_count = $test_data['count'], t('@test_id: Real count (=@real_count) should be equal to desirable (=@desirable_count)', array('@test_id' => $id, '!real_count' => $real_count, '@desirable_count' => $desirable_count)));
     }
   }
 }

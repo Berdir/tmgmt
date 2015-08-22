@@ -5,9 +5,6 @@
  * Main module file for the Translation Management module.
  */
 
-use Drupal\Component\Utility\NestedArray;
-use Drupal\Component\Utility\SafeMarkup;
-use Drupal\Component\Utility\Unicode;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\Component\Utility\Html;
@@ -646,8 +643,7 @@ function tmgmt_write_request_messages(JobInterface $job) {
       $errors = TRUE;
     }
     if ($text = $message->getMessage()) {
-      // @todo Verify if this usage is correct.
-      drupal_set_message(SafeMarkup::xssFilter($text), $message->getType());
+      drupal_set_message($text, $message->getType());
     }
   }
   return !$errors;

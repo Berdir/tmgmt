@@ -242,22 +242,22 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
     $count = count($items);
     if ($count > 0) {
       $source_label = reset($items)->getSourceLabel();
-      $t_args = array('!title' => $source_label, '!more' => $count - 1);
-      $label = \Drupal::translation()->formatPlural($count, '!title', '!title and !more more', $t_args);
+      $t_args = array('@title' => $source_label, '@more' => $count - 1);
+      $label = \Drupal::translation()->formatPlural($count, '@title', '@title and @more more', $t_args);
 
       // If the label length exceeds maximum allowed then cut off exceeding
       // characters from the title and use it to recreate the label.
       if (strlen($label) > Job::LABEL_MAX_LENGTH) {
         $max_length = strlen($source_label) - (strlen($label) - Job::LABEL_MAX_LENGTH);
         $source_label = Unicode::truncate($source_label, $max_length, TRUE);
-        $t_args['!title'] = $source_label;
-        $label = \Drupal::translation()->formatPlural($count, '!title', '!title and !more more', $t_args);
+        $t_args['@title'] = $source_label;
+        $label = \Drupal::translation()->formatPlural($count, '@title', '@title and @more more', $t_args);
       }
     }
     else {
       $source = $this->getSourceLanguage() ? $this->getSourceLanguage()->getName() : '?';
       $target = $this->getTargetLanguage() ? $this->getTargetLanguage()->getName() : '?';
-      $label = t('From !source to !target', array('!source' => $source, '!target' => $target));
+      $label = t('From @source to @target', array('@source' => $source, '@target' => $target));
     }
 
     return $label;

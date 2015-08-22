@@ -42,7 +42,7 @@ class LocalTranslator extends TranslatorPluginBase {
       'uid' => $job->uid,
       'tuid' => $tuid,
       'tjid' => $job->id(),
-      'title' => t('Task for !label', array('!label' => $job->label())),
+      'title' => t('Task for @label', array('@label' => $job->label())),
     ));
     // If we have translator then switch to pending state.
     if ($tuid) {
