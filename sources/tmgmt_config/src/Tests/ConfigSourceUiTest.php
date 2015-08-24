@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_config\Tests;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\EntityTestBase;
+use Drupal\views\Entity\View;
 
 /**
  * Content entity source UI tests.
@@ -238,6 +239,16 @@ class ConfigSourceUiTest extends EntityTestBase {
       }
     }
     $this->assertEqual($counter, 2);
+
+    // Test that a job can not be accepted if the entity does not exist.
+    $this->clickLink(t('Needs review'));
+
+    // Delete the view  and assert that the job can not be accepted.
+    $view_content = View::load('content');
+    $view_content->delete();
+
+    $this->drupalPostForm(NULL, array(), t('Save as completed'));
+    $this->assertText(t('@id of type @type does not exist, the job can not be completed.', array('@id' => $view_content->id(), '@type' => $view_content->getEntityTypeId())));
   }
 
   /**

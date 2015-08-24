@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_config\Plugin\tmgmt\Source;
 use Drupal\config_translation\ConfigMapperManagerInterface;
 use Drupal\config_translation\Form\ConfigTranslationFormBase;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
 use Drupal\Core\Config\Schema\Mapping;
 use Drupal\Core\Config\Schema\Sequence;
 use Drupal\Core\Config\TypedConfigManagerInterface;
@@ -124,8 +125,8 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
     else {
       $config_mapper = $this->configMapperManager->createInstance($job_item->getItemType());
 
+      /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $entity_type */
       $entity_type = $this->entityManager->getDefinition($job_item->getItemType());
-      $entity_type->getConfigPrefix();
 
       $pos = strpos($job_item->getItemId(), $entity_type->getConfigPrefix());
       if (($pos !== false)) {
@@ -148,15 +149,31 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
    * {@inheritdoc}
    */
   public function getLabel(JobItemInterface $job_item) {
-    return $this->getMapper($job_item)->getTitle();
+    try {
+      return $this->getMapper($job_item)->getTitle();
+    }
+    catch (TMGMTException $e) {
+      drupal_set_message(t('Title can not be displayed, the entity does not exist: %error.', array(
+        '%error' => $e->getMessage(),
+      )), 'error');
+    }
+    return NULL;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getUrl(JobItemInterface $job_item) {
-    $config_mapper = $this->getMapper($job_item);
-    return Url::fromRoute($config_mapper->getBaseRouteName(), $config_mapper->getBaseRouteParameters());
+    try {
+      $config_mapper = $this->getMapper($job_item);
+      return Url::fromRoute($config_mapper->getBaseRouteName(), $config_mapper->getBaseRouteParameters());
+    }
+    catch (TMGMTException $e) {
+      drupal_set_message(t('Url can not be displayed, the entity does not exist: %error.', array(
+        '%error' => $e->getMessage(),
+      )), 'error');
+    }
+    return NULL;
   }
 
   /**
@@ -185,7 +202,16 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
    * {@inheritdoc}
    */
   public function saveTranslation(JobItemInterface $job_item) {
-    $config_mapper = $this->getMapper($job_item);
+    try {
+      $config_mapper = $this->getMapper($job_item);
+    }
+    catch (TMGMTException $e) {
+      $job_item->addMessage('The entity %id of type %type does not exist, the job can not be completed.', array(
+        '%id' => $job_item->getItemId(),
+        '%type' => $job_item->getItemType(),
+      ), 'error');
+      return FALSE;
+    }
 
     $data = $job_item->getData();
 
@@ -215,6 +241,7 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
         $config_translation->save();
       }
     }
+    return TRUE;
   }
 
   /**

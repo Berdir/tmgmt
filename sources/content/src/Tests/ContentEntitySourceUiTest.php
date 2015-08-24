@@ -169,6 +169,21 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertText($node->getTitle());
     $this->assertNoText($node_german->getTitle());
     $this->assertText($node_not_translated->getTitle());
+
+    // Test that a job can not be accepted if the entity does not exist.
+    $deleted_node = $this->createNode('page', 'en');
+    $this->drupalGet('node/' . $deleted_node->id() . '/translations');
+    $edit = array(
+      'languages[de]' => TRUE,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Request translation'));
+    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->clickLink(t('Needs review'));
+
+    // Delete the node and assert that the job can not be accepted.
+    $deleted_node->delete();
+    $this->drupalPostForm(NULL, array(), t('Save as completed'));
+    $this->assertText(t('@id of type @type does not exist, the job can not be completed.', array('@id' => $deleted_node->id(), '@type' => $deleted_node->getEntityTypeId())));
   }
 
   /**

@@ -170,11 +170,19 @@ class ContentEntitySource extends SourcePluginBase {
   public function saveTranslation(JobItemInterface $job_item) {
     /* @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
+    if (!$entity) {
+      $job_item->addMessage('The entity %id of type %type does not exist, the job can not be completed.', array(
+        '%id' => $job_item->getItemId(),
+        '%type' => $job_item->getItemType(),
+      ), 'error');
+      return FALSE;
+    }
     $job = $job_item->getJob();
 
     $data = $job_item->getData();
     $this->doSaveTranslations($entity, $data, $job->getTargetLangcode());
     $job_item->accepted();
+    return TRUE;
   }
 
   /**

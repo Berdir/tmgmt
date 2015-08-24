@@ -224,8 +224,10 @@ class LocaleSource extends SourcePluginBase {
       // @todo: Send error message to user if update fails.
       if ($this->updateTranslation($job_item->getItemId(), $job->getTargetLangcode(), $translation)) {
         $job_item->accepted();
+        return TRUE;
       }
     }
+    return FALSE;
   }
 
   /**
