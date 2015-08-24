@@ -293,7 +293,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
    * @param $status
    *   The value to check the current status against.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the passed status matches the current status, FALSE otherwise.
    */
   public function isStatus($status) {
@@ -314,7 +314,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   /**
    * Returns whether the status of this task is 'unassigned'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the status is 'unassigned', FALSE otherwise.
    */
   public function isUnassigned() {
@@ -324,7 +324,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   /**
    * Returns whether the status of this task is 'pending'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the status is 'pending', FALSE otherwise.
    */
   public function isPending() {
@@ -334,7 +334,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   /**
    * Returns whether the status of this task is 'completed'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the status is 'completed', FALSE otherwise.
    */
   public function isCompleted() {
@@ -344,7 +344,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   /**
    * Returns whether the status of this task is 'rejected'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the status is 'rejected', FALSE otherwise.
    */
   public function isRejected() {
@@ -354,7 +354,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   /**
    * Returns whether the status of this task is 'closed'.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the status is 'closed', FALSE otherwise.
    */
   public function isClosed() {

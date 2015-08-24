@@ -129,7 +129,7 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
       $entity_type = $this->entityManager->getDefinition($job_item->getItemType());
 
       $pos = strpos($job_item->getItemId(), $entity_type->getConfigPrefix());
-      if (($pos !== false)) {
+      if (($pos !== FALSE)) {
         $entity_id = str_replace($entity_type->getConfigPrefix() . '.', '', $job_item->getItemId());
       }
       else {

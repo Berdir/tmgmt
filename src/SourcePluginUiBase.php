@@ -160,7 +160,7 @@ class SourcePluginUiBase extends PluginBase implements SourcePluginUiInterface {
    *   Entity type.
    *
    * @return bool
-   *   Returns true, if redirect has been set.
+   *   Returns TRUE, if redirect has been set.
    */
   public function overviewSearchFormRedirect(array $form, FormStateInterface $form_state, $type) {
     if ($form_state->getTriggeringElement()['#id'] == 'edit-search-cancel') {

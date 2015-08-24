@@ -33,7 +33,7 @@ interface SourcePluginInterface extends PluginInspectionInterface {
    * @param \Drupal\tmgmt\JobItemInterface $job_item
    *   The job item entity.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the translation was saved successfully, FALSE otherwise.
    */
   public function saveTranslation(JobItemInterface $job_item);

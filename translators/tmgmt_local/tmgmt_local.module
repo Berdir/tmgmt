@@ -301,7 +301,7 @@ function tmgmt_local_task_delete_multiple(array $tltids) {
  *   (Optional) The user to check for. Leave it to NULL to check for the global
  *   user.
  *
- * @return boolean
+ * @return bool
  *   TRUE if access is allowed, FALSE otherwise.
  */
 function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
@@ -338,7 +338,7 @@ function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
  *   (Optional) The user to check for. Leave it to NULL to check for the global
  *   user.
  *
- * @return boolean
+ * @return bool
  *   TRUE if access is allowed, FALSE otherwise.
  */
 function tmgmt_local_task_item_access($op, TMGMTLocalTaskItem $item = NULL, $account = NULL) {

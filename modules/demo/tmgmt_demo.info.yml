@@ -3,7 +3,7 @@ type: module
 description: All elements for a functioning demo.
 package: Translation Management
 core: 8.x
-hidden: FALSE
+hidden: false
 
 dependencies:
  - tmgmt

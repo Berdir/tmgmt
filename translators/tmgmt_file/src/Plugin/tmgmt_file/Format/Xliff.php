@@ -151,7 +151,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
     $this->job = $job;
 
     $this->openMemory();
-    $this->setIndent(true);
+    $this->setIndent(TRUE);
     $this->setIndentString(' ');
     $this->startDocument('1.0', 'UTF-8');
 

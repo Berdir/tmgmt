@@ -225,7 +225,7 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
    *   Configuration name.
    *
    * @return bool
-   *   Returns true, if it is translatable.
+   *   Returns TRUE, if it is translatable.
    */
   public function isTranslated($langcode, $name) {
     $config = \Drupal::languageManager()->getLanguageConfigOverride($langcode, $name);

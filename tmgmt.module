@@ -403,7 +403,7 @@ function tmgmt_translator_load_available($job) {
  * @param $translator
  *   The machine-readable name of a translator.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the translator is busy, FALSE otherwise.
  */
 function tmgmt_translator_busy($translator) {
