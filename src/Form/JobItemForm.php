@@ -8,7 +8,7 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
@@ -94,7 +94,7 @@ class JobItemForm extends TmgmtFormBase {
       $form['info']['translator'] = array(
         '#type' => 'item',
         '#title' => t('Translator'),
-        '#markup' => isset($translators[$item->getJob()->getTranslatorId()]) ? SafeMarkup::checkPlain($translators[$item->getJob()->getTranslatorId()]) : t('Missing translator'),
+        '#markup' => isset($translators[$item->getJob()->getTranslatorId()]) ? Html::escape($translators[$item->getJob()->getTranslatorId()]) : t('Missing translator'),
         '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
         '#suffix' => '</div>',
       );

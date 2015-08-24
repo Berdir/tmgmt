@@ -138,7 +138,7 @@ class SourcePluginUiBase extends PluginBase implements SourcePluginUiInterface {
     $languages = array();
     foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
       $languages['langcode-' . $langcode] = array(
-        'data' => SafeMarkup::checkPlain($language->getName()),
+        'data' => $language->getName(),
       );
     }
 

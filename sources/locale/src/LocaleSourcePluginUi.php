@@ -83,7 +83,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
     $languages = array();
     foreach ($this->getLanguages() as $langcode => $language) {
       $languages['langcode-' . $langcode] = array(
-        'data' => SafeMarkup::checkPlain($language->getName()),
+        'data' => $language->getName(),
       );
     }
 
@@ -231,7 +231,7 @@ class LocaleSourcePluginUi extends SourcePluginUiBase {
 
     $row = array(
       'id' => $data['id'],
-      'source' => SafeMarkup::checkPlain($source->source),
+      'source' => $source->source,
     );
 
 

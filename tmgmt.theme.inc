@@ -5,6 +5,7 @@
  * Theme file stub for tmgmt.
  */
 
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
@@ -22,7 +23,7 @@ function theme_tmgmt_element($variables) {
   // Use the #title attribute.
   $title = '';
   if (!empty($element['#title'])) {
-    $title = '<h3>' . SafeMarkup::checkPlain($element['#title']) . '</h3>';
+    $title = '<h3>' . Html::escape($element['#title']) . '</h3>';
   }
 
   // Use #attributes to customize a wrapper <div>.
