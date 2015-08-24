@@ -502,6 +502,33 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText('Translated text for job item');
     $this->drupalPostForm(NULL, $edit, t('Save as completed'));
     $this->assertEqual(\Drupal::state()->get('tmgmt_test_saved_translation_' . $item5->getItemType() . '_' . $item5->getItemId())['dummy']['deep_nesting']['#translation']['#text'], 'Translated text for job item');
+
+    $this->loginAsAdmin();
+
+    // Create two translators.
+    $translator1 = $this->createTranslator();
+    $translator2 = $this->createTranslator();
+    $this->drupalGet('/admin/tmgmt/jobs');
+
+    // Assert that translators are in dropdown list.
+    $this->assertOption('edit-translator', $translator1->id());
+    $this->assertOption('edit-translator', $translator2->id());
+
+    // Assign each job to a translator.
+    $job1 = $this->createJob();
+    $job2 = $this->createJob();
+    $job1->set('translator', $translator1->id())->save();
+    $job2->set('translator', $translator2->id())->save();
+
+    // Filter jobs by translator and assert values.
+    $this->drupalGet('/admin/tmgmt/jobs', array('query' => array('translator' => $translator1->id())));
+    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr')[0]->td[4]);
+    $this->assertEqual($label, $translator1->label(), 'Found translator label in table');
+    $this->assertNotEqual($label, $translator2->label(), "Translators filtered in table");
+    $this->drupalGet('/admin/tmgmt/jobs', array('query' => array('translator' => $translator2->id())));
+    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr')[0]->td[4]);
+    $this->assertEqual($label, $translator2->label(), 'Found translator label in table');
+    $this->assertNotEqual($label, $translator1->label(), "Translators filtered in table");
   }
 
   /**

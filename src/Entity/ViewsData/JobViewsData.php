@@ -46,7 +46,7 @@ class JobViewsData extends EntityViewsData {
     $data['tmgmt_job']['translator']['field']['id'] = 'tmgmt_translator';
     $data['tmgmt_job']['translator']['field']['options callback'] = 'tmgmt_translator_labels';
     $data['tmgmt_job']['translator']['filter']['id'] = 'in_operator';
-    $data['tmgmt_job']['translator']['field']['options callback'] = 'tmgmt_translator_labels';
+    $data['tmgmt_job']['translator']['filter']['options callback'] = 'tmgmt_translator_labels';
 
     return $data;
   }
