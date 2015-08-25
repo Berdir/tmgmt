@@ -664,6 +664,10 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalLogin($this->admin_user);
     // Navigate back to the aborted job and check for the log message.
     $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
+
+    // Assert that the progress is N/A since the job was aborted.
+    $element = (array) $this->xpath('//div[@class="view-content"]/table[@class="views-table views-view-table cols-7"]/tbody//tr[1]')[0];
+    $this->assertEqual(trim((string) $element['td'][3]), t('N/A'));
     $this->assertRaw(t('Job has been duplicated as a new job <a href="@url">#@id</a>.',
       array('@url' => $resubmitted_job->url(), '@id' => $resubmitted_job->id())));
     $this->drupalPostForm(NULL, array(), t('Delete'));
@@ -673,13 +677,6 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->drupalGet('admin/tmgmt/jobs/');
     $this->assertText('No jobs available.');
-    $this->drupalGet('admin/tmgmt');
-    $elements = $this->xpath('//table[contains(@class, @view)]//td[contains(., @text)]',
-      array('@view' => 'views-table', '@text' => t('N/A')));
-    if(isset($elements[0])) {
-      $status = $elements[0];
-      $this->assertEqual(trim((string) $status), t('N/A'));
-    }
   }
 
   /**
