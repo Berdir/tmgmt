@@ -346,4 +346,14 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
     }
   }
 
+  /**
+   * Gets the timestamp of the last entity change across all translations.
+   *
+   * @return int
+   *   The timestamp of the last entity save operation across all
+   *   translations.
+   */
+  public function getChangedTimeAcrossTranslations() {
+    return $this->getChangedTime();
+  }
 }
