@@ -1,5 +1,6 @@
 <?php
 use Drupal\Core\Session\AccountInterface;
+use Drupal\user\Entity\User;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\JobItemInterface;
@@ -704,7 +705,7 @@ function tmgmt_local_translators($source_language = NULL, array $target_language
   // Finally build the translators list.
   $translators[$key] = array();
   if (!empty($translators_uids)) {
-    foreach (loadMultiple($translators_uids) as $account) {
+    foreach (User::loadMultiple($translators_uids) as $account) {
       $translators[$key][$account->id()] = $account->getUsername();
     }
   }
