@@ -1,0 +1,20 @@
+entity.tmgmt_local_task.canonical:
+  path: '/translate/{tmgmt_local_task}'
+  defaults:
+    _entity_form: tmgmt_local_task.edit
+  requirements:
+    _entity_access: tmgmt_local_task.update
+
+entity.tmgmt_local_task.resubmit_form:
+  path: '/translate/{tmgmt_local_task}/unassign'
+  defaults:
+    _entity_form: tmgmt_local_task.unassign
+  requirements:
+    _entity_access: tmgmt_local_task.update
+
+entity.tmgmt_local_task.delete_form:
+  path: '/translate/{tmgmt_local_task}/delete'
+  defaults:
+    _entity_form: tmgmt_local_task.delete
+  requirements:
+    _entity_access: tmgmt_local_task.delete

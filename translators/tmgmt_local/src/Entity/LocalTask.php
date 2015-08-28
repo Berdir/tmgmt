@@ -16,6 +16,7 @@ use Drupal\tmgmt\JobItemInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 use Drupal\user\Entity\User;
+use Drupal\tmgmt_local\LocalTaskInterface;
 
 /**
  * Entity class for the local task entity.
@@ -23,17 +24,27 @@ use Drupal\user\Entity\User;
  * @ContentEntityType(
  *   id = "tmgmt_local_task",
  *   label = @Translation("Translation Task"),
- *   controllers = {
- *     "access" = "Drupal\tmgmt_local\Entity\Controller\LocalTaskAccessController",
+ *   handlers = {
+ *     "access" = "Drupal\tmgmt_local\Entity\Controller\LocalTaskAccessControlHandler",
  *     "form" = {
- *       "edit" = "Drupal\tmgmt_local\Entity\Form\LocalTaskFormController"
- *     }
+ *       "edit" = "Drupal\tmgmt_local\Form\LocalTaskForm",
+ *       "unassign" = "Drupal\tmgmt_local\Form\LocalTaskUnassignForm",
+ *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
+ *     },
+ *     "list_builder" = "Drupal\tmgmt_local\Entity\ListBuilder\LocalTaskListBuilder",
+ *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "views_data" = "Drupal\tmgmt_local\Entity\ViewsData\LocalTaskViewsData",
  *   },
  *   base_table = "tmgmt_local_task",
  *   entity_keys = {
  *     "id" = "tltid",
  *     "label" = "label",
  *     "uuid" = "uuid"
+ *   },
+ *   links = {
+ *     "canonical" = "/translate/{tmgmt_local_task}",
+ *     "unassign-form" = "/translate/{tmgmt_local_task}/unassign",
+ *     "delete-form" = "/translate/{tmgmt_local_task}/delete",
  *   }
  * )
  *
