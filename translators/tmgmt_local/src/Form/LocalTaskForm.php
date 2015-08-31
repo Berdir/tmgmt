@@ -39,9 +39,16 @@ class LocalTaskForm extends ContentEntityForm {
 
     $localTask = $this->entity;
 
-    $form['test'] = array(
+    $form['label'] = array(
       '#type' => 'markup',
-      '#markup' => 'hello world',
+      '#markup' => $localTask->defaultLabel(),
+    );
+
+    $form['title'] = array(
+      '#title' => t('Title'),
+      '#type' => 'textfield',
+      '#default_value' => $localTask->getTitle(),
+      '#required' => TRUE,
     );
     return $form;
     /*$states = LocalTask::getStates();
@@ -334,41 +341,11 @@ class LocalTaskForm extends ContentEntityForm {
 
     $actions['save'] = array(
       '#type' => 'submit',
-      '#value' => t('Save localTask'),
+      '#value' => t('Save task'),
       '#submit' => array('::submitForm', '::save'),
       '#weight' => 5,
+      '#button_type' => 'primary',
     );
-
-    if ($localTask->access('submit')) {
-      $actions['submit'] = array(
-        '#type' => 'submit',
-        '#button_type' => 'primary',
-        '#value' => tmgmt_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
-        //'#access' => $localTask->isSubmittable(),
-        //'#disabled' => !$localTask->getTranslatorId(),
-        '#submit' => array('::submitForm', '::save'),
-        '#weight' => 0,
-      );
-      $actions['resubmit_localTask'] = array(
-        '#type' => 'submit',
-        '#submit' => array('tmgmt_submit_redirect'),
-        '#redirect' => 'admin/tmgmt/localTasks/' . $localTask->id() . '/resubmit',
-        '#value' => t('Resubmit'),
-        //'#access' => $localTask->isAborted(),
-        '#weight' => 10,
-      );
-      $actions['abort_localTask'] = array(
-        '#type' => 'submit',
-        '#value' => t('Abort localTask'),
-        '#redirect' => 'admin/tmgmt/localTasks/' . $localTask->id() . '/abort',
-        '#submit' => array('tmgmt_submit_redirect'),
-        //'#access' => $localTask->isAbortable(),
-        '#weight' => 15,
-      );
-    }
-    else {
-      $actions['save']['#button_type'] = 'primary';
-    }
 
     if (!$localTask->isNew()) {
       $actions['delete'] = array(
@@ -380,15 +357,6 @@ class LocalTaskForm extends ContentEntityForm {
         '#limit_validation_errors' => array(),
       );
     }
-    // Only show the 'Cancel' button if the localTask has been submitted to the
-    // translator.
-    $actions['cancel'] = array(
-      '#type' => 'button',
-      '#value' => t('Cancel'),
-      '#submit' => array('tmgmt_submit_redirect'),
-      '#redirect' => 'admin/tmgmt/localTasks',
-      //'#access' => $localTask->isActive(),
-    );
     return $actions;
   }
 

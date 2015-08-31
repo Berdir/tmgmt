@@ -157,6 +157,13 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   /**
    * {@inheritdoc}
    */
+  public function getTranslator() {
+    return $this->get('tuid')->entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getChangedTime() {
     return $this->get('changed')->value;
   }
@@ -164,7 +171,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   /**
    * {@inheritdoc}
    */
-  protected function defaultLabel() {
+  public function defaultLabel() {
     if (empty($this->tuid)) {
       if (empty($this->title)) {
         return t('Task for @job', array('@job' => $this->getJob()->label()));
@@ -178,7 +185,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
         return t('Task for @job assigned to @translator', array('@job' => $this->getJob()->label(), '@translator' => User::load($this->tuid->getUsername())));
       }
       else {
-        return t('@title assigned to @translator', array('@title' => $this->title, '@translator' => User::load($this->tuid->getUsername())));
+        return t('%title assigned to @translator', array('%title' => $this->getTitle(), '@translator' => $this->getTranslator()->getUsername()));
       }
     }
   }
@@ -471,5 +478,14 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
    */
   public function getChangedTimeAcrossTranslations() {
     return $this->getChangedTime();
+  }
+
+  /**
+   * Gets the local task title.
+   */
+  public function getTitle() {
+    if (!empty($this->get('title')->value)) {
+      return $this->get('title')->value;
+    }
   }
 }
