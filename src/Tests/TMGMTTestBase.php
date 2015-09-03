@@ -67,7 +67,7 @@ abstract class TMGMTTestBase extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt', 'tmgmt_test', 'node');
+  public static $modules = array('tmgmt', 'tmgmt_test', 'node', 'block');
 
   /**
    * Overrides DrupalWebTestCase::setUp()
@@ -75,6 +75,8 @@ abstract class TMGMTTestBase extends WebTestBase {
   function setUp() {
     parent::setUp();
     $this->default_translator = Translator::load('test_translator');
+    $this->drupalPlaceBlock('local_tasks_block');
+    $this->drupalPlaceBlock('local_actions_block');
 
     // Load default admin permissions.
     $this->admin_permissions = array(
