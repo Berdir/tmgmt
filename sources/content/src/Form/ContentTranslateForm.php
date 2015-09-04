@@ -62,7 +62,7 @@ class ContentTranslateForm extends FormBase {
       // after the other from the original non-form rows.
       $option = array_shift($overview['#rows']);
       if ($langcode == $entity_langcode) {
-        $additional = SafeMarkup::set('<strong>' . t('Source') . '</strong>');
+        $additional = array('data' => array('#markup' => '<strong>' . t('Source') . '</strong>'));
         // This is the source object so we disable the checkbox for this row.
         $form['languages'][$langcode] = array(
           '#type' => 'checkbox',
