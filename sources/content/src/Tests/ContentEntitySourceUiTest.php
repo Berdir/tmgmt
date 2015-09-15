@@ -27,7 +27,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt_content', 'comment');
+  public static $modules = array('tmgmt_content', 'comment', 'ckeditor');
 
   /**
    * {@inheritdoc}
@@ -121,6 +121,12 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->clickLink(t('In progress'));
     $this->assertText($node->getTitle());
     $this->assertRaw('<div data-drupal-selector="edit-actions" class="form-actions js-form-wrapper form-wrapper" id="edit-actions">');
+
+    // Assert that the validation of HTML tags with editor works.
+    $this->drupalPostForm(NULL, [], t('Validate HTML tags'));
+    $this->assertText($node->label());
+    $this->assertResponse(200);
+
     $this->drupalGet('node/' . $node->id() . '/translations', array('query' => array('destination' => 'node/' . $node->id())));
 
     // Request a spanish translation.

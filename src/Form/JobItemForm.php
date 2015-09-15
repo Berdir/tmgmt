@@ -490,6 +490,12 @@ class JobItemForm extends TmgmtFormBase {
    */
   function compareHTMLTags($source, $translation) {
     $pattern = "/\<(.*?)\>/";
+    if (is_array($source) && isset($source['value'])) {
+      $source = $source['value'];
+    }
+    if (is_array($translation) && isset($translation['value'])) {
+      $translation = $translation['value'];
+    }
     preg_match_all($pattern, $source, $source_tags);
     preg_match_all($pattern, $translation, $translation_tags);
     $message = '';
