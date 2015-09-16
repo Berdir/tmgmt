@@ -548,28 +548,28 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Load all suggestions.
     $commands = $this->drupalPostAjaxForm(NULL, array(), array('op' => t('Load suggestions')));
-    $this->assertEqual(count($commands), 4, 'Found 4 commands in AJAX-Request.');
+    $this->assertEqual(count($commands), 5, 'Found 5 commands in AJAX-Request.');
 
     // Check each command for success.
     foreach ($commands as $command) {
       // Ignore irrelevant commands.
-      if ($command['command'] == 'settings' || $command['command'] == 'update_build_id') {
+      if ($command['command'] == 'settings' || $command['command'] == 'update_build_id' || $command['data'] == "\n") {
       }
       // Other commands must be from type "insert".
-      else if ($command['command'] == 'insert') {
+      elseif ($command['command'] == 'insert') {
         // This should be the tableselect javascript file for the header.
         if (($command['method'] == 'append') && ($command['selector'] == 'body')) {
           $this->assertTrue(substr_count($command['data'], 'misc/tableselect.js'), 'Javascript for Tableselect found.');
         }
         // Check for the main content, the tableselect with the suggestions.
-        else if (($command['method'] == NULL) && ($command['selector'] == NULL)) {
+        elseif (($command['method'] == NULL) && ($command['selector'] == NULL)) {
           $this->assertTrue(substr_count($command['data'], '</th>') == 5, 'Found five table header.');
           $this->assertTrue(substr_count($command['data'], '</tr>') == 3, 'Found two suggestion and one table header.');
           $this->assertTrue(substr_count($command['data'], '<td>11</td>') == 2, 'Found 10 words to translate per suggestion.');
           $this->assertTrue(substr_count($command['data'], 'value="Add suggestions"'), 'Found add button.');
         }
         // Nothing to prepend...
-        else if (($command['method'] == 'prepend') && ($command['selector'] == NULL)) {
+        elseif (($command['method'] == 'prepend') && ($command['selector'] == NULL)) {
           $this->assertTrue(empty($command['data']), 'No content will be prepended.');
         }
         else {
