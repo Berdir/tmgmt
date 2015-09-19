@@ -317,11 +317,11 @@ class JobForm extends TmgmtFormBase {
         '#weight' => 20,
       );
 
-      $form['translator_wrapper']['info'] = $this->checkoutInfo($job);
+      $form['translator_wrapper']['checkout_info'] = $this->checkoutInfo($job);
     }
 
-    if (!$job->isSubmittable() && empty($form['translator_wrapper']['info'])) {
-      $form['translator_wrapper']['info'] = array(
+    if (!$job->isSubmittable() && empty($form['translator_wrapper']['checkout_info'])) {
+      $form['translator_wrapper']['checkout_info'] = array(
         '#type' => 'markup',
         '#markup' => t('The translator does not provide any information.'),
       );

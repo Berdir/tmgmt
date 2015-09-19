@@ -95,7 +95,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
     $supported_formats = array_keys(\Drupal::service('plugin.manager.tmgmt_file.format')->getDefinitions());
     $form['file'] = array(
       '#type' => 'file',
-      '#title' => t('File file'),
+      '#title' => t('File'),
       '#size' => 50,
       '#description' => t('Supported formats: @formats.', array('@formats' => implode(', ', $supported_formats))),
     );
