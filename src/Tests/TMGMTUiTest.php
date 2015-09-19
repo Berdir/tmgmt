@@ -677,6 +677,31 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->drupalGet('admin/tmgmt/jobs/');
     $this->assertText('No jobs available.');
+
+    // Create a translator.
+    $translator = $this->createTranslator();
+
+    // Create a job and attach to the translator.
+    $job = $this->createJob();
+    $job->translator = $translator;
+    $job->save();
+    $job->setState(Job::STATE_ACTIVE);
+
+    // Add item to the job.
+    $job->addItem('test_source', 'test', 1);
+    $this->drupalGet('admin/tmgmt/jobs');
+
+    // Try to abort the job and save.
+    $this->clickLink(t('manage'));
+    $this->drupalPostForm(NULL, [], t('Abort job'));
+    $this->drupalPostForm(NULL, [], t('Confirm'));
+
+    // Go back to the job page.
+    $this->drupalGet('admin/tmgmt/jobs');
+
+    // Check that job is aborted now.
+    $aborted = (array) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr[1]')[0];
+    $this->assertEqual(trim($aborted['td'][2]), 'Aborted');
   }
 
   /**

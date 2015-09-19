@@ -931,7 +931,9 @@ function tmgmt_job_checkout_and_redirect(FormStateInterface $form_state, array $
 /**
  * Helper function for redirecting a form after a button has been clicked.
  */
-function tmgmt_submit_redirect(array $form, FormStateInterface $form_state){
+function tmgmt_submit_redirect(array $form, FormStateInterface $form_state) {
+  // Remove destination from the query to fix form redirects.
+  \Drupal::request()->query->remove('destination');
   if ($form_state->getTriggeringElement()['#redirect']) {
     $form_state->setRedirectUrl(Url::fromUri('base:' . $form_state->getTriggeringElement()['#redirect']));
   }
