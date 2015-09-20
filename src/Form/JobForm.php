@@ -493,10 +493,10 @@ class JobForm extends TmgmtFormBase {
    */
   function checkoutSettingsForm(FormStateInterface $form_state, JobInterface $job) {
     $form = array();
-    $translator = $job->getTranslator();
-    if (!$translator) {
+    if (!$job->hasTranslator()) {
       return $form;
     }
+    $translator = $job->getTranslator();
     if (!$translator->isAvailable()) {
       $form['#description'] = Xss::filter($job->getTranslator()->getNotAvailableReason());
     }
