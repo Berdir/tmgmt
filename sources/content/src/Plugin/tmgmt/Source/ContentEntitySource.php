@@ -132,7 +132,7 @@ class ContentEntitySource extends SourcePluginBase {
         // Add the format to the translatable properties.
         if (!empty($format)) {
           foreach ($data[$key][$index] as $name => $value) {
-            if (isset($value['#translate']) && $value['#translate'] == TRUE) {
+            if (is_array($value) && isset($value['#translate']) && $value['#translate'] == TRUE) {
               $data[$key][$index][$name]['#format'] = $format;
             }
           }
