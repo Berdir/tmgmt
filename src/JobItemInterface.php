@@ -173,7 +173,7 @@ interface JobItemInterface extends ContentEntityInterface {
    *
    * @todo: Move data item documentation to a new, separate api group.
    *
-   * The key can be an alphanumeric string.
+   * The key can be any alphanumeric character and '_'.
    *
    * @param array $key
    *   If present, only the subarray identified by key is returned.

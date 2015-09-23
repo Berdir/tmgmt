@@ -187,6 +187,7 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
     $data = array();
     foreach ($config_mapper->getConfigData() as $config_id => $config_data) {
       $schema = $this->typedConfig->get($config_id);
+      $config_id = str_replace('.', '__', $config_id);
       $data[$config_id] = $this->extractTranslatables($schema, $config_data);
     }
     // If there is only one, we simplify the data and return it.
@@ -221,6 +222,16 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
     if (count($config_names) == 1) {
       $data[$config_names[0]] = $job_item->getData();
     }
+    else {
+
+      // Replace the arrays keys back.
+      foreach ($data as $key => $value) {
+        $new_key = str_replace('__', '.', $key);
+        $data[$new_key] = $value;
+        unset($data[$key]);
+      }
+    }
+
     foreach ($config_mapper->getConfigNames() as $name) {
       $schema = $this->typedConfig->get($name);
 

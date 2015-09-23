@@ -190,5 +190,40 @@ class ConfigSourceUnitTest extends EntityUnitTestBase {
 
     $this->assertEqual(\Drupal::config('system.site')->get('slogan'), $data['slogan']['#translation']['#text']);
   }
+  /**
+   * Tests the user config entity.
+   */
+  public function testAccountSettings() {
+    $this->installConfig(['user']);
+    $this->config('user.settings')->set('anonymous', 'Test Anonymous')->save();
+    $job = tmgmt_job_create('en', 'de');
+    $job->translator = 'test_translator';
+    $job->save();
+    $job_item = tmgmt_job_item_create('config', '_simple_config', 'entity.user.admin_form', array('tjid' => $job->id()));
+    $job_item->save();
 
+    $source_plugin = $this->container->get('plugin.manager.tmgmt.source')->createInstance('config');
+    $data = $source_plugin->getData($job_item);
+
+    // Test the name property.
+    $this->assertEqual($data['user__settings']['anonymous']['#label'], 'Name');
+    $this->assertEqual($data['user__settings']['anonymous']['#text'], 'Test Anonymous');
+    $this->assertEqual($data['user__settings']['anonymous']['#translate'], TRUE);
+
+    // Test item types.
+    $this->assertEqual($source_plugin->getItemTypes()['view'], t('View'));
+
+    // Now request a translation and save it back.
+    $job->requestTranslation();
+    $items = $job->getItems();
+    $item = reset($items);
+    $item->acceptTranslation();
+    $data = $item->getData();
+
+    // Check that the translations were saved correctly.
+    $language_manager = \Drupal::languageManager();
+    $language_manager->setConfigOverrideLanguage($language_manager->getLanguage('de'));
+
+    $this->assertEqual(\Drupal::config('user.settings')->get('anonymous'), $data['user__settings']['anonymous']['#translation']['#text']);
+  }
 }

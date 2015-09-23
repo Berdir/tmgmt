@@ -313,6 +313,9 @@ class ConfigSourceUiTest extends EntityTestBase {
 
     // Verify that the pending translation is shown.
     $this->clickLink(t('Needs review'));
+    $this->drupalPostForm(NULL, array('name[translation]' => 'de_Druplicon'), t('Save'));
+    $this->clickLink(t('Needs review'));
+    $this->assertText('de_Druplicon');
     $this->drupalPostForm(NULL, array(), t('Save'));
 
     // Request a spanish translation.
@@ -339,6 +342,20 @@ class ConfigSourceUiTest extends EntityTestBase {
       }
     }
     $this->assertEqual($counter, 2);
+
+    // Test translation and validation tags of account settings.
+    $this->drupalGet('admin/config/people/accounts/translate');
+
+    $this->drupalPostForm(NULL, ['languages[de]' => TRUE], t('Request translation'));
+
+    // Submit.
+    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->clickLink(t('Needs review'));
+    $this->drupalPostForm(NULL, array('user__settings|anonymous[translation]' => 'de_Druplicon'), t('Validate HTML tags'));
+    $this->assertText('de_Druplicon');
+    $this->drupalPostForm(NULL, array(), t('Save'));
+    $this->clickLink(t('Needs review'));
+    $this->assertText('de_Druplicon');
   }
 
 }
