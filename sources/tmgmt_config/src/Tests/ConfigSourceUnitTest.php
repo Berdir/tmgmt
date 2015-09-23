@@ -100,10 +100,8 @@ class ConfigSourceUnitTest extends EntityUnitTestBase {
 
   /**
    * Tests the view config entity
-   *
-   * @todo  Uncomment the test when the core issue (2460259) is fixed.
    */
-  public function dtestView() {
+  public function testView() {
     $this->installConfig(['system', 'tmgmt']);
     $job = tmgmt_job_create('en', 'de');
     $job->translator = 'test_translator';
