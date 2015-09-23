@@ -78,7 +78,7 @@ class PluginsTest extends TMGMTKernelTestBase {
 
     // The third message is specific to a job item and has different state
     // constants.
-    $this->assertEqual('The translation of @source to @language is finished and can now be <a href="@review_url">reviewed</a>.', $needs_review->message->value);
+    $this->assertEqual('The translation of <a href=":source_url">@source</a> to @language is finished and can now be <a href=":review_url">reviewed</a>.', $needs_review->message->value);
     $this->assertEqual('status', $needs_review->type->value);
 
     $i = 1;

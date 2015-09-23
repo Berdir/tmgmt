@@ -485,11 +485,13 @@ class TMGMTUiTest extends TMGMTTestBase {
     ));
     $item5 = $job->addItem('test_source', 'test', 5);
 
+    $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
+    $this->assertText('The translation of test_source:test:1 to German is finished and can now be reviewed.');
     $edit = array(
       'target_language' => 'de',
       'settings[action]' => 'translate',
     );
-    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), $edit, t('Submit to translator'));
+    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
 
     $this->drupalGet('admin/tmgmt/items/' . $item5->id());
     $rows5 = $this->xpath('//textarea[@name="dummy|deep_nesting[source][value]"]');

@@ -9,6 +9,7 @@ namespace Drupal\tmgmt\Form;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
@@ -238,7 +239,7 @@ class JobItemForm extends TmgmtFormBase {
           continue;
         }
         if ($text = $message->getMessage()) {
-          drupal_set_message(Xss::filter($text), $message->getType());
+          drupal_set_message(SafeMarkup::format($text, []), $message->getType());
         }
       }
     }

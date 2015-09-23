@@ -15,9 +15,11 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
+use Drupal\Core\Url;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Render\Element;
+use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Entity class for the tmgmt_job_item entity.
@@ -272,7 +274,14 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
   public function addMessage($message, $variables = array(), $type = 'status') {
     // Save the job item if it hasn't yet been saved.
     if (!$this->isNew() || $this->save()) {
-      $message = tmgmt_message_create($message, $variables, array('tjid' => $this->getJobId(), 'tjiid' => $this->id(), 'type' => $type));
+      $message = tmgmt_message_create($message,
+        $variables,
+        array(
+          'tjid' => $this->getJobId(),
+          'tjiid' => $this->id(),
+          'type' => $type,
+        )
+      );
       if ($message->save()) {
         return $message;
       }
@@ -432,9 +441,12 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    */
   public function needsReview($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
-      $url = $this->getSourceUrl();
-      $message = 'The translation for @source needs to be reviewed.';
-      $variables = array('@source' => \Drupal::l($this->getSourceLabel(), $url));
+      $source_url = $this->getSourceUrl();
+      $message = $source_url ? 'The translation for <a href=":source_url">@source</a> needs to be reviewed.' : 'The translation for @source needs to be reviewed.';
+      $variables = $source_url ? array(
+        ':source_url' => $source_url,
+        '@source' => ($this->getSourceLabel()),
+      ) : array('@source' => ($this->getSourceLabel()));
     }
     $return = $this->setState(static::STATE_REVIEW, $message, $variables, $type);
     // Auto accept the trganslation if the translator is configured for it.
@@ -449,9 +461,12 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    */
   public function accepted($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
-      $url = $this->getSourceUrl();
-      $message = 'The translation for @source has been accepted.';
-      $variables = array('@source' => $url ? \Drupal::l($this->getSourceLabel(), $url) : $this->getSourceLabel());
+      $source_url = $this->getSourceUrl();
+      $message = $source_url ? 'The translation for <a href=":source_url">@source</a> has been accepted.' : 'The translation for @source has been accepted.';
+      $variables = $source_url ? array(
+        ':source_url' => $source_url->toString(),
+        '@source' => ($this->getSourceLabel()),
+      ) : array('@source' => ($this->getSourceLabel()));
     }
     $return = $this->setState(static::STATE_ACCEPTED, $message, $variables, $type);
     // Check if this was the last unfinished job item in this job.
@@ -467,9 +482,12 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    */
   public function active($message = NULL, $variables = array(), $type = 'status') {
     if (!isset($message)) {
-      $url = $this->getSourceUrl();
-      $message = 'The translation for @source is now being processed.';
-      $variables = array('@source' => $url ? \Drupal::l($this->getSourceLabel(), $url) : $this->getSourceLabel());
+      $source_url = $this->getSourceUrl();
+      $message = $source_url ? 'The translation for <a href=":source_url">@source</a> is now being processed.' : 'The translation for @source is now being processed.';
+      $variables = $source_url ? array(
+        ':source_url' => $source_url->toString(),
+        '@source' => ($this->getSourceLabel()),
+      ) : array('@source' => ($this->getSourceLabel()));
     }
     return $this->setState(static::STATE_ACTIVE, $message, $variables, $type);
   }
@@ -716,11 +734,12 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
           // language and links to the review form.
           $job_url = $this->getJob()->url();
           $variables = array(
-            '@source' => $this->link($this->getSourceLabel()),
+            '@source' => $this->getSourceLabel(),
             '@language' => $this->getJob()->getTargetLanguage()->getName(),
-            '@review_url' => $this->url('canonical', array('query' => array('destination' => $job_url))),
+            ':review_url' => Url::fromUserInput($job_url)->toString(),
           );
-          $this->needsReview('The translation of @source to @language is finished and can now be <a href="@review_url">reviewed</a>.', $variables);
+          (!$this->getSourceUrl()) ? $variables[':source_url'] = (string) $job_url : $variables[':source_url'] = $this->getSourceUrl()->toString();
+          $this->needsReview('The translation of <a href=":source_url">@source</a> to @language is finished and can now be <a href=":review_url">reviewed</a>.', $variables);
         }
       }
     }

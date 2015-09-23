@@ -240,6 +240,9 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     )));
     $this->assertText(t('The translation for @title has been accepted.', array('@title' => $node->getTitle())));
 
+    //Assert link is clickable.
+    $this->clickLink($node->getTitle());
+
     // Translated nodes should now be listed and be clickable.
     // @todo Use links on translate tab.
     $this->drupalGet('de/node/' . $node->id());
