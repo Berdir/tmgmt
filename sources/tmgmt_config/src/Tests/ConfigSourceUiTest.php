@@ -268,8 +268,8 @@ class ConfigSourceUiTest extends EntityTestBase {
 
     // Test the label on the source overivew.
     $this->drupalGet('admin/structure/views/view/content/translate');
-    $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a> including the current item.',
-        array('@count' => 2, '@url' => Url::fromRoute('tmgmt.cart')->toString())));
+    $this->assertRaw(t('There are @count items in the <a href=":url">translation cart</a> including the current item.',
+        array('@count' => 2, ':url' => Url::fromRoute('tmgmt.cart')->toString())));
   }
 
   /**

@@ -47,10 +47,10 @@ class JobResubmitForm extends ContentEntityConfirmFormBase {
       $new_job->addExistingItem($item_to_resubmit);
     }
 
-    $this->entity->addMessage('Job has been duplicated as a new job <a href="@url">#@id</a>.',
-      array('@url' => $new_job->url(), '@id' => $new_job->id()));
-    $new_job->addMessage('This job is a duplicate of the previously aborted job <a href="@url">#@id</a>',
-      array('@url' => $this->entity->url(), '@id' => $this->entity->id()));
+    $this->entity->addMessage('Job has been duplicated as a new job <a href=":url">#@id</a>.',
+      array(':url' => $new_job->url(), '@id' => $new_job->id()));
+    $new_job->addMessage('This job is a duplicate of the previously aborted job <a href=":url">#@id</a>',
+      array(':url' => $this->entity->url(), '@id' => $this->entity->id()));
 
     drupal_set_message(t('The aborted job has been duplicated. You can resubmit it now.'));
     $form_state->setRedirectUrl($new_job->urlInfo());

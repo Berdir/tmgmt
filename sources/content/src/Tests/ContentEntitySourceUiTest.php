@@ -372,13 +372,13 @@ class ContentEntitySourceUiTest extends EntityTestBase {
 
     // Test the translate tab.
     $this->drupalGet('node/' . $nodes[3]->id() . '/translations');
-    $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a>.',
-        array('@count' => 2, '@url' => Url::fromRoute('tmgmt.cart')->toString())));
+    $this->assertRaw(t('There are @count items in the <a href=":url">translation cart</a>.',
+        array('@count' => 2, ':url' => Url::fromRoute('tmgmt.cart')->toString())));
 
     $this->drupalPostForm(NULL, array(), t('Add to cart'));
-    $this->assertRaw(t('@count content source was added into the <a href="@url">cart</a>.', array('@count' => 1, '@url' => Url::fromRoute('tmgmt.cart')->toString())));
-    $this->assertRaw(t('There are @count items in the <a href="@url">translation cart</a> including the current item.',
-        array('@count' => 3, '@url' => Url::fromRoute('tmgmt.cart')->toString())));
+    $this->assertRaw(t('@count content source was added into the <a href=":url">cart</a>.', array('@count' => 1, ':url' => Url::fromRoute('tmgmt.cart')->toString())));
+    $this->assertRaw(t('There are @count items in the <a href=":url">translation cart</a> including the current item.',
+        array('@count' => 3, ':url' => Url::fromRoute('tmgmt.cart')->toString())));
   }
 
   /**

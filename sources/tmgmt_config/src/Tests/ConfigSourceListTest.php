@@ -253,7 +253,7 @@ class ConfigSourceListTest extends EntityTestBase {
     $overview_url = Url::fromRoute('tmgmt.source_overview', array('plugin' => 'config', 'item_type' => '_simple_config'))->getInternalPath();
 
     // Translated languages should now be listed as Needs review.
-    $this->assertRaw(SafeMarkup::format('href="@url" title="Active job item: Needs review"', array('@url' => JobItem::load(1)->urlInfo()->setOption('query',
+    $this->assertRaw(SafeMarkup::format('href=":url" title="Active job item: Needs review"', array(':url' => JobItem::load(1)->urlInfo()->setOption('query',
       ['destination' => $overview_url])->toString())));
 
     $this->assertText(t('Test translation created.'));

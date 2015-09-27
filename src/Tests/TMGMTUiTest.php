@@ -631,8 +631,8 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), array(), t('Resubmit'));
     $this->drupalPostForm(NULL, array(), t('Confirm'));
     // Test for the log message.
-    $this->assertRaw(t('This job is a duplicate of the previously aborted job <a href="@url">#@id</a>',
-      array('@url' => $job->url(), '@id' => $job->id())));
+    $this->assertRaw(t('This job is a duplicate of the previously aborted job <a href=":url">#@id</a>',
+      array(':url' => $job->url(), '@id' => $job->id())));
 
     // Load the resubmitted job and check for its status and values.
     $url_parts = explode('/', $this->getUrl());
@@ -649,7 +649,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       // We match job items based on "id #" string. This is not that straight
       // forward, but it works as the test source text is generated as follows:
       // Text for job item with type #type and id #id.
-      $_items = $resubmitted_job->getItems(array('data' => array('value' => '%id ' . $item->getItemId() . '%', 'operator' => 'LIKE')));
+      $_items = $resubmitted_job->getItems(array('data' => array('value' => 'id ' . $item->getItemId(), 'operator' => 'CONTAINS')));
       $_item = reset($_items);
       $this->assertNotEqual($_item->getJobId(), $item->getJobId());
       $this->assertEqual($_item->getPlugin(), $item->getPlugin());
@@ -670,8 +670,8 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Assert that the progress is N/A since the job was aborted.
     $element = (array) $this->xpath('//div[@class="view-content"]/table[@class="views-table views-view-table cols-7"]/tbody//tr[1]')[0];
     $this->assertEqual(trim((string) $element['td'][3]), t('N/A'));
-    $this->assertRaw(t('Job has been duplicated as a new job <a href="@url">#@id</a>.',
-      array('@url' => $resubmitted_job->url(), '@id' => $resubmitted_job->id())));
+    $this->assertRaw(t('Job has been duplicated as a new job <a href=":url">#@id</a>.',
+      array(':url' => $resubmitted_job->url(), '@id' => $resubmitted_job->id())));
     $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->assertText('The translation job From English to Spanish has been deleted.');
