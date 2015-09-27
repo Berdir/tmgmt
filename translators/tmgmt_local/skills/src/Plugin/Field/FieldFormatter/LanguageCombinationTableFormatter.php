@@ -26,7 +26,7 @@ class LanguageCombinationTableFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $rows = array();
 
     foreach ($items as $item) {
