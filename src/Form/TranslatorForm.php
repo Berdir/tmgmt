@@ -143,7 +143,7 @@ class TranslatorForm extends EntityForm {
         '#required' => TRUE,
         '#disabled' => $busy,
         '#ajax' => array(
-          'callback' => array($this, 'ajaxTranslaorPluginSelect'),
+          'callback' => array($this, 'ajaxTranslatorPluginSelect'),
           'wrapper' => 'tmgmt-plugin-wrapper',
         ),
       );
@@ -257,7 +257,7 @@ class TranslatorForm extends EntityForm {
    * Ajax callback for loading the translator plugin settings form for the
    * currently selected translator plugin.
    */
-  function ajaxTranslaorPluginSelect(array $form, FormStateInterface $form_state) {
+  function ajaxTranslatorPluginSelect(array $form, FormStateInterface $form_state) {
     return $form['plugin_wrapper'];
   }
 
