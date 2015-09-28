@@ -139,7 +139,9 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
 
     $row = array(
       'id' => $entity->id(),
-      'title' => $entity->link($label),
+      // If the entity type is FieldConfig, we list the field of the fieldable
+      // entity type which doesn't have a link.
+      'title' => $entity->url('edit-form') ? $entity->link($label) : $label,
     );
 
     // Load entity translation specific data.
@@ -295,18 +297,27 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
         $item_id = $definition['id'];
         $items[$item_id]['label'] = $definition['title'];;
         $items[$item_id]['langcode'] = \Drupal::config($definition['names'][0])->get('langcode') ?: 'en';
+        $items[$item_id]['type'] = $type;
       }
     }
     else {
       $entity_type = \Drupal::entityManager()->getDefinition($type);
       $entity_ids = str_replace($entity_type->getConfigPrefix() . '.', '', array_filter($form_state->getValue('items')));
-
       $entities = entity_load_multiple($type, $entity_ids);
       foreach ($entities as $entity) {
         /* @var $entity \Drupal\Core\Entity\EntityInterface */
         $item_id = $entity->getConfigDependencyName();
         $items[$item_id]['label'] = $entity->label();
         $items[$item_id]['langcode'] = $entity->language()->getId();
+
+        // The type cannot be field_config, should be the id of the
+        // fieldable entity type.
+        if ($type == 'field_config') {
+          $items[$item_id]['type'] = $entity->get('entity_type') . '_fields';
+        }
+        else {
+          $items[$item_id]['type'] = $type;
+        }
       }
     }
     $source_lang_registry = array();
@@ -321,7 +332,7 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
           // Create new job.
           $job = tmgmt_job_create($source_lang, LanguageInterface::LANGCODE_NOT_SPECIFIED, \Drupal::currentUser()->id());
           // Add initial job item.
-          $job->addItem('config', $type, $id);
+          $job->addItem('config', $extra['type'], $id);
           // Add job identifier into registry
           $source_lang_registry[$source_lang] = $job->id();
           // Add newly created job into jobs queue.
@@ -330,7 +341,7 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
         // We have a job for given source lang, so just add new job item for the
         // existing job.
         else {
-          $jobs[$source_lang_registry[$source_lang]]->addItem('config', $type, $id);
+          $jobs[$source_lang_registry[$source_lang]]->addItem('config', $extra['type'], $id);
         }
       } catch (TMGMTException $e) {
         watchdog_exception('tmgmt', $e);

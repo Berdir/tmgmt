@@ -126,7 +126,7 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
       $config_mapper = $this->configMapperManager->createInstance($job_item->getItemType());
 
       /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $entity_type */
-      $entity_type = $this->entityManager->getDefinition($job_item->getItemType());
+      $entity_type = $this->entityManager->getDefinition($config_mapper->getType());
 
       $pos = strpos($job_item->getItemId(), $entity_type->getConfigPrefix());
       if (($pos !== FALSE)) {
@@ -136,7 +136,7 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
         throw new TMGMTException(t('Item ID does not contain the full config object name.'));
       }
 
-      $entity = $this->entityManager->getStorage($job_item->getItemType())->load($entity_id);
+      $entity = $this->entityManager->getStorage($config_mapper->getType())->load($entity_id);
       if (!$entity) {
         throw new TMGMTException(t('Unable to load entity %type with id %id', array('%type' => $job_item->getItemType(), '%id' => $entity_id)));
       }
@@ -298,9 +298,9 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
     $entity_types = $this->entityManager->getDefinitions();
     $definitions = $this->configMapperManager->getDefinitions();
     $types = array();
-    foreach ($entity_types as $entity_type_name => $entity_type) {
-      if (isset($definitions[$entity_type_name])) {
-        $types[$entity_type_name] = (string) $entity_type->getLabel();
+    foreach ($definitions as $definition_name => $definition) {
+      if (isset($definition['entity_type'])) {
+        $types[$definition['entity_type']] = (string) $entity_types[$definition['entity_type']]->getLabel();
       }
     }
     $types[static::SIMPLE_CONFIG] = t('Simple configuration');

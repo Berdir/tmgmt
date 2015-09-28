@@ -24,7 +24,7 @@ class ConfigSourceListTest extends EntityTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt_config', 'tmgmt_content', 'config_translation', 'views', 'views_ui');
+  public static $modules = array('tmgmt_config', 'tmgmt_content', 'config_translation', 'views', 'views_ui', 'field_ui');
 
   protected $nodes = array();
 
@@ -328,6 +328,23 @@ class ConfigSourceListTest extends EntityTestBase {
 
     // There are 2 simple configurations with name 'sys' but just 1 is translated.
     $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
+  }
+
+  /**
+   * Test for field configuration translation from source list.
+   */
+  function testFieldConfigList() {
+    $this->drupalGet('admin/tmgmt/sources/config/field_config');
+
+    // Test submission.
+    $this->drupalPostForm(NULL, array('items[field.field.node.article.body]' => TRUE), t('Request translation'));
+    $this->assertText(t('One job needs to be checked out.'));
+    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+
+    // Make sure that we're back on the originally defined destination URL.
+    $this->assertUrl('admin/tmgmt/sources/config/field_config');
+    $this->assertText(t('Test translation created.'));
+    $this->assertText(t('The translation of Body  to German is finished and can now be reviewed.'));
   }
 
 }

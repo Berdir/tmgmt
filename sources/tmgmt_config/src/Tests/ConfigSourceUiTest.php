@@ -24,7 +24,7 @@ class ConfigSourceUiTest extends EntityTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt_config', 'views', 'views_ui', 'config_translation');
+  public static $modules = array('tmgmt_config', 'views', 'views_ui', 'field_ui', 'config_translation');
 
   /**
    * {@inheritdoc}
@@ -251,6 +251,28 @@ class ConfigSourceUiTest extends EntityTestBase {
     $this->assertText(t('@id of type @type does not exist, the job can not be completed.', array('@id' => $view_content->id(), '@type' => $view_content->getEntityTypeId())));
   }
 
+  /**
+   * Test the field config entity type for a single checkout.
+   */
+  function testFieldConfigTranslateTabSingleCheckout() {
+    $this->loginAsAdmin(array('translate configuration'));
+
+    // Go to the translate tab.
+    $this->drupalGet('admin/structure/types/manage/article/fields/node.article.body/translate');
+
+    // Request a german translation.
+    $this->drupalPostForm(NULL, array('languages[de]' => TRUE), t('Request translation'));
+
+    // Verify that we are on the checkout page.
+    $this->assertResponse(200);
+    $this->assertText(t('One job needs to be checked out.'));
+    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+
+    // Verify that the pending translation is shown.
+    $this->clickLink(t('Needs review'));
+    $this->drupalPostForm(NULL, array(), t('Save as completed'));
+
+  }
   /**
    * Test the entity source specific cart functionality.
    */
