@@ -756,7 +756,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
     // We don't know if the source plugin was able to save the translation after
     // this point. That means that the plugin has to set the 'accepted' states
     // on its own.
-    $plugin->saveTranslation($this);
+    $plugin->saveTranslation($this, $this->getJob()->getTargetLangcode());
   }
 
   /**

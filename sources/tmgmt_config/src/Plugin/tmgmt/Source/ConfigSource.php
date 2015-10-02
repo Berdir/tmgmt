@@ -202,7 +202,7 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
   /**
    * {@inheritdoc}
    */
-  public function saveTranslation(JobItemInterface $job_item) {
+  public function saveTranslation(JobItemInterface $job_item, $target_langcode) {
     try {
       $config_mapper = $this->getMapper($job_item);
     }
@@ -220,7 +220,7 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
 
     // We need to refactor the array just as we did in getData.
     if (count($config_names) == 1) {
-      $data[$config_names[0]] = $job_item->getData();
+      $data[$config_names[0]] = $data;
     }
     else {
 
@@ -237,7 +237,7 @@ class ConfigSource extends SourcePluginBase implements ContainerFactoryPluginInt
 
       // Set configuration values based on form submission and source values.
       $base_config = $this->configFactoryManager->getEditable($name);
-      $config_translation = $this->languageManager->getLanguageConfigOverride($job_item->getJob()->getTargetLangcode(), $name);
+      $config_translation = $this->languageManager->getLanguageConfigOverride($target_langcode, $name);
 
       $element = ConfigTranslationFormBase::createFormElement($schema);
 

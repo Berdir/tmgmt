@@ -215,14 +215,13 @@ class LocaleSource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function saveTranslation(JobItemInterface $job_item) {
-    $job = $job_item->getJob();
+  public function saveTranslation(JobItemInterface $job_item, $target_langcode) {
     $data = $job_item->getData();
     if (isset($data['singular'])) {
       $translation = $data['singular']['#translation']['#text'];
       // Update the locale string in the system.
       // @todo: Send error message to user if update fails.
-      if ($this->updateTranslation($job_item->getItemId(), $job->getTargetLangcode(), $translation)) {
+      if ($this->updateTranslation($job_item->getItemId(), $target_langcode, $translation)) {
         $job_item->accepted();
         return TRUE;
       }

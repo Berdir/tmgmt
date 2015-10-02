@@ -32,11 +32,13 @@ interface SourcePluginInterface extends PluginInspectionInterface {
    *
    * @param \Drupal\tmgmt\JobItemInterface $job_item
    *   The job item entity.
+   * @param string $target_langcode
+   *   The target language code.
    *
    * @return bool
    *   TRUE if the translation was saved successfully, FALSE otherwise.
    */
-  public function saveTranslation(JobItemInterface $job_item);
+  public function saveTranslation(JobItemInterface $job_item, $target_langcode);
 
   /**
    * Return a title for this job item.

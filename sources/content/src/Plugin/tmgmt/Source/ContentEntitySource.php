@@ -167,7 +167,7 @@ class ContentEntitySource extends SourcePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function saveTranslation(JobItemInterface $job_item) {
+  public function saveTranslation(JobItemInterface $job_item, $target_langcode) {
     /* @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity = entity_load($job_item->getItemType(), $job_item->getItemId());
     if (!$entity) {
@@ -177,10 +177,9 @@ class ContentEntitySource extends SourcePluginBase {
       ), 'error');
       return FALSE;
     }
-    $job = $job_item->getJob();
 
     $data = $job_item->getData();
-    $this->doSaveTranslations($entity, $data, $job->getTargetLangcode());
+    $this->doSaveTranslations($entity, $data, $target_langcode);
     $job_item->accepted();
     return TRUE;
   }
