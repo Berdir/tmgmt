@@ -49,7 +49,7 @@ class TMGMTCartTest extends TMGMTTestBase {
       'type' => $content_type->id(),
     ));
 
-    $node = $node_sk->getTranslation('en');
+    $node = $node_sk->addTranslation('en');
 
     $node->title->value = $this->randomMachineName();
     $node->body->value = $this->randomMachineName();

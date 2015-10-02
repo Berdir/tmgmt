@@ -9,6 +9,7 @@ namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -297,7 +298,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
       'langcode' => 'cs',
     ));
 
-    $node = $node->getTranslation('en');
+    $node = $node->addTranslation('en');
 
     $node->title->appendItem(array('value' => $this->randomMachineName()));
     $value = array(
