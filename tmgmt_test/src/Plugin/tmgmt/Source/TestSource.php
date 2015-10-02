@@ -7,7 +7,7 @@
 
 namespace Drupal\tmgmt_test\Plugin\tmgmt\Source;
 
-use Drupal\Component\Utility\FormattableString;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\SourcePluginBase;
@@ -92,7 +92,7 @@ class TestSource extends SourcePluginBase {
   protected function replacePlaceholders(&$data, $variables) {
     foreach (Element::children($data) as $key) {
       if (isset($data[$key]['#text'])) {
-        $data[$key]['#text'] = (string) new FormattableString($data[$key]['#text'], $variables);
+        $data[$key]['#text'] = (string) new FormattableMarkup($data[$key]['#text'], $variables);
       }
       else {
         $this->replacePlaceholders($data[$key], $variables);
