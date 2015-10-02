@@ -9,6 +9,7 @@ namespace Drupal\tmgmt_config\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Routing\RouteMatch;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TMGMTException;
@@ -65,7 +66,8 @@ class ConfigTranslateForm extends FormBase {
 
     /** @var \Drupal\config_translation\ConfigMapperInterface $mapper */
     $mapper = $this->configMapperManager->createInstance($plugin_id);
-    $mapper->populateFromRequest($request);
+    $route_match = RouteMatch::createFromRequest($request);
+    $mapper->populateFromRouteMatch($route_match);
 
     $form_state->set('mapper', $mapper);
 

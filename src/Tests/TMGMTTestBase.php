@@ -77,6 +77,7 @@ abstract class TMGMTTestBase extends WebTestBase {
     $this->default_translator = Translator::load('test_translator');
     $this->drupalPlaceBlock('local_tasks_block');
     $this->drupalPlaceBlock('local_actions_block');
+    $this->drupalPlaceBlock('page_title_block');
 
     // Load default admin permissions.
     $this->admin_permissions = array(
