@@ -156,7 +156,11 @@ class TranslatorForm extends EntityForm {
 
       // Add the translator plugin settings form.
       $plugin_ui = $this->translatorManager->createUIInstance($entity->getPluginID());
-      $form['plugin_wrapper']['settings'] += $plugin_ui->pluginSettingsForm($form['plugin_wrapper']['settings'], $form_state, $entity, $busy);
+      $form_state->set('busy', $busy);
+      $form['plugin_wrapper']['settings'] += $plugin_ui->buildConfigurationForm($form['plugin_wrapper']['settings'], $form_state);
+      if (!Element::children($form['plugin_wrapper']['settings'])) {
+        $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $plugin_ui->getPluginDefinition()['label']));
+      }
     }
 
     $controller = $entity->getPlugin();
@@ -225,6 +229,8 @@ class TranslatorForm extends EntityForm {
     if (!$form_state->getValue('plugin')) {
       $form_state->setErrorByName('plugin', $this->t('You have to select a translator plugin.'));
     }
+    $plugin_ui = $this->translatorManager->createUIInstance($this->entity->getPluginID());
+    $plugin_ui->validateConfigurationForm($form, $form_state);
   }
 
 

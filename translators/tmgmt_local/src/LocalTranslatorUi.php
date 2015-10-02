@@ -9,8 +9,6 @@ namespace Drupal\tmgmt_local;
 
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\TranslatorPluginUiBase;
 use Drupal\user\Entity\User;
@@ -76,7 +74,14 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
     return $form;
   }
 
-  public function pluginSetting(array $form, FormStateInterfaceerface $form_state, TranslatorInterface $translator, $busy = FALSE) {
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildConfigurationForm($form, $form_state);
+
+    /** @var \Drupal\tmgmt\TranslatorInterface $translator */
+    $translator = $form_state->getFormObject()->getEntity();
     $form['allow_all'] = array(
       '#title' => t('Allow translations for enabled languages even if no translator has the necessary abilities'),
       '#type' => 'checkbox',

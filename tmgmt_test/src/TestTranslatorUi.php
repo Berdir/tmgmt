@@ -10,11 +10,7 @@ namespace Drupal\tmgmt_test;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\JobItemInterface;
-use Drupal\tmgmt\TranslatorInterface;
 use Drupal\tmgmt\TranslatorPluginUiBase;
-use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt\Entity\JobItem;
-use Drupal\tmgmt\Entity\Translator;
 
 /**
  * Test translator UI controller.
@@ -24,7 +20,9 @@ class TestTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function pluginSettingsForm(array $form, FormStateInterface $form_state, TranslatorInterface $translator, $busy = FALSE) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildConfigurationForm($form, $form_state);
+
     $form['expose_settings'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display settings'),
@@ -42,7 +40,7 @@ class TestTranslatorUi extends TranslatorPluginUiBase {
         'not_translatable' => t('Not translatable'),
       ),
     );
-    return parent::pluginSettingsForm($form, $form_state, $translator, $busy);
+    return $form;
   }
 
   /**

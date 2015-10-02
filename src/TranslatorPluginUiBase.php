@@ -9,9 +9,6 @@ namespace Drupal\tmgmt;
 
 use Drupal\Component\Plugin\PluginBase as ComponentPluginBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt\Entity\JobItem;
-use Drupal\tmgmt\Entity\Translator;
 use Drupal\Core\Render\Element;
 
 /**
@@ -20,16 +17,6 @@ use Drupal\Core\Render\Element;
  * @ingroup tmgmt_translator
  */
 class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPluginUiInterface {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function pluginSettingsForm(array $form, FormStateInterface $form_state, TranslatorInterface $translator, $busy = FALSE) {
-    if (!Element::children($form)) {
-      $form['#description'] = t("The @plugin plugin doesn't provide any settings.", array('@plugin' => $this->pluginDefinition['label']));
-    }
-    return $form;
-  }
 
   /**
    * {@inheritdoc}
@@ -95,6 +82,27 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
    * {@inheritdoc}
    */
   public function reviewFormSubmit(array $form, FormStateInterface $form_state, JobItemInterface $item) {
+    // Nothing to do here by default.
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
+    // Nothing to do here by default.
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     // Nothing to do here by default.
   }
 

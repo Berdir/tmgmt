@@ -11,7 +11,6 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\tmgmt\JobInterface;
-use Drupal\tmgmt\TranslatorInterface;
 use Drupal\tmgmt\TranslatorPluginUiBase;
 
 /**
@@ -22,7 +21,11 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
   /**
    * {@inheritdoc}
    */
-  public function pluginSettingsForm(array $form, FormStateInterface $form_state, TranslatorInterface $translator, $busy = FALSE) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildConfigurationForm($form, $form_state);
+
+    /** @var \Drupal\tmgmt\TranslatorInterface $translator */
+    $translator = $form_state->getFormObject()->getEntity();
     $form['export_format'] = array(
       '#type' => 'radios',
       '#title' => t('Export to'),
@@ -60,7 +63,7 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
       );
     }
 
-    return parent::pluginSettingsForm($form, $form_state, $translator);
+    return $form;
   }
 
   /**

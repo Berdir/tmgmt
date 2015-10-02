@@ -9,18 +9,14 @@ namespace Drupal\tmgmt;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\PluginFormInterface;
 
 /**
  * Interface for translator ui controllers.
  *
  * @ingroup tmgmt_translator
  */
-interface TranslatorPluginUiInterface extends PluginInspectionInterface {
-
-  /**
-   * Form callback for the plugin settings form.
-   */
-  public function pluginSettingsForm(array $form, FormStateInterface $form_state, TranslatorInterface $translator, $busy = FALSE);
+interface TranslatorPluginUiInterface extends PluginInspectionInterface, PluginFormInterface {
 
   /**
    * Form callback for the checkout settings form.
@@ -57,5 +53,20 @@ interface TranslatorPluginUiInterface extends PluginInspectionInterface {
    * Submit callback for the job item review form.
    */
   public function reviewFormSubmit(array $form, FormStateInterface $form_state, JobItemInterface $item);
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state);
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state);
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state);
 
 }
