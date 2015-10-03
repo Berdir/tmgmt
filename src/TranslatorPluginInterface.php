@@ -22,23 +22,11 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    * @param TranslatorInterface $translator
    *   The translator entity.
    *
-   * @return bool
+   * @return \Drupal\tmgmt\Translator\AvailableResult
    *   TRUE if the translator plugin is available, FALSE otherwise.
    */
-  public function isAvailable(TranslatorInterface $translator);
+  public function checkAvailable(TranslatorInterface $translator);
 
-  /**
-   * Return a reason why the translator is not available.
-   *
-   * @param TranslatorInterface $translator
-   *   The translator entity.
-   *
-   * Might be called when isAvailable() returns FALSE to get a reason that
-   * can be displayed to the user.
-   *
-   * @todo Remove this once http://drupal.org/node/1420364 is done.
-   */
-  public function getNotAvailableReason(TranslatorInterface $translator);
 
   /**
    * Check whether this service can handle a particular translation job.
@@ -48,23 +36,10 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    * @param \Drupal\tmgmt\JobInterface $job
    *   The Job entity that should be translated.
    *
-   * @return bool
+   * @return \Drupal\tmgmt\Translator\TranslatableResult
    *   TRUE if the job can be processed and translated, FALSE otherwise.
    */
-  public function canTranslate(TranslatorInterface $translator, JobInterface $job);
-
-  /**
-   * Return a reason why the translator is not able to translate this job.
-   *
-   * @param \Drupal\tmgmt\JobInterface $job
-   *   The job entity.
-   *
-   * Might be called when canTranslate() returns FALSE to get a reason that
-   * can be displayed to the user.
-   *
-   * @todo Remove this once http://drupal.org/node/1420364 is done.
-   */
-  public function getNotCanTranslateReason(JobInterface $job);
+  public function checkTranslatable(TranslatorInterface $translator, JobInterface $job);
 
   /**
    * Specifies default mappings for local to remote language codes.

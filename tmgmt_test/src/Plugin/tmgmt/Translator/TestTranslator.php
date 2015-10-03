@@ -11,6 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\JobItemInterface;
+use Drupal\tmgmt\Translator\TranslatableResult;
 use Drupal\tmgmt\TranslatorInterface;
 use Drupal\tmgmt\TranslatorPluginBase;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
@@ -97,11 +98,15 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
   /**
    * {@inheritdoc}
    */
-  function canTranslate(TranslatorInterface $translator, JobInterface $job) {
+  function checkTranslatable(TranslatorInterface $translator, JobInterface $job) {
     if ($job->getSetting('action') == 'not_translatable') {
-      return FALSE;
+      return TranslatableResult::no(t('@translator can not translate from @source to @target.', array(
+        '@translator' => $job->getTranslator()->label(),
+        '@source' => $job->getSourceLanguage()->getName(),
+        '@target' => $job->getTargetLanguage()->getName()
+      )));
     }
-    return parent::canTranslate($translator, $job);
+    return parent::checkTranslatable($translator, $job);
   }
 
   /**

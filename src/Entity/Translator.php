@@ -13,6 +13,8 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\Translator\AvailableResult;
+use Drupal\tmgmt\Translator\TranslatableResult;
 use Drupal\tmgmt\TranslatorInterface;
 
 /**
@@ -306,21 +308,25 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
   /**
    * {@inheritdoc}
    */
-  public function canTranslate(JobInterface $job) {
+  public function checkTranslatable(JobInterface $job) {
     if ($plugin = $this->getPlugin()) {
-      return $plugin->canTranslate($this, $job);
+      return $plugin->checkTranslatable($this, $job);
     }
-    return FALSE;
+    return TranslatableResult::no(t('The job cannot be translated.'));
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isAvailable() {
+  public function checkAvailable() {
     if ($plugin = $this->getPlugin()) {
-      return $plugin->isAvailable($this);
+      return $plugin->checkAvailable($this);
     }
-    return FALSE;
+    return AvailableResult::no(t('@translator is not available. Make sure it is properly :configured.', [
+      '@translator' => $this->label(),
+      ':configured' => $this->link(t('configured')
+      )
+    ]));
   }
 
   /**
@@ -333,25 +339,6 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
     return FALSE;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function getNotAvailableReason() {
-    if ($plugin = $this->getPlugin()) {
-      return $plugin->getNotAvailableReason($this);
-    }
-    return FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getNotCanTranslateReason(JobInterface $job) {
-    if ($plugin = $this->getPlugin()) {
-      return $plugin->getNotCanTranslateReason($job);
-    }
-    return FALSE;
-  }
 
   /**
    * {@inheritdoc}

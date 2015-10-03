@@ -17,6 +17,8 @@ use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\Translator\AvailableResult;
+use Drupal\tmgmt\Translator\TranslatableResult;
 use Drupal\views\Views;
 
 /**
@@ -420,12 +422,14 @@ class JobForm extends TmgmtFormBase {
     // Load the selected translator.
     $translator = $job->getTranslator();
     // Check translator availability.
+    $available_status = $translator->checkAvailable();
+    $translatable_status = $translator->checkTranslatable($job);
     if (!empty($translator)) {
-      if (!$translator->isAvailable()) {
-        $form_state->setErrorByName('translator', $translator->getNotAvailableReason());
+      if (!($available_status->getSuccess())) {
+        $form_state->setErrorByName('translator', $available_status->getMessage());
       }
-      elseif (!$translator->canTranslate($job)) {
-        $form_state->setErrorByName('translator', $translator->getNotCanTranslateReason($job));
+      elseif (!$translatable_status->getSuccess()) {
+        $form_state->setErrorByName('translator', $translatable_status->getMessage());
       }
     }
   }
@@ -497,12 +501,13 @@ class JobForm extends TmgmtFormBase {
       return $form;
     }
     $translator = $job->getTranslator();
-    if (!$translator->isAvailable()) {
-      $form['#description'] = Xss::filter($job->getTranslator()->getNotAvailableReason());
+    if (!$translator->checkAvailable()->getSuccess()) {
+      $result = AvailableResult::no(t('@translator is not available. Make sure it is properly :configured.', array('@translator' => $translator->label(), ':configured' => $translator->link(t('configured')))));
+      $form['#description'] = Xss::filter($result->getMessage());
     }
     // @todo: if the target language is not defined, the check will not work if the first language in the list is not available.
-    elseif ($job->getTargetLangcode() && !$translator->canTranslate($job)) {
-      $form['#description'] = Xss::filter($job->getTranslator()->getNotCanTranslateReason($job));
+    elseif ($job->getTargetLangcode() && !$translator->checkTranslatable($job)->getSuccess()) {
+      $form['#description'] = Xss::filter($job->getTranslator()->checkTranslatable($job)->getMessage());
     }
     else {
       $plugin_ui = $this->translatorManager->createUIInstance($translator->getPluginId());

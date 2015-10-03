@@ -41,7 +41,7 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    *
    * The translator plugin can use this state if the job has been actively
    * rejected. However, this should be avoided by doing the necessary checks
-   * in the canTranslate() method and in the job configuration settings.
+   * in the checkTranslatable() method and in the job configuration settings.
    *
    * A rejected job can be re-submitted.
    */

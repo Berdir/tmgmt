@@ -289,6 +289,13 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Verify that we are on the submit job page.
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
 
+    // Test for Unavailable/Unconfigured Translators.
+    $this->default_translator->setSetting('action', 'not_translatable');
+    $this->default_translator->save();
+    $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
+    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->assertText(t('Test translator (auto created) can not translate from English to German.'));
+
     // Login as administrator to delete a job.
     $this->loginAsAdmin();
     $this->drupalGet('admin/tmgmt/jobs');

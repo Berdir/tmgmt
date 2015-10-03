@@ -11,6 +11,8 @@ use Drupal\Component\Plugin\PluginBase;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
+use Drupal\tmgmt\Translator\AvailableResult;
+use Drupal\tmgmt\Translator\TranslatableResult;
 
 /**
  * Default controller class for service plugins.
@@ -36,22 +38,22 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   /**
    * {@inheritdoc}
    */
-  public function isAvailable(TranslatorInterface $translator) {
+  public function checkAvailable(TranslatorInterface $translator) {
     // Assume that the translation service is always available.
-    return TRUE;
+    return AvailableResult::yes();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function canTranslate(TranslatorInterface $translator, JobInterface $job) {
+  public function checkTranslatable(TranslatorInterface $translator, JobInterface $job) {
     // The job is only translatable if the translator is available too.
-    if ($this->isAvailable($translator) && array_key_exists($job->getTargetLangcode(), $translator->getSupportedTargetLanguages($job->getSourceLangcode()))) {
+    if ($this->checkAvailable($translator)->getSuccess() && array_key_exists($job->getTargetLangcode(), $translator->getSupportedTargetLanguages($job->getSourceLangcode()))) {
       // We can only translate this job if the target language of the job is in
       // one of the supported languages.
-      return TRUE;
+      return TranslatableResult::yes();
     }
-    return FALSE;
+    return TranslatableResult::no(t('@translator can not translate because is not available', array('@translator' => $translator->label())));
   }
 
   /**
@@ -105,20 +107,6 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
     return $language_pairs;
   }
 
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getNotCanTranslateReason(JobInterface $job) {
-    return t('@translator can not translate from @source to @target.', array('@translator' => $job->getTranslator()->label(), '@source' => $job->getSourceLanguage()->getName(), '@target' => $job->getTargetLanguage()->getName()));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getNotAvailableReason(TranslatorInterface $translator) {
-    return t('@translator is not available. Make sure it is properly @configured.', array('@translator' => $this->pluginDefinition['label'], '@configured' => $translator->link(t('configured'))));
-  }
 
   /**
    * {@inheritdoc}

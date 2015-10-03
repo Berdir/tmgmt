@@ -8,7 +8,8 @@
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\Xss;
+use Drupal\tmgmt\Translator\TranslatableResult;
+use Drupal\tmgmt\Translator\AvailableResult;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
@@ -388,7 +389,7 @@ function tmgmt_message_create($message = '', $variables = array(), $values = arr
 function tmgmt_translator_load_available($job) {
   $translators = Translator::loadMultiple();
   foreach ($translators as $name => $translator) {
-    if (!$translator->isAvailable() || (isset($job) && !$translator->canTranslate($job))) {
+    if (!$translator->checkAvailable()->getSuccess() || (isset($job) && !$translator->checkTranslatable($job)->getSuccess())) {
       unset($translators[$name]);
     }
   }
@@ -465,10 +466,10 @@ function tmgmt_translator_labels() {
 function tmgmt_translator_labels_flagged($job = NULL) {
   $labels = array();
   foreach (Translator::loadMultiple() as $translator) {
-    if (!$translator->isAvailable()) {
+    if (!$translator->checkAvailable()->getSuccess()) {
       $labels[$translator->id()] = t('@label (not available)', array('@label' => $translator->label()));
     }
-    elseif (isset($job) && !$translator->canTranslate($job)) {
+    elseif (isset($job) && !$translator->checkTranslatable($job)->getSuccess()) {
       $labels[$translator->id()] = t('@label (unsupported)', array('@label' => $translator->label()));
     }
     else {

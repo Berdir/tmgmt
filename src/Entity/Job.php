@@ -18,6 +18,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TMGMTException;
+use Drupal\tmgmt\Translator\TranslatableResult;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
@@ -517,11 +518,11 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    */
   public function canRequestTranslation() {
     if ($translator = $this->getTranslator()) {
-      if ($translator->canTranslate($this)) {
-        return TRUE;
+      if ($translator->checkTranslatable($this)) {
+        return TranslatableResult::yes();
       }
     }
-    return FALSE;
+    return TranslatableResult::no(t('Translation cant be requested.'));
   }
 
   /**
