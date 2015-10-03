@@ -53,7 +53,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
       // one of the supported languages.
       return TranslatableResult::yes();
     }
-    return TranslatableResult::no(t('@translator can not translate because is not available', array('@translator' => $translator->label())));
+    return TranslatableResult::no(t('@translator can not translate from @source to @target.', array('@translator' => $translator->label(), '@source' => $job->getSourceLanguage()->getName(), '@target' => $job->getTargetLanguage()->getName())));
   }
 
   /**

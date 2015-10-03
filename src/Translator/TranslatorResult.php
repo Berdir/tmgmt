@@ -7,15 +7,17 @@
 
 namespace Drupal\tmgmt\Translator;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
 /**
- * TMGMT Translator Result abstract class.
+ * Used by translator to return the boolean result of a check with a reason.
  */
 abstract class TranslatorResult {
 
   /**
    * TRUE or FALSE for response.
    *
-   * @var boolean
+   * @var bool
    */
   protected $success;
 
@@ -27,11 +29,26 @@ abstract class TranslatorResult {
   protected $message;
 
   /**
-   * Returns the object message.
+   * Constructs a result object.
+   *
+   * @param bool $success
+   *   Whether or not the check was successful.
+   * @param \Drupal\Core\StringTranslation\TranslatableMarkup|null $reason
+   *   The reason in case of an unsuccessful check.
    */
-  public function getMessage() {
-    $argumented_message = t($this->message);
-    return $argumented_message;
+  protected function __construct($success, TranslatableMarkup $reason = NULL) {
+    $this->success = $success;
+    $this->message = $reason;
+  }
+
+  /**
+   * Returns the reason for an unsuccessful result.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The reason.
+   */
+  public function getReason() {
+    return $this->message;
   }
 
   /**
@@ -62,24 +79,23 @@ abstract class TranslatorResult {
   /**
    * Returns the object with TRUE.
    *
-   * @return \Drupal\tmgmt\Translator\TranslatorResult
+   * @return static
    *   This returns the instance of the object with desired values.
    */
   public static function yes() {
-    $result = new static();
-    $result->setYes();
-    return $result;
+    return new static(TRUE);
   }
 
   /**
    * Returns the object with FALSE and a message.
    *
-   * @return \Drupal\tmgmt\Translator\TranslatorResult
+   * @param \Drupal\Core\StringTranslation\TranslatableMarkup|null $reason
+   *   The reason in case of an unsuccessful check.
+   *
+   * @return static
    *   This returns the instance of the object with desired values.
    */
-  public static function no($message) {
-    $result = new static();
-    $result->setNo($message);
-    return $result;
+  public static function no($reason) {
+    return new static(FALSE, $reason);
   }
 }

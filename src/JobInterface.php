@@ -368,8 +368,8 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   /**
    * Checks whether a job is translatable.
    *
-   * @return bool
-   *   TRUE if the job can be translated, FALSE otherwise.
+   * @return \Drupal\tmgmt\Translator\TranslatableResult
+   *   Whether the job can be translated or not.
    */
   public function canRequestTranslation();
 

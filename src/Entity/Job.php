@@ -518,9 +518,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    */
   public function canRequestTranslation() {
     if ($translator = $this->getTranslator()) {
-      if ($translator->checkTranslatable($this)) {
-        return TranslatableResult::yes();
-      }
+      return $translator->checkTranslatable($this);
     }
     return TranslatableResult::no(t('Translation cant be requested.'));
   }
@@ -595,13 +593,13 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    * {@inheritdoc}
    */
   public function requestTranslation() {
-    if (!$this->canRequestTranslation() || !$plugin = $this->getTranslatorPlugin()) {
+    if (!$this->canRequestTranslation()->getSuccess()) {
       return FALSE;
     }
     // We don't know if the translator plugin already processed our
     // translation request after this point. That means that the plugin has to
     // set the 'submitted', 'needs review', etc. states on its own.
-    $plugin->requestTranslation($this);
+    $this->getTranslatorPlugin()->requestTranslation($this);
   }
 
   /**

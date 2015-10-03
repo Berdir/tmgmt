@@ -23,7 +23,7 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *   The translator entity.
    *
    * @return \Drupal\tmgmt\Translator\AvailableResult
-   *   TRUE if the translator plugin is available, FALSE otherwise.
+   *   The result of the availability check.
    */
   public function checkAvailable(TranslatorInterface $translator);
 
@@ -37,7 +37,7 @@ interface TranslatorPluginInterface extends PluginInspectionInterface {
    *   The Job entity that should be translated.
    *
    * @return \Drupal\tmgmt\Translator\TranslatableResult
-   *   TRUE if the job can be processed and translated, FALSE otherwise.
+   *   The result of the translatable check.
    */
   public function checkTranslatable(TranslatorInterface $translator, JobInterface $job);
 

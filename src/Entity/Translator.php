@@ -312,7 +312,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
     if ($plugin = $this->getPlugin()) {
       return $plugin->checkTranslatable($this, $job);
     }
-    return TranslatableResult::no(t('The job cannot be translated.'));
+    return TranslatableResult::no(t('Missing translator plugin'));
   }
 
   /**

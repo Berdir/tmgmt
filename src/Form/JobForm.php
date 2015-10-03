@@ -417,19 +417,18 @@ class JobForm extends TmgmtFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
-    $job = $this->buildEntity($form, $form_state);
-    // Load the selected translator.
-    $translator = $job->getTranslator();
+    /** @var \Drupal\tmgmt\JobInterface $job */
+    $job = parent::validateForm($form, $form_state);
+    if ($job->hasTranslator()) {
+      $translator = $job->getTranslator();
     // Check translator availability.
-    $available_status = $translator->checkAvailable();
-    $translatable_status = $translator->checkTranslatable($job);
-    if (!empty($translator)) {
+      $available_status = $translator->checkAvailable();
+      $translatable_status = $translator->checkTranslatable($job);
       if (!($available_status->getSuccess())) {
-        $form_state->setErrorByName('translator', $available_status->getMessage());
+        $form_state->setErrorByName('translator', $available_status->getReason());
       }
       elseif (!$translatable_status->getSuccess()) {
-        $form_state->setErrorByName('translator', $translatable_status->getMessage());
+        $form_state->setErrorByName('translator', $translatable_status->getReason());
       }
     }
   }
@@ -438,10 +437,11 @@ class JobForm extends TmgmtFormBase {
    * {@inheritdoc}
    */
   public function buildEntity(array $form, FormStateInterface $form_state) {
+    /** @var \Drupal\tmgmt\JobInterface $job */
     $job = parent::buildEntity($form, $form_state);
 
+    if ($job->hasTranslator()) {
     $translator = $job->getTranslator();
-    if (!empty($translator)) {
       // If requested custom job settings handling, copy values from original job.
       if ($translator->hasCustomSettingsHandling()) {
         $original_job = entity_load_unchanged('tmgmt_job', $job->id());
@@ -501,18 +501,19 @@ class JobForm extends TmgmtFormBase {
       return $form;
     }
     $translator = $job->getTranslator();
-    if (!$translator->checkAvailable()->getSuccess()) {
-      $result = AvailableResult::no(t('@translator is not available. Make sure it is properly :configured.', array('@translator' => $translator->label(), ':configured' => $translator->link(t('configured')))));
-      $form['#description'] = Xss::filter($result->getMessage());
+    $result = $translator->checkAvailable();
+    if (!$result->getSuccess()) {
+      $form['#description'] = $result->getSuccess();
+      return $form;
     }
     // @todo: if the target language is not defined, the check will not work if the first language in the list is not available.
-    elseif ($job->getTargetLangcode() && !$translator->checkTranslatable($job)->getSuccess()) {
-      $form['#description'] = Xss::filter($job->getTranslator()->checkTranslatable($job)->getMessage());
+    $result = $translator->checkTranslatable($job);
+    if ($job->getTargetLangcode() && !$result->getSuccess()) {
+      $form['#description'] = $result->getReason();
+      return $form;
     }
-    else {
-      $plugin_ui = $this->translatorManager->createUIInstance($translator->getPluginId());
-      $form = $plugin_ui->checkoutSettingsForm($form, $form_state, $job);
-    }
+    $plugin_ui = $this->translatorManager->createUIInstance($translator->getPluginId());
+    $form = $plugin_ui->checkoutSettingsForm($form, $form_state, $job);
     return $form;
   }
 
