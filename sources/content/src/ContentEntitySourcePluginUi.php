@@ -39,13 +39,14 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     $form = parent::overviewSearchFormPart($form, $form_state, $type);
 
     $entity_type = \Drupal::entityManager()->getDefinition($type);
+    $field_definitions = \Drupal::entityManager()->getBaseFieldDefinitions($type);
 
     $label_key = $entity_type->getKey('label');
-
     if (!empty($label_key)) {
+      $label = (string) $field_definitions[$label_key]->getlabel();
       $form['search_wrapper']['search'][$label_key] = array(
         '#type' => 'textfield',
-        '#title' => t('@entity_name title', array('@entity_name' => $entity_type->getLabel())),
+        '#title' => $label,
         '#size' => 25,
         '#default_value' => isset($_GET[$label_key]) ? $_GET[$label_key] : NULL,
       );
@@ -70,7 +71,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     if (count($bundle_options) > 1) {
       $form['search_wrapper']['search'][$bundle_key] = array(
         '#type' => 'select',
-        '#title' => t('@entity_name type', array('@entity_name' => $entity_type->getLabel())),
+        '#title' => $entity_type->getBundleLabel(),
         '#options' => $bundle_options,
         '#empty_option' => t('All'),
         '#default_value' => isset($_GET[$bundle_key]) ? $_GET[$bundle_key] : NULL,
