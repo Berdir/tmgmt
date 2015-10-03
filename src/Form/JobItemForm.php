@@ -337,7 +337,7 @@ class JobItemForm extends TmgmtFormBase {
               '#type' => 'submit',
               // Unicode character U+21B6 ANTICLOCKWISE TOP SEMICIRCLE ARROW
               '#value' => '↶',
-              '#attributes' => array('title' => t('Revert to previous revision')),
+              '#attributes' => array('title' => t('Revert to previous revision'), 'class' => array('reset-above')),
               '#name' => 'revert-' . $target_key,
               '#data_item_key' => $key,
               '#submit' => array('tmgmt_translation_review_form_revert'),
@@ -346,6 +346,8 @@ class JobItemForm extends TmgmtFormBase {
                 'wrapper' => $form['#ajaxid'],
               ),
             );
+            $form[$target_key]['actions']['unreviewed']['#attributes'] = array('class' => array('reviewed-below'));
+            $form[$target_key]['actions']['reviewed']['#attributes'] = array('class' => array('reviewed-below'));
           }
         }
         if (!empty($data[$key]['#translation']['#text_revisions'])) {

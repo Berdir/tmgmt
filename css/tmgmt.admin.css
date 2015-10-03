@@ -20,6 +20,15 @@ table.tmgmt-ui-review input.unreviewed {
   text-decoration: line-through;
 }
 
+table.tmgmt-ui-review input.reset-above {
+  margin:5px 0;
+}
+
+table.tmgmt-ui-review input.reviewed-below {
+  margin: 0;
+
+}
+
 table.tmgmt-ui-review tbody th {
   background: none;
   font-weight: bold;
@@ -102,13 +111,11 @@ table.tmgmt-ui-review tbody th {
 }
 
 .tmgmt-ui-data-item-actions div {
-  min-height: 63px;
   position: relative;
+  margin-top: 25%;
 }
 
 .tmgmt-ui-data-item-actions div input {
-  position:absolute;
-  top: 50%;
   text-align: center;
 }
 
