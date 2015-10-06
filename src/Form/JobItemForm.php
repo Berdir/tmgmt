@@ -243,6 +243,12 @@ class JobItemForm extends TmgmtFormBase {
         }
       }
     }
+    if ($form_state->getTriggeringElement()['#value'] == $form['actions']['save']['#value']) {
+      drupal_set_message(t('The translation for <a href=:job>@job_title</a> has been saved successfully.', [
+        ':job' => $item->getSourceUrl()->toString(),
+        '@job_title' => $item->label()
+      ]));
+    }
     $item->save();
   }
 
