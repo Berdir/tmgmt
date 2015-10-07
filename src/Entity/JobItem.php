@@ -449,8 +449,8 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
       ) : array('@source' => ($this->getSourceLabel()));
     }
     $return = $this->setState(static::STATE_REVIEW, $message, $variables, $type);
-    // Auto accept the trganslation if the translator is configured for it.
-    if ($this->getTranslator()->getSetting('auto_accept')) {
+    // Auto accept the translation if the translator is configured for it.
+    if ($this->getTranslator()->isAutoAccept()) {
       $this->acceptTranslation();
     }
     return $return;
@@ -724,7 +724,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
       }
       if ($finished) {
         // There are no unfinished elements left.
-        if ($this->getJob()->getTranslator()->getSetting('auto_accept')) {
+        if ($this->getJob()->getTranslator()->isAutoAccept()) {
           // If the job item is going to be auto-accepted, set to review without
           // a message.
           $this->needsReview(FALSE);

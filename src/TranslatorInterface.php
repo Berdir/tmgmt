@@ -65,6 +65,24 @@ interface TranslatorInterface extends ConfigEntityInterface {
   public function setSetting($setting_name, $value);
 
   /**
+   * Checks if it can skip the reviewing process and automatically accepts all translations.
+   *
+   * @return bool
+   *   TRUE if it can skip the reviewing process, FALSE otherwise.
+   */
+  public function isAutoAccept();
+
+  /**
+   * Sets whether to skip the reviewing process and automatically accept all translations.
+   *
+   * @param bool
+   *   The value to set.
+   *
+   * @return $this
+   */
+  public function setAutoAccept($value);
+
+  /**
    * Returns the translator plugin ID.
    *
    * @return string

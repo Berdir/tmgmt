@@ -31,6 +31,9 @@ tmgmt.translator.*:
     description:
       type: string
       label: 'Description'
+    auto_accept:
+      type: boolean
+      label: 'Automatically accept'
     weight:
       type: integer
       label: 'Weight of the translator'
@@ -43,15 +46,12 @@ tmgmt.translator.*:
       type: sequence
       sequence:
         type: string
-        label: Language key
+        label: 'Language key'
 
 views.access.tmgmt_job:
   type: mapping
-  label: View translation jobs'
+  label: 'View translation jobs'
 
 tmgmt.translator_base:
-  type: config_entity
-  mapping:
-    auto_accept:
-      type: boolean
-      label: Automatically accept
+  type: mapping
+  mapping: { }

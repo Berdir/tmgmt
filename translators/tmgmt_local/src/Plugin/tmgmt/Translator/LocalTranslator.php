@@ -21,9 +21,7 @@ use Drupal\tmgmt\TranslatorPluginBase;
  *   label = @Translation("Local translator"),
  *   description = @Translation("Allows local users to process translation jobs."),
  *   ui = "\Drupal\tmgmt_local\LocalTranslatorUi",
- *   default_settings = {
- *     "auto_accept" = TRUE
- *   },
+ *   default_settings = {},
  *   map_remote_languages = FALSE
  * )
  */

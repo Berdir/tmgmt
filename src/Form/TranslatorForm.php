@@ -110,22 +110,12 @@ class TranslatorForm extends EntityForm {
       '#size' => 32,
       '#maxlength' => 255,
     );
-    $form['settings'] = array(
-      '#type' => 'details',
-      '#open' => TRUE,
-      '#title' => t('Translator settings'),
-      '#tree' => TRUE,
-    );
-    $form['settings']['auto_accept'] = array(
+    $form['auto_accept'] = array(
       '#type' => 'checkbox',
       '#title' => t('Auto accept finished translations'),
       '#description' => t('This skips the reviewing process and automatically accepts all translations as soon as they are returned by the translation provider.'),
-      '#default_value' => $entity->getSetting('auto_accept'),
-      '#weight' => -1,
+      '#default_value' => $entity->isAutoAccept(),
     );
-    if (!Element::children($form['settings'])) {
-      unset($form['settings']);
-    }
     $form['plugin_wrapper'] = array(
       '#type' => 'container',
       '#prefix' => '<div id="tmgmt-plugin-wrapper">',

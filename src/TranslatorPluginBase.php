@@ -124,7 +124,7 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
    * {@inheritdoc}
    */
   public function defaultSettings() {
-    $defaults = array('auto_accept' => FALSE);
+    $defaults = array();
     // Check if any default settings are defined in the plugin info.
     if (isset($this->pluginDefinition['default_settings'])) {
       return array_merge($defaults, $this->pluginDefinition['default_settings']);
@@ -190,4 +190,3 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
   }
 
 }
-

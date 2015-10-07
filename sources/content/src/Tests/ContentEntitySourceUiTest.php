@@ -199,7 +199,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     // Allow auto-accept.
     $default_translator = Translator::load('test_translator');
     $default_translator
-      ->setSetting('auto_accept', TRUE)
+      ->setAutoAccept(TRUE)
       ->save();
 
     $this->loginAsTranslator(array('translate any entity', 'create content translations'));
@@ -261,7 +261,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     // Allow auto-accept.
     $default_translator = Translator::load('test_translator');
     $default_translator
-      ->setSetting('auto_accept', TRUE)
+      ->setAutoAccept(TRUE)
       ->save();
 
     // Add default comment type.

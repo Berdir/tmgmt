@@ -123,7 +123,7 @@ class ConfigSourceUiTest extends EntityTestBase {
     // Allow auto-accept.
     $default_translator = Translator::load('test_translator');
     $default_translator
-      ->setSetting('auto_accept', TRUE)
+      ->setAutoAccept(TRUE)
       ->save();
 
     $this->loginAsTranslator(array('translate configuration'));

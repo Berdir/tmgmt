@@ -41,6 +41,7 @@ use Drupal\tmgmt\TranslatorInterface;
  *     "name",
  *     "label",
  *     "description",
+ *     "auto_accept",
  *     "weight",
  *     "plugin",
  *     "settings",
@@ -107,6 +108,13 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
   protected $settings = array();
 
   /**
+   * Whether to skip reviewing process and auto accepting translation.
+   *
+   * @var bool
+   */
+   protected $auto_accept;
+
+  /**
    * The supported target languages caches.
    *
    * @var array
@@ -123,7 +131,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
   /**
    * Whether the language cache in the database is outdated.
    *
-   * @var boolean
+   * @var bool
    */
   protected $languageCacheOutdated;
 
@@ -188,6 +196,21 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
   public function setSetting($setting_name, $value) {
     NestedArray::setValue($this->settings, (array) $setting_name, $value);
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isAutoAccept() {
+      return $this->auto_accept;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setAutoAccept($value) {
+      $this->auto_accept = $value;
+      return $this;
   }
 
   /**
