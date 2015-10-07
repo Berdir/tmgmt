@@ -58,7 +58,7 @@ class TranslatorAccessControlHandler extends EntityAccessControlHandler implemen
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     if (!$entity->hasPlugin() && $operation != 'delete') {
       return AccessResult::forbidden();
     }
