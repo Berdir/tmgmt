@@ -276,6 +276,10 @@ class TMGMTUiTest extends TMGMTTestBase {
     $targets = $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr/td[@class="views-field views-field-target-language"][contains(., "Spanish") or contains(., "German")]');
     $this->assertEqual(count($targets), 5);
 
+    // Check that the first action is 'manage'.
+    $first_action = $this->xpath('//tbody/tr[2]/td[9]/div/div/ul/li[1]/a');
+    $this->assertEqual($first_action[0][0], 'manage');
+
     // Test the abort link.
     $this->clickLink(t('abort'));
 
