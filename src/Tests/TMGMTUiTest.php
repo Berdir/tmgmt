@@ -515,7 +515,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Create two translators.
     $translator1 = $this->createTranslator();
     $translator2 = $this->createTranslator();
-    $this->drupalGet('/admin/tmgmt/jobs');
+    $this->drupalGet('admin/tmgmt/jobs');
 
     // Assert that translators are in dropdown list.
     $this->assertOption('edit-translator', $translator1->id());
@@ -523,16 +523,21 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Assign each job to a translator.
     $job1 = $this->createJob();
+    $this->drupalGet('admin/tmgmt/jobs');
+    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr')[0]->td[0]);
+
     $job2 = $this->createJob();
+    $this->drupalGet('admin/tmgmt/jobs');
+    $this->assertTrue($label, trim((string) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr')[0]->td[0]));
     $job1->set('translator', $translator1->id())->save();
     $job2->set('translator', $translator2->id())->save();
 
     // Filter jobs by translator and assert values.
-    $this->drupalGet('/admin/tmgmt/jobs', array('query' => array('translator' => $translator1->id())));
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('translator' => $translator1->id())));
     $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr')[0]->td[4]);
     $this->assertEqual($label, $translator1->label(), 'Found translator label in table');
     $this->assertNotEqual($label, $translator2->label(), "Translators filtered in table");
-    $this->drupalGet('/admin/tmgmt/jobs', array('query' => array('translator' => $translator2->id())));
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('translator' => $translator2->id())));
     $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr')[0]->td[4]);
     $this->assertEqual($label, $translator2->label(), 'Found translator label in table');
     $this->assertNotEqual($label, $translator1->label(), "Translators filtered in table");

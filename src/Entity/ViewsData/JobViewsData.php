@@ -34,6 +34,7 @@ class JobViewsData extends EntityViewsData {
       'field' => array(
         'id' => 'tmgmt_wordcount',
       ),
+      'sort' => array(),
     );
     $data['tmgmt_job']['label'] = array(
       'title' => 'Label',
@@ -42,6 +43,7 @@ class JobViewsData extends EntityViewsData {
       'field' => array(
         'id' => 'tmgmt_entity_label',
       ),
+      'sort' => array(),
     );
     $data['tmgmt_job']['translator']['field']['id'] = 'tmgmt_translator';
     $data['tmgmt_job']['translator']['field']['options callback'] = 'tmgmt_translator_labels';
