@@ -88,7 +88,7 @@ class ConfigSourceUiTest extends EntityTestBase {
 
     // Verify that the pending translation is shown.
     $this->clickLink(t('Needs review'));
-    $this->drupalPostForm(NULL, array(), t('Save as completed'));
+    $this->drupalPostForm(NULL, array(), t('Save'));
 
     // Request a spanish translation.
     $edit = array(
@@ -108,8 +108,8 @@ class ConfigSourceUiTest extends EntityTestBase {
     $rows = $this->xpath('//tbody/tr');
     $counter = 0;
     foreach ($rows as $value) {
-      if ($value->td[2]->a == 'Needs review') {
-        $this->assertEqual('Spanish' || 'German', (string) $value->td[1]);
+      if ('Spanish' == (string) $value->td[1] || 'German' == (string) $value->td[1]) {
+        $this->assertEqual($value->td[2]->a, 'Needs review');
         $counter++;
       }
     }
@@ -120,12 +120,6 @@ class ConfigSourceUiTest extends EntityTestBase {
    * Test the node type for a single checkout.
    */
   function testNodeTypeTranslateTabMultipeCheckout() {
-    // Allow auto-accept.
-    $default_translator = Translator::load('test_translator');
-    $default_translator
-      ->setAutoAccept(TRUE)
-      ->save();
-
     $this->loginAsTranslator(array('translate configuration'));
 
     // Go to the translate tab.
@@ -163,8 +157,8 @@ class ConfigSourceUiTest extends EntityTestBase {
     $rows = $this->xpath('//tbody/tr');
     $counter = 0;
     foreach ($rows as $value) {
-      if ($value->td[2]->a == 'Needs review') {
-        $this->assertEqual('German' || 'Spanish', (string) $value->td[1]);
+      if ('Spanish' == (string) $value->td[1] || 'German' == (string) $value->td[1]) {
+        $this->assertEqual($value->td[2]->a, 'Needs review');
         $counter++;
       }
     }
@@ -206,14 +200,14 @@ class ConfigSourceUiTest extends EntityTestBase {
     // Translated languages should now be listed as Needs review.
     $rows = $this->xpath('//tbody/tr');
     foreach ($rows as $value) {
-      if ($value->td[2]->a == 'Needs review') {
-        $this->assertEqual('German', (string) $value->td[1]);
+      if ('German' == (string) $value->td[1]) {
+        $this->assertEqual($value->td[2]->a, 'Needs review');
       }
     }
 
     // Verify that the pending translation is shown.
     $this->clickLink(t('Needs review'));
-    $this->drupalPostForm(NULL, array(), t('Save as completed'));
+    $this->drupalPostForm(NULL, array(), t('Save'));
 
     // Request a spanish translation.
     $edit = array(
@@ -233,8 +227,8 @@ class ConfigSourceUiTest extends EntityTestBase {
     $rows = $this->xpath('//tbody/tr');
     $counter = 0;
     foreach ($rows as $value) {
-      if ($value->td[2]->a == 'Needs review') {
-        $this->assertEqual('Spanish' || 'German', (string) $value->td[1]);
+      if ('Spanish' == (string) $value->td[1] || 'German' == (string) $value->td[1]) {
+        $this->assertEqual($value->td[2]->a, 'Needs review');
         $counter++;
       }
     }

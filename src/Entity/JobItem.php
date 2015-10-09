@@ -753,10 +753,13 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
     if (!$this->isNeedsReview() || !$plugin = $this->getSourcePlugin()) {
       return FALSE;
     }
-    // We don't know if the source plugin was able to save the translation after
-    // this point. That means that the plugin has to set the 'accepted' states
-    // on its own.
-    $plugin->saveTranslation($this, $this->getJob()->getTargetLangcode());
+    if (!$plugin->saveTranslation($this, $this->getJob()->getTargetLangcode())) {
+      return FALSE;
+    }
+    // If the plugin could save the translation, we will set it
+    // to the 'accepted' state.
+    $this->accepted();
+    return TRUE;
   }
 
   /**

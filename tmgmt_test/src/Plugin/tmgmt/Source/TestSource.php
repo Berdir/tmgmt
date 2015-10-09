@@ -106,7 +106,6 @@ class TestSource extends SourcePluginBase {
   public function saveTranslation(JobItemInterface $job_item, $target_langcode) {
     // Set a variable that can be checked later for a given job item.
     \Drupal::state()->set('tmgmt_test_saved_translation_' . $job_item->getItemType() . '_' . $job_item->getItemId(), $job_item->getData());
-    $job_item->accepted();
     return TRUE;
   }
 

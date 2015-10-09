@@ -222,7 +222,6 @@ class LocaleSource extends SourcePluginBase {
       // Update the locale string in the system.
       // @todo: Send error message to user if update fails.
       if ($this->updateTranslation($job_item->getItemId(), $target_langcode, $translation)) {
-        $job_item->accepted();
         return TRUE;
       }
     }

@@ -15,6 +15,8 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
+use Drupal\tmgmt\Entity\Translator;
+use Drupal\tmgmt\JobItemInterface;
 
 /**
  * Content entity Source unit tests.
@@ -45,7 +47,6 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     ConfigurableLanguage::createFromLangcode('de')->save();
     ConfigurableLanguage::createFromLangcode('cs')->save();
 
-    //$this->installEntitySchema('node');
     $this->installEntitySchema('tmgmt_job');
     $this->installEntitySchema('tmgmt_job_item');
     $this->installEntitySchema('tmgmt_message');
@@ -53,6 +54,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->installEntitySchema('entity_test_mulrev');
     $this->installEntitySchema('entity_test_mul');
     $this->installSchema('system', array('router'));
+    $this->installSchema('node', array('node_access'));
     \Drupal::moduleHandler()->loadInclude('entity_test', 'install');
     entity_test_install();
 
@@ -277,6 +279,37 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     catch (\Exception $e){
       $this->pass("Adding of language neutral to a translation job did fail.");
     }
+  }
+
+  /**
+   * Test node acceptTranslation.
+   */
+  public function testAcceptTranslation() {
+    $account = $this->createUser();
+    $type = $this->drupalCreateContentType();
+    /** @var Translator $translator */
+    $translator = Translator::load('test_translator');
+    $translator->setAutoAccept(TRUE)->save();
+    $node = entity_create('node', array(
+      'title' => $this->randomMachineName(),
+      'uid' => $account->id(),
+      'type' => $type->id(),
+      'langcode' => 'en',
+    ));
+    $node->save();
+    $job = tmgmt_job_create('en', 'de');
+    $job->translator = 'test_translator';
+    $job->save();
+    $job_item = tmgmt_job_item_create('content', $node->getEntityTypeId(), $node->id(), array('tjid' => $job->id()));
+    $job_item->save();
+
+    // Request translation. Here it fails.
+    $job->requestTranslation();
+    $items = $job->getItems();
+    /** @var \Drupal\tmgmt\Entity\JobItem $item */
+    $item = reset($items);
+    // As was set to auto_accept, should be accepted.
+    $this->assertEqual($item->getState(), JobItemInterface::STATE_ACCEPTED);
   }
 
   /**

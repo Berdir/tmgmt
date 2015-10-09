@@ -180,7 +180,6 @@ class ContentEntitySource extends SourcePluginBase {
 
     $data = $job_item->getData();
     $this->doSaveTranslations($entity, $data, $target_langcode);
-    $job_item->accepted();
     return TRUE;
   }
 
