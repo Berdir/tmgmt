@@ -37,6 +37,7 @@ class TestTranslatorUi extends TranslatorPluginUiBase {
         'submit' => t('Submit'),
         'reject' => t('Reject'),
         'fail' => t('Fail'),
+        'not_available' => t('Not available'),
         'not_translatable' => t('Not translatable'),
       ),
     );
@@ -56,6 +57,7 @@ class TestTranslatorUi extends TranslatorPluginUiBase {
           'submit' => t('Submit'),
           'reject' => t('Reject'),
           'fail' => t('Fail'),
+          'not_available' => t('Not available'),
           'not_translatable' => t('Not translatable'),
         ),
         '#default_value' => $job->getTranslator()->getSetting('action'),

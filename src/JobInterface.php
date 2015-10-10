@@ -41,7 +41,7 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    *
    * The translator plugin can use this state if the job has been actively
    * rejected. However, this should be avoided by doing the necessary checks
-   * in the canTranslate() method and in the job configuration settings.
+   * in the checkTranslatable() method and in the job configuration settings.
    *
    * A rejected job can be re-submitted.
    */
@@ -368,8 +368,8 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   /**
    * Checks whether a job is translatable.
    *
-   * @return bool
-   *   TRUE if the job can be translated, FALSE otherwise.
+   * @return \Drupal\tmgmt\Translator\TranslatableResult
+   *   Whether the job can be translated or not.
    */
   public function canRequestTranslation();
 

@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_file\Plugin\tmgmt\Translator;
 
 use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\Translator\TranslatableResult;
 use Drupal\tmgmt\TranslatorInterface;
 use Drupal\tmgmt\TranslatorPluginBase;
 
@@ -26,9 +27,9 @@ class FileTranslator extends TranslatorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function canTranslate(TranslatorInterface $translator, JobInterface $job) {
+  public function checkTranslatable(TranslatorInterface $translator, JobInterface $job) {
     // Anything can be exported.
-    return TRUE;
+    return TranslatableResult::yes();
   }
 
   /**
