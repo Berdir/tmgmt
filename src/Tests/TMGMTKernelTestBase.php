@@ -44,7 +44,7 @@ abstract class TMGMTKernelTestBase extends KernelTestBase {
     $this->installEntitySchema('tmgmt_job_item');
     $this->installEntitySchema('tmgmt_message');
 
-    $this->default_translator = entity_create('tmgmt_translator', array('name' => 'test_translator', 'plugin' => 'test_translator'));
+    $this->default_translator = entity_create('tmgmt_translator', array('name' => 'test_translator', 'plugin' => 'test_translator', 'remote_languages_mappings' => []));
     $this->default_translator->save();
 
     $this->addLanguage('de');
@@ -60,6 +60,7 @@ abstract class TMGMTKernelTestBase extends KernelTestBase {
       'name' => strtolower($this->randomMachineName()),
       'label' => $this->randomMachineName(),
       'plugin' => 'test_translator',
+      'remote_languages_mappings' => [],
       'settings' => array(
         'key' => $this->randomMachineName(),
         'another_key' => $this->randomMachineName(),

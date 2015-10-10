@@ -110,8 +110,10 @@ class TranslatorTest extends TMGMTTestBase {
     $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en-us');
     $this->assertEqual($this->default_translator->mapToRemoteLanguage('de'), 'de-ch');
 
-    $this->default_translator->setSetting(['remote_languages_mappings', 'de'], 'de-de');
-    $this->default_translator->setSetting(['remote_languages_mappings', 'en'], 'en-uk');
+    $remote_language_mappings = $this->default_translator->get('remote_languages_mappings');
+    $remote_language_mappings['de'] = 'de-de';
+    $remote_language_mappings['en'] = 'en-uk';
+    $this->default_translator->set('remote_languages_mappings', $remote_language_mappings);
     $this->default_translator->save();
 
     $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en-uk');
@@ -123,6 +125,55 @@ class TranslatorTest extends TMGMTTestBase {
 
     $this->assertEqual($this->default_translator->mapToRemoteLanguage('en'), 'en');
     $this->assertEqual($this->default_translator->mapToRemoteLanguage('de'), 'de');
+  }
+
+  /**
+   * Test multiple local language with one single remote language.
+   */
+  protected function testMultipleLocalToSingleRemoteMapping() {
+    $this->addLanguage('pt-br');
+    $this->addLanguage('pt-pt');
+
+    // Add mapping to the file translator.
+    $edit = array(
+      'remote_languages_mappings[pt-br]' => 'pt',
+      'remote_languages_mappings[pt-pt]' => 'pt',
+    );
+    $this->drupalPostForm('admin/config/regional/tmgmt_translator/manage/test_translator', $edit, t('Save'));
+    $this->drupalGet('admin/config/regional/tmgmt_translator/manage/test_translator');
+    $this->assertFieldById('edit-remote-languages-mappings-pt-br', 'pt', 'Mapping saved correctly');
+
+    // Test first local language.
+    $job = tmgmt_job_match_item('en', 'pt-br');
+    $job->addItem('test_source', 'test', 0);
+    $edit = array(
+      'target_language' => 'pt-br',
+    );
+    $this->drupalPostAjaxForm('admin/tmgmt/jobs/' . $job->id(), $edit, 'target_language');
+    $this->assertFieldByXPath('//select[@id="edit-translator"]//option[@value="test_translator"]', t('Test translator (auto created)'), 'Translator maps correctly');
+    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
+    $this->assertText('Portuguese, Brazil');
+    $this->assertEqual(count($job->getItems()), 1);
+    $this->assertTrue($job->getItems()[1]->accepted());
+    $this->drupalGet('admin/tmgmt/items/' . 1);
+    $this->assertText('pt-br(pt): Text for job item with type ' . $job->getItems()[1]->getItemType() . ' and id ' . $job->getItems()[1]->getItemId() . '.');
+    $this->assertEqual($job->getTargetLangcode(), 'pt-br');
+
+    // Test the other local language.
+    $job = tmgmt_job_match_item('en', 'pt-pt');
+    $job->addItem('test_source', 'test', 0);
+    $edit = array(
+      'target_language' => 'pt-pt',
+    );
+    $this->drupalPostAjaxForm('admin/tmgmt/jobs/' . $job->id(), $edit, 'target_language');
+    $this->assertFieldByXPath('//select[@id="edit-translator"]//option[@value="test_translator"]', t('Test translator (auto created)'), 'Translator maps correctly');
+    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
+    $this->assertText('Portuguese, Portugal');
+    $this->assertEqual(count($job->getItems()), 1);
+    $this->assertTrue($job->getItems()[2]->accepted());
+    $this->drupalGet('admin/tmgmt/items/' . 2);
+    $this->assertText('pt-pt(pt): Text for job item with type ' . $job->getItems()[2]->getItemType() . ' and id ' . $job->getItems()[2]->getItemId() . '.');
+    $this->assertEqual($job->getTargetLangcode(), 'pt-pt');
   }
 
 }

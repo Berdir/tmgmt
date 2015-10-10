@@ -85,7 +85,7 @@ class LocaleSourceUiTest extends TMGMTTestBase {
     // Review and accept the job item.
     $job_items = tmgmt_job_item_load_latest('locale', 'default', $locale_object->lid, 'en');
     $this->drupalGet('admin/tmgmt/items/' . $job_items['gsw-berne']->id());
-    $this->assertRaw('gsw-berne_Hello World');
+    $this->assertRaw('gsw-berne: Hello World');
     $this->drupalPostForm(NULL, array(), t('Save as completed'));
     $this->drupalGet('admin/tmgmt/sources/locale/default');
 

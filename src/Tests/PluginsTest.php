@@ -85,11 +85,11 @@ class PluginsTest extends TMGMTKernelTestBase {
     foreach ($translate_job->getItems() as $item) {
       // Check the translated text.
       if ($i != 3) {
-        $expected_text = 'de_Text for job item with type ' . $item->getItemType() . ' and id ' . $item->getItemId() . '.';
+        $expected_text = 'de(de-ch): Text for job item with type ' . $item->getItemType() . ' and id ' . $item->getItemId() . '.';
       }
       else {
         // The third item has an explicitly stored data value.
-        $expected_text = 'de_Stored data';
+        $expected_text = 'de(de-ch): Stored data';
       }
       $item_data = $item->getData();
       $this->assertEqual($expected_text, $item_data['dummy']['deep_nesting']['#translation']['#text']);

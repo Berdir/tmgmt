@@ -101,9 +101,9 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertText(t('The translation for @title has been accepted.', array('@title' => $node->getTitle())));
 
     // German node should now be listed and be clickable.
-    $this->clickLink('de_' . $node->label());
-    $this->assertText('de_' . $node->getTitle());
-    $this->assertText('de_' . $node->body->value);
+    $this->clickLink('de(de-ch): ' . $node->label());
+    $this->assertText('de(de-ch): ' . $node->getTitle());
+    $this->assertText('de(de-ch): ' . $node->body->value);
 
     // Test that the destination query argument does not break the redirect
     // and we are redirected back to the correct page.
@@ -246,12 +246,12 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     // Translated nodes should now be listed and be clickable.
     // @todo Use links on translate tab.
     $this->drupalGet('de/node/' . $node->id());
-    $this->assertText('de_' . $node->getTitle());
-    $this->assertText('de_' . $node->body->value);
+    $this->assertText('de(de-ch): ' . $node->getTitle());
+    $this->assertText('de(de-ch): ' . $node->body->value);
 
     $this->drupalGet('es/node/' . $node->id());
-    $this->assertText('es_' . $node->getTitle());
-    $this->assertText('es_' . $node->body->value);
+    $this->assertText('es: ' . $node->getTitle());
+    $this->assertText('es: ' . $node->body->value);
   }
 
   /**
@@ -339,14 +339,14 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertText(t('The translation for @title has been accepted.', array('@title' => $comment->getSubject())));
 
     // The translated content should be in place.
-    $this->clickLink('de_' . $comment->getSubject());
-    $this->assertText('de_' . $comment->get('comment_body')->value);
+    $this->clickLink('de(de-ch): ' . $comment->getSubject());
+    $this->assertText('de(de-ch): ' . $comment->get('comment_body')->value);
     // @todo Remove when https://www.drupal.org/node/2444267 is fixed.
     \Drupal::entityManager()->getViewBuilder('node')->resetCache();
     $this->drupalGet('comment/1/translations');
-    $this->clickLink('es_' . $comment->getSubject());
+    $this->clickLink('es: ' . $comment->getSubject());
     $this->drupalGet('es/node/' . $comment->id());
-    $this->assertText('es_' . $comment->get('comment_body')->value);
+    $this->assertText('es: ' . $comment->get('comment_body')->value);
   }
 
   /**

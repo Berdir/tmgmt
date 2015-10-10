@@ -45,6 +45,7 @@ use Drupal\tmgmt\TranslatorInterface;
  *     "weight",
  *     "plugin",
  *     "settings",
+ *     "remote_languages_mappings",
  *   },
  *   links = {
  *     "collection" = "/admin/config/regional/tmgmt_translator",
@@ -423,8 +424,9 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
       return $language;
     }
 
-    if ($mapping = $this->getSetting(['remote_languages_mappings', $language])) {
-      return $mapping;
+    $mapping = $this->get('remote_languages_mappings');
+    if (!empty($mapping) && array_key_exists($language, $mapping)) {
+      return $mapping[$language];
     }
 
     $default_mappings = $this->getPlugin()->getDefaultRemoteLanguagesMappings();

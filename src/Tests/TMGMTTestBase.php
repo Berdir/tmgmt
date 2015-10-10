@@ -159,6 +159,7 @@ abstract class TMGMTTestBase extends WebTestBase {
       'name' => strtolower($this->randomMachineName()),
       'label' => $this->randomMachineName(),
       'plugin' => 'test_translator',
+      'remote_languages_mappings' => [],
       'settings' => empty($values['plugin']) ? [
         'key' => $this->randomMachineName(),
         'another_key' => $this->randomMachineName(),

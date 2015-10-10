@@ -427,6 +427,7 @@ function tmgmt_translator_auto_create(array $definition) {
     $translator = Translator::create([
       'name' => $plugin,
       'plugin' => $plugin,
+      'remote_languages_mappings' => array(),
       'label' => $definition['label'] . ' (auto created)',
       'description' => (string) $definition['description'],
     ]);

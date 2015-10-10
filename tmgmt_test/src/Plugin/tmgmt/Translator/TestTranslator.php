@@ -86,7 +86,12 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
         $data = array_filter(\Drupal::service('tmgmt.data')->flatten($job->getData()), array(\Drupal::service('tmgmt.data'), 'filterData'));
         $tdata = array();
         foreach ($data as $key => $value) {
-          $tdata[$key]['#text'] = $job->getTargetLangcode() . '_' . $value['#text'];
+          if ($job->getTargetLangcode() != $job->getRemoteTargetLanguage()) {
+            $tdata[$key]['#text'] = $job->getTargetLangcode() . '(' . $job->getRemoteTargetLanguage() . '): ' . $value['#text'];
+          }
+          else {
+            $tdata[$key]['#text'] = $job->getTargetLangcode() . ': ' . $value['#text'];
+          }
         }
         $job->submitted('Test translation created.');
         $job->addTranslatedData(\Drupal::service('tmgmt.data')->unflatten($tdata));
@@ -108,7 +113,7 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
    * {@inheritdoc}
    */
   public function getSupportedTargetLanguages(TranslatorInterface $translator, $source_language) {
-    $languages = array('en', 'de', 'es', 'it', 'zh-hans', 'gsw-berne');
+    $languages = array('en', 'de', 'es', 'it', 'pt', 'zh-hans', 'gsw-berne');
     $languages = array_combine($languages, $languages);
     unset($languages[$source_language]);
     return $languages;

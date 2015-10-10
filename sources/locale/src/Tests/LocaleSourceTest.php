@@ -76,7 +76,7 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
     }
 
     // Check string translation.
-    $expected_translation = $job->getTargetLangcode() . '_' . $source_text;
+    $expected_translation = $job->getTargetLangcode() . '(' . $job->getRemoteTargetLanguage() . '): ' . $source_text;
     $this->assertTranslation($locale_object->lid, 'de', $expected_translation);
 
     // Translate the german translation to spanish.
@@ -101,7 +101,7 @@ class LocaleSourceTest extends TMGMTKernelTestBase {
     }
 
     // Check string translation.
-    $this->assertTranslation($locale_object->lid, $target_langcode, $job->getTargetLangcode() . '_' . $expected_translation);
+    $this->assertTranslation($locale_object->lid, $target_langcode, $job->getTargetLangcode() . ': ' . $expected_translation);
   }
 
   /**
