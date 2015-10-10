@@ -171,6 +171,25 @@ class JobItemForm extends TmgmtFormBase {
     return $actions;
   }
 
+  /**
+   * Gets the parent key given the parent array and the key of the child.
+   *
+   * @param string $name
+   *   String containing the child's key.
+   * @param array $parent_array
+   *   Array containing the elements of the parent.
+   *
+   * @return string $key
+   *   Returns the parent key.
+   */
+  private function getParentKey($name, array $parent_array) {
+    foreach ($parent_array as $key => $value) {
+      if (is_array($value) && isset($value[$name])) {
+        return $key;
+      }
+    }
+    return NULL;
+  }
 
   /**
    * {@inheritdoc}
@@ -182,9 +201,18 @@ class JobItemForm extends TmgmtFormBase {
     $source_ui = $this->sourceManager->createUIInstance($item->getPlugin());
     $source_ui->reviewFormValidate($form, $form_state, $item);
     // Invoke the validation method on the translator controller (if available).
-    if($item->getTranslator()){
+    if ($item->getTranslator()) {
       $translator_ui = $this->translatorManager->createUIInstance($item->getTranslator()->getPluginId());
       $translator_ui->reviewFormValidate($form, $form_state, $item);
+    }
+    foreach ($form_state->getValues() as $key => $value) {
+      if (is_array($value) && isset($value['translation'])) {
+        // If there is an empty field then sets and error to fill it.
+        if (($value['translation'] == '') && ($value['source'] != '') && ($form_state->getTriggeringElement()['#value'] != 'Validate HTML tags')) {
+          $parent_key = $this->getParentKey($key, $form['review']);
+          $form_state->setError($form['review'][$parent_key][$key]['translation'], $this->t('The field is empty'));
+        }
+      }
     }
   }
 

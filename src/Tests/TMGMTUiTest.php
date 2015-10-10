@@ -477,6 +477,27 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
     $this->assertText(t('HTML tag validation failed for 2 field(s).'));
 
+    // Tests that there is always a title.
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'title' => array(
+        '0|value' => array(
+          '#text' => '<p><em><strong>Source text bold and Italic</strong></em></p>',
+          '#label' => 'Title',
+        ),
+      ),
+      'body' => array(
+        'deep_nesting' => array(
+          '#text' => '<p><em><strong>Source body bold and Italic</strong></em></p>',
+          '#label' => 'Body',
+        )
+      ),
+    ));
+    $item5 = $job->addItem('test_source', 'test', 4);
+
+    $this->drupalGet('admin/tmgmt/items/' . $item5->id());
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->assertText(t('The field is empty'));
+
     // Test for the text with format set.
     \Drupal::state()->set('tmgmt.test_source_data', array(
       'dummy' => array(
