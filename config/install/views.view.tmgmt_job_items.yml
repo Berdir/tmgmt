@@ -65,6 +65,75 @@ display:
           quantity: 9
       style:
         type: table
+        options:
+          grouping: {  }
+          row_class: ''
+          default_row_class: true
+          override: true
+          sticky: false
+          caption: ''
+          summary: ''
+          description: ''
+          columns:
+            label: label
+            type: type
+            state: state
+            progress: progress
+            word_count: word_count
+            changed: changed
+            operations: operations
+          info:
+            label:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            type:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            state:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            progress:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            word_count:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            changed:
+              sortable: true
+              default_sort_order: desc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            operations:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+          default: changed
+          empty_table: false
       row:
         type: fields
       fields:
@@ -499,12 +568,15 @@ display:
           entity_field: tjid
           plugin_id: numeric
       display_extenders: {  }
+      use_ajax: true
     cache_metadata:
       contexts:
         - 'languages:language_interface'
         - url
-        - 'url.query_args.pagers:0'
+        - url.query_args
       cacheable: false
+      max-age: 0
+      tags: {  }
   checkout:
     display_plugin: embed
     id: checkout
@@ -681,14 +753,82 @@ display:
           entity_type: tmgmt_job_item
           entity_field: word_count
           plugin_id: field
+        changed:
+          id: changed
+          table: tmgmt_job_item
+          field: changed
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: Changed
+          exclude: true
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: timestamp
+          settings:
+            date_format: medium
+            custom_date_format: ''
+            timezone: ''
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          entity_type: tmgmt_job_item
+          entity_field: changed
+          plugin_id: field
       defaults:
         fields: false
     cache_metadata:
       contexts:
         - 'languages:language_interface'
         - url
-        - 'url.query_args.pagers:0'
-      cacheable: false
+        - url.query_args
+      max-age: 0
+      tags: {  }
   submitted:
     display_plugin: embed
     id: submitted
@@ -702,5 +842,6 @@ display:
       contexts:
         - 'languages:language_interface'
         - url
-        - 'url.query_args.pagers:0'
-      cacheable: false
+        - url.query_args
+      max-age: 0
+      tags: {  }
