@@ -278,17 +278,17 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Check that the first action is 'manage'.
     $first_action = $this->xpath('//tbody/tr[2]/td[9]/div/div/ul/li[1]/a');
-    $this->assertEqual($first_action[0][0], 'manage');
+    $this->assertEqual($first_action[0][0], 'Manage');
 
     // Test the abort link.
-    $this->clickLink(t('abort'));
+    $this->clickLink(t('Abort'));
 
     // Verify that we are on the abort job page.
     $this->assertText('Abort this job?');
     $this->drupalPostForm(NULL, array(), t('Confirm'));
 
     // Test the submit link.
-    $this->clickLink(t('submit'));
+    $this->clickLink(t('Submit'));
 
     // Verify that we are on the submit job page.
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
@@ -739,7 +739,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalGet('admin/tmgmt/jobs');
 
     // Try to abort the job and save.
-    $this->clickLink(t('manage'));
+    $this->clickLink(t('Manage'));
     $this->drupalPostForm(NULL, [], t('Abort job'));
     $this->drupalPostForm(NULL, [], t('Confirm'));
 

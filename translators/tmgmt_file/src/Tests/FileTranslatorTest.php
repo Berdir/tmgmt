@@ -379,7 +379,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $message = reset($messages);
 
     $this->drupalGet('admin/tmgmt/jobs');
-    $this->clickLink(t('manage'));
+    $this->clickLink(t('Manage'));
 
     // Assert that the label field is only shown once in page.
     $this->assertEqual((count($this->xpath('//div[@id="tmgmt-ui-label"]'))), 1);
