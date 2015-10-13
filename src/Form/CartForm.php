@@ -203,7 +203,7 @@ class Cartform extends FormBase {
     if ($jobs) {
       if ($enforced_source_language) {
 
-        drupal_set_message(t('You have enforced the the job source language which most likely resulted in having a translation of your original content as the job source text. You should review the job translation received from the translator carefully to prevent the content quality loss.'), 'warning');
+        drupal_set_message(t('You have enforced the job source language which most likely resulted in having a translation of your original content as the job source text. You should review the job translation received from the translator carefully to prevent the content quality loss.'), 'warning');
 
         if ($skipped_count) {
           $languages = \Drupal::languageManager()->getLanguages();

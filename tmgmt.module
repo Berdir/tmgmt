@@ -696,7 +696,7 @@ function tmgmt_translation_review_form_update_state(array $form, FormStateInterf
   $matches = array();
   // We should have an #name element
   // and the name should beginn with approve-
-  // and the $matches should now kontain an element with with name key.
+  // and the $matches should now contain an element with name key.
   preg_match("/^(?P<action>[^-]+)-(?P<key>.+)/i", $form_state->getTriggeringElement()['#name'], $matches);
   $values = $form_state->getValues();
   $data = array();

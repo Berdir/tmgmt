@@ -154,7 +154,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertNoText($node->getTitle());
     $this->assertNoText($node_german->getTitle());
     $this->assertText($node_not_translated->getTitle());
-    // Update the the outdated flag of the translated node and test if it is
+    // Update the outdated flag of the translated node and test if it is
     // listed among sources with missing translation.
     \Drupal::entityManager()->getStorage('node')->resetCache();
     $node = Node::load($node->id());

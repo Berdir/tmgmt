@@ -83,7 +83,7 @@ class TMGMTCartTest extends TMGMTTestBase {
 
     $this->assertText(t('One job needs to be checked out.'));
     $this->assertRaw(t('One item skipped as for the language @language it was not possible to retrieve a translation.', array('@language' => 'English')));
-    $this->assertText(t('You have enforced the the job source language which most likely resulted in having a translation of your original content as the job source text. You should review the job translation received from the translator carefully to prevent the content quality loss.'));
+    $this->assertText(t('You have enforced the job source language which most likely resulted in having a translation of your original content as the job source text. You should review the job translation received from the translator carefully to prevent the content quality loss.'));
 
     $args = explode('/', $this->getUrl());
     $tjid = array_pop($args);

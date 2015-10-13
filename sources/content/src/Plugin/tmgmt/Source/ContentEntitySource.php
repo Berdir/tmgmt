@@ -79,7 +79,7 @@ class ContentEntitySource extends SourcePluginBase {
    * Extracts translatable data from an entity.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The entity to get the the translatable data from.
+   *   The entity to get the translatable data from.
    *
    * @return array $data
    *   Translatable data.
