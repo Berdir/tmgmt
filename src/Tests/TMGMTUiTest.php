@@ -175,6 +175,10 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
     $this->assertText(t('Test translation created'));
 
+    // Assert that values exist and are displayed accordingly.
+    $this->assertRaw('<span title="Accepted: 0, reviewed: 0, translated: 1, pending: 0.">0/0/1/0</span>');
+    $this->assertText('0/0/1/0');
+
     // Another job.
     $job = tmgmt_job_match_item('en', 'es');
     $job->addItem('test_source', 'test', 1);

@@ -62,7 +62,8 @@ class Progress extends FieldPluginBase {
       return '<div id="progress' . $id . '"></div>';
     }
     $title = t('Accepted: @accepted, reviewed: @reviewed, translated: @translated, pending: @pending.', $counts);
-    return sprintf('<span title="%s">%s</span>', $title, implode('/', $counts));
+    $complete_title = t('<span title="@title">@values</span>', ['@title' => $title, '@values' => implode('/', $counts)]);
+    return $complete_title;
   }
 
   /**
