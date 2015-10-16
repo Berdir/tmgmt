@@ -947,4 +947,40 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText(t('The translation job item @label has been deleted', ['@label' => $item->getSourceLabel()]));
   }
 
+  /**
+   * Test the Revisions of a job item.
+   */
+  function testItemRevision() {
+    $this->loginAsAdmin();
+
+    // Create a translator.
+    $translator = $this->createTranslator();
+    // Create a job and attach to the translator.
+    $job = $this->createJob();
+    $job->translator = $translator;
+    $job->settings = array();
+    $job->save();
+    $job->setState(Job::STATE_ACTIVE);
+    // Add item to the job.
+    $item = $job->addItem('test_source', 'test', 1);
+    $this->drupalGet('admin/tmgmt/jobs/');
+    $this->clickLink(t('Manage'));
+    $this->clickLink(t('view'));
+    $edit = [
+      'dummy|deep_nesting[translation]' => 'any_value',
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->clickLink(t('Manage'));
+    $this->clickLink(t('review'));
+    $edit = [
+      'dummy|deep_nesting[translation]' => 'any_different_value',
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->clickLink(t('Manage'));
+    $this->clickLink(t('review'));
+    $this->drupalPostAjaxForm(NULL, [], 'revert-dummy|deep_nesting');
+    $this->assertText('Translation for dummy reverted to the latest version.');
+    $this->assertFieldByName('dummy|deep_nesting[translation]', 'any_value');
+  }
+
 }

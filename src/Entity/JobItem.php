@@ -668,7 +668,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
       $data['#translation']['#timestamp'] = $prev_revision['#timestamp'];
 
       $this->updateData($key, $data);
-      $this->addMessage('Translation for @key reverted to the latest version.', array('@key' => \Drupal::service('tmgmt.data')->ensureStringKey($key)));
+      $this->addMessage('Translation for @key reverted to the latest version.', array('@key' => $key[0]));
       return TRUE;
     }
 

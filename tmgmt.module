@@ -680,6 +680,8 @@ function tmgmt_translation_review_form_revert(array $form, FormStateInterface $f
     $form_key = str_replace('][', '|', $form_state->getTriggeringElement()['#data_item_key']);
     $user_input = $form_state->getUserInput();
     unset($user_input[$form_key]['translation']);
+    // This will set the reverted user input to the current text area.
+    $user_input[$form_key]['translation'] = $item->getData([$key[0], '0', 'value', '#translation', '#text']);
     $form_state->setUserInput($user_input);
     $item->save();
   }

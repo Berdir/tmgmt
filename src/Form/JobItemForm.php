@@ -376,7 +376,7 @@ class JobItemForm extends TmgmtFormBase {
               '#data_item_key' => $key,
               '#submit' => array('tmgmt_translation_review_form_revert'),
               '#ajax' => array(
-                'callback' => array(array($this, 'ajaxReviewForm')),
+                'callback' => array($this, 'ajaxReviewForm'),
                 'wrapper' => $form['#ajaxid'],
               ),
             );
