@@ -341,8 +341,6 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     // The translated content should be in place.
     $this->clickLink('de(de-ch): ' . $comment->getSubject());
     $this->assertText('de(de-ch): ' . $comment->get('comment_body')->value);
-    // @todo Remove when https://www.drupal.org/node/2444267 is fixed.
-    \Drupal::entityManager()->getViewBuilder('node')->resetCache();
     $this->drupalGet('comment/1/translations');
     $this->clickLink('es: ' . $comment->getSubject());
     $this->drupalGet('es/node/' . $comment->id());
