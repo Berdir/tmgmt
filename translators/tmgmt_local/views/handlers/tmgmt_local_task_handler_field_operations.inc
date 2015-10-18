@@ -21,7 +21,7 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
     if ($task->access('view')) {
       $element['#links']['view'] = array(
         'query' => array('destination' => current_path()),
-        'title' => t('view'),
+        'title' => t('View'),
       ) + $task->urlInfo()->toArray();
     }
     if (user_access('administer translation tasks') && tmgmt_local_translation_access($task) && empty($task->tuid)) {

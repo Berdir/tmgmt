@@ -965,19 +965,19 @@ class TMGMTUiTest extends TMGMTTestBase {
     $item = $job->addItem('test_source', 'test', 1);
     $this->drupalGet('admin/tmgmt/jobs/');
     $this->clickLink(t('Manage'));
-    $this->clickLink(t('view'));
+    $this->clickLink(t('View'));
     $edit = [
       'dummy|deep_nesting[translation]' => 'any_value',
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->clickLink(t('Manage'));
-    $this->clickLink(t('review'));
+    $this->clickLink(t('Review'));
     $edit = [
       'dummy|deep_nesting[translation]' => 'any_different_value',
     ];
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->clickLink(t('Manage'));
-    $this->clickLink(t('review'));
+    $this->clickLink(t('Review'));
     $this->drupalPostAjaxForm(NULL, [], 'revert-dummy|deep_nesting');
     $this->assertText('Translation for dummy reverted to the latest version.');
     $this->assertFieldByName('dummy|deep_nesting[translation]', 'any_value');

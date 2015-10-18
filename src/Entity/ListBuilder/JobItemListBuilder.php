@@ -23,14 +23,14 @@ class JobItemListBuilder extends EntityListBuilder {
     if ($entity->getCountTranslated() > 0 && $entity->access('accept')) {
       $operations['review'] = array(
         'url' => $entity->urlInfo(),
-        'title' => t('review'),
+        'title' => t('Review'),
       );
     }
     // Do not display view on unprocessed jobs.
     elseif (!$entity->getJob()->isUnprocessed()) {
       $operations['view'] = array(
         'url' => $entity->urlInfo(),
-        'title' => t('view'),
+        'title' => t('View'),
       );
     }
     return $operations;

@@ -24,7 +24,7 @@ class tmgmt_local_task_handler_field_item_operations extends views_handler_field
         'attributes' => array(
           'title' => $item->isPending() ? t('Translate') : t('View'),
         ),
-        'title' => $item->isPending() ? t('translate') : t('view'),
+        'title' => $item->isPending() ? t('translate') : t('View'),
       );
     }
     return \Drupal::service('renderer')->render($element);

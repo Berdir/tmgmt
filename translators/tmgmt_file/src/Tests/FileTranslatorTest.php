@@ -308,7 +308,7 @@ class FileTranslatorTest extends TMGMTTestBase {
         'files[file]' => $translated_file,
       );
     $this->drupalPostForm($job->urlInfo(), $edit, t('Import'));
-    $this->clickLink(t('review'));
+    $this->clickLink(t('Review'));
     $this->drupalPostAjaxForm(NULL, NULL, array('reviewed-dummy|deep_nesting' => '✓'));
 
     // Update the translation for "another" item and import.
@@ -321,7 +321,7 @@ class FileTranslatorTest extends TMGMTTestBase {
 
     // At this point we must have the "dummy" item accepted and intact. The
     // "another" item must have updated translation.
-    $this->clickLink(t('review'));
+    $this->clickLink(t('Review'));
     $this->assertFieldByName('dummy|deep_nesting[translation]', 'de_' . $first_item_data['dummy][deep_nesting']['#text']);
     $this->assertFieldByName('another_item[translation]', 'de_' . $first_item_data['another_item']['#text'] . ' updated');
 
@@ -412,7 +412,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     //$this->assertText(t('Needs review'));
 
     // Review both items.
-    $this->clickLink(t('review'));
+    $this->clickLink(t('Review'));
     foreach ($translated_text[1] as $key => $value) {
       $this->assertText($value);
     }
@@ -421,7 +421,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     }
     $this->drupalPostForm(NULL, array(), t('Save as completed'));
     // Review both items.
-    $this->clickLink(t('review'));
+    $this->clickLink(t('Review'));
     foreach ($translated_text[1] as $key => $value) {
       $this->assertNoText($value);
     }
