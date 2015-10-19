@@ -22,7 +22,7 @@ class ConfigTranslationControllerOverride extends ConfigTranslationController {
   public function itemPage(Request $request, RouteMatchInterface $route_match, $plugin_id) {
     $build = parent::itemPage($request, $route_match, $plugin_id);
     if (\Drupal::entityManager()->getAccessControlHandler('tmgmt_job')->createAccess()) {
-      $build = \Drupal::formBuilder()->getForm('Drupal\tmgmt_config\Form\ConfigTranslateForm', $request, $build, $plugin_id);
+      $build = \Drupal::formBuilder()->getForm('Drupal\tmgmt_config\Form\ConfigTranslateForm', $build, $plugin_id);
     }
     return $build;
   }

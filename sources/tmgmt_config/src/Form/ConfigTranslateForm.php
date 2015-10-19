@@ -10,6 +10,7 @@ namespace Drupal\tmgmt_config\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Routing\RouteMatch;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\TMGMTException;
@@ -32,6 +33,13 @@ class ConfigTranslateForm extends FormBase {
   protected $configMapperManager;
 
   /**
+   * The RouteMatch service.
+   *
+   * @var \Drupal\Core\Routing\RouteMatch
+   */
+  protected $routeMatch;
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId() {
@@ -43,9 +51,12 @@ class ConfigTranslateForm extends FormBase {
    *
    * @param \Drupal\config_translation\ConfigMapperManagerInterface $config_mapper_manager
    *   The configuration mapper manager.
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The RouteMatch service.
    */
-  public function __construct(ConfigMapperManagerInterface $config_mapper_manager) {
+  public function __construct(ConfigMapperManagerInterface $config_mapper_manager, RouteMatchInterface $route_match) {
     $this->configMapperManager = $config_mapper_manager;
+    $this->routeMatch = $route_match;
   }
 
   /**
@@ -53,21 +64,23 @@ class ConfigTranslateForm extends FormBase {
    * @return static
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('plugin.manager.config_translation.mapper'));
+    return new static(
+      $container->get('plugin.manager.config_translation.mapper'),
+      $container->get('current_route_match')
+    );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, Request $request = NULL, array $build = NULL, $plugin_id = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, array $build = NULL, $plugin_id = NULL) {
     // Store the entity in the form state so we can easily create the job in the
     // submit handler.
     $mapper_definition = \Drupal::service('plugin.manager.config_translation.mapper')->getDefinition($plugin_id);
 
     /** @var \Drupal\config_translation\ConfigMapperInterface $mapper */
     $mapper = $this->configMapperManager->createInstance($plugin_id);
-    $route_match = RouteMatch::createFromRequest($request);
-    $mapper->populateFromRouteMatch($route_match);
+    $mapper->populateFromRouteMatch($this->routeMatch);
 
     $form_state->set('mapper', $mapper);
 
