@@ -72,12 +72,12 @@ class ConfigSourceUnitTest extends EntityUnitTestBase {
     $data = $source_plugin->getData($job_item);
 
     // Test the name property.
-    $this->assertEqual($data['node__type__test']['name']['#label'], 'Name');
-    $this->assertEqual($data['node__type__test']['name']['#text'], $node_type->label());
-    $this->assertEqual($data['node__type__test']['name']['#translate'], TRUE);
-    $this->assertEqual($data['node__type__test']['description']['#label'], 'Description');
-    $this->assertEqual($data['node__type__test']['description']['#text'], $node_type->getDescription());
-    $this->assertEqual($data['node__type__test']['description']['#translate'], TRUE);
+    $this->assertEqual($data['name']['#label'], 'Name');
+    $this->assertEqual($data['name']['#text'], $node_type->label());
+    $this->assertEqual($data['name']['#translate'], TRUE);
+    $this->assertEqual($data['description']['#label'], 'Description');
+    $this->assertEqual($data['description']['#text'], $node_type->getDescription());
+    $this->assertEqual($data['description']['#translate'], TRUE);
 
     // Test item types.
     $this->assertEqual($source_plugin->getItemTypes()['node_type'], t('Content type'));
@@ -94,8 +94,8 @@ class ConfigSourceUnitTest extends EntityUnitTestBase {
     $language_manager->setConfigOverrideLanguage($language_manager->getLanguage('de'));
     $node_type = entity_load('node_type', $node_type->id());
 
-    $this->assertEqual($node_type->label(), $data['node__type__test']['name']['#translation']['#text']);
-    $this->assertEqual($node_type->getDescription(), $data['node__type__test']['description']['#translation']['#text']);
+    $this->assertEqual($node_type->label(), $data['name']['#translation']['#text']);
+    $this->assertEqual($node_type->getDescription(), $data['description']['#translation']['#text']);
   }
 
   /**
