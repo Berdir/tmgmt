@@ -377,6 +377,15 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertRaw(t('@count content source was added into the <a href=":url">cart</a>.', array('@count' => 1, ':url' => Url::fromRoute('tmgmt.cart')->toString())));
     $this->assertRaw(t('There are @count items in the <a href=":url">translation cart</a> including the current item.',
         array('@count' => 3, ':url' => Url::fromRoute('tmgmt.cart')->toString())));
+
+    // Add nodes and assert that page footer is being shown.
+    $nodes = array();
+    for ($i = 0; $i < 50; $i++) {
+      $nodes[$i] = $this->createNode('page');
+    }
+    $this->drupalGet('admin/tmgmt/sources/content/node');
+    $this->assertRaw('<ul class="pager__items js-pager__items">');
+    $this->assertEqual(count($this->xpath('//nav[@class="pager"]/ul[@class="pager__items js-pager__items"]/li/a')), 5);
   }
 
   /**

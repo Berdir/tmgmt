@@ -218,7 +218,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     $search_property_params = array_intersect_key($search_property_params, array_flip($whitelist));
     $bundles = $this->getTranslatableBundles($type);
 
-    foreach ($this->getTranslatableEntities($type, $search_property_params) as $entity) {
+    foreach ($this->getTranslatableEntities($type, $search_property_params, TRUE) as $entity) {
       // This occurs on user entity type.
       if ($entity->id()) {
         $form['items']['#options'][$entity->id()] = $this->overviewRow($entity, $bundles);
