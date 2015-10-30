@@ -37,9 +37,19 @@ class ContentTranslateForm extends FormBase {
 
     $form['#title'] = $this->t('Translations of @title', array('@title' => $build['#entity']->label()));
 
-    $form['top_actions']['#type'] = 'actions';
-    $form['top_actions']['#weight'] = -10;
-    tmgmt_add_cart_form($form['top_actions'], $form_state, 'content', $form_state->get('entity')->getEntityTypeId(), $form_state->get('entity')->id());
+    $form['actions'] = array(
+      '#type' => 'details',
+      '#title' => t('Operations'),
+      '#open' => TRUE,
+      '#attributes' => array('class' => array('tmgmt-source-operations-wrapper'))
+    );
+    $form['actions']['request'] = array(
+      '#type' => 'submit',
+      '#button_type' => 'primary',
+      '#value' =>$this->t('Request translation'),
+      '#submit' => array('::submitForm'),
+    );
+    tmgmt_add_cart_form($form['actions'], $form_state, 'content', $form_state->get('entity')->getEntityTypeId(), $form_state->get('entity')->id());
 
     // Inject our additional column into the header.
     array_splice($overview['#header'], -1, 0, array(t('Pending Translations')));
@@ -104,12 +114,6 @@ class ContentTranslateForm extends FormBase {
         $form['languages']['#options'][$langcode] = $option;
       }
     }
-    $form['actions']['#type'] = 'actions';
-    $form['actions']['request'] = array(
-      '#type' => 'submit',
-      '#value' =>$this->t('Request translation'),
-      '#submit' => array('::submitForm'),
-    );
     return $form;
   }
 
