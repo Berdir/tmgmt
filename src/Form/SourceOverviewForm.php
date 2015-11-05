@@ -132,12 +132,14 @@ class SourceOverviewForm extends FormBase {
       '#open' => TRUE,
       '#attributes' => array('class' => array('tmgmt-source-operations-wrapper'))
     );
-    tmgmt_add_cart_form($form['actions'], $form_state, $plugin, $item_type);
     $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#validate' => array('::validateItemsSelected'),
-      '#value' => t('Request translation'),
+        '#type' => 'submit',
+        '#button_type' => 'primary',
+        '#validate' => array('::validateItemsSelected'),
+        '#value' => t('Request translation'),
+        '#submit' => array('::submitForm'),
     );
+    tmgmt_add_cart_form($form['actions'], $form_state, $plugin, $item_type);
 
     $source_ui = $this->sourceManager->createUIInstance($plugin);
     $form_state->set('plugin', $plugin);

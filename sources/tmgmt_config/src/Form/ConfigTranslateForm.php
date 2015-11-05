@@ -98,8 +98,18 @@ class ConfigTranslateForm extends FormBase {
     $form['#title'] = $this->t('Translations of @title', array('@title' => $mapper->getTitle()));
     $overview = $build['languages'];
 
-    $form['top_actions']['#type'] = 'actions';
-    $form['top_actions']['#weight'] = -10;
+    $form['top_actions'] = array(
+        '#type' => 'details',
+        '#title' => t('Operations'),
+        '#open' => TRUE,
+        '#attributes' => array('class' => array('tmgmt-source-operations-wrapper'))
+    );
+    $form['top_actions']['request'] = array(
+        '#type' => 'submit',
+        '#button_type' => 'primary',
+        '#value' =>$this->t('Request translation'),
+        '#submit' => array('::submitForm'),
+    );
     tmgmt_add_cart_form($form['top_actions'], $form_state, 'config', $form_state->get('item_type'), $form_state->get('item_id'));
 
     // Inject our additional column into the header.
@@ -166,12 +176,6 @@ class ConfigTranslateForm extends FormBase {
         );
       }
     }
-    $form['actions']['#type'] = 'actions';
-    $form['actions']['request'] = array(
-      '#type' => 'submit',
-      '#value' =>$this->t('Request translation'),
-      '#submit' => array('::submitForm'),
-    );
     return $form;
   }
 
