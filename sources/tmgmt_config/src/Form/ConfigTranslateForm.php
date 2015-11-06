@@ -132,7 +132,7 @@ class ConfigTranslateForm extends FormBase {
       // after the other from the original non-form rows.
       $option = $overview[$langcode];
       if ($langcode == $mapper->getLangcode()) {
-        $additional = '<strong>' . t('Source') . '</strong>';
+        $additional = array('data' => array('#markup' => '<strong>' . t('Source') . '</strong>'));
         // This is the source object so we disable the checkbox for this row.
         $form['languages'][$langcode] = array(
           '#type' => 'checkbox',

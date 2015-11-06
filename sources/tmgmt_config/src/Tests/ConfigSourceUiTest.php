@@ -86,6 +86,9 @@ class ConfigSourceUiTest extends EntityTestBase {
       }
     }
 
+    // Assert that 'Source' label is displayed properly.
+    $this->assertRaw('<strong>Source</strong>');
+
     // Verify that the pending translation is shown.
     $this->clickLink(t('Needs review'));
     $this->drupalPostForm(NULL, array(), t('Save'));
