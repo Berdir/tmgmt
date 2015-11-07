@@ -544,8 +544,8 @@ class JobForm extends TmgmtFormBase {
   public function ajaxLanguageSelect(array $form, FormStateInterface $form_state) {
     $replace = $form_state->getUserInput()['_triggering_element_name'] == 'source_language' ? 'target_language' : 'source_language';
     $response = new AjaxResponse();
-    $response->addCommand(new ReplaceCommand('#tmgmt-ui-translator-wrapper', $this->renderer->render($form['translator_wrapper'])));
-    $response->addCommand(new ReplaceCommand('#tmgmt-ui-' . str_replace('_', '-', $replace), $this->renderer->render($form['info'][$replace])));
+    $response->addCommand(new ReplaceCommand('#tmgmt-ui-translator-wrapper', $form['translator_wrapper']));
+    $response->addCommand(new ReplaceCommand('#tmgmt-ui-' . str_replace('_', '-', $replace), $form['info'][$replace]));
     return $response;
   }
 
