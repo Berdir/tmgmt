@@ -722,7 +722,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
           break;
         }
       }
-      if ($finished) {
+      if ($finished && $this->getJob()->hasTranslator()) {
         // There are no unfinished elements left.
         if ($this->getJob()->getTranslator()->isAutoAccept()) {
           // If the job item is going to be auto-accepted, set to review without

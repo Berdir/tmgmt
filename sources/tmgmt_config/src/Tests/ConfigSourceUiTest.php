@@ -117,6 +117,28 @@ class ConfigSourceUiTest extends EntityTestBase {
       }
     }
     $this->assertEqual($counter, 2);
+
+    // Test that a job can not be accepted if the translator does not exist.
+    // Request an italian translation.
+    $edit = array(
+      'languages[it]' => TRUE,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Request translation'));
+
+    // Go back to the originally defined destination URL without submitting.
+    $this->drupalGet('admin/structure/types/manage/article/translate');
+
+    // Verify that the pending translation is shown.
+    $this->clickLink(t('In progress'));
+
+    // Try to save, should fail because the job has no translator assigned.
+    $edit = array(
+      'name[translation]' => $this->randomMachineName(),
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    // Verify that we are on the checkout page.
+    $this->assertResponse(200);
   }
 
   /**

@@ -201,7 +201,7 @@ class JobItemForm extends TmgmtFormBase {
     $source_ui = $this->sourceManager->createUIInstance($item->getPlugin());
     $source_ui->reviewFormValidate($form, $form_state, $item);
     // Invoke the validation method on the translator controller (if available).
-    if ($item->getTranslator()) {
+    if ($item->hasTranslator()) {
       $translator_ui = $this->translatorManager->createUIInstance($item->getTranslator()->getPluginId());
       $translator_ui->reviewFormValidate($form, $form_state, $item);
     }
