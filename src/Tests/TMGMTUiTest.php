@@ -514,7 +514,7 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     $this->drupalGet('admin/tmgmt/items/' . $item5->id());
     $this->drupalPostForm(NULL, [], t('Save'));
-    $this->assertText(t('The field is empty'));
+    $this->assertNoText(t('The field is empty'));
 
     // Test for the text with format set.
     \Drupal::state()->set('tmgmt.test_source_data', array(
@@ -580,6 +580,22 @@ class TMGMTUiTest extends TMGMTTestBase {
     $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr')[0]->td[4]);
     $this->assertEqual($label, $translator2->label(), 'Found translator label in table');
     $this->assertNotEqual($label, $translator1->label(), "Translators filtered in table");
+
+
+    $edit = array(
+      'dummy|deep_nesting[translation]' => '',
+    );
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $this->drupalPostForm(NULL, $edit, t('Validate'));
+    $this->assertText(t('The field is empty'));
+
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->assertNoText(t('The field is empty'));
+
+    $item->needsReview();
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $this->drupalPostForm(NULL, [], t('Save as completed'));
+    $this->assertText(t('The field is empty'));
   }
 
   /**

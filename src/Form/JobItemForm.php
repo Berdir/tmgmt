@@ -146,8 +146,10 @@ class JobItemForm extends TmgmtFormBase {
     // Add the form actions as well.
     $actions['accept'] = array(
       '#type' => 'submit',
+      '#button_type' => 'primary',
       '#value' => t('Save as completed'),
       '#access' => $item->isNeedsReview(),
+      '#validate' => array('::validateForm', '::validateJobItem'),
       '#submit' => array('::submitForm', '::save'),
     );
     $actions['save'] = array(
@@ -157,6 +159,12 @@ class JobItemForm extends TmgmtFormBase {
       '#submit' => array('::submitForm', '::save'),
     );
     $actions['validate'] = array(
+      '#type' => 'submit',
+      '#value' => t('Validate'),
+      '#validate' => array('::validateForm', '::validateJobItem'),
+      '#submit' => array('::submitForm', '::submitRebuild'),
+    );
+    $actions['validate_html'] = array(
       '#type' => 'submit',
       '#value' => t('Validate HTML tags'),
       '#submit' => array('::submitForm', '::validateTags'),
@@ -205,10 +213,16 @@ class JobItemForm extends TmgmtFormBase {
       $translator_ui = $this->translatorManager->createUIInstance($item->getTranslator()->getPluginId());
       $translator_ui->reviewFormValidate($form, $form_state, $item);
     }
+  }
+
+  /**
+   * Form validate callback to validate the job item.
+   */
+  public function validateJobItem(array &$form, FormStateInterface $form_state) {
     foreach ($form_state->getValues() as $key => $value) {
       if (is_array($value) && isset($value['translation'])) {
         // If there is an empty field then sets and error to fill it.
-        if (($value['translation'] == '') && ($value['source'] != '') && ($form_state->getTriggeringElement()['#value'] != 'Validate HTML tags')) {
+        if (($value['translation'] == '') && ($value['source'] != '')) {
           $parent_key = $this->getParentKey($key, $form['review']);
           $form_state->setError($form['review'][$parent_key][$key]['translation'], $this->t('The field is empty'));
         }
@@ -515,6 +529,13 @@ class JobItemForm extends TmgmtFormBase {
       $url->setOption('query', array('destination' => $destination));
     }
     $form_state->setRedirectUrl($url);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Submit rebuild.
+   */
+  function submitRebuild(array $form, FormStateInterface $form_state) {
     $form_state->setRebuild();
   }
 
