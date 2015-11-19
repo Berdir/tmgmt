@@ -12,7 +12,6 @@
     {% for item_key, item in items %}
       <div class="asset" id="{{ item_key }}">
         {% for field_key, field in item %}
-        <?php foreach ($item as $field_key => {{ field }}): ?>
           <div class="atom" id="{{ field_key }}">{{ field['#text'] }}</div>
         {% endfor %}
       </div>
