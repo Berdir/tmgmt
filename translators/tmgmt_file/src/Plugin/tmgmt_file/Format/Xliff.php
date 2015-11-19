@@ -205,7 +205,9 @@ class Xliff extends \XMLWriter implements FormatInterface {
    * {@inheritdoc}
    */
   public function import($imported_file) {
-    $this->getImportedXML($imported_file);
+    if ($this->getImportedXML($imported_file) === FALSE) {
+      return FALSE;
+    }
     $phase = $this->importedXML->xpath("//xliff:phase[@phase-name='extraction']");
     $phase = reset($phase);
     $job = Job::load((string) $phase['job-id']);
@@ -223,6 +225,10 @@ class Xliff extends \XMLWriter implements FormatInterface {
     // - Content integrity.
 
     $xml = $this->getImportedXML($imported_file);
+    if ($xml === FALSE) {
+      drupal_set_message(t('The imported file is not a valid XML.'), 'error');
+      return FALSE;
+    }
     // Check if our phase information is there.
     $phase = $xml->xpath("//xliff:phase[@phase-name='extraction']");
     if ($phase) {
@@ -311,6 +317,10 @@ class Xliff extends \XMLWriter implements FormatInterface {
       // https://bugs.php.net/bug.php?id=61469
       $xml_string = file_get_contents($imported_file);
       $this->importedXML = simplexml_load_string($xml_string);
+      if ($this->importedXML === FALSE) {
+        drupal_set_message(t('The imported file is not a valid XML.'), 'error');
+        return FALSE;
+      }
       // Register the XLIFF namespace, required for xpath.
       $this->importedXML->registerXPathNamespace('xliff', 'urn:oasis:names:tc:xliff:document:1.2');
     }
