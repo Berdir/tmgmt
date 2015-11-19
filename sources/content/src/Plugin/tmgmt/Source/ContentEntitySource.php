@@ -124,6 +124,9 @@ class ContentEntitySource extends SourcePluginBase {
             '#text' => $property->getValue(),
             '#translate' => $translate,
           );
+          if ($translate && ($field_item->getFieldDefinition()->getFieldStorageDefinition()->getSetting('max_length') != 0)) {
+            $data[$key][$index][$property_key]['#max_length'] = $field_item->getFieldDefinition()->getFieldStorageDefinition()->getSetting('max_length');
+          }
 
           if ($property_definition->getDataType() == 'filter_format') {
             $format = $property->getValue();

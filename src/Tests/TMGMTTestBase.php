@@ -67,7 +67,13 @@ abstract class TMGMTTestBase extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt', 'tmgmt_test', 'node', 'block');
+  public static $modules = array(
+    'tmgmt',
+    'tmgmt_test',
+    'node',
+    'block',
+    'locale',
+  );
 
   /**
    * Overrides DrupalWebTestCase::setUp()

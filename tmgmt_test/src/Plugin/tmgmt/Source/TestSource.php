@@ -67,6 +67,7 @@ class TestSource extends SourcePluginBase {
         'deep_nesting' => array(
           '#text' => 'Text for job item with type @type and id @id.',
           '#label' => 'Label for job item with type @type and id @id.',
+          '#translate' => TRUE,
         ),
       ),
     ));

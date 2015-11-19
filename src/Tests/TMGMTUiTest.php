@@ -496,25 +496,52 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText(t('HTML tag validation failed for 2 field(s).'));
 
     // Tests that there is always a title.
-    \Drupal::state()->set('tmgmt.test_source_data', array(
-      'title' => array(
-        '0|value' => array(
-          '#text' => '<p><em><strong>Source text bold and Italic</strong></em></p>',
-          '#label' => 'Title',
-        ),
-      ),
-      'body' => array(
-        'deep_nesting' => array(
-          '#text' => '<p><em><strong>Source body bold and Italic</strong></em></p>',
+    $text = '<p><em><strong>Source text bold and Italic</strong></em></p>';
+    \Drupal::state()->set('tmgmt.test_source_data', [
+      'title' => [
+        [
+          'value' => [
+            '#text' => $text,
+            '#label' => 'Title',
+            '#translate' => TRUE,
+          ],
+        ],
+      ],
+      'body' => [
+        'deep_nesting' => [
+          '#text' => $text,
           '#label' => 'Body',
-        )
-      ),
-    ));
+          '#translate' => TRUE,
+        ],
+      ],
+    ]);
     $item5 = $job->addItem('test_source', 'test', 4);
 
-    $this->drupalGet('admin/tmgmt/items/' . $item5->id());
-    $this->drupalPostForm(NULL, [], t('Save'));
-    $this->assertNoText(t('The field is empty'));
+    $this->drupalPostForm('admin/tmgmt/items/' . $item5->id(), [], t('Validate'));
+    $this->assertText(t('The field is empty.'));
+
+    // Tests field is less than max_length.
+    \Drupal::state()->set('tmgmt.test_source_data', [
+      'title' => [
+        [
+          'value' => [
+            '#text' => $text,
+            '#label' => 'Title',
+            '#translate' => TRUE,
+            '#max_length' => 10,
+          ],
+        ],
+      ],
+    ]);
+    $item5 = $job->addItem('test_source', 'test', 4);
+
+    $this->drupalPostForm('admin/tmgmt/items/' . $item5->id(), [
+      'title|0|value[translation]' => $text,
+    ], t('Save'));
+    $this->assertText(t('The field has @size characters while the limit is @limit.', [
+      '@size' => strlen($text),
+      '@limit' => 10,
+    ]));
 
     // Test for the text with format set.
     \Drupal::state()->set('tmgmt.test_source_data', array(
@@ -587,15 +614,15 @@ class TMGMTUiTest extends TMGMTTestBase {
     );
     $this->drupalGet('admin/tmgmt/items/' . $item->id());
     $this->drupalPostForm(NULL, $edit, t('Validate'));
-    $this->assertText(t('The field is empty'));
+    $this->assertText(t('The field is empty.'));
 
     $this->drupalPostForm(NULL, [], t('Save'));
-    $this->assertNoText(t('The field is empty'));
+    $this->assertNoText(t('The field is empty.'));
 
     $item->needsReview();
     $this->drupalGet('admin/tmgmt/items/' . $item->id());
     $this->drupalPostForm(NULL, [], t('Save as completed'));
-    $this->assertText(t('The field is empty'));
+    $this->assertText(t('The field is empty.'));
   }
 
   /**

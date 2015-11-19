@@ -11,7 +11,6 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Xss;
-use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
@@ -167,7 +166,8 @@ class JobItemForm extends TmgmtFormBase {
     $actions['validate_html'] = array(
       '#type' => 'submit',
       '#value' => t('Validate HTML tags'),
-      '#submit' => array('::submitForm', '::validateTags'),
+      '#validate' => ['::validateTags'],
+      '#submit' => ['::submitForm'],
     );
     $url = $item->getJob()->url();
     $url = isset($_GET['destination']) ? $_GET['destination'] : $url;
@@ -180,23 +180,26 @@ class JobItemForm extends TmgmtFormBase {
   }
 
   /**
-   * Gets the parent key given the parent array and the key of the child.
+   * Gets the translatable fields of a given job item.
    *
-   * @param string $name
-   *   String containing the child's key.
-   * @param array $parent_array
-   *   Array containing the elements of the parent.
+   * @param array $form
+   *   The form array.
    *
-   * @return string $key
-   *   Returns the parent key.
+   * @return array $fields
+   *   Returns the translatable fields of the job item.
    */
-  private function getParentKey($name, array $parent_array) {
-    foreach ($parent_array as $key => $value) {
-      if (is_array($value) && isset($value[$name])) {
-        return $key;
+  private function getTranslatableFields(array $form) {
+    $fields = [];
+    foreach ($form['review'] as $parent_key => $value) {
+      if (is_array($value)) {
+        foreach ($value as $key => $data) {
+          if (isset($data['translation'])) {
+            $fields[$key] = ['parent_key' => $parent_key, 'data' => $data];
+          }
+        }
       }
     }
-    return NULL;
+    return $fields;
   }
 
   /**
@@ -204,6 +207,7 @@ class JobItemForm extends TmgmtFormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
+    /** @var JobItem $item */
     $item = $this->buildEntity($form, $form_state);
     // First invoke the validation method on the source controller.
     $source_ui = $this->sourceManager->createUIInstance($item->getPlugin());
@@ -219,14 +223,41 @@ class JobItemForm extends TmgmtFormBase {
    * Form validate callback to validate the job item.
    */
   public function validateJobItem(array &$form, FormStateInterface $form_state) {
-    foreach ($form_state->getValues() as $key => $value) {
-      if (is_array($value) && isset($value['translation'])) {
-        // If there is an empty field then sets and error to fill it.
-        if (($value['translation'] == '') && ($value['source'] != '')) {
-          $parent_key = $this->getParentKey($key, $form['review']);
-          $form_state->setError($form['review'][$parent_key][$key]['translation'], $this->t('The field is empty'));
-        }
+    foreach ($this->getTranslatableFields($form) as $key => $value) {
+      $parent_key = $value['parent_key'];
+      // If has HTML tags will be an array.
+      if (isset($value['data']['translation']['value'])) {
+        $label = $value['data']['translation']['value']['#value'];
       }
+      else {
+        $label = $value['data']['translation']['#value'];
+      }
+
+      // Validate that is not empty.
+      if (empty($label)) {
+        $form_state->setError($form['review'][$parent_key][$key]['translation'], $this->t('The field is empty.'));
+        continue;
+      }
+    }
+  }
+
+  /**
+   * Validate that the element is not longer than the max length.
+   *
+   * @param array $element
+   *   The input element to validate.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function validateMaxLength(array $element, FormStateInterface &$form_state) {
+    if (isset($element['#max_length'])
+      && ($element['#max_length'] < strlen($element['#value']))) {
+      $form_state->setError($element,
+        $this->t('The field has @size characters while the limit is @limit.', [
+          '@size' => strlen($element['#value']),
+          '@limit' => $element['#max_length'],
+        ])
+      );
     }
   }
 
@@ -445,6 +476,10 @@ class JobItemForm extends TmgmtFormBase {
             '#disabled' => $job_item->isAccepted(),
             '#rows' => $rows,
           );
+          if (!empty($data[$key]['#max_length'])) {
+            $form[$target_key]['translation']['#max_length'] = $data[$key]['#max_length'];
+            $form[$target_key]['translation']['#element_validate'] = ['::validateMaxLength'];
+          }
         }
 
         if (!empty($data[$key]['#format']) && \Drupal::config('tmgmt.settings')->get('respect_text_format') == '1') {
@@ -605,4 +640,5 @@ class JobItemForm extends TmgmtFormBase {
     }
     return $counted_tags;
   }
+
 }
