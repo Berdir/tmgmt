@@ -57,7 +57,7 @@ class Html implements FormatInterface {
       '#theme' => 'tmgmt_file_html_template',
       '#tjid' => $job->id(),
       '#source_language' => $job->getRemoteSourceLanguage(),
-      '#target_language' => $job->getRemoteSourceLanguage(),
+      '#target_language' => $job->getRemoteTargetLanguage(),
       '#items' => $items,
     );
     return \Drupal::service('renderer')->renderPlain($elements);
@@ -114,7 +114,7 @@ class Html implements FormatInterface {
 
     // Check language.
     if ($meta['languageSource'] != $job->getRemoteSourceLanguage() ||
-        $meta['languageTarget'] != $job->getRemoteSourceLanguage()) {
+        $meta['languageTarget'] != $job->getRemoteTargetLanguage()) {
       return FALSE;
     }
 
