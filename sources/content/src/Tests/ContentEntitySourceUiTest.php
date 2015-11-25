@@ -175,6 +175,9 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertText($node->getTitle());
     $this->assertNoText($node_german->getTitle());
     $this->assertText($node_not_translated->getTitle());
+    // Check that is set to outdated.
+    $xpath = $this->xpath('//*[@id="edit-items"]/tbody/tr[2]/td[6]/img');
+    $this->assertEqual($xpath[0]->attributes()->title, t('Translation Outdated'));
 
     // Test that a job can not be accepted if the entity does not exist.
     $deleted_node = $this->createNode('page', 'en');

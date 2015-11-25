@@ -175,6 +175,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     }
 
     // Load entity translation specific data.
+    $manager = \Drupal::service('content_translation.manager');
     foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
 
       $translation_status = 'current';
@@ -185,9 +186,11 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
       elseif (!isset($translations[$langcode])) {
         $translation_status = 'missing';
       }
-
-      elseif (!empty($translations->data[$langcode]['translate'])) {
-        $translation_status = 'outofdate';
+      elseif ($translation = $entity->getTranslation($langcode)) {
+        $metadata = $manager->getTranslationMetadata($translation);
+        if ($metadata->isOutdated()) {
+          $translation_status = 'outofdate';
+        }
       }
 
       $array = array(
