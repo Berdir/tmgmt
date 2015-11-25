@@ -6,4 +6,4 @@ type: module
 dependencies:
   - tmgmt
   - file
-configure: admin/config/regional/tmgmt_translator
+configure: entity.tmgmt_translator.collection
