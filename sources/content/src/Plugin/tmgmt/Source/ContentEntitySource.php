@@ -162,6 +162,7 @@ class ContentEntitySource extends SourcePluginBase {
             $data[$key][$index][$property_key] = $this->extractTranslatableData($property->getValue());
           }
         }
+
       }
     }
     return $data;

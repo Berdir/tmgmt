@@ -11,6 +11,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Annotation\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedInterface;
+use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -23,11 +24,14 @@ use Drupal\Core\Render\Element;
  * @ContentEntityType(
  *   id = "tmgmt_local_task_item",
  *   label = @Translation("Translation Task Item"),
- *   controllers = {
+ *   handlers = {
  *     "access" = "Drupal\tmgmt_local\Entity\Controller\LocalTaskItemAccessController",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt_local\Entity\Form\LocalTaskItemFormController"
  *     },
+ *     "list_builder" = "Drupal\tmgmt_local\Entity\ListBuilder\LocalTaskItemListBuilder",
+ *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "views_data" = "Drupal\tmgmt_local\Entity\ViewsData\LocalTaskItemViewsData",
  *   },
  *   base_table = "tmgmt_local_task_item",
  *   entity_keys = {
@@ -39,6 +43,8 @@ use Drupal\Core\Render\Element;
  * @ingroup tmgmt_local_task
  */
 class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface {
+
+  use EntityChangedTrait;
 
   /**
    * {@inheritdoc}

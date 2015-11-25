@@ -37,7 +37,7 @@ class LocalTranslator extends TranslatorPluginBase {
 
     // Create local task for this job.
     $local_task = tmgmt_local_task_create(array(
-      'uid' => $job->uid,
+      'uid' => $job->getOwnerId(),
       'tuid' => $tuid,
       'tjid' => $job->id(),
       'title' => t('Task for @label', array('@label' => $job->label())),

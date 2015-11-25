@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * @file
  * Contains \Drupal\tmgmt_local\Entity\LocalTask.
  */
@@ -9,6 +9,7 @@ namespace Drupal\tmgmt_local\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedInterface;
+use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -52,6 +53,8 @@ use Drupal\tmgmt_local\LocalTaskInterface;
  * @ingroup tmgmt_local_task
  */
 class LocalTask extends ContentEntityBase implements EntityChangedInterface, EntityOwnerInterface {
+
+  use EntityChangedTrait;
 
   /**
    * {@inheritdoc}
