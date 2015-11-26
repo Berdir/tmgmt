@@ -6,7 +6,7 @@ entity_type: user
 bundle: user
 label: 'Translation skills'
 description: ''
-required: 0
+required: false
 default_value: {  }
 default_value_function: ''
 settings: {  }

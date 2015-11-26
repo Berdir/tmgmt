@@ -169,20 +169,20 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Make sure that the checkout page works as expected when there are no
     // roles.
-    $this->drupalGet($job->getSystemPath());
-    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Local Translator (auto created)', '@source' => 'English', '@target' => 'German')));
+    $this->drupalGet($job->toUrl());
+    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Local translator (auto created)', '@source' => 'English', '@target' => 'German')));
     $this->local_translator = $this->drupalCreateUser($this->local_translator_permissions);
 
     // The same when there is a single role.
-    $this->drupalGet($job->getSystemPath());
-    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Local Translator (auto created)', '@source' => 'English', '@target' => 'German')));
+    $this->drupalGet($job->toUrl());
+    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Local translator (auto created)', '@source' => 'English', '@target' => 'German')));
 
     // Create another local translator with the required abilities.
     $other_translator_same = $this->drupalCreateUser($this->local_translator_permissions);
 
     // And test again with two roles but still no abilities.
-    $this->drupalGet($job->getSystemPath());
-    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Local Translator (auto created)', '@source' => 'English', '@target' => 'German')));
+    $this->drupalGet($job->toUrl());
+    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Local translator (auto created)', '@source' => 'English', '@target' => 'German')));
 
     $this->drupalLogin($other_translator_same);
     // Configure language abilities.
@@ -194,7 +194,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Check that the user is not listed in the translator selection form.
     $this->loginAsAdmin();
-    $this->drupalGet($job->getSystemPath());
+    $this->drupalGet($job->toUrl());
     $this->assertText(t('Select translator for this job'));
     $this->assertText($other_translator_same->getUsername());
     $this->assertNoText($this->local_translator->getUsername());
@@ -209,13 +209,13 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Check that the translator is now listed.
     $this->loginAsAdmin();
-    $this->drupalGet($job->getSystemPath());
+    $this->drupalGet($job->toUrl());
     $this->assertText($this->local_translator->getUsername());
 
     $job->requestTranslation();
 
     // Test for job comment in the job checkout info pane.
-    $this->drupalGet($job->getSystemPath());
+    $this->drupalGet($job->toUrl());
     $this->assertText($job_comment);
 
     $this->drupalLogin($this->local_translator);

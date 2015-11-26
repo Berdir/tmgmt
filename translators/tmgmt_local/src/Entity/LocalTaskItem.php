@@ -47,6 +47,13 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
   use EntityChangedTrait;
 
   /**
+   * Holds the unserialized source data.
+   *
+   * @var array
+   */
+  protected $unserializedData;
+
+  /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
@@ -112,7 +119,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
       ->setLabel(t('Reviewed count'))
       ->setSetting('unsigned', TRUE);
 
-    $fields['count_accepted'] = BaseFieldDefinition::create('integer')
+    $fields['count_completed'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Accepted count'))
       ->setSetting('unsigned', TRUE);
 
@@ -126,14 +133,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
   /**
    * {@inheritdoc}
    */
-  public function getChangedTime() {
-    $this->get('changed')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function defaultLabel() {
+  public function label() {
     if ($job_item = $this->getJobItem()) {
       return $job_item->label();
     }
@@ -146,7 +146,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
    * @return LocalTask
    */
   public function getTask() {
-    $this->get('tltid')->entity;
+    return $this->get('tltid')->entity;
   }
 
   /**
@@ -214,7 +214,16 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
    * @param $values
    *   Nested array of values to set.
    */
-  public function updateData($key, $values = array()) {
+  public function updateData($key, $values = array(), $replace = FALSE) {
+    if ($replace) {
+      if (!is_array($this->unserializedData)) {
+        $this->unserializedData = unserialize($this->get('data')->value);
+        if (!is_array($this->unserializedData)) {
+          $this->unserializedData = array();
+        }
+      }
+      NestedArray::setValue($this->unserializedData, \Drupal::service('tmgmt.data')->ensureArrayKey($key), $values);
+    }
     foreach ($values as $index => $value) {
       // In order to preserve existing values, we can not aplly the values array
       // at once. We need to apply each containing value on its own.
@@ -224,7 +233,10 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
       }
       // Apply the value.
       else {
-        NestedArray::setValue($this->data, array_merge(\Drupal::service('tmgmt.data')->tmgmt_ensure_keys_array($key), array($index)), $value);
+        if (!is_array($this->unserializedData)) {
+          $this->unserializedData = unserialize($this->get('data')->value);
+        }
+        NestedArray::setValue($this->unserializedData, array_merge(\Drupal::service('tmgmt.data')->ensureArrayKey($key), array($index)), $value);
       }
     }
   }
@@ -249,14 +261,22 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
    * @return array
    *   A structured data array.
    */
-  public function getData(array $key = array(), $index = NULL) {
+  public function getData($key = array(), $index = NULL) {
+    if (empty($this->unserializedData) && $this->get('data')->value) {
+      $this->unserializedData = unserialize($this->get('data')->value);
+    }
+    if (empty($this->unserializedData) && $this->getTask()) {
+      // Load the data from the source if it has not been set yet.
+      $this->unserializedData = $this->getJobItem()->getData();
+      $this->save();
+    }
     if (empty($key)) {
-      return $this->data;
+      return $this->unserializedData;
     }
     if ($index) {
       $key = array_merge($key, array($index));
     }
-    return NestedArray::getValue($this->data, $key);
+    return NestedArray::getValue($this->unserializedData, $key);
   }
 
   /**
@@ -289,34 +309,51 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
     return $this->count_completed;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+    if ($this->getTask()) {
+      $this->recalculateStatistics();
+    }
+    if ($this->unserializedData) {
+      $this->data = serialize($this->unserializedData);
+    }
+    elseif (empty($this->get('data')->value)) {
+      $this->data = serialize(array());
+    }
+  }
 
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageInterface $storage_controller) {
-    parent::preSave($storage_controller);
-    // @todo Eliminate the need to flatten and unflatten the TaskItem data.
-    // Consider everything translated when the job item is translated.
-    $data_service = \Drupal::service('tmgmt.data');
-    if ($this->isCompleted()) {
-      $this->count_untranslated = 0;
-      $this->count_translated = count($data_service->flattenData($this->data));
-      $this->count_completed = 0;
+  public function recalculateStatistics() {
+    // Set translatable data from the current entity to calculate words.
+    if (empty($this->unserializedData) && $this->get('data')->value) {
+      $this->unserializedData = unserialize($this->get('data')->value);
     }
-    // Consider everything completed if the job is completed.
-    elseif ($this->isClosed()) {
-      $this->count_untranslated = 0;
+
+    if (empty($this->unserializedData)) {
+      $this->unserializedData = $this->getJobItem()->getData();
+    }
+
+    // Consider everything accepted when the job item is accepted.
+    if ($this->isCompleted()) {
+      $this->count_pending = 0;
       $this->count_translated = 0;
-      $this->count_completed = count($data_service->flattenData($this->data));
+      $this->count_reviewed = 0;
+      $this->count_completed = count(array_filter(\Drupal::service('tmgmt.data')->flatten($this->unserializedData), array(\Drupal::service('tmgmt.data'), 'filterData')));
     }
     // Count the data item states.
     else {
-      // Start with assuming that all data is untranslated, then go through it
-      // and count translated data.
-      $this->count_untranslated = count(\Drupal::service('tmgmt.data')->filterTranslatable($this->getData()));
+      // Reset counter values.
+      $this->count_pending = 0;
       $this->count_translated = 0;
+      $this->count_reviewed = 0;
       $this->count_completed = 0;
-      $this->count($this->data);
+      $this->word_count = 0;
+      $this->count($this->unserializedData);
     }
   }
 

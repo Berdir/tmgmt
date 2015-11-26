@@ -22,7 +22,7 @@ class LocalTaskAccessControlHandler extends EntityAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     if ($account->hasPermission('administer tmgmt')) {
       // Administrators can do everything.
       return AccessResult::allowed()->cachePerPermissions();

@@ -5,6 +5,7 @@ use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt_local\Entity\LocalTask;
+use Drupal\user\UserInterface;
 
 /**
  * @file
@@ -465,9 +466,11 @@ function tmgmt_local_tasks_languages($tasks) {
   $query = db_select('tmgmt_local_task', 't');
   $query->condition('tltid', $tasks, 'IN');
   $query->join('tmgmt_job', 'j', 't.tjid = j.tjid');
-  $query->fields('j', array('source_language', 'target_language'));
-  $query->groupBy('target_language');
-  $result = $query->execute();
+  $result = $query
+    ->fields('j', array('source_language', 'target_language'))
+    ->groupBy('target_language')
+    ->groupBy('source_language')
+    ->execute();
   $languages = array();
 
   foreach ($result as $row) {
@@ -579,19 +582,8 @@ function tmgmt_local_field_access($op, $field, $entity_type, $entity = NULL, $ac
 /**
  * Implements hook_field_attach_insert().
  */
-function tmgmt_local_field_attach_insert($entity_type, $entity) {
-  if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
-    return;
-  }
-
-  tmgmt_local_clear_languages_cache();
-}
-
-/**
- * Implements hook_field_attach_update().
- */
-function tmgmt_local_field_attach_update($entity_type, $entity) {
-  if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
+function tmgmt_local_user_presave(UserInterface $user) {
+  if (!$user->hasPermission('provide translation services')) {
     return;
   }
 
@@ -601,8 +593,8 @@ function tmgmt_local_field_attach_update($entity_type, $entity) {
 /**
  * Implements hook_field_attach_delete().
  */
-function tmgmt_local_field_attach_delete($entity_type, $entity) {
-  if ($entity_type != 'user' || !array_intersect_key(user_roles(TRUE, 'provide translation services'), $entity->roles)) {
+function tmgmt_local_field_attach_delete(UserInterface $user) {
+  if (!$user->hasPermission('provide translation services')) {
     return;
   }
   tmgmt_local_clear_languages_cache();

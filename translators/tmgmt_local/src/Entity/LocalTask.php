@@ -261,7 +261,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
    */
   public function addTaskItem(JobItemInterface $job_item) {
     // Save the task to get an id.
-    if (empty($this->tltid)) {
+    if ($this->isNew()) {
       $this->save();
     }
 

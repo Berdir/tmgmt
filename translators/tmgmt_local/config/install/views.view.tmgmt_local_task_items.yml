@@ -3,13 +3,13 @@ status: true
 dependencies:
   module:
     - tmgmt_local
-id: translation_tasks
-label: 'Translation Tasks'
+id: tmgmt_local_task_items
+label: 'TMGMT task item'
 module: views
 description: ''
 tag: ''
-base_table: tmgmt_local_task
-base_field: tltid
+base_table: tmgmt_local_task_item
+base_field: tjiid
 core: 8.x
 display:
   default:
@@ -68,10 +68,13 @@ display:
       row:
         type: fields
       fields:
-        title:
-          id: title
-          table: tmgmt_local_task
-          field: title
+        tjiid:
+          table: tmgmt_local_task_item
+          field: tjiid
+          id: tjiid
+          entity_type: null
+          entity_field: tjiid
+          plugin_id: numeric
           relationship: none
           group_type: group
           admin_label: ''
@@ -108,7 +111,7 @@ display:
           element_class: ''
           element_label_type: ''
           element_label_class: ''
-          element_label_colon: false
+          element_label_colon: true
           element_wrapper_type: ''
           element_wrapper_class: ''
           element_default_classes: true
@@ -116,13 +119,18 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          entity_type: tmgmt_local_task
-          entity_field: title
-          plugin_id: standard
-        tuid:
-          id: tuid
-          table: tmgmt_local_task
-          field: tuid
+          set_precision: false
+          precision: 0
+          decimal: .
+          separator: ','
+          format_plural: false
+          format_plural_string: '1\x03@count'
+          prefix: ''
+          suffix: ''
+        count_accepted:
+          id: count_accepted
+          table: tmgmt_local_task_item
+          field: count_accepted
           relationship: none
           group_type: group
           admin_label: ''
@@ -172,16 +180,15 @@ display:
           decimal: .
           separator: ','
           format_plural: false
-          format_plural_singular: '1'
-          format_plural_plural: '@count'
+          format_plural_string: '1\x03@count'
           prefix: ''
           suffix: ''
-          entity_type: tmgmt_local_task
-          entity_field: tuid
+          entity_type: tmgmt_local_task_item
+          entity_field: count_accepted
           plugin_id: numeric
         changed:
           id: changed
-          table: tmgmt_local_task
+          table: tmgmt_local_task_item
           field: changed
           relationship: none
           group_type: group
@@ -230,13 +237,13 @@ display:
           date_format: fallback
           custom_date_format: ''
           timezone: ''
-          entity_type: tmgmt_local_task
+          entity_type: tmgmt_local_task_item
           entity_field: changed
           plugin_id: date
-        created:
-          id: created
-          table: tmgmt_local_task
-          field: created
+        item_type:
+          id: item_type
+          table: tmgmt_local_task_item
+          field: item_type
           relationship: none
           group_type: group
           admin_label: ''
@@ -281,16 +288,13 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          date_format: fallback
-          custom_date_format: ''
-          timezone: ''
-          entity_type: tmgmt_local_task
-          entity_field: created
-          plugin_id: date
-        tjid:
-          id: tjid
-          table: tmgmt_local_task
-          field: tjid
+          entity_type: tmgmt_local_task_item
+          entity_field: item_type
+          plugin_id: standard
+        tjiid_1:
+          id: tjiid_1
+          table: tmgmt_local_task_item
+          field: tjiid
           relationship: none
           group_type: group
           admin_label: ''
@@ -340,16 +344,15 @@ display:
           decimal: .
           separator: ','
           format_plural: false
-          format_plural_singular: '1'
-          format_plural_plural: '@count'
+          format_plural_string: '1\x03@count'
           prefix: ''
           suffix: ''
-          entity_type: tmgmt_local_task
-          entity_field: tjid
+          entity_type: tmgmt_local_task_item
+          entity_field: tjiid
           plugin_id: numeric
         tltid:
           id: tltid
-          table: tmgmt_local_task
+          table: tmgmt_local_task_item
           field: tltid
           relationship: none
           group_type: group
@@ -400,17 +403,16 @@ display:
           decimal: .
           separator: ','
           format_plural: false
-          format_plural_singular: '1'
-          format_plural_plural: '@count'
+          format_plural_string: '1\x03@count'
           prefix: ''
           suffix: ''
-          entity_type: tmgmt_local_task
+          entity_type: tmgmt_local_task_item
           entity_field: tltid
           plugin_id: numeric
-        status:
-          id: status
-          table: tmgmt_local_task
-          field: status
+        tltiid:
+          id: tltiid
+          table: tmgmt_local_task_item
+          field: tltiid
           relationship: none
           group_type: group
           admin_label: ''
@@ -460,16 +462,22 @@ display:
           decimal: .
           separator: ','
           format_plural: false
-          format_plural_singular: '1'
-          format_plural_plural: '@count'
+          format_plural_string: '1\x03@count'
           prefix: ''
           suffix: ''
-          entity_type: tmgmt_local_task
+          entity_type: tmgmt_local_task_item
+          entity_field: tltiid
+          plugin_id: numeric
+        status:
+          id: status
+          table: tmgmt_local_task_item
+          field: status
+          entity_type: tmgmt_local_task_item
           entity_field: status
           plugin_id: numeric
       filters: {  }
       sorts: {  }
-      title: 'Translation Tasks'
+      title: 'TMGMT task item'
       header: {  }
       footer: {  }
       empty: {  }
@@ -483,4 +491,4 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      path: translate
+      path: translate_tasks

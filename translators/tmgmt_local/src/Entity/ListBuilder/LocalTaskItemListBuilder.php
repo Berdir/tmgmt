@@ -4,11 +4,10 @@
  * Contains \Drupal\tmgmt\Entity\ListBuilder\JobListBuilder.
  */
 
-namespace Drupal\tmgmt\Entity\ListBuilder;
+namespace Drupal\tmgmt_local\Entity\ListBuilder;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
-use Drupal\Core\Url;
 
 /**
  * Provides the views data for the message entity type.

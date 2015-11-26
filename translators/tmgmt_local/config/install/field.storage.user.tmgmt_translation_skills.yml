@@ -8,6 +8,6 @@ settings: {  }
 module: tmgmt_language_combination
 active: true
 locked: false
-cardinality: '-1'
+cardinality: -1
 translatable: false
 indexes: {  }
