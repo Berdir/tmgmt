@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt\Plugin\views\field\LoopCount.
+ * Contains \Drupal\tmgmt_local\Plugin\views\field\LoopCount.
  */
 
-namespace Drupal\tmgmt\Plugin\views\field;
+namespace Drupal\tmgmt_local\Plugin\views\field;
 
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;

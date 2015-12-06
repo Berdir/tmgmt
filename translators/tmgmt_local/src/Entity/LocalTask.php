@@ -174,25 +174,14 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   /**
    * {@inheritdoc}
    */
-  public function defaultLabel() {
-    if (empty($this->tuid)) {
-      if (empty($this->title)) {
-        return t('Task for @job', array('@job' => $this->getJob()->label()));
-      }
-      else {
-        return $this->title;
-      }
+  public function label() {
+    if (!$this->title->value) {
+      return t('Task for @job', array('@job' => $this->getJob()->label()));
     }
     else {
-      if (empty($this->title)) {
-        return t('Task for @job assigned to @translator', array('@job' => $this->getJob()->label(), '@translator' => User::load($this->tuid->getUsername())));
-      }
-      else {
-        return t('%title assigned to @translator', array('%title' => $this->getTitle(), '@translator' => $this->getTranslator()->getUsername()));
-      }
+      return $this->title->value;
     }
   }
-
 
   /**
    * Return the corresponding translation job.
@@ -235,7 +224,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
    *   An array of local task items.
    */
   public function getItems($conditions = array()) {
-    $query = \Drupal::entityQuery('tmgmt_loal_task_item');
+    $query = \Drupal::entityQuery('tmgmt_local_task_item');
     $query->condition('tltid', $this->id());
     foreach ($conditions as $key => $condition) {
       if (is_array($condition)) {
@@ -483,12 +472,4 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
     return $this->getChangedTime();
   }
 
-  /**
-   * Gets the local task title.
-   */
-  public function getTitle() {
-    if (!empty($this->get('title')->value)) {
-      return $this->get('title')->value;
-    }
-  }
 }

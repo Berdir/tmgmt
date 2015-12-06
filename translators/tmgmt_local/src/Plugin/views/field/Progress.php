@@ -7,8 +7,6 @@
 
 namespace Drupal\tmgmt_local\Plugin\views\field;
 
-use Drupal\Component\Annotation\PluginID;
-use Drupal\tmgmt_local\Entity\LocalTask;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 

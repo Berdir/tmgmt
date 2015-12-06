@@ -415,9 +415,9 @@ function tmgmt_local_task_statistics_load(array $tltids) {
  *   The requested information as an integer.
  */
 function tmgmt_local_task_statistic(LocalTask $task, $key) {
-  $statistics = tmgmt_local_task_statistics_load(array($task->tltid));
-  if (isset($statistics[$task->tltid]->$key)) {
-    return $statistics[$task->tltid]->$key;
+  $statistics = tmgmt_local_task_statistics_load(array($task->id()));
+  if (isset($statistics[$task->id()]->$key)) {
+    return $statistics[$task->id()]->$key;
   }
   return 0;
 }

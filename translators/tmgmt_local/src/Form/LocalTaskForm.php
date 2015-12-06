@@ -39,15 +39,10 @@ class LocalTaskForm extends ContentEntityForm {
 
     $localTask = $this->entity;
 
-    $form['label'] = array(
-      '#type' => 'markup',
-      '#markup' => $localTask->defaultLabel(),
-    );
-
     $form['title'] = array(
       '#title' => t('Title'),
       '#type' => 'textfield',
-      '#default_value' => $localTask->getTitle(),
+      '#default_value' => $localTask->label(),
       '#required' => TRUE,
     );
     return $form;

@@ -107,16 +107,12 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the job was last edited.'));
 
-    $fields['count_pending'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Pending count'))
+    $fields['count_untranslated'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('Untranslated count'))
       ->setSetting('unsigned', TRUE);
 
     $fields['count_translated'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Translated count'))
-      ->setSetting('unsigned', TRUE);
-
-    $fields['count_reviewed'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Reviewed count'))
       ->setSetting('unsigned', TRUE);
 
     $fields['count_completed'] = BaseFieldDefinition::create('integer')

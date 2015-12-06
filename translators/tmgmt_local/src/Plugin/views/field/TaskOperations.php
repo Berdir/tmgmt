@@ -1,33 +1,45 @@
 <?php
 
 /**
- * Field handler which shows the operations for a task.
- *
- * @todo Remove this once http://drupal.org/node/1435662 is through.
- *
- * @ingroup views_field_handlers
+ * @file
+ * Contains \Drupal\tmgmt_local\Plugin\views\field\TaskOperations.
  */
-class tmgmt_local_task_handler_field_operations extends views_handler_field_entity {
 
-  function render($values) {
-    /**
-     * @var \Drupal\tmgmt_local\Entity\LocalTask $task
-     */
-    $task = $this->getValue($values);
+namespace Drupal\tmgmt_local\Plugin\views\field;
+
+use Drupal\Core\Routing\RedirectDestinationTrait;
+use Drupal\views\Plugin\views\field\FieldPluginBase;
+use Drupal\views\ResultRow;
+
+/**
+ * Field handler which shows the progress of a job or job item.
+ *
+ * @ViewsField("tmgmt_local_task_operations")
+ */
+class TaskOperations extends FieldPluginBase {
+
+  use RedirectDestinationTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function render(ResultRow $values) {
+    /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
+    $task = $values->_entity;
 
     $element = array();
     $element['#theme'] = 'links';
     $element['#attributes'] = array('class' => array('links', 'inline'));
     if ($task->access('view')) {
       $element['#links']['view'] = array(
-        'query' => array('destination' => current_path()),
+        'query' => $this->getDestinationArray(),
         'title' => t('View'),
-      ) + $task->urlInfo()->toArray();
+      ) + $task->toUrl()->toRenderArray();
     }
-    if (user_access('administer translation tasks') && tmgmt_local_translation_access($task) && empty($task->tuid)) {
+    if (\Drupal::currentUser()->hasPermission('administer translation tasks') && tmgmt_local_translation_access($task) && empty($task->tuid)) {
       $element['#links']['assign'] = array(
-        'href' => 'manage-translate/assign-tasks/' . $task->tltid,
-        'query' => array('destination' => current_path()),
+        'href' => 'manage-translate/assign-tasks/' . $task->id(),
+        'query' => $this->getDestinationArray(),
         'attributes' => array(
           'title' => t('Assign'),
         ),
@@ -36,8 +48,8 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
     }
     elseif (tmgmt_local_translation_access($task) && empty($task->tuid)) {
       $element['#links']['assign_to_me'] = array(
-        'href' => 'translate/' . $task->tltid . '/assign-to-me',
-        'query' => array('destination' => current_path()),
+        'href' => 'translate/' . $task->id() . '/assign-to-me',
+        'query' => $this->getDestinationArray(),
         'attributes' => array(
           'title' => t('Assign to me'),
         ),
@@ -46,8 +58,8 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
     }
     elseif (tmgmt_local_translation_access($task) && empty($task->tuid)) {
       $element['#links']['assign_to_me'] = array(
-        'href' => 'translate/' . $task->tltid . '/assign-to-me',
-        'query' => array('destination' => current_path()),
+        'href' => 'translate/' . $task->id() . '/assign-to-me',
+        'query' => $this->getDestinationArray(),
         'attributes' => array(
           'title' => t('Assign to me'),
         ),
@@ -56,8 +68,8 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
     }
     if (!empty($task->tuid) && $task->access('unassign')) {
       $element['#links']['unassign'] = array(
-        'href' => 'translate/' . $task->tltid . '/unassign',
-        'query' => array('destination' => current_path()),
+        'href' => 'translate/' . $task->id() . '/unassign',
+        'query' => $this->getDestinationArray(),
         'attributes' => array(
           'title' => t('Unassign'),
         ),
@@ -68,11 +80,11 @@ class tmgmt_local_task_handler_field_operations extends views_handler_field_enti
       $element['#links']['delete'] = array(
         'route_name' => 'tmgmt_local.local_task_delete',
         'route_parameters' => array('tmgmt_local_task' => $task->id()),
-        'query' => array('destination' => current_path()),
+        'query' => $this->getDestinationArray(),
         'title' => t('delete'),
       );
     }
-    return \Drupal::service('renderer')->render($element);
+    return $element;
   }
 
 }
