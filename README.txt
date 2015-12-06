@@ -186,3 +186,10 @@ Credits
   Licenced by GNU General Public License / Creative Commons Attribution 4.0 International (CC BY 4.0).
   It is available on the following URL: https://icomoon.io/#icons-icomoon
   The only change made was the change of the color to grey.
+
+Support for paragraphs_demo
+---------------------------
+
+- TMGMT demo module supports the translation of paragraphs. To enable this, do the following:
+  - Enable paragraphs_demo module
+  - Enable tmgmt_demo module

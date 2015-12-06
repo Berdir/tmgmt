@@ -14,4 +14,8 @@ dependencies:
  - path
  - text
  - menu_ui
+
+simplytest_dependencies:
+ - paragraphs_demo
+
 #@todo add the google_chart_tools dependancy

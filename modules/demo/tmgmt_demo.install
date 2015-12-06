@@ -88,4 +88,10 @@ function tmgmt_demo_install() {
     'status' => 1,
   ));
   $node->save();
+
+  if (\Drupal::moduleHandler()->moduleExists('paragraphs_demo')) {
+    \Drupal::configFactory()->getEditable('tmgmt_content.settings')
+    ->set('embedded_fields.node.field_paragraphs_demo', TRUE)
+    ->save();
+  }
 }
