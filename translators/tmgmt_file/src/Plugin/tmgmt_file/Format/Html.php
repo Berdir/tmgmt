@@ -107,7 +107,7 @@ class Html implements FormatInterface {
     // Attempt to load the job.
     if (!$job = Job::load($meta['JobID'])) {
       drupal_set_message(t('The imported file job id @file_id is not available.', array(
-        '@file_id' => $job->id(),
+        '@file_id' => $meta['JobID'],
       )), 'error');
       return FALSE;
     }
