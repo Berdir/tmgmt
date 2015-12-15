@@ -1,3 +1,7 @@
 tmgmt.translator.settings.local:
   type: mapping
-  mapping: { }
+  label: 'Local translator settings'
+  mapping:
+    allow_all:
+      type: boolean
+      label: 'Allow all'
