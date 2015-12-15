@@ -1,4 +1,5 @@
 <?php
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\user\Entity\User;
 use Drupal\tmgmt\Entity\Translator;
@@ -292,24 +293,12 @@ function tmgmt_local_task_delete_multiple(array $tltids) {
 }
 
 /**
- * Access callback for the local task entity.
- *
- * @param $op
- *   The operation being performed.
- * @param $item
- *   (Optional) A TMGMTLocalTask entity to check access for. If no entity is
- *   given, it will be determined whether access is allowed for all entities.
- * @param $account
- *   (Optional) The user to check for. Leave it to NULL to check for the global
- *   user.
- *
- * @return bool
- *   TRUE if access is allowed, FALSE otherwise.
+ * Implements hook_tmgmt_local_task_access().
  */
-function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
-  if (user_access('administer tmgmt', $account) || user_access('administer translation tasks', $account)) {
+function tmgmt_local_tmgmt_local_task_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
+  if ($account->hasPermission('administer tmgmt') || $account->hasPermission('administer translation tasks')) {
     // Administrators can do everything.
-    return TRUE;
+    return AccessResult::allowed();
   }
 
   if (!$account) {
@@ -318,14 +307,15 @@ function tmgmt_local_task_access($op, $task = NULL, $account = NULL) {
   }
 
   // @todo - probably need refinement when we introduce more module permissions.
-  switch ($op) {
+  switch ($operation) {
     case 'view':
     case 'update':
-      return user_access('provide translation services', $account);
-      break;
+      return AccessResult::allowedIfHasPermission($account, 'provide translation services');
+
     case 'unassign':
-      return !empty($task->tuid) && $task->tuid == $account->id() && user_access('provide translation services', $account);
+      return AccessResult::allowedIf(!empty($entity->tuid) && $entity->tuid == $account->id() && $account->hasPermission('provide translation services'));
   }
+  return AccessResult::neutral();
 }
 
 /**

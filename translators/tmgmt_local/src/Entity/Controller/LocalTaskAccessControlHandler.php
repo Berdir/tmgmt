@@ -32,27 +32,23 @@ class LocalTaskAccessControlHandler extends EntityAccessControlHandler {
       case 'view':
       case 'update':
         return AccessResult::allowedIfHasPermission($account, 'provide translation services')->orIf(AccessResult::allowedIfHasPermission($account, 'administer translation tasks'));
-        break;
 
       case 'delete':
         // Only administrators can delete jobs.
         return AccessResult::allowedIfHasPermission($account, 'administer translation tasks');
-        break;
 
       // Custom operations.
       case 'submit':
         return AccessResult::allowedIfHasPermission($account, 'administer translation tasks');
-        break;
 
       case 'accept':
         return AccessResult::allowedIfHasPermission($account, 'administer translation tasks');
-        break;
 
       case 'abort':
       case 'resubmit':
         return AccessResult::allowedIfHasPermission($account, 'administer translation tasks');
-        break;
     }
+    return AccessResult::neutral();
   }
 
   /**
