@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_local\Entity\Controller\LocalTaskAccessControlHandler.
+ * Contains \Drupal\tmgmt_local\Entity\Controller\LocalTaskItemAccessController.
  */
 
 namespace Drupal\tmgmt_local\Entity\Controller;
@@ -17,7 +17,7 @@ use Drupal\Core\Session\AccountInterface;
  *
  * @see \Drupal\tmgmt\Plugin\Core\Entity\Job.
  */
-class LocalTaskAccessControlHandler extends EntityAccessControlHandler {
+class LocalTaskItemAccessController extends EntityAccessControlHandler {
 
   /**
    * {@inheritdoc}

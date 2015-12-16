@@ -18,12 +18,19 @@ class LocalTaskItemViewsData extends EntityViewsData {
    */
   public function getViewsData() {
     $data = parent::getViewsData();
+    $data['tmgmt_local_task_item']['status'] = array(
+      'title' => t('Status'),
+      'help' => t('Display the status of the task item.'),
+      'field' => array(
+        'id' => 'tmgmt_local_task_item_status',
+      ),
+    );
     $data['tmgmt_local_task_item']['operations'] = array(
       'title' => t('Operations'),
       'help' => t('Displays a list of operations which are available for a task item.'),
       'real field' => 'tltiid',
       'field' => array(
-        'handler' => 'tmgmt_local_task_handler_field_item_operations',
+        'id' => 'tmgmt_local_task_item_operations',
       ),
     );
     return $data;

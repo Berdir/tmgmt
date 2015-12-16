@@ -58,7 +58,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields['tltiid'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Local Task ID'))
+      ->setLabel(t('Local Task Item ID'))
       ->setDescription(t('The Local Task Item ID.'))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
