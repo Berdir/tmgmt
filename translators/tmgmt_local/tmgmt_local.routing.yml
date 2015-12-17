@@ -19,6 +19,13 @@ entity.tmgmt_local_task.delete_form:
   requirements:
     _entity_access: tmgmt_local_task.delete
 
+tmgmt_local_task.assign_multiple:
+  path: '/translate/assign-tasks'
+  defaults:
+    _form: \Drupal\tmgmt_local\Form\AssignMultiple
+  requirements:
+    _entity_access: tmgmt_local_task.update
+
 entity.tmgmt_local_task_item.canonical:
   path: '/translate/items/{tmgmt_local_task_item}'
   defaults:

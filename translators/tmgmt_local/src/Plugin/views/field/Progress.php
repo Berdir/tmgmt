@@ -18,9 +18,11 @@ use Drupal\views\ResultRow;
 class Progress extends FieldPluginBase {
 
   /**
+   * {@inheritdoc}
+   *
    * Prefetch statistics for all jobs.
    */
-  function preRender(&$values) {
+  public function preRender(&$values) {
     parent::preRender($values);
 
     // In case of tasks, pre-fetch the statistics in a single query and add them
@@ -37,9 +39,9 @@ class Progress extends FieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  function render(ResultRow $values) {
-
-    $entity =  $values->_entity;
+  public function render(ResultRow $values) {
+    /** @var \Drupal\tmgmt_local\LocalTaskInterface $entity */
+    $entity = $values->_entity;
     $counts = array(
       '@untranslated' => $entity->getCountUntranslated(),
       '@translated' => $entity->getCountTranslated(),
@@ -48,7 +50,7 @@ class Progress extends FieldPluginBase {
     $id = $entity->id();
 
     if (\Drupal::moduleHandler()->moduleExists('google_chart_tools')) {
-      draw_chart($this->build_progressbar_settings($id, $counts));
+      draw_chart($this->buildProgressbarSettings($id, $counts));
       return '<div id="progress' . $id . '"></div>';
     }
     $title = t('Untranslated: @untranslated, translated: @translated, completed: @completed.', $counts);
@@ -61,20 +63,21 @@ class Progress extends FieldPluginBase {
    * The settings are preset with values to display a progress bar for either
    * a job or job item.
    *
-   * @param $id
+   * @param string $id
    *   The id of the chart.
-   * @param $counts
+   * @param array $counts
    *   Array with the counts for accepted, translated and pending.
-   * @param $prefix
+   * @param string $prefix
    *   Prefix to id.
-   * @return
+   *
+   * @return array
    *   Settings array.
    */
-  function build_progressbar_settings($id, $counts, $prefix = 'progress') {
+  protected function buildProgressbarSettings($id, array $counts, $prefix = 'progress') {
     $settings['chart'][$prefix . $id] = array(
-      'header' => array(t('Accepted'), t('Reviewed'), t('Translated'), t('Pending')),
+      'header' => [t('Accepted'), t('Reviewed'), t('Translated'), t('Pending')],
       'rows' => array(
-        array($counts['@accepted'], $counts['@reviewed'], $counts['@translated'], $counts['@pending']),
+        [$counts['@accepted'], $counts['@reviewed'], $counts['@translated'], $counts['@pending']],
       ),
       'columns' => array(''),
       'chartType' => 'PieChart',
@@ -97,7 +100,7 @@ class Progress extends FieldPluginBase {
         'isStacked' => TRUE,
         'legend' => array('position' => 'none'),
         'pieSliceText' => 'none',
-      )
+      ),
     );
     return $settings;
   }

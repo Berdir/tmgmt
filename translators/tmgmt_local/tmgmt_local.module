@@ -1,12 +1,14 @@
 <?php
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\user\Entity\User;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt_local\Entity\LocalTask;
 use Drupal\user\UserInterface;
+use Drupal\views\Views;
 
 /**
  * @file
@@ -111,6 +113,21 @@ function tmgmt_local_theme() {
       'file' => 'tmgmt_local.theme.inc',
     ),
   );
+}
+
+/**
+ * Implements hook_menu_links_discovered_alter().
+ */
+function tmgmt_local_menu_links_discovered_alter(&$links) {
+  // Display the menu item if one of the default past event views exists.
+  $view = NULL;
+  if ($view = Views::getView('tmgmt_local_manage_translate_task')) {
+    $links['tmgmt_local_manage_translate_task'] = [
+      'title' => new TranslatableMarkup('Manage translation tasks'),
+      'route_name' => $view->getUrl()->getRouteName(),
+      'menu_name' => 'account',
+    ];
+  }
 }
 
 /**
