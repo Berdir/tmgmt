@@ -1,5 +1,5 @@
 tmgmt.translator.settings.local:
-  type: mapping
+  type: tmgmt.translator_base
   label: 'Local translator settings'
   mapping:
     allow_all:

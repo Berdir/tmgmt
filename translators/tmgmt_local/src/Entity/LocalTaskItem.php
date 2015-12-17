@@ -27,7 +27,7 @@ use Drupal\Core\Render\Element;
  *   handlers = {
  *     "access" = "Drupal\tmgmt_local\Entity\Controller\LocalTaskItemAccessController",
  *     "form" = {
- *       "edit" = "Drupal\tmgmt_local\Entity\Form\LocalTaskItemFormController"
+ *       "edit" = "Drupal\tmgmt_local\Form\LocalTaskItemForm"
  *     },
  *     "list_builder" = "Drupal\tmgmt_local\Entity\ListBuilder\LocalTaskItemListBuilder",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
@@ -37,6 +37,9 @@ use Drupal\Core\Render\Element;
  *   entity_keys = {
  *     "id" = "tjiid",
  *     "uuid" = "uuid"
+ *   },
+ *   links = {
+ *     "canonical" = "/translate/items/{tmgmt_local_task_item}",
  *   }
  * )
  *

@@ -32,7 +32,7 @@ class TaskItemOperations extends FieldPluginBase {
     // Only allow to translate if the job is assigned to this user.
     if ($item->access('view') && $item->getTask()->getTranslator()->id() == \Drupal::currentUser()->id()) {
       $element = Link::fromTextAndUrl($item->isPending() ? t('translate') : t('View'),
-        Url::fromUserInput('/translate/' . $item->getTask()->id() . '/item/' . $item->id()))->toString();
+        Url::fromUserInput('/translate/items/' . $item->id()))->toString();
     }
     return $element;
   }
