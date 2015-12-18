@@ -62,12 +62,12 @@ class LocalTaskForm extends ContentEntityForm {
       '#access' => \Drupal::currentUser()->hasPermission('administer tmgmt') || \Drupal::currentUser()->hasPermission('administer translation tasks'),
     );
 
-    $form['title'] = array(
+    /*$form['title'] = array(
       '#title' => t('Title'),
       '#type' => 'textfield',
       '#default_value' => $local_task->label(),
       '#required' => TRUE,
-    );
+    );*/
 
     $form['info'] = array(
       '#type' => 'container',
@@ -166,7 +166,8 @@ class LocalTaskForm extends ContentEntityForm {
   protected function actions(array $form, FormStateInterface $form_state) {
     $local_task = $this->entity;
 
-    $actions['save'] = array(
+    $actions['#access'] = \Drupal::currentUser()->hasPermission('administer tmgmt') || \Drupal::currentUser()->hasPermission('administer translation tasks');
+    $actions['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Save task'),
       '#submit' => array('::submitForm', '::save'),
@@ -179,7 +180,7 @@ class LocalTaskForm extends ContentEntityForm {
         '#type' => 'submit',
         '#value' => t('Delete'),
         '#submit' => array('tmgmt_submit_redirect'),
-        '#redirect' => 'admin/tmgmt/localTasks/' . $local_task->id() . '/delete',
+        '#redirect' => 'admin/tmgmt/local_tasks/' . $local_task->id() . '/delete',
         // Don't run validations, so the user can always delete the localTask.
         '#limit_validation_errors' => array(),
       );
@@ -241,6 +242,7 @@ class LocalTaskForm extends ContentEntityForm {
 
     // Everything below this line is only invoked if the 'Submit to translator'
     // button was clicked.
+    $view = Views::getView('tmgmt_local_task_overview');
     if ($form_state->getTriggeringElement()['#value'] == $form['actions']['submit']['#value']) {
       if (!tmgmt_job_request_translation($this->entity->getJob())) {
         // Don't redirect the user if the translation request failed but retain
@@ -258,12 +260,12 @@ class LocalTaskForm extends ContentEntityForm {
       }
       else {
         // Per default we want to redirect the user to the overview.
-        $form_state->setRedirect('view.tmgmt_localTask_overview.page_1');
+        $form_state->setRedirect($view->getUrl()->getRouteName());
       }
     }
     else {
       // Per default we want to redirect the user to the overview.
-      $form_state->setRedirect('view.tmgmt_localTask_overview.page_1');
+      $form_state->setRedirect($view->getUrl()->getRouteName());
     }
   }
 

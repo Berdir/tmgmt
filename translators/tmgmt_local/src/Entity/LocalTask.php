@@ -158,7 +158,10 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   }
 
   /**
-   * {@inheritdoc}
+   * Return the translator assigned to this task.
+   *
+   * @return \Drupal\user\UserInterface
+   *   The translator assigned to this task.
    */
   public function getTranslator() {
     return $this->get('tuid')->entity;

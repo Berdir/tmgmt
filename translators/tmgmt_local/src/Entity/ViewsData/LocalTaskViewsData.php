@@ -48,7 +48,7 @@ class LocalTaskViewsData extends EntityViewsData {
       'help' => t('Limit translation tasks to those that the user can translate'),
       'real field' => 'tltid',
       'filter' => array(
-        'options callback' => 'local_task_eligible',
+        'id' => 'tmgmt_local_task_eligible',
       ),
     );
     // Manager handlers.

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_local\Plugin\views\filter\Eligible.
+ * Contains \Drupal\tmgmt_local\Plugin\views\filter\TaskEligible.
  */
 
 namespace Drupal\tmgmt_local\Plugin\views\filter;
@@ -14,9 +14,9 @@ use Drupal\views\Plugin\views\filter\FilterPluginBase;
  *
  * @ingroup views_filter_handlers
  *
- * @ViewsFilter("tmgmt_local_eligible")
+ * @ViewsFilter("tmgmt_local_task_eligible")
  */
-class Eligible extends FilterPluginBase {
+class TaskEligible extends FilterPluginBase {
 
   /**
    * Where the $query object will reside.

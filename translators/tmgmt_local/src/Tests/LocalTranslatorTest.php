@@ -36,7 +36,12 @@ class LocalTranslatorTest extends TMGMTTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt_language_combination', 'tmgmt_local');
+  public static $modules = [
+    'user',
+    'tmgmt',
+    'tmgmt_language_combination',
+    'tmgmt_local',
+  ];
 
   /**
    * {@inheritdoc}
@@ -238,8 +243,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Check the translate overview.
     $this->drupalGet('translate');
     $this->assertText(t('Task for @job', array('@job' => $job->label())));
-    // @todo: Fails, encoding problem?
-    //$this->assertText(t('@from => @to', array('@from' => 'en', '@to' => 'de')));
+    $this->assertText(t('@from => @to', array('@from' => 'en', '@to' => 'de')));
     $edit = array(
       'views_bulk_operations[0]' => $job->id(),
     );
@@ -275,7 +279,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($task->getCountCompleted(), 0);
     $this->assertEqual($task->getCountTranslated(), 0);
     $this->assertEqual($task->getCountUntranslated(), 2);
-    return;
+
     list($first_task_item, $second_task_item) = array_values($task->getItems());
     $this->assertTrue($first_task_item->isPending());
     $this->assertEqual($first_task_item->getCountCompleted(), 0);
