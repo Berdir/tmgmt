@@ -31,3 +31,7 @@ views.field.tmgmt_local_task_operations:
 views.field.tmgmt_local_wordcount:
   type: views_field
   label: 'Word count'
+
+views.filter.tmgmt_local_eligible:
+  type: views_filter
+  label: 'Eligible'
