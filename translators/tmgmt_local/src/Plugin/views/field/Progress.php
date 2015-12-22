@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_local\Plugin\views\field;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 
@@ -54,7 +55,8 @@ class Progress extends FieldPluginBase {
       return '<div id="progress' . $id . '"></div>';
     }
     $title = t('Untranslated: @untranslated, translated: @translated, completed: @completed.', $counts);
-    return sprintf('<span title="%s">%s</span>', $title, implode('/', $counts));
+    $complete_title = t('<span title="@title">@values</span>', ['@title' => $title, '@values' => implode('/', $counts)]);
+    return $complete_title;
   }
 
   /**

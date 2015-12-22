@@ -285,7 +285,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
    *   Translated count
    */
   public function getCountTranslated() {
-    return $this->count_translated;
+    return $this->count_translated->value;
   }
 
   /**
@@ -295,7 +295,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
    *   Translated count
    */
   public function getCountUntranslated() {
-    return $this->count_untranslated;
+    return $this->count_untranslated->value;
   }
 
   /**
@@ -305,7 +305,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
    *   Translated count
    */
   public function getCountCompleted() {
-    return $this->count_completed;
+    return $this->count_completed->value;
   }
 
   /**
@@ -352,6 +352,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
       $this->count_reviewed = 0;
       $this->count_completed = 0;
       $this->word_count = 0;
+      $this->count_untranslated = count(array_filter(\Drupal::service('tmgmt.data')->flatten($this->unserializedData), array(\Drupal::service('tmgmt.data'), 'filterData')));
       $this->count($this->unserializedData);
     }
   }

@@ -10,9 +10,11 @@ namespace Drupal\tmgmt_local\Form;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
 use Drupal\user\PrivateTempStoreFactory;
+use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,7 +25,7 @@ class AssignMultiple extends FormBase {
   /**
    * The array of tasks to assign.
    *
-   * @var string[][]
+   * @var string[]
    */
   protected $taskInfo = array();
 
@@ -75,9 +77,8 @@ class AssignMultiple extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    /** @var \Drupal\node\NodeInterface[] $nodes */
-    $tasks = $this->storage->loadMultiple(array_keys($this->taskInfo));
-    $form_state->set('tasks', explode(',', $tasks));
+    $this->taskInfo = $this->tempStoreFactory->get('task_multiple_assign')->get(\Drupal::currentUser()->id());
+    $form_state->set('tasks', array_keys($this->taskInfo));
 
     $roles = tmgmt_local_translator_roles();
     if (empty($roles)) {
@@ -89,7 +90,7 @@ class AssignMultiple extends FormBase {
       '#title' => t('Assign to'),
       '#type' => 'select',
       '#empty_option' => t('Select user'),
-      '#options' => tmgmt_local_get_translators_for_tasks($form_state['tasks']),
+      '#options' => tmgmt_local_get_translators_for_tasks($form_state->get('tasks')),
       '#required' => TRUE,
     );
 
@@ -107,10 +108,10 @@ class AssignMultiple extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     /** @var User $translator */
-    $translator = User::load($form_state['values']['tuid']);
+    $translator = User::load($form_state->getValue('tuid'));
 
     $how_many = 0;
-    foreach ($form_state['tasks'] as $task_id) {
+    foreach ($form_state->get('tasks') as $task_id) {
       $task = tmgmt_local_task_load($task_id);
       if ($task) {
         $task->assign($translator);
@@ -121,7 +122,7 @@ class AssignMultiple extends FormBase {
 
     drupal_set_message(t('Assigned @how_many to translator @translator_name.', array('@how_many' => $how_many, '@translator_name' => $translator->getAccountName())));
 
-    $form_state['redirect'] = 'manage-translate';
+    $form_state->setRedirect(Views::getView('tmgmt_local_task_overview')->getUrl()->getRouteName());
   }
 
 }

@@ -29,6 +29,7 @@ use Drupal\tmgmt_local\LocalTaskInterface;
  *     "access" = "Drupal\tmgmt_local\Entity\Controller\LocalTaskAccessControlHandler",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt_local\Form\LocalTaskForm",
+ *       "assign" = "Drupal\tmgmt_local\Form\LocalTaskAssignForm",
  *       "unassign" = "Drupal\tmgmt_local\Form\LocalTaskUnassignForm",
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
@@ -44,8 +45,9 @@ use Drupal\tmgmt_local\LocalTaskInterface;
  *   },
  *   links = {
  *     "canonical" = "/translate/{tmgmt_local_task}",
- *     "unassign-form" = "/translate/{tmgmt_local_task}/unassign",
- *     "delete-form" = "/translate/{tmgmt_local_task}/delete",
+ *     "assign" = "/translate/{tmgmt_local_task}/assign",
+ *     "unassign" = "/translate/{tmgmt_local_task}/unassign",
+ *     "delete" = "/translate/{tmgmt_local_task}/delete",
  *   }
  * )
  *

@@ -18,10 +18,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Redirects to a task assign form.
  *
  * @Action(
- *   id = "task_assign_action",
+ *   id = "tmgmt_local_task_assign_multiple",
  *   label = @Translation("Assign to..."),
  *   type = "tmgmt_local_task",
- *   assign_form_route_name = "tmgmt_local_task.assign_multiple"
+ *   confirm_form_route_name = "tmgmt_local_task.assign_multiple"
  * )
  */
 class AssignTask extends ActionBase implements ContainerFactoryPluginInterface {
@@ -78,7 +78,12 @@ class AssignTask extends ActionBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public function executeMultiple(array $entities) {
-    $this->tempStore->get('user_user_operations_cancel')->set($this->currentUser->id(), $entities);
+    $info = [];
+    /** @var \Drupal\tmgmt_local\LocalTaskInterface $task */
+    foreach ($entities as $task) {
+      $info[$task->id()] = $task;
+    }
+    $this->tempStore->set($this->currentUser->id(), $info);
   }
 
   /**

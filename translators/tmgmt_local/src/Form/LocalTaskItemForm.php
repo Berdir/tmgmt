@@ -8,11 +8,13 @@
 namespace Drupal\tmgmt_local\Form;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\tmgmt_local\Entity\LocalTaskItem;
+use Drupal\views\Views;
 
 /**
  * Form controller for the localTaskItem edit forms.
@@ -38,6 +40,8 @@ class LocalTaskItemForm extends ContentEntityForm {
     $form_state->set('task', $task_item->getTask());
     $form_state->set('task_item', $task_item);
     $form_state->set('job_item', $job_item = $task_item->getJobItem());
+
+    $form['#title'] = $task_item->label();
 
     $job = $job_item->getJob();
 
@@ -65,21 +69,31 @@ class LocalTaskItemForm extends ContentEntityForm {
       $form['translation'][$key] = $this->formElement($flattened, $task_item, $zebra);
     }
 
-    // Add the form actions as well.
-    $form['actions']['#type'] = 'actions';
-    $form['actions']['save_as_completed'] = array(
-      '#type' => 'submit',
-      '#validate' => ['::validateSaveAsComplete'],
-      '#submit' => ['::save', '::saveAsComplete'],
-      '#value' => t('Save as completed'),
-    );
-    $form['actions']['save'] = array(
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function actions(array $form, FormStateInterface $form_state) {
+    $local_task = $this->entity;
+
+    $actions['#access'] = \Drupal::currentUser()->hasPermission('provide translation services');
+    $actions['save'] = array(
       '#type' => 'submit',
       '#submit' => ['::save'],
       '#value' => t('Save'),
     );
 
-    return $form;
+    if (!$local_task->isNew()) {
+      $actions['save_as_completed'] = array(
+        '#type' => 'submit',
+        '#validate' => ['::validateSaveAsComplete'],
+        '#submit' => ['::save', '::saveAsComplete'],
+        '#value' => t('Save as completed'),
+      );
+    }
+    return $actions;
   }
 
   /**
@@ -150,9 +164,9 @@ class LocalTaskItemForm extends ContentEntityForm {
             '#value' => '✗',
             '#attributes' => array('title' => t('Reject')),
             '#name' => 'reject-' . $target_key,
-            '#submit' => array('tmgmt_local_translation_form_update_state_submit'),
+            '#submit' => array('::submitStatus'),
             '#ajax' => array(
-              'callback' => 'tmgmt_local_translation_form_update_state_ajax',
+              'callback' => '::ajaxReviewForm',
               'wrapper' => $form[$target_key]['#ajaxid'],
             ),
             '#tmgmt_local_action' => 'reject',
@@ -166,9 +180,9 @@ class LocalTaskItemForm extends ContentEntityForm {
             '#value' => '✓',
             '#attributes' => array('title' => t('Finish')),
             '#name' => 'finish-' . $target_key,
-            '#submit' => array('tmgmt_local_translation_form_update_state_submit'),
+            '#submit' => array('::submitStatus'),
             '#ajax' => array(
-              'callback' => 'tmgmt_local_translation_form_update_state_ajax',
+              'callback' => '::ajaxReviewForm',
               'wrapper' => $form[$target_key]['#ajaxid'],
             ),
             '#tmgmt_local_action' => 'finish',
@@ -227,7 +241,7 @@ class LocalTaskItemForm extends ContentEntityForm {
     if ($all_done) {
       $task->setStatus(TMGMT_LOCAL_TASK_STATUS_COMPLETED);
       // If the task is now completed, redirect back to the overview.
-      $form_state->setRedirect('translate');
+      $form_state->setRedirect(Views::getView('tmgmt_local_task_overview')->getUrl()->getRouteName());
     }
     else {
       // If there are more task items, redirect back to the task.
@@ -236,7 +250,7 @@ class LocalTaskItemForm extends ContentEntityForm {
     }
 
     /** @var \Drupal\tmgmt\Entity\JobItem $job_item */
-    $job_item = $form_state['job_item'];
+    $job_item = $form_state->get('job_item');
 
     // Add the translations to the job item.
     $job_item->addTranslatedData($task_item->getData());
@@ -249,12 +263,46 @@ class LocalTaskItemForm extends ContentEntityForm {
    */
   public function validateSaveAsComplete(array &$form, FormStateInterface $form_state) {
     // Loop over all data items and verify that there is a translation in there.
-    foreach ($form_state['values'] as $key => $value) {
+    foreach ($form_state->getValues() as $key => $value) {
       if (is_array($value) && isset($value['translation'])) {
         if (empty($value['translation'])) {
           $form_state->setErrorByName($key . '[translation]', t('Missing translation.'));
         }
       }
+    }
+  }
+
+  /**
+   * Ajax callback for the job item review form.
+   */
+  public function ajaxReviewForm(array $form, FormStateInterface $form_state) {
+    $key = array_slice($form_state->getTriggeringElement()['#array_parents'], 0, 3);
+    $render_data = NestedArray::getValue($form, $key);
+    tmgmt_write_request_messages($form_state->getFormObject()->getEntity()->getJob());
+    return $render_data;
+  }
+
+  /**
+   * Form submit callback for the translation state update button.
+   */
+  public function submitStatus(array $form, FormStateInterface $form_state) {
+    $values = $form_state->getValues();
+
+    /** @var \Drupal\tmgmt_local\Entity\LocalTaskItem $item */
+    $item = $form_state->get('task_item');
+
+    $action = $form_state->getTriggeringElement()['#tmgmt_local_action'];
+    $key = $form_state->getTriggeringElement()['#tmgmt_local_key'];
+
+    // Write the translated data into the job item.
+    if (isset($values[$key]) && is_array($values[$key]) && isset($values[$key]['translation'])) {
+      $update['#status'] = $action == 'finish' ? TMGMT_DATA_ITEM_STATE_TRANSLATED : TMGMT_DATA_ITEM_STATE_PENDING;
+      $update['#text'] = $values[$key]['translation'];
+      $item->updateData($key, $update);
+      $item->save();
+
+      // We need to rebuild form so we get updated action button state.
+      $form_state->setRebuild();
     }
   }
 

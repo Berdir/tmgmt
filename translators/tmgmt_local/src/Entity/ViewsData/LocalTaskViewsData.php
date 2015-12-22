@@ -19,6 +19,16 @@ class LocalTaskViewsData extends EntityViewsData {
   public function getViewsData() {
     $data = parent::getViewsData();
 
+    $data['tmgmt_local_task']['status'] = array(
+      'title' => t('Status'),
+      'help' => t('Display the status of the task.'),
+      'field' => array(
+        'id' => 'tmgmt_local_task_status',
+      ),
+      'filter' => array(
+        'id' => 'numeric',
+      ),
+    );
     $data['tmgmt_local_task']['progress'] = array(
       'title' => t('Progress'),
       'help' => t('Displays the progress of a job.'),

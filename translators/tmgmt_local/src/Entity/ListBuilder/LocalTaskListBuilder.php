@@ -9,7 +9,6 @@ namespace Drupal\tmgmt_local\Entity\ListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Routing\RedirectDestinationTrait;
-use Drupal\Core\Url;
 
 /**
  * Provides the views data for the message entity type.
@@ -32,52 +31,32 @@ class LocalTaskListBuilder extends EntityListBuilder {
       );
     }
 
-    if (\Drupal::currentUser()->hasPermission('administer translation tasks') && tmgmt_local_translation_access($entity) && !$entity->getTranslator()) {
+    if (\Drupal::currentUser()->hasPermission('administer translation tasks') && tmgmt_local_translation_access($entity) && $entity->getStatus() == TMGMT_LOCAL_TASK_STATUS_UNASSIGNED) {
       $operations['assign'] = array(
-        'href' => 'manage-translate/assign-tasks/' . $entity->id(),
-        'query' => $this->getDestinationArray(),
-        'attributes' => array(
-          'title' => t('Assign'),
-        ),
-        'title' => t('assign'),
+        'title' => $this->t('Assign'),
+        'weight' => 0,
+        'url' => $entity->toUrl('assign'),
       );
     }
-    elseif (tmgmt_local_translation_access($entity) && !$entity->getTranslator()) {
+    elseif (tmgmt_local_translation_access($entity) && $entity->getStatus() == TMGMT_LOCAL_TASK_STATUS_UNASSIGNED) {
       $operations['assign_to_me'] = array(
-        'href' => 'translate/' . $entity->id() . '/assign-to-me',
-        'query' => $this->getDestinationArray(),
-        'attributes' => array(
-          'title' => t('Assign to me'),
-        ),
-        'title' => t('assign'),
+        'title' => $this->t('Assign to me'),
+        'weight' => 0,
+        'url' => $entity->toUrl('assign'),
       );
     }
-    elseif (tmgmt_local_translation_access($entity) && !$entity->getTranslator()) {
-      $operations['assign_to_me'] = array(
-        'href' => 'translate/' . $entity->id() . '/assign-to-me',
-        'query' => $this->getDestinationArray(),
-        'attributes' => array(
-          'title' => t('Assign to me'),
-        ),
-        'title' => t('assign'),
-      );
-    }
-    if ($entity->getTranslator() && $entity->access('unassign')) {
+    if ($entity->getStatus() != TMGMT_LOCAL_TASK_STATUS_UNASSIGNED && $entity->access('unassign')) {
       $operations['unassign'] = array(
-        'href' => 'translate/' . $entity->id() . '/unassign',
-        'query' => $this->getDestinationArray(),
-        'attributes' => array(
-          'title' => t('Unassign'),
-        ),
-        'title' => t('unassign'),
+        'title' => $this->t('Unassign'),
+        'weight' => 0,
+        'url' => $entity->toUrl('unassign'),
       );
     }
     if ($entity->access('delete')) {
       $operations['delete'] = array(
-        'route_name' => 'tmgmt_local.local_task_delete',
-        'route_parameters' => array('tmgmt_local_task' => $entity->id()),
-        'query' => $this->getDestinationArray(),
-        'title' => t('delete'),
+        'title' => $this->t('Delete'),
+        'weight' => 10,
+        'url' => $entity->toUrl('delete'),
       );
     }
     return $operations;

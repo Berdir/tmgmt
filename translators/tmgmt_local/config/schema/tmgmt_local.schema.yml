@@ -6,6 +6,14 @@ tmgmt.translator.settings.local:
       type: boolean
       label: 'Allow all'
 
-action.configuration.task_assign_action:
+action.configuration.tmgmt_local_task_assign_multiple:
   type: action_configuration_default
-  label: 'Assign task configuration'
+  label: 'Assign multiple task configuration'
+
+action.configuration.tmgmt_local_task_assign_to_me:
+  type: action_configuration_default
+  label: 'Assign task to me configuration'
+
+action.configuration.tmgmt_local_task_unassign_multiple:
+  type: action_configuration_default
+  label: 'Assign task to me configuration'

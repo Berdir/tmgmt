@@ -20,6 +20,10 @@ views.field.tmgmt_local_task_item_operations:
   type: views_field
   label: 'Task item operations'
 
+views.field.tmgmt_local_task_status:
+  type: views.field.numeric
+  label: 'Task status'
+
 views.field.tmgmt_local_task_item_status:
   type: views.field.numeric
   label: 'Task item status'
