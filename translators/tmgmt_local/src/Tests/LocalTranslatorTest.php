@@ -25,9 +25,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
    *
    * @var object
    */
-  protected $local_translator;
+  protected $localTranslator;
 
-  protected $local_translator_permissions = array(
+  protected $localTranslatorPermissions = array(
     'provide translation services',
   );
 
@@ -46,17 +46,20 @@ class LocalTranslatorTest extends TMGMTTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     $this->loginAsAdmin();
     $this->addLanguage('de');
   }
 
-  function testTranslatorSkillsForTasks() {
+  /**
+   * Test translator skills.
+   */
+  public function testTranslatorSkillsForTasks() {
 
     $this->addLanguage('fr');
 
-    $translator1 = $this->drupalCreateUser($this->local_translator_permissions);
+    $translator1 = $this->drupalCreateUser($this->localTranslatorPermissions);
     $this->drupalLogin($translator1);
     $edit = array(
       'tmgmt_translation_skills[0][language_from]' => 'en',
@@ -64,7 +67,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     );
     $this->drupalPostForm('user/' . $translator1->id() . '/edit', $edit, t('Save'));
 
-    $translator2 = $this->drupalCreateUser($this->local_translator_permissions);
+    $translator2 = $this->drupalCreateUser($this->localTranslatorPermissions);
     $this->drupalLogin($translator2);
     $edit = array(
       'tmgmt_translation_skills[0][language_from]' => 'en',
@@ -77,7 +80,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     );
     $this->drupalPostForm('user/' . $translator2->id() . '/edit', $edit, t('Save'));
 
-    $translator3 = $this->drupalCreateUser($this->local_translator_permissions);
+    $translator3 = $this->drupalCreateUser($this->localTranslatorPermissions);
     $this->drupalLogin($translator3);
     $edit = array(
       'tmgmt_translation_skills[0][language_from]' => 'en',
@@ -122,7 +125,11 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Test languages involved in tasks.
     $this->assertEqual(
-      tmgmt_local_tasks_languages(array($local_task1->id(), $local_task2->id(), $local_task3->id())),
+      tmgmt_local_tasks_languages(array(
+        $local_task1->id(),
+        $local_task2->id(),
+        $local_task3->id(),
+      )),
       array(
         'en' => array('de', 'fr'),
         'de' => array('en'),
@@ -150,7 +157,11 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Test available translators for tasks en - de, de - en, en - fr.
     $this->assertEqual(
-      tmgmt_local_get_translators_for_tasks(array($local_task1->id(), $local_task2->id(), $local_task3->id())),
+      tmgmt_local_get_translators_for_tasks(array(
+        $local_task1->id(),
+        $local_task2->id(),
+        $local_task3->id(),
+      )),
       array(
         $translator3->id() => $translator3->getUsername(),
       )
@@ -158,9 +169,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
   }
 
   /**
-   * Test the basic translation workflow
+   * Test the basic translation workflow.
    */
-  function testBasicWorkflow() {
+  public function testBasicWorkflow() {
     $translator = Translator::load('local');
 
     // Create a job and request a local translation.
@@ -175,19 +186,31 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Make sure that the checkout page works as expected when there are no
     // roles.
     $this->drupalGet($job->toUrl());
-    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Local translator (auto created)', '@source' => 'English', '@target' => 'German')));
-    $this->local_translator = $this->drupalCreateUser($this->local_translator_permissions);
+    $this->assertText(t('@translator can not translate from @source to @target.', array(
+      '@translator' => 'Local translator (auto created)',
+      '@source' => 'English',
+      '@target' => 'German',
+    )));
+    $this->localTranslator = $this->drupalCreateUser($this->localTranslatorPermissions);
 
     // The same when there is a single role.
     $this->drupalGet($job->toUrl());
-    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Local translator (auto created)', '@source' => 'English', '@target' => 'German')));
+    $this->assertText(t('@translator can not translate from @source to @target.', array(
+      '@translator' => 'Local translator (auto created)',
+      '@source' => 'English',
+      '@target' => 'German',
+    )));
 
     // Create another local translator with the required abilities.
-    $other_translator_same = $this->drupalCreateUser($this->local_translator_permissions);
+    $other_translator_same = $this->drupalCreateUser($this->localTranslatorPermissions);
 
     // And test again with two roles but still no abilities.
     $this->drupalGet($job->toUrl());
-    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Local translator (auto created)', '@source' => 'English', '@target' => 'German')));
+    $this->assertText(t('@translator can not translate from @source to @target.', array(
+      '@translator' => 'Local translator (auto created)',
+      '@source' => 'English',
+      '@target' => 'German',
+    )));
 
     $this->drupalLogin($other_translator_same);
     // Configure language abilities.
@@ -202,20 +225,20 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalGet($job->toUrl());
     $this->assertText(t('Select translator for this job'));
     $this->assertText($other_translator_same->getUsername());
-    $this->assertNoText($this->local_translator->getUsername());
+    $this->assertNoText($this->localTranslator->getUsername());
 
-    $this->drupalLogin($this->local_translator);
+    $this->drupalLogin($this->localTranslator);
     // Configure language abilities.
     $edit = array(
       'tmgmt_translation_skills[0][language_from]' => 'en',
       'tmgmt_translation_skills[0][language_to]' => 'de',
     );
-    $this->drupalPostForm('user/' . $this->local_translator->id() . '/edit', $edit, t('Save'));
+    $this->drupalPostForm('user/' . $this->localTranslator->id() . '/edit', $edit, t('Save'));
 
     // Check that the translator is now listed.
     $this->loginAsAdmin();
     $this->drupalGet($job->toUrl());
-    $this->assertText($this->local_translator->getUsername());
+    $this->assertText($this->localTranslator->getUsername());
 
     $job->requestTranslation();
 
@@ -223,11 +246,11 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalGet($job->toUrl());
     $this->assertText($job_comment);
 
-    $this->drupalLogin($this->local_translator);
+    $this->drupalLogin($this->localTranslator);
 
     // Create a second local translator with different language abilities,
     // make sure that he does not see the task.
-    $other_translator = $this->drupalCreateUser($this->local_translator_permissions);
+    $other_translator = $this->drupalCreateUser($this->localTranslatorPermissions);
     $this->drupalLogin($other_translator);
     // Configure language abilities.
     $edit = array(
@@ -238,13 +261,13 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalGet('translate');
     $this->assertNoText(t('Task for @job', array('@job' => $job->label())));
 
-    $this->drupalLogin($this->local_translator);
+    $this->drupalLogin($this->localTranslator);
 
     // Check the translate overview.
     $this->drupalGet('translate');
     $this->assertText(t('Task for @job', array('@job' => $job->label())));
     // @todo: Fails, encoding problem?
-    //$this->assertText(t('@from => @to', array('@from' => 'en', '@to' => 'de')));
+    // $this->assertText(t('@from => @to', array('@from' => 'en', '@to' => 'de')));
 
     // Assign to action not working yet.
     $edit = array(
@@ -260,10 +283,10 @@ class LocalTranslatorTest extends TMGMTTestBase {
       'action' => 'tmgmt_local_task_unassign_multiple',
     );
     $this->drupalPostForm(NULL, $edit, t('Apply'));
-    $this->assertText(t('Unassign multiple was applied to 1 item.'));
+    $this->assertText(t('Unassign was applied to 1 item.'));
 
     // Now test the assign link.
-    // @todo Action should not redirect.
+    // @todo Action should not redirect to mine.
     $this->drupalGet('translate');
     $this->clickLink(t('Assign to me'));
 
@@ -282,7 +305,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalGet('translate');
     $this->assertNoText(t('Task for @job', array('@job' => $job->label())));
 
-    $this->drupalLogin($this->local_translator);
+    $this->drupalLogin($this->localTranslator);
 
     // Translate the task.
     $this->drupalGet('translate/pending');
@@ -310,7 +333,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertText(t('Untranslated'));
 
     // Translate the first item.
-    $this->clickLink(t('translate'));
+    $this->clickLink(t('Translate'));
 
     $this->assertText(t('Dummy'));
     // Job comment is present in the translate tool as well.
@@ -330,9 +353,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save as completed'));
 
     // Review and accept the first item.
-    \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
-    \Drupal::entityManager()->getStorage('tmgmt_local_task')->resetCache();
-    \Drupal::entityManager()->getStorage('tmgmt_local_task_item')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     /** @var \Drupal\tmgmt\JobItemInterface $item1 */
     $item1 = JobItem::load(1);
@@ -340,7 +363,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // The first item should be accepted now, the second still in progress.
     $this->drupalGet('translate/1');
-    $this->assertText(t('Translated'));
+    $this->assertText(t('Completed'));
     $this->assertText(t('Untranslated'));
 
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
@@ -360,17 +383,17 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($second_task_item->getCountUntranslated(), 1);
 
     // Translate the second item but do not mark as translated it yet.
-    $this->clickLink(t('translate'));
+    $this->clickLink(t('Translate'));
     $edit = array(
       'dummy|deep_nesting[translation]' => $translation2 = 'German translation of source 2',
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
     // The first item is still completed, the second still untranslated.
-    $this->assertText(t('Translated'));
+    $this->assertText(t('Completed'));
     $this->assertText(t('Untranslated'));
 
-    \Drupal::entityManager()->getStorage('tmgmt_local_task')->resetCache();
-    \Drupal::entityManager()->getStorage('tmgmt_local_task_item')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
     $task = entity_load('tmgmt_local_task', $task->id(), TRUE);
@@ -390,11 +413,11 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Mark the data item as translated but don't save the task item as
     // completed.
-    $this->clickLink(t('translate'));
+    $this->clickLink(t('Translate'));
     $this->drupalPostForm(NULL, array(), t('✓'));
 
-    \Drupal::entityManager()->getStorage('tmgmt_local_task')->resetCache();
-    \Drupal::entityManager()->getStorage('tmgmt_local_task_item')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
     $task = entity_load('tmgmt_local_task', $task->id(), TRUE);
@@ -413,8 +436,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($second_task_item->getCountUntranslated(), 0);
 
     // Check the job data.
-    \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
-    \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_job')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
     $job = Job::load($job->id());
     list($item1, $item2) = array_values($job->getItems());
     // The text in the first item should be available for review, the
@@ -427,20 +450,20 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertText(t('Pending'));
 
     // Mark the second item as completed now.
-    $this->clickLink(t('view'));
-    $this->clickLink(t('translate'));
+    $this->clickLink(t('View'));
+    $this->clickLink(t('Translate'));
     $this->drupalPostForm(NULL, array(), t('Save as completed'));
 
     // Review and accept the second item.
-    \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
-    \Drupal::entityManager()->getStorage('tmgmt_local_task')->resetCache();
-    \Drupal::entityManager()->getStorage('tmgmt_local_task_item')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     $item1 = JobItem::load(2);
     $item1->acceptTranslation();
 
     // Refresh the page.
-    $this->drupalGet($this->url);
+    $this->drupalGet('translate');
 
     $task = tmgmt_local_task_load($task->id());
     $this->assertTrue($task->isClosed());
@@ -464,8 +487,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertText($task->getJob()->label());
     $this->assertText(t('Completed'));
 
-    \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
-    \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_job')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
     $job = Job::load($job->id());
     list($item1, $item2) = array_values($job->getItems());
     // Job was accepted and finished automatically due to the default approve
@@ -494,7 +517,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
   /**
    * Test the allow all setting.
    */
-  function testAllowAll() {
+  public function testAllowAll() {
+    /** @var Translator $translator */
     $translator = Translator::load('local');
 
     // Create a job and request a local translation.
@@ -509,12 +533,15 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Now enable the setting.
     $translator->setSetting('allow_all', TRUE);
     $translator->save();
+    /** @var Job $job */
+    $job = entity_load('tmgmt_job', $job->id(), TRUE);
+    $job->translator = $translator->id();
 
     $this->assertIdentical(NULL, $job->requestTranslation(), 'Translation request was successfull');
     $this->assertTrue($job->isActive());
   }
 
-  function testAbilitiesAPI() {
+  public function testAbilitiesAPI() {
 
     $this->addLanguage('fr');
     $this->addLanguage('ru');
@@ -522,7 +549,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     $all_translators = array();
 
-    $translator1 = $this->drupalCreateUser($this->local_translator_permissions);
+    $translator1 = $this->drupalCreateUser($this->localTranslatorPermissions);
     $all_translators[$translator1->id()] = $translator1->getUsername();
     $this->drupalLogin($translator1);
     $edit = array(
@@ -531,7 +558,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     );
     $this->drupalPostForm('user/' . $translator1->id() . '/edit', $edit, t('Save'));
 
-    $translator2 = $this->drupalCreateUser($this->local_translator_permissions);
+    $translator2 = $this->drupalCreateUser($this->localTranslatorPermissions);
     $all_translators[$translator2->id()] = $translator2->getUsername();
     $this->drupalLogin($translator2);
     $edit = array(
@@ -550,7 +577,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     );
     $this->drupalPostForm('user/' . $translator2->id() . '/edit', $edit, t('Save'));
 
-    $translator3 = $this->drupalCreateUser($this->local_translator_permissions);
+    $translator3 = $this->drupalCreateUser($this->localTranslatorPermissions);
     $all_translators[$translator3->id()] = $translator3->getUsername();
     $this->drupalLogin($translator3);
     $edit = array(
@@ -632,7 +659,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
   /**
    * Test permissions for the tmgmt_local VBO actions.
    */
-  function testVBOPermissions() {
+  public function testVBOPermissions() {
     $translator = Translator::load('local');
     $job = $this->createJob();
     $job->translator = $translator->id();
@@ -641,24 +668,50 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $job->addItem('test_source', 'test', '2');
 
     // Create another local translator with the required abilities.
-    $local_translator = $this->loginAsTranslator($this->local_translator_permissions);
+    $local_translator = $this->loginAsTranslator($this->localTranslatorPermissions);
     // Configure language abilities.
     $edit = array(
-      'tmgmt_translation_skills[und][0][language_from]' => 'en',
-      'tmgmt_translation_skills[und][0][language_to]' => 'de',
+      'tmgmt_translation_skills[0][language_from]' => 'en',
+      'tmgmt_translation_skills[0][language_to]' => 'de',
     );
     $this->drupalPostForm('user/' . $local_translator->id() . '/edit', $edit, t('Save'));
 
     $job->requestTranslation();
 
     $this->drupalGet('translate');
-    $this->assertFieldById('edit-rules-componentrules-tmgmt-local-task-assign-to-me', t('Assign to me'));
-    $this->assertFieldById('edit-rules-componentrules-tmgmt-local-task-unassign', t('Unassign'));
+    $edit = array(
+      'tmgmt_local_task_bulk_form[0]' => TRUE,
+      'action' => 'tmgmt_local_task_assign_multiple',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Apply'));
+    $this->assertText(t('You are not authorized to access this page.'));
+    $this->drupalGet('translate');
+    $edit = array(
+      'tmgmt_local_task_bulk_form[0]' => TRUE,
+      'action' => 'tmgmt_local_task_assign_to_me',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Apply'));
+    $this->assertText(t('Assign to me was applied to 1 item.'));
+    $edit = array(
+      'tmgmt_local_task_bulk_form[0]' => TRUE,
+      'action' => 'tmgmt_local_task_unassign_multiple',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Apply'));
+    $this->assertText(t('Unassign was applied to 1 item.'));
 
     // Login as admin and check VBO submit actions are present.
     $this->loginAsAdmin(array('administer translation tasks'));
     $this->drupalGet('manage-translate');
-    $this->assertFieldById('edit-actionviews-bulk-operations-argument-selector-action--2', t('Assign to...'));
-    $this->assertFieldById('edit-actionviews-bulk-operations-argument-selector-action', t('Assign to...'));
+    $edit = array(
+      'tmgmt_local_task_bulk_form[0]' => TRUE,
+      'action' => 'tmgmt_local_task_assign_multiple',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Apply'));
+    $edit = array(
+      'tuid' => $local_translator->id(),
+    );
+    $this->drupalPostForm(NULL, $edit, t('Assign tasks'));
+    $this->assertText(t('Assigned 1 to translator @translator.', ['@translator' => $local_translator->getAccountName()]));
   }
+
 }

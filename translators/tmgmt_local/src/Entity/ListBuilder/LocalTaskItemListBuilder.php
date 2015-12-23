@@ -18,17 +18,26 @@ class LocalTaskItemListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   protected function getDefaultOperations(EntityInterface $entity) {
+    /** @var \Drupal\tmgmt_local\Entity\LocalTaskItem $entity */
     $operations = parent::getDefaultOperations($entity);
     // @todo access control handlers and routing
-    if (entity_access('view', 'tmgmt_local_task_item', $entity) && $entity->getTask()->tuid == $user->id()) {
-    $element['#links']['translate'] = array(
-      'href' => 'translate/' . $entity->tltid . '/item/' . $entity->tltiid,
-      'attributes' => array(
-        'title' => $entity->isPending() ? t('Translate') : t('View'),
-      ),
-      'title' => $entity->isPending() ? t('translate') : t('view'),
-    );
-  }
+    if ($entity->access('view', \Drupal::currentUser()) && $entity->getTask()->getTranslator()->id() == \Drupal::currentUser()->id()) {
+      if ($entity->isPending()) {
+        $element['#links']['translate'] = [
+          'title' => $this->t('Translate'),
+          'weight' => 0,
+          'url' => $entity->toUrl('translate'),
+        ];
+      }
+      else {
+        $element['#links']['view'] = [
+          'title' => $this->t('View'),
+          'weight' => 0,
+          'url' => $entity->toUrl('view'),
+        ];
+      }
+    }
     return $operations;
   }
+
 }

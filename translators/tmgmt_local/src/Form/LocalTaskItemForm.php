@@ -203,6 +203,7 @@ class LocalTaskItemForm extends ContentEntityForm {
 
     /** @var LocalTaskItem $task_item */
     $task_item = $form_state->get('task_item');
+    $form_state->cleanValues();
     foreach ($form_state->getValues() as $key => $value) {
       if (is_array($value) && isset($value['translation'])) {
         $update['#text'] = $value['translation'];

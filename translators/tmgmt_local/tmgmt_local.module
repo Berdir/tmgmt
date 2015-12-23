@@ -124,7 +124,7 @@ function tmgmt_local_menu_links_discovered_alter(&$links) {
   if ($view = Views::getView('tmgmt_local_manage_translate_task')) {
     $links['tmgmt_local_manage_translate_task'] = [
       'title' => new TranslatableMarkup('Manage translation tasks'),
-      'route_name' => $view->getUrl()->getRouteName(),
+      'route_name' => $view->getUrl(NULL, 'unassigned')->getRouteName(),
       'menu_name' => 'account',
     ];
   }

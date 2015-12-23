@@ -4,7 +4,7 @@ dependencies:
   module:
     - tmgmt_local
 id: tmgmt_local_task_assign_multiple
-label: 'Assign multiple'
+label: 'Assign to...'
 type: tmgmt_local_task
 plugin: tmgmt_local_task_assign_multiple
 configuration: {  }

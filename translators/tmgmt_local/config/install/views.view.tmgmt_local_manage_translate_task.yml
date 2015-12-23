@@ -409,7 +409,7 @@ display:
         description: ''
         expanded: false
         parent: 'views_view:views.tmgmt_local_manage_translate_task.unassigned'
-        weight: 0
+        weight: 10
         context: '0'
       display_description: 'Shows asigned tasks.'
       fields:
@@ -1313,7 +1313,7 @@ display:
         description: ''
         expanded: false
         parent: 'views_view:views.tmgmt_local_manage_translate_task.unassigned'
-        weight: 0
+        weight: 50
         context: '0'
       display_description: 'Shows asigned tasks with closed status.'
       fields:
@@ -2284,7 +2284,7 @@ display:
         description: ''
         expanded: false
         parent: 'views_view:views.tmgmt_local_manage_translate_task.unassigned'
-        weight: 0
+        weight: 40
         context: '0'
       display_description: 'Shows asigned tasks with completed status.'
       fields:
@@ -3255,7 +3255,7 @@ display:
         description: ''
         expanded: false
         parent: 'views_view:views.tmgmt_local_manage_translate_task.unassigned'
-        weight: 0
+        weight: 30
         context: '0'
       display_description: 'Shows asigned tasks with pending status.'
       fields:
@@ -4093,7 +4093,7 @@ display:
         description: ''
         expanded: false
         parent: 'views_view:views.tmgmt_local_manage_translate_task.unassigned'
-        weight: 0
+        weight: 20
         context: '0'
       display_description: 'Shows asigned tasks with rejected status.'
       fields:

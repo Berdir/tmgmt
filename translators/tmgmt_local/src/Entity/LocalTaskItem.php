@@ -35,7 +35,7 @@ use Drupal\Core\Render\Element;
  *   },
  *   base_table = "tmgmt_local_task_item",
  *   entity_keys = {
- *     "id" = "tjiid",
+ *     "id" = "tltiid",
  *     "uuid" = "uuid"
  *   },
  *   links = {
@@ -82,20 +82,6 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
       ->setLabel(t('UUID'))
       ->setDescription(t('The job item UUID.'))
       ->setReadOnly(TRUE);
-
-    $fields['item_type'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Item Type'))
-      ->setDescription(t('The item type of this job item.'))
-      ->setSettings(array(
-        'max_length' => 255,
-      ));
-
-    $fields['item_id'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Item ID'))
-      ->setDescription(t('The item ID of this job item.'))
-      ->setSettings(array(
-        'max_length' => 255,
-      ));
 
     $fields['data'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('Data'))
@@ -338,11 +324,12 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
     }
 
     // Consider everything accepted when the job item is accepted.
-    if ($this->isCompleted()) {
+    if ($this->isCompleted() || $this->isClosed()) {
       $this->count_pending = 0;
       $this->count_translated = 0;
       $this->count_reviewed = 0;
       $this->count_completed = count(array_filter(\Drupal::service('tmgmt.data')->flatten($this->unserializedData), array(\Drupal::service('tmgmt.data'), 'filterData')));
+      $this->count_untranslated = 0;
     }
     // Count the data item states.
     else {
@@ -376,8 +363,8 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
         }
         switch ($item['#status']) {
           case TMGMT_DATA_ITEM_STATE_TRANSLATED:
-            $this->count_untranslated--;
-            $this->count_translated++;
+            $this->count_untranslated = $this->count_untranslated->value - 1;
+            $this->count_translated = $this->count_translated->value + 1;
             break;
         }
       }
@@ -399,4 +386,5 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
   public function getChangedTimeAcrossTranslations() {
     return $this->getChangedTime();
   }
+
 }
