@@ -286,7 +286,11 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
         // Even if we successfully queried the cache it might not have an entry
         // for our source language yet.
         if (!isset($this->languageCache[$source_language])) {
-          $this->languageCache[$source_language] = $this->mapToLocalLanguages($plugin->getSupportedTargetLanguages($this, $this->mapToRemoteLanguage($source_language)));
+          $local_languages = $this->mapToLocalLanguages($plugin->getSupportedTargetLanguages($this, $this->mapToRemoteLanguage($source_language)));
+          if (empty($local_languages)) {
+            return [];
+          }
+          $this->languageCache[$source_language] = $local_languages;
           $this->updateCache();
         }
       }

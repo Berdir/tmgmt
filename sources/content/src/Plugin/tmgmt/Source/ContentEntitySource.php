@@ -272,7 +272,7 @@ class ContentEntitySource extends SourcePluginBase {
         foreach (Element::children($field_item) as $property) {
           $property_data = $field_item[$property];
           // If there is translation data for the field property, save it.
-          if (isset($property_data['#translation']['#text'])) {
+          if (isset($property_data['#translation']['#text']) && $property_data['#translate']) {
             $translation->get($name)
               ->offsetGet($delta)
               ->set($property, $property_data['#translation']['#text']);

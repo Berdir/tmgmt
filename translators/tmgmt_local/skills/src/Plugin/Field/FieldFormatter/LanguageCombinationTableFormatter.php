@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_language_combination\Plugin\Field\FieldFormatter;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 
@@ -34,17 +35,17 @@ class LanguageCombinationTableFormatter extends FormatterBase {
       $from = tmgmt_language_combination_language_label($item->language_from);
       $row[] = array(
         'data' => $from,
-        'class' => array('from-language', drupal_html_class('language-' . $from)),
+        'class' => array('from-language', Html::getClass('language-' . $from)),
       );
 
       $row[] = array(
         'data' => $to,
-        'class' => array('to-language', drupal_html_class('language-' . $to)),
+        'class' => array('to-language', Html::getClass('language-' . $to)),
       );
 
       $rows[] = array(
         'data' => $row,
-        'class' => array(drupal_html_class($from . '-' . $to)),
+        'class' => array(Html::getClass($from . '-' . $to)),
       );
     }
 

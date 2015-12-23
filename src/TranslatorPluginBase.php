@@ -83,9 +83,8 @@ abstract class TranslatorPluginBase extends PluginBase implements TranslatorPlug
    * {@inheritdoc}
    */
   public function getSupportedTargetLanguages(TranslatorInterface $translator, $source_language) {
-    $languages = entity_metadata_language_list();
-    unset($languages[LANGUAGE_NONE], $languages[$source_language]);
-    return drupal_map_assoc(array_keys($languages));
+    $languages = tmgmt_available_languages();
+    return array_combine(array_keys($languages), array_keys($languages));
   }
 
   /**

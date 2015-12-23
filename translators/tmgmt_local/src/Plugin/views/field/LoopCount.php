@@ -20,8 +20,10 @@ class LoopCount extends FieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  function render(ResultRow $values) {
+  public function render(ResultRow $values) {
+    /** @var \Drupal\tmgmt_local\LocalTaskInterface $entity */
     $entity = $values->_entity;
     return $entity->getLoopCount();
   }
+
 }

@@ -18,9 +18,11 @@ use Drupal\views\ResultRow;
 class WordCount extends FieldPluginBase {
 
   /**
+   * {@inheritdoc}
+   *
    * Prefetch statistics for all jobs.
    */
-  function preRender(&$values) {
+  public function preRender(&$values) {
     parent::preRender($values);
 
     // In case of jobs, pre-fetch the statistics in a single query and add them
@@ -37,8 +39,10 @@ class WordCount extends FieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  function render(ResultRow $values) {
+  public function render(ResultRow $values) {
+    /** @var \Drupal\tmgmt_local\LocalTaskInterface $entity */
     $entity = $values->_entity;
     return $entity->getWordCount();
   }
+
 }
