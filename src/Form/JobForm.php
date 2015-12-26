@@ -182,7 +182,7 @@ class JobForm extends TmgmtFormBase {
       $form['job_items_wrapper'] = array(
         '#type' => 'details',
         '#title' => t('Job items'),
-        '#open' => FALSE,
+        '#open' => $job->getState() == Job::STATE_ACTIVE,
         '#weight' => 10,
         '#prefix' => '<div class="tmgmt-ui-job-checkout-details">',
         '#suffix' => '</div>',
