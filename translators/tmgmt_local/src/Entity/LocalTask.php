@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * @file
  * Contains \Drupal\tmgmt_local\Entity\LocalTask.
  */
@@ -9,6 +9,7 @@ namespace Drupal\tmgmt_local\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedInterface;
+use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -16,6 +17,7 @@ use Drupal\tmgmt\JobItemInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 use Drupal\user\Entity\User;
+use Drupal\tmgmt_local\LocalTaskInterface;
 
 /**
  * Entity class for the local task entity.
@@ -23,17 +25,29 @@ use Drupal\user\Entity\User;
  * @ContentEntityType(
  *   id = "tmgmt_local_task",
  *   label = @Translation("Translation Task"),
- *   controllers = {
- *     "access" = "Drupal\tmgmt_local\Entity\Controller\LocalTaskAccessController",
+ *   handlers = {
+ *     "access" = "Drupal\tmgmt_local\Entity\Controller\LocalTaskAccessControlHandler",
  *     "form" = {
- *       "edit" = "Drupal\tmgmt_local\Entity\Form\LocalTaskFormController"
- *     }
+ *       "edit" = "Drupal\tmgmt_local\Form\LocalTaskForm",
+ *       "assign" = "Drupal\tmgmt_local\Form\LocalTaskAssignForm",
+ *       "unassign" = "Drupal\tmgmt_local\Form\LocalTaskUnassignForm",
+ *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
+ *     },
+ *     "list_builder" = "Drupal\tmgmt_local\Entity\ListBuilder\LocalTaskListBuilder",
+ *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "views_data" = "Drupal\tmgmt_local\Entity\ViewsData\LocalTaskViewsData",
  *   },
  *   base_table = "tmgmt_local_task",
  *   entity_keys = {
  *     "id" = "tltid",
  *     "label" = "label",
  *     "uuid" = "uuid"
+ *   },
+ *   links = {
+ *     "canonical" = "/translate/{tmgmt_local_task}",
+ *     "assign" = "/translate/{tmgmt_local_task}/assign",
+ *     "unassign" = "/translate/{tmgmt_local_task}/unassign",
+ *     "delete" = "/translate/{tmgmt_local_task}/delete",
  *   }
  * )
  *
@@ -41,6 +55,8 @@ use Drupal\user\Entity\User;
  * @ingroup tmgmt_local_task
  */
 class LocalTask extends ContentEntityBase implements EntityChangedInterface, EntityOwnerInterface {
+
+  use EntityChangedTrait;
 
   /**
    * {@inheritdoc}
@@ -144,6 +160,16 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   }
 
   /**
+   * Return the translator assigned to this task.
+   *
+   * @return \Drupal\user\UserInterface
+   *   The translator assigned to this task.
+   */
+  public function getTranslator() {
+    return $this->get('tuid')->entity;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getChangedTime() {
@@ -153,25 +179,14 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
   /**
    * {@inheritdoc}
    */
-  protected function defaultLabel() {
-    if (empty($this->tuid)) {
-      if (empty($this->title)) {
-        return t('Task for @job', array('@job' => $this->getJob()->label()));
-      }
-      else {
-        return $this->title;
-      }
+  public function label() {
+    if (!$this->title->value) {
+      return t('Task for @job', array('@job' => $this->getJob()->label()));
     }
     else {
-      if (empty($this->title)) {
-        return t('Task for @job assigned to @translator', array('@job' => $this->getJob()->label(), '@translator' => User::load($this->tuid->getUsername())));
-      }
-      else {
-        return t('@title assigned to @translator', array('@title' => $this->title, '@translator' => User::load($this->tuid->getUsername())));
-      }
+      return $this->title->value;
     }
   }
-
 
   /**
    * Return the corresponding translation job.
@@ -214,7 +229,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
    *   An array of local task items.
    */
   public function getItems($conditions = array()) {
-    $query = \Drupal::entityQuery('tmgmt_loal_task_item');
+    $query = \Drupal::entityQuery('tmgmt_local_task_item');
     $query->condition('tltid', $this->id());
     foreach ($conditions as $key => $condition) {
       if (is_array($condition)) {
@@ -240,7 +255,7 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
    */
   public function addTaskItem(JobItemInterface $job_item) {
     // Save the task to get an id.
-    if (empty($this->tltid)) {
+    if ($this->isNew()) {
       $this->save();
     }
 
@@ -449,6 +464,17 @@ class LocalTask extends ContentEntityBase implements EntityChangedInterface, Ent
     if (!empty($ids)) {
       entity_delete_multiple('tmgmt_local_task_item', $ids);
     }
+  }
+
+  /**
+   * Gets the timestamp of the last entity change across all translations.
+   *
+   * @return int
+   *   The timestamp of the last entity save operation across all
+   *   translations.
+   */
+  public function getChangedTimeAcrossTranslations() {
+    return $this->getChangedTime();
   }
 
 }

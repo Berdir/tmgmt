@@ -1,3 +1,19 @@
 tmgmt.translator.settings.local:
-  type: mapping
-  mapping: { }
+  type: tmgmt.translator_base
+  label: 'Local translator settings'
+  mapping:
+    allow_all:
+      type: boolean
+      label: 'Allow all'
+
+action.configuration.tmgmt_local_task_assign_multiple:
+  type: action_configuration_default
+  label: 'Assign multiple task configuration'
+
+action.configuration.tmgmt_local_task_assign_to_me:
+  type: action_configuration_default
+  label: 'Assign task to me configuration'
+
+action.configuration.tmgmt_local_task_unassign_multiple:
+  type: action_configuration_default
+  label: 'Assign task to me configuration'
