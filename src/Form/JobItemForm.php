@@ -299,11 +299,6 @@ class JobItemForm extends TmgmtFormBase {
     // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
     if (!empty($form['actions']['accept']) && $form_state->getTriggeringElement()['#value'] == $form['actions']['accept']['#value']) {
       $item->acceptTranslation();
-      // Check if the item could be saved and accepted successfully and redirect
-      // to the job item view if that is the case.
-      if ($item->isAccepted()) {
-        $form_state->setRedirectUrl($item->getJob()->urlInfo());
-      }
       // Print all messages that have been saved while accepting the reviewed
       // translation.
       foreach ($item->getMessagesSince() as $message) {
@@ -323,6 +318,7 @@ class JobItemForm extends TmgmtFormBase {
       ]));
     }
     $item->save();
+    $form_state->setRedirectUrl($item->getJob()->urlInfo());
   }
 
   /**
