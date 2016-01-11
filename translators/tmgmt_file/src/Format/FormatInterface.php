@@ -20,11 +20,13 @@ interface FormatInterface {
    *
    * @param $job
    *   The translation job object to be exported.
+   * @param array $conditions
+   *   (optional) An array containing list of conditions.
    *
    * @return
    *   String with the file content.
    */
-  function export(JobInterface $job);
+  function export(JobInterface $job, $conditions = array());
 
   /**
    * Validates that the given file is valid and can be imported.

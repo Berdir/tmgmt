@@ -45,9 +45,9 @@ class Html implements FormatInterface {
   /**
    * Implements TMGMTFileExportInterface::export().
    */
-  public function export(JobInterface $job) {
+  public function export(JobInterface $job, $conditions = array()) {
     $items = array();
-    foreach ($job->getItems() as $item) {
+    foreach ($job->getItems($conditions) as $item) {
       $data = \Drupal::service('tmgmt.data')->filterTranslatable($item->getData());
       foreach ($data as $key => $value) {
         $items[$item->id()][$this->encodeIdSafeBase64($item->id() . '][' . $key)] = $value;

@@ -146,7 +146,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
   /**
    * {@inheritdoc}
    */
-  public function export(JobInterface $job) {
+  public function export(JobInterface $job, $conditions = array()) {
 
     $this->job = $job;
 
@@ -189,7 +189,7 @@ class Xliff extends \XMLWriter implements FormatInterface {
 
     $this->startElement('body');
 
-    foreach ($job->getItems() as $item) {
+    foreach ($job->getItems($conditions) as $item) {
       $this->addItem($item);
     }
 
