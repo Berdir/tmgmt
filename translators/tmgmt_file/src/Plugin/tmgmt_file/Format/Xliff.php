@@ -204,8 +204,8 @@ class Xliff extends \XMLWriter implements FormatInterface {
   /**
    * {@inheritdoc}
    */
-  public function import($imported_file) {
-    if ($this->getImportedXML($imported_file) === FALSE) {
+  public function import($imported_file, $is_file = TRUE) {
+    if ($this->getImportedXML($imported_file, $is_file) === FALSE) {
       return FALSE;
     }
     $phase = $this->importedXML->xpath("//xliff:phase[@phase-name='extraction']");
@@ -310,13 +310,27 @@ class Xliff extends \XMLWriter implements FormatInterface {
     return $job;
   }
 
-  protected function getImportedXML($imported_file) {
+  /**
+   * Returns the simple XMLElement object.
+   *
+   * @param string $imported_file
+   *   Path to a file or an XML string to import.
+   * @param bool $is_file
+   *   (optional) Whether $imported_file is the path to a file or not.
+   *
+   * @return bool|\SimpleXMLElement
+   *   The parsed SimpleXMLElement object. FALSE in case of failed parsing.
+   */
+  protected function getImportedXML($imported_file, $is_file = TRUE) {
     if (empty($this->importedXML)) {
       // It is not possible to load the file directly with simplexml as it gets
       // url encoded due to the temporary://. This is a PHP bug, see
       // https://bugs.php.net/bug.php?id=61469
-      $xml_string = file_get_contents($imported_file);
-      $this->importedXML = simplexml_load_string($xml_string);
+      if ($is_file) {
+        $imported_file = file_get_contents($imported_file);
+      }
+
+      $this->importedXML = simplexml_load_string($imported_file);
       if ($this->importedXML === FALSE) {
         drupal_set_message(t('The imported file is not a valid XML.'), 'error');
         return FALSE;

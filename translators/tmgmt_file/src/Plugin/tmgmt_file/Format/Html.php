@@ -66,7 +66,7 @@ class Html implements FormatInterface {
   /**
    * Implements TMGMTFileExportInterface::import().
    */
-  public function import($imported_file) {
+  public function import($imported_file, $is_file = TRUE) {
     $dom = new \DOMDocument();
     $dom->loadHTMLFile($imported_file);
     $xml = simplexml_import_dom($dom);

@@ -41,8 +41,13 @@ interface FormatInterface {
   /**
    * Converts an exported file content back to the translated data.
    *
+   * @param string $imported_file
+   *   Path to a file or an XML string to import.
+   * @param bool $is_file
+   *   (optional) Whether $imported_file is the path to a file or not.
+   *
    * @return
    *   Translated data array.
    */
-  function import($imported_file);
+  function import($imported_file, $is_file = TRUE);
 }
