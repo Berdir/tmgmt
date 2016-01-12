@@ -269,6 +269,11 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // @todo: Fails, encoding problem?
     // $this->assertText(t('@from => @to', array('@from' => 'en', '@to' => 'de')));
 
+    // Test LocalTaskForm.
+    $this->clickLink('View');
+    $this->assertText('Unassigned');
+    $this->drupalGet('translate');
+
     // Assign to action not working yet.
     $edit = array(
       'tmgmt_local_task_bulk_form[0]' => TRUE,
