@@ -663,4 +663,11 @@ class JobForm extends TmgmtFormBase {
     $form_state->set('rebuild_suggestions', TRUE);
   }
 
+  /**
+   * Handles submit call to rebuild a job.
+   */
+  public function submitBuildJob(array $form, FormStateInterface $form_state) {
+    $this->entity = $this->buildEntity($form, $form_state);
+    $form_state->setRebuild();
+  }
 }
