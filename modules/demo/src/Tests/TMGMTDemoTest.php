@@ -6,6 +6,7 @@
 
 namespace Drupal\tmgmt_demo\Tests;
 
+use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 
 /**
@@ -25,7 +26,7 @@ class TMGMTDemoTest extends TMGMTTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     $this->loginAsAdmin([
       'access content overview',
@@ -57,6 +58,14 @@ class TMGMTDemoTest extends TMGMTTestBase {
     $this->clickLink(t('Translate'));
     $this->drupalPostForm(NULL, $edit, t('Request translation'));
     $this->assertText(t('2 jobs need to be checked out.'));
+
+    // Test local translator.
+    $edit = [
+      'translator' => 'local',
+    ];
+    $this->drupalPostForm(NULL, $edit, 'Submit to translator and continue');
+    $this->assertText('The translation job has been submitted.');
+
     // Check to see if no items are selected and the error message pops up.
     $this->drupalPostForm('admin/tmgmt/sources', [], t('Request translation'));
     $this->assertUniqueText(t("You didn't select any source items."));

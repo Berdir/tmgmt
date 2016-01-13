@@ -6,6 +6,9 @@
 
 use Drupal\Core\Url;
 use Drupal\node\Entity\Node;
+use Drupal\user\Entity\Role;
+use Drupal\user\Entity\User;
+use Drupal\user\RoleInterface;
 
 
 /**
@@ -40,14 +43,26 @@ function tmgmt_demo_install() {
         . '</ul>'
         . '<ul>'
         .   '<li>'
-        .   '<span>' . t('In the TMGMT demo module the <a href="@file_translator">File translator</a> is enabled by default. It allows users to export and import texts via xliff and HTML. The workflow is the following:', ['@file_translator' => Url::fromUri('base:admin/config/regional/tmgmt_translator')->toString()]) . '</span>'
+        .   '<span>' . t('In the TMGMT demo module the <a href="@file_translator">File translator</a> is enabled by default. It allows users to export and import texts via xliff and HTML. The workflow is the following:', ['@file_translator' => Url::fromUri('base:admin/config/regional/tmgmt_translator/manage/file')->toString()]) . '</span>'
         .     '<ul>'
         .       '<li>' . t('Submit a job to the File translator. The job is in "active" state.') . '</li>'
         .       '<li>' . t('Export it as HTML/XLIFF format.') . '</li>'
         .       '<li>' . t('Translate the content by editing the XLIFF files in plaintext or with a proper CAT tool.') . '</li>'
         .       '<li>' . t('Import it back on the site.') . '</li>'
         .       '<li>' . t('Review the job items/data items. XLIFF does not support a feedback loop or commenting an item. Improvements/fixings can only be done by the reviewer (or by reimporting the improved XLIFF).') . '</li>'
-        .       '<li>' . t('Job items can be accepted separately by clicking the check button - "Reviewed" and saving or finally as the whole job.') . '</li>'
+        .       '<li>' . t('Press save as completed to accept the translation and finish the process.') . '</li>'
+        .     '</ul>'
+        .   '</li>'
+        . '</ul>'
+        . '<ul>'
+        .   '<li>'
+        .   '<span>' . t('In the TMGMT demo module the <a href="@tmgmt_local">Local translator</a> is also enabled by default. It allows to assign translation tasks to the users of the site that have the abilities to translate it (The demo adds all the abilities to all the users). The workflow is the following:', ['@tmgmt_local' => Url::fromUri('base:admin/config/regional/tmgmt_translator/manage/local')->toString()]) . '</span>'
+        .     '<ul>'
+        .       '<li>' . t('Submit a job to the Local translator and select translator for the job. The job is in "active" state.') . '</li>'
+        .       '<li>' . t('The user will translate the task. Also the task items can be reviewed.') . '</li>'
+        .       '<li>' . t('When the translation is done, the user will set the task as completed.') . '</li>'
+        .       '<li>' . t('Review the job items. This translator does not support a feedback loop or commenting an item. Improvements/fixings can be done by the reviewer and at this moment also by the user, <a href="@issue">this is a known issue</a>', ['@issue' => Url::fromUri('https://www.drupal.org/node/2646596')->toString()]) . '.</li>'
+        .       '<li>' . t('Press save as completed to accept the translation and finish the process.') . '</li>'
         .     '</ul>'
         .   '</li>'
         . '</ul>'
@@ -93,5 +108,29 @@ function tmgmt_demo_install() {
     \Drupal::configFactory()->getEditable('tmgmt_content.settings')
     ->set('embedded_fields.node.field_paragraphs_demo', TRUE)
     ->save();
+  }
+
+  // Allow translation to all authenticated users.
+  /** @var Role $role */
+  $role = Role::load(RoleInterface::AUTHENTICATED_ID);
+  $role->grantPermission('provide translation services');
+  $role->save();
+
+  // Add all skills to all users.
+  /** @var User $user */
+  foreach (User::loadMultiple() as $user) {
+    if ($user->id() != 0) {
+      $user->tmgmt_translation_skills = [
+        [
+          'language_from' => 'en',
+          'language_to' => 'de',
+        ],
+        [
+          'language_from' => 'en',
+          'language_to' => 'fr',
+        ],
+      ];
+      $user->save();
+    }
   }
 }
