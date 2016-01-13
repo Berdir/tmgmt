@@ -148,8 +148,6 @@ class LocalTaskForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    parent::save($form, $form_state);
-
     if (!empty($form_state->getValue('tuid'))) {
       /** @var User $translator */
       $translator = User::load($form_state->getValue('tuid'));
@@ -157,10 +155,10 @@ class LocalTaskForm extends ContentEntityForm {
       /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
       $task = $this->getEntity();
       $task->assign($translator);
-      $task->save();
 
       drupal_set_message(t('Assigned to translator @translator_name.', ['@translator_name' => $translator->getAccountName()]));
     }
+    $this->entity->save();
 
     $form_state->setRedirect(Views::getView('tmgmt_local_task_overview')->getUrl()->getRouteName());
   }
