@@ -191,6 +191,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
       '@source' => 'English',
       '@target' => 'German',
     )));
+    $xpath = $this->xpath('//*[@id="edit-translator"]')[0];
+    $this->assertEqual($xpath->option[0], 'Local translator (auto created) (unsupported)');
     $this->localTranslator = $this->drupalCreateUser($this->localTranslatorPermissions);
 
     // The same when there is a single role.
@@ -223,6 +225,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Check that the user is not listed in the translator selection form.
     $this->loginAsAdmin();
     $this->drupalGet($job->toUrl());
+    $xpath = $this->xpath('//*[@id="edit-translator"]')[0];
+    $this->assertEqual($xpath->option[0], 'Local translator (auto created)');
     $this->assertText(t('Select translator for this job'));
     $this->assertText($other_translator_same->getUsername());
     $this->assertNoText($this->localTranslator->getUsername());
