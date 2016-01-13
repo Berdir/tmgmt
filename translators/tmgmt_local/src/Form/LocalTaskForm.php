@@ -9,8 +9,7 @@ namespace Drupal\tmgmt_local\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
-use Drupal\tmgmt_local\Entity\LocalTask;
+use Drupal\user\Entity\User;
 use Drupal\views\Views;
 
 /**
@@ -62,13 +61,6 @@ class LocalTaskForm extends ContentEntityForm {
       '#access' => \Drupal::currentUser()->hasPermission('administer tmgmt') || \Drupal::currentUser()->hasPermission('administer translation tasks'),
     );
 
-    /*$form['title'] = array(
-      '#title' => t('Title'),
-      '#type' => 'textfield',
-      '#default_value' => $local_task->label(),
-      '#required' => TRUE,
-    );*/
-
     $form['info'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('tmgmt-ui-localTask-info', 'clearfix')),
@@ -80,10 +72,10 @@ class LocalTaskForm extends ContentEntityForm {
       $form_state->setValue('label', $local_task->label());
     }
 
-    $form['label']['widget'][0]['value']['#description'] = t('You can provide a label for this localTask in order to identify it easily later on. Or leave it empty to use default one.');
-    $form['label']['#group'] = 'info';
-    $form['label']['#prefix'] = '<div id="tmgmt-ui-label">';
-    $form['label']['#suffix'] = '</div>';
+    $form['title']['widget'][0]['value']['#description'] = t('You can provide a label for this localTask in order to identify it easily later on. Or leave it empty to use default one.');
+    $form['title']['#group'] = 'info';
+    $form['title']['#prefix'] = '<div id="tmgmt-ui-label">';
+    $form['title']['#suffix'] = '</div>';
 
     $form['info']['source_language'] = array(
       '#title' => t('Source language'),
@@ -136,26 +128,6 @@ class LocalTaskForm extends ContentEntityForm {
       );
     }
 
-    // Add the buttons and action links.
-    $form['actions']['#type'] = 'actions';
-    $form['actions']['#access'] = \Drupal::currentUser()->hasPermission('administer tmgmt') || \Drupal::currentUser()->hasPermission('administer translation tasks');
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save task'),
-    );
-
-    // Check if the translator entity is completely new or not.
-    $old = empty($local_task->isNew()) && $form_state->getBuildInfo()['callback_object']->operation != 'clone';
-    if ($old) {
-      $form['actions']['delete'] = array(
-        '#type' => 'submit',
-        '#value' => t('Delete'),
-        '#redirect' => 'translate/' . $local_task->id() . '/delete',
-        // Don't run validations, so the user can always delete the job.
-        '#limit_validation_errors' => array(),
-      );
-    }
-
     $form['#attached']['library'][] = 'tmgmt/admin';
     return $form;
   }
@@ -164,74 +136,12 @@ class LocalTaskForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   protected function actions(array $form, FormStateInterface $form_state) {
-    $local_task = $this->entity;
+    $actions = parent::actions($form, $form_state);
 
-    $actions['#access'] = \Drupal::currentUser()->hasPermission('administer tmgmt') || \Drupal::currentUser()->hasPermission('administer translation tasks');
-    $actions['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save task'),
-      '#submit' => array('::submitForm', '::save'),
-      '#weight' => 5,
-      '#button_type' => 'primary',
-    );
+    $actions['submit']['#value'] = $this->t('Save task');
+    $actions['submit']['#access'] = \Drupal::currentUser()->hasPermission('administer tmgmt') || \Drupal::currentUser()->hasPermission('administer translation tasks');
 
-    if (!$local_task->isNew()) {
-      $actions['delete'] = array(
-        '#type' => 'submit',
-        '#value' => t('Delete'),
-        '#submit' => array('tmgmt_submit_redirect'),
-        '#redirect' => 'admin/tmgmt/local_tasks/' . $local_task->id() . '/delete',
-        // Don't run validations, so the user can always delete the localTask.
-        '#limit_validation_errors' => array(),
-      );
-    }
     return $actions;
-  }
-
-
-  /**
-   * {@inheritdoc}
-   */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
-    /** @var LocalTask $local_task */
-    $local_task = $this->buildEntity($form, $form_state);
-    // Load the selected translator.
-    $translator = $local_task->getJob()->getTranslator();
-    // Check translator availability.
-    if (!empty($translator)) {
-      if (!$result = $translator->checkAvailable()) {
-        $form_state->setErrorByName('translator', $result->getReason());
-      }
-      elseif (!$result = $translator->checkTranslatable($local_task->getJob())) {
-        $form_state->setErrorByName('translator', $result->getReason());
-      }
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildEntity(array $form, FormStateInterface $form_state) {
-    /** @var LocalTask $local_task */
-    $local_task = parent::buildEntity($form, $form_state);
-
-    $translator = $local_task->getJob()->getTranslator();
-    if (!empty($translator)) {
-      // If requested custom localTask settings handling, copy values from
-      // original localTask.
-      if ($translator->hasCustomSettingsHandling()) {
-        /** @var LocalTask $original_local_task */
-        $original_local_task = \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->loadUnchanged($local_task->id());
-        $local_task->settings = $original_local_task->settings;
-      }
-    }
-    // Make sure that we always store a label as it can be a slow operation to
-    // generate the default label.
-    if (empty($local_task->label)) {
-      $local_task->label = $local_task->label();
-    }
-    return $local_task;
   }
 
   /**
@@ -240,33 +150,19 @@ class LocalTaskForm extends ContentEntityForm {
   public function save(array $form, FormStateInterface $form_state) {
     parent::save($form, $form_state);
 
-    // Everything below this line is only invoked if the 'Submit to translator'
-    // button was clicked.
-    $view = Views::getView('tmgmt_local_task_overview');
-    if ($form_state->getTriggeringElement()['#value'] == $form['actions']['submit']['#value']) {
-      if (!tmgmt_job_request_translation($this->entity->getJob())) {
-        // Don't redirect the user if the translation request failed but retain
-        // existing destination parameters so we can redirect once the request
-        // finished successfully.
-        unset($_GET['destination']);
-      }
-      elseif ($redirect = tmgmt_redirect_queue_dequeue()) {
-        // Proceed to the next redirect queue item, if there is one.
-        $form_state->setRedirectUrl(Url::fromUri('base:' . $redirect));
-      }
-      elseif ($destination = tmgmt_redirect_queue_destination()) {
-        // Proceed to the defined destination if there is one.
-        $form_state->setRedirectUrl(Url::fromUri('base:' . $destination));
-      }
-      else {
-        // Per default we want to redirect the user to the overview.
-        $form_state->setRedirect($view->getUrl()->getRouteName());
-      }
+    if (!empty($form_state->getValue('tuid'))) {
+      /** @var User $translator */
+      $translator = User::load($form_state->getValue('tuid'));
+
+      /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
+      $task = $this->getEntity();
+      $task->assign($translator);
+      $task->save();
+
+      drupal_set_message(t('Assigned to translator @translator_name.', ['@translator_name' => $translator->getAccountName()]));
     }
-    else {
-      // Per default we want to redirect the user to the overview.
-      $form_state->setRedirect($view->getUrl()->getRouteName());
-    }
+
+    $form_state->setRedirect(Views::getView('tmgmt_local_task_overview')->getUrl()->getRouteName());
   }
 
   /**

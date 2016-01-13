@@ -272,6 +272,28 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Test LocalTaskForm.
     $this->clickLink('View');
     $this->assertText('Unassigned');
+    $xpath = $this->xpath('//*[@id="edit-status"]');
+    $this->assertTrue(empty($xpath));
+
+    $this->loginAsAdmin(['administer translation tasks']);
+    $this->drupalGet('translate');
+    $this->clickLink('View');
+    $xpath = $this->xpath('//*[@id="edit-status"]');
+    $this->assertFalse(empty($xpath));
+    $edit = array(
+      'tuid' => $this->localTranslator->id(),
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save task'));
+    $this->assertText(t('Assigned to translator @translator.', ['@translator' => $this->localTranslator->getDisplayName()]));
+
+    $this->drupalGet('manage-translate/assigned');
+    $this->clickLink('View');
+    $edit = array(
+      'status' => TMGMT_LOCAL_TASK_STATUS_UNASSIGNED,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save task'));
+
+    $this->drupalLogin($this->localTranslator);
     $this->drupalGet('translate');
 
     // Assign to action not working yet.
