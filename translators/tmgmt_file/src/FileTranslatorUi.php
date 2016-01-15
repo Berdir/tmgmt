@@ -34,11 +34,26 @@ class FileTranslatorUi extends TranslatorPluginUiBase {
       '#description' => t('Please select the format you want to export data.'),
     );
 
+    $form['xliff_cdata'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('XLIFF CDATA'),
+      '#description' => t('Check to use CDATA for import/export.'),
+      '#default_value' => $translator->getSetting('xliff_cdata'),
+    );
+
     $form['xliff_processing'] = array(
       '#type' => 'checkbox',
       '#title' => t('Extended XLIFF processing'),
       '#description' => t('Check to further process content semantics and mask HTML tags instead just escaping it.'),
       '#default_value' => $translator->getSetting('xliff_processing'),
+    );
+
+    $form['xliff_message'] = array(
+      '#type' => 'container',
+      '#markup' => t('By selecting CDATA option, XLIFF processing will be ignored.'),
+      '#attributes' => array(
+        'class' => array('messages messages--warning'),
+      ),
     );
 
     $form['allow_override'] = array(

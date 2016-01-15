@@ -13,3 +13,6 @@ tmgmt.translator.settings.file:
     xliff_processing:
       type: boolean
       label: Xliff HTML processing
+    xliff_cdata:
+      type: boolean
+      label: Xliff CDATA

@@ -139,6 +139,77 @@ class FileTranslatorTest extends TMGMTTestBase {
   }
 
   /**
+   * Test the CDATA option for XLIFF export and import.
+   */
+  function testXLIFFCDATA() {
+    $translator = $this->createTranslator([
+      'plugin' => 'file',
+      'settings' => [
+        'export_format' => 'xlf',
+        'xliff_cdata' => TRUE,
+      ]
+    ]);
+
+    // Get the source text.
+    $source_text = trim(file_get_contents(drupal_get_path('module', 'tmgmt') . '/tests/testing_html/sample.html'));
+
+    // Create a new job.
+    $job = $this->createJob();
+    $job->translator = $translator->id();
+    $job->addItem('test_html_source', 'test', '1');
+    $job->requestTranslation();
+    $messages = $job->getMessages();
+    $message = reset($messages);
+
+    // Get XLIFF content.
+    $variables = $message->variables;
+    $download_url = $variables->{'@link'};
+    $this->assertFalse((bool) strpos('< a', $download_url));
+    $xliff = file_get_contents($download_url);
+
+    $dom = new \DOMDocument();
+    $dom->loadXML($xliff);
+    $this->assertTrue($dom->schemaValidate(drupal_get_path('module', 'tmgmt_file') . '/xliff-core-1.2-strict.xsd'));
+
+    // "Translate" items.
+    $xml = simplexml_import_dom($dom);
+    $translated_text = array();
+    foreach ($xml->file->body->children() as $group) {
+      foreach ($group->children() as $transunit) {
+        if ($transunit->getName() == 'trans-unit') {
+          // The target should be empty.
+          $this->assertEqual($transunit->target, '');
+
+          // Update translations using CDATA.
+          $node = dom_import_simplexml($transunit->target);
+          $owner = $node->ownerDocument;
+          $node->appendChild($owner->createCDATASection($xml->file['target-language'] . '_' . (string) $transunit->source));
+
+          // Store the text to allow assertions later on.
+          $translated_text[(string) $group['id']][(string) $transunit['id']] = (string) $transunit->target;
+        }
+      }
+    }
+
+    $translated_file = 'public://tmgmt_file/translated file.xlf';
+    $xml->asXML($translated_file);
+
+    // Import the file and check translation for the "dummy" item.
+    $edit = array(
+      'files[file]' => $translated_file,
+    );
+    $this->drupalPostForm($job->urlInfo(), $edit, t('Import'));
+
+    // Reset caches and reload job.
+    \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
+    \Drupal::entityManager()->getStorage('tmgmt_job_item')->resetCache();
+    $job = Job::load($job->id());
+
+    $item_data = $job->getData(array(1, 'dummy', 'deep_nesting'));
+    $this->assertEqual(trim($item_data[1]['#translation']['#text']), str_replace($source_text, $xml->file['target-language'] . '_' . $source_text, $source_text));
+  }
+
+  /**
    * Gets trans-unit content from the XLIFF file that has been exported for the
    * given job as last.
    */

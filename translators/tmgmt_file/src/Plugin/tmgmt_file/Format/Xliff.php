@@ -116,7 +116,10 @@ class Xliff extends \XMLWriter implements FormatInterface {
     $this->startElement('source');
     $this->writeAttribute('xml:lang', $this->job->getRemoteSourceLanguage());
 
-    if ($job->getSetting('xliff_processing')) {
+    if ($job->getSetting('xliff_cdata')) {
+      $this->writeCdata(trim($element['#text']));
+    }
+    elseif ($job->getSetting('xliff_processing')) {
       $this->writeRaw($this->processForExport($element['#text'], $key_array));
     }
     else {
@@ -217,14 +220,14 @@ class Xliff extends \XMLWriter implements FormatInterface {
   /**
    * {@inheritdoc}
    */
-  public function validateImport($imported_file) {
+  public function validateImport($imported_file, $is_file = TRUE) {
     // Validates imported XLIFF file.
     // Checks:
     // - Job ID
     // - Target ans source languages
     // - Content integrity.
 
-    $xml = $this->getImportedXML($imported_file);
+    $xml = $this->getImportedXML($imported_file, $is_file);
     if ($xml === FALSE) {
       drupal_set_message(t('The imported file is not a valid XML.'), 'error');
       return FALSE;
@@ -350,6 +353,11 @@ class Xliff extends \XMLWriter implements FormatInterface {
     if (empty($this->importedTransUnits)) {
       $reader = new \XMLReader();
       foreach ($this->importedXML->xpath('//xliff:trans-unit') as $unit) {
+        if ($job->getSetting('xliff_cdata')) {
+          $this->importedTransUnits[(string) $unit['id']]['#text'] = (string) $unit->target;
+          continue;
+        }
+
         $reader->XML($unit->target->asXML());
         $reader->read();
         $this->importedTransUnits[(string) $unit['id']]['#text'] =
