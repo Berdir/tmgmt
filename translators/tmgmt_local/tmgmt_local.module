@@ -324,6 +324,19 @@ function tmgmt_local_tmgmt_local_task_item_access(\Drupal\Core\Entity\EntityInte
 }
 
 /**
+ * Implements hook_view_access().
+ */
+function tmgmt_local_view_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
+  if ($entity->id() == 'tmgmt_local_task_overview') {
+    switch ($operation) {
+      case 'delete':
+        return AccessResult::forbidden();
+    }
+  }
+  return AccessResult::neutral();
+}
+
+/**
  * Loads an array with the word and status statistics of a task.
  *
  * @param $tltids
