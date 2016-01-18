@@ -283,6 +283,7 @@ class JobForm extends TmgmtFormBase {
       $preselected_translator = $job->getTranslatorId() && isset($translators[$job->getTranslatorId()]) ? $job->getTranslatorId() : key($translators);
       $job->translator = $form_state->getValue('translator') ?: $preselected_translator;
 
+      asort($translators);
       $form['translator_wrapper']['translator'] = array(
         '#type' => 'select',
         '#title' => t('Translator'),
