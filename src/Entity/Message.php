@@ -11,6 +11,7 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\tmgmt\MessageInterface;
 
 /**
@@ -96,10 +97,10 @@ class Message extends ContentEntityBase implements MessageInterface {
   public function getMessage() {
     $text = $this->message->value;
     if ($this->variables->first()->toArray()) {
-      return t($text, $this->variables->first()->toArray());
+      return new TranslatableMarkup($text, $this->variables->first()->toArray());
     }
     else {
-      return t($text);
+      return new TranslatableMarkup($text);
     }
   }
 

@@ -6,6 +6,7 @@
 
 namespace Drupal\tmgmt;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Interface for the tmgmt_message entity.
@@ -17,8 +18,8 @@ interface MessageInterface extends ContentEntityInterface {
   /**
    * Returns the translated message.
    *
-   * @return string
-   *   The translated message.
+   * @return TranslatableMarkup
+   *   The message.
    */
   public function getMessage();
 

@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_file\Tests;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobInterface;
@@ -379,6 +380,8 @@ class FileTranslatorTest extends TMGMTTestBase {
         'files[file]' => $translated_file,
       );
     $this->drupalPostForm($job->urlInfo(), $edit, t('Import'));
+    $this->assertText(t('The translation of @job_item to German is finished and can now be reviewed.', ['@job_item' => $first_item->label()]));
+
     $this->clickLink(t('Review'));
     $this->drupalPostAjaxForm(NULL, NULL, array('reviewed-dummy|deep_nesting' => '✓'));
 
@@ -541,9 +544,9 @@ class FileTranslatorTest extends TMGMTTestBase {
    */
   protected function assertIntegrityCheck(JobInterface $job, $expected = TRUE) {
     $integrity_check_failed = FALSE;
-    /** @var MessageInterface $message */
+    /** @var \Drupal\tmgmt\MessageInterface $message */
     foreach ($job->getMessages() as $message) {
-      if ($message->getMessage() == t('Failed to validate semantic integrity of %key element. Please check also the HTML code of the element in the review process.', array('%key' => 'dummy][deep_nesting'))) {
+      if ($message->getMessage() == new TranslatableMarkup('Failed to validate semantic integrity of %key element. Please check also the HTML code of the element in the review process.', array('%key' => 'dummy][deep_nesting'))) {
         $integrity_check_failed = TRUE;
         break;
       }
@@ -556,4 +559,5 @@ class FileTranslatorTest extends TMGMTTestBase {
       $this->assertFalse($integrity_check_failed, 'The validation of semantic integrity must not fail.');
     }
   }
+
 }

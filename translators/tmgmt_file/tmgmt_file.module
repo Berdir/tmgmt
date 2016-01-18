@@ -1,6 +1,5 @@
 <?php
 
-use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
 use Drupal\tmgmt\Entity\Job;
@@ -63,7 +62,7 @@ function tmgmt_file_import_form_submit(array $form, FormStateInterface $form_sta
       continue;
     }
     if ($text = $message->getMessage()) {
-      drupal_set_message(Xss::filter($text), $message->getType());
+      drupal_set_message($text, $message->getType());
     }
   }
 }
