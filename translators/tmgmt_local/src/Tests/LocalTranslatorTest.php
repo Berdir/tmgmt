@@ -12,6 +12,7 @@ use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 use Drupal\tmgmt_local\Entity\LocalTask;
+use Drupal\tmgmt_local\LocalTaskInterface;
 
 /**
  * Basic tests for the local translator.
@@ -293,7 +294,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalGet('manage-translate/assigned');
     $this->clickLink('View');
     $edit = array(
-      'status' => TMGMT_LOCAL_TASK_STATUS_UNASSIGNED,
+      'status' => LocalTaskInterface::STATUS_UNASSIGNED,
     );
     $this->drupalPostForm(NULL, $edit, t('Save task'));
 

@@ -9,6 +9,8 @@ namespace Drupal\tmgmt_local\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\tmgmt_local\Entity\LocalTask;
+use Drupal\tmgmt_local\LocalTaskInterface;
 use Drupal\user\Entity\User;
 use Drupal\views\Views;
 
@@ -33,7 +35,7 @@ class LocalTaskForm extends ContentEntityForm {
     $form = parent::form($form, $form_state);
     $local_task = $this->entity;
 
-    $states = tmgmt_local_task_statuses();
+    $states = LocalTask::getStatuses();
     // Set the title of the page to the label and the current state of the
     // localTask.
     $form['#title'] = (t('@title (@source to @target, @state)', array(

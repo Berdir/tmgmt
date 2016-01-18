@@ -12,6 +12,7 @@ use Drupal\Core\Url;
 use Drupal\tmgmt_local\Entity\LocalTask;
 use Drupal\tmgmt_local\Entity\LocalTaskItem;
 use Drupal\Core\Render\Element;
+use Drupal\tmgmt_local\LocalTaskInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -49,7 +50,7 @@ function tmgmt_local_task_form($form, FormStateInterface $form_state, LocalTask 
   $form['status'] = array(
     '#type' => 'select',
     '#title' => t('Status'),
-    '#options' => tmgmt_local_task_statuses(),
+    '#options' => LocalTask::getStatuses(),
     '#default_value' => $wrapper->status->value(),
     '#access' => user_access('administer tmgmt') || user_access('administer translation tasks'),
   );
@@ -230,7 +231,7 @@ function tmgmt_local_translation_form_save_as_completed_submit($form, FormStateI
     }
   }
   if ($all_done) {
-    $task->setStatus(TMGMT_LOCAL_TASK_STATUS_COMPLETED);
+    $task->setStatus(LocalTaskInterface::STATUS_COMPLETED);
     // If the task is now completed, redirect back to the overview.
     $form_state['redirect'] = 'translate';
   }

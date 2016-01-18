@@ -7,11 +7,10 @@
 
 namespace Drupal\tmgmt_local\Plugin\tmgmt\Translator;
 
-use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\TranslatorInterface;
 use Drupal\tmgmt\TranslatorPluginBase;
+use Drupal\tmgmt_local\LocalTaskInterface;
 
 /**
  * Local translator.
@@ -44,7 +43,7 @@ class LocalTranslator extends TranslatorPluginBase {
     ));
     // If we have translator then switch to pending state.
     if ($tuid) {
-      $local_task->status = TMGMT_LOCAL_TASK_STATUS_PENDING;
+      $local_task->status = LocalTaskInterface::STATUS_PENDING;
     }
     $local_task->save();
 

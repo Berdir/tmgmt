@@ -8,63 +8,66 @@
 namespace Drupal\tmgmt_local;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityChangedInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\tmgmt\JobItemInterface;
+use Drupal\user\EntityOwnerInterface;
 
 /**
  * Interface for tmgmt_local_task entity.
  *
  * @ingroup tmgmt_local_task
  */
-interface LocalTaskInterface extends ContentEntityInterface {
+interface LocalTaskInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface {
 
   /**
-   * {@inheritdoc}
+   * Translation task is not assigned to translator.
    */
-  public static function baseFieldDefinitions(EntityTypeInterface $entity_type);
+  const STATUS_UNASSIGNED = 0;
 
   /**
-   * {@inheritdoc}
+   * Translation task is pending.
    */
-  public function getOwner();
+  const STATUS_PENDING = 1;
 
   /**
-   * {@inheritdoc}
+   * Translation task is completed (all job items are translated).
    */
-  public function getOwnerId();
+  const STATUS_COMPLETED = 2;
 
   /**
-   * {@inheritdoc}
+   * Translation task is rejected (at least some job items are rejected).
    */
-  public function setOwnerId($uid);
+  const STATUS_REJECTED = 3;
 
   /**
-   * {@inheritdoc}
+   * Translation task is closed.
    */
-  public function setOwner(UserInterface $account);
+  const STATUS_CLOSED = 4;
 
   /**
-   * {@inheritdoc}
+   * Return the translator assigned to this task.
+   *
+   * @return \Drupal\Core\Session\AccountInterface
+   *   The translator assigned to this task.
    */
-  public function getChangedTime();
-
-  /**
-   * {@inheritdoc}
-   */
-  function defaultLabel();
+  public function getTranslator();
 
   /**
    * Return the corresponding translation job.
    *
    * @return \Drupal\tmgmt\JobInterface
+   *   The job.
    */
   public function getJob();
 
   /**
    * Assign translation task to passed user.
    *
-   * @param object $user
+   * @param \Drupal\Core\Session\AccountInterface $user
    *   User object.
    */
-  public function assign($user);
+  public function assign(AccountInterface $user);
 
   /**
    * Unassign translation task.
@@ -101,24 +104,26 @@ interface LocalTaskInterface extends ContentEntityInterface {
   /**
    * Updates the status of the task.
    *
-   * @param $status
+   * @param int $status
    *   The new status of the task. Has to be one of the task status constants.
-   * @param $message
+   * @param string $message
    *   (Optional) The log message to be saved along with the status change.
-   * @param $variables
+   * @param array $variables
    *   (Optional) An array of variables to replace in the message on display.
+   * @param string $type
+   *   (optional) The message type.
    *
    * @return int
    *   The updated status of the task if it could be set.
    *
    * @see Job::addMessage()
    */
-  public function setStatus($status);
+  public function setStatus($status, $message = NULL, $variables = array(), $type = 'debug');
 
   /**
    * Checks whether the passed value matches the current status.
    *
-   * @param $status
+   * @param int $status
    *   The value to check the current status against.
    *
    * @return bool
@@ -129,10 +134,10 @@ interface LocalTaskInterface extends ContentEntityInterface {
   /**
    * Checks whether the user described by $account is the author of this task.
    *
-   * @param $account
+   * @param \Drupal\Core\Session\AccountInterface $account
    *   (Optional) A user object. Defaults to the currently logged in user.
    */
-  public function isAuthor($account = NULL);
+  public function isAuthor(AccountInterface $account = NULL);
 
   /**
    * Returns whether the status of this task is 'unassigned'.
@@ -177,7 +182,7 @@ interface LocalTaskInterface extends ContentEntityInterface {
   /**
    * Count of all translated data items.
    *
-   * @return
+   * @return int
    *   Translated count
    */
   public function getCountTranslated();
@@ -185,7 +190,7 @@ interface LocalTaskInterface extends ContentEntityInterface {
   /**
    * Count of all untranslated data items.
    *
-   * @return
+   * @return int
    *   Translated count
    */
   public function getCountUntranslated();
@@ -193,7 +198,7 @@ interface LocalTaskInterface extends ContentEntityInterface {
   /**
    * Count of all completed data items.
    *
-   * @return
+   * @return int
    *   Translated count
    */
   public function getCountCompleted();
@@ -201,7 +206,7 @@ interface LocalTaskInterface extends ContentEntityInterface {
   /**
    * Sums up all word counts of this task job items.
    *
-   * @return
+   * @return int
    *   The sum of all accepted counts
    */
   public function getWordCount();
@@ -216,27 +221,23 @@ interface LocalTaskInterface extends ContentEntityInterface {
   public function getLoopCount();
 
   /**
-   * Increment loop_count property depending on current status, new status and
-   * new translator.
+   * Increment loop_count property.
    *
-   * @param int $newStatus
+   * Does it depending on current status, new status and new translator.
+   *
+   * @param int $new_status
    *   New status of task.
    * @param int $new_tuid
    *   New translator uid.
    */
-  public function incrementLoopCount($newStatus, $new_tuid);
+  public function incrementLoopCount($new_status, $new_tuid);
 
   /**
-   * {@inheritdoc}
-   */
-  public static function postDelete(EntityStorageInterface $storage_controller, array $entities);
-
-  /**
-   * Gets the timestamp of the last entity change across all translations.
+   * Returns a labeled list of all available statuses.
    *
-   * @return int
-   *   The timestamp of the last entity save operation across all
-   *   translations.
+   * @return array
+   *   A list of all available statuses.
    */
-  public function getChangedTimeAcrossTranslations();
+  public static function getStatuses();
+
 }

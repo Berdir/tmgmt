@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt_local\Plugin\views\field;
 
+use Drupal\tmgmt_local\Entity\LocalTask;
 use Drupal\views\Plugin\views\field\NumericField;
 use Drupal\views\ResultRow;
 
@@ -25,7 +26,7 @@ class TaskStatus extends NumericField {
 
     $element = [
       '#type' => 'item',
-      '#markup' => tmgmt_local_task_statuses()[$value],
+      '#markup' => LocalTask::getStatuses()[$value],
     ];
     return \Drupal::service('renderer')->render($element);
   }

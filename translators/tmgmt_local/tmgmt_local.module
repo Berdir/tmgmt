@@ -2,6 +2,7 @@
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\tmgmt_local\LocalTaskInterface;
 use Drupal\user\Entity\User;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobInterface;
@@ -38,31 +39,6 @@ define('TMGMT_LOCAL_TRANSLATION_ACCESS_DENY', 'deny');
  * to not affect node access.
  */
 define('TMGMT_LOCAL_TRANSLATION_ACCESS_IGNORE', NULL);
-
-/**
- * Translation task is not assigned to translator.
- */
-define('TMGMT_LOCAL_TASK_STATUS_UNASSIGNED', 0);
-
-/**
- * Translation task is pending.
- */
-define('TMGMT_LOCAL_TASK_STATUS_PENDING', 1);
-
-/**
- * Translation task is completed (all job items are translated).
- */
-define('TMGMT_LOCAL_TASK_STATUS_COMPLETED', 2);
-
-/**
- * Translation task is rejected (at least some job items are rejected).
- */
-define('TMGMT_LOCAL_TASK_STATUS_REJECTED', 3);
-
-/**
- * Translation task is closed.
- */
-define('TMGMT_LOCAL_TASK_STATUS_CLOSED', 4);
 
 /**
  * Translation task item is untranslated.
@@ -408,22 +384,6 @@ function tmgmt_local_task_statistic(LocalTask $task, $key) {
 }
 
 /**
- * Retrieve a labeled list of all available statuses.
- *
- * @return array
- *   A list of all available statuses.
- */
-function tmgmt_local_task_statuses() {
-  return $statuses = array(
-    TMGMT_LOCAL_TASK_STATUS_UNASSIGNED => t('Unassigned'),
-    TMGMT_LOCAL_TASK_STATUS_PENDING => t('Pending'),
-    TMGMT_LOCAL_TASK_STATUS_COMPLETED => t('Completed'),
-    TMGMT_LOCAL_TASK_STATUS_REJECTED => t('Rejected'),
-    TMGMT_LOCAL_TASK_STATUS_CLOSED => t('Closed'),
-  );
-}
-
-/**
  * Retrieve a labeled list of all available statuses for task items.
  *
  * @return array
@@ -518,7 +478,7 @@ function tmgmt_local_tmgmt_job_item_update(JobItemInterface $job_item) {
         ->execute();
       if ($unclosed_tasks == 0) {
         $task = $task_item->getTask();
-        $task->setStatus(TMGMT_LOCAL_TASK_STATUS_CLOSED);
+        $task->setStatus(LocalTaskInterface::STATUS_CLOSED);
         $task->save();
       }
     }

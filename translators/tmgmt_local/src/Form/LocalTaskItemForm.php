@@ -15,6 +15,7 @@ use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\tmgmt_local\Entity\LocalTaskItem;
+use Drupal\tmgmt_local\LocalTaskInterface;
 use Drupal\views\Views;
 
 /**
@@ -258,7 +259,7 @@ class LocalTaskItemForm extends ContentEntityForm {
       }
     }
     if ($all_done) {
-      $task->setStatus(TMGMT_LOCAL_TASK_STATUS_COMPLETED);
+      $task->setStatus(LocalTaskInterface::STATUS_COMPLETED);
       // If the task is now completed, redirect back to the overview.
       $form_state->setRedirect(Views::getView('tmgmt_local_task_overview')->getUrl()->getRouteName());
     }

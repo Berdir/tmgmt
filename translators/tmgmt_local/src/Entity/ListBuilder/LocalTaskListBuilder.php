@@ -9,6 +9,7 @@ namespace Drupal\tmgmt_local\Entity\ListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Routing\RedirectDestinationTrait;
+use Drupal\tmgmt_local\LocalTaskInterface;
 
 /**
  * Provides the views data for the message entity type.
@@ -31,21 +32,21 @@ class LocalTaskListBuilder extends EntityListBuilder {
       );
     }
 
-    if (\Drupal::currentUser()->hasPermission('administer translation tasks') && tmgmt_local_translation_access($entity) && $entity->getStatus() == TMGMT_LOCAL_TASK_STATUS_UNASSIGNED) {
+    if (\Drupal::currentUser()->hasPermission('administer translation tasks') && tmgmt_local_translation_access($entity) && $entity->getStatus() == LocalTaskInterface::STATUS_UNASSIGNED) {
       $operations['assign'] = array(
         'title' => $this->t('Assign'),
         'weight' => 0,
         'url' => $entity->toUrl('assign'),
       );
     }
-    elseif (tmgmt_local_translation_access($entity) && $entity->getStatus() == TMGMT_LOCAL_TASK_STATUS_UNASSIGNED) {
+    elseif (tmgmt_local_translation_access($entity) && $entity->getStatus() == LocalTaskInterface::STATUS_UNASSIGNED) {
       $operations['assign_to_me'] = array(
         'title' => $this->t('Assign to me'),
         'weight' => 0,
         'url' => $entity->toUrl('assign'),
       );
     }
-    if ($entity->getStatus() != TMGMT_LOCAL_TASK_STATUS_UNASSIGNED && $entity->access('unassign')) {
+    if ($entity->getStatus() != LocalTaskInterface::STATUS_UNASSIGNED && $entity->access('unassign')) {
       $operations['unassign'] = array(
         'title' => $this->t('Unassign'),
         'weight' => 0,
