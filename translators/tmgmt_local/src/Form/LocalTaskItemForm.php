@@ -77,23 +77,31 @@ class LocalTaskItemForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   protected function actions(array $form, FormStateInterface $form_state) {
-    $local_task = $this->entity;
+    /** @var LocalTaskItem $task_item */
+    $task_item = $this->entity;
 
-    $actions['#access'] = \Drupal::currentUser()->hasPermission('provide translation services');
     $actions['save'] = array(
       '#type' => 'submit',
       '#submit' => ['::save'],
+      '#access' => \Drupal::currentUser()->hasPermission('provide translation services') && $task_item->isPending(),
       '#value' => t('Save'),
     );
 
-    if (!$local_task->isNew()) {
-      $actions['save_as_completed'] = array(
-        '#type' => 'submit',
-        '#validate' => ['::validateSaveAsComplete'],
-        '#submit' => ['::save', '::saveAsComplete'],
-        '#value' => t('Save as completed'),
-      );
-    }
+    $actions['save_as_completed'] = array(
+      '#type' => 'submit',
+      '#validate' => ['::validateSaveAsComplete'],
+      '#submit' => ['::save', '::saveAsComplete'],
+      '#access' => \Drupal::currentUser()->hasPermission('provide translation services') && $task_item->isPending(),
+      '#value' => t('Save as completed'),
+    );
+
+    $url = $task_item->getTask()->toUrl();
+    $url = isset($_GET['destination']) ? $_GET['destination'] : $url;
+    $actions['cancel'] = array(
+      '#type' => 'link',
+      '#title' => t('Cancel'),
+      '#url' => $url,
+    );
     return $actions;
   }
 
@@ -151,6 +159,8 @@ class LocalTaskItemForm extends ContentEntityForm {
           '#type' => 'textarea',
           '#title' => $target_language->getName(),
           '#default_value' => $item->getData(\Drupal::service('tmgmt.data')->ensureArrayKey($key), '#text'),
+          '#disabled' => !$item->isPending(),
+          '#allow_focus' => TRUE,
         );
 
         $form[$target_key]['actions'] = array(
