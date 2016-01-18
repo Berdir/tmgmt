@@ -3,6 +3,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\tmgmt_local\LocalTaskInterface;
+use Drupal\tmgmt_local\LocalTaskItemInterface;
 use Drupal\user\Entity\User;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobInterface;
@@ -39,26 +40,6 @@ define('TMGMT_LOCAL_TRANSLATION_ACCESS_DENY', 'deny');
  * to not affect node access.
  */
 define('TMGMT_LOCAL_TRANSLATION_ACCESS_IGNORE', NULL);
-
-/**
- * Translation task item is untranslated.
- */
-define('TMGMT_LOCAL_TASK_ITEM_STATUS_PENDING', 0);
-
-/**
- * Translation task item is translated and pending review of the job item.
- */
-define('TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED', 1);
-
-/**
- * Translation job item has been rejected and the task needs to be updated.
- */
-define('TMGMT_LOCAL_TASK_ITEM_STATUS_REJECTED', 2);
-
-/**
- * The translation task item has been completed and closed.
- */
-define('TMGMT_LOCAL_TASK_ITEM_STATUS_CLOSED', 3);
 
 /**
  * Untranslated translation data item.
@@ -384,21 +365,6 @@ function tmgmt_local_task_statistic(LocalTask $task, $key) {
 }
 
 /**
- * Retrieve a labeled list of all available statuses for task items.
- *
- * @return array
- *   A list of all available statuses.
- */
-function tmgmt_local_task_item_statuses() {
-  return $statuses = array(
-    TMGMT_LOCAL_TASK_ITEM_STATUS_PENDING => t('Untranslated'),
-    TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED => t('Translated'),
-    TMGMT_LOCAL_TASK_ITEM_STATUS_REJECTED => t('Rejected'),
-    TMGMT_LOCAL_TASK_ITEM_STATUS_CLOSED => t('Completed'),
-  );
-}
-
-/**
  * Gets all involved language pairs for given tasks.
  *
  * @param array $tasks
@@ -473,7 +439,7 @@ function tmgmt_local_tmgmt_job_item_update(JobItemInterface $job_item) {
       // Check if the task can be marked as closed as well.
       $unclosed_tasks = \Drupal::entityQuery('tmgmt_local_task_item')
         ->condition('tltid', $task_item->id())
-        ->condition('status', TMGMT_LOCAL_TASK_ITEM_STATUS_CLOSED, '<>')
+        ->condition('status', LocalTaskItemInterface::STATUS_CLOSED, '<>')
         ->count()
         ->execute();
       if ($unclosed_tasks == 0) {

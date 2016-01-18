@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * @file
  * Contains \Drupal\tmgmt_local\Entity\LocalTaskItem.
  */
@@ -8,14 +8,13 @@
 namespace Drupal\tmgmt_local\Entity;
 
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Entity\Annotation\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Render\Element;
+use Drupal\tmgmt_local\LocalTaskItemInterface;
 
 
 /**
@@ -45,7 +44,7 @@ use Drupal\Core\Render\Element;
  *
  * @ingroup tmgmt_local_task
  */
-class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface {
+class LocalTaskItem extends ContentEntityBase implements LocalTaskItemInterface {
 
   use EntityChangedTrait;
 
@@ -90,7 +89,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
     $fields['status'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Local task item status'))
       ->setDescription(t('The local task item status'))
-      ->setDefaultValue(TMGMT_LOCAL_TASK_ITEM_STATUS_PENDING);
+      ->setDefaultValue(LocalTaskItemInterface::STATUS_PENDING);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
@@ -126,78 +125,56 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
   }
 
   /**
-   * Returns the translation task.
-   *
-   * @return LocalTask
+   * {@inheritdoc}
    */
   public function getTask() {
     return $this->get('tltid')->entity;
   }
 
   /**
-   * Returns the translation job item.
-   *
-   * @return \Drupal\tmgmt\JobItemInterface
+   * {@inheritdoc}
    */
   public function getJobItem() {
     return $this->get('tjiid')->entity;
   }
 
   /**
-   * Returns TRUE if the local task is pending.
-   *
-   * @return bool
-   *   TRUE if the local task item is untranslated.
+   * {@inheritdoc}
    */
   public function isPending() {
-    return $this->status->value == TMGMT_LOCAL_TASK_ITEM_STATUS_PENDING;
+    return $this->get('status')->value == LocalTaskItemInterface::STATUS_PENDING;
   }
 
   /**
-   * Returns TRUE if the local task is translated (fully translated).
-   *
-   * @return bool
-   *   TRUE if the local task item is translated.
+   * {@inheritdoc}
    */
   public function isCompleted() {
-    return $this->status->value == TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED;
+    return $this->get('status')->value == LocalTaskItemInterface::STATUS_COMPLETED;
   }
 
   /**
-   * Rreturns TRUE if the local task is closed (translated and accepted).
-   *
-   * @return bool
-   *   TRUE if the local task item is translated and accepted.
+   * {@inheritdoc}
    */
   public function isClosed() {
-    return $this->status->value == TMGMT_LOCAL_TASK_ITEM_STATUS_CLOSED;
+    return $this->get('status')->value == LocalTaskItemInterface::STATUS_CLOSED;
   }
 
   /**
-   * Sets the task item status to completed.
+   * {@inheritdoc}
    */
   public function completed() {
-    $this->status = TMGMT_LOCAL_TASK_ITEM_STATUS_COMPLETED;
+    $this->set('status', LocalTaskItemInterface::STATUS_COMPLETED);
   }
 
   /**
-   * Sets the task item status to closed.
+   * {@inheritdoc}
    */
   public function closed() {
-    $this->status = TMGMT_LOCAL_TASK_ITEM_STATUS_CLOSED;
+    $this->set('status', LocalTaskItemInterface::STATUS_CLOSED);
   }
 
   /**
-   * Updates the values for a specific substructure in the data array.
-   *
-   * The values are either set or updated but never deleted.
-   *
-   * @param $key
-   *   Key pointing to the item the values should be applied.
-   *   The key can be either be an array containing the keys of a nested array
-   *   hierarchy path or a string with '][' or '|' as delimiter.
-   * @param $values
-   *   Nested array of values to set.
+   * {@inheritdoc}
    */
   public function updateData($key, $values = array(), $replace = FALSE) {
     if ($replace) {
@@ -227,24 +204,7 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
   }
 
   /**
-   * Array of translations.
-   *
-   * The structure is similar to the form API in the way that it is a possibly
-   * nested array with the following properties whose presence indicate that the
-   * current element is a text that might need to be translated.
-   *
-   * - #text: The translated text of the corresponding entry in the job item.
-   * - #status: The status of the translation.
-   *
-   * The key can be an alphanumeric string.
-   *
-   * @param array $key
-   *   If present, only the subarray identified by key is returned.
-   * @param string $index
-   *   Optional index of an attribute below $key.
-   *
-   * @return array
-   *   A structured data array.
+   * {@inheritdoc}
    */
   public function getData($key = array(), $index = NULL) {
     if (empty($this->unserializedData) && $this->get('data')->value) {
@@ -265,33 +225,24 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
   }
 
   /**
-   * Count of all translated data items.
-   *
-   * @return
-   *   Translated count
+   * {@inheritdoc}
    */
   public function getCountTranslated() {
-    return $this->count_translated->value;
+    return $this->get('count_translated')->value;
   }
 
   /**
-   * Count of all untranslated data items.
-   *
-   * @return
-   *   Translated count
+   * {@inheritdoc}
    */
   public function getCountUntranslated() {
-    return $this->count_untranslated->value;
+    return $this->get('count_untranslated')->value;
   }
 
   /**
-   * Count of all completed data items.
-   *
-   * @return
-   *   Translated count
+   * {@inheritdoc}
    */
   public function getCountCompleted() {
-    return $this->count_completed->value;
+    return $this->get('count_completed')->value;
   }
 
   /**
@@ -303,10 +254,10 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
       $this->recalculateStatistics();
     }
     if ($this->unserializedData) {
-      $this->data = serialize($this->unserializedData);
+      $this->set('data', serialize($this->unserializedData));
     }
     elseif (empty($this->get('data')->value)) {
-      $this->data = serialize(array());
+      $this->set('data', serialize(array()));
     }
   }
 
@@ -325,35 +276,31 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
 
     // Consider everything accepted when the job item is accepted.
     if ($this->isCompleted() || $this->isClosed()) {
-      $this->count_pending = 0;
-      $this->count_translated = 0;
-      $this->count_reviewed = 0;
-      $this->count_completed = count(array_filter(\Drupal::service('tmgmt.data')->flatten($this->unserializedData), array(\Drupal::service('tmgmt.data'), 'filterData')));
-      $this->count_untranslated = 0;
+      $this->set('count_translated', 0);
+      $this->set('count_completed', count(array_filter(\Drupal::service('tmgmt.data')->flatten($this->unserializedData), array(\Drupal::service('tmgmt.data'), 'filterData'))));
+      $this->set('count_untranslated', 0);
     }
     // Count the data item states.
     else {
       // Reset counter values.
-      $this->count_pending = 0;
-      $this->count_translated = 0;
-      $this->count_reviewed = 0;
-      $this->count_completed = 0;
-      $this->word_count = 0;
-      $this->count_untranslated = count(array_filter(\Drupal::service('tmgmt.data')->flatten($this->unserializedData), array(\Drupal::service('tmgmt.data'), 'filterData')));
+      $this->set('count_translated', 0);
+      $this->set('count_completed', 0);
+      $this->set('word_count', 0);
+      $this->set('count_untranslated', count(array_filter(\Drupal::service('tmgmt.data')->flatten($this->unserializedData), array(\Drupal::service('tmgmt.data'), 'filterData'))));
       $this->count($this->unserializedData);
     }
   }
 
   /**
+   * Counts accepted, translated and pending items.
+   *
    * Parse all data items recursively and sums up the counters for
    * accepted, translated and pending items.
    *
-   * @param $item
+   * @param array $item
    *   The current data item.
-   * @param $this
-   *   The job item the count should be calculated.
    */
-  protected function count(&$item) {
+  protected function count(array &$item) {
     if (!empty($item['#text'])) {
       if (\Drupal::service('tmgmt.data')->filterData($item)) {
 
@@ -363,8 +310,8 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
         }
         switch ($item['#status']) {
           case TMGMT_DATA_ITEM_STATE_TRANSLATED:
-            $this->count_untranslated = $this->count_untranslated->value - 1;
-            $this->count_translated = $this->count_translated->value + 1;
+            $this->set('count_untranslated', $this->get('count_untranslated')->value - 1);
+            $this->set('count_translated', $this->get('count_translated')->value + 1);
             break;
         }
       }
@@ -377,14 +324,25 @@ class LocalTaskItem extends ContentEntityBase implements EntityChangedInterface 
   }
 
   /**
-   * Gets the timestamp of the last entity change across all translations.
-   *
-   * @return int
-   *   The timestamp of the last entity save operation across all
-   *   translations.
+   * {@inheritdoc}
    */
   public function getChangedTimeAcrossTranslations() {
     return $this->getChangedTime();
+  }
+
+  /**
+   * Retrieve a labeled list of all available statuses for task items.
+   *
+   * @return array
+   *   A list of all available statuses.
+   */
+  public static function getStatuses() {
+    return array(
+      LocalTaskItemInterface::STATUS_PENDING => t('Untranslated'),
+      LocalTaskItemInterface::STATUS_COMPLETED => t('Translated'),
+      LocalTaskItemInterface::STATUS_REJECTED => t('Rejected'),
+      LocalTaskItemInterface::STATUS_CLOSED => t('Completed'),
+    );
   }
 
 }
