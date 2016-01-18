@@ -382,6 +382,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
       'dummy|deep_nesting[translation]' => $translation1 = 'German translation of source 1',
     );
     $this->drupalPostForm(NULL, $edit, t('Save as completed'));
+    $this->assertText('The translation for ' . $first_task_item->label() . ' has been saved as completed.');
 
     // Review and accept the first item.
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
@@ -419,6 +420,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
       'dummy|deep_nesting[translation]' => $translation2 = 'German translation of source 2',
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertText('The translation for ' . $second_task_item->label() . ' has been saved.');
     // The first item is still completed, the second still untranslated.
     $this->assertText(t('Completed'));
     $this->assertText(t('Untranslated'));
@@ -484,6 +486,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->clickLink(t('View'));
     $this->clickLink(t('Translate'));
     $this->drupalPostForm(NULL, array(), t('Save as completed'));
+    $this->assertText('The translation for ' . $second_task_item->label() . ' has been saved as completed.');
 
     // Review and accept the second item.
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();

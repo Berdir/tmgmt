@@ -9,6 +9,7 @@ namespace Drupal\tmgmt_local\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
@@ -212,6 +213,13 @@ class LocalTaskItemForm extends ContentEntityForm {
     }
     $task_item->save();
 
+    if ($form_state->getTriggeringElement()['#value'] == $form['actions']['save']['#value']) {
+      drupal_set_message(t('The translation for <a href=:task_item>@task_item_title</a> has been saved.', [
+        ':task_item' => $task_item->urlInfo()->toString(),
+        '@task_item_title' => $task_item->label()
+      ]));
+    }
+
     $task = $task_item->getTask();
     $uri = $task->urlInfo();
     $form_state->setRedirect($uri->getRouteName(), $uri->getRouteParameters());
@@ -255,6 +263,10 @@ class LocalTaskItemForm extends ContentEntityForm {
 
     // Add the translations to the job item.
     $job_item->addTranslatedData($task_item->getData());
+    drupal_set_message(t('The translation for <a href=:task_item>@task_item_title</a> has been saved as completed.', [
+      ':task_item' => $task_item->urlInfo()->toString(),
+      '@task_item_title' => $task_item->label()
+    ]));
   }
 
   /**
