@@ -296,7 +296,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->loginAsAdmin(['administer translation tasks']);
     $this->drupalGet('translate');
     $this->clickLink('View');
-    $xpath = $this->xpath('//*[@id="edit-status"]');
+    $xpath = $this->xpath('//*[@id="edit-tuid"]');
     $this->assertFalse(empty($xpath));
     $edit = array(
       'tuid' => $this->localTranslator->id(),
@@ -307,7 +307,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalGet('manage-translate/assigned');
     $this->clickLink('View');
     $edit = array(
-      'status' => LocalTaskInterface::STATUS_UNASSIGNED,
+      'tuid' => 0,
     );
     $this->drupalPostForm(NULL, $edit, t('Save task'));
 

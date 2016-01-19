@@ -33,6 +33,7 @@ class LocalTaskForm extends ContentEntityForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
+    /** @var LocalTask $local_task */
     $local_task = $this->entity;
 
     $states = LocalTask::getStatuses();
@@ -45,21 +46,13 @@ class LocalTaskForm extends ContentEntityForm {
       '@state' => $states[$local_task->getStatus()],
     )));
 
-    $form['status'] = array(
-      '#type' => 'select',
-      '#title' => t('Status'),
-      '#options' => $states,
-      '#default_value' => $local_task->getStatus(),
-      '#access' => \Drupal::currentUser()->hasPermission('administer tmgmt') || \Drupal::currentUser()->hasPermission('administer translation tasks'),
-    );
-
     $translators = tmgmt_local_translators($local_task->getJob()->getSourceLangcode(), array($local_task->getJob()->getTargetLangcode()));
     $form['tuid'] = array(
       '#title' => t('Assigned'),
       '#type' => 'select',
       '#options' => $translators,
-      '#empty_option' => t('- Select user -'),
-      '#default_value' => $local_task->getJob()->getTranslatorId(),
+      '#empty_option' => t('- Unassigned -'),
+      '#default_value' => $local_task->getTranslator()->id(),
       '#access' => \Drupal::currentUser()->hasPermission('administer tmgmt') || \Drupal::currentUser()->hasPermission('administer translation tasks'),
     );
 
@@ -67,6 +60,7 @@ class LocalTaskForm extends ContentEntityForm {
       '#type' => 'container',
       '#attributes' => array('class' => array('tmgmt-ui-localTask-info', 'clearfix')),
       '#weight' => 0,
+      '#tree' => TRUE,
     );
 
     // Check for label value and set for dynamically change.
@@ -117,6 +111,14 @@ class LocalTaskForm extends ContentEntityForm {
       );
     }
 
+    $form['info']['status'] = array(
+      '#type' => 'item',
+      '#title' => t('Status'),
+      '#markup' => $states[$local_task->getStatus()],
+      '#prefix' => '<div class="tmgmt-local-ui-status tmgmt-ui-info-item">',
+      '#suffix' => '</div>',
+    );
+
     if ($view = Views::getView('tmgmt_local_task_items')) {
       $block = $view->preview('block_1', [$local_task->id()]);
       $form['items'] = array(
@@ -150,15 +152,20 @@ class LocalTaskForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
+    /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
+    $task = $this->getEntity();
+
     if (!empty($form_state->getValue('tuid'))) {
       /** @var User $translator */
       $translator = User::load($form_state->getValue('tuid'));
-
-      /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
-      $task = $this->getEntity();
       $task->assign($translator);
 
       drupal_set_message(t('Assigned to translator @translator_name.', ['@translator_name' => $translator->getAccountName()]));
+    }
+    else {
+      $task->setStatus(LocalTaskInterface::STATUS_UNASSIGNED);
+
+      drupal_set_message(t('Unassigned from translation local task @label.', array('@label' => $task->label())));
     }
     $this->entity->save();
 
