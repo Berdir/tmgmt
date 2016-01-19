@@ -35,6 +35,12 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
         '#markup' => t('There are no translators available.'),
       );
     }
+    $form['job_comment'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Comment for the translation'),
+      '#description' => t('You can provide a comment so that the translator will better understand your requirements.'),
+      '#default_value' => $job->getSetting('job_comment'),
+    );
 
     return $form;
   }

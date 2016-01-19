@@ -179,7 +179,6 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->loginAsTranslator();
     $job = $this->createJob();
     $job->translator = $translator->id();
-    $job->settings->job_comment = $job_comment = 'Dummy job comment';
     $job->addItem('test_source', 'test', '1');
     $job->addItem('test_source', 'test', '2');
     $job->save();
@@ -245,7 +244,21 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalGet($job->toUrl());
     $this->assertText($this->localTranslator->getUsername());
 
-    $job->requestTranslation();
+    // Test assign task while submitting job.
+    $job_comment = 'Dummy job comment';
+    $edit = [
+      'settings[translator]' => $this->localTranslator->id(),
+      'settings[job_comment]' => $job_comment,
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
+    $this->drupalLogin($this->localTranslator);
+    $this->drupalGet('translate/pending');
+    $this->assertText(t('Task for @job', array('@job' => $job->label())));
+
+    $this->loginAsAdmin(['administer translation tasks']);
+    $this->drupalGet('manage-translate/assigned');
+    $this->clickLink(t('Unassign'));
+    $this->drupalPostForm(NULL, [], t('Unassign'));
 
     // Test for job comment in the job checkout info pane.
     $this->drupalGet($job->toUrl());
