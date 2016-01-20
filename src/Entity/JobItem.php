@@ -736,7 +736,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
           $variables = array(
             '@source' => $this->getSourceLabel(),
             '@language' => $this->getJob()->getTargetLanguage()->getName(),
-            ':review_url' => Url::fromUserInput($job_url)->toString(),
+            ':review_url' => $this->url('canonical', array('query' => array('destination' => $job_url))),
           );
           (!$this->getSourceUrl()) ? $variables[':source_url'] = (string) $job_url : $variables[':source_url'] = $this->getSourceUrl()->toString();
           $this->needsReview('The translation of <a href=":source_url">@source</a> to @language is finished and can now be <a href=":review_url">reviewed</a>.', $variables);
