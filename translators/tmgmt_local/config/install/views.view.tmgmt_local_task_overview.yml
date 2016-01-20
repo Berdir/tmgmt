@@ -413,7 +413,20 @@ display:
       sorts: {  }
       header: {  }
       footer: {  }
-      empty: {  }
+      empty:
+        area:
+          id: area
+          table: views
+          field: area
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: true
+          tokenize: false
+          content:
+            value: 'You do not have tasks assigned to you.'
+            format: basic_html
+          plugin_id: text
       relationships:
         tjid:
           id: tjid
@@ -429,6 +442,7 @@ display:
       arguments: {  }
       display_extenders: {  }
       title: 'Local Tasks'
+      link_display: unassigned
     cache_metadata:
       max-age: 0
       contexts:
