@@ -10,7 +10,7 @@ module: views
 description: ''
 tag: default
 base_table: tmgmt_local_task_item
-base_field: tjiid
+base_field: tltiid
 core: 8.x
 display:
   default:
@@ -126,7 +126,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Local task item status'
+          label: Status
           exclude: false
           alter:
             alter_text: false

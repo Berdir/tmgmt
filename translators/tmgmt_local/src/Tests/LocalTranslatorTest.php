@@ -375,7 +375,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     $this->assertText('test_source:test:1');
     $this->assertText('test_source:test:2');
-    $this->assertText(t('Untranslated'));
+    $this->assertRaw('tmgmt/icons/ready.svg" title="Untranslated"');
 
     // Translate the first item.
     $this->clickLink(t('Translate'));
@@ -401,6 +401,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
       'dummy|deep_nesting[translation]' => $translation1 = 'German translation of source 1',
     );
     $this->drupalPostForm(NULL, $edit, t('Save as completed'));
+    $this->assertRaw('tmgmt/icons/gray-check.svg" title="Translated"');
     $this->assertText('The translation for ' . $first_task_item->label() . ' has been saved as completed.');
 
     // Review and accept the first item.
@@ -414,8 +415,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // The first item should be accepted now, the second still in progress.
     $this->drupalGet('translate/1');
-    $this->assertText(t('Completed'));
-    $this->assertText(t('Untranslated'));
+    $this->assertRaw('icons/73b355/check.svg" title="Completed"');
+    $this->assertRaw('tmgmt/icons/ready.svg" title="Untranslated"');
     // Checking if the 'Save as completed' button is displayed.
     $this->drupalGet('translate/items/1');
     $elements = $this->xpath('//*[@id="edit-save-as-completed"]');
@@ -446,8 +447,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertText('The translation for ' . $second_task_item->label() . ' has been saved.');
     // The first item is still completed, the second still untranslated.
-    $this->assertText(t('Completed'));
-    $this->assertText(t('Untranslated'));
+    $this->assertRaw('icons/73b355/check.svg" title="Completed"');
+    $this->assertRaw('tmgmt/icons/ready.svg" title="Untranslated"');
 
     \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->resetCache();
     \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
