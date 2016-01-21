@@ -51,6 +51,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     parent::setUp();
     $this->loginAsAdmin();
     $this->addLanguage('de');
+    $this->drupalPlaceBlock('system_breadcrumb_block');
   }
 
   /**
@@ -379,6 +380,11 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Translate the first item.
     $this->clickLink(t('Translate'));
+
+    // Assert the breadcrumb.
+    $this->assertLink(t('Home'));
+    $this->assertLink(t('Local Tasks'));
+    $this->assertText(t('Task for @job', array('@job' => $job->label())));
 
     $this->assertText(t('Dummy'));
     // Check if the cancel link and the Save as completed button are displayed.

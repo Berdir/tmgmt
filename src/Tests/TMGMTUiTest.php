@@ -45,6 +45,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       'submit translation jobs',
       $filtered_html_format->getPermissionName(),
     ), TRUE);
+    $this->drupalPlaceBlock('system_breadcrumb_block');
   }
 
   /**
@@ -953,6 +954,11 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Edit Job Item.
     $this->drupalGet('/admin/tmgmt/items/' . $job->id());
     $this->assertTitle(t('Job item @label | Drupal', ['@label' => $item->label()]));
+    // Assert the breadcrumb.
+    $this->assertLink(t('Home'));
+    $this->assertLink(t('Administration'));
+    $this->assertLink(t('Job overview'));
+    $this->assertLink($job->label());
     // Translation Sources.
     $this->drupalGet('admin');
     $this->clickLink(t('Translation'));
