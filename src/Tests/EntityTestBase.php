@@ -164,7 +164,7 @@ abstract class EntityTestBase extends TMGMTTestBase {
    * @return \Drupal\node\NodeInterface
    *   Newly created node object.
    */
-  function createNode($bundle, $sourcelang = 'en') {
+  protected function createTranslatableNode($bundle, $sourcelang = 'en') {
     $node = array(
       'type' => $bundle,
       'langcode' => $sourcelang,

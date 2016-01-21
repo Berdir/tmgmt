@@ -59,11 +59,11 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->loginAsTranslator(array('translate any entity', 'create content translations'));
 
     // Create an english source node.
-    $node = $this->createNode('page', 'en');
+    $node = $this->createTranslatableNode('page', 'en');
     // Create a nodes that will not be translated to test the missing
     // translation filter.
-    $node_not_translated = $this->createNode('page', 'en');
-    $node_german = $this->createNode('page', 'de');
+    $node_not_translated = $this->createTranslatableNode('page', 'en');
+    $node_german = $this->createTranslatableNode('page', 'de');
 
     // Go to the translate tab.
     $this->drupalGet('node/' . $node->id());
@@ -180,7 +180,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertEqual($xpath[0]->attributes()->title, t('Translation Outdated'));
 
     // Test that a job can not be accepted if the entity does not exist.
-    $deleted_node = $this->createNode('page', 'en');
+    $deleted_node = $this->createTranslatableNode('page', 'en');
     $this->drupalGet('node/' . $deleted_node->id() . '/translations');
     $edit = array(
       'languages[de]' => TRUE,
@@ -208,7 +208,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->loginAsTranslator(array('translate any entity', 'create content translations'));
 
     // Create an english source node.
-    $node = $this->createNode('page', 'en');
+    $node = $this->createTranslatableNode('page', 'en');
 
     // Go to the translate tab.
     $this->drupalGet('node/' . $node->id());
@@ -295,7 +295,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->loginAsTranslator($permissions, TRUE);
 
     // Create an english source article.
-    $node = $this->createNode('article', 'en');
+    $node = $this->createTranslatableNode('article', 'en');
 
     // Add a comment.
     $this->drupalGet('node/' . $node->id());
@@ -358,7 +358,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
 
     $nodes = array();
     for ($i = 0; $i < 4; $i++) {
-      $nodes[$i] = $this->createNode('page');
+      $nodes[$i] = $this->createTranslatableNode('page');
     }
 
     // Test the source overview.
@@ -384,7 +384,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     // Add nodes and assert that page footer is being shown.
     $nodes = array();
     for ($i = 0; $i < 50; $i++) {
-      $nodes[$i] = $this->createNode('page');
+      $nodes[$i] = $this->createTranslatableNode('page');
     }
     $this->drupalGet('admin/tmgmt/sources/content/node');
     $this->assertRaw('<ul class="pager__items js-pager__items">');

@@ -47,15 +47,15 @@ class ContentEntitySourceListTest extends EntityTestBase {
     // Create nodes that will be used during tests.
     // NOTE that the order matters as results are read by xpath based on
     // position in the list.
-    $this->nodes['page']['en'][] = $this->createNode('page');
-    $this->nodes['article']['de'][0] = $this->createNode('article', 'de');
-    $this->nodes['article']['fr'][0] = $this->createNode('article', 'fr');
-    $this->nodes['article']['en'][3] = $this->createNode('article', 'en');
-    $this->nodes['article']['en'][2] = $this->createNode('article', 'en');
-    $this->nodes['article']['en'][1] = $this->createNode('article', 'en');
-    $this->nodes['article']['en'][0] = $this->createNode('article', 'en');
-    $this->nodes['article'][LanguageInterface::LANGCODE_NOT_SPECIFIED][0] = $this->createNode('article', LanguageInterface::LANGCODE_NOT_SPECIFIED);
-    $this->nodes['article'][LanguageInterface::LANGCODE_NOT_APPLICABLE][0] = $this->createNode('article', LanguageInterface::LANGCODE_NOT_APPLICABLE);
+    $this->nodes['page']['en'][] = $this->createTranslatableNode('page');
+    $this->nodes['article']['de'][0] = $this->createTranslatableNode('article', 'de');
+    $this->nodes['article']['fr'][0] = $this->createTranslatableNode('article', 'fr');
+    $this->nodes['article']['en'][3] = $this->createTranslatableNode('article', 'en');
+    $this->nodes['article']['en'][2] = $this->createTranslatableNode('article', 'en');
+    $this->nodes['article']['en'][1] = $this->createTranslatableNode('article', 'en');
+    $this->nodes['article']['en'][0] = $this->createTranslatableNode('article', 'en');
+    $this->nodes['article'][LanguageInterface::LANGCODE_NOT_SPECIFIED][0] = $this->createTranslatableNode('article', LanguageInterface::LANGCODE_NOT_SPECIFIED);
+    $this->nodes['article'][LanguageInterface::LANGCODE_NOT_APPLICABLE][0] = $this->createTranslatableNode('article', LanguageInterface::LANGCODE_NOT_APPLICABLE);
   }
 
   /**
@@ -224,7 +224,7 @@ class ContentEntitySourceListTest extends EntityTestBase {
     $content_translation_manager->setEnabled('node', 'page', TRUE);
 
     // Create page node after entity translation is enabled.
-    $page_node_translatable = $this->createNode('page');
+    $page_node_translatable = $this->createTranslatableNode('page');
 
     $this->drupalGet('admin/tmgmt/sources/content/node');
     // We have both listed - one of articles and page.
