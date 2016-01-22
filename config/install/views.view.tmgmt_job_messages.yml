@@ -212,7 +212,20 @@ display:
       title: Messages
       header: {  }
       footer: {  }
-      empty: {  }
+      empty:
+        area:
+          id: area
+          table: views
+          field: area
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: true
+          tokenize: false
+          content:
+            value: 'There are no messages yet in this Job.'
+            format: basic_html
+          plugin_id: text
       relationships:
         tjiid:
           id: tjiid
@@ -273,11 +286,12 @@ display:
       display_extenders: {  }
     cache_metadata:
       contexts:
-        - 'languages:language_content'
         - 'languages:language_interface'
         - url
         - url.query_args
       cacheable: false
+      max-age: 0
+      tags: {  }
   embed:
     display_plugin: embed
     id: embed
@@ -288,8 +302,9 @@ display:
       display_extenders: {  }
     cache_metadata:
       contexts:
-        - 'languages:language_content'
         - 'languages:language_interface'
         - url
         - url.query_args
       cacheable: false
+      max-age: 0
+      tags: {  }

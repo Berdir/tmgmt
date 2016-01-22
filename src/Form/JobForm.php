@@ -316,7 +316,7 @@ class JobForm extends TmgmtFormBase {
       $form['translator_wrapper'] = array(
         '#type' => 'details',
         '#title' => t('Translator information'),
-        '#open' => FALSE,
+        '#open' => TRUE,
         '#weight' => 20,
       );
 
@@ -339,7 +339,7 @@ class JobForm extends TmgmtFormBase {
       $form['messages'] = array(
         '#type' => 'details',
         '#title' => $view->storage->label(),
-        '#open' => FALSE,
+        '#open' => $job->getTranslatorId() ? TRUE : FALSE,
         '#weight' => 50,
       );
       $output = $view->preview('embed', array($job->id()));
