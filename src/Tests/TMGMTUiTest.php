@@ -535,15 +535,28 @@ class TMGMTUiTest extends TMGMTTestBase {
           ],
         ],
       ],
+      'body' => [
+        'deep_nesting' => [
+          '#text' => $text,
+          '#label' => 'Body',
+          '#translate' => TRUE,
+          '#max_length' => 20,
+        ],
+      ],
     ]);
     $item5 = $job->addItem('test_source', 'test', 4);
 
     $this->drupalPostForm('admin/tmgmt/items/' . $item5->id(), [
       'title|0|value[translation]' => $text,
+      'body|deep_nesting[translation]' => $text,
     ], t('Save'));
     $this->assertText(t('The field has @size characters while the limit is @limit.', [
       '@size' => strlen($text),
       '@limit' => 10,
+    ]));
+    $this->assertText(t('The field has @size characters while the limit is @limit.', [
+      '@size' => strlen($text),
+      '@limit' => 20,
     ]));
 
     // Test for the text with format set.
