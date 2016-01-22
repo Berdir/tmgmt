@@ -22,9 +22,9 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
    * {@inheritdoc}
    */
   public function checkoutSettingsForm(array $form, FormStateInterface $form_state, JobInterface $job) {
-    if ($translators = tmgmt_local_translators($job->getSourceLangcode(), array($job->getTargetLangcode()))) {
+    if ($translators = tmgmt_local_assignees($job->getSourceLangcode(), array($job->getTargetLangcode()))) {
       $form['translator'] = array(
-        '#title' => t('Select translator for this job'),
+        '#title' => t('Assign job to'),
         '#type' => 'select',
         '#options' => array('' => t('Select user')) + $translators,
         '#default_value' => $job->getSetting('translator'),
@@ -32,13 +32,13 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
     }
     else {
       $form['message'] = array(
-        '#markup' => t('There are no translators available.'),
+        '#markup' => t('There are no users available to assign.'),
       );
     }
     $form['job_comment'] = array(
       '#type' => 'textarea',
       '#title' => t('Comment for the translation'),
-      '#description' => t('You can provide a comment so that the translator will better understand your requirements.'),
+      '#description' => t('You can provide a comment so that the assigned user will better understand your requirements.'),
       '#default_value' => $job->getSetting('job_comment'),
     );
 
@@ -65,7 +65,7 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
       $form['job_status'] = array(
         '#type' => 'item',
         '#title' => t('Job status'),
-        '#markup' => t('Translation job is not assigned to any translator.'),
+        '#markup' => t('Translation job is not assigned to any user.'),
       );
     }
 
@@ -89,7 +89,7 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
     /** @var \Drupal\tmgmt\TranslatorInterface $translator */
     $translator = $form_state->getFormObject()->getEntity();
     $form['allow_all'] = array(
-      '#title' => t('Allow translations for enabled languages even if no translator has the necessary abilities'),
+      '#title' => t('Allow translations for enabled languages even if no user has the necessary abilities'),
       '#type' => 'checkbox',
       '#default_value' => $translator->getSetting('allow_all'),
     );

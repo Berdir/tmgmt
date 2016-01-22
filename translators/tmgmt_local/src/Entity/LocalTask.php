@@ -99,8 +99,8 @@ class LocalTask extends ContentEntityBase implements LocalTaskInterface {
       ->setDefaultValue(0);
 
     $fields['tuid'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Assigned translator'))
-      ->setDescription(t('The translator assigned to this task.'))
+      ->setLabel(t('Assigned user'))
+      ->setDescription(t('The user assigned to this task.'))
       ->setSettings(array(
         'target_type' => 'user',
       ))
@@ -113,7 +113,7 @@ class LocalTask extends ContentEntityBase implements LocalTaskInterface {
 
     $fields['loop_count'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Loop count'))
-      ->setDescription(t('Counter for how many times task was returned to translator.'))
+      ->setDescription(t('Counter for how many times task was returned to the assigned user.'))
       ->setDefaultValue(static::STATUS_UNASSIGNED);
 
     $fields['created'] = BaseFieldDefinition::create('created')
@@ -159,7 +159,7 @@ class LocalTask extends ContentEntityBase implements LocalTaskInterface {
   /**
    * {@inheritdoc}
    */
-  public function getTranslator() {
+  public function getAssignee() {
     return $this->get('tuid')->entity;
   }
 

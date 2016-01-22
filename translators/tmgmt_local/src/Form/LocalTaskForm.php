@@ -46,13 +46,13 @@ class LocalTaskForm extends ContentEntityForm {
       '@state' => $states[$local_task->getStatus()],
     )));
 
-    $translators = tmgmt_local_translators($local_task->getJob()->getSourceLangcode(), array($local_task->getJob()->getTargetLangcode()));
+    $assignees = tmgmt_local_assignees($local_task->getJob()->getSourceLangcode(), array($local_task->getJob()->getTargetLangcode()));
     $form['tuid'] = array(
       '#title' => t('Assigned'),
       '#type' => 'select',
-      '#options' => $translators,
+      '#options' => $assignees,
       '#empty_option' => t('- Unassigned -'),
-      '#default_value' => $local_task->getTranslator()->id(),
+      '#default_value' => $local_task->getAssignee()->id(),
       '#access' => \Drupal::currentUser()->hasPermission('administer tmgmt') || \Drupal::currentUser()->hasPermission('administer translation tasks'),
     );
 
@@ -157,11 +157,11 @@ class LocalTaskForm extends ContentEntityForm {
     $task = $this->getEntity();
 
     if (!empty($form_state->getValue('tuid'))) {
-      /** @var User $translator */
-      $translator = User::load($form_state->getValue('tuid'));
-      $task->assign($translator);
+      /** @var User $assignee */
+      $assignee = User::load($form_state->getValue('tuid'));
+      $task->assign($assignee);
 
-      drupal_set_message(t('Assigned to translator @translator_name.', ['@translator_name' => $translator->getAccountName()]));
+      drupal_set_message(t('Assigned to user @assignee_name.', ['@assignee_name' => $assignee->getAccountName()]));
     }
     else {
       $task->setStatus(LocalTaskInterface::STATUS_UNASSIGNED);

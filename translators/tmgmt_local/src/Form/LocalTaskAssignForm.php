@@ -35,7 +35,7 @@ class LocalTaskAssignForm extends ContentEntityForm {
       '#title' => t('Assign to'),
       '#type' => 'select',
       '#empty_option' => t('Select user'),
-      '#options' => tmgmt_local_get_translators_for_tasks([$this->getEntity()->id()]),
+      '#options' => tmgmt_local_get_assignees_for_tasks([$this->getEntity()->id()]),
       '#required' => TRUE,
     );
 
@@ -54,15 +54,15 @@ class LocalTaskAssignForm extends ContentEntityForm {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
-    /** @var \Drupal\user\Entity\User $translator */
-    $translator = User::load($form_state->getValue('tuid'));
+    /** @var \Drupal\user\Entity\User $assignee */
+    $assignee = User::load($form_state->getValue('tuid'));
 
     /** @var \Drupal\tmgmt_local\LocalTaskInterface $task */
     $task = $this->getEntity();
-    $task->assign($translator);
+    $task->assign($assignee);
     $task->save();
 
-    drupal_set_message(t('Assigned @label to translator @translator_name.', array('@label' => $task->label(), '@translator_name' => $translator->getAccountName())));
+    drupal_set_message(t('Assigned @label to user @assignee_name.', array('@label' => $task->label(), '@assignee_name' => $assignee->getAccountName())));
 
     $form_state->setRedirect(Views::getView('tmgmt_local_task_overview')->getUrl()->getRouteName());
   }

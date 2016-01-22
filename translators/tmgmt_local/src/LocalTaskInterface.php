@@ -46,12 +46,12 @@ interface LocalTaskInterface extends ContentEntityInterface, EntityChangedInterf
   const STATUS_CLOSED = 4;
 
   /**
-   * Return the translator assigned to this task.
+   * Return the user assigned to this task.
    *
    * @return \Drupal\Core\Session\AccountInterface
-   *   The translator assigned to this task.
+   *   The user assigned to this task.
    */
-  public function getTranslator();
+  public function getAssignee();
 
   /**
    * Return the corresponding translation job.
@@ -223,7 +223,7 @@ interface LocalTaskInterface extends ContentEntityInterface, EntityChangedInterf
   /**
    * Increment loop_count property.
    *
-   * Does it depending on current status, new status and new translator.
+   * Does it depending on current status, new status and new assignee.
    *
    * @param int $new_status
    *   New status of task.

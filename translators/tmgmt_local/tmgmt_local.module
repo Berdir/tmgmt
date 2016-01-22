@@ -127,7 +127,7 @@ function tmgmt_local_translation_access(LocalTask $task, AccountInterface $accou
 
   // We grant access to the translation if both of the following conditions are
   // met:
-  // - User is assigned as a translator to the given task.
+  // - User is assigned as a assignee to the given task.
   // - User has 'provide translation services' permission.
   // - No modules say to deny access.
   // - At least one module says to grant access.
@@ -394,7 +394,7 @@ function tmgmt_local_tasks_languages($tasks) {
 }
 
 /**
- * Gets translators able to translate all given tasks.
+ * Gets users able to translate all given tasks.
  *
  * @param array $tasks
  *   Array of tasks ids.
@@ -402,18 +402,18 @@ function tmgmt_local_tasks_languages($tasks) {
  * @return array
  *   List of uid => name values.
  */
-function tmgmt_local_get_translators_for_tasks($tasks) {
-  $translators = array();
+function tmgmt_local_get_assignees_for_tasks($tasks) {
+  $assignees = array();
 
   foreach (tmgmt_local_tasks_languages($tasks) as $source_language => $target_languages) {
-    $translators[] = tmgmt_local_translators($source_language, $target_languages);
+    $assignees[] = tmgmt_local_assignees($source_language, $target_languages);
   }
 
-  if (count($translators) > 1) {
-    return call_user_func_array('array_intersect', $translators);
+  if (count($assignees) > 1) {
+    return call_user_func_array('array_intersect', $assignees);
   }
-  elseif (count($translators) == 1) {
-    return array_shift($translators);
+  elseif (count($assignees) == 1) {
+    return array_shift($assignees);
   }
 
   return array();
@@ -568,7 +568,7 @@ function tmgmt_local_supported_target_languages($source_language, $uids = array(
 }
 
 /**
- * Gets local translator for given language combination.
+ * Gets local assignees for given language combination.
  *
  * @param string $source_language
  *   (optional) Source language to limit on.
@@ -576,44 +576,43 @@ function tmgmt_local_supported_target_languages($source_language, $uids = array(
  *   (optional) List of target languages to limit to.
  *
  * @return array
- *   Array of uid => name translators or empty array if there are no translator
- *   users.
+ *   Array of uid => name assignees or empty array if there are no assignees.
  */
-function tmgmt_local_translators($source_language = NULL, array $target_languages = array()) {
-  $translators = &drupal_static(__FUNCTION__);
+function tmgmt_local_assignees($source_language = NULL, array $target_languages = array()) {
+  $assignees = &drupal_static(__FUNCTION__);
 
   $key = $source_language . '_' . implode('_', $target_languages);
 
-  if (isset($translators[$key])) {
-    return $translators[$key];
+  if (isset($assignees[$key])) {
+    return $assignees[$key];
   }
 
   // Get all abilities keyed by uids for given source language.
-  $translators_abilities = array();
+  $assignees_abilities = array();
   foreach (tmgmt_local_abilities($source_language) as $row) {
-    $translators_abilities[$row->uid][] = $row->tmgmt_translation_skills_language_to;
+    $assignees_abilities[$row->uid][] = $row->tmgmt_translation_skills_language_to;
   }
 
-  // Filter out translator uids who's abilities are not sufficient for given
+  // Filter out assignees uids who's abilities are not sufficient for given
   // target languages.
-  $translators_uids = array();
-  foreach ($translators_abilities as $uid => $abilities) {
+  $assignees_uids = array();
+  foreach ($assignees_abilities as $uid => $abilities) {
     // In case provided target languages exceed users abilities, exclude.
     if (!empty($target_languages) && count(array_diff($target_languages, $abilities)) > 0) {
       continue;
     }
-    $translators_uids[] = $uid;
+    $assignees_uids[] = $uid;
   }
 
-  // Finally build the translators list.
-  $translators[$key] = array();
-  if (!empty($translators_uids)) {
-    foreach (User::loadMultiple($translators_uids) as $account) {
-      $translators[$key][$account->id()] = $account->getUsername();
+  // Finally build the assignees list.
+  $assignees[$key] = array();
+  if (!empty($assignees_uids)) {
+    foreach (User::loadMultiple($assignees_uids) as $account) {
+      $assignees[$key][$account->id()] = $account->getUsername();
     }
   }
 
-  return $translators[$key];
+  return $assignees[$key];
 }
 
 /**

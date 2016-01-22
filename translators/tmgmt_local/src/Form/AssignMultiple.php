@@ -90,7 +90,7 @@ class AssignMultiple extends FormBase {
       '#title' => t('Assign to'),
       '#type' => 'select',
       '#empty_option' => t('Select user'),
-      '#options' => tmgmt_local_get_translators_for_tasks($form_state->get('tasks')),
+      '#options' => tmgmt_local_get_assignees_for_tasks($form_state->get('tasks')),
       '#required' => TRUE,
     );
 
@@ -107,20 +107,20 @@ class AssignMultiple extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    /** @var User $translator */
-    $translator = User::load($form_state->getValue('tuid'));
+    /** @var User $assignee */
+    $assignee = User::load($form_state->getValue('tuid'));
 
     $how_many = 0;
     foreach ($form_state->get('tasks') as $task_id) {
       $task = tmgmt_local_task_load($task_id);
       if ($task) {
-        $task->assign($translator);
+        $task->assign($assignee);
         $task->save();
         ++$how_many;
       }
     }
 
-    drupal_set_message(t('Assigned @how_many to translator @translator_name.', array('@how_many' => $how_many, '@translator_name' => $translator->getAccountName())));
+    drupal_set_message(t('Assigned @how_many to user @assignee_name.', array('@how_many' => $how_many, '@assignee_name' => $assignee->getAccountName())));
 
     $form_state->setRedirect(Views::getView('tmgmt_local_task_overview')->getUrl()->getRouteName());
   }

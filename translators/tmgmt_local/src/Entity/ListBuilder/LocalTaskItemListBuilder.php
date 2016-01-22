@@ -21,7 +21,7 @@ class LocalTaskItemListBuilder extends EntityListBuilder {
     /** @var \Drupal\tmgmt_local\Entity\LocalTaskItem $entity */
     $operations = parent::getDefaultOperations($entity);
     // @todo access control handlers and routing
-    if ($entity->access('view', \Drupal::currentUser()) && $entity->getTask()->getTranslator()->id() == \Drupal::currentUser()->id()) {
+    if ($entity->access('view', \Drupal::currentUser()) && $entity->getTask()->getAssignee()->id() == \Drupal::currentUser()->id()) {
       if ($entity->isPending()) {
         $element['#links']['translate'] = [
           'title' => $this->t('Translate'),

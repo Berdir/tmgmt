@@ -42,10 +42,10 @@ function tmgmt_local_rules_action_info() {
 }
 
 /**
- * Rules callback to assign a translation task to translator.
+ * Rules callback to assign a translation task to assignee.
  */
-function tmgmt_local_rules_task_assign(TMGMTLocalTask $task, stdClass $translator) {
-  $task->assign($translator);
+function tmgmt_local_rules_task_assign(TMGMTLocalTask $task, stdClass $assignee) {
+  $task->assign($assignee);
   $task->save();
 }
 

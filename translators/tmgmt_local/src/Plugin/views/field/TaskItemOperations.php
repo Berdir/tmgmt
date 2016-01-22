@@ -33,7 +33,7 @@ class TaskItemOperations extends FieldPluginBase {
     if ($item->getTask()->isUnassigned()) {
       return $element;
     }
-    if ($item->access('view') && $item->getTask()->getTranslator()->id() == \Drupal::currentUser()->id()) {
+    if ($item->access('view') && $item->getTask()->getAssignee()->id() == \Drupal::currentUser()->id()) {
       $element = Link::fromTextAndUrl($item->isPending() ? t('Translate') : t('View'),
         Url::fromUserInput('/translate/items/' . $item->id()))->toString();
     }
