@@ -583,6 +583,9 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save as completed'));
     $this->assertEqual(\Drupal::state()->get('tmgmt_test_saved_translation_' . $item5->getItemType() . '_' . $item5->getItemId())['dummy']['deep_nesting']['#translation']['#text'], 'Translated text for job item');
 
+    // Test if the icons are displayed.
+    $this->assertRaw('icons/73b355/check.svg" title="Accepted"');
+    $this->assertRaw('icons/ready.svg" title="Needs review"');
     $this->loginAsAdmin();
 
     // Create two translators.

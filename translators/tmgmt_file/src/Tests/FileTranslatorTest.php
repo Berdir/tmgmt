@@ -480,7 +480,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     $this->drupalPostForm($job->urlInfo(), $edit, t('Import'));
 
     // Make sure the translations have been imported correctly.
-    $this->assertNoText(t('In progress'));
+    $this->assertNoRaw('title="In progress"');
     // @todo: Enable this assertion once new releases for views and entity
     // module are out.
     //$this->assertText(t('Needs review'));
@@ -507,7 +507,7 @@ class FileTranslatorTest extends TMGMTTestBase {
     // module are out.
     //$this->assertText(t('Accepted'));
     $this->assertText(t('Finished'));
-    $this->assertNoText(t('Needs review'));
+    $this->assertNoRaw('title="Needs review"');
   }
 
   /**

@@ -187,7 +187,8 @@ class JobForm extends TmgmtFormBase {
         '#prefix' => '<div class="tmgmt-ui-job-checkout-details">',
         '#suffix' => '</div>',
       );
-
+      $form['footer'] = tmgmt_color_item_legend();
+      $form['footer']['#weight'] = 100;
       // Translation jobs.
       $output = $view->preview($job->isSubmittable() ? 'checkout' : 'submitted', array($job->id()));
       $form['job_items_wrapper']['items'] = array(
