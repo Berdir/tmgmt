@@ -56,6 +56,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Test that there is no job at the beginning.
     $this->drupalGet('admin/tmgmt/jobs');
     $this->assertText('No jobs available.');
+    $this->assertRaw('Open Jobs');
 
     // Add a first item to the job. This will auto-create the job.
     $job = tmgmt_job_match_item('en', '');
@@ -256,7 +257,7 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Test exposed filters.
     $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
-      'state' => '1',
+      'state' => '2',
       'target_language' => 'de',
       'source_language' => 'en',
     )));
@@ -265,7 +266,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
 
     $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
-      'state' => '4',
+      'state' => '5',
     )));
 
     // Check if the list has no rows.
@@ -292,6 +293,9 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText('Abort this job?');
     $this->drupalPostForm(NULL, array(), t('Confirm'));
 
+    // Count if the items do now show the las aborted one in Open Jobs.
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 4);
+
     // Test the submit link.
     $this->clickLink(t('Submit'));
 
@@ -314,7 +318,9 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Login as administrator to delete a job.
     $this->loginAsAdmin();
-    $this->drupalGet('admin/tmgmt/jobs');
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
+      'state' => 'All',
+    )));
 
     // Translated languages should now be listed as Needs review.
     $start_rows = $this->xpath('//tbody/tr');
@@ -322,7 +328,9 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalGet($job4->urlInfo('delete-form'));
     $this->assertText('Are you sure you want to delete the translation job test_source:test:1 and 2 more?');
     $this->drupalPostForm(NULL, array(), t('Delete'));
-    $this->drupalGet('admin/tmgmt/jobs');
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
+      'state' => 'All',
+    )));
     $end_rows = $this->xpath('//tbody/tr');
     $this->assertEqual(count($end_rows), 4);
   }
@@ -816,7 +824,9 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, [], t('Confirm'));
 
     // Go back to the job page.
-    $this->drupalGet('admin/tmgmt/jobs');
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
+      'state' => '6',
+    )));
 
     // Check that job is aborted now.
     $aborted = (array) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr[1]')[0];
