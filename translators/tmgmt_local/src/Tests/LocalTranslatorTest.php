@@ -487,6 +487,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // completed.
     $this->clickLink(t('Translate'));
     $this->drupalPostForm(NULL, array(), t('✓'));
+    $elements = $this->xpath('//*[@id="edit-dummydeep-nesting-actions-reject-dummydeep-nesting"]');
+    $this->assertTrue(!empty($elements), "'✗' button appears.");
 
     \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->resetCache();
     \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
