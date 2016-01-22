@@ -93,6 +93,45 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
   }
 
   /**
+   * Ajax callback to fetch the options provided by a translator.
+   */
+  public function ajaxUpdateSettings(array $form, FormStateInterface $form_state) {
+    return $form['plugin_wrapper'];
+  }
+
+  /**
+   * Handles submit call to test credentials.
+   */
+  public function submitTestCredentials(array $form, FormStateInterface $form_state) {
+    // When this method is called the form already passed validation and we can
+    // assume that credentials are valid.
+    drupal_set_message(t('Valid credentials'));
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Adds a test credentials button to a form.
+   *
+   * @return array
+   *   A form array containing test credentials button.
+   */
+  public function addTestCredentialsButton() {
+    $form['test_credentials'] = array(
+      '#type' => 'submit',
+      '#value' => t('Test credentials'),
+      '#submit' => array(array($this, 'submitTestCredentials')),
+      '#limit_validation_errors' => array(array('settings')),
+      '#executes_submit_callback' => TRUE,
+      '#ajax' => array(
+        'callback' => array($this, 'ajaxUpdateSettings'),
+        'wrapper' => 'tmgmt-plugin-wrapper',
+      ),
+    );
+
+    return $form;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {

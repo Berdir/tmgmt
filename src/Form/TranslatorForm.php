@@ -127,6 +127,7 @@ class TranslatorForm extends EntityForm {
       $form['plugin_wrapper']['plugin'] = array(
         '#type' => 'select',
         '#title' => t('Translator plugin'),
+        '#limit_validation_errors' => array(array('plugin')),
         '#description' => isset($definition['description']) ? Xss::filter($definition['description']) : '',
         '#options' => $available,
         '#default_value' => $entity->getPluginID(),
@@ -158,7 +159,7 @@ class TranslatorForm extends EntityForm {
     // If current translator is configured to provide remote language mapping
     // provide the form to configure mappings, unless it does not exists yet.
     if (!empty($controller) && $entity->providesRemoteLanguageMappings()) {
-      $form['remote_languages_mappings'] = array(
+      $form['plugin_wrapper']['remote_languages_mappings'] = array(
         '#tree' => TRUE,
         '#type' => 'details',
         '#title' => t('Remote languages mappings'),
@@ -172,7 +173,7 @@ class TranslatorForm extends EntityForm {
       }
 
       foreach ($entity->getRemoteLanguagesMappings() as $local_language => $remote_language) {
-        $form['remote_languages_mappings'][$local_language] = array(
+        $form['plugin_wrapper']['remote_languages_mappings'][$local_language] = array(
           '#type' => 'textfield',
           '#title' => \Drupal::languageManager()->getLanguage($local_language)->getName() . ' (' . $local_language . ')',
           '#default_value' => $remote_language,
@@ -180,10 +181,10 @@ class TranslatorForm extends EntityForm {
         );
 
         if (!empty($options)) {
-          $form['remote_languages_mappings'][$local_language]['#type'] = 'select';
-          $form['remote_languages_mappings'][$local_language]['#options'] = $options;
-          $form['remote_languages_mappings'][$local_language]['#empty_option'] = ' - ';
-          unset($form['remote_languages_mappings'][$local_language]['#size']);
+          $form['plugin_wrapper']['remote_languages_mappings'][$local_language]['#type'] = 'select';
+          $form['plugin_wrapper']['remote_languages_mappings'][$local_language]['#options'] = $options;
+          $form['plugin_wrapper']['remote_languages_mappings'][$local_language]['#empty_option'] = ' - ';
+          unset($form['plugin_wrapper']['remote_languages_mappings'][$local_language]['#size']);
         }
       }
     }
