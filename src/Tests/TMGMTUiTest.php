@@ -313,6 +313,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->default_translator->setSetting('action', 'not_available');
     $this->default_translator->save();
     $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
+    $this->assertText(t('Test translator (auto created) is not available. Make sure it is properly configured.'));
     $this->drupalPostForm(NULL, array(), t('Submit to translator'));
     $this->assertText(t('@translator is not available. Make sure it is properly configured.', array('@translator' => 'Test translator (auto created)')));
 

@@ -504,7 +504,7 @@ class JobForm extends TmgmtFormBase {
     $translator = $job->getTranslator();
     $result = $translator->checkAvailable();
     if (!$result->getSuccess()) {
-      $form['#description'] = $result->getSuccess();
+      $form['#description'] = $result->getReason();
       return $form;
     }
     // @todo: if the target language is not defined, the check will not work if the first language in the list is not available.
