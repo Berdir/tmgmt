@@ -248,6 +248,13 @@ class LocalTaskItem extends ContentEntityBase implements LocalTaskItemInterface 
   /**
    * {@inheritdoc}
    */
+  public function getWordCount() {
+    return $this->get('word_count')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
     if ($this->getTask()) {
@@ -303,6 +310,9 @@ class LocalTaskItem extends ContentEntityBase implements LocalTaskItemInterface 
   protected function count(array &$item) {
     if (!empty($item['#text'])) {
       if (\Drupal::service('tmgmt.data')->filterData($item)) {
+
+        // Count words of the data item.
+        $this->set('word_count', $this->get('word_count')->value + \Drupal::service('tmgmt.data')->wordCount($item['#text']));
 
         // Set default states if no state is set.
         if (!isset($item['#status'])) {

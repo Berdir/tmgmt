@@ -373,6 +373,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($first_task_item->getCountCompleted(), 0);
     $this->assertEqual($first_task_item->getCountTranslated(), 0);
     $this->assertEqual($first_task_item->getCountUntranslated(), 1);
+    $this->asserTaskItemProgress(1, '1/0/0');
+    $this->asserTaskItemProgress(2, '1/0/0');
+    $this->assertRaw('Untranslated: 1, translated: 0, completed: 0.');
 
     $this->assertText('test_source:test:1');
     $this->assertText('test_source:test:2');
@@ -435,6 +438,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($task->getCountCompleted(), 1);
     $this->assertEqual($task->getCountTranslated(), 0);
     $this->assertEqual($task->getCountUntranslated(), 1);
+    /** @var \Drupal\tmgmt_local\Entity\LocalTaskItem $second_task_item */
     list($first_task_item, $second_task_item) = array_values($task->getItems());
     $this->assertTrue($first_task_item->isClosed());
     $this->assertEqual($first_task_item->getCountCompleted(), 1);
@@ -444,6 +448,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($second_task_item->getCountCompleted(), 0);
     $this->assertEqual($second_task_item->getCountTranslated(), 0);
     $this->assertEqual($second_task_item->getCountUntranslated(), 1);
+    $this->asserTaskItemProgress(1, '0/0/1');
+    $this->asserTaskItemProgress(2, '1/0/0');
 
     // Translate the second item but do not mark as translated it yet.
     $this->clickLink(t('Translate'));
@@ -474,6 +480,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($second_task_item->getCountCompleted(), 0);
     $this->assertEqual($second_task_item->getCountTranslated(), 0);
     $this->assertEqual($second_task_item->getCountUntranslated(), 1);
+    $this->asserTaskItemProgress(1, '0/0/1');
+    $this->asserTaskItemProgress(2, '1/0/0');
 
     // Mark the data item as translated but don't save the task item as
     // completed.
@@ -498,6 +506,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($second_task_item->getCountCompleted(), 0);
     $this->assertEqual($second_task_item->getCountTranslated(), 1);
     $this->assertEqual($second_task_item->getCountUntranslated(), 0);
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->asserTaskItemProgress(1, '0/0/1');
+    $this->asserTaskItemProgress(2, '0/1/0');
 
     // Check the job data.
     \Drupal::entityTypeManager()->getStorage('tmgmt_job')->resetCache();
@@ -518,6 +529,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->clickLink(t('Translate'));
     $this->drupalPostForm(NULL, array(), t('Save as completed'));
     $this->assertText('The translation for ' . $second_task_item->label() . ' has been saved as completed.');
+    $this->clickLink('View');
+    $this->asserTaskItemProgress(1, '0/0/1');
+    $this->asserTaskItemProgress(2, '0/0/1');
 
     // Review and accept the second item.
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
@@ -777,6 +791,19 @@ class LocalTranslatorTest extends TMGMTTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Assign tasks'));
     $this->assertText(t('Assigned 1 to translator @translator.', ['@translator' => $local_translator->getAccountName()]));
+  }
+
+  /**
+   * Asserts job item language codes.
+   *
+   * @param int $row
+   *   The row of the item you want to check.
+   * @param string $progress
+   *   The progress text.
+   */
+  private function asserTaskItemProgress($row, $progress) {
+    $result = $this->xpath('//*[@id="edit-items"]/div/div/table/tbody/tr[' . $row . ']/td[2]')[0];
+    $this->assertEqual($result->span, $progress);
   }
 
 }
