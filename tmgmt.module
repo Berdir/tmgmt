@@ -453,8 +453,10 @@ function tmgmt_translator_labels() {
 }
 
 /**
- * Returns a list of flagged translator labels. If a translator is not available
- * it will be suffixed with a short text explaining why it is not available.
+ * Returns a list of flagged translator labels.
+ *
+ * If a translator is not available it will be suffixed with a short text
+ * explaining why it is not available.
  * This can either be because the configuration of the passed job is not
  * supported or because the translator service can't be reached.
  *
@@ -464,9 +466,12 @@ function tmgmt_translator_labels() {
  * @return array
  *   An array of flagged translator labels.
  */
-function tmgmt_translator_labels_flagged($job = NULL) {
+function tmgmt_translator_labels_flagged(JobInterface $job = NULL) {
   $labels = array();
-  foreach (Translator::loadMultiple() as $translator) {
+  $translators = Translator::loadMultiple();
+  uasort($translators, array('Drupal\Core\Config\Entity\ConfigEntityBase', 'sort'));
+  /** @var \Drupal\tmgmt\Entity\Translator $translator */
+  foreach ($translators as $translator) {
     if (!$translator->checkAvailable()->getSuccess()) {
       $labels[$translator->id()] = t('@label (not available)', array('@label' => $translator->label()));
     }
