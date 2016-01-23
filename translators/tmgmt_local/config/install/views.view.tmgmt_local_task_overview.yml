@@ -38,7 +38,7 @@ display:
       exposed_form:
         type: basic
         options:
-          submit_button: Apply
+          submit_button: Filter
           reset_button: false
           reset_button_label: Reset
           exposed_sorts_label: 'Sort by'
@@ -222,7 +222,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Word count'
+          label: Words
           exclude: false
           alter:
             alter_text: false
@@ -272,7 +272,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Item count'
+          label: Items
           exclude: false
           alter:
             alter_text: false
@@ -768,7 +768,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Word count'
+          label: Words
           exclude: false
           alter:
             alter_text: false
@@ -818,7 +818,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Item count'
+          label: Items
           exclude: false
           alter:
             alter_text: false
@@ -1498,7 +1498,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Word count'
+          label: Words
           exclude: false
           alter:
             alter_text: false
@@ -1548,7 +1548,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Item count'
+          label: Items
           exclude: false
           alter:
             alter_text: false
@@ -2178,7 +2178,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Word count'
+          label: Words
           exclude: false
           alter:
             alter_text: false
@@ -2228,7 +2228,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Item count'
+          label: Items
           exclude: false
           alter:
             alter_text: false
@@ -2811,7 +2811,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Word count'
+          label: Words
           exclude: false
           alter:
             alter_text: false
@@ -2861,7 +2861,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Item count'
+          label: Items
           exclude: false
           alter:
             alter_text: false
@@ -3583,7 +3583,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Word count'
+          label: Words
           exclude: false
           alter:
             alter_text: false
@@ -3633,7 +3633,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Item count'
+          label: Items
           exclude: false
           alter:
             alter_text: false
@@ -4313,7 +4313,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Word count'
+          label: Words
           exclude: false
           alter:
             alter_text: false
@@ -4363,7 +4363,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Item count'
+          label: Items
           exclude: false
           alter:
             alter_text: false
@@ -4993,7 +4993,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Word count'
+          label: Words
           exclude: false
           alter:
             alter_text: false
@@ -5043,7 +5043,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Item count'
+          label: Items
           exclude: false
           alter:
             alter_text: false
