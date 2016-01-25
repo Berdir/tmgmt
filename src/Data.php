@@ -126,6 +126,24 @@ class Data {
   }
 
   /**
+   * Calculates number of HTML tags, which a text consists of.
+   *
+   * @param string $text
+   *
+   * @return int $count
+   *   Returns count of tags of text.
+   */
+  public function tagsCount($text) {
+    // Regular expression for html tags.
+    $html_reg_exp = '/<.*?>/';
+
+    // Find all tags in the text.
+    $count = preg_match_all($html_reg_exp, $text, $matches);
+
+    return $count;
+  }
+
+  /**
    * Converts string keys to array keys.
    *
    * There are three conventions for data keys in use. This function accepts each

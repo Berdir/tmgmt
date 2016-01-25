@@ -59,6 +59,9 @@ class RemoteMapping extends ContentEntityBase implements RemoteMappingInterface 
     $fields['word_count'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Word count'))
       ->setDescription(t('Word count provided by the remote service.'));
+    $fields['tags_count'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('Tags count'))
+      ->setDescription(t('HTML tags count provided by the remote service.'));
     $fields['amount'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Amount'))
       ->setDescription(t('Amount charged for the remote translation job.'));

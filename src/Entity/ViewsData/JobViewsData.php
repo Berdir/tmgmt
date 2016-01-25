@@ -36,6 +36,14 @@ class JobViewsData extends EntityViewsData {
       ),
       'sort' => array(),
     );
+    $data['tmgmt_job']['tags_count'] = array(
+      'title' => 'Tags count',
+      'help' => 'Displays the HTML tags count of a job.',
+      'real field' => 'tjid',
+      'field' => array(
+        'id' => 'tmgmt_tagscount',
+      ),
+    );
     $data['tmgmt_job']['label'] = array(
       'title' => 'Label',
       'help' => 'Displays a label of the job item.',

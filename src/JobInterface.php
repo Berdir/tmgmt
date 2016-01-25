@@ -554,6 +554,14 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   public function getWordCount();
 
   /**
+   * Sums up all HTML tags counts of this jobs job items.
+   *
+   * @return int
+   *   The total tags count of this job.
+   */
+  public function getTagsCount();
+
+  /**
    * Store translated data back into the items.
    *
    * @param array $data

@@ -181,6 +181,30 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertRaw('<span title="Accepted: 0, reviewed: 0, translated: 1, pending: 0.">0/0/1/0</span>');
     $this->assertText('0/0/1/0');
 
+    // HTML tags count.
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'title' => array(
+        'deep_nesting' => array(
+          '#text' => '<p><em><strong>Six dummy HTML tags in the title.</strong></em></p>',
+          '#label' => 'Title',
+        ),
+      ),
+      'body' => array(
+        'deep_nesting' => array(
+          '#text' => '<p>Two dummy HTML tags in the body.</p>',
+          '#label' => 'Body',
+        )
+      ),
+    ));
+    $item4 = $job->addItem('test_source', 'test', 4);
+    $this->drupalPostForm('admin/tmgmt/items/' . $item4->id(), NULL, t('Save'));
+    $this->drupalPostForm(NULL, NULL, t('Save job'));
+    $this->drupalGet('admin/tmgmt/jobs');
+
+    // Total number of tags should be 8.
+    $tags = trim((int) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[7]);
+    $this->assertEqual($tags, 8);
+
     // Another job.
     $job = tmgmt_job_match_item('en', 'es');
     $job->addItem('test_source', 'test', 1);
@@ -275,15 +299,15 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalGet('admin/tmgmt/jobs');
 
     // Test if sources languages are correct.
-    $sources = $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr/td[@class="views-field views-field-source-language-1"][contains(., "English")]');
+    $sources = $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr/td[@class="views-field views-field-source-language-1"][contains(., "English")]');
     $this->assertEqual(count($sources), 5);
 
     // Test if targets languages are correct.
-    $targets = $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr/td[@class="views-field views-field-target-language"][contains(., "Spanish") or contains(., "German")]');
+    $targets = $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr/td[@class="views-field views-field-target-language"][contains(., "Spanish") or contains(., "German")]');
     $this->assertEqual(count($targets), 5);
 
     // Check that the first action is 'manage'.
-    $first_action = $this->xpath('//tbody/tr[2]/td[9]/div/div/ul/li[1]/a');
+    $first_action = $this->xpath('//tbody/tr[2]/td[10]/div/div/ul/li[1]/a');
     $this->assertEqual($first_action[0][0], 'Manage');
 
     // Test the abort link.
@@ -624,21 +648,21 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Assign each job to a translator.
     $job1 = $this->createJob();
     $this->drupalGet('admin/tmgmt/jobs');
-    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr')[0]->td[0]);
+    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[0]);
 
     $job2 = $this->createJob();
     $this->drupalGet('admin/tmgmt/jobs');
-    $this->assertTrue($label, trim((string) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr')[0]->td[0]));
+    $this->assertTrue($label, trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[0]));
     $job1->set('translator', $translator1->id())->save();
     $job2->set('translator', $translator2->id())->save();
 
     // Filter jobs by translator and assert values.
     $this->drupalGet('admin/tmgmt/jobs', array('query' => array('translator' => $translator1->id())));
-    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr')[0]->td[4]);
+    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[4]);
     $this->assertEqual($label, $translator1->label(), 'Found translator label in table');
     $this->assertNotEqual($label, $translator2->label(), "Translators filtered in table");
     $this->drupalGet('admin/tmgmt/jobs', array('query' => array('translator' => $translator2->id())));
-    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr')[0]->td[4]);
+    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[4]);
     $this->assertEqual($label, $translator2->label(), 'Found translator label in table');
     $this->assertNotEqual($label, $translator1->label(), "Translators filtered in table");
 
@@ -794,7 +818,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
 
     // Assert that the progress is N/A since the job was aborted.
-    $element = (array) $this->xpath('//div[@class="view-content"]/table[@class="views-table views-view-table cols-7"]/tbody//tr[1]')[0];
+    $element = (array) $this->xpath('//div[@class="view-content"]/table[@class="views-table views-view-table cols-8"]/tbody//tr[1]')[0];
     $this->assertEqual(trim((string) $element['td'][3]), t('N/A'));
     $this->assertRaw(t('Job has been duplicated as a new job <a href=":url">#@id</a>.',
       array(':url' => $resubmitted_job->url(), '@id' => $resubmitted_job->id())));
@@ -830,7 +854,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     )));
 
     // Check that job is aborted now.
-    $aborted = (array) $this->xpath('//table[@class="views-table views-view-table cols-9"]/tbody/tr[1]')[0];
+    $aborted = (array) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr[1]')[0];
     $this->assertEqual(trim($aborted['td'][2]), 'Aborted');
   }
 

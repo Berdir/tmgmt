@@ -166,6 +166,14 @@ class JobForm extends TmgmtFormBase {
       '#suffix' => '</div>',
     );
 
+    $form['info']['tags_count'] = array(
+      '#type' => 'item',
+      '#title' => t('Total HTML tags count'),
+      '#markup' => number_format($job->getTagsCount()),
+      '#prefix' => '<div class="tmgmt-ui-tags-count tmgmt-ui-info-item">',
+      '#suffix' => '</div>',
+    );
+
     // Display created time only for jobs that are not new anymore.
     if (!$job->isUnprocessed()) {
       $form['info']['created'] = array(
@@ -637,6 +645,7 @@ class JobForm extends TmgmtFormBase {
       'title' => $item->label(),
       'type' => $item->getSourceType(),
       'words' => $item->getWordCount(),
+      'tags' => $item->getTagsCount(),
       'reason' => $reason,
     );
 

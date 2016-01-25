@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ * Update function for the tmgmt module.
+ */
+
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Add a field for the HTML tag count.
+ */
+function tmgmt_update_8001() {
+  $storage_definition = BaseFieldDefinition::create('integer')
+    ->setLabel(t('Tags count'))
+    ->setSetting('unsigned', TRUE);
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('tags_count', 'tmgmt_job_item', 'tmgmt', $storage_definition);
+
+  $storage_definition = BaseFieldDefinition::create('integer')
+    ->setLabel(t('Tags count'))
+    ->setDescription(t('HTML tags count provided by the remote service.'));
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('tags_count', 'tmgmt_remote', 'tmgmt', $storage_definition);
+}

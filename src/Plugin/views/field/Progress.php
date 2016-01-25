@@ -7,9 +7,6 @@
 
 namespace Drupal\tmgmt\Plugin\views\field;
 
-use Drupal\Component\Annotation\PluginID;
-use Drupal\tmgmt\Entity\Job;
-use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 
 /**
@@ -17,33 +14,12 @@ use Drupal\views\ResultRow;
  *
  * @ViewsField("tmgmt_progress")
  */
-class Progress extends FieldPluginBase {
-
-  /**
-   * Prefetch statistics for all jobs.
-   */
-  function preRender(&$values) {
-    parent::preRender($values);
-
-    // In case of jobs, pre-fetch the statistics in a single query and add them
-    // to the static cache.
-    if ($this->getEntityType() == 'tmgmt_job') {
-      $tjids = array();
-      foreach ($values as $value) {
-        // Do not load statistics for aborted jobs.
-        if ($value->_entity->tmgmt_job_state == Job::STATE_ABORTED) {
-          continue;
-        }
-        $tjids[] = $value->tjid;
-      }
-      tmgmt_job_statistics_load($tjids);
-    }
-  }
+class Progress extends StatisticsBase {
 
   /**
    * {@inheritdoc}
    */
-  function render(ResultRow $values) {
+  public function render(ResultRow $values) {
     $entity = $values->_entity;
     // If job has been aborted the status info is not applicable.
     if ($entity->isAborted()) {

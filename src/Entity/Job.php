@@ -688,6 +688,13 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
   /**
    * {@inheritdoc}
    */
+  public function getTagsCount() {
+    return tmgmt_job_statistic($this, 'tags_count');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function addTranslatedData(array $data, $key = NULL) {
     $key = \Drupal::service('tmgmt.data')->ensureArrayKey($key);
     $items = $this->getItems();

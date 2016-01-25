@@ -262,7 +262,7 @@ function tmgmt_job_create($source_language, $target_language, $uid = 0, array $v
  *   An array of job ids.
  *
  * @return
- *   An array of objects with the keys word_count, count_pending,
+ *   An array of objects with the keys word_count, tags_count, count_pending,
  *   count_accepted, count_reviewed and count_translated.
  */
 function tmgmt_job_statistics_load(array $tjids) {
@@ -289,6 +289,7 @@ function tmgmt_job_statistics_load(array $tjids) {
     $query = db_select('tmgmt_job_item', 'tji')
       ->fields('tji', array('tjid'));
     $query->addExpression('SUM(word_count)', 'word_count');
+    $query->addExpression('SUM(tags_count)', 'tags_count');
     $query->addExpression('SUM(count_accepted)', 'count_accepted');
     $query->addExpression('SUM(count_reviewed)', 'count_reviewed');
     $query->addExpression('SUM(count_pending)', 'count_pending');
@@ -310,8 +311,8 @@ function tmgmt_job_statistics_load(array $tjids) {
  * @param $job
  *   The translation job entity.
  * @param $key
- *   One of word_count, count_pending, count_accepted, count_reviewed and
- *   count_translated.
+ *   One of word_count, tags_count, count_pending, count_accepted,
+ *   count_reviewed and count_translated.
  *
  * @return
  *   The requested information as an integer.

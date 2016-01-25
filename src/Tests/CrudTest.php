@@ -376,6 +376,9 @@ class CrudTest extends TMGMTKernelTestBase {
       'data1' => $data1,
       'data4' => $data4,
     );
+    $data6 = array(
+      '#text' => '<p>Test the HTML tags count.</p>',
+    );
 
     // No data items.
     $this->assertEqual(0, $job->getCountPending());
@@ -502,6 +505,11 @@ class CrudTest extends TMGMTKernelTestBase {
     $this->assertEqual(3, $job->getCountPending());
     $this->assertEqual(7, $job->getCountTranslated());
     $this->assertEqual(5, $job->getCountReviewed());
+
+    // Check for HTML tags count.
+    $job_item1->updateData('data_item1', $data6);
+    $job_item1->save();
+    $this->assertEqual(2, $job_item1->getTagsCount());
 
     // Add several job items
     $job_item2 = tmgmt_job_item_create('plugin', 'type', 5, array('tjid' => $job->id()));

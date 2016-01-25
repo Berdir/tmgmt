@@ -238,6 +238,14 @@ interface JobItemInterface extends ContentEntityInterface {
   public function getWordCount();
 
   /**
+   * Tags count of all data items.
+   *
+   * @return int
+   *   Tags count
+   */
+  public function getTagsCount();
+
+  /**
    * Sets the state of the job item to 'needs review'.
    *
    * @param string $message

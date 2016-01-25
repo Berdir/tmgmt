@@ -138,6 +138,10 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
       ->setLabel(t('Word count'))
       ->setSetting('unsigned', TRUE);
 
+    $fields['tags_count'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('Tags count'))
+      ->setSetting('unsigned', TRUE);
+
     return $fields;
   }
 
@@ -151,6 +155,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
     $clone->tjid->target_id = 0;
     $clone->tjiid->value = 0;
     $clone->word_count->value = NULL;
+    $clone->tags_count->value = NULL;
     $clone->count_accepted->value = NULL;
     $clone->count_pending->value = NULL;
     $clone->count_translated->value = NULL;
@@ -434,6 +439,13 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    */
   public function getWordCount() {
     return (int) $this->get('word_count')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getTagsCount() {
+    return (int) $this->get('tags_count')->value;
   }
 
   /**
@@ -890,6 +902,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
       $this->count_reviewed = 0;
       $this->count_accepted = 0;
       $this->word_count = 0;
+      $this->tags_count = 0;
       $this->count($this->unserializedData);
     }
   }
@@ -906,6 +919,9 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
 
         // Count words of the data item.
         $this->word_count->value += \Drupal::service('tmgmt.data')->wordCount($item['#text']);
+
+        // Count HTML tags of the data item.
+        $this->tags_count->value += \Drupal::service('tmgmt.data')->tagsCount($item['#text']);
 
         // Set default states if no state is set.
         if (!isset($item['#status'])) {
