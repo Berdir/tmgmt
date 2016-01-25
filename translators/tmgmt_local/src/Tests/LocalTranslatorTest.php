@@ -486,9 +486,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Mark the data item as translated but don't save the task item as
     // completed.
     $this->clickLink(t('Translate'));
-    $this->drupalPostForm(NULL, array(), t('✓'));
-    $elements = $this->xpath('//*[@id="edit-dummydeep-nesting-actions-reject-dummydeep-nesting"]');
-    $this->assertTrue(!empty($elements), "'✗' button appears.");
+    $this->drupalPostAjaxForm(NULL, [], 'finish-dummy|deep_nesting');
+    $this->assertRaw('name="reject-dummy|deep_nesting"', "'✗' button appears.");
 
     \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->resetCache();
     \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
