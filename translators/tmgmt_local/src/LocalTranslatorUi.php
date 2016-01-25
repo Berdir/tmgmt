@@ -49,10 +49,6 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
    * {@inheritdoc}
    */
   public function checkoutInfo(JobInterface $job) {
-    $label = $job->getTranslator()->label();
-    $form['#title'] = t('@translator translation job information', array('@translator' => $label));
-    $form['#type'] = 'fieldset';
-
     $tuid = $job->getSetting('translator');
     if ($tuid && $translator = User::load($tuid)) {
       $form['job_status'] = array(
