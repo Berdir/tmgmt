@@ -860,7 +860,13 @@ class TMGMTUiTest extends TMGMTTestBase {
     }
 
     // Test the remove items from cart functionality.
-    $this->drupalPostForm(NULL, array('items[1]' => TRUE, 'items[4]' => TRUE), t('Remove selected'));
+    $this->drupalPostForm(NULL, [
+      'items[1]' => TRUE,
+      'items[2]' => FALSE,
+      'items[3]' => FALSE,
+      'items[4]' => TRUE,
+      'items[5]' => FALSE,
+    ], t('Remove selected'));
     $this->assertText($job_items[2]->label());
     $this->assertText($job_items[3]->label());
     $this->assertText($job_items[5]->label());
@@ -902,6 +908,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       'items[' . $job_items[3]->id() . ']' => TRUE,
       'items[' . $job_items[4]->id() . ']' => TRUE,
       'items[' . $job_items[5]->id() . ']' => TRUE,
+      'items[' . $job_items[6]->id() . ']' => FALSE,
       'target_language[]' => array('en', 'de'),
     ), t('Request translation'));
 
@@ -940,7 +947,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText($job_items[6]->label());
 
     // Check to see if no items are selected and the error message pops up.
-    $this->drupalPostForm('admin/tmgmt/cart', array(), t('Request translation'));
+    $this->drupalPostForm('admin/tmgmt/cart', ['items[' . $job_items[6]->id() . ']' => FALSE], t('Request translation'));
     $this->assertUniqueText(t("You didn't select any source items."));
   }
 

@@ -76,9 +76,7 @@ class TMGMTCartTest extends TMGMTTestBase {
     $this->drupalPostForm('admin/tmgmt/cart', array(
       'enforced_source_language' => TRUE,
       'source_language' => 'en',
-      'items[' . $job_item_cs->id() . ']' => TRUE,
-      'items[' . $job_item_sk->id() . ']' => TRUE,
-      'target_language[]' => array('es')
+      'target_language[]' => array('es'),
     ), t('Request translation'));
 
     $this->assertText(t('One job needs to be checked out.'));
