@@ -432,9 +432,18 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Save translation.
     $this->drupalPostForm(NULL, array('dummy|deep_nesting[translation]' => $data[$key]['#text'] . 'translated'), t('Save'));
+
+    // Test review data item.
     $this->drupalGet('admin/tmgmt/items/' . $item->id());
     $this->drupalPostAjaxForm(NULL, [], 'reviewed-dummy|deep_nesting');
     $this->assertRaw('icons/73b355/check.svg" alt="Reviewed"');
+
+    \Drupal::entityTypeManager()->getStorage('tmgmt_job')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
+    /** @var JobItem $item */
+    $item = JobItem::load($item->id());
+    $this->assertEqual($item->getCountReviewed(), 1, 'Item reviewed correctly.');
+
     // Check if translation has been saved.
     $this->assertFieldByName('dummy|deep_nesting[translation]', $data[$key]['#text'] . 'translated');
 

@@ -753,6 +753,7 @@ function tmgmt_translation_review_form_update_state(array $form, FormStateInterf
       $job_item->active(FALSE);
     }
   }
+  $job_item->save();
   tmgmt_write_request_messages($job_item->getJob());
 }
 
