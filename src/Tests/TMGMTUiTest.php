@@ -626,6 +626,8 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), $edit, t('Submit to translator'));
 
     $this->drupalGet('admin/tmgmt/items/' . $item5->id());
+    $xpath = $this->xpath('//*[@id="edit-dummydeep-nesting-translation-format-guidelines"]/div')[0];
+    $this->assertEqual($xpath[0]->h4[0], t('Filtered HTML'));
     $rows5 = $this->xpath('//textarea[@name="dummy|deep_nesting[source][value]"]');
     $this->assertEqual((string) $rows5[0]['rows'], 3);
 

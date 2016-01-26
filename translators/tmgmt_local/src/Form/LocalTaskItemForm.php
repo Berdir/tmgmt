@@ -131,7 +131,6 @@ class LocalTaskItemForm extends ContentEntityForm {
     $language_list = \Drupal::languageManager()->getLanguages();
 
     foreach (Element::children($data) as $key) {
-      $form = [];
       if (isset($data[$key]['#text']) && \Drupal::service('tmgmt.data')->filterData($data[$key])) {
         // The char sequence '][' confuses the form API so we need to replace
         // it.
@@ -148,21 +147,37 @@ class LocalTaskItemForm extends ContentEntityForm {
         $source_language = $language_list[$job->getSourceLangcode()];
         $target_language = $language_list[$job->getTargetLangcode()];
 
-        $form[$target_key]['source'] = array(
+        // Manage the height of the texteareas, depending on the lenght of the
+        // description. The minimum number of rows is 3 and the maximum is 15.
+        $rows = ceil(strlen($data[$key]['#text']) / 100);
+        if ($rows < 3) {
+          $rows = 3;
+        }
+        elseif ($rows > 15) {
+          $rows = 15;
+        }
+        $form[$target_key]['source'] = [
           '#type' => 'textarea',
-          '#title' => $source_language->getName(),
           '#value' => $data[$key]['#text'],
+          '#title' => $source_language->getName(),
           '#disabled' => TRUE,
-          '#allow_focus' => TRUE,
-        );
+          '#rows' => $rows,
+        ];
 
-        $form[$target_key]['translation'] = array(
+        $form[$target_key]['translation'] = [
           '#type' => 'textarea',
-          '#title' => $target_language->getName(),
           '#default_value' => $item->getData(\Drupal::service('tmgmt.data')->ensureArrayKey($key), '#text'),
+          '#title' => $target_language->getName(),
           '#disabled' => !$item->isPending(),
+          '#rows' => $rows,
           '#allow_focus' => TRUE,
-        );
+        ];
+        if (!empty($data[$key]['#format']) && \Drupal::config('tmgmt.settings')->get('respect_text_format') == '1') {
+          $form[$target_key]['source']['#type'] = 'text_format';
+          $form[$target_key]['source']['#allowed_formats'] = [$data[$key]['#format']];
+          $form[$target_key]['translation']['#type'] = 'text_format';
+          $form[$target_key]['translation']['#allowed_formats'] = [$data[$key]['#format']];
+        }
 
         $form[$target_key]['actions'] = array(
           '#type' => 'container',
@@ -218,7 +233,15 @@ class LocalTaskItemForm extends ContentEntityForm {
     $form_state->cleanValues();
     foreach ($form_state->getValues() as $key => $value) {
       if (is_array($value) && isset($value['translation'])) {
-        $update['#text'] = $value['translation'];
+        // Update the translation, this will only update the translation in case
+        // it has changed. We have two different cases, the first is for nested
+        // texts.
+        if (is_array($value['translation'])) {
+          $update['#text'] = $value['translation']['value'];
+        }
+        else {
+          $update['#text'] = $value['translation'];
+        }
         $task_item->updateData($key, $update);
       }
     }

@@ -7,12 +7,12 @@
 
 namespace Drupal\tmgmt_local\Tests;
 
+use Drupal\filter\Entity\FilterFormat;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 use Drupal\tmgmt_local\Entity\LocalTask;
-use Drupal\tmgmt_local\LocalTaskInterface;
 
 /**
  * Basic tests for the local translator.
@@ -47,6 +47,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     'tmgmt',
     'tmgmt_language_combination',
     'tmgmt_local',
+    'ckeditor',
   ];
 
   /**
@@ -181,11 +182,28 @@ class LocalTranslatorTest extends TMGMTTestBase {
   public function testBasicWorkflow() {
     $translator = Translator::load('local');
 
+    /** @var FilterFormat $basic_html_format */
+    $basic_html_format = FilterFormat::create(array(
+      'format' => 'basic_html',
+      'name' => 'Basic HTML',
+    ));
+    $basic_html_format->save();
+
     // Create a job and request a local translation.
     $this->loginAsTranslator();
     $job = $this->createJob();
     $job->translator = $translator->id();
     $job->addItem('test_source', 'test', '1');
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'dummy' => array(
+        'deep_nesting' => array(
+          '#text' => file_get_contents(drupal_get_path('module', 'tmgmt') . '/tests/testing_html/sample.html'),
+          '#label' => 'Label for job item with type test and id 2.',
+          '#translate' => TRUE,
+          '#format' => 'basic_html',
+        ),
+      ),
+    ));
     $job->addItem('test_source', 'test', '2');
     $job->save();
 
@@ -199,7 +217,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     )));
     $xpath = $this->xpath('//*[@id="edit-translator"]')[0];
     $this->assertEqual($xpath->option[0], 'Local translator (auto created) (unsupported)');
-    $this->assignee = $this->drupalCreateUser($this->localTranslatorPermissions);
+    $this->assignee = $this->drupalCreateUser(
+      array_merge($this->localTranslatorPermissions, [$basic_html_format->getPermissionName()])
+    );
 
     // The same when there is a single role.
     $this->drupalGet($job->toUrl());
@@ -458,8 +478,10 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Translate the second item but do not mark as translated it yet.
     $this->clickLink(t('Translate'));
+    $xpath = $this->xpath('//*[@id="edit-dummydeep-nesting-translation-format-guidelines"]/div')[0];
+    $this->assertEqual($xpath[0]->h4[0], t('Basic HTML'));
     $edit = array(
-      'dummy|deep_nesting[translation]' => $translation2 = 'German translation of source 2',
+      'dummy|deep_nesting[translation][value]' => $translation2 = 'German translation of source 2',
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertText('The translation for ' . $second_task_item->label() . ' has been saved.');

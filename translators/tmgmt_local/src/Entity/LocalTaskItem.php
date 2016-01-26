@@ -198,7 +198,7 @@ class LocalTaskItem extends ContentEntityBase implements LocalTaskItemInterface 
         if (!is_array($this->unserializedData)) {
           $this->unserializedData = unserialize($this->get('data')->value);
         }
-        NestedArray::setValue($this->unserializedData, array_merge(\Drupal::service('tmgmt.data')->ensureArrayKey($key), array($index)), $value);
+        NestedArray::setValue($this->unserializedData, array_merge(\Drupal::service('tmgmt.data')->ensureArrayKey($key), array($index)), $value, TRUE);
       }
     }
   }
@@ -312,7 +312,8 @@ class LocalTaskItem extends ContentEntityBase implements LocalTaskItemInterface 
       if (\Drupal::service('tmgmt.data')->filterData($item)) {
 
         // Count words of the data item.
-        $this->set('word_count', $this->get('word_count')->value + \Drupal::service('tmgmt.data')->wordCount($item['#text']));
+        $text = is_array($item['#text']) ? $item['#text']['value'] : $item['#text'];
+        $this->set('word_count', $this->get('word_count')->value + \Drupal::service('tmgmt.data')->wordCount($text));
 
         // Set default states if no state is set.
         if (!isset($item['#status'])) {
