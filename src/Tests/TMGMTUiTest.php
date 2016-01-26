@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * @file
  * Contains Drupal\tmgmt\Tests\TMGMTUiTest.
  */
@@ -178,8 +178,8 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText(t('Test translation created'));
 
     // Assert that values exist and are displayed accordingly.
-    $this->assertRaw('<span title="Accepted: 0, reviewed: 0, translated: 1, pending: 0.">0/0/1/0</span>');
-    $this->assertText('0/0/1/0');
+    $this->assertRaw('<span title="Pending: 0, translated: 1, reviewed: 0, accepted: 0.">0/1/0/0</span>');
+    $this->assertText('0/1/0/0');
 
     // HTML tags count.
     \Drupal::state()->set('tmgmt.test_source_data', array(

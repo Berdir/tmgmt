@@ -26,10 +26,11 @@ class Progress extends StatisticsBase {
       return t('N/A');
     }
     $counts = array(
-      '@accepted' => $entity->getCountAccepted(),
-      '@reviewed' => $entity->getCountReviewed(),
-      '@translated' => $entity->getCountTranslated(),
       '@pending' => $entity->getCountPending(),
+      '@translated' => $entity->getCountTranslated(),
+      '@reviewed' => $entity->getCountReviewed(),
+      '@accepted' => $entity->getCountAccepted(),
+
     );
     $id = $entity->id();
 
@@ -37,7 +38,7 @@ class Progress extends StatisticsBase {
       draw_chart($this->build_progressbar_settings($id, $counts));
       return '<div id="progress' . $id . '"></div>';
     }
-    $title = t('Accepted: @accepted, reviewed: @reviewed, translated: @translated, pending: @pending.', $counts);
+    $title = t('Pending: @pending, translated: @translated, reviewed: @reviewed, accepted: @accepted.', $counts);
     $complete_title = t('<span title="@title">@values</span>', ['@title' => $title, '@values' => implode('/', $counts)]);
     return $complete_title;
   }
