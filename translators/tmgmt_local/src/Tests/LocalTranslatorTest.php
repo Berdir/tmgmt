@@ -32,6 +32,11 @@ class LocalTranslatorTest extends TMGMTTestBase {
     'provide translation services',
   );
 
+  protected $localManagerPermissions = [
+    'administer translation tasks',
+    'provide translation services',
+  ];
+
   /**
    * Modules to enable.
    *
@@ -256,7 +261,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalGet('translate/pending');
     $this->assertText(t('Task for @job', array('@job' => $job->label())));
 
-    $this->loginAsAdmin(['administer translation tasks']);
+    $this->loginAsAdmin($this->localManagerPermissions);
     $this->drupalGet('manage-translate/assigned');
     $this->clickLink(t('Unassign'));
     $this->drupalPostForm(NULL, [], t('Unassign'));
@@ -294,7 +299,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $xpath = $this->xpath('//*[@id="edit-status"]');
     $this->assertTrue(empty($xpath));
 
-    $this->loginAsAdmin(['administer translation tasks']);
+    $this->loginAsAdmin($this->localManagerPermissions);
     $this->drupalGet('translate');
     $this->clickLink('View');
     $xpath = $this->xpath('//*[@id="edit-tuid"]');
@@ -780,7 +785,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertText(t('Unassign was applied to 1 item.'));
 
     // Login as admin and check VBO submit actions are present.
-    $this->loginAsAdmin(array('administer translation tasks'));
+    $this->loginAsAdmin($this->localManagerPermissions);
     $this->drupalGet('manage-translate');
     $edit = array(
       'tmgmt_local_task_bulk_form[0]' => TRUE,

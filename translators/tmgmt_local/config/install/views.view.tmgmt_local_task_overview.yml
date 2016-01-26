@@ -22,8 +22,9 @@ display:
     position: 0
     display_options:
       access:
-        type: none
-        options: {  }
+        type: perm
+        options:
+          perm: 'provide translation services'
       cache:
         type: tag
         options: {  }
@@ -450,6 +451,7 @@ display:
         - 'languages:language_interface'
         - url
         - url.query_args
+        - user.permissions
       tags: {  }
   closed:
     display_plugin: page
@@ -1180,6 +1182,7 @@ display:
         - url
         - url.query_args
         - user
+        - user.permissions
       tags: {  }
   completed:
     display_plugin: page
@@ -1910,6 +1913,7 @@ display:
         - url
         - url.query_args
         - user
+        - user.permissions
       tags: {  }
   eligible:
     display_plugin: page
@@ -2441,6 +2445,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
+        - user.permissions
       tags: {  }
   my_tasks:
     display_plugin: page
@@ -3199,6 +3204,7 @@ display:
         - url
         - url.query_args
         - user
+        - user.permissions
       tags: {  }
   pending:
     display_plugin: page
@@ -3995,6 +4001,7 @@ display:
         - url
         - url.query_args
         - user
+        - user.permissions
       tags: {  }
   rejected:
     display_plugin: page
@@ -4725,6 +4732,7 @@ display:
         - url
         - url.query_args
         - user
+        - user.permissions
       tags: {  }
   unassigned:
     display_plugin: page
@@ -5287,4 +5295,5 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
+        - user.permissions
       tags: {  }
