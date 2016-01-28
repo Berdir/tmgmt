@@ -189,26 +189,6 @@ class TranslatorForm extends EntityForm {
       }
     }
 
-    // Add a submit button and a cancel link to the form.
-    $form['actions']['#type'] = 'actions';
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save translator'),
-      '#disabled' => empty($available),
-    );
-    $form['actions']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => t('Delete'),
-      '#submit' => array('tmgmt_submit_redirect'),
-      '#redirect' => 'admin/tmgmt/translators/manage/' . $entity->id() . '/delete',
-      '#access' => !$entity->isNew(),
-    );
-    $form['actions']['cancel'] = array(
-      '#type' => 'link',
-      '#title' => t('Cancel'),
-      '#href' => 'admin/config/regional/tmgmt_translator',
-    );
-
     return $form;
   }
 

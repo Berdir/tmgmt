@@ -638,7 +638,6 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText('The translation for ' . trim($item5->label()) . ' has been saved successfully.');
     $this->drupalGet('admin/tmgmt/items/' . $item5->id());
     $this->assertText('Translated text for job item');
-    $this->assertLink(t('Cancel'));
     $this->drupalPostForm(NULL, $edit, t('Save as completed'));
     $this->assertEqual(\Drupal::state()->get('tmgmt_test_saved_translation_' . $item5->getItemType() . '_' . $item5->getItemId())['dummy']['deep_nesting']['#translation']['#text'], 'Translated text for job item');
 

@@ -415,8 +415,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertText(t('Task for @job', array('@job' => $job->label())));
 
     $this->assertText(t('Dummy'));
-    // Check if the cancel link and the Save as completed button are displayed.
-    $this->assertLink('Cancel');
+    // Check if Save as completed button is displayed.
     $elements = $this->xpath('//*[@id="edit-save-as-completed"]');
     $this->assertTrue(!empty($elements), "'Save as completed' button appears.");
 
@@ -455,7 +454,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalGet('translate/items/1');
     $elements = $this->xpath('//*[@id="edit-save-as-completed"]');
     $this->assertTrue(empty($elements), "'Save as completed' button does not appear.");
-    $this->clickLink(t('Cancel'));
+    $this->clickLink($task->label());
 
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
     $task = entity_load('tmgmt_local_task', $task->id(), TRUE);

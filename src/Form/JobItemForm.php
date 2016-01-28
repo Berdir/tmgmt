@@ -169,13 +169,6 @@ class JobItemForm extends TmgmtFormBase {
       '#validate' => ['::validateTags'],
       '#submit' => ['::submitForm'],
     );
-    $url = $item->getJob()->toUrl();
-    $url = isset($_GET['destination']) ? $_GET['destination'] : $url;
-    $actions['cancel'] = array(
-      '#type' => 'link',
-      '#title' => t('Cancel'),
-      '#url' => $url,
-    );
     return $actions;
   }
 

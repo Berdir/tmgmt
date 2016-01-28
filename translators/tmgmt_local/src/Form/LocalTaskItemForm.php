@@ -95,14 +95,6 @@ class LocalTaskItemForm extends ContentEntityForm {
       '#access' => \Drupal::currentUser()->hasPermission('provide translation services') && $task_item->isPending(),
       '#value' => t('Save as completed'),
     );
-
-    $url = $task_item->getTask()->toUrl();
-    $url = isset($_GET['destination']) ? $_GET['destination'] : $url;
-    $actions['cancel'] = array(
-      '#type' => 'link',
-      '#title' => t('Cancel'),
-      '#url' => $url,
-    );
     return $actions;
   }
 

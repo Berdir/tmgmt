@@ -409,15 +409,6 @@ class JobForm extends TmgmtFormBase {
         '#limit_validation_errors' => array(),
       );
     }
-    // Only show the 'Cancel' button if the job has been submitted to the
-    // translator.
-    $actions['cancel'] = array(
-      '#type' => 'button',
-      '#value' => t('Cancel'),
-      '#submit' => array('tmgmt_submit_redirect'),
-      '#redirect' => 'admin/tmgmt/jobs',
-      '#access' => $job->isActive(),
-    );
     return $actions;
   }
 
