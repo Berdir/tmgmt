@@ -784,13 +784,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     $job->requestTranslation();
 
-    $this->drupalGet('translate');
-    $edit = array(
-      'tmgmt_local_task_bulk_form[0]' => TRUE,
-      'action' => 'tmgmt_local_task_assign_multiple',
-    );
-    $this->drupalPostForm(NULL, $edit, t('Apply'));
-    $this->assertText(t('You are not authorized to access this page.'));
+    $this->drupalGet('manage-translate');
+    $this->assertResponse(403);
     $this->drupalGet('translate');
     $edit = array(
       'tmgmt_local_task_bulk_form[0]' => TRUE,

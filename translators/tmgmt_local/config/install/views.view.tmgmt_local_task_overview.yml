@@ -147,8 +147,10 @@ display:
           empty_zero: false
           hide_alter_empty: true
           action_title: 'With selection'
-          include_exclude: exclude
-          selected_actions: {  }
+          include_exclude: include
+          selected_actions:
+            - tmgmt_local_task_assign_to_me
+            - tmgmt_local_task_unassign_multiple
           entity_type: tmgmt_local_task
           plugin_id: bulk_form
         title:
@@ -512,8 +514,10 @@ display:
           empty_zero: false
           hide_alter_empty: true
           action_title: 'With selection'
-          include_exclude: exclude
-          selected_actions: {  }
+          include_exclude: include
+          selected_actions:
+            - tmgmt_local_task_assign_to_me
+            - tmgmt_local_task_unassign_multiple
           entity_type: tmgmt_local_task
           plugin_id: bulk_form
         progress:
@@ -1243,8 +1247,10 @@ display:
           empty_zero: false
           hide_alter_empty: true
           action_title: 'With selection'
-          include_exclude: exclude
-          selected_actions: {  }
+          include_exclude: include
+          selected_actions:
+            - tmgmt_local_task_assign_to_me
+            - tmgmt_local_task_unassign_multiple
           entity_type: tmgmt_local_task
           plugin_id: bulk_form
         progress:
@@ -1974,8 +1980,10 @@ display:
           empty_zero: false
           hide_alter_empty: true
           action_title: 'With selection'
-          include_exclude: exclude
-          selected_actions: {  }
+          include_exclude: include
+          selected_actions:
+            - tmgmt_local_task_assign_to_me
+            - tmgmt_local_task_unassign_multiple
           entity_type: tmgmt_local_task
           plugin_id: bulk_form
         title:
@@ -2506,8 +2514,10 @@ display:
           empty_zero: false
           hide_alter_empty: true
           action_title: 'With selection'
-          include_exclude: exclude
-          selected_actions: {  }
+          include_exclude: include
+          selected_actions:
+            - tmgmt_local_task_assign_to_me
+            - tmgmt_local_task_unassign_multiple
           entity_type: tmgmt_local_task
           plugin_id: bulk_form
         status:
@@ -3265,8 +3275,10 @@ display:
           empty_zero: false
           hide_alter_empty: true
           action_title: 'With selection'
-          include_exclude: exclude
-          selected_actions: {  }
+          include_exclude: include
+          selected_actions:
+            - tmgmt_local_task_assign_to_me
+            - tmgmt_local_task_unassign_multiple
           entity_type: tmgmt_local_task
           plugin_id: bulk_form
         status:
@@ -4062,8 +4074,10 @@ display:
           empty_zero: false
           hide_alter_empty: true
           action_title: 'With selection'
-          include_exclude: exclude
-          selected_actions: {  }
+          include_exclude: include
+          selected_actions:
+            - tmgmt_local_task_assign_to_me
+            - tmgmt_local_task_unassign_multiple
           entity_type: tmgmt_local_task
           plugin_id: bulk_form
         progress:
@@ -4793,8 +4807,10 @@ display:
           empty_zero: false
           hide_alter_empty: true
           action_title: 'With selection'
-          include_exclude: exclude
-          selected_actions: {  }
+          include_exclude: include
+          selected_actions:
+            - tmgmt_local_task_assign_to_me
+            - tmgmt_local_task_unassign_multiple
           entity_type: tmgmt_local_task
           plugin_id: bulk_form
         title:
