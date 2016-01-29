@@ -13,9 +13,9 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Access control handler for the job entity.
+ * Access control handler for the task item entity.
  *
- * @see \Drupal\tmgmt\Plugin\Core\Entity\Job.
+ * @see \Drupal\tmgmt_local\Entity\LocalTaskItem.
  */
 class LocalTaskItemAccessController extends EntityAccessControlHandler {
 
@@ -23,32 +23,7 @@ class LocalTaskItemAccessController extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
-    if ($account->hasPermission('administer tmgmt')) {
-      // Administrators can do everything.
-      return AccessResult::allowed()->cachePerPermissions();
-    }
-
-    switch ($operation) {
-      case 'view':
-      case 'update':
-        return AccessResult::allowedIfHasPermission($account, 'provide translation services')->orIf(AccessResult::allowedIfHasPermission($account, 'administer translation tasks'));
-
-      case 'delete':
-        // Only administrators can delete jobs.
-        return AccessResult::allowedIfHasPermission($account, 'administer translation tasks');
-
-      // Custom operations.
-      case 'submit':
-        return AccessResult::allowedIfHasPermission($account, 'administer translation tasks');
-
-      case 'accept':
-        return AccessResult::allowedIfHasPermission($account, 'administer translation tasks');
-
-      case 'abort':
-      case 'resubmit':
-        return AccessResult::allowedIfHasPermission($account, 'administer translation tasks');
-    }
-    return AccessResult::neutral();
+    return $entity->getTask()->access($operation, $account, TRUE);
   }
 
   /**

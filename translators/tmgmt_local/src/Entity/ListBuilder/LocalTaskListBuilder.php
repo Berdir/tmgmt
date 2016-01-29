@@ -53,13 +53,6 @@ class LocalTaskListBuilder extends EntityListBuilder {
         'url' => $entity->toUrl('unassign'),
       );
     }
-    if ($entity->access('delete')) {
-      $operations['delete'] = array(
-        'title' => $this->t('Delete'),
-        'weight' => 10,
-        'url' => $entity->toUrl('delete'),
-      );
-    }
     return $operations;
   }
 

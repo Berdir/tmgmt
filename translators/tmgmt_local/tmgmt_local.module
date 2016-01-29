@@ -232,55 +232,6 @@ function tmgmt_local_task_delete_multiple(array $tltids) {
 }
 
 /**
- * Implements hook_tmgmt_local_task_access().
- */
-function tmgmt_local_tmgmt_local_task_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
-  if ($account->hasPermission('administer tmgmt') || $account->hasPermission('administer translation tasks')) {
-    // Administrators can do everything.
-    return AccessResult::allowed();
-  }
-
-  if (!$account) {
-    global $user;
-    $account = $user;
-  }
-
-  // @todo - probably need refinement when we introduce more module permissions.
-  switch ($operation) {
-    case 'view':
-    case 'update':
-      return AccessResult::allowedIfHasPermission($account, 'provide translation services');
-
-    case 'unassign':
-      return AccessResult::allowedIf(!empty($entity->tuid) && $entity->tuid == $account->id() && $account->hasPermission('provide translation services'));
-  }
-  return AccessResult::neutral();
-}
-
-/**
- * Access callback for the local task item entity.
- *
- * @param $op
- *   The operation being performed.
- * @param $item
- *   (Optional) A TMGMTLocalTaskItem entity to check access for. If no entity is
- *   given, it will be determined whether access is allowed for all entities.
- * @param $account
- *   (Optional) The user to check for. Leave it to NULL to check for the global
- *   user.
- *
- * @return bool
- *   TRUE if access is allowed, FALSE otherwise.
- */
-function tmgmt_local_tmgmt_local_task_item_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
-  $task = NULL;
-  if ($entity) {
-    $task = $entity->getTask();
-  }
-  return AccessResult::allowedIf($task->access($operation, $account));
-}
-
-/**
  * Implements hook_view_access().
  */
 function tmgmt_local_view_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {

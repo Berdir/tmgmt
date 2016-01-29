@@ -283,6 +283,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     $this->loginAsAdmin($this->localManagerPermissions);
     $this->drupalGet('manage-translate/assigned');
+    $this->assertNoLink(t('Delete'));
     $this->clickLink(t('Unassign'));
     $this->drupalPostForm(NULL, [], t('Unassign'));
 
