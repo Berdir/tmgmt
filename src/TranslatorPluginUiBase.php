@@ -100,26 +100,26 @@ class TranslatorPluginUiBase extends ComponentPluginBase implements TranslatorPl
   }
 
   /**
-   * Handles submit call to test credentials.
+   * Handles submit call of "Connect" button.
    */
-  public function submitTestCredentials(array $form, FormStateInterface $form_state) {
+  public function submitConnect(array $form, FormStateInterface $form_state) {
     // When this method is called the form already passed validation and we can
     // assume that credentials are valid.
-    drupal_set_message(t('Valid credentials'));
+    drupal_set_message(t('Successfully connected!'));
     $form_state->setRebuild();
   }
 
   /**
-   * Adds a test credentials button to a form.
+   * Adds a "Connect" button to a form.
    *
    * @return array
-   *   A form array containing test credentials button.
+   *   A form array containing "Connect" button.
    */
-  public function addTestCredentialsButton() {
-    $form['test_credentials'] = array(
+  public function addConnectButton() {
+    $form['connect'] = array(
       '#type' => 'submit',
-      '#value' => t('Test credentials'),
-      '#submit' => array(array($this, 'submitTestCredentials')),
+      '#value' => t('Connect'),
+      '#submit' => array(array($this, 'submitConnect')),
       '#limit_validation_errors' => array(array('settings')),
       '#executes_submit_callback' => TRUE,
       '#ajax' => array(
