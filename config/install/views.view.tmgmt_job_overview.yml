@@ -928,7 +928,17 @@ display:
       sorts: {  }
       title: 'Job overview'
       header: {  }
-      footer: {  }
+      footer:
+        footer:
+          id: footer
+          table: tmgmt_job
+          field: footer
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: false
+          entity_type: tmgmt_job
+          plugin_id: tmgmt_job_legend
       empty:
         area_text_custom:
           id: area_text_custom

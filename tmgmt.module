@@ -906,12 +906,12 @@ function tmgmt_color_legend() {
 }
 
 /**
- * Provides color legends for job states.
+ * Provides color legends for job item states.
  *
  * @return array
  *   Color legend render array.
  */
-function tmgmt_color_item_legend() {
+function tmgmt_color_job_item_legend() {
   $output = [
     '#attached' => [
       'library' => ['tmgmt/admin'],
@@ -932,6 +932,49 @@ function tmgmt_color_item_legend() {
   $output['legends']['#markup'] = '<div class="tmgmt-color-legend clearfix">';
 
   $output['legends']['#markup'] .= '<div class="tmgmt-source-status"><div class="tmgmt-status">' . $item_status . '</div>';
+
+  foreach ($legends_left as $legend) {
+    $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
+        <div class="tmgmt-legend-icon">
+            <img src="' . file_create_url($legend['icon']) . '"><span></span>
+        </div>
+        <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
+        </div>';
+  }
+
+  $output['legends']['#markup'] .= '</div></div>';
+
+  return $output;
+}
+
+/**
+ * Provides color legends for job states.
+ *
+ * @return array
+ *   Color legend render array.
+ */
+function tmgmt_color_job_legend() {
+  $output = [
+    '#attached' => [
+      'library' => ['tmgmt/admin'],
+    ]
+  ];
+  if (\Drupal::theme()->getActiveTheme()->getName() == 'seven') {
+    $output['#attached']['library'][] = 'tmgmt/admin.seven';
+  }
+
+  $legends_left = array();
+  $legends_left[] = array('legend' => t('Unprocessed'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg');
+  $legends_left[] = array('legend' => t('Active'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
+  $legends_left[] = array('legend' => t('Rejected'), 'icon' => 'core/misc/icons/787878/ex.svg');
+  $legends_left[] = array('legend' => t('Aborted'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ex-red.svg');
+  $legends_left[] = array('legend' => t('Finished'), 'icon' => 'core/misc/icons/73b355/check.svg');
+
+  $job_state = 'Job state:';
+
+  $output['legends']['#markup'] = '<div class="tmgmt-color-legend clearfix">';
+
+  $output['legends']['#markup'] .= '<div class="tmgmt-source-status"><div class="tmgmt-status">' . $job_state . '</div>';
 
   foreach ($legends_left as $legend) {
     $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">

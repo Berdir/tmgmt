@@ -864,8 +864,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     )));
 
     // Check that job is aborted now.
-    $aborted = (array) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr[1]')[0];
-    $this->assertEqual(trim($aborted['td'][2]), 'Aborted');
+    $this->assertRaw('title="Aborted"');
   }
 
   /**
