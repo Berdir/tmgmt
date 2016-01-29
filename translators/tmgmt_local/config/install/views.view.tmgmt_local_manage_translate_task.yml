@@ -1288,7 +1288,7 @@ display:
           empty: true
           tokenize: false
           content:
-            value: 'There are no unassigned tasks.'
+            value: 'There are no assigned tasks.'
             format: basic_html
           plugin_id: text
     cache_metadata:
@@ -4988,7 +4988,7 @@ display:
   unassigned:
     display_plugin: page
     id: unassigned
-    display_title: Unassigned
+    display_title: 'Unassigned and ongoing'
     position: 1
     display_options:
       display_extenders: {  }
@@ -5531,7 +5531,7 @@ display:
           1: AND
       menu:
         type: 'default tab'
-        title: Unassigned
+        title: 'Unassigned and ongoing'
         description: ''
         expanded: false
         parent: ''
@@ -5540,7 +5540,7 @@ display:
       display_description: 'Shows main view elegible (unasigned) tasks and assigned.'
       tab_options:
         type: normal
-        title: Unassigned
+        title: 'Unassigned and ongoing'
         description: ''
         weight: 0
       footer:
@@ -5552,7 +5552,7 @@ display:
           group_type: group
           admin_label: ''
           empty: false
-          view_to_insert: 'tmgmt_local_manage_translate_task:pending'
+          view_to_insert: 'tmgmt_local_manage_translate_task:assigned'
           inherit_arguments: false
           plugin_id: view
       empty:
