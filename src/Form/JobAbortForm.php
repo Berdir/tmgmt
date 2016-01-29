@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt\Form;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 

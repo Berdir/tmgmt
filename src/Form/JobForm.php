@@ -8,7 +8,6 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\Xss;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Form\FormStateInterface;
@@ -17,8 +16,6 @@ use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobInterface;
-use Drupal\tmgmt\Translator\AvailableResult;
-use Drupal\tmgmt\Translator\TranslatableResult;
 use Drupal\views\Views;
 
 /**

@@ -10,7 +10,6 @@ namespace Drupal\tmgmt;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
-use Drupal\tmgmt\Entity\Translator;
 
 /**
  * A plugin manager for translator plugins.

@@ -15,11 +15,9 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
-use Drupal\Core\Url;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Render\Element;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Entity class for the tmgmt_job_item entity.

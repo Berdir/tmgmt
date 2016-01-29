@@ -8,9 +8,7 @@
 namespace Drupal\tmgmt_locale\Tests;
 
 use Drupal\locale\Gettext;
-use Drupal\tmgmt\Tests\TMGMTTestBase;
 use Drupal\tmgmt\Tests\TMGMTKernelTestBase;
-use Drupal\tmgmt\TMGMTException;
 
 /**
  * Basic Locale Source tests.

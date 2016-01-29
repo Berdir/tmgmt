@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt\Entity;
 
-use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;

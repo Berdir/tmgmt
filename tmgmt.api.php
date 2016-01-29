@@ -4,7 +4,6 @@
  * @file
  * Hooks provided by the Translation Management module.
  */
-use Drupal\tmgmt\Entity\Job;
 
 /**
  * @addtogroup tmgmt_source

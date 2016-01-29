@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt_local\Plugin\views\field;
 
-use Drupal\tmgmt_local\Entity\LocalTaskItem;
 use Drupal\tmgmt_local\LocalTaskItemInterface;
 use Drupal\views\Plugin\views\field\NumericField;
 use Drupal\views\ResultRow;

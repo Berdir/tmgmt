@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt_locale;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\SourcePluginUiBase;

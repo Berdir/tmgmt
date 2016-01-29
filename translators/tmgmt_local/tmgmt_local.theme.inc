@@ -5,11 +5,6 @@
  * Theme file stub for tmgmt.
  */
 
-use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\SafeMarkup;
-use Drupal\Core\Template\Attribute;
-use Drupal\Core\Url;
-use Drupal\tmgmt\Entity\JobItem;
 use Drupal\Core\Render\Element;
 
 /**

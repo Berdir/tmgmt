@@ -9,7 +9,6 @@ namespace Drupal\tmgmt;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Default ui controller class for source plugin.

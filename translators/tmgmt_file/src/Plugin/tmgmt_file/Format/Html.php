@@ -12,8 +12,6 @@ use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt_file\Format\DOMDocument;
 use Drupal\tmgmt_file\Format\FormatInterface;
 use Drupal\tmgmt_file\Format\type;
-use Drupal\tmgmt_file\Annotation\FormatPlugin;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * Export into HTML.

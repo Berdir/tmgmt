@@ -8,7 +8,6 @@
 namespace Drupal\tmgmt_config\Tests;
 
 use Drupal\Core\Url;
-use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\EntityTestBase;
 use Drupal\views\Entity\View;
 

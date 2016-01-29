@@ -8,8 +8,6 @@
 namespace Drupal\tmgmt;
 
 use Drupal\Component\Plugin\PluginBase;
-use Drupal\tmgmt\Entity\JobItem;
-
 
 /**
  * Default controller class for source plugins.

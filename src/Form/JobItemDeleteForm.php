@@ -8,7 +8,6 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Core\Entity\ContentEntityDeleteForm;
-use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a confirmation delete form for 'tmgmt_job_item' entity.

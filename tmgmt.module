@@ -8,15 +8,13 @@
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\Component\Utility\Html;
-use Drupal\tmgmt\Translator\TranslatableResult;
-use Drupal\tmgmt\Translator\AvailableResult;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
-use \Drupal\Core\Render\Element;
+use Drupal\Core\Render\Element;
 
 /**
  * @addtogroup tmgmt_job

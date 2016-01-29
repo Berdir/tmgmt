@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt;
 
-use Drupal\tmgmt\Entity\JobItem;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 
 /**

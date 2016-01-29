@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt\Tests;
 
-use Drupal\comment\CommentTranslationHandler;
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;

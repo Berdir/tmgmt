@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt_content\Tests;
 
-use Drupal\comment\Entity\CommentType;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Tests\EntityTestBase;
 use Drupal\Core\Language\LanguageInterface;

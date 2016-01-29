@@ -10,7 +10,6 @@ namespace Drupal\tmgmt;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\tmgmt\Entity\JobItem;
 use TMGMTPluginBaseInterface;
 
 /**

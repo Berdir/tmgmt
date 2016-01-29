@@ -10,7 +10,6 @@ namespace Drupal\tmgmt\Plugin\views\field;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
-use Drupal\Component\Annotation\PluginID;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;

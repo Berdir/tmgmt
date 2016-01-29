@@ -8,9 +8,6 @@
 namespace Drupal\tmgmt;
 
 use Drupal\Component\Plugin\PluginBase;
-use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt\Entity\JobItem;
-use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Translator\AvailableResult;
 use Drupal\tmgmt\Translator\TranslatableResult;
 

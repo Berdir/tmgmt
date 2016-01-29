@@ -8,7 +8,6 @@
 namespace Drupal\tmgmt;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\tmgmt\Entity\JobItem;
 
 /**
  * Handle reject on data item level.

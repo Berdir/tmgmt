@@ -6,7 +6,6 @@
 
 namespace Drupal\tmgmt_locale\Tests;
 
-use Drupal\Core\Url;
 use Drupal\locale\Gettext;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 

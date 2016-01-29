@@ -10,7 +10,6 @@ namespace Drupal\tmgmt_config\Plugin\tmgmt\Source;
 use Drupal\config_translation\ConfigMapperManagerInterface;
 use Drupal\config_translation\Form\ConfigTranslationFormBase;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
 use Drupal\Core\Config\Schema\Mapping;
 use Drupal\Core\Config\Schema\Sequence;
 use Drupal\Core\Config\TypedConfigManagerInterface;

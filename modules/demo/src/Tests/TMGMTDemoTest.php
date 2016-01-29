@@ -6,7 +6,6 @@
 
 namespace Drupal\tmgmt_demo\Tests;
 
-use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 
 /**

@@ -7,11 +7,8 @@
 
 namespace Drupal\tmgmt\Tests;
 
-use Drupal\Core\Language\Language;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\simpletest\WebTestBase;
-use Drupal\tmgmt\Entity\Job;
-use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobItemInterface;
 

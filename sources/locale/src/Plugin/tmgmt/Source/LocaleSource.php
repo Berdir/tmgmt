@@ -9,7 +9,6 @@
 namespace Drupal\tmgmt_locale\Plugin\tmgmt\Source;
 
 use Drupal\Component\Utility\Unicode;
-use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\SourcePluginBase;
 use Drupal\tmgmt\TMGMTException;

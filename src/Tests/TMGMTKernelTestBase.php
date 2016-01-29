@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt\Tests;
 
-use Drupal\Core\Language\Language;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\simpletest\KernelTestBase;
 use Drupal\tmgmt\JobItemInterface;

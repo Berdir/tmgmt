@@ -11,7 +11,6 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\SourcePluginBase;
-use Drupal\tmgmt\Entity\JobItem;
 use Drupal\Core\Render\Element;
 
 /**

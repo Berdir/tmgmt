@@ -5,7 +5,6 @@
  * Rules integration.
  */
 
-use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\TMGMTException;
 
 /**

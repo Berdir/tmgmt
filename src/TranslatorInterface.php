@@ -5,8 +5,8 @@
  */
 
 namespace Drupal\tmgmt;
+
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
-use Drupal\tmgmt\Entity\Job;
 
 /**
  * Interface for the tmgmt_translator entity.

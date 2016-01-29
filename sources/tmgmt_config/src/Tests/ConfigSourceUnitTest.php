@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt_config\Tests;
 
-use Drupal\Core\Config\Config;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\NodeType;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;

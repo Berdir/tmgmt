@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt\Entity;
 
-use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
