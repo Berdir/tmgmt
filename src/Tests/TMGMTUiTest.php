@@ -621,7 +621,7 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     $edit = array(
       'target_language' => 'de',
-      'settings[action]' => 'translate',
+      'settings[action]' => 'submit',
     );
     $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), $edit, t('Submit to translator'));
 
@@ -631,6 +631,10 @@ class TMGMTUiTest extends TMGMTTestBase {
     $rows5 = $this->xpath('//textarea[@name="dummy|deep_nesting[source][value]"]');
     $this->assertEqual((string) $rows5[0]['rows'], 3);
 
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->assertNoText('has been saved successfully.');
+    $this->drupalGet('admin/tmgmt/items/' . $item5->id());
+    $this->assertText('In progress');
     $edit = array(
       'dummy|deep_nesting[translation][value]' => 'Translated text for job item',
     );
@@ -687,7 +691,6 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, [], t('Save'));
     $this->assertNoText(t('The field is empty.'));
 
-    $item->needsReview();
     $this->drupalGet('admin/tmgmt/items/' . $item->id());
     $this->drupalPostForm(NULL, [], t('Save as completed'));
     $this->assertText(t('The field is empty.'));

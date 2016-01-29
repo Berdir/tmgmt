@@ -16,6 +16,7 @@ use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Symfony\Component\Validator\Constraints\Null;
 
 /**
  * Form controller for the job item edit forms.
@@ -285,6 +286,10 @@ class JobItemForm extends TmgmtFormBase {
             '#origin' => 'local',
           );
         }
+        if ($data['#text'] == '' && $item->isActive()) {
+          $data = NULL;
+          continue;
+        }
 
         $item->addTranslatedData($data, $key);
       }
@@ -304,7 +309,7 @@ class JobItemForm extends TmgmtFormBase {
         }
       }
     }
-    if ($form_state->getTriggeringElement()['#value'] == $form['actions']['save']['#value']) {
+    if ($form_state->getTriggeringElement()['#value'] == $form['actions']['save']['#value'] && isset($data)) {
       drupal_set_message(t('The translation for <a href=:job>@job_title</a> has been saved successfully.', [
         ':job' => $item->getSourceUrl()->toString(),
         '@job_title' => $item->label()
