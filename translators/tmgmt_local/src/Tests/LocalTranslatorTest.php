@@ -451,12 +451,18 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalGet('translate/1');
     $this->assertRaw('icons/73b355/check.svg" title="Completed"');
     $this->assertRaw('tmgmt/icons/ready.svg" title="Untranslated"');
-    // Checking if the 'Save as completed' button is displayed.
+    // Checking if the 'Save as completed' button is not displayed.
     $this->drupalGet('translate/items/1');
     $elements = $this->xpath('//*[@id="edit-save-as-completed"]');
     $this->assertTrue(empty($elements), "'Save as completed' button does not appear.");
-    $this->clickLink($task->label());
+    // Checking if the item status is not displayed.
+    $this->assertNoRaw('title="Finish"');
+    $this->assertNoRaw('title="Reject"');
 
+    // We can go back to the Task from the item.
+    $this->drupalGet('translate/items/1');
+    $this->clickLink($task->label());
+    // Let's check the task status.
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
     $task = entity_load('tmgmt_local_task', $task->id(), TRUE);
     $this->assertTrue($task->isPending());

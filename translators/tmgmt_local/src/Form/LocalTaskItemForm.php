@@ -173,6 +173,7 @@ class LocalTaskItemForm extends ContentEntityForm {
 
         $form[$target_key]['actions'] = array(
           '#type' => 'container',
+          '#access' => $item->isPending(),
         );
         $status = $item->getData(\Drupal::service('tmgmt.data')->ensureArrayKey($key), '#status');
         $completed = $status == TMGMT_DATA_ITEM_STATE_TRANSLATED;
