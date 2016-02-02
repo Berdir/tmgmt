@@ -53,7 +53,7 @@ use Drupal\tmgmt\TranslatorInterface;
  *     "collection" = "/admin/config/regional/tmgmt_translator",
  *     "edit-form" = "/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}",
  *     "add-form" = "/admin/config/regional/tmgmt_translator/add",
- *     "delete-form" = "/tmgmt_translator/{tmgmt_translator}/delete",
+ *     "delete-form" = "/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}/delete",
  *     "clone-form" = "/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}/clone",
  *   }
  * )

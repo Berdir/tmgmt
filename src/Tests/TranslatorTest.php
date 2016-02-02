@@ -54,7 +54,7 @@ class TranslatorTest extends TMGMTTestBase {
     $item = $job->addItem('test_source', 'test', 1);
 
     // Try to delete the translator, should fail because of active job.
-    $delete_url = 'tmgmt_translator/' . $translator->id() . '/delete';
+    $delete_url = '/admin/config/regional/tmgmt_translator/manage/' . $translator->id() . '/delete';
     $this->drupalGet($delete_url);
     $this->assertLink(t('Cancel'));
     $this->drupalPostForm(NULL, array(), 'Delete');
