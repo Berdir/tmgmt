@@ -69,6 +69,9 @@ class TranslatorForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
+    if ($this->operation == 'clone') {
+      $this->entity = $this->entity->createDuplicate();
+    }
     $entity = $this->entity;
     // Check if the translator is currently in use.
     if ($busy = !$entity->isNew() ? tmgmt_translator_busy($entity->id()) : FALSE) {

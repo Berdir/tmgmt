@@ -91,6 +91,19 @@ class TranslatorListBuilder extends DraggableListBuilder implements EntityListBu
   /**
    * {@inheritdoc}
    */
+  public function getDefaultOperations(EntityInterface $entity) {
+    $operations = parent::getDefaultOperations($entity);
+    $operations['clone'] = array(
+      'url' => $entity->urlInfo('clone-form'),
+      'title' => t('Clone'),
+      'weight' => 10,
+    );
+    return $operations;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildRow(EntityInterface $entity) {
     $row['label'] = $this->getLabel($entity);
     return $row + parent::buildRow($entity);

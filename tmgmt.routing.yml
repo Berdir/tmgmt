@@ -29,6 +29,14 @@ entity.tmgmt_translator.delete_form:
   requirements:
     _entity_access: tmgmt_translator.delete
 
+entity.tmgmt_translator.clone_form:
+  path: '/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}/clone'
+  defaults:
+    _title: 'Clone translator'
+    _entity_form: tmgmt_translator.clone
+  requirements:
+    _entity_access: tmgmt_translator.clone
+
 entity.tmgmt_translator.edit_form:
   path: '/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}'
   defaults:

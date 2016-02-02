@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * @file
  * Contains Drupal\tmgmt\Tests\TranslatorTest.
  */
@@ -69,6 +69,15 @@ class TranslatorTest extends TMGMTTestBase {
     $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
     $this->assertText(t('@label has been deleted.', array('@label' => $translator->label())));
 
+    // Check if the clone action works.
+    $this->clickLink('Clone');
+    $edit = array(
+      'name' => $translator->id() . '_clone',
+    );
+    $this->drupalPostForm(NULL, $edit, 'Save');
+    // Check if the list of translators has 2 row.
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 2);
+    $this->assertText('configuration has been created');
     // Assert that the job works and there is a text saying that the translator
     // is missing.
     $this->drupalGet('admin/tmgmt/jobs/' . $job->id());

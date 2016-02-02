@@ -27,6 +27,7 @@ use Drupal\tmgmt\TranslatorInterface;
  *       "edit" = "Drupal\tmgmt\Form\TranslatorForm",
  *       "add" = "Drupal\tmgmt\Form\TranslatorForm",
  *       "delete" = "Drupal\tmgmt\Form\TranslatorDeleteForm",
+ *       "clone" = "Drupal\tmgmt\Form\TranslatorForm",
  *     },
  *     "list_builder" = "Drupal\tmgmt\Entity\ListBuilder\TranslatorListBuilder",
  *     "access" = "Drupal\tmgmt\Entity\Controller\TranslatorAccessControlHandler",
@@ -53,6 +54,7 @@ use Drupal\tmgmt\TranslatorInterface;
  *     "edit-form" = "/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}",
  *     "add-form" = "/admin/config/regional/tmgmt_translator/add",
  *     "delete-form" = "/tmgmt_translator/{tmgmt_translator}/delete",
+ *     "clone-form" = "/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}/clone",
  *   }
  * )
  *
