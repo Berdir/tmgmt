@@ -976,15 +976,15 @@ display:
       rendering_language: '***LANGUAGE_entity_default***'
       menu:
         type: normal
-        title: Translation
-        description: ''
-        parent: system.admin
-        weight: 0
+        title: Jobs
+        description: 'Overview of Jobs.'
+        parent: tmgmt.admin_tmgmt
+        weight: -100
         context: '0'
         menu_name: admin
       tab_options:
         type: normal
-        title: Translation
+        title: Jobs
         description: ''
         weight: 0
       display_extenders: {  }

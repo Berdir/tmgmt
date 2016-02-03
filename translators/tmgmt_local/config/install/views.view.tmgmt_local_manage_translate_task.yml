@@ -7,7 +7,7 @@ dependencies:
     - tmgmt_local
     - user
 id: tmgmt_local_manage_translate_task
-label: 'Manage Translation Tasks'
+label: 'Manage Tasks'
 module: views
 description: 'Gives a bulk operation overview of translation tasks in the system.'
 tag: ''
@@ -4992,7 +4992,7 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      title: 'Manage Translation Tasks'
+      title: 'Manage Tasks'
       defaults:
         title: false
         relationships: false

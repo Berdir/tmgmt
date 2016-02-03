@@ -41,8 +41,10 @@ class JobItemBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     $job_item = $route_match->getParameter('tmgmt_job_item');
     $breadcrumb->addCacheableDependency($job_item);
 
-    // Add links to administration, job overview and job to the breadcrumb.
+    // Add links to administration, translation, job overview and job to the
+    // breadcrumb.
     $breadcrumb->addLink(Link::createFromRoute($this->t('Administration'), 'system.admin'));
+    $breadcrumb->addLink(Link::createFromRoute($this->t('Translation'), 'tmgmt.admin_tmgmt'));
     $breadcrumb->addLink(Link::createFromRoute($this->t('Job overview'), 'view.tmgmt_job_overview.page_1'));
     $breadcrumb->addLink(Link::createFromRoute($job_item->getJob()->label(), 'entity.tmgmt_job.canonical', array('tmgmt_job' => $job_item->getJobId())));
 

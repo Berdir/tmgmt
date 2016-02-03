@@ -1034,8 +1034,11 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Translation Sources.
     $this->drupalGet('admin');
     $this->clickLink(t('Translation'));
+    $this->assertTitle(t('Translation | Drupal'));
     $this->clickLink(t('Cart'));
+    $this->assertTitle(t('Cart | Drupal'));
     $this->clickLink(t('Jobs'));
+    $this->assertTitle(t('Job overview | Drupal'));
     $this->clickLink(t('Sources'));
     $this->assertTitle(t('Translation Sources | Drupal'));
   }

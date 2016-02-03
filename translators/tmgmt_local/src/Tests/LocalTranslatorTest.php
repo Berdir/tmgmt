@@ -835,4 +835,26 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($result->span, $progress);
   }
 
+  /**
+   * Test permissions for the tmgmt_local VBO actions.
+   */
+  public function testUserPermissionsAccess() {
+    $permissions = [
+      'administer tmgmt',
+      'create translation jobs',
+      'accept translation jobs',
+      'administer translation tasks',
+    ];
+    foreach ($permissions as $permission) {
+      $user = $this->drupalCreateUser([$permission]);
+      $this->drupalLogin($user);
+      $this->drupalGet('admin/tmgmt');
+      $this->assertText('Translation');
+    }
+    $user = $this->drupalCreateUser(['provide translation services']);
+    $this->drupalLogin($user);
+    $this->drupalGet('admin/tmgmt');
+    $this->assertText('Local Tasks');
+  }
+
 }

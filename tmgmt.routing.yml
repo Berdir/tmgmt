@@ -45,6 +45,14 @@ entity.tmgmt_translator.edit_form:
   requirements:
     _entity_access: tmgmt_translator.update
 
+tmgmt.admin_tmgmt:
+  path: '/admin/tmgmt'
+  defaults:
+    _controller: '\Drupal\tmgmt\Controller\TMGMTController::translatorAdminMenuBlockPage'
+    _title: 'Translation'
+  requirements:
+    _permission: 'administer tmgmt+create translation jobs+accept translation jobs'
+
 entity.tmgmt_job.canonical:
   path: '/admin/tmgmt/jobs/{tmgmt_job}'
   defaults:

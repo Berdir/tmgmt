@@ -28,6 +28,13 @@ The local translator adds two permissions:
   Assign jobs to other users for translation. Adds a 'Manage Translate Tasks'
   to the User Menu.
 
+Moreover, as we use the admin theme for the local translator, that means that
+the users will need the following permissions to be able to see the theme:
+
+- View the administration theme
+
+- Access toolbar
+
 
 Getting started
 ---------------

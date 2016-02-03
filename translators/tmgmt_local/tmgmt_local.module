@@ -80,9 +80,22 @@ function tmgmt_local_menu_links_discovered_alter(&$links) {
   $view = NULL;
   if ($view = Views::getView('tmgmt_local_manage_translate_task')) {
     $links['tmgmt_local_manage_translate_task'] = [
-      'title' => new TranslatableMarkup('Manage translation tasks'),
+      'title' => new TranslatableMarkup('Manage tasks'),
+      'description' => new TranslatableMarkup('Overview the local translation process and manage the tasks.'),
       'route_name' => $view->getUrl(NULL, 'unassigned')->getRouteName(),
-      'menu_name' => 'account',
+      'parent' => 'tmgmt.admin_tmgmt',
+      'menu_name' => 'admin',
+      'weight' => 10,
+    ];
+  }
+  if ($view = Views::getView('tmgmt_local_task_overview')) {
+    $links['tmgmt_local_task_overview'] = [
+      'title' => new TranslatableMarkup('Translate'),
+      'description' => new TranslatableMarkup('Perform local translations.'),
+      'route_name' => $view->getUrl(NULL, 'unassigned')->getRouteName(),
+      'parent' => 'tmgmt.admin_tmgmt',
+      'menu_name' => 'admin',
+      'weight' => 20,
     ];
   }
 }

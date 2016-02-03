@@ -115,6 +115,8 @@ function tmgmt_demo_install() {
   /** @var Role $role */
   $role = Role::load(RoleInterface::AUTHENTICATED_ID);
   $role->grantPermission('provide translation services');
+  $role->grantPermission('view the administration theme');
+  $role->grantPermission('access toolbar');
   $role->save();
 
   // Add all skills to all users.

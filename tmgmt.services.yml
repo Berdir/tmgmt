@@ -14,7 +14,3 @@ services:
     class: Drupal\tmgmt\Menu\JobItemBreadcrumbBuilder
     tags:
       - { name: breadcrumb_builder, priority: 101 }
-  tmgmt.tmgmt_local_task_item.breadcrumb:
-    class: Drupal\tmgmt\Menu\LocalTaskItemBreadcrumbBuilder
-    tags:
-      - { name: breadcrumb_builder, priority: 101 }

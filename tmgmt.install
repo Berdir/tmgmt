@@ -25,3 +25,18 @@ function tmgmt_update_8001() {
   \Drupal::entityDefinitionUpdateManager()
     ->installFieldStorageDefinition('tags_count', 'tmgmt_remote', 'tmgmt', $storage_definition);
 }
+
+/**
+ * Update the menu parent, to move job to the new translator menu block.
+ */
+function tmgmt_update_8002() {
+  // Update views.
+  $config_factory = \Drupal::configFactory();
+  $view = $config_factory->getEditable('views.view.tmgmt_job_overview');
+  $displays = $view->get('display');
+  $displays['page_1']['display_options']['menu']['parent'] = 'tmgmt.admin_tmgmt';
+  $displays['page_1']['display_options']['menu']['title'] = 'Jobs';
+  $displays['page_1']['display_options']['menu']['description'] = 'Overview of Jobs.';
+  $view->set('display', $displays);
+  $view->save(TRUE);
+}
