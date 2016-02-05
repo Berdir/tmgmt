@@ -1,5 +1,5 @@
-quick_checkout: 1
+quick_checkout: true
 purge_finished: _never
 word_count_exclude_tags: true
 source_list_limit: 20
-respect_text_format: 1
+respect_text_format: true

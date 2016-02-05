@@ -1111,4 +1111,31 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertFieldByName('dummy|deep_nesting[translation]', 'any_value');
   }
 
+  /**
+   * Test the settings of TMGMT.
+   */
+  public function testSettings() {
+    $this->loginAsAdmin();
+
+    $settings = \Drupal::config('tmgmt.settings');
+    $this->assertTrue($settings->get('quick_checkout'));
+    $this->assertEqual('_never', $settings->get('purge_finished'));
+    $this->assertTrue($settings->get('word_count_exclude_tags'));
+    $this->assertEqual(20, $settings->get('source_list_limit'));
+    $this->assertTrue($settings->get('respect_text_format'));
+
+    $this->drupalGet('admin/config/regional/tmgmt_settings');
+    $edit = [
+      'tmgmt_quick_checkout' => FALSE,
+      'tmgmt_purge_finished' => 0,
+      'respect_text_format' => FALSE,
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save configuration'));
+
+    $settings = \Drupal::config('tmgmt.settings');
+    $this->assertFalse($settings->get('quick_checkout'));
+    $this->assertEqual(0, $settings->get('purge_finished'));
+    $this->assertFalse($settings->get('respect_text_format'));
+  }
+
 }

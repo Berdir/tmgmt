@@ -3,13 +3,13 @@ tmgmt.settings:
   label: 'TMGMT settings'
   mapping:
     quick_checkout:
-      type: integer
+      type: boolean
       label: 'Allow quick-checkout'
     purge_finished:
       type: string
       label: 'Purge finished jobs'
     respect_text_format:
-      type: integer
+      type: boolean
       label: 'Respect text format'
     word_count_exclude_tags:
       type: boolean
