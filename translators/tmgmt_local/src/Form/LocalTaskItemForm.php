@@ -80,19 +80,20 @@ class LocalTaskItemForm extends ContentEntityForm {
     /** @var LocalTaskItem $task_item */
     $task_item = $this->entity;
 
+    $actions['save_as_completed'] = array(
+      '#type' => 'submit',
+      '#button_type' => 'primary',
+      '#validate' => ['::validateSaveAsComplete'],
+      '#submit' => ['::save', '::saveAsComplete'],
+      '#access' => \Drupal::currentUser()->hasPermission('provide translation services') && $task_item->isPending(),
+      '#value' => t('Save as completed'),
+    );
+
     $actions['save'] = array(
       '#type' => 'submit',
       '#submit' => ['::save'],
       '#access' => \Drupal::currentUser()->hasPermission('provide translation services') && $task_item->isPending(),
       '#value' => t('Save'),
-    );
-
-    $actions['save_as_completed'] = array(
-      '#type' => 'submit',
-      '#validate' => ['::validateSaveAsComplete'],
-      '#submit' => ['::save', '::saveAsComplete'],
-      '#access' => \Drupal::currentUser()->hasPermission('provide translation services') && $task_item->isPending(),
-      '#value' => t('Save as completed'),
     );
     return $actions;
   }
