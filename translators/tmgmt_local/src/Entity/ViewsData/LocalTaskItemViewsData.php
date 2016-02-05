@@ -41,14 +41,6 @@ class LocalTaskItemViewsData extends EntityViewsData {
         'id' => 'tmgmt_local_wordcount',
       ),
     );
-    $data['tmgmt_local_task_item']['operations'] = array(
-      'title' => t('Operations'),
-      'help' => t('Displays a list of operations which are available for a task item.'),
-      'real field' => 'tltiid',
-      'field' => array(
-        'id' => 'tmgmt_local_task_item_operations',
-      ),
-    );
     return $data;
   }
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\tmgmt\Entity\ListBuilder\JobListBuilder.
+ * Contains \Drupal\tmgmt_local\Entity\ListBuilder\LocalTaskItemListBuilder.
  */
 
 namespace Drupal\tmgmt_local\Entity\ListBuilder;
@@ -20,20 +20,19 @@ class LocalTaskItemListBuilder extends EntityListBuilder {
   protected function getDefaultOperations(EntityInterface $entity) {
     /** @var \Drupal\tmgmt_local\Entity\LocalTaskItem $entity */
     $operations = parent::getDefaultOperations($entity);
-    // @todo access control handlers and routing
     if ($entity->access('view', \Drupal::currentUser()) && $entity->getTask()->getAssignee()->id() == \Drupal::currentUser()->id()) {
       if ($entity->isPending()) {
-        $element['#links']['translate'] = [
-          'title' => $this->t('Translate'),
+        $operations['translate'] = [
+          'url' => $entity->urlInfo(),
+          'title' => t('Translate'),
           'weight' => 0,
-          'url' => $entity->toUrl('translate'),
         ];
       }
       else {
-        $element['#links']['view'] = [
-          'title' => $this->t('View'),
+        $operations['view'] = [
+          'url' => $entity->urlInfo(),
+          'title' => t('View'),
           'weight' => 0,
-          'url' => $entity->toUrl('view'),
         ];
       }
     }
