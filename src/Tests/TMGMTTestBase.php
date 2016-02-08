@@ -177,8 +177,8 @@ abstract class TMGMTTestBase extends WebTestBase {
    *
    * @return \Drupal\tmgmt\JobInterface
    */
-  function createJob($source = 'en', $target = 'de', $uid = 1)  {
-    $job = tmgmt_job_create($source, $target, $uid);
+  function createJob($source = 'en', $target = 'de', $uid = 1, $values = array())  {
+    $job = tmgmt_job_create($source, $target, $uid, $values);
     $this->assertEqual(SAVED_NEW, $job->save());
 
     // Assert that the translator was assigned a tid.

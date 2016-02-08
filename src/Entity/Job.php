@@ -137,6 +137,13 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the job was last edited.'));
+
+    $fields['job_type'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Job type'))
+      ->setDescription(t('Type of job entity, can be Normal or Continuous.'))
+      ->setSetting('allowed_values', [static::TYPE_NORMAL, static::TYPE_CONTINUOUS])
+      ->setDefaultValue(static::TYPE_NORMAL);
+
     return $fields;
   }
 
@@ -187,6 +194,13 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    */
   public function getReference() {
     return $this->get('reference')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getJobType() {
+    return $this->get('job_type')->value;
   }
 
   /**

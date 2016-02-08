@@ -75,8 +75,8 @@ abstract class TMGMTKernelTestBase extends KernelTestBase {
    * @return \Drupal\tmgmt\JobInterface
    *   A new job.
    */
-  function createJob($source = 'en', $target = 'de', $uid = 0)  {
-    $job = tmgmt_job_create($source, $target, $uid);
+  function createJob($source = 'en', $target = 'de', $uid = 0, $values = array())  {
+    $job = tmgmt_job_create($source, $target, $uid, $values);
     $this->assertEqual(SAVED_NEW, $job->save());
 
     // Assert that the translator was assigned a tid.

@@ -70,6 +70,16 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   const LABEL_MAX_LENGTH = 128;
 
   /**
+   * Translation job of type Normal.
+   */
+  const TYPE_NORMAL = 'normal';
+
+  /**
+   * Translation job of type Continuous.
+   */
+  const TYPE_CONTINUOUS = 'continuous';
+
+  /**
    * Returns the target language.
    *
    * @return \Drupal\Core\Language\LanguageInterface
@@ -124,6 +134,14 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
    *   The reference set by the translator.
    */
   public function getReference();
+
+  /**
+   * Returns the job type.
+   *
+   * @return string
+   *   The job type.
+   */
+  public function getJobType();
 
   /**
    * Clones job as unprocessed.

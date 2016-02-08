@@ -59,6 +59,11 @@ class CrudTest extends TMGMTKernelTestBase {
   function testJobs() {
     $job = $this->createJob();
 
+    $continuous_job = $this->createJob('en', 'de', 0, ['job_type' => Job::TYPE_CONTINUOUS]);
+
+    $this->assertEqual(Job::TYPE_NORMAL, $job->getJobType());
+    $this->assertEqual(Job::TYPE_CONTINUOUS, $continuous_job->getJobType());
+
     $loaded_job = Job::load($job->id());
 
     $this->assertEqual($job->getSourceLangcode(), $loaded_job->getSourceLangcode());

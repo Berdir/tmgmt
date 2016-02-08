@@ -694,6 +694,11 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalGet('admin/tmgmt/items/' . $item->id());
     $this->drupalPostForm(NULL, [], t('Save as completed'));
     $this->assertText(t('The field is empty.'));
+
+    //Test that continuous jobs are not shown in the job overview.
+    $continuous_job = $this->createJob('en', 'de', 0, ['label' => 'Continuous job', 'job_type' => 'continuous']);
+    $this->drupalGet('admin/tmgmt/jobs');
+    $this->assertNoText($continuous_job->label(), 'Continuous job is not displayed on job overview page.');
   }
 
   /**
