@@ -130,7 +130,9 @@ class TranslatorForm extends EntityForm {
       $form['plugin_wrapper']['plugin'] = array(
         '#type' => 'select',
         '#title' => t('Translator plugin'),
+        '#submit' => array('::updateRemoteLanguagesMappings'),
         '#limit_validation_errors' => array(array('plugin')),
+        '#executes_submit_callback' => TRUE,
         '#description' => isset($definition['description']) ? Xss::filter($definition['description']) : '',
         '#options' => $available,
         '#default_value' => $entity->getPluginID(),
@@ -170,11 +172,7 @@ class TranslatorForm extends EntityForm {
         '#open' => TRUE,
       );
 
-      $options = array();
-      foreach ($controller->getSupportedRemoteLanguages($entity) as $language) {
-        $options[$language] = $language;
-      }
-
+      $options = $controller->getSupportedRemoteLanguages($entity);
       foreach ($entity->getRemoteLanguagesMappings() as $local_language => $remote_language) {
         $form['plugin_wrapper']['remote_languages_mappings'][$local_language] = array(
           '#type' => 'textfield',
@@ -193,6 +191,30 @@ class TranslatorForm extends EntityForm {
     }
 
     return $form;
+  }
+
+  /**
+   * Updates remote languages mappings.
+   *
+   * @param array $form
+   *   An associative array containing the initial structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the complete form.
+   */
+  public function updateRemoteLanguagesMappings(array $form, FormStateInterface $form_state) {
+    // After updating translator plugin, we have to empty remote languages
+    // mappings on it in order to retrieve new ones.
+    $this->entity->set('remote_languages_mappings', NULL);
+
+    if (!empty($form_state->getUserInput()['remote_languages_mappings'])) {
+      // The user input containing remote languages mappings from an old
+      // translator has priority over new mappings. Similarly to the action
+      // above, we have to remove it from here as well.
+      $user_input = $form_state->getUserInput();
+      unset($user_input['remote_languages_mappings']);
+      $form_state->setUserInput($user_input);
+    }
+    $form_state->setRebuild();
   }
 
   /**

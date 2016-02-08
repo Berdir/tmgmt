@@ -116,7 +116,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    *
    * @var bool
    */
-   protected $auto_accept;
+  protected $auto_accept;
 
   /**
    * The supported target languages caches.
@@ -144,7 +144,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    *
    * @var array
    */
-  protected $remoteLanguagesMappings = array();
+  protected $remote_languages_mappings = array();
 
   /**
    * {@inheritdoc}
@@ -206,15 +206,15 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    * {@inheritdoc}
    */
   public function isAutoAccept() {
-      return $this->auto_accept;
+    return $this->auto_accept;
   }
 
   /**
    * {@inheritdoc}
    */
   public function setAutoAccept($value) {
-      $this->auto_accept = $value;
-      return $this;
+    $this->auto_accept = $value;
+    return $this;
   }
 
   /**
@@ -267,7 +267,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
     if (!empty($this->plugin) && \Drupal::service('plugin.manager.tmgmt.translator')->hasDefinition($this->plugin)) {
       return TRUE;
     }
-   return FALSE;
+    return FALSE;
   }
 
   /**
@@ -372,15 +372,12 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
    * {@inheritdoc}
    */
   public function getRemoteLanguagesMappings() {
-    if (!empty($this->remoteLanguagesMappings)) {
-      return $this->remoteLanguagesMappings;
-    }
-
+    $remote_languages_mappings = [];
     foreach (\Drupal::languageManager()->getLanguages() as $language => $info) {
-      $this->remoteLanguagesMappings[$language] = $this->mapToRemoteLanguage($language);
+      $remote_languages_mappings[$language] = $this->mapToRemoteLanguage($language);
     }
 
-    return $this->remoteLanguagesMappings;
+    return $remote_languages_mappings;
   }
 
   /**
