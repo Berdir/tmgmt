@@ -601,6 +601,13 @@ class TMGMTUiTest extends TMGMTTestBase {
       '@limit' => 20,
     ]));
 
+    // Test if the validation is properly done.
+    $this->drupalPostAjaxForm(NULL, [], 'reviewed-body|deep_nesting');
+    $this->assertUniqueText(t('The field has @size characters while the limit is @limit.', [
+      '@size' => strlen($text),
+      '@limit' => 10,
+    ]));
+
     // Test for the text with format set.
     \Drupal::state()->set('tmgmt.test_source_data', array(
       'dummy' => array(

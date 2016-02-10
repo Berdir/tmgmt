@@ -374,6 +374,7 @@ class JobItemForm extends TmgmtFormBase {
               '#attributes' => array('title' => t('Reviewed')),
               '#name' => 'reviewed-' . $target_key,
               '#submit' => array('tmgmt_translation_review_form_update_state'),
+              '#limit_validation_errors' => array(array($form['#ajaxid']), array($target_key)),
               '#ajax' => array(
                 'callback' => array($this, 'ajaxReviewForm'),
                 'wrapper' => $form['#ajaxid'],
@@ -388,6 +389,7 @@ class JobItemForm extends TmgmtFormBase {
               '#attributes' => array('title' => t('Not reviewed'), 'class' => array('unreviewed')),
               '#name' => 'unreviewed-' . $target_key,
               '#submit' => array('tmgmt_translation_review_form_update_state'),
+              '#limit_validation_errors' => array(array($form['#ajaxid']), array($target_key)),
               '#ajax' => array(
                 'callback' => array($this, 'ajaxReviewForm'),
                 'wrapper' => $form['#ajaxid'],
