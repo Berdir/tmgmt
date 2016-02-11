@@ -12,3 +12,13 @@ tmgmt.cart:
   route_name: tmgmt.cart
   base_route: view.tmgmt_job_overview.page_1
   title: Cart
+
+tmgmt.translators:
+  route_name: entity.tmgmt_translator.collection
+  base_route: view.tmgmt_job_overview.page_1
+  title: Translators
+
+tmgmt.settings:
+  route_name: tmgmt.settings
+  base_route: view.tmgmt_job_overview.page_1
+  title: Settings

@@ -1,13 +1,15 @@
 tmgmt.settings:
-  title: 'Translation Management settings'
+  title: 'Settings'
+  description: 'Configure your translation management settings.'
   route_name: tmgmt.settings
-  parent: system.admin_config_regional
-  weight: 10
+  parent: tmgmt.admin_tmgmt
+  weight: 25
 entity.tmgmt_translator.collection:
-  title: 'Translation Management translators'
+  title: 'Translators'
+  description: 'Add and modify job translators.'
   route_name: entity.tmgmt_translator.collection
-  parent: system.admin_config_regional
-  weight: 15
+  parent: tmgmt.admin_tmgmt
+  weight: 20
 tmgmt.admin_tmgmt:
   title: 'Translation'
   description: 'Translation Management Tool.'
@@ -16,13 +18,13 @@ tmgmt.admin_tmgmt:
   weight: 0
 tmgmt.cart:
   title: 'Cart'
-  description: 'Manage the carts.'
+  description: 'Manage the cart items.'
   route_name: tmgmt.cart
   parent: tmgmt.admin_tmgmt
   weight: -60
 tmgmt.sources:
   title: 'Sources'
-  description: 'Overview off the souces plugins.'
+  description: 'View translation status of your site and create new jobs.'
   route_name: tmgmt.source_overview_default
   parent: tmgmt.admin_tmgmt
   weight: -80

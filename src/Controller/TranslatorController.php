@@ -27,7 +27,7 @@ class TranslatorController extends ControllerBase {
    */
   function enable(TranslatorInterface $tmgmt_translator) {
     $tmgmt_translator->enable()->save();
-    return new RedirectResponse(url('admin/config/regional/tmgmt_translator', array('absolute' => TRUE)));
+    return new RedirectResponse(url('admin/tmgmt/translators', array('absolute' => TRUE)));
   }
 
   /**
@@ -41,7 +41,7 @@ class TranslatorController extends ControllerBase {
    */
   function disable(TranslatorInterface $tmgmt_translator) {
     $tmgmt_translator->disable()->save();
-    return new RedirectResponse(url('admin/config/regional/tmgmt_translator', array('absolute' => TRUE)));
+    return new RedirectResponse(url('admin/tmgmt/translators', array('absolute' => TRUE)));
   }
 
 }

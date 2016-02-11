@@ -50,11 +50,11 @@ use Drupal\tmgmt\TranslatorInterface;
  *     "remote_languages_mappings",
  *   },
  *   links = {
- *     "collection" = "/admin/config/regional/tmgmt_translator",
- *     "edit-form" = "/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}",
- *     "add-form" = "/admin/config/regional/tmgmt_translator/add",
- *     "delete-form" = "/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}/delete",
- *     "clone-form" = "/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}/clone",
+ *     "collection" = "/admin/tmgmt/translators",
+ *     "edit-form" = "/admin/tmgmt/translator/manage/{tmgmt_translator}",
+ *     "add-form" = "/admin/tmgmt/translators/add",
+ *     "delete-form" = "/admin/tmgmt/translators/manage/{tmgmt_translator}/delete",
+ *     "clone-form" = "/admin/tmgmt/translators/manage/{tmgmt_translator}/clone",
  *   }
  * )
  *

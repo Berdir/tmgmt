@@ -1012,19 +1012,19 @@ class TMGMTUiTest extends TMGMTTestBase {
     $item = $job->addItem('test_source', 'test', 1);
 
     // Tmgtm settings.
-    $this->drupalGet('/admin/config/regional/tmgmt_settings');
+    $this->drupalGet('/admin/tmgmt/settings');
     $this->assertTitle(t('Translation Management settings | Drupal'));
     // Manage translators.
-    $this->drupalGet('/admin/config/regional/tmgmt_translator');
+    $this->drupalGet('/admin/tmgmt/translators');
     $this->assertTitle(t('Translation Management translators | Drupal'));
     // Add Translator.
-    $this->drupalGet('/admin/config/regional/tmgmt_translator/add');
+    $this->drupalGet('/admin/tmgmt/translators/add');
     $this->assertTitle(t('Add Translator | Drupal'));
     // Delete Translators.
-    $this->drupalGet('/admin/config/regional/tmgmt_translator/manage/' . $translator->id() . '/delete');
+    $this->drupalGet('/admin/tmgmt/translators/manage/' . $translator->id() . '/delete');
     $this->assertTitle(t('Are you sure you want to delete the translator @label? | Drupal', ['@label' => $translator->label()]));
     // Edit Translators.
-    $this->drupalGet('/admin/config/regional/tmgmt_translator/manage/' . $translator->id());
+    $this->drupalGet('/admin/tmgmt/translators/manage/' . $translator->id());
     $this->assertTitle(t('Edit translator | Drupal'));
     // Delete Job.
     $this->drupalGet('/admin/tmgmt/jobs/' . $job->id() . '/delete');
@@ -1136,7 +1136,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertEqual(20, $settings->get('source_list_limit'));
     $this->assertTrue($settings->get('respect_text_format'));
 
-    $this->drupalGet('admin/config/regional/tmgmt_settings');
+    $this->drupalGet('admin/tmgmt/settings');
     $edit = [
       'tmgmt_quick_checkout' => FALSE,
       'tmgmt_purge_finished' => 0,

@@ -91,7 +91,7 @@ function tmgmt_local_menu_links_discovered_alter(&$links) {
   if ($view = Views::getView('tmgmt_local_task_overview')) {
     $links['tmgmt_local_task_overview'] = [
       'title' => new TranslatableMarkup('Translate'),
-      'description' => new TranslatableMarkup('Perform local translations.'),
+      'description' => new TranslatableMarkup('Perform task translations.'),
       'route_name' => $view->getUrl(NULL, 'unassigned')->getRouteName(),
       'parent' => 'tmgmt.admin_tmgmt',
       'menu_name' => 'admin',

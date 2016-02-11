@@ -41,7 +41,7 @@ class TranslatorTest extends TMGMTTestBase {
     // Create a translator for later deletion.
     $translator = parent::createTranslator();
     // Does the translator exist in the listing?
-    $this->drupalGet('admin/config/regional/tmgmt_translator');
+    $this->drupalGet('admin/tmgmt/translators');
     $this->assertText($translator->label());
     $this->assertEqual(count($this->xpath('//tbody/tr')), 2);
 
@@ -54,7 +54,7 @@ class TranslatorTest extends TMGMTTestBase {
     $item = $job->addItem('test_source', 'test', 1);
 
     // Try to delete the translator, should fail because of active job.
-    $delete_url = '/admin/config/regional/tmgmt_translator/manage/' . $translator->id() . '/delete';
+    $delete_url = '/admin/tmgmt/translators/manage/' . $translator->id() . '/delete';
     $this->drupalGet($delete_url);
     $this->assertLink(t('Cancel'));
     $this->drupalPostForm(NULL, array(), 'Delete');
@@ -99,7 +99,7 @@ class TranslatorTest extends TMGMTTestBase {
     \Drupal::service('module_installer')->uninstall(array('tmgmt_file'), FALSE);
 
     // Get the overview.
-    $this->drupalGet('admin/config/regional/tmgmt_translator');
+    $this->drupalGet('admin/tmgmt/translators');
     $this->assertNoText(t('Add translator'));
     $this->assertText(t('There are no translator plugins available. Please install a translator plugin.'));
   }
@@ -148,8 +148,8 @@ class TranslatorTest extends TMGMTTestBase {
       'remote_languages_mappings[pt-br]' => 'pt',
       'remote_languages_mappings[pt-pt]' => 'pt',
     );
-    $this->drupalPostForm('admin/config/regional/tmgmt_translator/manage/test_translator', $edit, t('Save'));
-    $this->drupalGet('admin/config/regional/tmgmt_translator/manage/test_translator');
+    $this->drupalPostForm('admin/tmgmt/translators/manage/test_translator', $edit, t('Save'));
+    $this->drupalGet('admin/tmgmt/translators/manage/test_translator');
     $this->assertFieldById('edit-remote-languages-mappings-pt-br', 'pt', 'Mapping saved correctly');
 
     // Test first local language.

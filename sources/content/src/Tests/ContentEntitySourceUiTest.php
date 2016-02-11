@@ -451,7 +451,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
       )
     )->save();
 
-    $this->drupalGet('admin/config/regional/tmgmt_settings');
+    $this->drupalGet('admin/tmgmt/settings');
 
     $checked_reference_fields = array(
       'embedded_fields[node][field1]' => TRUE,

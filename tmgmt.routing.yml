@@ -1,5 +1,5 @@
 tmgmt.settings:
-  path: '/admin/config/regional/tmgmt_settings'
+  path: '/admin/tmgmt/settings'
   defaults:
     _title: 'Translation Management settings'
     _form: 'Drupal\tmgmt\Form\SettingsForm'
@@ -7,7 +7,7 @@ tmgmt.settings:
     _permission: 'administer tmgmt'
 
 entity.tmgmt_translator.collection:
-  path: '/admin/config/regional/tmgmt_translator'
+  path: '/admin/tmgmt/translators'
   defaults:
     _title: 'Translation Management translators'
     _entity_list: 'tmgmt_translator'
@@ -15,7 +15,7 @@ entity.tmgmt_translator.collection:
     _permission: 'administer tmgmt'
 
 entity.tmgmt_translator.add_form:
-  path: '/admin/config/regional/tmgmt_translator/add'
+  path: '/admin/tmgmt/translators/add'
   defaults:
     _title: 'Add Translator'
     _entity_form: tmgmt_translator.add
@@ -23,14 +23,14 @@ entity.tmgmt_translator.add_form:
     _entity_create_access: tmgmt_translator
 
 entity.tmgmt_translator.delete_form:
-  path: '/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}/delete'
+  path: '/admin/tmgmt/translators/manage/{tmgmt_translator}/delete'
   defaults:
     _entity_form: tmgmt_translator.delete
   requirements:
     _entity_access: tmgmt_translator.delete
 
 entity.tmgmt_translator.clone_form:
-  path: '/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}/clone'
+  path: '/admin/tmgmt/translators/manage/{tmgmt_translator}/clone'
   defaults:
     _title: 'Clone translator'
     _entity_form: tmgmt_translator.clone
@@ -38,7 +38,7 @@ entity.tmgmt_translator.clone_form:
     _entity_access: tmgmt_translator.clone
 
 entity.tmgmt_translator.edit_form:
-  path: '/admin/config/regional/tmgmt_translator/manage/{tmgmt_translator}'
+  path: '/admin/tmgmt/translators/manage/{tmgmt_translator}'
   defaults:
     _title: 'Edit translator'
     _entity_form: tmgmt_translator.edit
