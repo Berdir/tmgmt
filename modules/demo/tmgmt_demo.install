@@ -90,7 +90,10 @@ function tmgmt_demo_install() {
   $node = Node::create(array(
     'type' => 'translatable_node',
     'title' => t('Second node'),
-    'body' => t('Have another try. This text can be translated as well.'),
+    'body' => [
+      'value' => t('Have another try. This text can be translated as well.'),
+      'format' => 'restricted_html',
+    ],
     'uid' => '0',
     'status' => 1,
   ));
@@ -99,7 +102,10 @@ function tmgmt_demo_install() {
   $node = Node::create(array(
     'type' => 'translatable_node',
     'title' => t('First node'),
-    'body' => t('This text can be translated with TMGMT. Use the "translate" Tab and choose "Request Translation" to get started.'),
+    'body' => [
+      'value' => t('This text can be translated with TMGMT. Use the "translate" Tab and choose "Request Translation" to get started.'),
+      'format' => 'full_html',
+    ],
     'uid' => '0',
     'status' => 1,
   ));

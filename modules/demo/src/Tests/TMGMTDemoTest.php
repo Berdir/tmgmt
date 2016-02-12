@@ -6,6 +6,7 @@
 
 namespace Drupal\tmgmt_demo\Tests;
 
+use Drupal\filter\Entity\FilterFormat;
 use Drupal\tmgmt\Tests\TMGMTTestBase;
 
 /**
@@ -20,17 +21,32 @@ class TMGMTDemoTest extends TMGMTTestBase {
    *
    * @var string[]
    */
-  public static $modules = array('tmgmt_demo');
+  public static $modules = array('tmgmt_demo', 'ckeditor');
 
   /**
    * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();
+    $basic_html_format = FilterFormat::load('basic_html');
+    $restricted_html_format = FilterFormat::create(array(
+      'format' => 'restricted_html',
+      'name' => 'Restricted HTML',
+    ));
+    $restricted_html_format->save();
+    $full_html_format = FilterFormat::create(array(
+      'format' => 'full_html',
+      'name' => 'Full HTML',
+    ));
+    $full_html_format->save();
     $this->loginAsAdmin([
       'access content overview',
       'administer tmgmt',
-      'translate any entity'
+      'translate any entity',
+      'edit any translatable_node content',
+      $basic_html_format->getPermissionName(),
+      $restricted_html_format->getPermissionName(),
+      $full_html_format->getPermissionName(),
     ]);
   }
 
@@ -74,6 +90,14 @@ class TMGMTDemoTest extends TMGMTTestBase {
     $this->assertNoText(t("You didn't select any source items."));
     $this->drupalPostForm(NULL, [], t('Add to cart'));
     $this->assertUniqueText(t("You didn't select any source items."));
+
+    // Test if the formats are set properly.
+    $this->drupalGet('node/1/edit');
+    $this->assertOptionSelected('edit-body-0-format--2', 'basic_html', 'Basic HTML selected as format');
+    $this->drupalGet('node/2/edit');
+    $this->assertOptionSelected('edit-body-0-format--2', 'restricted_html', 'Restricted HTML selected as format');
+    $this->drupalGet('node/3/edit');
+    $this->assertOptionSelected('edit-body-0-format--2', 'full_html', 'Full HTML selected as format');
   }
 
 }
