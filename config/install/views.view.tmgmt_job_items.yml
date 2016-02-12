@@ -346,7 +346,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Word count'
+          label: 'Words'
           exclude: false
           alter:
             alter_text: false
@@ -412,7 +412,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Tags count'
+          label: 'Tags'
           exclude: false
           alter:
             alter_text: false
@@ -532,7 +532,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Operations links'
+          label: 'Operations'
           exclude: false
           alter:
             alter_text: false
@@ -760,7 +760,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Word count'
+          label: 'Words'
           exclude: false
           alter:
             alter_text: false

@@ -158,7 +158,7 @@ class JobForm extends TmgmtFormBase {
     if(!$job->isContinuous()) {
       $form['info']['word_count'] = array(
         '#type' => 'item',
-        '#title' => t('Total word count'),
+        '#title' => t('Total words'),
         '#markup' => number_format($job->getWordCount()),
         '#prefix' => '<div class="tmgmt-ui-word-count tmgmt-ui-info-item">',
         '#suffix' => '</div>',
@@ -166,7 +166,7 @@ class JobForm extends TmgmtFormBase {
 
       $form['info']['tags_count'] = array(
         '#type' => 'item',
-        '#title' => t('Total HTML tags count'),
+        '#title' => t('Total HTML tags'),
         '#markup' => number_format($job->getTagsCount()),
         '#prefix' => '<div class="tmgmt-ui-tags-count tmgmt-ui-info-item">',
         '#suffix' => '</div>',
