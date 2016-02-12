@@ -36,6 +36,7 @@ use Drupal\user\UserInterface;
  *       "abort" = "Drupal\tmgmt\Form\JobAbortForm",
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *       "resubmit" = "Drupal\tmgmt\Form\JobResubmitForm",
+ *       "continuous_add" = "Drupal\tmgmt\Form\ContinuousJobForm",
  *     },
  *     "list_builder" = "Drupal\tmgmt\Entity\ListBuilder\JobListBuilder",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
@@ -52,6 +53,7 @@ use Drupal\user\UserInterface;
  *     "abort-form" = "/admin/tmgmt/jobs/{tmgmt_job}/abort",
  *     "delete-form" = "/admin/tmgmt/jobs/{tmgmt_job}/delete",
  *     "resubmit-form" = "/admin/tmgmt/jobs/{tmgmt_job}/resubmit",
+ *     "continuous-add-form" = "/admin/tmgmt/continuous_jobs/continuous_add",
  *   }
  * )
  *
@@ -542,14 +544,24 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    */
   public function isAbortable() {
     // Only non-submitted translation jobs can be aborted.
-    return $this->isActive();
+    if ($this->isContinuous()) {
+      return FALSE;
+    }
+    else {
+      return $this->isActive();
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function isSubmittable() {
-    return $this->isUnprocessed() || $this->isRejected();
+    if ($this->isContinuous()) {
+      return FALSE;
+    }
+    else {
+      return $this->isUnprocessed() || $this->isRejected();
+    }
   }
 
   /**
@@ -557,6 +569,13 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    */
   public function isDeletable() {
     return !$this->isActive();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isContinuous() {
+    return $this->getJobType() == static::TYPE_CONTINUOUS;
   }
 
   /**

@@ -116,7 +116,7 @@ class JobForm extends TmgmtFormBase {
         ),
       );
     }
-    if (!$job->isSubmittable()) {
+    if (!$job->isSubmittable() && !$job->isContinuous()) {
       $form['info']['target_language'] = array(
         '#title' => t('Target language'),
         '#type' => 'item',
@@ -143,7 +143,7 @@ class JobForm extends TmgmtFormBase {
     }
 
     // Display selected translator for already submitted jobs.
-    if (!$job->isSubmittable()) {
+    if (!$job->isSubmittable() && !$job->isContinuous()) {
       $translators = tmgmt_translator_labels();
       $form['info']['translator'] = array(
         '#type' => 'item',
@@ -155,21 +155,23 @@ class JobForm extends TmgmtFormBase {
       );
     }
 
-    $form['info']['word_count'] = array(
-      '#type' => 'item',
-      '#title' => t('Total word count'),
-      '#markup' => number_format($job->getWordCount()),
-      '#prefix' => '<div class="tmgmt-ui-word-count tmgmt-ui-info-item">',
-      '#suffix' => '</div>',
-    );
+    if(!$job->isContinuous()) {
+      $form['info']['word_count'] = array(
+        '#type' => 'item',
+        '#title' => t('Total word count'),
+        '#markup' => number_format($job->getWordCount()),
+        '#prefix' => '<div class="tmgmt-ui-word-count tmgmt-ui-info-item">',
+        '#suffix' => '</div>',
+      );
 
-    $form['info']['tags_count'] = array(
-      '#type' => 'item',
-      '#title' => t('Total HTML tags count'),
-      '#markup' => number_format($job->getTagsCount()),
-      '#prefix' => '<div class="tmgmt-ui-tags-count tmgmt-ui-info-item">',
-      '#suffix' => '</div>',
-    );
+      $form['info']['tags_count'] = array(
+        '#type' => 'item',
+        '#title' => t('Total HTML tags count'),
+        '#markup' => number_format($job->getTagsCount()),
+        '#prefix' => '<div class="tmgmt-ui-tags-count tmgmt-ui-info-item">',
+        '#suffix' => '</div>',
+      );
+    }
 
     // Display created time only for jobs that are not new anymore.
     if (!$job->isUnprocessed()) {
@@ -182,96 +184,96 @@ class JobForm extends TmgmtFormBase {
         '#value' => $job->getCreatedTime(),
       );
     }
+    if(!$job->isContinuous()) {
+      if ($view = Views::getView('tmgmt_job_items')) {
+        $form['job_items_wrapper'] = array(
+          '#type' => 'details',
+          '#title' => t('Job items'),
+          '#open' => $job->getState() == Job::STATE_ACTIVE,
+          '#weight' => 10,
+          '#prefix' => '<div class="tmgmt-ui-job-checkout-details">',
+          '#suffix' => '</div>',
+        );
+        $form['footer'] = tmgmt_color_job_item_legend();
+        $form['footer']['#weight'] = 100;
+        // Translation jobs.
+        $output = $view->preview($job->isSubmittable() ? 'checkout' : 'submitted', array($job->id()));
+        $form['job_items_wrapper']['items'] = array(
+          '#type' => 'markup',
+          '#title' => $view->storage->label(),
+          '#prefix' => '<div class="' . 'tmgmt-ui-job-items ' . ($job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage') . '">',
+          'view' => ['#markup' => $this->renderer->render($output)],
+          '#attributes' => array('class' => array('tmgmt-ui-job-items', $job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage')),
+          '#suffix' => '</div>',
+        );
+      }
 
-    if ($view = Views::getView('tmgmt_job_items')) {
-      $form['job_items_wrapper'] = array(
-        '#type' => 'details',
-        '#title' => t('Job items'),
-        '#open' => $job->getState() == Job::STATE_ACTIVE,
-        '#weight' => 10,
-        '#prefix' => '<div class="tmgmt-ui-job-checkout-details">',
-        '#suffix' => '</div>',
+      // A Wrapper for a button and a table with all suggestions.
+      $form['job_items_wrapper']['suggestions'] = array(
+        '#type' => 'container',
+        '#access' => $job->isSubmittable(),
       );
-      $form['footer'] = tmgmt_color_job_item_legend();
-      $form['footer']['#weight'] = 100;
-      // Translation jobs.
-      $output = $view->preview($job->isSubmittable() ? 'checkout' : 'submitted', array($job->id()));
-      $form['job_items_wrapper']['items'] = array(
-        '#type' => 'markup',
-        '#title' => $view->storage->label(),
-        '#prefix' => '<div class="' . 'tmgmt-ui-job-items ' . ($job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage') . '">',
-        'view' => ['#markup' => $this->renderer->render($output)],
-        '#attributes' => array('class' => array('tmgmt-ui-job-items', $job->isSubmittable() ? 'tmgmt-ui-job-submit' : 'tmgmt-ui-job-manage')),
-        '#suffix' => '</div>',
-      );
-    }
 
-    // A Wrapper for a button and a table with all suggestions.
-    $form['job_items_wrapper']['suggestions'] = array(
-      '#type' => 'container',
-      '#access' => $job->isSubmittable(),
-    );
-
-    // Button to load all translation suggestions with AJAX.
-    $form['job_items_wrapper']['suggestions']['load'] = array(
-      '#type' => 'submit',
-      '#value' => t('Load suggestions'),
-      '#submit' => array('::loadSuggestionsSubmit'),
-      '#limit_validation_errors' => array(),
-      '#attributes' => array(
-        'class' => array('tmgmt-ui-job-suggestions-load'),
-      ),
-      '#ajax' => array(
-        'callback' => '::ajaxLoadSuggestions',
-        'wrapper' => 'tmgmt-ui-job-items-suggestions',
-        'method' => 'replace',
-        'effect' => 'fade',
-      ),
-    );
-
-    $form['job_items_wrapper']['suggestions']['container'] = array(
-      '#type' => 'container',
-      '#prefix' => '<div id="tmgmt-ui-job-items-suggestions">',
-      '#suffix' => '</div>',
-    );
-
-    // Create the suggestions table.
-    $suggestions_table = array(
-      '#type' => 'tableselect',
-      '#header' => array(),
-      '#options' => array(),
-      '#multiple' => TRUE,
-    );
-
-    // If this is an AJAX-Request, load all related nodes and fill the table.
-    if ($form_state->isRebuilding() && $form_state->get('rebuild_suggestions')) {
-      $this->buildSuggestions($suggestions_table, $form_state);
-
-      // A save button on bottom of the table is needed.
-      $suggestions_table = array(
-        'suggestions_table' => $suggestions_table,
-        'suggestions_add' => array(
-          '#type' => 'submit',
-          '#value' => t('Add suggestions'),
-          '#submit' => array('::addSuggestionsSubmit'),
-          '#limit_validation_errors' => array(array('suggestions_table')),
-          '#attributes' => array(
-            'class' => array('tmgmt-ui-job-suggestions-add'),
-          ),
-          '#access' => !empty($suggestions_table['#options']),
+      // Button to load all translation suggestions with AJAX.
+      $form['job_items_wrapper']['suggestions']['load'] = array(
+        '#type' => 'submit',
+        '#value' => t('Load suggestions'),
+        '#submit' => array('::loadSuggestionsSubmit'),
+        '#limit_validation_errors' => array(),
+        '#attributes' => array(
+          'class' => array('tmgmt-ui-job-suggestions-load'),
+        ),
+        '#ajax' => array(
+          'callback' => '::ajaxLoadSuggestions',
+          'wrapper' => 'tmgmt-ui-job-items-suggestions',
+          'method' => 'replace',
+          'effect' => 'fade',
         ),
       );
-      $form['job_items_wrapper']['suggestions']['container']['suggestions_list'] = array(
-        '#type' => 'details',
-        '#title' => t('Suggestions'),
+
+      $form['job_items_wrapper']['suggestions']['container'] = array(
+        '#type' => 'container',
         '#prefix' => '<div id="tmgmt-ui-job-items-suggestions">',
         '#suffix' => '</div>',
-        '#open' => FALSE,
-      ) + $suggestions_table;
-    }
+      );
 
+      // Create the suggestions table.
+      $suggestions_table = array(
+        '#type' => 'tableselect',
+        '#header' => array(),
+        '#options' => array(),
+        '#multiple' => TRUE,
+      );
+
+      // If this is an AJAX-Request, load all related nodes and fill the table.
+      if ($form_state->isRebuilding() && $form_state->get('rebuild_suggestions')) {
+        $this->buildSuggestions($suggestions_table, $form_state);
+
+        // A save button on bottom of the table is needed.
+        $suggestions_table = array(
+          'suggestions_table' => $suggestions_table,
+          'suggestions_add' => array(
+            '#type' => 'submit',
+            '#value' => t('Add suggestions'),
+            '#submit' => array('::addSuggestionsSubmit'),
+            '#limit_validation_errors' => array(array('suggestions_table')),
+            '#attributes' => array(
+              'class' => array('tmgmt-ui-job-suggestions-add'),
+            ),
+            '#access' => !empty($suggestions_table['#options']),
+          ),
+        );
+        $form['job_items_wrapper']['suggestions']['container']['suggestions_list'] = array(
+            '#type' => 'details',
+            '#title' => t('Suggestions'),
+            '#prefix' => '<div id="tmgmt-ui-job-items-suggestions">',
+            '#suffix' => '</div>',
+            '#open' => FALSE,
+          ) + $suggestions_table;
+      }
+    }
     // Display the checkout settings form if the job can be checked out.
-    if ($job->isSubmittable()) {
+    if ($job->isSubmittable() || $job->isContinuous()) {
 
       $form['translator_wrapper'] = array(
         '#type' => 'fieldset',
@@ -340,7 +342,7 @@ class JobForm extends TmgmtFormBase {
       '#weight' => 45,
     );
 
-    if ($view = Views::getView('tmgmt_job_messages')) {
+    if (!$job->isContinuous() && $view = Views::getView('tmgmt_job_messages')) {
       $form['messages'] = array(
         '#type' => 'details',
         '#title' => $view->storage->label(),
@@ -365,7 +367,7 @@ class JobForm extends TmgmtFormBase {
       '#weight' => 5,
     );
 
-    if ($job->access('submit')) {
+    if (!$job->isContinuous() && $job->access('submit')) {
       $actions['submit'] = array(
         '#type' => 'submit',
         '#button_type' => 'primary',
@@ -461,7 +463,7 @@ class JobForm extends TmgmtFormBase {
 
     // Everything below this line is only invoked if the 'Submit to translator'
     // button was clicked.
-    if ($form_state->getTriggeringElement()['#value'] == $form['actions']['submit']['#value']) {
+    if (isset($form['actions']['submit']) && $form_state->getTriggeringElement()['#value'] == $form['actions']['submit']['#value']) {
       if (!tmgmt_job_request_translation($this->entity)) {
         // Don't redirect the user if the translation request failed but retain
         // existing destination parameters so we can redirect once the request

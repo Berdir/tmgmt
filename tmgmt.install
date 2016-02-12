@@ -7,6 +7,7 @@
 
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\tmgmt\Entity\Job;
+use Drupal\Component\Serialization\Yaml;
 
 /**
  * Add a field for the HTML tag count.
@@ -54,4 +55,14 @@ function tmgmt_update_8003() {
 
   \Drupal::entityDefinitionUpdateManager()
     ->installFieldStorageDefinition('job_type', 'tmgmt_job', 'tmgmt', $storage_definition);
+}
+
+/**
+ * Add continuous job overview.
+ */
+function tmgmt_update_8004() {
+  $overview = file_get_contents(drupal_get_path('module', 'tmgmt') . '/config/install/views.view.tmgmt_continuous_job_overview.yml');
+  $values = Yaml::decode($overview);
+  $storage_controller = \Drupal::entityTypeManager()->getStorage('view');
+  $storage_controller->create($values)->save();
 }

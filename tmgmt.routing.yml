@@ -103,6 +103,13 @@ tmgmt.source_overview:
   requirements:
     _entity_create_access: tmgmt_job
 
+entity.tmgmt_job.continuous_add_form:
+  path: 'admin/tmgmt/continuous_jobs/continuous_add'
+  defaults:
+    _entity_form: tmgmt_job.continuous_add
+  requirements:
+    _entity_create_access: tmgmt_job
+
 tmgmt.source_overview_default:
   path: '/admin/tmgmt/sources'
   defaults:

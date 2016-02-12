@@ -9,6 +9,7 @@ namespace Drupal\tmgmt\Entity\ListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Url;
+use Drupal\tmgmt\Entity\Job;
 
 /**
  * Provides the views data for the message entity type.

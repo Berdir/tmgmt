@@ -13,6 +13,11 @@ tmgmt.cart:
   base_route: view.tmgmt_job_overview.page_1
   title: Cart
 
+tmgmt.continuous_jobs:
+  route_name: view.tmgmt_continuous_job_overview.page_1
+  base_route: view.tmgmt_job_overview.page_1
+  title: Continuous Jobs
+
 tmgmt.translators:
   route_name: entity.tmgmt_translator.collection
   base_route: view.tmgmt_job_overview.page_1

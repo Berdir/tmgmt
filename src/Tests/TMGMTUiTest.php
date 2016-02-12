@@ -687,7 +687,6 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertEqual($label, $translator2->label(), 'Found translator label in table');
     $this->assertNotEqual($label, $translator1->label(), "Translators filtered in table");
 
-
     $edit = array(
       'dummy|deep_nesting[translation]' => '',
     );
@@ -702,10 +701,49 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, [], t('Save as completed'));
     $this->assertText(t('The field is empty.'));
 
-    //Test that continuous jobs are not shown in the job overview.
+    // Test that continuous jobs are not shown in the job overview.
     $continuous_job = $this->createJob('en', 'de', 0, ['label' => 'Continuous job', 'job_type' => 'continuous']);
     $this->drupalGet('admin/tmgmt/jobs');
     $this->assertNoText($continuous_job->label(), 'Continuous job is not displayed on job overview page.');
+
+    // Test that continuous jobs are shown in the continuous job overview.
+    $this->drupalGet('admin/tmgmt/continuous_jobs');
+    $this->assertText($continuous_job->label(), 'Continuous job is displayed on continuous job overview page.');
+
+    // Test that normal jobs are not shown in the continuous job overview.
+    $this->assertNoText($job1->label(), 'Normal job is not displayed on continuous job overview page.');
+
+    // Create continuous job through the form.
+    $this->drupalGet('admin/tmgmt/continuous_jobs/continuous_add');
+    $continuous_job_label = strtolower($this->randomMachineName());
+    $edit_job = [
+      'label[0][value]' => $continuous_job_label,
+      'target_language' => 'de',
+      'translator' => $this->default_translator->id()
+    ];
+    $this->drupalPostForm(NULL, $edit_job, t('Save job'));
+    $this->assertText($continuous_job_label, 'Continuous job was created.');
+
+    // Test that previous created job is continuous job.
+    $this->drupalGet('admin/tmgmt/continuous_jobs');
+    $this->assertText($continuous_job_label, 'Created continuous job is displayed on continuous job overview page.');
+
+    // Test that continuous job overview page does not have Submit link.
+    $this->assertNoLink('Submit', 'There is no Submit link on continuous job overview.');
+
+    // Test that all unnecessary fields and buttons do not exist on continuous
+    // job edit form.
+    $this->clickLink('Manage');
+    $this->assertNoRaw('<label for="edit-translator">Translator</label>', 'There is no Translator info field on continuous job edit form.');
+    $this->assertNoRaw('<label for="edit-word-count">Total word count</label>', 'There is no Total word count info field on continuous job edit form.');
+    $this->assertNoRaw('<label for="edit-tags-count">Total HTML tags count</label>', 'There is no Total HTML tags count info field on continuous job edit form.');
+    $this->assertNoRaw('<label for="edit-created">Created</label>', 'There is no Created info field on continuous job edit form.');
+    $this->assertNoRaw('id="edit-job-items-wrapper"', 'There is no Job items field on continuous job edit form.');
+    $this->assertNoRaw('<div class="tmgmt-color-legend clearfix">', 'There is no Item state legend on continuous job edit form.');
+    $this->assertNoRaw('id="edit-messages"', 'There is no Translation Job Messages field on continuous job edit form.');
+    $this->assertNoFieldById('edit-abort-job', NULL, 'There is no Abort job button.');
+    $this->assertNoFieldById('edit-submit', NULL, 'There is no Submit button.');
+    $this->assertNoFieldById('edit-resubmit-job', NULL, 'There is Resubmit job button.');
   }
 
   /**

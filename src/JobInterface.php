@@ -416,6 +416,14 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   public function isDeletable();
 
   /**
+   * Checks whether a job type is continuous.
+   *
+   * @return bool
+   *   TRUE if the job is continuous, FALSE otherwise.
+   */
+  public function isContinuous();
+
+  /**
    * Set the state of the job to 'submitted'.
    *
    * @param string $message
