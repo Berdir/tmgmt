@@ -471,4 +471,34 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertFieldChecked('edit-embedded-fields-node-field1');
   }
 
+  /**
+   * Test content entity source preview.
+   */
+  function testEntitySourcePreview() {
+    // Create translatable node.
+    $node = $this->createTranslatableNode('page', 'en');
+
+    $job = $this->createJob('en', 'de');
+    $job->translator = $this->default_translator->id();
+    $job->save();
+    $job_item = tmgmt_job_item_create('content', $node->getEntityTypeId(), $node->id(), array('tjid' => $job->id()));
+    $job_item->save();
+    $job->requestTranslation();
+    $items = $job->getItems();
+    $item = reset($items);
+    $item->acceptTranslation();
+
+    // Visit preview route.
+    $this->drupalGet(URL::fromRoute('entity.tmgmt_job_item.preview', ['tmgmt_job_item' => $job->id()])->setAbsolute()->toString());
+    $this->assertResponse(200);
+    $this->assertTitle(t("Preview of @title for @target_language | Drupal", [
+      '@title' => $node->getTitle(),
+      '@target_language' => $job->getTargetLanguage()->getName(),
+    ]));
+
+    $translated_node = entity_load($node->getEntityTypeId(), $node->id());
+    $de_node = $translated_node->getTranslation('de');
+    $this->assertText($de_node->getTitle());
+  }
+
 }
