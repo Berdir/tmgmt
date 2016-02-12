@@ -66,6 +66,9 @@ class TMGMTUiTest extends TMGMTTestBase {
     $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->drupalGet(reset($redirects));
 
+    // Test primary buttons.
+    $this->assertRaw('Save job" class="button js-form-submit form-submit"');
+
     // Check checkout form.
     $this->assertText('test_source:test:1');
 
@@ -197,7 +200,15 @@ class TMGMTUiTest extends TMGMTTestBase {
       ),
     ));
     $item4 = $job->addItem('test_source', 'test', 4);
-    $this->drupalPostForm('admin/tmgmt/items/' . $item4->id(), NULL, t('Save'));
+    $this->drupalGet('admin/tmgmt/items/' . $item4->id());
+
+    // Test primary buttons.
+    $this->assertRaw('Save" class="button button--primary js-form-submit form-submit"');
+    $this->drupalPostForm(NULL, NULL, t('Save'));
+    $this->clickLink('View');
+    $this->assertRaw('Save as completed" class="button button--primary js-form-submit form-submit"');
+    $this->drupalPostForm(NULL, NULL, t('Save'));
+    $this->assertRaw('Save job" class="button button--primary js-form-submit form-submit"');
     $this->drupalPostForm(NULL, NULL, t('Save job'));
     $this->drupalGet('admin/tmgmt/jobs');
 

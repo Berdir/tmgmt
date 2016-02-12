@@ -367,6 +367,9 @@ class JobForm extends TmgmtFormBase {
       '#weight' => 5,
     );
 
+    if (!$job->isUnprocessed()) {
+      $actions['save']['#button_type'] = 'primary';
+    }
     if (!$job->isContinuous() && $job->access('submit')) {
       $actions['submit'] = array(
         '#type' => 'submit',

@@ -158,6 +158,9 @@ class JobItemForm extends TmgmtFormBase {
       '#access' => !$item->isAccepted(),
       '#submit' => array('::submitForm', '::save'),
     );
+    if ($item->isActive()) {
+      $actions['save']['#button_type'] = 'primary';
+    }
     $actions['validate'] = array(
       '#type' => 'submit',
       '#value' => t('Validate'),
