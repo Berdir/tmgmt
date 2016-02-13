@@ -560,6 +560,7 @@ class TMGMTUiTest extends TMGMTTestBase {
             '#text' => $text,
             '#label' => 'Title',
             '#translate' => TRUE,
+            '#format' => 'filtered_html',
           ],
         ],
       ],
@@ -568,6 +569,7 @@ class TMGMTUiTest extends TMGMTTestBase {
           '#text' => $text,
           '#label' => 'Body',
           '#translate' => TRUE,
+          '#format' => 'filtered_html',
         ],
       ],
     ]);
@@ -575,6 +577,18 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     $this->drupalPostForm('admin/tmgmt/items/' . $item5->id(), [], t('Validate'));
     $this->assertText(t('The field is empty.'));
+
+    // Test review just one data item.
+    $edit = [
+      'title|0|value[translation][value]' => $text . 'translated',
+      'body|deep_nesting[translation][value]' => $text . 'no save',
+    ];
+    $this->drupalPostAjaxForm('admin/tmgmt/items/' . $item5->id(), $edit, 'reviewed-title|0|value');
+
+    // Check if translation has been saved.
+    $this->drupalGet('admin/tmgmt/items/' . $item5->id());
+    $this->assertFieldByName('title|0|value[translation][value]', $text . 'translated');
+    $this->assertNoFieldByName('body|deep_nesting[translation][value]', $text . 'no save');
 
     // Tests field is less than max_length.
     \Drupal::state()->set('tmgmt.test_source_data', [

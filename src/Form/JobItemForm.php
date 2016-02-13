@@ -289,7 +289,7 @@ class JobItemForm extends TmgmtFormBase {
             '#origin' => 'local',
           );
         }
-        if ($data['#text'] == '' && $item->isActive()) {
+        if ($data['#text'] == '' && $item->isActive() && $form_state->getTriggeringElement()['#value'] != '✓') {
           $data = NULL;
           continue;
         }
@@ -376,7 +376,10 @@ class JobItemForm extends TmgmtFormBase {
               '#value' => '✓',
               '#attributes' => array('title' => t('Reviewed')),
               '#name' => 'reviewed-' . $target_key,
-              '#submit' => array('tmgmt_translation_review_form_update_state'),
+              '#submit' => [
+                '::save',
+                'tmgmt_translation_review_form_update_state',
+              ],
               '#limit_validation_errors' => array(array($form['#ajaxid']), array($target_key)),
               '#ajax' => array(
                 'callback' => array($this, 'ajaxReviewForm'),
@@ -391,7 +394,10 @@ class JobItemForm extends TmgmtFormBase {
               '#value' => '✓',
               '#attributes' => array('title' => t('Not reviewed'), 'class' => array('unreviewed')),
               '#name' => 'unreviewed-' . $target_key,
-              '#submit' => array('tmgmt_translation_review_form_update_state'),
+              '#submit' => [
+                '::save',
+                'tmgmt_translation_review_form_update_state',
+              ],
               '#limit_validation_errors' => array(array($form['#ajaxid']), array($target_key)),
               '#ajax' => array(
                 'callback' => array($this, 'ajaxReviewForm'),
@@ -406,7 +412,10 @@ class JobItemForm extends TmgmtFormBase {
               '#value' => '✗',
               '#attributes' => array('title' => t('Reject')),
               '#name' => 'reject-' . $target_key,
-              '#submit' => array('tmgmt_translation_review_form_update_state'),
+              '#submit' => [
+                '::save',
+                'tmgmt_translation_review_form_update_state',
+              ],
             );
           }
 
