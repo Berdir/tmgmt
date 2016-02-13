@@ -107,7 +107,7 @@ class LocalTask extends ContentEntityBase implements LocalTaskInterface {
       ->setDefaultValue(0);
 
     $fields['status'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Local task status'))
+      ->setLabel(t('Status'))
       ->setDescription(t('The local task status.'))
       ->setDefaultValue(static::STATUS_UNASSIGNED);
 

@@ -2529,7 +2529,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Local task status'
+          label: 'Status'
           exclude: false
           alter:
             alter_text: false
@@ -3290,7 +3290,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Local task status'
+          label: 'Status'
           exclude: false
           alter:
             alter_text: false
