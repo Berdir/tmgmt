@@ -868,7 +868,7 @@ function tmgmt_color_legend() {
   $legends_left[] = array('legend' => t('Translated'), 'icon' => 'core/misc/icons/73b355/check.svg');
   $legends_left[] = array('legend' => t('Translation Outdated'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/outdated.svg');
   $legends_right = array();
-  $legends_right[] = array('legend' => t('Ready for review'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
+  $legends_right[] = array('legend' => t('Needs review'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
   $legends_right[] = array('legend' => t('In progress'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg');
 
   $source_status = 'Source status:';
