@@ -336,7 +336,7 @@ class LocalTaskItemForm extends ContentEntityForm {
     // Write the translated data into the job item.
     if (isset($values[$key]) && is_array($values[$key]) && isset($values[$key]['translation'])) {
       $update['#status'] = $action == 'finish' ? TMGMT_DATA_ITEM_STATE_TRANSLATED : TMGMT_DATA_ITEM_STATE_PENDING;
-      $update['#text'] = $values[$key]['translation'];
+      $update['#text'] = is_array($values[$key]['translation']) ? $values[$key]['translation']['value'] : $values[$key]['translation'];
       $item->updateData($key, $update);
       $item->save();
 

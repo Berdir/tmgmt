@@ -10,6 +10,7 @@ namespace Drupal\tmgmt\Entity;
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -959,6 +960,21 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    */
   public function language() {
     return new Language(array('id' => Language::LANGCODE_NOT_SPECIFIED));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function invalidateTagsOnSave($update) {
+    parent::invalidateTagsOnSave($update);
+    if ($this->getJob()) {
+      $tags = $this->getJob()->getEntityType()->getListCacheTags();
+      if ($update) {
+        $tags = Cache::mergeTags($tags, $this->getJob()
+          ->getCacheTagsToInvalidate());
+      }
+      Cache::invalidateTags($tags);
+    }
   }
 
   /**

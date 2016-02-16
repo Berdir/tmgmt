@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_local\Entity;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -339,6 +340,18 @@ class LocalTaskItem extends ContentEntityBase implements LocalTaskItemInterface 
    */
   public function getChangedTimeAcrossTranslations() {
     return $this->getChangedTime();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function invalidateTagsOnSave($update) {
+    parent::invalidateTagsOnSave($update);
+    $tags = $this->getTask()->getEntityType()->getListCacheTags();
+    if ($update) {
+      $tags = Cache::mergeTags($tags, $this->getTask()->getCacheTagsToInvalidate());
+    }
+    Cache::invalidateTags($tags);
   }
 
   /**

@@ -440,14 +440,13 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Review and accept the first item.
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
-    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->resetCache();
-    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     /** @var \Drupal\tmgmt\JobItemInterface $item1 */
     $item1 = JobItem::load(1);
     $item1->acceptTranslation();
 
     // The first item should be accepted now, the second still in progress.
+    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     $this->drupalGet('translate/1');
     $this->assertRaw('icons/73b355/check.svg" title="Completed"');
     $this->assertRaw('tmgmt/icons/ready.svg" title="Untranslated"');
@@ -495,8 +494,6 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertRaw('icons/73b355/check.svg" title="Completed"');
     $this->assertRaw('tmgmt/icons/ready.svg" title="Untranslated"');
 
-    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->resetCache();
-    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
     $task = entity_load('tmgmt_local_task', $task->id(), TRUE);
@@ -521,8 +518,10 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->clickLink(t('Translate'));
     $this->drupalPostAjaxForm(NULL, [], 'finish-dummy|deep_nesting');
     $this->assertRaw('name="reject-dummy|deep_nesting"', "'✗' button appears.");
+    $this->drupalGet('translate/' . $task->id());
+    $this->asserTaskItemProgress(1, '0/0/1');
+    $this->asserTaskItemProgress(2, '0/1/0');
 
-    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->resetCache();
     \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
@@ -540,12 +539,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($second_task_item->getCountCompleted(), 0);
     $this->assertEqual($second_task_item->getCountTranslated(), 1);
     $this->assertEqual($second_task_item->getCountUntranslated(), 0);
-    $this->drupalPostForm(NULL, [], t('Save'));
-    $this->asserTaskItemProgress(1, '0/0/1');
-    $this->asserTaskItemProgress(2, '0/1/0');
 
     // Check the job data.
-    \Drupal::entityTypeManager()->getStorage('tmgmt_job')->resetCache();
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
     $job = Job::load($job->id());
     list($item1, $item2) = array_values($job->getItems());
@@ -569,15 +564,20 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Review and accept the second item.
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
-    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->resetCache();
-    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     $item1 = JobItem::load(2);
     $item1->acceptTranslation();
 
     // Refresh the page.
     $this->drupalGet('translate');
+    // We should have been redirect back to the overview, the task should be
+    // completed now.
+    $this->assertNoText($task->getJob()->label());
+    $this->clickLink(t('Closed'));
+    $this->assertText($task->getJob()->label());
+    $this->assertText(t('Completed'));
 
+    \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     $task = tmgmt_local_task_load($task->id());
     $this->assertTrue($task->isClosed());
     $this->assertEqual($task->getCountCompleted(), 2);
@@ -593,14 +593,6 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertEqual($second_task_item->getCountTranslated(), 0);
     $this->assertEqual($second_task_item->getCountUntranslated(), 0);
 
-    // We should have been redirect back to the overview, the task should be
-    // completed now.
-    $this->assertNoText($task->getJob()->label());
-    $this->clickLink(t('Closed'));
-    $this->assertText($task->getJob()->label());
-    $this->assertText(t('Completed'));
-
-    \Drupal::entityTypeManager()->getStorage('tmgmt_job')->resetCache();
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
     $job = Job::load($job->id());
     list($item1, $item2) = array_values($job->getItems());
