@@ -9,6 +9,7 @@ namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\tmgmt\Tests\TMGMTKernelTestBase;
@@ -25,13 +26,14 @@ class ContentEntitySuggestionsTest extends TMGMTKernelTestBase {
    *
    * @var array
    */
-  public static $modules = array('tmgmt_content', 'tmgmt_test', 'content_translation', 'node', 'filter', 'entity_reference');
+  public static $modules = array('menu_link_content', 'link', 'tmgmt_content', 'tmgmt_test', 'content_translation', 'node', 'filter', 'entity_reference');
 
   /**
    * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp();
+    $this->installEntitySchema('menu_link_content');
     $this->installEntitySchema('node');
     $this->installConfig(['node']);
   }
@@ -128,6 +130,15 @@ class ContentEntitySuggestionsTest extends TMGMTKernelTestBase {
       ),
     )));
     $node->save();
+
+    $link = MenuLinkContent::create([
+      'link' => [['uri' => 'entity:node/' . $node->id()]],
+      'title' => 'Node menu link',
+      'menu_name' => 'main',
+    ]);
+    $link->save();
+    $node->link = $link;
+
     return $node;
   }
 
@@ -138,40 +149,52 @@ class ContentEntitySuggestionsTest extends TMGMTKernelTestBase {
     // Prepare a job and a node for testing.
     $job = $this->createJob();
     $node = $this->prepareTranslationSuggestions();
+    $expected_nodes = array(
+      $node->field2[0]->target_id => $node->field2[0]->target_id,
+      $node->field2[1]->target_id => $node->field2[1]->target_id,
+    );
     $item = $job->addItem('content', 'node', $node->id());
 
     // Get all suggestions and clean the list.
     $suggestions = $job->getSuggestions();
     $job->cleanSuggestionsList($suggestions);
 
-    // Check for one suggestion.
-    $this->assertEqual(count($suggestions), 2, 'Found two suggestions.');
+    // Check for three suggestions.
+    $this->assertEqual(count($suggestions), 3, 'Found three suggestions.');
 
-    // Check for valid attributes on the suggestions.
-    $suggestion = array_shift($suggestions);
-    $this->assertEqual($suggestion['job_item']->getWordCount(), 2, 'Two translatable words in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->getPlugin(), 'content', 'Got a content entity as plugin in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->getItemType(), 'node', 'Got a node in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->getItemId(), $node->field2[0]->target_id, 'Node id match between node and suggestion.');
-    $this->assertEqual($suggestion['reason'], 'Field Field 2');
-    $this->assertEqual($suggestion['from_item'], $item->id());
-    $job->addExistingItem($suggestion['job_item']);
 
-    $suggestion = array_shift($suggestions);
-    $this->assertEqual($suggestion['job_item']->getWordCount(), 2, 'Two translatable words in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->getPlugin(), 'content', 'Got a content entity as plugin in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->getItemType(), 'node', 'Got a node in the suggestion.');
-    $this->assertEqual($suggestion['job_item']->getItemId(), $node->field2[1]->target_id, 'Node id match between node and suggestion.');
-    $this->assertEqual($suggestion['reason'], 'Field Field 2');
-    $this->assertEqual($suggestion['from_item'], $item->id());
+    foreach ($suggestions as $suggestion) {
+      switch ($suggestion['job_item']->getItemType()) {
+        case 'node':
+          // Check for valid attributes on the node suggestions.
+          $this->assertEqual($suggestion['job_item']->getWordCount(), 2, 'Two translatable words in the suggestion.');
+          $this->assertEqual($suggestion['job_item']->getItemType(), 'node', 'Got a node in the suggestion.');
+          $this->assertTrue(in_array($suggestion['job_item']->getItemId(), $expected_nodes), 'Node id match between node and suggestion.');
+          unset($expected_nodes[$suggestion['job_item']->getItemId()]);
+          break;
+        case 'menu_link_content':
+          // Check for valid attributes on the menu link suggestions.
+          $this->assertEqual($suggestion['job_item']->getWordCount(), 3, 'Three translatable words in the suggestion.');
+          $this->assertEqual($suggestion['job_item']->getItemType(), 'menu_link_content', 'Got a menu link in the suggestion.');
+          $this->assertEqual($suggestion['job_item']->getItemId(), $node->link->id(), 'Menu link id match between menu link and suggestion.');
+          break;
+        default:
+          $this->fail('Found an invalid suggestion.');
+          break;
+      }
+      $this->assertEqual($suggestion['job_item']->getPlugin(), 'content', 'Got a content entity as plugin in the suggestion.');
+      $this->assertEqual($suggestion['from_item'], $item->id());
+      $job->addExistingItem($suggestion['job_item']);
+    }
+    // Check that we tested all expected nodes.
+    $this->assertTrue(empty($expected_nodes), 'Found unexpected node suggestions.');
 
     // Add the suggestion to the job and re-get all suggestions.
-    $job->addExistingItem($suggestion['job_item']);
     $suggestions = $job->getSuggestions();
     $job->cleanSuggestionsList($suggestions);
 
     // Check for no more suggestions.
-    $this->assertEqual(count($suggestions), 0, 'Found no more suggestion.');
+    $this->assertEqual(count($suggestions), 0, 'Found no more suggestions.');
   }
 
 }
