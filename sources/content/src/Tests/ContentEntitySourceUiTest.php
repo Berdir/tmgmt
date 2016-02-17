@@ -483,10 +483,11 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $job->save();
     $job_item = tmgmt_job_item_create('content', $node->getEntityTypeId(), $node->id(), array('tjid' => $job->id()));
     $job_item->save();
+    // Check are we dont have preview on review page.
+    $this->drupalGet('admin/tmgmt/items/' . $node->id(), array('query' => array('destination' => 'admin/tmgmt/items/' . $node->id())));
+    $this->assertNoRaw(t('Preview'));
+
     $job->requestTranslation();
-    $items = $job->getItems();
-    $item = reset($items);
-    $item->acceptTranslation();
 
     // Visit preview route.
     $this->drupalGet(URL::fromRoute('entity.tmgmt_job_item.preview', ['tmgmt_job_item' => $job->id()])->setAbsolute()->toString());
@@ -495,6 +496,19 @@ class ContentEntitySourceUiTest extends EntityTestBase {
       '@title' => $node->getTitle(),
       '@target_language' => $job->getTargetLanguage()->getName(),
     ]));
+
+    // Check are we have clickable link on review page.
+    $this->drupalGet('admin/tmgmt/items/' . $node->id(), array('query' => array('destination' => 'admin/tmgmt/items/' . $node->id())));
+    $this->clickLink(t('Preview'));
+    // Make sure we are on preview page.
+    $this->assertTitle(t("Preview of @title for @target_language | Drupal", [
+      '@title' => $node->getTitle(),
+      '@target_language' => $job->getTargetLanguage()->getName(),
+    ]));
+
+    $items = $job->getItems();
+    $item = reset($items);
+    $item->acceptTranslation();
 
     $translated_node = entity_load($node->getEntityTypeId(), $node->id());
     $de_node = $translated_node->getTranslation('de');

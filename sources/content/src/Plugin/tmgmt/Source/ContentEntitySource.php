@@ -14,8 +14,10 @@ use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\TypedData\OptionsProviderInterface;
 use Drupal\Core\TypedData\Type\StringInterface;
 use Drupal\Core\TypedData\PrimitiveInterface;
+use Drupal\Core\Url;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\SourcePluginBase;
+use Drupal\tmgmt\SourcePreviewInterface;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Render\Element;
 
@@ -29,7 +31,7 @@ use Drupal\Core\Render\Element;
  *   ui = "Drupal\tmgmt_content\ContentEntitySourcePluginUi"
  * )
  */
-class ContentEntitySource extends SourcePluginBase {
+class ContentEntitySource extends SourcePluginBase implements SourcePreviewInterface {
 
   /**
    * {@inheritdoc}
@@ -287,4 +289,16 @@ class ContentEntitySource extends SourcePluginBase {
     }
     $translation->save();
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPreviewUrl(JobItemInterface $job_item) {
+    if ($job_item->getJob()->isActive() && $job_item->isNeedsReview()) {
+      return new Url('entity.tmgmt_job_item.preview', ['tmgmt_job_item' => $job_item->id()]);
+    } else {
+      return NULL;
+    }
+  }
+
 }

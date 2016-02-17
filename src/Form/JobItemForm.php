@@ -13,6 +13,7 @@ use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Xss;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobItemInterface;
+use Drupal\tmgmt\SourcePreviewInterface;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
@@ -173,6 +174,16 @@ class JobItemForm extends TmgmtFormBase {
       '#validate' => ['::validateTags'],
       '#submit' => ['::submitForm'],
     );
+    if ($item->getSourcePlugin() instanceof SourcePreviewInterface && $item->getSourcePlugin()->getPreviewUrl($item)) {
+      $actions['preview'] = [
+        '#type' => 'link',
+        '#title' => t('Preview'),
+        '#url' => $item->getSourcePlugin()->getPreviewUrl($item),
+        '#attributes' => [
+          'target' => '_blank',
+        ],
+      ];
+    }
     return $actions;
   }
 
