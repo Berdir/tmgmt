@@ -158,7 +158,7 @@ display:
               separator: ''
               empty_column: false
               responsive: ''
-          default: '-1'
+          default: changed
           empty_table: false
       row:
         type: fields
@@ -701,7 +701,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Operations links'
+          label: Operations
           exclude: false
           alter:
             alter_text: false
