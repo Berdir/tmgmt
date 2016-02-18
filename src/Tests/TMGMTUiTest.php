@@ -18,7 +18,7 @@ use Drupal\filter\Entity\FilterFormat;
  */
 class TMGMTUiTest extends TMGMTTestBase {
 
-  public static $modules = array('ckeditor');
+  public static $modules = ['ckeditor'];
 
   /**
    * {@inheritdoc}
@@ -727,6 +727,15 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText(t('The field is empty.'));
 
     // Test that continuous jobs are not shown in the job overview.
+    $this->container->get('module_installer')->install(['tmgmt_file'], TRUE);
+    $non_continuous_translator = Translator::create([
+      'name' => strtolower($this->randomMachineName()),
+      'label' => $this->randomMachineName(),
+      'plugin' => 'file',
+      'remote_languages_mappings' => [],
+      'settings' => [],
+    ]);
+    $non_continuous_translator->save();
     $continuous_job = $this->createJob('en', 'de', 0, ['label' => 'Continuous job', 'job_type' => 'continuous']);
     $this->drupalGet('admin/tmgmt/jobs');
     $this->assertNoText($continuous_job->label(), 'Continuous job is not displayed on job overview page.');
@@ -740,11 +749,12 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Create continuous job through the form.
     $this->drupalGet('admin/tmgmt/continuous_jobs/continuous_add');
+    $this->assertNoText($non_continuous_translator->label());
     $continuous_job_label = strtolower($this->randomMachineName());
     $edit_job = [
       'label[0][value]' => $continuous_job_label,
       'target_language' => 'de',
-      'translator' => $this->default_translator->id()
+      'translator' => $this->default_translator->id(),
     ];
     $this->drupalPostForm(NULL, $edit_job, t('Save job'));
     $this->assertText($continuous_job_label, 'Continuous job was created.');

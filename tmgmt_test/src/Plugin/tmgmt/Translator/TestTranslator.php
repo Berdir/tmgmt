@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_test\Plugin\tmgmt\Translator;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\tmgmt\ContinuousTranslatorInterface;
 use Drupal\tmgmt\Translator\AvailableResult;
 use Drupal\tmgmt\Translator\TranslatableResult;
 use Drupal\tmgmt\JobInterface;
@@ -29,9 +30,9 @@ use Drupal\tmgmt\TranslatorRejectDataInterface;
  *   ui = "Drupal\tmgmt_test\TestTranslatorUi"
  * )
  */
-class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDataInterface {
+class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDataInterface, ContinuousTranslatorInterface {
 
- /**
+  /**
    * {@inheritdoc}
    */
   protected $escapeStart = '[[[';
@@ -150,6 +151,40 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
    */
   public function rejectForm(array $form, FormStateInterface $form_state) {
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function requestJobItemsTranslation(array $job_items) {
+    /** @var JobItemInterface $job_item */
+    foreach ($job_items as $job_item) {
+      // Add a debug message.
+      $job_item->addMessage('Requested translation to the continuous translator.', [], 'debug');
+
+      // The dummy translation prefixes strings with the target language.
+      $data = array_filter(\Drupal::service('tmgmt.data')
+        ->flatten($job_item->getData()), [
+          \Drupal::service('tmgmt.data'),
+          'filterData',
+        ]);
+      $tdata = [];
+      foreach ($data as $key => $value) {
+        if ($job_item->getJob()->getTargetLangcode() != $job_item->getJob()
+            ->getRemoteTargetLanguage()
+        ) {
+          $tdata[$key]['#text'] = $job_item->getJob()
+              ->getTargetLangcode() . '(' . $job_item->getJob()
+              ->getRemoteTargetLanguage() . '): ' . $value['#text'];
+        }
+        else {
+          $tdata[$key]['#text'] = $job_item->getJob()
+              ->getTargetLangcode() . ': ' . $value['#text'];
+        }
+      }
+      $job_item->addTranslatedData(\Drupal::service('tmgmt.data')
+        ->unflatten($tdata));
+    }
   }
 
 }

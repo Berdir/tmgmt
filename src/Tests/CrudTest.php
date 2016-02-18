@@ -1,12 +1,13 @@
 <?php
 
-/*
+/**
  * @file
  * Contains Drupal\tmgmt\Tests\CrudTest.
  */
 
 namespace Drupal\tmgmt\Tests;
 
+use Drupal\tmgmt\ContinuousTranslatorInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\RemoteMapping;
@@ -59,10 +60,7 @@ class CrudTest extends TMGMTKernelTestBase {
   function testJobs() {
     $job = $this->createJob();
 
-    $continuous_job = $this->createJob('en', 'de', 0, ['job_type' => Job::TYPE_CONTINUOUS]);
-
     $this->assertEqual(Job::TYPE_NORMAL, $job->getJobType());
-    $this->assertEqual(Job::TYPE_CONTINUOUS, $continuous_job->getJobType());
 
     $loaded_job = Job::load($job->id());
 
@@ -548,6 +546,29 @@ class CrudTest extends TMGMTKernelTestBase {
     $this->assertEqual(0, $job->getCountTranslated());
     $this->assertEqual(0, $job->getCountReviewed());
     $this->assertEqual(31, $job->getCountAccepted());
+  }
+
+  /**
+   * Test crud operations of jobs.
+   */
+  protected function testContinuousTranslators() {
+    $translator = $this->createTranslator();
+    $this->assertTrue($translator->getPlugin() instanceof ContinuousTranslatorInterface);
+
+    $job = $this->createJob('en', 'de', 0, ['job_type' => Job::TYPE_CONTINUOUS]);
+
+    $this->assertEqual(Job::TYPE_CONTINUOUS, $job->getJobType());
+    $job->translator = $translator->id();
+    $job->save();
+
+    // Add a test item.
+    $item = $job->addItem('test_source', 'test', 1);
+
+    /** @var ContinuousTranslatorInterface $plugin */
+    $plugin = $job->getTranslatorPlugin();
+    $plugin->requestJobItemsTranslation([$item]);
+
+    $this->assertEqual($item->getData()['dummy']['deep_nesting']['#translation']['#text'], 'de(de-ch): Text for job item with type test and id 1.');
   }
 
 }

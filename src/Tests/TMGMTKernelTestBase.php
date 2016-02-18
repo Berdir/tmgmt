@@ -72,10 +72,19 @@ abstract class TMGMTKernelTestBase extends KernelTestBase {
   /**
    * Creates, saves and returns a translation job.
    *
-   * @return \Drupal\tmgmt\JobInterface
+   * @param string $source
+   *   The source langcode.
+   * @param string $target
+   *   The target langcode.
+   * @param int $uid
+   *   The user ID.
+   * @param array $values
+   *   (Optional) An array of additional entity values.
+   *
+   * @return \Drupal\tmgmt\JobInterface A new job.
    *   A new job.
    */
-  function createJob($source = 'en', $target = 'de', $uid = 0, $values = array())  {
+  protected function createJob($source = 'en', $target = 'de', $uid = 0, array $values = array()) {
     $job = tmgmt_job_create($source, $target, $uid, $values);
     $this->assertEqual(SAVED_NEW, $job->save());
 

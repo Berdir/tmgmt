@@ -5,6 +5,7 @@
  * Main module file for the Translation Management module.
  */
 
+use Drupal\tmgmt\ContinuousTranslatorInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\Component\Utility\Html;
@@ -14,7 +15,6 @@ use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobInterface;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
-use Drupal\Core\Render\Element;
 
 /**
  * @addtogroup tmgmt_job
@@ -235,14 +235,16 @@ function tmgmt_job_check_finished($tjid) {
 /**
  * Creates a translation job.
  *
- * @param $source_language
+ * @param string $source_language
  *   The source language from which should be translated.
- * @param $target_language
+ * @param string $target_language
  *   The target language into which should be translated.
- * @param $values
+ * @param int $uid
+ *   The user ID.
+ * @param array $values
  *   (Optional) An array of additional entity values.
  *
- * @return \Drupal\tmgmt\JobInterface
+ * @return \Drupal\tmgmt\JobInterface The job entity.
  *   The job entity.
  */
 function tmgmt_job_create($source_language, $target_language, $uid = 0, array $values = array()) {
@@ -471,6 +473,9 @@ function tmgmt_translator_labels_flagged(JobInterface $job = NULL) {
   uasort($translators, array('Drupal\Core\Config\Entity\ConfigEntityBase', 'sort'));
   /** @var \Drupal\tmgmt\Entity\Translator $translator */
   foreach ($translators as $translator) {
+    if (isset($job) && $job->isContinuous() && !($translator->getPlugin() instanceof ContinuousTranslatorInterface)) {
+      continue;
+    }
     if (!$translator->checkAvailable()->getSuccess()) {
       $labels[$translator->id()] = t('@label (not available)', array('@label' => $translator->label()));
     }
