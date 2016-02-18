@@ -66,3 +66,13 @@ function tmgmt_update_8004() {
   $storage_controller = \Drupal::entityTypeManager()->getStorage('view');
   $storage_controller->create($values)->save();
 }
+
+/**
+ * Add job items overview.
+ */
+function tmgmt_update_8005() {
+  $overview = file_get_contents(drupal_get_path('module', 'tmgmt') . '/config/install/views.view.tmgmt_translation_all_job_items.yml');
+  $values = Yaml::decode($overview);
+  $storage_controller = \Drupal::entityTypeManager()->getStorage('view');
+  $storage_controller->create($values)->save();
+}

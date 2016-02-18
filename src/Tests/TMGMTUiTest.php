@@ -779,6 +779,10 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertNoFieldById('edit-abort-job', NULL, 'There is no Abort job button.');
     $this->assertNoFieldById('edit-submit', NULL, 'There is no Submit button.');
     $this->assertNoFieldById('edit-resubmit-job', NULL, 'There is Resubmit job button.');
+
+    // Test that normal job item are shown in job items overview.
+    $this->drupalGet('admin/tmgmt/job_items');
+    $this->assertNoText($job1->label(), 'Normal job item is displayed on job items overview.');
   }
 
   /**
