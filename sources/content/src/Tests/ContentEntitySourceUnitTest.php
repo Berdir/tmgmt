@@ -16,6 +16,7 @@ use Drupal\node\Entity\Node;
 use Drupal\system\Tests\Entity\EntityUnitTestBase;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobItemInterface;
+use Drupal\tmgmt\Entity\Job;
 
 /**
  * Content entity Source unit tests.
@@ -480,6 +481,70 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $referenced_translation = $referenced_entity->getTranslation('de');
     $this->assertEqual($referenced_translation->name->value, $data['field1'][0]['entity']['name'][0]['value']['#translation']['#text']);
 
+  }
+
+  /**
+   * Test creation of continuous job items.
+   */
+  public function testContinuousJobItems() {
+    $account = $this->createUser();
+    $type = $this->drupalCreateContentType();
+
+    // Enable entity translations for nodes.
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    $content_translation_manager->setEnabled('node', $type->label(), TRUE);
+
+    // Create test translator for continuous job.
+    $translator = Translator::load('test_translator');
+    $translator->setAutoAccept(TRUE)->save();
+
+    // Create continuous job with source language set to english.
+    $continuous_job = tmgmt_job_create('en', 'de', $account->id(), ['job_type' => Job::TYPE_CONTINUOUS, 'translator' => $translator]);
+    $this->assertEqual(SAVED_NEW, $continuous_job->save());
+
+    // Create an english node.
+    $node = entity_create('node', array(
+      'title' => $this->randomMachineName(),
+      'uid' => $account->id(),
+      'type' => $type->id(),
+      'langcode' => 'en',
+    ));
+    $node->save();
+
+    // Test hook_entity_insert() for english node.
+    $continuous_job_items = $continuous_job->getItems();
+    $continuous_job_item = reset($continuous_job_items);
+    $this->assertEqual($node->label(), $continuous_job_item->label(), 'Continuous job item is automatically created for an english node.');
+
+    // Test that the translation for an english node is created and saved.
+    // Check that the translations were saved correctly.
+    $node = entity_load('node', $node->id());
+    $translation = $node->getTranslation('de');
+    $data = $continuous_job_item->getData();
+    $this->assertEqual($translation->label(), $data['title'][0]['value']['#translation']['#text'], 'Translation for an english node has been saved correctly.');
+
+    // As was set to auto_accept, the translation should be accepted.
+    $this->assertEqual($continuous_job_item->getState(), JobItemInterface::STATE_ACCEPTED, 'Translation for an english node has been accepted.');
+
+    // Create a german node.
+    $german_node = entity_create('node', array(
+      'title' => $this->randomMachineName(),
+      'uid' => $account->id(),
+      'type' => $type->id(),
+      'langcode' => 'de',
+    ));
+    $german_node->save();
+
+    // Test that there is no new item for german node.
+    $this->assertEqual(count($continuous_job->getItems()), 1, 'Continuous job item is not created for a german node.');
+
+    // Update english node.
+    $node->set('title', $this->randomMachineName());
+    $node->save();
+
+    // Test that there are now two items for english node.
+    // @see tmgmt_content_entity_update(EntityInterface $entity)
+    $this->assertEqual(count($continuous_job->getItems()), 2, 'Continuous job item is automatically created for an updated english node.');
   }
 
 }
