@@ -279,7 +279,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
     $this->drupalLogin($this->assignee);
     $this->drupalGet('translate/pending');
-    $this->assertText(t('Task for @job', array('@job' => $job->label())));
+    $this->assertText($job->label());
 
     $this->loginAsAdmin($this->localManagerPermissions);
     $this->drupalGet('manage-translate/assigned');
@@ -304,13 +304,13 @@ class LocalTranslatorTest extends TMGMTTestBase {
     );
     $this->drupalPostForm('user/' . $other_translator->id() . '/edit', $edit, t('Save'));
     $this->drupalGet('translate');
-    $this->assertNoText(t('Task for @job', array('@job' => $job->label())));
+    $this->assertNoText($job->label());
 
     $this->drupalLogin($this->assignee);
 
     // Check the translate overview.
     $this->drupalGet('translate');
-    $this->assertText(t('Task for @job', array('@job' => $job->label())));
+    $this->assertText($job->label());
     // @todo: Fails, encoding problem?
     // $this->assertText(t('@from => @to', array('@from' => 'en', '@to' => 'de')));
 
@@ -375,7 +375,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // does not see the assigned task.
     $this->drupalLogin($other_assignee_same);
     $this->drupalGet('translate');
-    $this->assertNoText(t('Task for @job', array('@job' => $job->label())));
+    $this->assertNoText($job->label());
 
     $this->drupalLogin($this->assignee);
 
@@ -413,7 +413,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Assert the breadcrumb.
     $this->assertLink(t('Home'));
     $this->assertLink(t('Local Tasks'));
-    $this->assertText(t('Task for @job', array('@job' => $job->label())));
+    $this->assertText($job->label());
 
     $this->assertText(t('Dummy'));
     // Check if Save as completed button is displayed.

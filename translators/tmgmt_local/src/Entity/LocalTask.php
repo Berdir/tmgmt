@@ -175,7 +175,7 @@ class LocalTask extends ContentEntityBase implements LocalTaskInterface {
    */
   public function label() {
     if (!$this->get('title')->value) {
-      return t('Task for @job', array('@job' => $this->getJob()->label()));
+      return $this->getJob()->label();
     }
     else {
       return $this->get('title')->value;
