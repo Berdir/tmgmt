@@ -483,36 +483,51 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $job->save();
     $job_item = tmgmt_job_item_create('content', $node->getEntityTypeId(), $node->id(), array('tjid' => $job->id()));
     $job_item->save();
-    // Check are we dont have preview on review page.
-    $this->drupalGet('admin/tmgmt/items/' . $node->id(), array('query' => array('destination' => 'admin/tmgmt/items/' . $node->id())));
-    $this->assertNoRaw(t('Preview'));
 
+    // At this point job is state 0 (STATE_UNPROCESSED) or "cart job", we don't
+    // want a preview link available.
+    $this->drupalGet(URL::fromRoute('entity.tmgmt_job_item.canonical', ['tmgmt_job_item' => $job->id()])->setAbsolute()->toString());
+    $this->assertNoLink(t('Preview'));
+    // Changing job state to active.
     $job->requestTranslation();
 
-    // Visit preview route.
-    $this->drupalGet(URL::fromRoute('entity.tmgmt_job_item.preview', ['tmgmt_job_item' => $job->id()])->setAbsolute()->toString());
+    // Visit preview route without key.
+    $this->drupalGet(URL::fromRoute('tmgmt_content.job_item_preview', ['tmgmt_job_item' => $job->id()])->setAbsolute()->toString());
+    $this->assertResponse(403);
+    // Visit preview by clicking the preview button.
+    $this->drupalGet(URL::fromRoute('entity.tmgmt_job_item.canonical', ['tmgmt_job_item' => $job->id()])->setAbsolute()->toString());
+    $this->clickLink(t('Preview'));
     $this->assertResponse(200);
     $this->assertTitle(t("Preview of @title for @target_language | Drupal", [
       '@title' => $node->getTitle(),
       '@target_language' => $job->getTargetLanguage()->getName(),
     ]));
 
-    // Check are we have clickable link on review page.
-    $this->drupalGet('admin/tmgmt/items/' . $node->id(), array('query' => array('destination' => 'admin/tmgmt/items/' . $node->id())));
-    $this->clickLink(t('Preview'));
-    // Make sure we are on preview page.
+    // Test if anonymous user can access preview without key.
+    $this->drupalLogout();
+    $this->drupalGet(URL::fromRoute('tmgmt_content.job_item_preview', ['tmgmt_job_item' => $job->id()])->setAbsolute()->toString());
+    $this->assertResponse(403);
+
+    // Test if anonymous user can access preview with key.
+    $key = \Drupal::service('tmgmt_content.key_access')->getKey($job_item);
+    $this->drupalGet(URL::fromRoute('tmgmt_content.job_item_preview', ['tmgmt_job_item' => $job_item->id()], ['query' => ['key' => $key]]));
+    $this->assertResponse(200);
     $this->assertTitle(t("Preview of @title for @target_language | Drupal", [
       '@title' => $node->getTitle(),
       '@target_language' => $job->getTargetLanguage()->getName(),
     ]));
 
+    $this->loginAsAdmin([
+      'accept translation jobs',
+    ]);
+
     $items = $job->getItems();
     $item = reset($items);
     $item->acceptTranslation();
 
-    $translated_node = entity_load($node->getEntityTypeId(), $node->id());
-    $de_node = $translated_node->getTranslation('de');
-    $this->assertText($de_node->getTitle());
+    // There should be no link if the job item is accepted.
+    $this->drupalGet('admin/tmgmt/items/' . $node->id(), array('query' => array('destination' => 'admin/tmgmt/items/' . $node->id())));
+    $this->assertNoLink(t('Preview'));
   }
 
 }

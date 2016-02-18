@@ -294,9 +294,10 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
    * {@inheritdoc}
    */
   public function getPreviewUrl(JobItemInterface $job_item) {
-    if ($job_item->getJob()->isActive() && $job_item->isNeedsReview()) {
-      return new Url('entity.tmgmt_job_item.preview', ['tmgmt_job_item' => $job_item->id()]);
-    } else {
+    if ($job_item->getJob()->isActive() && !($job_item->isAborted() || $job_item->isAccepted()) && $job_item->isNeedsReview()) {
+      return new Url('tmgmt_content.job_item_preview', ['tmgmt_job_item' => $job_item->id()], ['query' => ['key' => \Drupal::service('tmgmt_content.key_access')->getKey($job_item)]]);
+    }
+    else {
       return NULL;
     }
   }
