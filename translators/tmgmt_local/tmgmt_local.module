@@ -47,6 +47,11 @@ define('TMGMT_LOCAL_TRANSLATION_ACCESS_IGNORE', NULL);
 define('TMGMT_DATA_ITEM_STATE_UNTRANSLATED', 0);
 
 /**
+ * Completed translation data item.
+ */
+define('TMGMT_DATA_ITEM_STATE_COMPLETED', 3);
+
+/**
  * @} End of "tmgmt_local_task".
  */
 
@@ -64,10 +69,10 @@ function tmgmt_local_theme() {
       'file' => 'tmgmt_local.theme.inc',
       'function' => 'tmgmt_local_translation_form_element',
     ),
-    // @todo - not implemented.
     'tmgmt_local_translation_form_element_status' => array(
       'render element' => 'status',
       'file' => 'tmgmt_local.theme.inc',
+      'function' => 'theme_tmgmt_local_translation_form_element_status',
     ),
   );
 }

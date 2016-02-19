@@ -516,7 +516,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Mark the data item as translated but don't save the task item as
     // completed.
     $this->clickLink(t('Translate'));
+    $this->assertRaw('ready.svg" alt="Untranslated"');
     $this->drupalPostAjaxForm(NULL, [], 'finish-dummy|deep_nesting');
+    $this->assertRaw('check.svg" alt="Translated"');
     $this->assertRaw('name="reject-dummy|deep_nesting"', "'✗' button appears.");
     $this->drupalGet('translate/' . $task->id());
     $this->asserTaskItemProgress(1, '0/0/1');

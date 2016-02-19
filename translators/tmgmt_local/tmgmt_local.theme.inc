@@ -5,6 +5,7 @@
  * Theme file stub for tmgmt.
  */
 
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Render\Element;
 
 /**
@@ -29,12 +30,13 @@ function tmgmt_local_translation_form_element($variables) {
     '#header' => [
       [
         'data' => $header_title,
-        'colspan' => 3,
+        'colspan' => 4,
       ]
     ],
     '#rows' => array(
       array(
         'data' => array(
+          \Drupal::service('renderer')->render($element['status']),
           \Drupal::service('renderer')->render($element['source']),
           \Drupal::service('renderer')->render($element['translation']),
           \Drupal::service('renderer')->render($element['actions']),
@@ -45,4 +47,29 @@ function tmgmt_local_translation_form_element($variables) {
   $result .= \Drupal::service('renderer')->render($table);
 
   return $result;
+}
+
+/**
+ * Renders a data item status as an HTML/CSS icon.
+ */
+function theme_tmgmt_local_translation_form_element_status($variables) {
+  $classes = array();
+  $classes[] = 'tmgmt-ui-icon';
+  $classes[] = 'tmgmt-ui-icon-32'; // Icon size 32px square.
+  switch ($variables['status']['#value']) {
+    case TMGMT_DATA_ITEM_STATE_COMPLETED:
+      $title = t('Accepted');
+      $icon = 'core/misc/icons/73b355/check.svg';
+      break;
+    case TMGMT_DATA_ITEM_STATE_TRANSLATED:
+      $title = t('Translated');
+      $icon = drupal_get_path('module', 'tmgmt') . '/icons/gray-check.svg';
+      break;
+    case TMGMT_DATA_ITEM_STATE_UNTRANSLATED:
+    default:
+      $title = t('Untranslated');
+      $icon = drupal_get_path('module', 'tmgmt') . '/icons/ready.svg';
+      break;
+  }
+  return SafeMarkup::format('<div class="@c"><img src="@s" alt="@t"/><span></span></div>', array("@c" => implode(' ', $classes), "@s" => file_create_url($icon), "@t" => $title));
 }

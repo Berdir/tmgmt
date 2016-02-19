@@ -38,13 +38,9 @@ class LocalTaskItemForm extends ContentEntityForm {
     $form = parent::form($form, $form_state);
     $task_item = $this->entity;
 
-    $form_state->set('task', $task_item->getTask());
-    $form_state->set('task_item', $task_item);
-    $form_state->set('job_item', $job_item = $task_item->getJobItem());
-
     $form['#title'] = $task_item->label();
 
-    $job = $job_item->getJob();
+    $job = $task_item->getJobItem()->getJob();
 
     if ($job->getSetting('job_comment')) {
       $form['job_comment'] = array(
@@ -59,7 +55,7 @@ class LocalTaskItemForm extends ContentEntityForm {
     );
 
     // Build the translation form.
-    $data = $job_item->getData();
+    $data = $task_item->getData();
 
     // Need to keep the first hierarchy. So flatten must take place inside
     // of the foreach loop.
@@ -70,6 +66,7 @@ class LocalTaskItemForm extends ContentEntityForm {
       $form['translation'][$key] = $this->formElement($flattened, $task_item, $zebra);
     }
 
+    $form['#attached']['library'][] = 'tmgmt/admin';
     return $form;
   }
 
@@ -135,7 +132,10 @@ class LocalTaskItemForm extends ContentEntityForm {
           '#parent_label' => $data[$key]['#parent_label'],
           '#zebra' => $zebra,
         );
-
+        $form[$target_key]['status'] = array(
+          '#theme' => 'tmgmt_local_translation_form_element_status',
+          '#value' => $this->entity->isCompleted() ? TMGMT_DATA_ITEM_STATE_COMPLETED : $data[$key]['#status'],
+        );
         $source_language = $language_list[$job->getSourceLangcode()];
         $target_language = $language_list[$job->getTargetLangcode()];
 
@@ -176,8 +176,7 @@ class LocalTaskItemForm extends ContentEntityForm {
           '#access' => $item->isPending(),
         );
         $status = $item->getData(\Drupal::service('tmgmt.data')->ensureArrayKey($key), '#status');
-        $completed = $status == TMGMT_DATA_ITEM_STATE_TRANSLATED;
-        if ($completed) {
+        if ($status == TMGMT_DATA_ITEM_STATE_TRANSLATED) {
           $form[$target_key]['actions']['reject-' . $target_key] = array(
             '#type' => 'submit',
             // Unicode character &#x2717 BALLOT X.
@@ -222,7 +221,7 @@ class LocalTaskItemForm extends ContentEntityForm {
     parent::save($form, $form_state);
 
     /** @var LocalTaskItem $task_item */
-    $task_item = $form_state->get('task_item');
+    $task_item = $this->entity;
     $form_state->cleanValues();
     foreach ($form_state->getValues() as $key => $value) {
       if (is_array($value) && isset($value['translation'])) {
@@ -259,10 +258,10 @@ class LocalTaskItemForm extends ContentEntityForm {
    */
   public function saveAsComplete(array &$form, FormStateInterface $form_state) {
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
-    $task = $form_state->get('task');
+    $task = $this->entity->getTask();
 
     /** @var LocalTaskItem $task_item */
-    $task_item = $form_state->get('task_item');
+    $task_item = $this->entity;
     $task_item->completed();
     $task_item->save();
 
@@ -286,7 +285,7 @@ class LocalTaskItemForm extends ContentEntityForm {
     }
 
     /** @var \Drupal\tmgmt\Entity\JobItem $job_item */
-    $job_item = $form_state->get('job_item');
+    $job_item = $this->entity->getJobItem();
 
     // Add the translations to the job item.
     $job_item->addTranslatedData($task_item->getData());
@@ -328,14 +327,14 @@ class LocalTaskItemForm extends ContentEntityForm {
     $values = $form_state->getValues();
 
     /** @var \Drupal\tmgmt_local\Entity\LocalTaskItem $item */
-    $item = $form_state->get('task_item');
+    $item = $this->entity;
 
     $action = $form_state->getTriggeringElement()['#tmgmt_local_action'];
     $key = $form_state->getTriggeringElement()['#tmgmt_local_key'];
 
     // Write the translated data into the job item.
     if (isset($values[$key]) && is_array($values[$key]) && isset($values[$key]['translation'])) {
-      $update['#status'] = $action == 'finish' ? TMGMT_DATA_ITEM_STATE_TRANSLATED : TMGMT_DATA_ITEM_STATE_PENDING;
+      $update['#status'] = $action == 'finish' ? TMGMT_DATA_ITEM_STATE_TRANSLATED : TMGMT_DATA_ITEM_STATE_UNTRANSLATED;
       $update['#text'] = is_array($values[$key]['translation']) ? $values[$key]['translation']['value'] : $values[$key]['translation'];
       $item->updateData($key, $update);
       $item->save();
