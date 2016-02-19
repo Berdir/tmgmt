@@ -356,15 +356,16 @@ class JobItemForm extends TmgmtFormBase {
       'even' => 'odd',
       'odd' => 'even',
     );
-    $form = array(
-      '#theme' => 'tmgmt_translator_review_form',
-      '#ajaxid' => tmgmt_review_form_element_ajaxid($parent_key),
-    );
+    $form = NULL;
 
     foreach (Element::children($data) as $key) {
       // The char sequence '][' confuses the form API so we need to replace it.
       $target_key = str_replace('][', '|', $key);
       if (isset($data[$key]['#text']) && \Drupal::service('tmgmt.data')->filterData($data[$key])) {
+        $form = array(
+          '#theme' => 'tmgmt_translator_review_form',
+          '#ajaxid' => tmgmt_review_form_element_ajaxid($parent_key),
+        );
         $zebra = $flip[$zebra];
         $form[$target_key] = array(
           '#tree' => TRUE,
