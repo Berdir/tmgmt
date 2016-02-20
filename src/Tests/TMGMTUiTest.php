@@ -198,19 +198,9 @@ class TMGMTUiTest extends TMGMTTestBase {
           '#label' => 'Body',
         )
       ),
-      'phantom' => array(
-        'deep_nesting' => array(
-          '#text' => 'phantom text',
-          '#label' => 'phantom label',
-          '#translate' => FALSE,
-          '#format' => 'filtered_html',
-        ),
-      ),
     ));
     $item4 = $job->addItem('test_source', 'test', 4);
     $this->drupalGet('admin/tmgmt/items/' . $item4->id());
-    // Test if the phantom wrapper is not displayed because of #translate FALSE.
-    $this->assertNoRaw('tmgmt-ui-element-phantom-wrapper');
 
     // Test primary buttons.
     $this->assertRaw('Save" class="button button--primary js-form-submit form-submit"');
