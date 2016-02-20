@@ -147,8 +147,8 @@ class JobForm extends TmgmtFormBase {
       $translators = tmgmt_translator_labels();
       $form['info']['translator'] = array(
         '#type' => 'item',
-        '#title' => t('Translator'),
-        '#markup' => isset($translators[$job->getTranslatorId()]) ? Html::escape($translators[$job->getTranslatorId()]) : t('Missing translator'),
+        '#title' => t('Provider'),
+        '#markup' => isset($translators[$job->getTranslatorId()]) ? Html::escape($translators[$job->getTranslatorId()]) : t('Missing provider'),
         '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
         '#suffix' => '</div>',
         '#value' => $job->getTranslatorId(),
@@ -277,7 +277,7 @@ class JobForm extends TmgmtFormBase {
 
       $form['translator_wrapper'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Configure translator'),
+        '#title' => t('Configure provider'),
         '#weight' => 20,
         '#prefix' => '<div id="tmgmt-ui-translator-wrapper">',
         '#suffix' => '</div>',
@@ -286,15 +286,15 @@ class JobForm extends TmgmtFormBase {
       // Show a list of translators tagged by availability for the selected source
       // and target language combination.
       if (!$translators = tmgmt_translator_labels_flagged($job)) {
-        drupal_set_message(t('There are no translators available. Before you can checkout you need to @configure at least one translator.', array('@configure' => \Drupal::l(t('configure'), Url::fromRoute('entity.tmgmt_translator.collection')))), 'warning');
+        drupal_set_message(t('There are no providers available. Before you can checkout you need to @configure at least one provider.', array('@configure' => \Drupal::l(t('configure'), Url::fromRoute('entity.tmgmt_translator.collection')))), 'warning');
       }
       $preselected_translator = $job->getTranslatorId() && isset($translators[$job->getTranslatorId()]) ? $job->getTranslatorId() : key($translators);
       $job->translator = $form_state->getValue('translator') ?: $preselected_translator;
 
       $form['translator_wrapper']['translator'] = array(
         '#type' => 'select',
-        '#title' => t('Translator'),
-        '#description' => t('The configured translator plugin that will process of the translation.'),
+        '#title' => t('Provider'),
+        '#description' => t('The configured provider plugin that will process of the translation.'),
         '#options' => $translators,
         '#default_value' => $job->getTranslatorId(),
         '#required' => TRUE,
@@ -322,7 +322,7 @@ class JobForm extends TmgmtFormBase {
 
       $form['translator_wrapper'] = array(
         '#type' => 'details',
-        '#title' => t('Translator information'),
+        '#title' => t('Provider information'),
         '#open' => TRUE,
         '#weight' => 20,
       );
@@ -374,7 +374,7 @@ class JobForm extends TmgmtFormBase {
       $actions['submit'] = array(
         '#type' => 'submit',
         '#button_type' => 'primary',
-        '#value' => tmgmt_redirect_queue_count() == 0 ? t('Submit to translator') : t('Submit to translator and continue'),
+        '#value' => tmgmt_redirect_queue_count() == 0 ? t('Submit to provider') : t('Submit to provider and continue'),
         '#access' => $job->isSubmittable(),
         '#disabled' => !$job->getTranslatorId(),
         '#submit' => array('::submitForm', '::save'),
@@ -464,7 +464,7 @@ class JobForm extends TmgmtFormBase {
   public function save(array $form, FormStateInterface $form_state) {
     parent::save($form, $form_state);
 
-    // Everything below this line is only invoked if the 'Submit to translator'
+    // Everything below this line is only invoked if the 'Submit to provider'
     // button was clicked.
     if (isset($form['actions']['submit']) && $form_state->getTriggeringElement()['#value'] == $form['actions']['submit']['#value']) {
       if (!tmgmt_job_request_translation($this->entity)) {
@@ -525,7 +525,7 @@ class JobForm extends TmgmtFormBase {
   function checkoutInfo(JobInterface $job) {
     // The translator might have been disabled or removed.
     if (!$job->hasTranslator()) {
-      return array('#markup' => t('The job has no translator assigned.'));
+      return array('#markup' => t('The job has no provider assigned.'));
     }
     $translator = $job->getTranslator();
     $plugin_ui = $this->translatorManager->createUIInstance($translator->getPluginId());

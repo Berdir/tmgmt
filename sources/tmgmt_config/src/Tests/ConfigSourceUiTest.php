@@ -69,7 +69,7 @@ class ConfigSourceUiTest extends EntityTestBase {
     $this->assertText('Article content type (English to German, Unprocessed)');
 
     // Submit.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/structure/types/manage/article/translate');
@@ -101,7 +101,7 @@ class ConfigSourceUiTest extends EntityTestBase {
     // Verify that we are on the checkout page.
     $this->assertText(t('One job needs to be checked out.'));
     $this->assertText('Article content type (English to Spanish, Unprocessed)');
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/structure/types/manage/article/translate');
@@ -165,9 +165,9 @@ class ConfigSourceUiTest extends EntityTestBase {
 
     // Submit all jobs.
     $this->assertText('Article content type (English to German, Unprocessed)');
-    $this->drupalPostForm(NULL, array(), t('Submit to translator and continue'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider and continue'));
     $this->assertText('Article content type (English to Spanish, Unprocessed)');
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the translate tab.
     $this->assertUrl('admin/structure/types/manage/article/translate');
@@ -213,7 +213,7 @@ class ConfigSourceUiTest extends EntityTestBase {
     $this->assertText('Content view (English to German, Unprocessed)');
 
     // Submit.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/structure/views/view/content/translate');
@@ -242,7 +242,7 @@ class ConfigSourceUiTest extends EntityTestBase {
     // Verify that we are on the checkout page.
     $this->assertText(t('One job needs to be checked out.'));
     $this->assertText('Content view (English to Spanish, Unprocessed)');
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/structure/views/view/content/translate');
@@ -284,7 +284,7 @@ class ConfigSourceUiTest extends EntityTestBase {
     // Verify that we are on the checkout page.
     $this->assertResponse(200);
     $this->assertText(t('One job needs to be checked out.'));
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Verify that the pending translation is shown.
     $this->clickLink(t('Needs review'));
@@ -335,7 +335,7 @@ class ConfigSourceUiTest extends EntityTestBase {
     $this->assertText('System information (English to German, Unprocessed)');
 
     // Submit.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/config/system/site-information/translate');
@@ -367,7 +367,7 @@ class ConfigSourceUiTest extends EntityTestBase {
     // Verify that we are on the checkout page.
     $this->assertText(t('One job needs to be checked out.'));
     $this->assertText('System information (English to Spanish, Unprocessed)');
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/config/system/site-information/translate');
@@ -389,7 +389,7 @@ class ConfigSourceUiTest extends EntityTestBase {
     $this->drupalPostForm(NULL, ['languages[de]' => TRUE], t('Request translation'));
 
     // Submit.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
     $this->clickLink(t('Needs review'));
     $this->drupalPostForm(NULL, array('user__settings|anonymous[translation]' => 'de_Druplicon'), t('Validate HTML tags'));
     $this->assertText('de_Druplicon');

@@ -5,8 +5,8 @@ tmgmt.settings:
   parent: tmgmt.admin_tmgmt
   weight: 25
 entity.tmgmt_translator.collection:
-  title: 'Translators'
-  description: 'Add and modify job translators.'
+  title: 'Providers'
+  description: 'Add and modify translation service providers.'
   route_name: entity.tmgmt_translator.collection
   parent: tmgmt.admin_tmgmt
   weight: 20

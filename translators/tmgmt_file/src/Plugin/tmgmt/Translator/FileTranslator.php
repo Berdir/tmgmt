@@ -17,8 +17,8 @@ use Drupal\tmgmt\TranslatorPluginBase;
  *
  * @TranslatorPlugin(
  *   id = "file",
- *   label = @Translation("File translator"),
- *   description = @Translation("File translator that exports and imports files."),
+ *   label = @Translation("File exchange"),
+ *   description = @Translation("Provider to export and import files."),
  *   ui = "Drupal\tmgmt_file\FileTranslatorUi"
  * )
  */

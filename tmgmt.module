@@ -430,7 +430,7 @@ function tmgmt_translator_auto_create(array $definition) {
       'name' => $plugin,
       'plugin' => $plugin,
       'remote_languages_mappings' => array(),
-      'label' => $definition['label'] . ' (auto created)',
+      'label' => $definition['label'],
       'description' => (string) $definition['description'],
     ]);
     // Append default settings from the translator plugin definition.

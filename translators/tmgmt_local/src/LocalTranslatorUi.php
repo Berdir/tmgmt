@@ -14,7 +14,7 @@ use Drupal\tmgmt\TranslatorPluginUiBase;
 use Drupal\user\Entity\User;
 
 /**
- * Local translator plugin UI.
+ * Drupal user provider plugin UI.
  */
 class LocalTranslatorUi extends TranslatorPluginUiBase {
 

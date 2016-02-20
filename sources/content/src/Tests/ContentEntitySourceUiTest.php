@@ -84,7 +84,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertText($node->getTitle());
 
     // Submit.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the translate tab.
     $this->assertEqual($node->url('canonical', array('absolute' => TRUE)) . '/translations', $this->getUrl());
@@ -138,7 +138,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     // Verify that we are on the checkout page.
     $this->assertText(t('One job needs to be checked out.'));
     $this->assertText($node->getTitle());
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertEqual($node->url('canonical', array('absolute' => TRUE)), $this->getUrl());
@@ -186,7 +186,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
       'languages[de]' => TRUE,
     );
     $this->drupalPostForm(NULL, $edit, t('Request translation'));
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
     $this->clickLink(t('Needs review'));
 
     // Delete the node and assert that the job can not be accepted.
@@ -230,9 +230,9 @@ class ContentEntitySourceUiTest extends EntityTestBase {
 
     // Submit all jobs.
     $this->assertText($node->getTitle());
-    $this->drupalPostForm(NULL, array(), t('Submit to translator and continue'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider and continue'));
     $this->assertText($node->getTitle());
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the translate tab.
     $this->assertEqual($node->url('canonical', array('absolute' => TRUE)) . '/translations', $this->getUrl());
@@ -328,9 +328,9 @@ class ContentEntitySourceUiTest extends EntityTestBase {
 
     // Submit all jobs.
     $this->assertText($comment->getSubject());
-    $this->drupalPostForm(NULL, array(), t('Submit to translator and continue'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider and continue'));
     $this->assertText($comment->getSubject());
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the translate tab.
     $this->assertUrl($comment->url('canonical', array('absolute' => TRUE)) . '/translations');

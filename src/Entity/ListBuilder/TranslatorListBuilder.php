@@ -83,7 +83,7 @@ class TranslatorListBuilder extends DraggableListBuilder implements EntityListBu
     $header['label'] = t('Translator name');
     $installed_translators = $this->translatorManager->getLabels();
     if (empty($installed_translators)) {
-      drupal_set_message(t("There are no translator plugins available. Please install a translator plugin."), 'error');
+      drupal_set_message(t("There are no provider plugins available. Please install a provider plugin."), 'error');
     }
     return $header + parent::buildHeader();
   }

@@ -31,7 +31,7 @@ tmgmt.cart:
 tmgmt.translators:
   route_name: entity.tmgmt_translator.collection
   base_route: view.tmgmt_job_overview.page_1
-  title: Translators
+  title: Providers
   weight: 25
 
 tmgmt.settings:

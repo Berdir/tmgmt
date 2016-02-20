@@ -13,11 +13,11 @@ use Drupal\tmgmt\TranslatorPluginBase;
 use Drupal\tmgmt_local\LocalTaskInterface;
 
 /**
- * Local translator.
+ * Drupal user provider.
  *
  * @TranslatorPlugin(
  *   id = "local",
- *   label = @Translation("Local translator"),
+ *   label = @Translation("Drupal user"),
  *   description = @Translation("Allows local users to process translation jobs."),
  *   ui = "\Drupal\tmgmt_local\LocalTranslatorUi",
  *   default_settings = {},

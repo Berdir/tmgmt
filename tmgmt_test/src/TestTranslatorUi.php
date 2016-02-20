@@ -71,7 +71,7 @@ class TestTranslatorUi extends TranslatorPluginUiBase {
    */
   public function reviewDataItemElement(array $form, FormStateInterface $form_state, $data_item_key, $parent_key, array $data_item, JobItemInterface $item) {
     $form['below'] = array(
-      '#markup' => t('Testing output of review data item element @key from the testing translator.', array('@key' => $data_item_key))
+      '#markup' => t('Testing output of review data item element @key from the testing provider.', array('@key' => $data_item_key))
     );
 
     return $form;

@@ -58,7 +58,7 @@ class LocalTasksTests extends TMGMTTestBase {
     // Make sure the Cart,Jobs and Sources pages are available.
     $this->clickLink(t('Cart'));
     $this->clickLink(t('Jobs'));
-    $this->clickLink(t('Translators'));
+    $this->clickLink(t('Providers'));
     $this->clickLink(t('Settings'));
     $this->clickLink(t('Sources'));
 

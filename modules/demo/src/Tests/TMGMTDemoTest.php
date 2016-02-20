@@ -78,7 +78,7 @@ class TMGMTDemoTest extends TMGMTTestBase {
     $edit = [
       'translator' => 'local',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Submit to translator and continue');
+    $this->drupalPostForm(NULL, $edit, 'Submit to provider and continue');
     $this->assertText('The translation job has been submitted.');
 
     // Check to see if no items are selected and the error message pops up.

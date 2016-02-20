@@ -1,7 +1,7 @@
 tmgmt.settings:
   path: '/admin/tmgmt/settings'
   defaults:
-    _title: 'Translation Management settings'
+    _title: 'Settings'
     _form: 'Drupal\tmgmt\Form\SettingsForm'
   requirements:
     _permission: 'administer tmgmt'
@@ -9,7 +9,7 @@ tmgmt.settings:
 entity.tmgmt_translator.collection:
   path: '/admin/tmgmt/translators'
   defaults:
-    _title: 'Translation Management translators'
+    _title: 'Providers'
     _entity_list: 'tmgmt_translator'
   requirements:
     _permission: 'administer tmgmt'
@@ -17,7 +17,7 @@ entity.tmgmt_translator.collection:
 entity.tmgmt_translator.add_form:
   path: '/admin/tmgmt/translators/add'
   defaults:
-    _title: 'Add Translator'
+    _title: 'Add Provider'
     _entity_form: tmgmt_translator.add
   requirements:
     _entity_create_access: tmgmt_translator
@@ -32,7 +32,7 @@ entity.tmgmt_translator.delete_form:
 entity.tmgmt_translator.clone_form:
   path: '/admin/tmgmt/translators/manage/{tmgmt_translator}/clone'
   defaults:
-    _title: 'Clone translator'
+    _title: 'Clone provider'
     _entity_form: tmgmt_translator.clone
   requirements:
     _entity_access: tmgmt_translator.clone
@@ -40,7 +40,7 @@ entity.tmgmt_translator.clone_form:
 entity.tmgmt_translator.edit_form:
   path: '/admin/tmgmt/translators/manage/{tmgmt_translator}'
   defaults:
-    _title: 'Edit translator'
+    _title: 'Edit provider'
     _entity_form: tmgmt_translator.edit
   requirements:
     _entity_access: tmgmt_translator.update

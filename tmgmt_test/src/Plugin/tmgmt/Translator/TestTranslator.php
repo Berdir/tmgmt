@@ -22,8 +22,8 @@ use Drupal\tmgmt\TranslatorRejectDataInterface;
  *
  * @TranslatorPlugin(
  *   id = "test_translator",
- *   label = @Translation("Test translator"),
- *   description = @Translation("Simple translator for testing purposes."),
+ *   label = @Translation("Test provider"),
+ *   description = @Translation("Simple provider for testing purposes."),
  *   default_settings = {
  *     "expose_settings" = TRUE,
  *   },

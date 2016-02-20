@@ -92,8 +92,8 @@ class TMGMTUiTest extends TMGMTTestBase {
       'target_language' => 'el',
       'settings[action]' => 'translate',
     );
-    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
-    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Test translator (auto created)', '@source' => 'English', '@target' => 'Greek')));
+    $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
+    $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Test provider', '@source' => 'English', '@target' => 'Greek')));
 
     // Job still needs to be in state new.
     $job = entity_load_unchanged('tmgmt_job', $job->id());
@@ -103,7 +103,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       'target_language' => 'es',
       'settings[action]' => 'translate',
     );
-    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
+    $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
 
     // Job needs to be in state active.
     $job = entity_load_unchanged('tmgmt_job', $job->id());
@@ -113,7 +113,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       $this->assertTrue($job_item->isNeedsReview());
     }
     $this->assertText(t('Test translation created'));
-    $this->assertNoText(t('Test translator called'));
+    $this->assertNoText(t('Test provider called'));
 
     // Test redirection.
     $this->assertText(t('Job overview'));
@@ -136,7 +136,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       'target_language' => 'es',
       'settings[action]' => 'submit',
     );
-    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
+    $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
     $this->assertText(t('Test submit'));
     $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isActive());
@@ -156,7 +156,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $edit = array(
       'settings[action]' => 'reject',
     );
-    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
+    $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
     $this->assertText(t('This is not supported'));
     $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isRejected());
@@ -177,7 +177,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $edit = array(
       'settings[action]' => 'translate',
     );
-    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
+    $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
     $this->assertText(t('Test translation created'));
 
     // Assert that values exist and are displayed accordingly.
@@ -231,7 +231,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $edit = array(
       'settings[action]' => 'fail',
     );
-    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
+    $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
     $this->assertText(t('Service not reachable'));
     $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isUnprocessed());
@@ -254,7 +254,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $edit = array(
       'settings[action]' => 'not_translatable',
     );
-    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
+    $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
     // @todo Update to correct failure message.
     $this->assertText(t('Fail'));
     $job = entity_load_unchanged('tmgmt_job', $job->id());
@@ -275,7 +275,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->assertText('test_source:test:1');
 
     // The action should now default to reject.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
     $this->assertText(t('This is not supported.'));
     $job4 = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job4->isRejected());
@@ -288,7 +288,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       'target_language' => 'de',
     );
     $this->drupalPostAjaxForm('admin/tmgmt/jobs/' . $job->id(), $edit, 'target_language');
-    $this->assertFieldByXPath('//select[@id="edit-translator"]/option[1]', 'Test translator (auto created)');
+    $this->assertFieldByXPath('//select[@id="edit-translator"]/option[1]', 'Test provider');
 
     // Test exposed filters.
     $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
@@ -335,22 +335,22 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->clickLink(t('Submit'));
 
     // Verify that we are on the submit job page.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Test for Unavailable/Unconfigured Translators.
     $this->default_translator->setSetting('action', 'not_translatable');
     $this->default_translator->save();
     $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
-    $this->assertText(t('Test translator (auto created) can not translate from English to German.'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
+    $this->assertText(t('Test provider can not translate from English to German.'));
 
     // Test for Unavailable/Unconfigured Translators.
     $this->default_translator->setSetting('action', 'not_available');
     $this->default_translator->save();
     $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
-    $this->assertText(t('Test translator (auto created) is not available. Make sure it is properly configured.'));
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
-    $this->assertText(t('@translator is not available. Make sure it is properly configured.', array('@translator' => 'Test translator (auto created)')));
+    $this->assertText(t('Test provider is not available. Make sure it is properly configured.'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
+    $this->assertText(t('@translator is not available. Make sure it is properly configured.', array('@translator' => 'Test provider')));
 
     // Login as administrator to delete a job.
     $this->loginAsAdmin();
@@ -436,7 +436,7 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Testing the result of the
     // TMGMTTranslatorUIControllerInterface::reviewDataItemElement()
-    $this->assertText(t('Testing output of review data item element @key from the testing translator.', array('@key' => $key)));
+    $this->assertText(t('Testing output of review data item element @key from the testing provider.', array('@key' => $key)));
 
     // Test the review tool source textarea.
     $this->assertFieldByName('dummy|deep_nesting[source]', $data[$key]['#text']);
@@ -655,7 +655,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       'target_language' => 'de',
       'settings[action]' => 'submit',
     );
-    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), $edit, t('Submit to translator'));
+    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), $edit, t('Submit to provider'));
 
     $this->drupalGet('admin/tmgmt/items/' . $item5->id());
     $xpath = $this->xpath('//*[@id="edit-dummydeep-nesting-translation-format-guidelines"]/div')[0];
@@ -705,12 +705,12 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Filter jobs by translator and assert values.
     $this->drupalGet('admin/tmgmt/jobs', array('query' => array('translator' => $translator1->id())));
     $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[4]);
-    $this->assertEqual($label, $translator1->label(), 'Found translator label in table');
-    $this->assertNotEqual($label, $translator2->label(), "Translators filtered in table");
+    $this->assertEqual($label, $translator1->label(), 'Found provider label in table');
+    $this->assertNotEqual($label, $translator2->label(), "Providers filtered in table");
     $this->drupalGet('admin/tmgmt/jobs', array('query' => array('translator' => $translator2->id())));
     $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[4]);
-    $this->assertEqual($label, $translator2->label(), 'Found translator label in table');
-    $this->assertNotEqual($label, $translator1->label(), "Translators filtered in table");
+    $this->assertEqual($label, $translator2->label(), 'Found provider label in table');
+    $this->assertNotEqual($label, $translator1->label(), "Providers filtered in table");
 
     $edit = array(
       'dummy|deep_nesting[translation]' => '',
@@ -769,7 +769,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Test that all unnecessary fields and buttons do not exist on continuous
     // job edit form.
     $this->clickLink('Manage');
-    $this->assertNoRaw('<label for="edit-translator">Translator</label>', 'There is no Translator info field on continuous job edit form.');
+    $this->assertNoRaw('<label for="edit-translator">Provider</label>', 'There is no Provider info field on continuous job edit form.');
     $this->assertNoRaw('<label for="edit-word-count">Total word count</label>', 'There is no Total word count info field on continuous job edit form.');
     $this->assertNoRaw('<label for="edit-tags-count">Total HTML tags count</label>', 'There is no Total HTML tags count info field on continuous job edit form.');
     $this->assertNoRaw('<label for="edit-created">Created</label>', 'There is no Created info field on continuous job edit form.');
@@ -866,7 +866,7 @@ class TMGMTUiTest extends TMGMTTestBase {
       'target_language' => 'es',
       'settings[action]' => 'translate',
     );
-    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), $edit, t('Submit to translator'));
+    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), $edit, t('Submit to provider'));
 
     // Abort job.
     $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), array(), t('Abort job'));
@@ -1090,19 +1090,19 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Tmgtm settings.
     $this->drupalGet('/admin/tmgmt/settings');
-    $this->assertTitle(t('Translation Management settings | Drupal'));
+    $this->assertTitle(t('Settings | Drupal'));
     // Manage translators.
     $this->drupalGet('/admin/tmgmt/translators');
-    $this->assertTitle(t('Translation Management translators | Drupal'));
+    $this->assertTitle(t('Providers | Drupal'));
     // Add Translator.
     $this->drupalGet('/admin/tmgmt/translators/add');
-    $this->assertTitle(t('Add Translator | Drupal'));
+    $this->assertTitle(t('Add Provider | Drupal'));
     // Delete Translators.
     $this->drupalGet('/admin/tmgmt/translators/manage/' . $translator->id() . '/delete');
-    $this->assertTitle(t('Are you sure you want to delete the translator @label? | Drupal', ['@label' => $translator->label()]));
+    $this->assertTitle(t('Are you sure you want to delete the provider @label? | Drupal', ['@label' => $translator->label()]));
     // Edit Translators.
     $this->drupalGet('/admin/tmgmt/translators/manage/' . $translator->id());
-    $this->assertTitle(t('Edit translator | Drupal'));
+    $this->assertTitle(t('Edit provider | Drupal'));
     // Delete Job.
     $this->drupalGet('/admin/tmgmt/jobs/' . $job->id() . '/delete');
     $this->assertTitle(t('Are you sure you want to delete the translation job @label? | Drupal', ['@label' => $job->label()]));

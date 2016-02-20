@@ -1,6 +1,6 @@
 tmgmt.translator.settings.local:
   type: tmgmt.translator_base
-  label: 'Local translator settings'
+  label: 'Drupal user settings'
   mapping:
     allow_all:
       type: boolean

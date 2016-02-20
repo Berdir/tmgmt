@@ -20,14 +20,14 @@ tmgmt.settings:
 
 tmgmt.translator.*:
   type: config_entity
-  label: 'Translator'
+  label: 'Provider'
   mapping:
     name:
       type: label
       label: 'Machine readable name of the translator'
     label:
       type: label
-      label: 'Translator label'
+      label: 'Provider label'
     description:
       type: string
       label: 'Description'
@@ -39,7 +39,7 @@ tmgmt.translator.*:
       label: 'Weight of the translator'
     plugin:
       type: string
-      label: 'Translator plugin'
+      label: 'Provider plugin'
     settings:
       type: tmgmt.translator.settings.[%parent.plugin]
     remote_languages_mappings:

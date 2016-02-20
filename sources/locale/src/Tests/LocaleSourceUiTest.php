@@ -75,7 +75,7 @@ class LocaleSourceUiTest extends TMGMTTestBase {
     $this->assertText('Hello World');
     $this->assertText(t('Locale'));
     $this->assertText('2');
-    $this->drupalPostForm(NULL, array('target_language' => 'gsw-berne'), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array('target_language' => 'gsw-berne'), t('Submit to provider'));
 
     // Test for the translation flag title.
     $this->drupalGet('admin/tmgmt/sources/locale/default');

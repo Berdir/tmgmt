@@ -22,7 +22,7 @@ class Translator extends FieldPluginBase {
    */
   function render(ResultRow $values) {
     if ($job = $values->_entity) {
-      return $job->hasTranslator() ? $job->getTranslator()->label() : t('Missing translator');
+      return $job->hasTranslator() ? $job->getTranslator()->label() : t('Missing provider');
     }
   }
 }

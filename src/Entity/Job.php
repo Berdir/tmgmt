@@ -108,15 +108,15 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
       ->setDefaultValue(0);
 
     $fields['translator'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Translator'))
-      ->setDescription(t('The selected translator'))
+      ->setLabel(t('Provider'))
+      ->setDescription(t('The selected provider'))
       ->setSettings(array(
         'target_type' => 'tmgmt_translator',
       ));
 
     $fields['settings'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Settings'))
-      ->setDescription(t('Translator specific configuration and context information for this job.'))
+      ->setDescription(t('Provider specific configuration and context information for this job.'))
       ->setDefaultValue(array());
 
     $fields['reference'] = BaseFieldDefinition::create('string')
@@ -436,7 +436,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
       return $this->translator->entity;
     }
     else if (!$this->translator->entity) {
-      throw new TMGMTException('The job has no translator assigned.');
+      throw new TMGMTException('The job has no provider assigned.');
     }
     else if (!$this->translator->entity->hasPlugin()) {
       throw new TMGMTException('The translator assigned to this job is missing the plugin.');

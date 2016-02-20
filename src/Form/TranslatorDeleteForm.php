@@ -23,7 +23,7 @@ class TranslatorDeleteForm extends EntityDeleteForm {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
     if (tmgmt_translator_busy($this->entity->id())) {
-      $form_state->setErrorByName('tmgmt', t('This translator cannot be deleted as long as there are active jobs using it.'));
+      $form_state->setErrorByName('tmgmt', t('This provider cannot be deleted as long as there are active jobs using it.'));
     }
   }
 }

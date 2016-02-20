@@ -86,7 +86,7 @@ class TMGMTCartTest extends TMGMTTestBase {
     $args = explode('/', $this->getUrl());
     $tjid = array_pop($args);
 
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
     // We cannot test for the item data as items without a job are not able to
     // get the data in case the source language is overridden. Therefore only
     // testing for item_id and item_type values.

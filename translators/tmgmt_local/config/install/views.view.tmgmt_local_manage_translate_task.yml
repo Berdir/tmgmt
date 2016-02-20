@@ -1205,7 +1205,7 @@ display:
           exposed: true
           expose:
             operator_id: uid_op
-            label: Translator
+            label: Provider
             description: ''
             use_operator: false
             operator: uid_op
@@ -2176,7 +2176,7 @@ display:
           exposed: true
           expose:
             operator_id: uid_op
-            label: Translator
+            label: Provider
             description: ''
             use_operator: false
             operator: uid_op
@@ -3147,7 +3147,7 @@ display:
           exposed: true
           expose:
             operator_id: uid_op
-            label: Translator
+            label: Provider
             description: ''
             use_operator: false
             operator: uid_op
@@ -3985,7 +3985,7 @@ display:
           exposed: true
           expose:
             operator_id: uid_op
-            label: Translator
+            label: Provider
             description: ''
             use_operator: false
             operator: uid_op
@@ -4890,7 +4890,7 @@ display:
           exposed: true
           expose:
             operator_id: uid_op
-            label: Translator
+            label: Provider
             description: ''
             use_operator: false
             operator: uid_op

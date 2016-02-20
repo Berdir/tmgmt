@@ -320,7 +320,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: Translator
+          label: Provider
           exclude: false
           alter:
             alter_text: false
@@ -511,7 +511,7 @@ display:
           exposed: true
           expose:
             operator_id: translator_op
-            label: Translator
+            label: Provider
             description: ''
             use_operator: false
             operator: translator_op

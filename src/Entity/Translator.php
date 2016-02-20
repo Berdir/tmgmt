@@ -19,9 +19,11 @@ use Drupal\tmgmt\TranslatorInterface;
 /**
  * Entity class for the tmgmt_translator entity.
  *
+ * For disambiguation, The UI uses the term "Provider" for a translator.
+ *
  * @ConfigEntityType(
  *   id = "tmgmt_translator",
- *   label = @Translation("Translator"),
+ *   label = @Translation("Provider"),
  *   handlers = {
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\TranslatorForm",
@@ -341,7 +343,7 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
     if ($plugin = $this->getPlugin()) {
       return $plugin->checkTranslatable($this, $job);
     }
-    return TranslatableResult::no(t('Missing translator plugin'));
+    return TranslatableResult::no(t('Missing provider plugin'));
   }
 
   /**

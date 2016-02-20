@@ -211,12 +211,12 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // roles.
     $this->drupalGet($job->toUrl());
     $this->assertText(t('@translator can not translate from @source to @target.', array(
-      '@translator' => 'Local translator (auto created)',
+      '@translator' => 'Drupal user',
       '@source' => 'English',
       '@target' => 'German',
     )));
     $xpath = $this->xpath('//*[@id="edit-translator"]')[0];
-    $this->assertEqual($xpath->option[0], 'Local translator (auto created) (unsupported)');
+    $this->assertEqual($xpath->option[0], 'Drupal user (unsupported)');
     $this->assignee = $this->drupalCreateUser(
       array_merge($this->localTranslatorPermissions, [$basic_html_format->getPermissionName()])
     );
@@ -224,7 +224,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // The same when there is a single role.
     $this->drupalGet($job->toUrl());
     $this->assertText(t('@translator can not translate from @source to @target.', array(
-      '@translator' => 'Local translator (auto created)',
+      '@translator' => 'Drupal user',
       '@source' => 'English',
       '@target' => 'German',
     )));
@@ -235,7 +235,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // And test again with two roles but still no abilities.
     $this->drupalGet($job->toUrl());
     $this->assertText(t('@translator can not translate from @source to @target.', array(
-      '@translator' => 'Local translator (auto created)',
+      '@translator' => 'Drupal user',
       '@source' => 'English',
       '@target' => 'German',
     )));
@@ -252,7 +252,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->loginAsAdmin();
     $this->drupalGet($job->toUrl());
     $xpath = $this->xpath('//*[@id="edit-translator"]')[0];
-    $this->assertEqual($xpath->option[0], 'Local translator (auto created)');
+    $this->assertEqual($xpath->option[0], 'Drupal user');
     $this->assertText(t('Assign job to'));
     $this->assertText($other_assignee_same->getUsername());
     $this->assertNoText($this->assignee->getUsername());
@@ -276,7 +276,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
       'settings[translator]' => $this->assignee->id(),
       'settings[job_comment]' => $job_comment,
     ];
-    $this->drupalPostForm(NULL, $edit, t('Submit to translator'));
+    $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
     $this->drupalLogin($this->assignee);
     $this->drupalGet('translate/pending');
     $this->assertText($job->label());

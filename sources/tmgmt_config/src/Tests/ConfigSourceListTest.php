@@ -66,7 +66,7 @@ class ConfigSourceListTest extends EntityTestBase {
     $this->assertText(t('Article content type (English to ?, Unprocessed)'));
 
     // Submit.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/tmgmt/sources/config/node_type');
@@ -87,7 +87,7 @@ class ConfigSourceListTest extends EntityTestBase {
     $this->assertText(t('Article content type and 1 more (English to ?, Unprocessed)'));
 
     // Submit.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/tmgmt/sources/config/node_type');
@@ -115,7 +115,7 @@ class ConfigSourceListTest extends EntityTestBase {
     $this->assertText(t('Archive view (English to ?, Unprocessed)'));
 
     // Submit.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/tmgmt/sources/config/view');
@@ -138,7 +138,7 @@ class ConfigSourceListTest extends EntityTestBase {
     $this->assertText(t('Archive view and 3 more (English to ?, Unprocessed)'));
 
     // Submit.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/tmgmt/sources/config/view');
@@ -245,7 +245,7 @@ class ConfigSourceListTest extends EntityTestBase {
     $this->assertText('System information (English to ?, Unprocessed)');
 
     // Submit.
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/tmgmt/sources/config/_simple_config');
@@ -274,7 +274,7 @@ class ConfigSourceListTest extends EntityTestBase {
     // Verify that we are on the checkout page.
     $this->assertText(t('One job needs to be checked out.'));
     $this->assertText('Account settings (English to ?, Unprocessed)');
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/tmgmt/sources/config/_simple_config');
@@ -339,7 +339,7 @@ class ConfigSourceListTest extends EntityTestBase {
     // Test submission.
     $this->drupalPostForm(NULL, array('items[field.field.node.article.body]' => TRUE), t('Request translation'));
     $this->assertText(t('One job needs to be checked out.'));
-    $this->drupalPostForm(NULL, array(), t('Submit to translator'));
+    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Make sure that we're back on the originally defined destination URL.
     $this->assertUrl('admin/tmgmt/sources/config/field_config');

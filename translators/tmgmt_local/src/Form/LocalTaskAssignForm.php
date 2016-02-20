@@ -26,7 +26,7 @@ class LocalTaskAssignForm extends ContentEntityForm {
 
     $roles = tmgmt_local_translator_roles();
     if (empty($roles)) {
-      drupal_set_message(t('No user role has the "provide translation services" permission. <a href="@url">Configure permissions</a> for the Local translator module.',
+      drupal_set_message(t('No user role has the "provide translation services" permission. <a href="@url">Configure permissions</a> for the Drupal user module.',
         array('@url' => URL::fromRoute('user.admin_permissions'))), 'warning');
     }
 

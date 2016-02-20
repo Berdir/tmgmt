@@ -75,7 +75,7 @@ class TranslatorForm extends EntityForm {
     $entity = $this->entity;
     // Check if the translator is currently in use.
     if ($busy = !$entity->isNew() ? tmgmt_translator_busy($entity->id()) : FALSE) {
-      drupal_set_message(t("This translator is currently in use. It cannot be deleted. The chosen Translation Plugin cannot be changed."), 'warning');
+      drupal_set_message(t("This provider is currently in use. It cannot be deleted. The chosen provider Plugin cannot be changed."), 'warning');
     }
     $available = $this->translatorManager->getLabels();
     // If the translator plugin is not set, pick the first available plugin as the
@@ -95,7 +95,7 @@ class TranslatorForm extends EntityForm {
     $form['name'] = array(
       '#type' => 'machine_name',
       '#title' => t('Machine name'),
-      '#description' => t('The machine readable name of this translator. It must be unique, and it must contain only alphanumeric characters and underscores. Once created, you will not be able to change this value!'),
+      '#description' => t('The machine readable name of this provider. It must be unique, and it must contain only alphanumeric characters and underscores. Once created, you will not be able to change this value!'),
       '#default_value' => $entity->id(),
       '#machine_name' => array(
         'exists' => '\Drupal\tmgmt\Entity\Translator::load',
@@ -108,7 +108,7 @@ class TranslatorForm extends EntityForm {
     $form['description'] = array(
       '#type' => 'textarea',
       '#title' => t('Description'),
-      '#description' => t('The description of the translator.'),
+      '#description' => t('The description of the provider.'),
       '#default_value' => $entity->getDescription(),
       '#size' => 32,
       '#maxlength' => 255,
@@ -129,7 +129,7 @@ class TranslatorForm extends EntityForm {
       $definition = $this->translatorManager->getDefinition($entity->getPluginID());
       $form['plugin_wrapper']['plugin'] = array(
         '#type' => 'select',
-        '#title' => t('Translator plugin'),
+        '#title' => t('Provider plugin'),
         '#submit' => array('::updateRemoteLanguagesMappings'),
         '#limit_validation_errors' => array(array('plugin')),
         '#executes_submit_callback' => TRUE,
