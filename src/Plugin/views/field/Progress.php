@@ -30,64 +30,47 @@ class Progress extends StatisticsBase {
       '@translated' => $entity->getCountTranslated(),
       '@reviewed' => $entity->getCountReviewed(),
       '@accepted' => $entity->getCountAccepted(),
-
     );
-    $id = $entity->id();
 
-    if (\Drupal::moduleHandler()->moduleExists('google_chart_tools')) {
-      draw_chart($this->build_progressbar_settings($id, $counts));
-      return '<div id="progress' . $id . '"></div>';
-    }
     $title = t('Pending: @pending, translated: @translated, reviewed: @reviewed, accepted: @accepted.', $counts);
-    $complete_title = t('<span title="@title">@values</span>', ['@title' => $title, '@values' => implode('/', $counts)]);
-    return $complete_title;
-  }
 
-  /**
-   * Creates a settings array for the google chart tools.
-   *
-   * The settings are preset with values to display a progress bar for either
-   * a job or job item.
-   *
-   * @param $id
-   *   The id of the chart.
-   * @param $counts
-   *   Array with the counts for accepted, translated and pending.
-   * @param $prefix
-   *   Prefix to id.
-   * @return
-   *   Settings array.
-   */
-  function build_progressbar_settings($id, $counts, $prefix = 'progress') {
-    $settings['chart'][$prefix . $id] = array(
-      'header' => array(t('Accepted'), t('Reviewed'), t('Translated'), t('Pending')),
-      'rows' => array(
-        array($counts['@accepted'], $counts['@reviewed'], $counts['@translated'], $counts['@pending']),
+    $one_hundred_percent = array_sum($counts);
+    if ($one_hundred_percent == 0) {
+      return [];
+    }
+
+    $output[] = array(
+      '#type' => 'inline_template',
+      '#template' => '
+        <div title="{{ title }}">
+        {% if width_pending %}
+          <div class="tmgmt-progress-pending" style="width: {{ width_pending }}%">{{ count_pending }}</div>
+        {% endif %}
+        {% if width_translated %}
+          <div class="tmgmt-progress-translated" style="width: {{ width_translated }}%">{{ count_translated }}</div>
+        {% endif %}
+        {% if width_reviewed %}
+          <div class="tmgmt-progress-reviewed" style="width: {{ width_reviewed }}%">{{ count_reviewed }}</div>
+        {% endif %}
+        {% if width_accepted %}
+          <div class="tmgmt-progress-accepted" style="width: {{ width_accepted }}%">{{ count_accepted }}</div>
+        {% endif %}
+        </div>
+          ',
+      '#context' => array(
+        'title' => $title,
+        'count_pending' => $counts['@pending'],
+        'count_translated' => $counts['@translated'],
+        'count_reviewed' => $counts['@reviewed'],
+        'count_accepted' => $counts['@accepted'],
+        'width_pending' => $counts['@pending'] / $one_hundred_percent * 100,
+        'width_translated' => $counts['@translated'] / $one_hundred_percent * 100,
+        'width_reviewed' => $counts['@reviewed'] / $one_hundred_percent * 100,
+        'width_accepted' => $counts['@accepted'] / $one_hundred_percent * 100,
       ),
-      'columns' => array(''),
-      'chartType' => 'PieChart',
-      'containerId' => $prefix . $id,
-      'options' => array(
-        'backgroundColor' => 'transparent',
-        'colors' => array('#00b600', '#60ff60', '#ffff00', '#6060ff'),
-        'forceIFrame' => FALSE,
-        'chartArea' => array(
-          'left' => 0,
-          'top' => 0,
-          'width' => '50%',
-          'height' => '100%',
-        ),
-        'fontSize' => 9,
-        'title' => t('Progress'),
-        'titlePosition' => 'none',
-        'width' => 60,
-        'height' => 50,
-        'isStacked' => TRUE,
-        'legend' => array('position' => 'none'),
-        'pieSliceText' => 'none',
-      )
     );
-    return $settings;
+
+    return $output;
   }
 
 }

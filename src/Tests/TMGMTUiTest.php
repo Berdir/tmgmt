@@ -180,9 +180,9 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
     $this->assertText(t('Test translation created'));
 
-    // Assert that values exist and are displayed accordingly.
-    $this->assertRaw('<span title="Pending: 0, translated: 1, reviewed: 0, accepted: 0.">0/1/0/0</span>');
-    $this->assertText('0/1/0/0');
+    // Assert that values exist the output is there for translated item.
+    $this->assertRaw('Pending: 0, translated: 1, reviewed: 0, accepted: 0.');
+    $this->assertRaw('<div class="tmgmt-progress-translated" style="width: 100%">1</div>');
 
     // HTML tags count.
     \Drupal::state()->set('tmgmt.test_source_data', array(

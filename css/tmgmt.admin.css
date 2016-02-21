@@ -123,3 +123,37 @@ table.tmgmt-ui-review tbody th {
   width: 50%;
   float: right;
 }
+
+.tmgmt-progress-pending, .tmgmt-progress-translated,
+.tmgmt-progress-reviewed, .tmgmt-progress-accepted {
+  float: left;
+  text-align: center;
+}
+
+.tmgmt-progress-pending {
+  background-color: #0074BD;
+  color: #fff;
+}
+
+.tmgmt-progress-translated {
+  background-color: #E29700;
+  color: #fff;
+}
+
+.tmgmt-progress-reviewed {
+  background-color: #8EDD77;
+}
+
+.tmgmt-progress-accepted {
+  background-color: #73B355;
+  color: #fff;
+}
+
+.view-tmgmt-job-overview td.views-field-progress,
+.view-tmgmt-job-items td.views-field-progress{
+  overflow: hidden;
+}
+
+td.views-field-word-count {
+  text-align: right;
+}
