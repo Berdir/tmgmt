@@ -88,7 +88,7 @@ class AssignMultiple extends FormBase {
     $form['tuid'] = array(
       '#title' => t('Assign to'),
       '#type' => 'select',
-      '#empty_option' => t('Select user'),
+      '#empty_option' => t('- Select user -'),
       '#options' => tmgmt_local_get_assignees_for_tasks($form_state->get('tasks')),
       '#required' => TRUE,
     );

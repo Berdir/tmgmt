@@ -26,7 +26,7 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
       $form['translator'] = array(
         '#title' => t('Assign job to'),
         '#type' => 'select',
-        '#options' => array('' => t('Select user')) + $translators,
+        '#options' => array('' => t('- Select user -')) + $translators,
         '#default_value' => $job->getSetting('translator'),
       );
     }

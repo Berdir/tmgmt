@@ -33,7 +33,7 @@ class LocalTaskAssignForm extends ContentEntityForm {
     $form['tuid'] = array(
       '#title' => t('Assign to'),
       '#type' => 'select',
-      '#empty_option' => t('Select user'),
+      '#empty_option' => t('- Select user -'),
       '#options' => tmgmt_local_get_assignees_for_tasks([$this->getEntity()->id()]),
       '#required' => TRUE,
     );
