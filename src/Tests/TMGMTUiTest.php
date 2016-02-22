@@ -783,6 +783,10 @@ class TMGMTUiTest extends TMGMTTestBase {
     // Test that normal job item are shown in job items overview.
     $this->drupalGet('admin/tmgmt/job_items');
     $this->assertNoText($job1->label(), 'Normal job item is displayed on job items overview.');
+
+    // Test that progress bar is being displayed.
+    $this->assertRaw('class="tmgmt-progress-pending" style="width: 50%"');
+    $this->assertRaw('class="tmgmt-progress-translated" style="width: 100%"');
   }
 
   /**

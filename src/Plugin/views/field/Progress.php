@@ -69,7 +69,9 @@ class Progress extends StatisticsBase {
         'width_accepted' => $counts['@accepted'] / $one_hundred_percent * 100,
       ),
     );
-
+    $output['#attached'] = [
+      'library' => ['tmgmt/admin'],
+    ];
     return $output;
   }
 
