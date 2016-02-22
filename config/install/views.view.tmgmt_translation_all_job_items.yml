@@ -914,7 +914,17 @@ display:
       sorts: {  }
       title: 'Job Items'
       header: {  }
-      footer: {  }
+      footer:
+        footer:
+          id: footer
+          table: tmgmt_job_item
+          field: footer
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: true
+          entity_type: tmgmt_job_item
+          plugin_id: tmgmt_job_item_legend
       empty: {  }
       relationships:
         tjid:

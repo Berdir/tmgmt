@@ -52,6 +52,13 @@ class JobItemViewsData extends EntityViewsData {
       ),
     );
 
+    $data['tmgmt_job_item']['footer'] = array(
+      'title' => t('Job Item Overview legend'),
+      'help' => t('Add job item state legends'),
+      'area' => array(
+        'id' => 'tmgmt_job_item_legend',
+        ),
+      );
     return $data;
   }
 }
