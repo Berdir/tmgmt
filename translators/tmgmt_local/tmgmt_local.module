@@ -74,6 +74,17 @@ function tmgmt_local_theme() {
       'file' => 'tmgmt_local.theme.inc',
       'function' => 'theme_tmgmt_local_translation_form_element_status',
     ),
+    'tmgmt_local_progress_bar' => array(
+      'variables' => array(
+        'title' => NULL,
+        'count_untranslated' => NULL,
+        'count_translated' => NULL,
+        'count_completed' => NULL,
+        'width_untranslated' => NULL,
+        'width_translated' => NULL,
+        'width_completed' => NULL,
+      ),
+    ),
   );
 }
 

@@ -39,39 +39,19 @@ class Progress extends StatisticsBase {
       return [];
     }
 
-    $output[] = array(
-      '#type' => 'inline_template',
-      '#template' => '
-        <div title="{{ title }}">
-        {% if width_pending %}
-          <div class="tmgmt-progress-pending" style="width: {{ width_pending }}%">{{ count_pending }}</div>
-        {% endif %}
-        {% if width_translated %}
-          <div class="tmgmt-progress-translated" style="width: {{ width_translated }}%">{{ count_translated }}</div>
-        {% endif %}
-        {% if width_reviewed %}
-          <div class="tmgmt-progress-reviewed" style="width: {{ width_reviewed }}%">{{ count_reviewed }}</div>
-        {% endif %}
-        {% if width_accepted %}
-          <div class="tmgmt-progress-accepted" style="width: {{ width_accepted }}%">{{ count_accepted }}</div>
-        {% endif %}
-        </div>
-          ',
-      '#context' => array(
-        'title' => $title,
-        'count_pending' => $counts['@pending'],
-        'count_translated' => $counts['@translated'],
-        'count_reviewed' => $counts['@reviewed'],
-        'count_accepted' => $counts['@accepted'],
-        'width_pending' => $counts['@pending'] / $one_hundred_percent * 100,
-        'width_translated' => $counts['@translated'] / $one_hundred_percent * 100,
-        'width_reviewed' => $counts['@reviewed'] / $one_hundred_percent * 100,
-        'width_accepted' => $counts['@accepted'] / $one_hundred_percent * 100,
-      ),
+    $output = array(
+      '#theme' => 'tmgmt_progress_bar',
+      '#attached' => array('library' => 'tmgmt/admin'),
+      '#title' => $title,
+      '#count_pending' => $counts['@pending'],
+      '#count_translated' => $counts['@translated'],
+      '#count_reviewed' => $counts['@reviewed'],
+      '#count_accepted' => $counts['@accepted'],
+      '#width_pending' => $counts['@pending'] / $one_hundred_percent * 100,
+      '#width_translated' => $counts['@translated'] / $one_hundred_percent * 100,
+      '#width_reviewed' => $counts['@reviewed'] / $one_hundred_percent * 100,
+      '#width_accepted' => $counts['@accepted'] / $one_hundred_percent * 100,
     );
-    $output['#attached'] = [
-      'library' => ['tmgmt/admin'],
-    ];
     return $output;
   }
 

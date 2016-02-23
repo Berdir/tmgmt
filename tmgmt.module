@@ -524,6 +524,19 @@ function tmgmt_theme() {
       'variables' => array('translation_status' => NULL, 'job_item' => NULL),
       'function' => 'theme_tmgmt_translation_language_status_single',
     ),
+    'tmgmt_progress_bar' => array(
+      'variables' => array(
+        'title' => NULL,
+        'count_pending' => NULL,
+        'count_translated' => NULL,
+        'count_reviewed' => NULL,
+        'count_accepted' => NULL,
+        'width_pending' => NULL,
+        'width_translated' => NULL,
+        'width_reviewed' => NULL,
+        'width_accepted' => NULL,
+      ),
+    ),
   );
 }
 
