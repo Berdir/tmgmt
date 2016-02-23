@@ -480,6 +480,7 @@ class ContentEntitySourceUiTest extends EntityTestBase {
 
     $job = $this->createJob('en', 'de');
     $job->translator = $this->default_translator->id();
+    $job->settings->action = 'submit';
     $job->save();
     $job_item = tmgmt_job_item_create('content', $node->getEntityTypeId(), $node->id(), array('tjid' => $job->id()));
     $job_item->save();
@@ -498,6 +499,11 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->drupalGet(URL::fromRoute('entity.tmgmt_job_item.canonical', ['tmgmt_job_item' => $job->id()])->setAbsolute()->toString());
     $this->clickLink(t('Preview'));
     $this->assertResponse(200);
+
+    // Translate job.
+    $job->settings->action = 'translate';
+    $job->save();
+    $job->requestTranslation();
     $this->assertTitle(t("Preview of @title for @target_language | Drupal", [
       '@title' => $node->getTitle(),
       '@target_language' => $job->getTargetLanguage()->getName(),
