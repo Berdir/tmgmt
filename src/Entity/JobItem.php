@@ -569,15 +569,28 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    * While doing this the #status of each data item is set to
    * TMGMT_DATA_ITEM_STATE_TRANSLATED.
    *
-   * @param $translation
+   * @param array $translation
    *   Nested array of translated data. Can either be a single text entry, the
    *   whole data structure or parts of it.
-   * @param $key
-   *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a nested
-   *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
-   *   means that it will replace the whole translated data array.
+   * @param array|string $key
+   *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a
+   *   nested one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty
+   *   array which means that it will replace the whole translated data array.
+   * @param int|null $status
+   *   (Optional) The data item status that will be set. Defaults to NULL,
+   *   which means that it will be set to translated unless it was previously
+   *   set to preliminary, then it will keep that state.
+   *   Explicitly pass TMGMT_DATA_ITEM_STATE_TRANSLATED or
+   *   TMGMT_DATA_ITEM_STATE_PRELIMINARY to set it to that value.
+   *   Other statuses are not supported.
+   *
+   * @throws \Drupal\tmgmt\TMGMTException
+   *   If is given an unsupported status.
    */
-  protected function addTranslatedDataRecursive($translation, $key = array()) {
+  protected function addTranslatedDataRecursive(array $translation, $key = array(), $status = NULL) {
+    if ($status != NULL && $status != TMGMT_DATA_ITEM_STATE_PRELIMINARY && $status != TMGMT_DATA_ITEM_STATE_TRANSLATED) {
+      new TMGMTException('Unsupported status given.');
+    }
     if (isset($translation['#text'])) {
       $data_service = \Drupal::service('tmgmt.data');
       $data = $this->getData($data_service->ensureArrayKey($key));
@@ -647,9 +660,18 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
           }
         }
 
+        if ($status == NULL) {
+          if (isset($data['#status']) && $data['#status'] == TMGMT_DATA_ITEM_STATE_PRELIMINARY) {
+            $status = TMGMT_DATA_ITEM_STATE_PRELIMINARY;
+          }
+          else {
+            $status = TMGMT_DATA_ITEM_STATE_TRANSLATED;
+          }
+        }
+
         $values = array(
           '#translation' => $translation,
-          '#status' => TMGMT_DATA_ITEM_STATE_TRANSLATED,
+          '#status' => $status,
         );
         $this->updateData($key, $values);
       }
@@ -657,7 +679,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
     }
 
     foreach (Element::children($translation) as $item) {
-      $this->addTranslatedDataRecursive($translation[$item], array_merge($key, array($item)));
+      $this->addTranslatedDataRecursive($translation[$item], array_merge($key, array($item)), $status);
     }
   }
 
@@ -719,8 +741,8 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
   /**
    * {@inheritdoc}
    */
-  public function addTranslatedData(array $translation, $key = array()) {
-    $this->addTranslatedDataRecursive($translation, $key);
+  public function addTranslatedData(array $translation, $key = array(), $status = NULL) {
+    $this->addTranslatedDataRecursive($translation, $key, $status);
     // Check if the job item has all the translated data that it needs now.
     // Only attempt to change the status to needs review if it is currently
     // active.
@@ -728,7 +750,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
       $data = \Drupal::service('tmgmt.data')->filterTranslatable($this->getData());
       $finished = TRUE;
       foreach ($data as $item) {
-        if (empty($item['#status']) || $item['#status'] == TMGMT_DATA_ITEM_STATE_PENDING) {
+        if (empty($item['#status']) || $item['#status'] == TMGMT_DATA_ITEM_STATE_PENDING || $item['#status'] == TMGMT_DATA_ITEM_STATE_PRELIMINARY) {
           $finished = FALSE;
           break;
         }

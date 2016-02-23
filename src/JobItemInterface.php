@@ -412,12 +412,22 @@ interface JobItemInterface extends ContentEntityInterface {
    * @param array $translation
    *   Nested array of translated data. Can either be a single text entry, the
    *   whole data structure or parts of it.
-   * @param array $key
-   *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a nested
-   *   one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty array which
-   *   means that it will replace the whole translated data array.
+   * @param array|string $key
+   *   (Optional) Either a flattened key (a 'key1][key2][key3' string) or a
+   *   nested one, e.g. array('key1', 'key2', 'key2'). Defaults to an empty
+   *   array which means that it will replace the whole translated data array.
+   * @param int|null $status
+   *   (Optional) The data item status that will be set. Defaults to NULL,
+   *   which means that it will be set to translated unless it was previously
+   *   set to preliminary, then it will keep that state.
+   *   Explicitly pass TMGMT_DATA_ITEM_STATE_TRANSLATED or
+   *   TMGMT_DATA_ITEM_STATE_PRELIMINARY to set it to that value.
+   *   Other statuses are not supported.
+   *
+   * @throws \Drupal\tmgmt\TMGMTException
+   *   If is given an unsupported status.
    */
-  public function addTranslatedData(array $translation, $key = array());
+  public function addTranslatedData(array $translation, $key = array(), $status = NULL);
 
   /**
    * Propagates the returned job item translations to the sources.

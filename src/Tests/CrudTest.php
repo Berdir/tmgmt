@@ -571,4 +571,35 @@ class CrudTest extends TMGMTKernelTestBase {
     $this->assertEqual($item->getData()['dummy']['deep_nesting']['#translation']['#text'], 'de(de-ch): Text for job item with type test and id 1.');
   }
 
+  /**
+   * Tests that with the preliminary state the item does not change.
+   */
+  protected function testPreliminaryState() {
+    $translator = $this->createTranslator();
+    $job = $this->createJob();
+    $job->translator = $translator->id();
+    $job->save();
+
+    // Add some test items.
+    $item = $job->addItem('test_source', 'test', 1);
+
+    $key = array('dummy', 'deep_nesting');
+
+    // Test with preliminary state.
+    $translation['dummy']['deep_nesting']['#text'] = 'translated';
+    $item->addTranslatedData($translation, [], TMGMT_DATA_ITEM_STATE_PRELIMINARY);
+    $this->assertEqual($item->getData($key)['#status'], TMGMT_DATA_ITEM_STATE_PRELIMINARY);
+    $this->assertTrue($item->isActive());
+
+    // Test with empty state.
+    $item->addTranslatedData($translation);
+    $this->assertEqual($item->getData($key)['#status'], TMGMT_DATA_ITEM_STATE_PRELIMINARY);
+    $this->assertTrue($item->isActive());
+
+    // Test without state.
+    $item->addTranslatedData($translation, [], TMGMT_DATA_ITEM_STATE_TRANSLATED);
+    $this->assertEqual($item->getData($key)['#status'], TMGMT_DATA_ITEM_STATE_TRANSLATED);
+    $this->assertTrue($item->isNeedsReview());
+  }
+
 }

@@ -42,6 +42,11 @@ define('TMGMT_DATA_ITEM_STATE_TRANSLATED', 2);
 define('TMGMT_DATA_ITEM_STATE_ACCEPTED', 3);
 
 /**
+ * The translation data item has been reviewed.
+ */
+define('TMGMT_DATA_ITEM_STATE_PRELIMINARY', 4);
+
+/**
  * @} End of "addtogroup tmgmt_job".
  */
 
