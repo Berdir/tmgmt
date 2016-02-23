@@ -15,12 +15,28 @@ use Drupal\Core\Entity\ContentEntityInterface;
 interface RemoteMappingInterface extends ContentEntityInterface {
 
   /**
+   * Gets translation job id.
+   *
+   * @return int
+   *   Returns the translation job id.
+   */
+  public function getJobId();
+
+  /**
    * Gets translation job.
    *
    * @return \Drupal\tmgmt\JobInterface
    *   Returns the translation job.
    */
   public function getJob();
+
+  /**
+   * Gets translation job item id.
+   *
+   * @return int
+   *   Returns the job item id.
+   */
+  public function getJobItemId();
 
   /**
    * Gets translation job item.

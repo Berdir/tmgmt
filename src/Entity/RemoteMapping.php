@@ -89,6 +89,13 @@ class RemoteMapping extends ContentEntityBase implements RemoteMappingInterface 
   /**
    * {@inheritdoc}
    */
+  public function getJobItemId() {
+    return $this->get('tjiid')->target_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getJobItem() {
     return $this->get('tjiid')->entity;
   }
