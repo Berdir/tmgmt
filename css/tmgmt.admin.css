@@ -128,32 +128,46 @@ table.tmgmt-ui-review tbody th {
 .tmgmt-progress-reviewed, .tmgmt-progress-accepted {
   float: left;
   text-align: center;
+  color: #fff;
+  overflow: hidden;
 }
 
 .tmgmt-progress-pending {
   background-color: #0074BD;
-  color: #fff;
 }
 
 .tmgmt-progress-translated {
   background-color: #E29700;
-  color: #fff;
 }
 
 .tmgmt-progress-reviewed {
-  background-color: #8EDD77;
+  background-color: #71b350;
 }
 
 .tmgmt-progress-accepted {
-  background-color: #73B355;
-  color: #fff;
-}
-
-.view-tmgmt-job-overview td.views-field-progress,
-.view-tmgmt-job-items td.views-field-progress{
-  overflow: hidden;
+  background-color: #578a3e;
 }
 
 td.views-field-word-count {
   text-align: right;
+}
+
+.tmgmt-local-progress-untranslated, .tmgmt-local-progress-translated,
+.tmgmt-local-progress-completed {
+  float: left;
+  text-align: center;
+  color: #fff;
+  overflow: hidden;
+}
+
+.tmgmt-local-progress-untranslated {
+  background-color: #0074BD;
+}
+
+.tmgmt-local-progress-translated {
+  background-color: #E29700;
+}
+
+.tmgmt-local-progress-completed {
+  background-color: #71b350;
 }
