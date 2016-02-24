@@ -52,16 +52,10 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
       );
     }
 
-    $language_options = array();
-    foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
-      $language_options[$langcode] = $language->getName();
-    }
-
     $form['search_wrapper']['search']['langcode'] = array(
-      '#type' => 'select',
+      '#type' => 'language_select',
       '#title' => t('Source Language'),
-      '#options' => $language_options,
-      '#empty_option' => t('All'),
+      '#empty_option' => t('- Any -'),
       '#default_value' => isset($_GET['langcode']) ? $_GET['langcode'] : NULL,
     );
 
@@ -73,7 +67,7 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
         '#type' => 'select',
         '#title' => $entity_type->getBundleLabel(),
         '#options' => $bundle_options,
-        '#empty_option' => t('All'),
+        '#empty_option' => t('- Any -'),
         '#default_value' => isset($_GET[$bundle_key]) ? $_GET[$bundle_key] : NULL,
       );
     }
@@ -85,16 +79,10 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
       return $form;
     }
 
-    $options = array();
-    foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {
-      $options[$langcode] = $language->getName();
-    }
-
     $form['search_wrapper']['search']['target_language'] = array(
-      '#type' => 'select',
+      '#type' => 'language_select',
       '#title' => $this->t('Target language'),
-      '#options' => $options,
-      '#empty_option' => $this->t('Any'),
+      '#empty_option' => $this->t('- Any -'),
       '#default_value' => isset($_GET['target_language']) ? $_GET['target_language'] : NULL,
     );
     $form['search_wrapper']['search']['target_status'] = array(
