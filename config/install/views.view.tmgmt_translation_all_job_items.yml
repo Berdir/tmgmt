@@ -749,9 +749,9 @@ display:
       filters:
         state:
           id: state
-          table: tmgmt_job
+          table: tmgmt_job_item
           field: state
-          relationship: tjid
+          relationship: none
           group_type: group
           admin_label: ''
           operator: '='
@@ -786,31 +786,31 @@ display:
             default_group_multiple: {  }
             group_items:
               1:
-                title: '- Open Job Items -'
+                title: '- Open job items -'
                 operator: between
                 value:
                   value: ''
                   min: ''
-                  max: '3'
+                  max: '2'
               2:
-                title: Unprocessed
-                operator: '='
-                value:
-                  value: '0'
-                  min: ''
-                  max: ''
-              3:
-                title: Active
+                title: 'In progress'
                 operator: '='
                 value:
                   value: '1'
                   min: ''
                   max: ''
-              4:
-                title: Rejected
+              3:
+                title: 'Needs review'
                 operator: '='
                 value:
                   value: '2'
+                  min: ''
+                  max: ''
+              4:
+                title: Accepted
+                operator: '='
+                value:
+                  value: '3'
                   min: ''
                   max: ''
               5:
@@ -820,14 +820,7 @@ display:
                   value: '4'
                   min: ''
                   max: ''
-              6:
-                title: Finished
-                operator: '='
-                value:
-                  value: '5'
-                  min: ''
-                  max: ''
-          entity_type: tmgmt_job
+          entity_type: tmgmt_job_item
           plugin_id: numeric
         source_language:
           id: source_language
