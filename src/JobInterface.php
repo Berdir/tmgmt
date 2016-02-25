@@ -144,6 +144,14 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   public function getJobType();
 
   /**
+   * Returns continuous settings.
+   *
+   * @return array
+   *   Continuous settings.
+   */
+  public function getContinuousSettings();
+
+  /**
    * Clones job as unprocessed.
    */
   public function cloneAsUnprocessed();

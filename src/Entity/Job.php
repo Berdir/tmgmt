@@ -146,6 +146,11 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
       ->setSetting('allowed_values', [static::TYPE_NORMAL, static::TYPE_CONTINUOUS])
       ->setDefaultValue(static::TYPE_NORMAL);
 
+    $fields['continuous_settings'] = BaseFieldDefinition::create('map')
+      ->setLabel(t('Continuous settings'))
+      ->setDescription(t('Continuous sources configuration.'))
+      ->setDefaultValue(array());
+
     return $fields;
   }
 
@@ -203,6 +208,13 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    */
   public function getJobType() {
     return $this->get('job_type')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getContinuousSettings() {
+    return $this->get('continuous_settings')[0] ? $this->get('continuous_settings')[0]->getValue() : array();
   }
 
   /**

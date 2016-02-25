@@ -8,10 +8,7 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Language\LanguageInterface;
-use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
-use Drupal\views\Views;
 
 /**
  * Form controller for the job edit forms.
@@ -48,8 +45,6 @@ class ContinuousJobForm extends JobForm {
     $form['label']['widget'][0]['value']['#description'] = t('You need to provide a label for this job in order to identify it later on.');
     $form['label']['widget'][0]['value']['#required'] = TRUE;
 
-    // Make the source and target language flexible by showing either a select
-    // dropdown or the plain string (if preselected).
     $form['info']['source_language'] = array(
       '#title' => t('Source language'),
       '#type' => 'select',
@@ -80,11 +75,14 @@ class ContinuousJobForm extends JobForm {
     return $form;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function actions(array $form, FormStateInterface $form_state) {
     $actions['save'] = array(
       '#type' => 'submit',
       '#value' => t('Save job'),
-      '#submit' => array('::submitForm','::save'),
+      '#submit' => array('::submitForm', '::save'),
       '#weight' => 5,
       '#button_type' => 'primary',
     );
@@ -92,7 +90,7 @@ class ContinuousJobForm extends JobForm {
   }
 
   /**
-   * Overrides Drupal\Core\Entity\EntityForm::save().
+   * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
     parent::save($form, $form_state);

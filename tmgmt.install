@@ -76,3 +76,16 @@ function tmgmt_update_8005() {
   $storage_controller = \Drupal::entityTypeManager()->getStorage('view');
   $storage_controller->create($values)->save();
 }
+
+/**
+ * Add continuous settings configuration field.
+ */
+function tmgmt_update_8006() {
+  $storage_definition = BaseFieldDefinition::create('map')
+    ->setLabel(t('Continuous settings'))
+    ->setDescription(t('Continuous sources configuration.'))
+    ->setDefaultValue(array());
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('continuous_settings', 'tmgmt_job', 'tmgmt', $storage_definition);
+}

@@ -23,13 +23,23 @@ class ContinuousManager {
   protected $entityTypeManager;
 
   /**
+   * The source plugin manager.
+   *
+   * @var \Drupal\tmgmt\SourceManager
+   */
+  protected $sourcePluginManager;
+
+  /**
    * Constructs a new ContinuousManager.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
+   * @param \Drupal\tmgmt\SourceManager $source_plugin_manager
+   *   The source plugin manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, SourceManager $source_plugin_manager) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->sourcePluginManager = $source_plugin_manager;
   }
 
   /**
@@ -66,9 +76,11 @@ class ContinuousManager {
    *   The source item id.
    */
   public function addItem(Job $job, $plugin, $item_type, $item_id) {
-    $job_item = $job->addItem($plugin, $item_type, $item_id);
-    $translator = $job->getTranslatorPlugin();
-    $translator->requestJobItemsTranslation([$job_item]);
+    if ($this->sourcePluginManager->createInstance($plugin)->shouldCreateContinuousItem($job, $plugin, $item_type, $item_id)) {
+      $job_item   = $job->addItem($plugin, $item_type, $item_id);
+      $translator = $job->getTranslatorPlugin();
+      $translator->requestJobItemsTranslation([$job_item]);
+    }
   }
 
 }

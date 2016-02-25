@@ -17,6 +17,7 @@ use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobInterface;
 use Drupal\views\Views;
+use Drupal\tmgmt\ContinuousSourceInterface;
 
 /**
  * Form controller for the job edit forms.
@@ -272,6 +273,27 @@ class JobForm extends TmgmtFormBase {
           ) + $suggestions_table;
       }
     }
+
+    if ($job->isContinuous()) {
+      $form['continuous_settings'] = array(
+        '#type' => 'details',
+        '#title' => $this->t('Continuous settings'),
+        '#description' => $this->t('Configure the sources that should be enabled for this continuous job.'),
+        '#open' => TRUE,
+        '#weight' => 10,
+        '#tree' => TRUE,
+      );
+
+      $source_manager = \Drupal::service('plugin.manager.tmgmt.source');
+      $source_plugins = $source_manager->getDefinitions();
+      foreach ($source_plugins as $type => $definition) {
+        $plugin_type = $source_manager->createInstance($type);
+        if ($plugin_type instanceof ContinuousSourceInterface) {
+          $form['continuous_settings'][$type] = $plugin_type->continuousSettingsForm($form, $form_state, $job);
+        }
+      }
+    }
+
     // Display the checkout settings form if the job can be checked out.
     if ($job->isSubmittable() || $job->isContinuous()) {
 
@@ -455,6 +477,7 @@ class JobForm extends TmgmtFormBase {
     if (empty($job->label)) {
       $job->label = $job->label();
     }
+
     return $job;
   }
 
@@ -673,4 +696,5 @@ class JobForm extends TmgmtFormBase {
     $this->entity = $this->buildEntity($form, $form_state);
     $form_state->setRebuild();
   }
+
 }

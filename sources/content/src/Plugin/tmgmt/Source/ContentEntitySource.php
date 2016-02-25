@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_content\Plugin\tmgmt\Source;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Plugin\DataType\EntityReference;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemInterface;
@@ -18,8 +19,11 @@ use Drupal\Core\Url;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\SourcePluginBase;
 use Drupal\tmgmt\SourcePreviewInterface;
+use Drupal\tmgmt\ContinuousSourceInterface;
 use Drupal\tmgmt\TMGMTException;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\tmgmt\Entity\Job;
 
 /**
  * Content entity source plugin controller.
@@ -31,7 +35,7 @@ use Drupal\Core\Render\Element;
  *   ui = "Drupal\tmgmt_content\ContentEntitySourcePluginUi"
  * )
  */
-class ContentEntitySource extends SourcePluginBase implements SourcePreviewInterface {
+class ContentEntitySource extends SourcePluginBase implements SourcePreviewInterface, ContinuousSourceInterface {
 
   /**
    * {@inheritdoc}
@@ -300,6 +304,86 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
     else {
       return NULL;
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function continuousSettingsForm(array &$form, FormStateInterface $form_state, Job $job) {
+    $continuous_settings = $job->getContinuousSettings();
+    $element = array();
+    $item_types = $this->getItemTypes();
+    asort($item_types);
+    $entity_type_manager = \Drupal::entityTypeManager();
+    foreach ($item_types as $item_type => $item_type_label) {
+      $entity_type = $entity_type_manager->getDefinition($item_type);
+      $element[$entity_type->id()]['enabled'] = array(
+        '#type' => 'checkbox',
+        '#title' => $item_type_label,
+        '#default_value' => isset($continuous_settings[$this->getPluginId()][$entity_type->id()]) ? $continuous_settings[$this->getPluginId()][$entity_type->id()]['enabled'] : FALSE,
+      );
+      if ($entity_type->hasKey('bundle')) {
+        $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($item_type);
+        $element[$entity_type->id()]['bundles'] = array(
+          '#title' => $this->getBundleLabel($entity_type),
+          '#type' => 'details',
+          '#open' => TRUE,
+          '#states' => array(
+            'invisible' => array(
+              'input[name="continuous_settings[' . $this->getPluginId() . '][' . $entity_type->id() . '][enabled]"]' => array('checked' => FALSE),
+            ),
+          ),
+        );
+        foreach ($bundles as $bundle => $bundle_label) {
+          $element[$entity_type->id()]['bundles'][$bundle] = array(
+            '#type' => 'checkbox',
+            '#title' => $bundle_label['label'],
+            '#default_value' => isset($continuous_settings[$this->getPluginId()][$entity_type->id()]) ? $continuous_settings[$this->getPluginId()][$entity_type->id()]['bundles'][$bundle] : FALSE,
+          );
+        }
+      }
+    }
+    return $element;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function shouldCreateContinuousItem(Job $job, $plugin, $item_type, $item_id) {
+    $continuous_settings = $job->getContinuousSettings();
+    $entity_manager = \Drupal::entityManager();
+    $entity = $entity_manager->getStorage($item_type)->load($item_id);
+    if ($entity && $entity->getEntityType()->hasKey('bundle')) {
+      if ($continuous_settings[$plugin][$item_type]['bundles'][$entity->bundle()] === 1 && $continuous_settings[$plugin][$item_type]['enabled'] === 1) {
+        return TRUE;
+      }
+    }
+    elseif ($continuous_settings[$plugin][$item_type]['enabled'] === 1) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+
+  /**
+   * Returns the bundle label for a given entity type.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type.
+   *
+   * @return string
+   *   The bundle label.
+   */
+  protected function getBundleLabel(EntityTypeInterface $entity_type) {
+    if ($entity_type->getBundleLabel()) {
+      return $entity_type->getBundleLabel();
+    }
+    if ($entity_type->getBundleEntityType()) {
+      return \Drupal::entityTypeManager()
+        ->getDefinition($entity_type->getBundleEntityType())
+        ->getLabel();
+    }
+    return $this->t('@label type', ['@label' => $entity_type->getLabel()]);
   }
 
 }

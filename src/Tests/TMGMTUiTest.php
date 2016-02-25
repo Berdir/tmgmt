@@ -6,19 +6,21 @@
  */
 
 namespace Drupal\tmgmt\Tests;
+
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\filter\Entity\FilterFormat;
+use Drupal\tmgmt\Tests\EntityTestBase;
 
 /**
  * Verifies basic functionality of the user interface
  *
  * @group tmgmt
  */
-class TMGMTUiTest extends TMGMTTestBase {
+class TMGMTUiTest extends EntityTestBase {
 
-  public static $modules = ['ckeditor'];
+  public static $modules = ['ckeditor', 'tmgmt_content'];
 
   /**
    * {@inheritdoc}
@@ -46,6 +48,9 @@ class TMGMTUiTest extends TMGMTTestBase {
       $filtered_html_format->getPermissionName(),
     ), TRUE);
     $this->drupalPlaceBlock('system_breadcrumb_block');
+
+    $this->createNodeType('page', 'Page', TRUE);
+    $this->createNodeType('article', 'Article', TRUE);
   }
 
   /**
@@ -736,7 +741,12 @@ class TMGMTUiTest extends TMGMTTestBase {
       'settings' => [],
     ]);
     $non_continuous_translator->save();
-    $continuous_job = $this->createJob('en', 'de', 0, ['label' => 'Continuous job', 'job_type' => 'continuous']);
+
+    $continuous_job = $this->createJob('en', 'de', 0, [
+      'label' => 'Continuous job',
+      'job_type' => 'continuous',
+    ]);
+
     $this->drupalGet('admin/tmgmt/jobs');
     $this->assertNoText($continuous_job->label(), 'Continuous job is not displayed on job overview page.');
 
@@ -746,6 +756,34 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Test that normal jobs are not shown in the continuous job overview.
     $this->assertNoText($job1->label(), 'Normal job is not displayed on continuous job overview page.');
+
+    // Test that there are source items checkboxes on a continuous job form.
+    $this->clickLink('Manage');
+    $this->assertText($continuous_job->label());
+    $this->assertNoFieldChecked('edit-continuous-settings-content-node-enabled', 'There is content checkbox and it is not checked yet.');
+    $this->assertNoFieldChecked('edit-continuous-settings-content-node-bundles-article', 'There is article checkbox and it is not checked yet.');
+    $this->assertNoFieldChecked('edit-continuous-settings-content-node-bundles-page', 'There is page checkbox and it is not checked yet.');
+
+    // Enable Article source item for continuous job.
+    $edit_continuous_job = [
+      'continuous_settings[content][node][enabled]' => TRUE,
+      'continuous_settings[content][node][bundles][article]' => TRUE,
+    ];
+    $this->drupalPostForm(NULL, $edit_continuous_job, t('Save job'));
+
+    // Test that continuous settings configuration is saved correctly.
+    $updated_continuous_job = Job::load($continuous_job->id());
+    $job_continuous_settings = $updated_continuous_job->getContinuousSettings();
+    $this->assertEqual($job_continuous_settings['content']['node']['enabled'], 1, 'Continuous settings configuration for node is saved correctly.');
+    $this->assertEqual($job_continuous_settings['content']['node']['bundles']['article'], 1, 'Continuous settings configuration for article is saved correctly.');
+    $this->assertEqual($job_continuous_settings['content']['node']['bundles']['page'], 0, 'Continuous settings configuration for page is saved correctly.');
+
+    // Test that continuous settings checkboxes are checked correctly.
+    $this->clickLink('Manage');
+    $this->assertText($continuous_job->label());
+    $this->assertFieldChecked('edit-continuous-settings-content-node-enabled', 'Content checkbox is now checked.');
+    $this->assertFieldChecked('edit-continuous-settings-content-node-bundles-article', 'Article checkbox now checked.');
+    $this->assertNoFieldChecked('edit-continuous-settings-content-node-bundles-page', 'Page checkbox is not checked.');
 
     // Create continuous job through the form.
     $this->drupalGet('admin/tmgmt/continuous_jobs/continuous_add');
@@ -768,7 +806,7 @@ class TMGMTUiTest extends TMGMTTestBase {
 
     // Test that all unnecessary fields and buttons do not exist on continuous
     // job edit form.
-    $this->clickLink('Manage');
+    $this->clickLink('Manage', 1);
     $this->assertNoRaw('<label for="edit-translator">Provider</label>', 'There is no Provider info field on continuous job edit form.');
     $this->assertNoRaw('<label for="edit-word-count">Total word count</label>', 'There is no Total word count info field on continuous job edit form.');
     $this->assertNoRaw('<label for="edit-tags-count">Total HTML tags count</label>', 'There is no Total HTML tags count info field on continuous job edit form.');
@@ -1136,7 +1174,7 @@ class TMGMTUiTest extends TMGMTTestBase {
     $this->clickLink(t('Jobs'));
     $this->assertTitle(t('Job overview | Drupal'));
     $this->clickLink(t('Sources'));
-    $this->assertTitle(t('Translation Sources | Drupal'));
+    $this->assertTitle(t('Content overview (Content Entity) | Drupal'));
   }
 
   /**

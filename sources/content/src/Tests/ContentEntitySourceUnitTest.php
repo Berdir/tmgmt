@@ -489,17 +489,36 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
   public function testContinuousJobItems() {
     $account = $this->createUser();
     $type = $this->drupalCreateContentType();
+    $second_type = $this->drupalCreateContentType();
 
     // Enable entity translations for nodes.
     $content_translation_manager = \Drupal::service('content_translation.manager');
     $content_translation_manager->setEnabled('node', $type->label(), TRUE);
+    $content_translation_manager->setEnabled('node', $second_type->label(), TRUE);
 
     // Create test translator for continuous job.
     $translator = Translator::load('test_translator');
     $translator->setAutoAccept(TRUE)->save();
 
+    // Continuous settings configuration.
+    $continuous_settings = [
+      'content' => [
+        'node' => [
+          'enabled' => 1,
+          'bundles' => [
+            $type->id() => 1,
+            $second_type->id() => 0,
+          ],
+        ],
+      ],
+    ];
+
     // Create continuous job with source language set to english.
-    $continuous_job = tmgmt_job_create('en', 'de', $account->id(), ['job_type' => Job::TYPE_CONTINUOUS, 'translator' => $translator]);
+    $continuous_job = tmgmt_job_create('en', 'de', $account->id(), [
+      'job_type' => Job::TYPE_CONTINUOUS,
+      'translator' => $translator,
+      'continuous_settings' => $continuous_settings,
+    ]);
     $this->assertEqual(SAVED_NEW, $continuous_job->save());
 
     // Create an english node.
@@ -517,7 +536,6 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual($node->label(), $continuous_job_item->label(), 'Continuous job item is automatically created for an english node.');
 
     // Test that the translation for an english node is created and saved.
-    // Check that the translations were saved correctly.
     $node = entity_load('node', $node->id());
     $translation = $node->getTranslation('de');
     $data = $continuous_job_item->getData();
@@ -537,6 +555,18 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     // Test that there is no new item for german node.
     $this->assertEqual(count($continuous_job->getItems()), 1, 'Continuous job item is not created for a german node.');
+
+    // Create new english node with different type.
+    $second_node = entity_create('node', array(
+      'title' => $this->randomMachineName(),
+      'uid' => $account->id(),
+      'type' => $second_type->id(),
+      'langcode' => 'en',
+    ));
+    $second_node->save();
+
+    // Test that there is no new item for second english node.
+    $this->assertEqual(count($continuous_job->getItems()), 1, 'Continuous job item is not created for a second english node.');
 
     // Update english node.
     $node->set('title', $this->randomMachineName());
