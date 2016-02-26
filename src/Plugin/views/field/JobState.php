@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt\Plugin\views\field;
 
 use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\views\Plugin\views\field\NumericField;
 use Drupal\views\ResultRow;
 
@@ -26,12 +27,25 @@ class JobState extends NumericField {
     switch ($value) {
       case JobInterface::STATE_UNPROCESSED:
         $label = t('Unprocessed');
-        $icon = drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg';
+        $icon = drupal_get_path('module', 'tmgmt') . '/icons/rejected.svg';
         break;
 
       case JobInterface::STATE_ACTIVE:
-        $label = t('Active');
-        $icon = drupal_get_path('module', 'tmgmt') . '/icons/ready.svg';
+        $needs_review = FALSE;
+        /** @var JobItemInterface $item */
+        foreach ($values->_entity->getItems() as $item) {
+          if ($item->isNeedsReview()) {
+            $needs_review = TRUE;
+            break;
+          }
+        }
+        if ($needs_review) {
+          $label = t('Needs review');
+          $icon = drupal_get_path('module', 'tmgmt') . '/icons/ready.svg';
+          break;
+        }
+        $label = t('In progress');
+        $icon = drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg';
         break;
 
       case JobInterface::STATE_REJECTED:

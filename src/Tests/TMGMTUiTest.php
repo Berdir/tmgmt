@@ -55,14 +55,16 @@ class TMGMTUiTest extends EntityTestBase {
 
   /**
    * Test the page callbacks to create jobs and check them out.
+   *
+   * This includes
+   * - Varying checkout situations with form detail values.
+   * - Unsupported checkout situations where translator is not available.
+   * - Exposed filters for job overview
+   * - Deleting a job
+   *
+   * @todo Separate the exposed filter admin overview test.
    */
   function testCheckoutForm() {
-
-    // Test that there is no job at the beginning.
-    $this->drupalGet('admin/tmgmt/jobs');
-    $this->assertText('No jobs available.');
-    $this->assertRaw('Open Jobs');
-
     // Add a first item to the job. This will auto-create the job.
     $job = tmgmt_job_match_item('en', '');
     $job->addItem('test_source', 'test', 1);
@@ -185,10 +187,6 @@ class TMGMTUiTest extends EntityTestBase {
     $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
     $this->assertText(t('Test translation created'));
 
-    // Assert that values exist the output is there for translated item.
-    $this->assertRaw('Pending: 0, translated: 1, reviewed: 0, accepted: 0.');
-    $this->assertRaw('<div class="tmgmt-progress-translated" style="width: 100%">1</div>');
-
     // HTML tags count.
     \Drupal::state()->set('tmgmt.test_source_data', array(
       'title' => array(
@@ -295,23 +293,6 @@ class TMGMTUiTest extends EntityTestBase {
     $this->drupalPostAjaxForm('admin/tmgmt/jobs/' . $job->id(), $edit, 'target_language');
     $this->assertFieldByXPath('//select[@id="edit-translator"]/option[1]', 'Test provider');
 
-    // Test exposed filters.
-    $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
-      'state' => '2',
-      'target_language' => 'de',
-      'source_language' => 'en',
-    )));
-
-    // Check if the list has 1 row.
-    $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
-
-    $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
-      'state' => '5',
-    )));
-
-    // Check if the list has no rows.
-    $this->assertEqual(count($this->xpath('//tbody/tr')), 0);
-
     $this->drupalGet('admin/tmgmt/jobs');
 
     // Test if sources languages are correct.
@@ -325,22 +306,6 @@ class TMGMTUiTest extends EntityTestBase {
     // Check that the first action is 'manage'.
     $first_action = $this->xpath('//tbody/tr[2]/td[10]/div/div/ul/li[1]/a');
     $this->assertEqual($first_action[0][0], 'Manage');
-
-    // Test the abort link.
-    $this->clickLink(t('Abort'));
-
-    // Verify that we are on the abort job page.
-    $this->assertText('Abort this job?');
-    $this->drupalPostForm(NULL, array(), t('Confirm'));
-
-    // Count if the items do now show the las aborted one in Open Jobs.
-    $this->assertEqual(count($this->xpath('//tbody/tr')), 4);
-
-    // Test the submit link.
-    $this->clickLink(t('Submit'));
-
-    // Verify that we are on the submit job page.
-    $this->drupalPostForm(NULL, array(), t('Submit to provider'));
 
     // Test for Unavailable/Unconfigured Translators.
     $this->default_translator->setSetting('action', 'not_translatable');
@@ -1123,6 +1088,8 @@ class TMGMTUiTest extends EntityTestBase {
 
   /**
    * Test titles of various TMGMT pages.
+   *
+   * @todo Miro wants to split this test to specific tests (check)
    */
   function testPageTitles() {
     $this->loginAsAdmin();
@@ -1179,6 +1146,9 @@ class TMGMTUiTest extends EntityTestBase {
 
   /**
    * Test the deletion of job item.
+   *
+   * @todo This will in future check that delete is not allowed.
+   * @todo There will be some overlap with Aborting items & testAbortJob.
    */
   function testJobItemDelete() {
     $this->loginAsAdmin();
@@ -1213,6 +1183,9 @@ class TMGMTUiTest extends EntityTestBase {
 
   /**
    * Test the Revisions of a job item.
+   *
+   * @todo Will be extended with the diff support.
+   * @todo There will be another test that checks for changes and merges with diffs.
    */
   function testItemRevision() {
     $this->loginAsAdmin();
@@ -1247,6 +1220,9 @@ class TMGMTUiTest extends EntityTestBase {
 
   /**
    * Test the settings of TMGMT.
+   *
+   * @todo some settings have no test coverage in their effect.
+   * @todo we will need to switch them in context of the other lifecycle tests.
    */
   public function testSettings() {
     $this->loginAsAdmin();
@@ -1272,4 +1248,217 @@ class TMGMTUiTest extends EntityTestBase {
     $this->assertFalse($settings->get('respect_text_format'));
   }
 
+  /**
+   * Tests of the job item review process.
+   */
+  public function testProgress() {
+    // Test that there are no jobs at the beginning.
+    $this->drupalGet('admin/tmgmt/jobs');
+    $this->assertText('No jobs available.');
+
+    // Create Jobs.
+    $job1 = $this->createJob();
+    $job1->save();
+    $job1->setState(Job::STATE_UNPROCESSED);
+
+    $job2 = $this->createJob();
+    $job2->save();
+    $job2->setState(Job::STATE_ACTIVE);
+
+    $job3 = $this->createJob();
+    $job3->save();
+    $job3->setState(Job::STATE_REJECTED);
+
+    $job4 = $this->createJob();
+    $job4->save();
+    $job4->setState(Job::STATE_ABORTED);
+
+    $job5 = $this->createJob();
+    $job5->save();
+    $job5->setState(Job::STATE_FINISHED);
+
+    // Test their icons.
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
+      'state' => 'All',
+    )));
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 5);
+    $this->assertJobStateIcon(1, 'Unprocessed');
+    $this->assertJobStateIcon(2, 'In progress');
+    $this->assertJobStateIcon(3, 'Rejected');
+    $this->assertJobStateIcon(4, 'Aborted');
+    $this->assertJobStateIcon(5, 'Finished');
+
+    // Test the row amount for each state selected.
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('state' => '1')));
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 3);
+
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('state' => '2')));
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
+
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('state' => '3')));
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
+
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('state' => '4')));
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
+
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('state' => '6')));
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
+
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('state' => '7')));
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
+
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('state' => '2')));
+
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'title' => array(
+        'deep_nesting' => array(
+          '#text' => '<p><em><strong>Six dummy HTML tags in the title.</strong></em></p>',
+          '#label' => 'Title',
+        ),
+      ),
+      'body' => array(
+        'deep_nesting' => array(
+          '#text' => '<p>Two dummy HTML tags in the body.</p>',
+          '#label' => 'Body',
+        )
+      ),
+    ));
+
+    // Add 2 items to job1 and submit it to provider.
+    $item1 = $job1->addItem('test_source', 'test', 1);
+    $job1->addItem('test_source', 'test', 2);
+    $redirects = tmgmt_job_checkout_multiple(array($job1));
+    $this->drupalGet(reset($redirects));
+    $edit = array(
+      'target_language' => 'de',
+      'settings[action]' => 'submit',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
+
+    // Translate body of one item.
+    $this->drupalGet('admin/tmgmt/items/' . $item1->id());
+    $this->drupalPostForm(NULL, array('body|deep_nesting[translation]' => 'translation'), t('Save'));
+    // Check job item state is still in progress.
+    $this->assertJobItemStateIcon(1, 'In progress');
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('state' => '1')));
+    // Check progress bar and icon.
+    $this->assertJobProgress(1, 3, 1, 0, 0);
+    $this->assertJobStateIcon(1, 'In progress');
+
+    // Translate title of one item.
+    $this->drupalGet('admin/tmgmt/items/' . $item1->id());
+    $this->drupalPostForm(NULL, array('title|deep_nesting[translation]' => 'translation'), t('Save'));
+    // Check job item state changed to needs review.
+    $this->assertJobItemStateIcon(1, 'Needs review');
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('state' => '1')));
+    // Check progress bar and icon.
+    $this->assertJobProgress(1, 2, 2, 0, 0);
+    $this->assertJobStateIcon(1, 'Needs review');
+
+    // Review the translation one by one.
+    $this->drupalPostAjaxForm('admin/tmgmt/items/' . $item1->id(), NULL, 'reviewed-body|deep_nesting');
+    $this->drupalGet('admin/tmgmt/jobs/' . $job1->id());
+    // Check the icon of the job item.
+    $this->assertJobItemStateIcon(1, 'Needs review');
+    $this->drupalPostAjaxForm('admin/tmgmt/items/' . $item1->id(), NULL, 'reviewed-title|deep_nesting');
+    $this->drupalGet('admin/tmgmt/jobs/' . $job1->id());
+    // Check the icon of the job item.
+    $this->assertJobItemStateIcon(1, 'Needs review');
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('state' => '1')));
+    // Check progress bar and icon.
+    $this->assertJobProgress(1, 2, 0, 2, 0);
+    $this->assertJobStateIcon(1, 'Needs review');
+
+    // Save one job item as completed.
+    $this->drupalPostForm('admin/tmgmt/items/' . $item1->id(), NULL, t('Save as completed'));
+    // Check job item state changed to accepted.
+    $this->assertJobItemStateIcon(1, 'Accepted');
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('state' => '1')));
+    // Check progress bar and icon.
+    $this->assertJobProgress(1, 2, 0, 0, 2);
+    $this->assertJobStateIcon(1, 'In progress');
+  }
+
+  /**
+   * Asserts task item progress bar.
+   *
+   * @param int $row
+   *   The row of the item you want to check.
+   * @param int $state
+   *   The expected state.
+   *
+   */
+  private function assertJobStateIcon($row, $state) {
+    $result = $this->xpath('/html/body/div/main/div/div/div/div/div[2]/table/tbody/tr[' . $row . ']/td[3]/img')[0];
+    $this->assertEqual($result['title'], $state);
+  }
+
+  /**
+   * Asserts task item progress bar.
+   *
+   * @param int $row
+   *   The row of the item you want to check.
+   * @param int $state
+   *   The expected state.
+   *
+   */
+  private function assertJobItemStateIcon($row, $state) {
+    $result = $this->xpath('//*[@id="edit-job-items-wrapper"]/div/div/div/div/table/tbody/tr[' . $row . ']/td[3]/img')[0];
+    $this->assertEqual($result['title'], $state);
+  }
+
+
+  /**
+   * Asserts task item progress bar.
+   *
+   * @param int $row
+   *   The row of the item you want to check.
+   * @param int $pending
+   *   The amount of pending items.
+   * @param int $reviewed
+   *   The amount of reviewed items.
+   * @param int $translated
+   *   The amount of translated items.
+   * @param int $accepted
+   *   The amount of accepted items.
+   *
+   */
+  private function assertJobProgress($row, $pending, $translated, $reviewed, $accepted) {
+    $result = $this->xpath('/html/body/div/main/div/div/div/div/div[2]/table/tbody/tr[' . $row . ']/td[6]')[0];
+    $div_number = 0;
+    if ($pending > 0) {
+      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-progress-pending');
+      $div_number++;
+    }
+    else {
+      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-progress-pending');
+    }
+    if ($translated > 0) {
+      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-progress-translated');
+      $div_number++;
+    }
+    else {
+      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-progress-translated');
+    }
+    if ($reviewed > 0) {
+      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-progress-reviewed');
+      $div_number++;
+    }
+    else {
+      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-progress-reviewed');
+    }
+    if ($accepted > 0) {
+      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-progress-accepted');
+    }
+    else {
+      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-progress-accepted');
+    }
+    $title = t('Pending: @pending, translated: @translated, reviewed: @reviewed, accepted: @accepted.', array(
+      '@pending' => $pending,
+      '@translated' => $translated,
+      '@reviewed' => $reviewed,
+      '@accepted' => $accepted,
+    ));
+    $this->assertEqual($result->div['title'], $title);
+  }
 }

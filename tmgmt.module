@@ -985,13 +985,14 @@ function tmgmt_color_job_legend() {
   }
 
   $legends_left = array();
-  $legends_left[] = array('legend' => t('Unprocessed'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg');
-  $legends_left[] = array('legend' => t('Active'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
+  $legends_left[] = array('legend' => t('Unprocessed'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/rejected.svg');
+  $legends_left[] = array('legend' => t('In progress'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg');
+  $legends_left[] = array('legend' => t('Needs review'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
   $legends_left[] = array('legend' => t('Rejected'), 'icon' => 'core/misc/icons/787878/ex.svg');
   $legends_left[] = array('legend' => t('Aborted'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ex-red.svg');
   $legends_left[] = array('legend' => t('Finished'), 'icon' => 'core/misc/icons/73b355/check.svg');
 
-  $job_state = 'Job state:';
+  $job_state = 'State:';
 
   $output['legends']['#markup'] = '<div class="tmgmt-color-legend clearfix">';
 
