@@ -664,11 +664,11 @@ class TMGMTUiTest extends EntityTestBase {
     // Assign each job to a translator.
     $job1 = $this->createJob();
     $this->drupalGet('admin/tmgmt/jobs');
-    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[0]);
+    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[1]);
 
     $job2 = $this->createJob();
     $this->drupalGet('admin/tmgmt/jobs');
-    $this->assertTrue($label, trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[0]));
+    $this->assertTrue($label, trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[1]));
     $job1->set('translator', $translator1->id())->save();
     $job2->set('translator', $translator2->id())->save();
 
