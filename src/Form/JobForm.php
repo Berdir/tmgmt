@@ -86,7 +86,7 @@ class JobForm extends TmgmtFormBase {
       $form_state->setValue('label', $job->label());
     }
 
-    $form['label']['widget'][0]['value']['#description'] = t('You can provide a label for this job in order to identify it easily later on. Or leave it empty to use default one.');
+    $form['label']['widget'][0]['value']['#description'] = t('You can provide a label for this job in order to identify it easily later on. Or leave it empty to use the default one.');
     $form['label']['#group'] = 'info';
     $form['label']['#prefix'] = '<div id="tmgmt-ui-label">';
     $form['label']['#suffix'] = '</div>';
@@ -316,7 +316,7 @@ class JobForm extends TmgmtFormBase {
       $form['translator_wrapper']['translator'] = array(
         '#type' => 'select',
         '#title' => t('Provider'),
-        '#description' => t('The configured provider plugin that will process of the translation.'),
+        '#description' => t('The configured provider that will process the translation.'),
         '#options' => $translators,
         '#default_value' => $job->getTranslatorId(),
         '#required' => TRUE,

@@ -86,7 +86,7 @@ class TranslatorForm extends EntityForm {
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),
-      '#description' => t('The label of the translator.'),
+      '#description' => t('The label of the provider.'),
       '#default_value' => $entity->label(),
       '#required' => TRUE,
       '#size' => 32,

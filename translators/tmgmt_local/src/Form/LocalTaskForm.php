@@ -68,7 +68,7 @@ class LocalTaskForm extends ContentEntityForm {
       $form_state->setValue('label', $local_task->label());
     }
 
-    $form['title']['widget'][0]['value']['#description'] = t('You can provide a label for this localTask in order to identify it easily later on. Or leave it empty to use default one.');
+    $form['title']['widget'][0]['value']['#description'] = t('You can provide a label for this localTask in order to identify it easily later on. Or leave it empty to use the default one.');
     $form['title']['#group'] = 'info';
     $form['title']['#prefix'] = '<div id="tmgmt-ui-label">';
     $form['title']['#suffix'] = '</div>';

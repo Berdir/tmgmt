@@ -619,7 +619,7 @@ display:
       menu:
         type: normal
         title: 'Continuous Jobs'
-        description: 'Manage and review continous translation jobs.'
+        description: 'Manage and review continuous translation jobs.'
         parent: tmgmt.admin_tmgmt
         weight: -90
         context: '0'
