@@ -1389,7 +1389,7 @@ class TMGMTUiTest extends EntityTestBase {
    *
    */
   private function assertJobStateIcon($row, $state) {
-    $result = $this->xpath('/html/body/div/main/div/div/div/div/div[2]/table/tbody/tr[' . $row . ']/td[3]/img')[0];
+    $result = $this->xpath('/html/body/div/main/div/div/div/div/div[2]/table/tbody/tr[' . $row . ']/td[1]/img')[0];
     $this->assertEqual($result['title'], $state);
   }
 
@@ -1403,7 +1403,7 @@ class TMGMTUiTest extends EntityTestBase {
    *
    */
   private function assertJobItemStateIcon($row, $state) {
-    $result = $this->xpath('//*[@id="edit-job-items-wrapper"]/div/div/div/div/table/tbody/tr[' . $row . ']/td[3]/img')[0];
+    $result = $this->xpath('//*[@id="edit-job-items-wrapper"]/div/div/div/div/table/tbody/tr[' . $row . ']/td[1]/img')[0];
     $this->assertEqual($result['title'], $state);
   }
 
