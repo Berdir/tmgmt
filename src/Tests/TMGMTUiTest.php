@@ -203,6 +203,8 @@ class TMGMTUiTest extends EntityTestBase {
       ),
     ));
     $item4 = $job->addItem('test_source', 'test', 4);
+    // Manually active the item as the test expects that.
+    $item4->active();
     $this->drupalGet('admin/tmgmt/items/' . $item4->id());
 
     // Test primary buttons.
@@ -394,6 +396,8 @@ class TMGMTUiTest extends EntityTestBase {
     $job->settings = array();
     $job->save();
     $item = $job->addItem('test_source', 'test', 1);
+    // The test expects the item to be active.
+    $item->active();
 
     $data = \Drupal::service('tmgmt.data')->flatten($item->getData());
     $keys = array_keys($data);
@@ -614,6 +618,7 @@ class TMGMTUiTest extends EntityTestBase {
       ),
     ));
     $item5 = $job->addItem('test_source', 'test', 5);
+    $item5->active();
 
     $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
     $this->assertText('The translation of test_source:test:1 to German is finished and can now be reviewed.');
@@ -1233,12 +1238,14 @@ class TMGMTUiTest extends EntityTestBase {
     $this->assertTrue($settings->get('word_count_exclude_tags'));
     $this->assertEqual(20, $settings->get('source_list_limit'));
     $this->assertTrue($settings->get('respect_text_format'));
+    $this->assertFalse($settings->get('submit_job_item_on_cron'));
 
     $this->drupalGet('admin/tmgmt/settings');
     $edit = [
       'tmgmt_quick_checkout' => FALSE,
       'tmgmt_purge_finished' => 0,
       'respect_text_format' => FALSE,
+      'tmgmt_submit_job_item_on_cron' => TRUE,
     ];
     $this->drupalPostForm(NULL, $edit, t('Save configuration'));
 
@@ -1246,6 +1253,7 @@ class TMGMTUiTest extends EntityTestBase {
     $this->assertFalse($settings->get('quick_checkout'));
     $this->assertEqual(0, $settings->get('purge_finished'));
     $this->assertFalse($settings->get('respect_text_format'));
+    $this->assertTrue($settings->get('submit_job_item_on_cron'));
   }
 
   /**

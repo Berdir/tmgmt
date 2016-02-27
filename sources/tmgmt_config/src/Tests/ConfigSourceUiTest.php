@@ -128,7 +128,7 @@ class ConfigSourceUiTest extends EntityTestBase {
     $this->drupalGet('admin/structure/types/manage/article/translate');
 
     // Verify that the pending translation is shown.
-    $this->clickLink(t('In progress'));
+    $this->clickLink(t('Inactive'));
 
     // Try to save, should fail because the job has no translator assigned.
     $edit = array(

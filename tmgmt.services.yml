@@ -7,7 +7,7 @@ services:
     parent: default_plugin_manager
   tmgmt.continuous:
     class: Drupal\tmgmt\ContinuousManager
-    arguments: ['@entity_type.manager', '@plugin.manager.tmgmt.source']
+    arguments: ['@entity_type.manager', '@plugin.manager.tmgmt.source', '@config.factory']
   tmgmt.cart:
     class: Drupal\tmgmt\JobItemCart
   tmgmt.data:

@@ -111,7 +111,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
       ->setLabel(t('Job item state'))
       ->setDescription(t('The job item state'))
       ->setSetting('allowed_values', $states)
-      ->setDefaultValue(static::STATE_ACTIVE);
+      ->setDefaultValue(static::STATE_INACTIVE);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
@@ -564,6 +564,13 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function isInactive() {
+    return $this->isState(static::STATE_INACTIVE);
+  }
+
+  /**
    * Recursively writes translated data to the data array of a job item.
    *
    * While doing this the #status of each data item is set to
@@ -742,6 +749,12 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    * {@inheritdoc}
    */
   public function addTranslatedData(array $translation, $key = array(), $status = NULL) {
+
+    if ($this->isInactive()) {
+      // The job item can not be inactive and receive translations.
+      $this->setState(JobItemInterface::STATE_ACTIVE);
+    }
+
     $this->addTranslatedDataRecursive($translation, $key, $status);
     // Check if the job item has all the translated data that it needs now.
     // Only attempt to change the status to needs review if it is currently
@@ -1008,6 +1021,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
       static::STATE_REVIEW => t('Needs review'),
       static::STATE_ACCEPTED => t('Accepted'),
       static::STATE_ABORTED => t('Aborted'),
+      static::STATE_INACTIVE => t('Inactive'),
     );
   }
 

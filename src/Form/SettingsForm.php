@@ -57,6 +57,12 @@ class SettingsForm extends ConfigFormBase {
       '#options' => array('_never' => t('Never'), '0' => t('Immediately'), '86400' => t('After 24 hours'), '604800' => t('After 7 days'), '2592000' => t('After 30 days'), '31536000' => t('After 365 days')),
       '#default_value' => $config->get('purge_finished'),
     );
+    $form['performance']['tmgmt_submit_job_item_on_cron'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Submit continuous job items'),
+      '#description' => t('Enabling will force all continuous job items to be submitted on cron.'),
+      '#default_value' => $config->get('submit_job_item_on_cron'),
+    );
     $form['plaintext'] = array(
       '#type' => 'details',
       '#title' => t('Text settings'),
@@ -79,6 +85,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('quick_checkout', $form_state->getValue('tmgmt_quick_checkout'))
       ->set('purge_finished', $form_state->getValue('tmgmt_purge_finished'))
       ->set('respect_text_format', $form_state->getValue('respect_text_format'))
+      ->set('submit_job_item_on_cron', $form_state->getValue('tmgmt_submit_job_item_on_cron'))
       ->save();
 
     parent::submitForm($form, $form_state);

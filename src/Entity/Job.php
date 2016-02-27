@@ -650,6 +650,22 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
   /**
    * {@inheritdoc}
    */
+  public function preSave(EntityStorageInterface $storage) {
+    parent::preSave($storage);
+    if ($this->isActive() && $this->original->isUnprocessed()) {
+      foreach ($this->getItems() as $item) {
+        // The job was submitted, activate any inactive job item.
+        if ($item->isInactive()) {
+          $item->setState(JobItemInterface::STATE_ACTIVE);
+          $item->save();
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function abortTranslation() {
     if (!$this->isAbortable() || !$plugin = $this->getTranslatorPlugin()) {
       return FALSE;

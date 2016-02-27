@@ -354,11 +354,11 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
     $entity_manager = \Drupal::entityManager();
     $entity = $entity_manager->getStorage($item_type)->load($item_id);
     if ($entity && $entity->getEntityType()->hasKey('bundle')) {
-      if ($continuous_settings[$plugin][$item_type]['bundles'][$entity->bundle()] === 1 && $continuous_settings[$plugin][$item_type]['enabled'] === 1) {
+      if (!empty($continuous_settings[$plugin][$item_type]['bundles'][$entity->bundle()]) && !empty($continuous_settings[$plugin][$item_type]['enabled'])) {
         return TRUE;
       }
     }
-    elseif ($continuous_settings[$plugin][$item_type]['enabled'] === 1) {
+    elseif (!empty($continuous_settings[$plugin][$item_type]['enabled'])) {
       return TRUE;
     }
     return FALSE;

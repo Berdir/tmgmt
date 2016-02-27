@@ -17,6 +17,11 @@ use Drupal\Core\Entity\ContentEntityInterface;
 interface JobItemInterface extends ContentEntityInterface {
 
   /**
+   * The translation job item is inactive.
+   */
+  const STATE_INACTIVE = 0;
+
+  /**
    * The translation job item is active and waiting to be translated.
    *
    * A job item is marked as 'active' until every translatable piece of text in
@@ -351,6 +356,14 @@ interface JobItemInterface extends ContentEntityInterface {
    *   TRUE if the state is 'aborted', FALSE otherwise.
    */
   public function isAborted();
+
+  /**
+   * Checks whether the state of this transaction is 'inactive'.
+   *
+   * @return bool
+   *   TRUE if the state is 'inactive', FALSE otherwise.
+   */
+  public function isInactive();
 
   /**
    * Reverts data item translation to the latest existing revision.

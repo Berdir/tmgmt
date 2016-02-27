@@ -157,17 +157,15 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
    * {@inheritdoc}
    */
   public function requestJobItemsTranslation(array $job_items) {
+    $group = [];
     /** @var JobItemInterface $job_item */
     foreach ($job_items as $job_item) {
+      $group[] = ['item_id' => $job_item->id(), 'job_id' => $job_item->getJobId()];
       // Add a debug message.
-      $job_item->addMessage('Requested translation to the continuous translator.', [], 'debug');
+      $job_item->active('Requested translation to the continuous translator.', [], 'debug');
 
       // The dummy translation prefixes strings with the target language.
-      $data = array_filter(\Drupal::service('tmgmt.data')
-        ->flatten($job_item->getData()), [
-          \Drupal::service('tmgmt.data'),
-          'filterData',
-        ]);
+      $data = \Drupal::service('tmgmt.data')->filterTranslatable($job_item->getData());
       $tdata = [];
       foreach ($data as $key => $value) {
         if ($job_item->getJob()->getTargetLangcode() != $job_item->getJob()
@@ -185,6 +183,9 @@ class TestTranslator extends TranslatorPluginBase implements TranslatorRejectDat
       $job_item->addTranslatedData(\Drupal::service('tmgmt.data')
         ->unflatten($tdata));
     }
+    $groups = \Drupal::state()->get('job_item_groups') ?: [];
+    $groups[] = $group;
+    \Drupal::state()->set('job_item_groups', $groups, $group);
   }
 
 }

@@ -577,4 +577,113 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $this->assertEqual(count($continuous_job->getItems()), 2, 'Continuous job item is automatically created for an updated english node.');
   }
 
+  /**
+   * Test submit continuous job items on cron.
+   */
+  public function testSubmitContinuousOnCron() {
+    $account = $this->createUser();
+    $type = $this->drupalCreateContentType();
+    $second_type = $this->drupalCreateContentType();
+
+    // Enable entity translations for nodes.
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    $content_translation_manager->setEnabled('node', $type->id(), TRUE);
+    $content_translation_manager->setEnabled('node', $second_type->id(), TRUE);
+
+    // Create test translator for continuous job.
+    $translator = Translator::load('test_translator');
+
+    // Continuous settings configuration.
+    $continuous_settings = [
+      'content' => [
+        'node' => [
+          'enabled' => 1,
+          'bundles' => [
+            $type->id() => 1,
+            $second_type->id() => 0,
+          ],
+        ],
+      ],
+    ];
+
+    $this->config('tmgmt.settings')
+      ->set('submit_job_item_on_cron', TRUE)
+      ->save();
+
+    $first_job = tmgmt_job_create('en', 'de', $account->id(), [
+      'job_type' => Job::TYPE_CONTINUOUS,
+      'translator' => $translator,
+      'continuous_settings' => $continuous_settings,
+    ]);
+    $first_job->save();
+
+    // Create an english node.
+    $first_node = Node::create([
+      'title' => $this->randomMachineName(),
+      'uid' => $account->id(),
+      'type' => $type->id(),
+      'langcode' => 'en',
+    ]);
+    $first_node->save();
+
+    $first_items = array_values($first_job->getItems());
+    foreach ($first_items as $job_item) {
+      $this->assertEqual($job_item->getState(), JobItemInterface::STATE_INACTIVE, 'Job item is inactive before cron run');
+    }
+
+    $second_job = tmgmt_job_create('de', 'en', $account->id(), [
+      'job_type' => Job::TYPE_CONTINUOUS,
+      'translator' => $translator,
+      'continuous_settings' => $continuous_settings,
+    ]);
+    $second_job->save();
+
+    // Create a german node.
+    $second_node = Node::create([
+      'title' => $this->randomMachineName(),
+      'uid' => $account->id(),
+      'type' => $type->id(),
+      'langcode' => 'de',
+    ]);
+    $second_node->save();
+    // Create a german node.
+    $third_node = Node::create([
+      'title' => $this->randomMachineName(),
+      'uid' => $account->id(),
+      'type' => $type->id(),
+      'langcode' => 'de',
+    ]);
+    $third_node->save();
+
+    $second_items = array_values($second_job->getItems());
+    foreach ($second_items as $job_item) {
+      $this->assertEqual($job_item->getState(), JobItemInterface::STATE_INACTIVE, 'Job item is inactive before cron run');
+    }
+
+    tmgmt_cron();
+
+    // Assert that the translator was called twice, once with the item of the
+    // first job and once with the 2 items of the second job.
+    $expected_groups = [
+      [
+        ['item_id' => $first_items[0]->id(), 'job_id' => $first_items[0]->getJobId()]
+      ],
+      [
+        ['item_id' => $second_items[0]->id(), 'job_id' => $second_items[0]->getJobId()],
+        ['item_id' => $second_items[1]->id(), 'job_id' => $second_items[1]->getJobId()]
+      ]
+    ];
+
+    // Check job items is properly grouped and we have exactly 2 groups.
+    $this->assertEqual(\Drupal::state()->get('job_item_groups'), $expected_groups, 'Job items groups are equal');
+
+    foreach ($first_job->getItems() as $job_item) {
+      $this->assertEqual($job_item->getState(), JobItemInterface::STATE_REVIEW, 'Job item is active after cron run');
+    }
+
+    foreach ($second_job->getItems() as $job_item) {
+      $this->assertEqual($job_item->getState(), JobItemInterface::STATE_REVIEW, 'Job item is active after cron run');
+    }
+  }
+
 }

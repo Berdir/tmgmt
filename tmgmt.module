@@ -81,6 +81,28 @@ function tmgmt_cron() {
       entity_delete_multiple('tmgmt_job', $tjid);
     }
   }
+
+  // Submit continuous job items.
+  if (\Drupal::config('tmgmt.settings')->get('submit_job_item_on_cron')) {
+
+    // Look for inactive job items of continuous jobs.
+    $ids = \Drupal::entityQuery('tmgmt_job_item')
+      ->condition('tjid.entity.job_type', JobInterface::TYPE_CONTINUOUS)
+      ->condition('state', JobItemInterface::STATE_INACTIVE)
+      ->execute();
+
+    // First, group the job items by job.
+    $job_items_by_job = [];
+    foreach (JobItem::loadMultiple($ids) as $item) {
+      $job_items_by_job[$item->getJobId()][] = $item;
+    }
+
+    // Then submit all items in a group per job.
+    foreach ($job_items_by_job as $items) {
+      $translator = reset($items)->getTranslatorPlugin();
+      $translator->requestJobItemsTranslation($items);
+    }
+  }
 }
 
 /**

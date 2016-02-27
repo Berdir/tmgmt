@@ -12,7 +12,9 @@ use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\Node;
+use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\Tests\EntityTestBase;
 
 /**
@@ -117,8 +119,8 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Request translation'));
     $this->drupalGet('node/' . $node->id() . '/translations', array('query' => array('destination' => 'node/' . $node->id())));
-    // Test that the translation in progress is working.
-    $this->clickLink(t('In progress'));
+    // The job item is not yet active.
+    $this->clickLink(t('Inactive'));
     $this->assertText($node->getTitle());
     $this->assertRaw('<div data-drupal-selector="edit-actions" class="form-actions js-form-wrapper form-wrapper" id="edit-actions">');
 

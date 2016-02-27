@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 
@@ -30,16 +31,26 @@ class ContinuousManager {
   protected $sourcePluginManager;
 
   /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
    * Constructs a new ContinuousManager.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\tmgmt\SourceManager $source_plugin_manager
    *   The source plugin manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, SourceManager $source_plugin_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, SourceManager $source_plugin_manager, ConfigFactoryInterface $config_factory) {
     $this->entityTypeManager = $entity_type_manager;
     $this->sourcePluginManager = $source_plugin_manager;
+    $this->configFactory = $config_factory;
   }
 
   /**
@@ -64,7 +75,13 @@ class ContinuousManager {
   }
 
   /**
-   * Creates job item and submits it to the translator of the given job.
+   * Creates job item and submits according to the configured settings.
+   *
+   * The job item will only be created if the given source plugin for the job is
+   * configured to accept this source.
+   *
+   * The job item will be immediately submitted to the translator unless
+   * this happens on cron runs.
    *
    * @param \Drupal\tmgmt\Entity\Job $job
    *   Continuous job.
@@ -76,10 +93,15 @@ class ContinuousManager {
    *   The source item id.
    */
   public function addItem(Job $job, $plugin, $item_type, $item_id) {
+    // Check if a job item should be created.
     if ($this->sourcePluginManager->createInstance($plugin)->shouldCreateContinuousItem($job, $plugin, $item_type, $item_id)) {
-      $job_item   = $job->addItem($plugin, $item_type, $item_id);
-      $translator = $job->getTranslatorPlugin();
-      $translator->requestJobItemsTranslation([$job_item]);
+      $job_item = $job->addItem($plugin, $item_type, $item_id);
+
+      // Only submit the item if cron submission is disabled.
+      if (!$this->configFactory->get('tmgmt.settings')->get('submit_job_item_on_cron')) {
+        $translator = $job->getTranslatorPlugin();
+        $translator->requestJobItemsTranslation([$job_item]);
+      }
     }
   }
 

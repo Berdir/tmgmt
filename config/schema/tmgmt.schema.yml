@@ -17,6 +17,9 @@ tmgmt.settings:
     source_list_limit:
       type: integer
       label: 'Source list limit'
+    submit_job_item_on_cron:
+      type: boolean
+      label: 'Submit job item on cron'
 
 tmgmt.translator.*:
   type: config_entity
