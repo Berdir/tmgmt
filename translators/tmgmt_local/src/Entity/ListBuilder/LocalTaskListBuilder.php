@@ -43,7 +43,7 @@ class LocalTaskListBuilder extends EntityListBuilder {
       $operations['assign_to_me'] = array(
         'title' => $this->t('Assign to me'),
         'weight' => 0,
-        'url' => $entity->toUrl('assign'),
+        'url' => $entity->toUrl('assign_to_me'),
       );
     }
     if ($entity->getStatus() != LocalTaskInterface::STATUS_UNASSIGNED && $entity->access('unassign')) {

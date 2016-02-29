@@ -7,7 +7,6 @@
 
 namespace Drupal\tmgmt_local\Plugin\Action;
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -57,7 +56,7 @@ class UnassignTask extends ActionBase implements ContainerFactoryPluginInterface
    * {@inheritdoc}
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    return AccessResult::allowedIfHasPermission($account, 'administer translation tasks');
+    return $object->access('unassign', $account, $return_as_object);
   }
 
 }

@@ -26,6 +26,14 @@ entity.tmgmt_local_task.assign:
   requirements:
     _entity_access: tmgmt_local_task.update
 
+entity.tmgmt_local_task.assign_to_me:
+  path: '/translate/{tmgmt_local_task}/assign_to_me'
+  defaults:
+    _controller: '\Drupal\tmgmt_local\Controller\LocalTaskController::assignToMe'
+  requirements:
+    _entity_access: tmgmt_local_task.update
+    _permission: 'provide translation services'
+
 tmgmt_local_task.assign_multiple:
   path: '/translate/assign-multiple'
   defaults:

@@ -38,7 +38,7 @@ class LocalTaskAccessControlHandler extends EntityAccessControlHandler {
 
       // Custom operations.
       case 'unassign':
-        return AccessResult::allowedIf(!empty($entity->tuid) && $entity->tuid == $account->id() && $account->hasPermission('provide translation services'));
+        return AccessResult::allowedIf($entity->tuid->target_id == $account->id() && $account->hasPermission('provide translation services'));
     }
     return AccessResult::neutral();
   }

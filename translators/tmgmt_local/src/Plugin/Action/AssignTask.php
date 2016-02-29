@@ -97,7 +97,8 @@ class AssignTask extends ActionBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    return AccessResult::allowedIfHasPermission($account, 'administer translation tasks');
+    $result = AccessResult::allowedIfHasPermission($account, 'administer translation tasks');
+    return $return_as_object ? $result : $result->isAllowed();
   }
 
 }

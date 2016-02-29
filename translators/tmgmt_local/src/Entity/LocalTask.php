@@ -44,6 +44,7 @@ use Drupal\tmgmt_local\LocalTaskInterface;
  *   links = {
  *     "canonical" = "/translate/{tmgmt_local_task}",
  *     "assign" = "/translate/{tmgmt_local_task}/assign",
+ *     "assign_to_me" = "/translate/{tmgmt_local_task}/assign_to_me",
  *     "unassign" = "/translate/{tmgmt_local_task}/unassign",
  *     "delete" = "/translate/{tmgmt_local_task}/delete",
  *   }

@@ -361,15 +361,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // @todo Action should not redirect to mine.
     $this->drupalGet('translate');
     $this->clickLink(t('Assign to me'));
-
-    // @todo Not working the link, delete that when works again.
-    $this->drupalGet('translate');
-    $edit = array(
-      'tmgmt_local_task_bulk_form[0]' => TRUE,
-      'action' => 'tmgmt_local_task_assign_to_me',
-    );
-    $this->drupalPostForm(NULL, $edit, t('Apply'));
-    $this->assertText(t('Assign to me was applied to 1 item.'));
+    $this->assertText(t('The task has been assigned to you.'));
 
     // Log in with the translator with the same abilities, make sure that he
     // does not see the assigned task.
