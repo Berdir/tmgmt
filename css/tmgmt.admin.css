@@ -148,7 +148,10 @@ table.tmgmt-ui-review tbody th {
   background-color: #578a3e;
 }
 
-td.views-field-word-count {
+td.views-field-word-count, th.views-field-word-count,
+td.views-field-tags-count, th.views-field-tags-count,
+td.views-field-item-count, th.views-field-item-count,
+td.views-field-loop-count, th.views-field-loop-count {
   text-align: right;
 }
 
