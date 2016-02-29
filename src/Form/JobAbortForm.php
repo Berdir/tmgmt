@@ -37,12 +37,15 @@ class JobAbortForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    if (!$this->entity->abortTranslation()) {
+    /** @var \Drupal\tmgmt\Entity\Job $entity */
+    $entity = $this->entity;
+    if (!$entity->abortTranslation()) {
       // This is the case when a translator does not support the abort operation.
       // It would make more sense to not display the button for the action,
       // however we do not know if the translator is able to abort a job until
       // we trigger the action.
-      foreach ($this->entity->getMessagesSince() as $message) {
+      foreach ($entity->getMessagesSince() as $message) {
+        /** @var \Drupal\tmgmt\MessageInterface $message */
         if ($message->getType() == 'debug') {
           continue;
         }
