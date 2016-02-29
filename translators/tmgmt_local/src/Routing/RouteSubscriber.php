@@ -45,7 +45,7 @@ class RouteSubscriber extends RouteSubscriberBase {
       ]);
     }
     foreach ($collection->all() as $route) {
-      if (strpos($route->getPath(), '/translate') === 0
+      if ((strpos($route->getPath(), '/translate') === 0 && $this->configFactory->get('tmgmt_local.settings')->get('use_admin_theme'))
         || strpos($route->getPath(), '/manage-translate') === 0) {
         $route->setOption('_admin_route', TRUE);
       }

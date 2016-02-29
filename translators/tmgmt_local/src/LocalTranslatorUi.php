@@ -89,6 +89,11 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
       '#type' => 'checkbox',
       '#default_value' => $translator->getSetting('allow_all'),
     );
+    $form['use_admin_theme'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use admin theme in local translator'),
+      '#default_value' => $translator->getSetting('use_admin_theme'),
+    );
     return $form;
   }
 

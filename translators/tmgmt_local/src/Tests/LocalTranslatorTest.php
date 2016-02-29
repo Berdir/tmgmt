@@ -35,6 +35,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
   protected $localManagerPermissions = [
     'administer translation tasks',
     'provide translation services',
+    'view the administration theme',
+    'administer themes',
   ];
 
   /**
@@ -872,6 +874,40 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalLogin($user);
     $this->drupalGet('admin/tmgmt');
     $this->assertText('Local Tasks');
+  }
+
+  /**
+   * Test the settings of TMGMT local.
+   */
+  public function testSettings() {
+    \Drupal::getContainer()->get('theme_handler')->install(array('seven'));
+    $this->drupalPlaceBlock('system_menu_block:account');
+    $this->loginAsAdmin($this->localManagerPermissions);
+    $edit = [
+      'admin_theme' => 'seven',
+      'use_admin_theme' => TRUE,
+    ];
+    $this->drupalPostForm('admin/appearance', $edit, t('Save configuration'));
+
+    $settings = \Drupal::config('tmgmt_local.settings');
+    $this->assertTrue($settings->get('use_admin_theme'));
+    $this->drupalGet('admin/tmgmt');
+    $this->assertText('Translate');
+    $this->drupalGet('<front>');
+    $this->assertNoText('Translate');
+
+    $this->drupalGet('admin/tmgmt/settings');
+    $edit = [
+      'use_admin_theme' => FALSE,
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save configuration'));
+
+    $settings = \Drupal::config('tmgmt_local.settings');
+    $this->assertFalse($settings->get('use_admin_theme'));
+    $this->drupalGet('admin/tmgmt');
+    $this->assertNoText('Translate');
+    $this->drupalGet('<front>');
+    $this->assertText('Translate');
   }
 
 }

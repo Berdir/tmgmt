@@ -41,8 +41,11 @@ class TMGMTLocalBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     $breadcrumb->addCacheContexts(['route']);
 
     // Add links to administration, and translation to the breadcrumb.
-    $breadcrumb->addLink(Link::createFromRoute($this->t('Administration'), 'system.admin'));
-    $breadcrumb->addLink(Link::createFromRoute($this->t('Translation'), 'tmgmt.admin_tmgmt'));
+    if (\Drupal::config('tmgmt_local.settings')->get('use_admin_theme')
+      || strpos($route_match->getRouteObject()->getPath(), '/manage-translate') === 0) {
+      $breadcrumb->addLink(Link::createFromRoute($this->t('Administration'), 'system.admin'));
+      $breadcrumb->addLink(Link::createFromRoute($this->t('Translation'), 'tmgmt.admin_tmgmt'));
+    }
 
     if ($route_match->getParameter('tmgmt_local_task') instanceof LocalTaskInterface || $route_match->getParameter('tmgmt_local_task_item') instanceof LocalTaskItemInterface) {
       $breadcrumb->addLink(Link::createFromRoute($this->t('Local Tasks'), 'view.tmgmt_local_task_overview.unassigned'));
