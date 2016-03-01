@@ -372,6 +372,24 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
   /**
    * {@inheritdoc}
    */
+  public function getMostRecentItem($plugin, $item_type, $item_id) {
+    $query = \Drupal::entityQuery('tmgmt_job_item')
+      ->condition('tjid', $this->id())
+      ->condition('plugin', $plugin)
+      ->condition('item_type', $item_type)
+      ->condition('item_id', $item_id)
+      ->sort('tjiid', 'DESC')
+      ->range(0, 1);
+    $result = $query->execute();
+    if (!empty($result)) {
+      return JobItem::load(reset($result));
+    }
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getMessages($conditions = array()) {
     $query = \Drupal::entityQuery('tmgmt_message')
       ->condition('tjid', $this->id());

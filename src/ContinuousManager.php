@@ -94,8 +94,25 @@ class ContinuousManager {
    */
   public function addItem(Job $job, $plugin, $item_type, $item_id) {
     // Check if a job item should be created.
-    if ($this->sourcePluginManager->createInstance($plugin)->shouldCreateContinuousItem($job, $plugin, $item_type, $item_id)) {
+    $most_recent_job_item = $job->getMostRecentItem($plugin, $item_type, $item_id);
+    $should_create_item = $this->sourcePluginManager->createInstance($plugin)->shouldCreateContinuousItem($job, $plugin, $item_type, $item_id);
+    if ($should_create_item) {
+      if ($most_recent_job_item) {
+        // If the most recent job item is not yet submitted update its data.
+        if ($most_recent_job_item->isInactive()) {
+          $most_recent_job_item->resetData();
+          $most_recent_job_item->addMessage('Updated source data.');
+          return;
+        }
+        // If the most recent job item is active do nothing.
+        elseif (!$most_recent_job_item->isAborted() && !$most_recent_job_item->isAccepted()) {
+          $most_recent_job_item->addMessage('Source was updated, changes were ignored as job item is still active.');
+          return;
+        }
+      }
+      // If there are no job items or it's finished/aborted create new one.
       $job_item = $job->addItem($plugin, $item_type, $item_id);
+      $job_item->addMessage('Continuous job item created');
 
       // Only submit the item if cron submission is disabled.
       if (!$this->configFactory->get('tmgmt.settings')->get('submit_job_item_on_cron')) {

@@ -212,6 +212,22 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   public function getItems($conditions = array());
 
   /**
+   * Returns most recent job item attached to this job.
+   *
+   * @param string $plugin
+   *   The plugin name.
+   * @param string $item_type
+   *   Source item type.
+   * @param string $item_id
+   *   Source item ID.
+   *
+   * @return \Drupal\tmgmt\JobItemInterface|null
+   *   The most recent job item that matches that source or NULL if none
+   *   exists.
+   */
+  public function getMostRecentItem($plugin, $item_type, $item_id);
+
+  /**
    * Returns all job messages attached to this job.
    *
    * @param array $conditions

@@ -748,6 +748,15 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
   /**
    * {@inheritdoc}
    */
+  public function resetData() {
+    $this->data->value = NULL;
+    $this->unserializedData = NULL;
+    $this->getData();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function addTranslatedData(array $translation, $key = array(), $status = NULL) {
 
     if ($this->isInactive()) {

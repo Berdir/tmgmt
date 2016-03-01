@@ -351,19 +351,32 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
    */
   public function shouldCreateContinuousItem(Job $job, $plugin, $item_type, $item_id) {
     $continuous_settings = $job->getContinuousSettings();
-    $entity_manager = \Drupal::entityManager();
+    $entity_manager = \Drupal::entityTypeManager();
     $entity = $entity_manager->getStorage($item_type)->load($item_id);
-    if ($entity && $entity->getEntityType()->hasKey('bundle')) {
-      if (!empty($continuous_settings[$plugin][$item_type]['bundles'][$entity->bundle()]) && !empty($continuous_settings[$plugin][$item_type]['enabled'])) {
+    $translation_manager = \Drupal::service('content_translation.manager');
+    $translation = $entity->hasTranslation($job->getTargetLangcode()) ? $entity->getTranslation($job->getTargetLangcode()) : NULL;
+    $metadata = isset($translation) ? $translation_manager->getTranslationMetadata($translation) : NULL;
+
+    // If a translation exists and is not marked as outdated, no new job items
+    // needs to be created.
+    if (isset($translation) && !$metadata->isOutdated()) {
+      return FALSE;
+    }
+    else {
+      if ($entity && $entity->getEntityType()->hasKey('bundle')) {
+        // The entity type has bundles, check both the entity type setting and
+        // the bundle.
+        if ($continuous_settings[$plugin][$item_type]['bundles'][$entity->bundle()] === 1 && $continuous_settings[$plugin][$item_type]['enabled'] === 1) {
+          return TRUE;
+        }
+      }
+      // No bundles, only check entity type setting.
+      elseif ($continuous_settings[$plugin][$item_type]['enabled'] === 1) {
         return TRUE;
       }
     }
-    elseif (!empty($continuous_settings[$plugin][$item_type]['enabled'])) {
-      return TRUE;
-    }
     return FALSE;
   }
-
 
   /**
    * Returns the bundle label for a given entity type.

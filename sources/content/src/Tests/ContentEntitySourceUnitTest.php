@@ -49,6 +49,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     $this->installEntitySchema('tmgmt_job');
     $this->installEntitySchema('tmgmt_job_item');
+    $this->installEntitySchema('tmgmt_remote');
     $this->installEntitySchema('tmgmt_message');
     $this->installEntitySchema('entity_test_rev');
     $this->installEntitySchema('entity_test_mulrev');
@@ -498,7 +499,6 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     // Create test translator for continuous job.
     $translator = Translator::load('test_translator');
-    $translator->setAutoAccept(TRUE)->save();
 
     // Continuous settings configuration.
     $continuous_settings = [
@@ -535,13 +535,24 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $continuous_job_item = reset($continuous_job_items);
     $this->assertEqual($node->label(), $continuous_job_item->label(), 'Continuous job item is automatically created for an english node.');
 
+    // Test that continuous job item is in state review.
+    $this->assertEqual($continuous_job_item->getState(), JobItemInterface::STATE_REVIEW, 'Translation for an english node is in state review.');
+
+    // Update english node.
+    $node->set('title', $this->randomMachineName());
+    $node->save();
+
+    // Test that there is no new job item.
+    $this->assertEqual(count($continuous_job->getItems()), 1, 'There are no new job items for an english node.');
+
+    // Accept translation for an english node.
+    $continuous_job_item->acceptTranslation();
+
     // Test that the translation for an english node is created and saved.
     $node = entity_load('node', $node->id());
     $translation = $node->getTranslation('de');
     $data = $continuous_job_item->getData();
     $this->assertEqual($translation->label(), $data['title'][0]['value']['#translation']['#text'], 'Translation for an english node has been saved correctly.');
-
-    // As was set to auto_accept, the translation should be accepted.
     $this->assertEqual($continuous_job_item->getState(), JobItemInterface::STATE_ACCEPTED, 'Translation for an english node has been accepted.');
 
     // Create a german node.
@@ -572,9 +583,29 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     $node->set('title', $this->randomMachineName());
     $node->save();
 
+    // Test that there are no new job items for english node because it's
+    // translation is not outdated.
+    $this->assertEqual(count($continuous_job->getItems()), 1, 'Continuous job item is not created for an updated english node.');
+
+    // Set the outdated flag to true.
+    $translation = $node->getTranslation('de');
+    $translation->content_translation_outdated->value = 1;
+    $translation->save();
+
     // Test that there are now two items for english node.
-    // @see tmgmt_content_entity_update(EntityInterface $entity)
     $this->assertEqual(count($continuous_job->getItems()), 2, 'Continuous job item is automatically created for an updated english node.');
+
+    $continuous_job_item_recent = $continuous_job->getMostRecentItem('content', $node->getEntityTypeId(), $node->id());
+
+    // Set job item state to aborted.
+    $continuous_job_item_recent->setState(JobItemInterface::STATE_ABORTED, NULL, array(), 'status');
+
+    // Update english node.
+    $node->set('title', $this->randomMachineName());
+    $node->save();
+
+    // Test that there are now three items for english node.
+    $this->assertEqual(count($continuous_job->getItems()), 3, 'Continuous job item is automatically created for an updated english node.');
   }
 
   /**
@@ -630,6 +661,22 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     foreach ($first_items as $job_item) {
       $this->assertEqual($job_item->getState(), JobItemInterface::STATE_INACTIVE, 'Job item is inactive before cron run');
     }
+
+    // Test that there is one job item for an english node.
+    $this->assertEqual(count($first_job->getItems()), 1, 'There is one job item for an english node.');
+
+    // Update english node.
+    $first_node->set('title', $this->randomMachineName());
+    $first_node->save();
+
+    // Test that there is no new job item for updated english node.
+    $this->assertEqual(count($first_job->getItems()), 1, 'There are no new job items for updated english node.');
+
+    // Test that job item's data is updated properly.
+    $first_job_items = $first_job->getItems();
+    $first_job_item = reset($first_job_items);
+    $data = $first_job_item->getData();
+    $this->assertEqual($first_node->label(), $data['title'][0]['value']['#text'], 'Data in job item has been updated properly.');
 
     $second_job = tmgmt_job_create('de', 'en', $account->id(), [
       'job_type' => Job::TYPE_CONTINUOUS,

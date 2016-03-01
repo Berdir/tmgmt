@@ -394,6 +394,11 @@ interface JobItemInterface extends ContentEntityInterface {
   public function updateData($key, $values = array(), $replace = FALSE);
 
   /**
+   * Resets job item data arrays.
+   */
+  public function resetData();
+
+  /**
    * Adds translated data to a job item.
    *
    * This function calls for JobItem::addTranslatedDataRecursive() which
