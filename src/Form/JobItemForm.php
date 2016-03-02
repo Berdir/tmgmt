@@ -112,7 +112,10 @@ class JobItemForm extends TmgmtFormBase {
     // of the foreach loop.
     $zebra = 'even';
     foreach (Element::children($data) as $key) {
-      $form['review'][$key] = $this->reviewFormElement($form_state, \Drupal::service('tmgmt.data')->flatten($data[$key], $key), $item, $zebra, $key);
+      $review_element = $this->reviewFormElement($form_state, \Drupal::service('tmgmt.data')->flatten($data[$key], $key), $item, $zebra, $key);
+      if ($review_element) {
+        $form['review'][$key] = $review_element;
+      }
     }
 
     if ($view =  entity_load('view', 'tmgmt_job_item_messages')) {
@@ -334,37 +337,39 @@ class JobItemForm extends TmgmtFormBase {
   }
 
   /**
-   * Build form elements for the review form using flatened data items.
+   * Build form elements for the review form using flattened data items.
    *
    * @todo Mention in the api documentation that the char '|' is not allowed in
    * field names.
    *
-   * @param array $form_state
-   *   Drupal form form_state object.
-   * @param $data
-   *   Flatened array of translation data items.
-   * @param $job_item
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   * @param array $data
+   *   Flattened array of translation data items.
+   * @param \Drupal\tmgmt\JobItemInterface $job_item
    *   The job item related to this data.
-   * @param $zebra
+   * @param string $zebra
    *   String containing either odd or even. This is used to style the each
    *   translation item with alternating colors.
-   * @param $parent_key
+   * @param string $parent_key
    *   The key for $data.
+   *
+   * @return array|NULL
+   *   Render array with the form element, or NULL if the text is not set.
    */
   function reviewFormElement(FormStateInterface $form_state, $data, JobItemInterface $job_item, &$zebra, $parent_key) {
     $flip = array(
       'even' => 'odd',
       'odd' => 'even',
     );
-    $form = array(
-      '#theme' => 'tmgmt_translator_review_form',
-      '#ajaxid' => tmgmt_review_form_element_ajaxid($parent_key),
-    );
+    $form = NULL;
 
     foreach (Element::children($data) as $key) {
       // The char sequence '][' confuses the form API so we need to replace it.
       $target_key = str_replace('][', '|', $key);
       if (isset($data[$key]['#text']) && \Drupal::service('tmgmt.data')->filterData($data[$key])) {
+        $form['#theme'] = 'tmgmt_translator_review_form';
+        $form['#ajaxid'] = tmgmt_review_form_element_ajaxid($parent_key);
         $zebra = $flip[$zebra];
         $form[$target_key] = array(
           '#tree' => TRUE,
