@@ -42,7 +42,7 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
    */
   public function getLabel(JobItemInterface $job_item) {
     if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
-      return $entity->label();
+      return $entity->label() ?: $entity->id();
     }
   }
 
@@ -51,7 +51,7 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
    */
   public function getUrl(JobItemInterface $job_item) {
     if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
-      return $entity->urlInfo();
+      return $entity->hasLinkTemplate('canonical') ? $entity->toUrl('canonical') : NULL;
     }
   }
 

@@ -151,12 +151,8 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
 
     $row = array(
       'id' => $entity->id(),
-      'title' => $entity->link($label),
+      'title' => $entity->hasLinkTemplate('canonical') ? $entity->toLink($label, 'canonical')->toString() : ($entity->label() ?: $entity->id()),
     );
-
-    if (isset($data['bundle'])) {
-      $row['bundle'] = $data['bundle'];
-    }
 
     if (count($bundles) > 1) {
       $row['bundle'] = isset($bundles[$entity->bundle()]) ? $bundles[$entity->bundle()] : t('Unknown');
@@ -203,8 +199,12 @@ class ContentEntitySourcePluginUi extends SourcePluginUiBase {
     // Build a list of allowed search conditions and get their values from the request.
     $entity_type = \Drupal::entityManager()->getDefinition($type);
     $whitelist = array('langcode', 'target_language', 'target_status');
-    $whitelist[] = $entity_type->getKey('bundle');
-    $whitelist[] = $entity_type->getKey('label');
+    if ($entity_type->hasKey('bundle')) {
+      $whitelist[] = $entity_type->getKey('bundle');
+    }
+    if ($entity_type->hasKey('label')) {
+      $whitelist[] = $entity_type->getKey('label');
+    }
     $search_property_params = array_filter(\Drupal::request()->query->all());
     $search_property_params = array_intersect_key($search_property_params, array_flip($whitelist));
     $bundles = $this->getTranslatableBundles($type);
