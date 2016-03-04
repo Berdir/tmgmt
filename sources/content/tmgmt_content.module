@@ -4,6 +4,8 @@
  * @file
  * Source plugin for the Translation Management system that handles entities.
  */
+
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\Plugin\DataType\EntityReference;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\JobInterface;
@@ -12,7 +14,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
- * Implements hook_tmgmt_source_suggestions()
+ * Implements hook_tmgmt_source_suggestions().
  */
 function tmgmt_content_tmgmt_source_suggestions(array $items, JobInterface $job) {
   $suggestions = array();
@@ -215,4 +217,30 @@ function tmgmt_content_create_continuous_job_items(ContentEntityInterface $entit
       $continuous_manager->addItem($job, 'content', $entity->getEntityTypeId(), $entity->id());
     }
   }
+}
+
+/**
+ * Implements hook_entity_access().
+ */
+function tmgmt_content_entity_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
+  $result = AccessResult::neutral();
+  $key = \Drupal::request()->query->get('key');
+  if ($entity instanceof ContentEntityInterface && $operation == 'view' && $key) {
+    $entity = $entity->getUntranslated();
+    $source_langcode = $entity->language()->getId();
+    $current_job_items = tmgmt_job_item_load_latest('content', $entity->getEntityTypeId(), $entity->id(), $source_langcode);
+    /** @var \Drupal\tmgmt\JobItemInterface $job_item */
+    if ($current_job_items) {
+      foreach ($current_job_items as $job_item) {
+        $valid_key = \Drupal::service('tmgmt_content.key_access')
+          ->getKey($job_item);
+        if ($key === $valid_key && \Drupal::config('tmgmt.settings')->get('anonymous_access')) {
+          $result = AccessResult::allowed();
+        }
+        $result->addCacheableDependency($job_item);
+      }
+      $result->addCacheableDependency(\Drupal::config('tmgmt.settings'));
+    }
+  }
+  return $result->addCacheContexts(['url.query_args:key']);
 }

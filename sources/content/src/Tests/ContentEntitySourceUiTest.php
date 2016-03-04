@@ -12,9 +12,7 @@ use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\Node;
-use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
-use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\Tests\EntityTestBase;
 
 /**
@@ -536,6 +534,37 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     // There should be no link if the job item is accepted.
     $this->drupalGet('admin/tmgmt/items/' . $node->id(), array('query' => array('destination' => 'admin/tmgmt/items/' . $node->id())));
     $this->assertNoLink(t('Preview'));
+  }
+
+  /**
+   * Test content entity source anonymous access.
+   */
+  public function testEntitySourceAnonymousAccess() {
+    // Create translatable node.
+    $node = $this->createTranslatableNode('page', 'en');
+
+    $job = $this->createJob('en', 'de');
+    $job->translator = $this->default_translator->id();
+    $job->save();
+    $job_item = tmgmt_job_item_create('content', $node->getEntityTypeId(), $node->id(), array('tjid' => $job->id()));
+    $job_item->save();
+
+    // Anonymous view of content entities.
+    $node->setPublished(FALSE);
+    $node->save();
+    $this->drupalLogout();
+    $url = $job_item->getSourceUrl();
+    $this->drupalGet($url);
+    $this->assertResponse(200);
+    \Drupal::configFactory()->getEditable('tmgmt.settings')->set('anonymous_access', FALSE)->save();
+    $this->drupalGet($url);
+    $this->assertResponse(403);
+    \Drupal::configFactory()->getEditable('tmgmt.settings')->set('anonymous_access', TRUE)->save();
+    $this->drupalGet($url);
+    $this->assertResponse(200);
+    $job->aborted();
+    $this->drupalGet($url);
+    $this->assertResponse(403);
   }
 
 }

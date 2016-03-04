@@ -1,4 +1,5 @@
 quick_checkout: true
+anonymous_access: true
 purge_finished: _never
 word_count_exclude_tags: true
 source_list_limit: 20

@@ -5,6 +5,9 @@ tmgmt.settings:
     quick_checkout:
       type: boolean
       label: 'Allow quick-checkout'
+    anonymous_access:
+      type: boolean
+      label: 'Allow access to source for translators'
     purge_finished:
       type: string
       label: 'Purge finished jobs'

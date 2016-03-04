@@ -11,7 +11,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Plugin\DataType\EntityReference;
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\FieldItemInterface;
+use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\TypedData\OptionsProviderInterface;
 use Drupal\Core\TypedData\Type\StringInterface;
 use Drupal\Core\TypedData\PrimitiveInterface;
@@ -50,9 +50,22 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
    * {@inheritdoc}
    */
   public function getUrl(JobItemInterface $job_item) {
-    if ($entity = entity_load($job_item->getItemType(), $job_item->getItemId())) {
-      return $entity->hasLinkTemplate('canonical') ? $entity->toUrl('canonical') : NULL;
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+    if ($entity = \Drupal::entityTypeManager()->getStorage($job_item->getItemType())->load($job_item->getItemId())) {
+      if ($entity->hasLinkTemplate('canonical')) {
+        $anonymous = new AnonymousUserSession();
+        $url = $entity->toUrl();
+        $anonymous_access = \Drupal::config('tmgmt.settings')->get('anonymous_access');
+        if ($url && $anonymous_access && !$entity->access('view', $anonymous)) {
+          $url->setOption('query', [
+            'key' => \Drupal::service('tmgmt_content.key_access')
+              ->getKey($job_item),
+          ]);
+        }
+        return $url;
+      }
     }
+    return NULL;
   }
 
   /**

@@ -1244,6 +1244,7 @@ class TMGMTUiTest extends EntityTestBase {
 
     $settings = \Drupal::config('tmgmt.settings');
     $this->assertTrue($settings->get('quick_checkout'));
+    $this->assertTrue($settings->get('anonymous_access'));
     $this->assertEqual('_never', $settings->get('purge_finished'));
     $this->assertTrue($settings->get('word_count_exclude_tags'));
     $this->assertEqual(20, $settings->get('source_list_limit'));
@@ -1253,6 +1254,7 @@ class TMGMTUiTest extends EntityTestBase {
     $this->drupalGet('admin/tmgmt/settings');
     $edit = [
       'tmgmt_quick_checkout' => FALSE,
+      'tmgmt_anonymous_access' => FALSE,
       'tmgmt_purge_finished' => 0,
       'respect_text_format' => FALSE,
       'tmgmt_submit_job_item_on_cron' => TRUE,
@@ -1261,6 +1263,7 @@ class TMGMTUiTest extends EntityTestBase {
 
     $settings = \Drupal::config('tmgmt.settings');
     $this->assertFalse($settings->get('quick_checkout'));
+    $this->assertFalse($settings->get('anonymous_access'));
     $this->assertEqual(0, $settings->get('purge_finished'));
     $this->assertFalse($settings->get('respect_text_format'));
     $this->assertTrue($settings->get('submit_job_item_on_cron'));
