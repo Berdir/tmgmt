@@ -32,7 +32,9 @@ class ContinuousJobForm extends JobForm {
     $available['source_language'] = tmgmt_available_languages();
 
     // Handle target language.
-    $available['target_language'] = tmgmt_available_languages();
+    $selected = $job->getSourceLangcode() != 'und' ?: array_keys(tmgmt_available_languages())[0];
+    $selected_option = [$selected => tmgmt_available_languages()[$selected]];
+    $available['target_language'] = array_diff(tmgmt_available_languages(), $selected_option);
 
     $this->entity->set('job_type', Job::TYPE_CONTINUOUS);
 
@@ -54,7 +56,9 @@ class ContinuousJobForm extends JobForm {
       '#prefix' => '<div id="tmgmt-ui-source-language" class="tmgmt-ui-source-language tmgmt-ui-info-item">',
       '#suffix' => '</div>',
       '#ajax' => array(
-        'callback' => array($this, 'ajaxLanguageSelect'),
+        'callback' => array($this, 'ajaxSourceLanguageSelect'),
+        'wrapper' => 'tmgmt-ui-target-language',
+        'event' => 'change',
       ),
     );
 
@@ -70,9 +74,30 @@ class ContinuousJobForm extends JobForm {
         'callback' => array($this, 'ajaxLanguageSelect'),
         'wrapper' => 'tmgmt-ui-target-language',
       ),
+      '#validated' => TRUE,
     );
 
     return $form;
+  }
+
+  /**
+   * Ajax callback to fetch the options for target language select.
+   *
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return mixed
+   *   Target language select array.
+   */
+  public function ajaxSourceLanguageSelect(array $form, FormStateInterface $form_state) {
+    if ($el = $form_state->getTriggeringElement()['#value']) {
+      $selected_option = [$el => tmgmt_available_languages()[$el]];
+      $options = array_diff(tmgmt_available_languages(), $selected_option);
+      $form['info']['target_language']['#options'] = $options;
+      return $form['info']['target_language'];
+    }
   }
 
   /**

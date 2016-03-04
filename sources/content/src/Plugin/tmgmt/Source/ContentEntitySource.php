@@ -348,11 +348,13 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
           ),
         );
         foreach ($bundles as $bundle => $bundle_label) {
-          $element[$entity_type->id()]['bundles'][$bundle] = array(
-            '#type' => 'checkbox',
-            '#title' => $bundle_label['label'],
-            '#default_value' => isset($continuous_settings[$this->getPluginId()][$entity_type->id()]) ? $continuous_settings[$this->getPluginId()][$entity_type->id()]['bundles'][$bundle] : FALSE,
-          );
+          if (\Drupal::service('content_translation.manager')->isEnabled($entity_type->id(), $bundle)) {
+            $element[$entity_type->id()]['bundles'][$bundle] = array(
+              '#type' => 'checkbox',
+              '#title' => $bundle_label['label'],
+              '#default_value' => isset($continuous_settings[$this->getPluginId()][$entity_type->id()]['bundles'][$bundle]) ? $continuous_settings[$this->getPluginId()][$entity_type->id()]['bundles'][$bundle] : FALSE,
+            );
+          }
         }
       }
     }
@@ -379,12 +381,12 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
       if ($entity && $entity->getEntityType()->hasKey('bundle')) {
         // The entity type has bundles, check both the entity type setting and
         // the bundle.
-        if ($continuous_settings[$plugin][$item_type]['bundles'][$entity->bundle()] === 1 && $continuous_settings[$plugin][$item_type]['enabled'] === 1) {
+        if (!empty($continuous_settings[$plugin][$item_type]['bundles'][$entity->bundle()]) && !empty($continuous_settings[$plugin][$item_type]['enabled'])) {
           return TRUE;
         }
       }
       // No bundles, only check entity type setting.
-      elseif ($continuous_settings[$plugin][$item_type]['enabled'] === 1) {
+      elseif (!empty($continuous_settings[$plugin][$item_type]['enabled'])) {
         return TRUE;
       }
     }

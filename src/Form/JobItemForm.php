@@ -168,12 +168,14 @@ class JobItemForm extends TmgmtFormBase {
     $actions['validate'] = array(
       '#type' => 'submit',
       '#value' => t('Validate'),
+      '#access' => !$item->isAccepted(),
       '#validate' => array('::validateForm', '::validateJobItem'),
       '#submit' => array('::submitForm', '::submitRebuild'),
     );
     $actions['validate_html'] = array(
       '#type' => 'submit',
       '#value' => t('Validate HTML tags'),
+      '#access' => !$item->isAccepted(),
       '#validate' => ['::validateTags'],
       '#submit' => ['::submitForm'],
     );
@@ -333,7 +335,7 @@ class JobItemForm extends TmgmtFormBase {
       ]));
     }
     $item->save();
-    $form_state->setRedirectUrl($item->getJob()->urlInfo());
+    $item->getJob()->isContinuous() ? $form_state->setRedirect('entity.tmgmt_job_item.canonical', ['tmgmt_job_item' => $item->id()]) : $form_state->setRedirectUrl($item->getJob()->urlInfo());
   }
 
   /**

@@ -117,7 +117,7 @@ class JobForm extends TmgmtFormBase {
         ),
       );
     }
-    if (!$job->isSubmittable() && !$job->isContinuous()) {
+    if (!$job->isSubmittable()) {
       $form['info']['target_language'] = array(
         '#title' => t('Target language'),
         '#type' => 'item',
@@ -318,6 +318,7 @@ class JobForm extends TmgmtFormBase {
         '#title' => t('Provider'),
         '#description' => t('The configured provider that will process the translation.'),
         '#options' => $translators,
+        '#access' => !empty($translators),
         '#default_value' => $job->getTranslatorId(),
         '#required' => TRUE,
         '#ajax' => array(
@@ -331,16 +332,16 @@ class JobForm extends TmgmtFormBase {
         $settings = array();
       }
       $form['translator_wrapper']['settings'] = array(
-          '#type' => 'details',
-          '#title' => t('Checkout settings'),
-          '#prefix' => '<div id="tmgmt-ui-translator-settings">',
-          '#suffix' => '</div>',
-          '#tree' => TRUE,
-          '#open' => TRUE,
-        ) + $settings;
+        '#type' => 'details',
+        '#title' => t('Checkout settings'),
+        '#prefix' => '<div id="tmgmt-ui-translator-settings">',
+        '#suffix' => '</div>',
+        '#tree' => TRUE,
+        '#open' => TRUE,
+      ) + $settings;
     }
     // Otherwise display the checkout info.
-    elseif ($job->getTranslatorId()) {
+    elseif ($job->getTranslatorId() && !$job->isContinuous()) {
 
       $form['translator_wrapper'] = array(
         '#type' => 'details',
@@ -352,7 +353,7 @@ class JobForm extends TmgmtFormBase {
       $form['translator_wrapper']['checkout_info'] = $this->checkoutInfo($job);
     }
 
-    if (!$job->isSubmittable() && empty($form['translator_wrapper']['checkout_info'])) {
+    if (!$job->isContinuous() && !$job->isSubmittable() && empty($form['translator_wrapper']['checkout_info'])) {
       $form['translator_wrapper']['checkout_info'] = array(
         '#type' => 'markup',
         '#markup' => t('The translator does not provide any information.'),

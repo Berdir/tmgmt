@@ -1482,4 +1482,36 @@ class TMGMTUiTest extends EntityTestBase {
     ));
     $this->assertEqual($result->div['title'], $title);
   }
+
+  /**
+   * Test continuous job form improvements.
+   */
+  public function testContinuousJobForm() {
+    // Create two new node types one not enabled for translation.
+    $this->createNodeType('page1', 'Enabled page', TRUE);
+    $this->createNodeType('article1', 'Not enabled article', FALSE);
+    // Create continuous job through the form.
+    $this->drupalGet('admin/tmgmt/continuous_jobs/continuous_add');
+    // Test we don't have selected source language in target language dropdown.
+    $this->drupalPostAjaxForm(NULL, ['source_language' => 'de'], 'source_language');
+    $option1 = $this->xpath('//*[@id="edit-target-language"]/option[1]');
+    $option2 = $this->xpath('//*[@id="edit-target-language"]/option[2]');
+    $option3 =$this->xpath('//*[@id="edit-target-language"]/option[3]');
+    $this->assertNotEqual('German', $option1);
+    $this->assertNotEqual('German', $option2);
+    $this->assertNotEqual('German', $option3);
+
+    $continuous_job_label = strtolower($this->randomMachineName());
+    $edit_job = [
+      'label[0][value]' => $continuous_job_label,
+      'target_language' => 'es',
+      'continuous_settings[content][node][enabled]' => TRUE,
+    ];
+
+    $this->drupalPostForm(NULL, $edit_job, t('Save job'));
+    // Check we don't see not enabled article in content type list.
+    $this->clickLink('Manage');
+    $this->assertText(t('Enabled page'));
+    $this->assertNoText(t('Not enabled article'));
+  }
 }
