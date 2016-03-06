@@ -131,7 +131,7 @@ class LocalTaskForm extends ContentEntityForm {
         '#weight' => 10,
       );
     }
-    $form['footer'] = tmgmt_color_legend_local();
+    $form['footer'] = tmgmt_color_legend_local_task_item();
     $form['footer']['#weight'] = 100;
     $form['#attached']['library'][] = 'tmgmt/admin';
     return $form;

@@ -734,12 +734,12 @@ function tmgmt_local_rules_component_access($type, $name) {
 }
 
 /**
- * Provides color legends for source statuses.
+ * Provides color legends for local task items.
  *
  * @return array
  *   Color legend render array.
  */
-function tmgmt_color_legend_local() {
+function tmgmt_color_legend_local_task_item() {
   $output = [
     '#attached' => [
       'library' => ['tmgmt/admin'],
@@ -752,8 +752,51 @@ function tmgmt_color_legend_local() {
   $legends_left = array();
   $legends_left[] = array('legend' => t('Untranslated'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
   $legends_left[] = array('legend' => t('Translated'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/gray-check.svg');
-  $legends_left[] = array('legend' => t('Translation Rejected'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/rejected.svg');
-  $legends_left[] = array('legend' => t('Translation Completed'), 'icon' => 'core/misc/icons/73b355/check.svg');
+  $legends_left[] = array('legend' => t('Rejected'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/rejected.svg');
+  $legends_left[] = array('legend' => t('Completed'), 'icon' => 'core/misc/icons/73b355/check.svg');
+
+  $item_status = 'Item status:';
+
+  $output['legends']['#markup'] = '<div class="tmgmt-color-legend clearfix">';
+
+  $output['legends']['#markup'] .= '<div class="tmgmt-source-status"><div class="tmgmt-status">' . $item_status . '</div>';
+
+  foreach ($legends_left as $legend) {
+    $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
+        <div class="tmgmt-legend-icon">
+            <img src="' . file_create_url($legend['icon']) . '"><span></span>
+        </div>
+        <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
+        </div>';
+  }
+
+  $output['legends']['#markup'] .= '</div></div>';
+
+  return $output;
+}
+
+/**
+ * Provides color legends for local tasks.
+ *
+ * @return array
+ *   Color legend render array.
+ */
+function tmgmt_color_legend_local_task() {
+  $output = [
+    '#attached' => [
+      'library' => ['tmgmt/admin'],
+    ]
+  ];
+  if (\Drupal::theme()->getActiveTheme()->getName() == 'seven') {
+    $output['#attached']['library'][] = 'tmgmt/admin.seven';
+  }
+
+  $legends_left = array();
+  $legends_left[] = array('legend' => t('Unassigned'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/rejected.svg');
+  $legends_left[] = array('legend' => t('Needs action'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
+  $legends_left[] = array('legend' => t('In review'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg');
+  $legends_left[] = array('legend' => t('Rejected'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ex-red.svg');
+  $legends_left[] = array('legend' => t('Closed'), 'icon' => 'core/misc/icons/73b355/check.svg');
 
   $item_status = 'Item status:';
 

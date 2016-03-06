@@ -382,24 +382,14 @@ class LocalTranslatorTest extends TMGMTTestBase {
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
     $task = entity_load('tmgmt_local_task', $matches[1], TRUE);
     $this->assertTrue($task->isPending());
-    $this->assertEqual($task->getCountCompleted(), 0);
-    $this->assertEqual($task->getCountTranslated(), 0);
-    $this->assertEqual($task->getCountUntranslated(), 2);
 
     $items = $task->getItems();
     /** @var \Drupal\tmgmt_local\Entity\LocalTaskItem $first_task_item */
     $first_task_item = reset($items);
     $this->assertTrue($first_task_item->isPending());
-    $this->assertEqual($first_task_item->getCountCompleted(), 0);
-    $this->assertEqual($first_task_item->getCountTranslated(), 0);
-    $this->assertEqual($first_task_item->getCountUntranslated(), 1);
-    $this->asserTaskItemProgress(1, 1, 0, 0);
-    $this->asserTaskItemProgress(2, 1, 0, 0);
-    $this->assertRaw('Untranslated: 1, translated: 0, completed: 0.');
 
     $this->assertText('test_source:test:1');
     $this->assertText('test_source:test:2');
-    $this->assertRaw('tmgmt/icons/ready.svg" title="Untranslated"');
 
     // Translate the first item.
     $this->clickLink(t('Translate'));
@@ -442,8 +432,6 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // The first item should be accepted now, the second still in progress.
     \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     $this->drupalGet('translate/1');
-    $this->assertRaw('icons/73b355/check.svg" title="Completed"');
-    $this->assertRaw('tmgmt/icons/ready.svg" title="Untranslated"');
     // Checking if the 'Save as completed' button is not displayed.
     $this->drupalGet('translate/items/1');
     $elements = $this->xpath('//*[@id="edit-save-as-completed"]');
@@ -459,21 +447,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
     $task = entity_load('tmgmt_local_task', $task->id(), TRUE);
     $this->assertTrue($task->isPending());
-    $this->assertEqual($task->getCountCompleted(), 1);
-    $this->assertEqual($task->getCountTranslated(), 0);
-    $this->assertEqual($task->getCountUntranslated(), 1);
     /** @var \Drupal\tmgmt_local\Entity\LocalTaskItem $second_task_item */
     list($first_task_item, $second_task_item) = array_values($task->getItems());
     $this->assertTrue($first_task_item->isClosed());
-    $this->assertEqual($first_task_item->getCountCompleted(), 1);
-    $this->assertEqual($first_task_item->getCountTranslated(), 0);
-    $this->assertEqual($first_task_item->getCountUntranslated(), 0);
-    $this->assertTrue($second_task_item->isPending());
-    $this->assertEqual($second_task_item->getCountCompleted(), 0);
-    $this->assertEqual($second_task_item->getCountTranslated(), 0);
-    $this->assertEqual($second_task_item->getCountUntranslated(), 1);
-    $this->asserTaskItemProgress(1, 0, 0, 1);
-    $this->asserTaskItemProgress(2, 1, 0, 0);
 
     // Translate the second item but do not mark as translated it yet.
     $this->clickLink(t('Translate'));
@@ -484,57 +460,27 @@ class LocalTranslatorTest extends TMGMTTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertText('The translation for ' . $second_task_item->label() . ' has been saved.');
-    // The first item is still completed, the second still untranslated.
-    $this->assertRaw('icons/73b355/check.svg" title="Completed"');
-    $this->assertRaw('tmgmt/icons/ready.svg" title="Untranslated"');
 
     drupal_static_reset('tmgmt_local_task_statistics_load');
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
     $task = entity_load('tmgmt_local_task', $task->id(), TRUE);
     $this->assertTrue($task->isPending());
-    $this->assertEqual($task->getCountCompleted(), 1);
-    $this->assertEqual($task->getCountTranslated(), 0);
-    $this->assertEqual($task->getCountUntranslated(), 1);
-    list($first_task_item, $second_task_item) = array_values($task->getItems());
-    $this->assertTrue($first_task_item->isClosed());
-    $this->assertEqual($first_task_item->getCountCompleted(), 1);
-    $this->assertEqual($first_task_item->getCountTranslated(), 0);
-    $this->assertEqual($first_task_item->getCountUntranslated(), 0);
-    $this->assertTrue($second_task_item->isPending());
-    $this->assertEqual($second_task_item->getCountCompleted(), 0);
-    $this->assertEqual($second_task_item->getCountTranslated(), 0);
-    $this->assertEqual($second_task_item->getCountUntranslated(), 1);
-    $this->asserTaskItemProgress(1, 0, 0, 1);
-    $this->asserTaskItemProgress(2, 1, 0, 0);
 
     // Mark the data item as translated but don't save the task item as
     // completed.
     $this->clickLink(t('Translate'));
-    $this->assertRaw('ready.svg" alt="Untranslated"');
     $this->drupalPostAjaxForm(NULL, [], 'finish-dummy|deep_nesting');
-    $this->assertRaw('check.svg" alt="Translated"');
     $this->assertRaw('name="reject-dummy|deep_nesting"', "'✗' button appears.");
     $this->drupalGet('translate/' . $task->id());
-    $this->asserTaskItemProgress(1, 0, 0, 1);
-    $this->asserTaskItemProgress(2, 0, 1, 0);
 
     \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
     $task = entity_load('tmgmt_local_task', $task->id(), TRUE);
     $this->assertTrue($task->isPending());
-    $this->assertEqual($task->getCountCompleted(), 1);
-    $this->assertEqual($task->getCountTranslated(), 1);
-    $this->assertEqual($task->getCountUntranslated(), 0);
     list($first_task_item, $second_task_item) = array_values($task->getItems());
     $this->assertTrue($first_task_item->isClosed());
-    $this->assertEqual($first_task_item->getCountCompleted(), 1);
-    $this->assertEqual($first_task_item->getCountTranslated(), 0);
-    $this->assertEqual($first_task_item->getCountUntranslated(), 0);
     $this->assertTrue($second_task_item->isPending());
-    $this->assertEqual($second_task_item->getCountCompleted(), 0);
-    $this->assertEqual($second_task_item->getCountTranslated(), 1);
-    $this->assertEqual($second_task_item->getCountUntranslated(), 0);
 
     // Check the job data.
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
@@ -555,8 +501,6 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->drupalPostForm(NULL, array(), t('Save as completed'));
     $this->assertText('The translation for ' . $second_task_item->label() . ' has been saved as completed.');
     $this->clickLink('View');
-    $this->asserTaskItemProgress(1, 0, 0, 1);
-    $this->asserTaskItemProgress(2, 0, 0, 1);
 
     // Review and accept the second item.
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
@@ -576,18 +520,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     \Drupal::entityTypeManager()->getStorage('tmgmt_local_task_item')->resetCache();
     $task = tmgmt_local_task_load($task->id());
     $this->assertTrue($task->isClosed());
-    $this->assertEqual($task->getCountCompleted(), 2);
-    $this->assertEqual($task->getCountTranslated(), 0);
-    $this->assertEqual($task->getCountUntranslated(), 0);
     list($first_task_item, $second_task_item) = array_values($task->getItems());
     $this->assertTrue($first_task_item->isClosed());
-    $this->assertEqual($first_task_item->getCountCompleted(), 1);
-    $this->assertEqual($first_task_item->getCountTranslated(), 0);
-    $this->assertEqual($first_task_item->getCountUntranslated(), 0);
     $this->assertTrue($second_task_item->isClosed());
-    $this->assertEqual($second_task_item->getCountCompleted(), 1);
-    $this->assertEqual($second_task_item->getCountTranslated(), 0);
-    $this->assertEqual($second_task_item->getCountUntranslated(), 0);
 
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
     $job = Job::load($job->id());
@@ -811,7 +746,210 @@ class LocalTranslatorTest extends TMGMTTestBase {
   }
 
   /**
-   * Asserts task item progress bar.
+   * Tests of the task progress.
+   */
+  public function testLocalProgress() {
+    // Load the local translator.
+    $translator = Translator::load('local');
+    // Create assignee with the skills.
+    $assignee1 = $this->drupalCreateUser($this->localTranslatorPermissions);
+    $this->drupalLogin($assignee1);
+    $edit = array(
+      'tmgmt_translation_skills[0][language_from]' => 'en',
+      'tmgmt_translation_skills[0][language_to]' => 'de',
+    );
+    $this->drupalPostForm('user/' . $assignee1->id() . '/edit', $edit, t('Save'));
+
+    // Login as translator.
+    $this->loginAsTranslator();
+    // Create the basic html format.
+    $basic_html_format = FilterFormat::create(array(
+      'format' => 'basic_html',
+      'name' => 'Basic HTML',
+    ));
+    $basic_html_format->save();
+    // Create a Job.
+    $job = $this->createJob();
+    $job->translator = $translator->id();
+    $job->addItem('test_source', 'test', '1');
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'title' => array(
+        'deep_nesting' => array(
+          '#text' => 'Example text',
+          '#label' => 'Label for job item with type test and id 2.',
+          '#translate' => TRUE,
+        ),
+      ),
+      'text' => array(
+        'deep_nesting' => array(
+          '#text' => 'Example text',
+          '#label' => 'Label for job item with type test and id 2.',
+          '#translate' => TRUE,
+        ),
+      ),
+    ));
+    $job->addItem('test_source', 'test', '2');
+    $job->save();
+    $this->drupalGet($job->toUrl());
+    $this->drupalPostForm(NULL, NULL, t('Submit to provider'));
+
+    // Login as assignee.
+    $this->drupalLogin($assignee1);
+    $this->drupalGet('/translate');
+
+    // Check the unassigned status.
+    $this->assertTaskStatusIcon(1, 'unassigned', 'Unassigned');
+    $edit = array(
+      'tmgmt_local_task_bulk_form[0]' => 1,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Apply'));
+    // Check the needs action status.
+    $this->assertTaskStatusIcon(1, 'my-tasks', 'Needs action');
+    // Check if the task is displayed on pending overview.
+    $this->drupalGet('/translate/pending');
+    $this->assertTaskStatusIcon(1, 'pending', 'Needs action');
+
+    // Check the icons of the task items.
+    $this->drupalGet('/translate/1');
+    $this->assertTaskItemStatusIcon(1, 'Untranslated');
+    $this->assertTaskItemStatusIcon(2, 'Untranslated');
+    $this->assertTaskItemProgress(1, 1, 0, 0);
+    $this->assertTaskItemProgress(2, 2, 0, 0);
+
+    // Check the progress bar and status of the task.
+    $this->drupalGet('/translate');
+    $this->assertTaskProgress(1, 'my-tasks', 3, 0, 0);
+    $this->assertTaskStatusIcon(1, 'my-tasks', 'Needs action');
+
+    // Set two items as translated.
+    $this->drupalPostAjaxForm('/translate/items/1', [], 'finish-dummy|deep_nesting');
+    $this->drupalPostAjaxForm('/translate/items/2', [], 'finish-title|deep_nesting');
+    // Check the task items icons and progress.
+    $this->drupalGet('/translate/1');
+    $this->assertTaskItemStatusIcon(1, 'Untranslated');
+    $this->assertTaskItemStatusIcon(2, 'Untranslated');
+    $this->assertTaskItemProgress(1, 0, 1, 0);
+    $this->assertTaskItemProgress(2, 1, 1, 0);
+
+    // Check the progress bar and status of the task.
+    $this->drupalGet('/translate');
+    $this->assertTaskProgress(1, 'my-tasks', 1, 2, 0);
+    $this->assertTaskStatusIcon(1, 'my-tasks', 'Needs action');
+
+    // Save the first item as completed and check item icons and progress.
+    $this->drupalPostForm('/translate/items/1', NULL, t('Save as completed'));
+    $this->assertTaskItemStatusIcon(1, 'Translated');
+    $this->assertTaskItemStatusIcon(2, 'Untranslated');
+    $this->assertTaskItemProgress(1, 0, 0, 1);
+    $this->assertTaskItemProgress(2, 1, 1, 0);
+    // Check the progress bar and status of the task.
+    $this->drupalGet('/translate');
+    $this->assertTaskProgress(1, 'my-tasks', 1, 1, 1);
+    $this->assertTaskStatusIcon(1, 'my-tasks', 'Needs action');
+
+    // Save the second item as completed.
+    $this->drupalPostForm('/translate/items/2', NULL, t('Save as completed'));
+    // Check the icon a progress bar of the task.
+    $this->assertTaskProgress(1, 'my-tasks', 0, 0, 3);
+    $this->assertTaskStatusIcon(1, 'my-tasks', 'In review');
+    // Check the task items icons.
+    $this->drupalGet('/translate/1');
+    $this->assertTaskItemStatusIcon(1, 'Translated');
+    $this->assertTaskItemStatusIcon(2, 'Translated');
+    $this->assertTaskItemProgress(1, 0, 0, 1);
+    $this->assertTaskItemProgress(2, 0, 0, 2);
+
+    // Check if the task is displayed on the completed overview.
+    $this->drupalGet('/translate/completed');
+    $this->assertTaskStatusIcon(1, 'completed', 'In review');
+    // Accept translation of the job items.
+    /** @var \Drupal\tmgmt\Entity\Job $job1 */
+    $job1 = Job::load($job->id());
+    /** @var \Drupal\tmgmt\Entity\JobItem $item */
+    foreach ($job1->getItems() as $item) {
+      $item->acceptTranslation();
+    }
+    // Check if the task is displayed on the closed overview.
+    $this->drupalGet('/translate/closed');
+    $this->assertTaskStatusIcon(1, 'closed', 'Closed');
+  }
+
+  /**
+   * Asserts task status icon.
+   *
+   * @param int $row
+   *   The row of the item you want to check.
+   * @param string $overview
+   *   The overview table to check.
+   * @param int $state
+   *   The expected state.
+   */
+  private function assertTaskStatusIcon($row, $overview, $state) {
+    $result = $this->xpath('//*[@id="views-form-tmgmt-local-task-overview-' . $overview . '"]/table/tbody/tr[' . $row . ']/td[2]/img')[0];
+    $this->assertEqual($result['title'], $state);
+  }
+
+  /**
+   * Asserts task item status icon.
+   *
+   * @param int $row
+   *   The row of the item you want to check.
+   * @param int $state
+   *   The expected state.
+   *
+   */
+  private function assertTaskItemStatusIcon($row, $state) {
+    $result = $this->xpath('//*[@id="edit-items"]/div/div/table/tbody/tr[' . $row . ']/td[1]/img')[0];
+    $this->assertEqual($result['title'], $state);
+  }
+
+  /**
+   * Asserts the task progress bar.
+   *
+   * @param int $row
+   *   The row of the item you want to check.
+   * @param $overview
+   *   The overview to be checked.
+   * @param int $untranslated
+   *   The amount of untranslated items.
+   * @param int $translated
+   *   The amount of translated items.
+   * @param int $completed
+   *   The amount of completed items.
+   */
+  private function assertTaskProgress($row, $overview, $untranslated, $translated, $completed) {
+    $result = $this->xpath('//*[@id="views-form-tmgmt-local-task-overview-' . $overview . '"]/table/tbody/tr[' . $row . ']/td[3]')[0];
+    $div_number = 0;
+    if ($untranslated > 0) {
+      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-untranslated');
+      $div_number++;
+    }
+    else {
+      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-untranslated');
+    }
+    if ($translated > 0) {
+      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-translated');
+      $div_number++;
+    }
+    else {
+      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-translated');
+    }
+    if ($completed > 0) {
+      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-completed');
+    }
+    else {
+      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-completed');
+    }
+    $title = t('Untranslated: @untranslated, translated: @translated, completed: @completed.', array(
+      '@untranslated' => $untranslated,
+      '@translated' => $translated,
+      '@completed' => $completed,
+    ));
+    $this->assertEqual($result->div['title'], $title);
+  }
+
+  /**
+   * Asserts the task item progress bar.
    *
    * @param int $row
    *   The row of the item you want to check.
@@ -821,9 +959,8 @@ class LocalTranslatorTest extends TMGMTTestBase {
    *   The amount of translated items.
    * @param int $completed
    *   The amount of completed items.
-   *
    */
-  private function asserTaskItemProgress($row, $untranslated, $translated, $completed) {
+  private function assertTaskItemProgress($row, $untranslated, $translated, $completed) {
     $result = $this->xpath('//*[@id="edit-items"]/div/div/table/tbody/tr[' . $row . ']/td[2]')[0];
     $div_number = 0;
     if ($untranslated > 0) {

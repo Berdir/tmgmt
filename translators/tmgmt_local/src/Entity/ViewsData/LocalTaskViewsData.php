@@ -73,6 +73,13 @@ class LocalTaskViewsData extends EntityViewsData {
       ),
     );
 
+    $data['tmgmt_local_task']['footer'] = array(
+      'title' => t('Task Overview legend'),
+      'help' => t('Add task state legends'),
+      'area' => array(
+        'id' => 'tmgmt_local_task_legend',
+        ),
+      );
     return $data;
   }
 
