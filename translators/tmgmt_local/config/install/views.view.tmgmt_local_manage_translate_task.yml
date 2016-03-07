@@ -741,7 +741,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Source language'
+          label: 'From'
           exclude: false
           alter:
             alter_text: false
@@ -807,7 +807,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Target language'
+          label: 'To'
           exclude: false
           alter:
             alter_text: false
@@ -1712,7 +1712,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Source language'
+          label: 'From'
           exclude: false
           alter:
             alter_text: false
@@ -1778,7 +1778,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Target language'
+          label: 'To'
           exclude: false
           alter:
             alter_text: false
@@ -2683,7 +2683,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Source language'
+          label: 'From'
           exclude: false
           alter:
             alter_text: false
@@ -2749,7 +2749,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Target language'
+          label: 'To'
           exclude: false
           alter:
             alter_text: false
@@ -3579,7 +3579,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Source language'
+          label: 'From'
           exclude: false
           alter:
             alter_text: false
@@ -3645,7 +3645,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Target language'
+          label: 'To'
           exclude: false
           alter:
             alter_text: false
@@ -4542,7 +4542,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Source language'
+          label: 'From'
           exclude: false
           alter:
             alter_text: false
@@ -4608,7 +4608,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Target language'
+          label: 'To'
           exclude: false
           alter:
             alter_text: false
@@ -5335,7 +5335,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Source language'
+          label: 'From'
           exclude: false
           alter:
             alter_text: false
@@ -5401,7 +5401,7 @@ display:
           relationship: tjid
           group_type: group
           admin_label: ''
-          label: 'Target language'
+          label: 'To'
           exclude: false
           alter:
             alter_text: false
