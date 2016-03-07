@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_content\Tests;
 
 use Drupal\comment\Entity\Comment;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -451,6 +452,13 @@ class ContentEntitySourceUiTest extends EntityTestBase {
       )
     )->save();
 
+    EntityViewDisplay::load('node.article.default')
+      ->setComponent('field1', [
+        'type' => 'entity_reference_entity_view',
+        'settings' => ['view_mode' => 'teaser'],
+      ])
+      ->save();
+
     $this->drupalGet('admin/tmgmt/settings');
 
     $checked_reference_fields = array(
@@ -469,6 +477,41 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     // Check if the save was successful.
     $this->assertText(t('The configuration options have been saved.'));
     $this->assertFieldChecked('edit-embedded-fields-node-field1');
+
+    // Create translatable child node.
+    $edit = [
+      'title' => 'Child title',
+      'type' => 'article',
+      'langcode' => 'en',
+    ];
+    $child_node = $this->createNode($edit);
+
+    // Create translatable parent node.
+    $edit = [
+      'title' => 'Parent title',
+      'type' => 'article',
+      'langcode' => 'en',
+    ];
+    $edit['field1'][]['target_id'] = $child_node->id();
+    $parent_node = $this->createNode($edit);
+
+    // Create a translation job.
+    $job = $this->createJob('en', 'de');
+    $job->translator = $this->default_translator->id();
+    $job->save();
+    $job_item = tmgmt_job_item_create('content', $parent_node->getEntityTypeId(), $parent_node->id(), array('tjid' => $job->id()));
+    $job_item->save();
+    $job->requestTranslation();
+
+    // Visit preview page.
+    $this->drupalGet(URL::fromRoute('entity.tmgmt_job_item.canonical', ['tmgmt_job_item' => $job_item->id()]));
+    $this->clickLink(t('Preview'));
+
+    // Check if parent and child nodes are translated.
+    $this->assertText('de(de-ch): ' . $parent_node->getTitle());
+    $this->assertText('de(de-ch): ' . $parent_node->body->value);
+    $this->assertText('de(de-ch): ' . $child_node->getTitle());
+    $this->assertText('de(de-ch): ' . $child_node->body->value);
   }
 
   /**

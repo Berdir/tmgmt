@@ -132,7 +132,11 @@ class ContentTranslationPreviewController extends ControllerBase {
               ->set($property, $property_data['#translation']['#text']);
           }
           // If the field is an embeddable reference, we assume that the
-          // property is a field reference.
+          // property is a field reference. The translation will be available
+          // to formatters due to the static entity caching.
+          // @todo Evaluate if the item could be tricked into thinking that this
+          //   is a new reference. See \Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem::hasNewEntity
+          //   and \Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase::prepareView.
           elseif (isset($embeded_fields[$entity->getEntityTypeId()][$name])) {
             $this->makePreview($translation->get($name)->offsetGet($delta)->$property, $property_data, $target_langcode);
           }
