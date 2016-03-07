@@ -54,6 +54,20 @@ class ContinuousManager {
   }
 
   /**
+   * Checks if there is any continuous job.
+   *
+   * @return bool
+   *   Returns TRUE if there is continuous job, FALSE otherwise.
+   */
+  public function hasContinuousJobs() {
+    $id = $this->entityTypeManager->getStorage('tmgmt_job')->getQuery()
+      ->condition('job_type', Job::TYPE_CONTINUOUS)
+      ->range(0, 1)
+      ->execute();
+    return !empty($id);
+  }
+
+  /**
    * Returns all continuous jobs with the given language.
    *
    * @param string $source_langcode

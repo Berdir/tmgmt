@@ -808,6 +808,19 @@ class TMGMTUiTest extends EntityTestBase {
     // Test that progress bar is being displayed.
     $this->assertRaw('class="tmgmt-progress-pending" style="width: 50%"');
     $this->assertRaw('class="tmgmt-progress-translated" style="width: 100%"');
+
+    // Test the job type filter.
+    $this->drupalGet('admin/tmgmt/job_items', array('query' => array('job_type' => 2)));
+    $this->assertEqual(count($this->xpath('//tbody/tr')), 0);
+
+    // Remove continuous jobs and assert there is no filter displayed.
+    $continuous_job->delete();
+    $this->drupalGet('admin/tmgmt/continuous_jobs');
+    $this->clickLink(t('Delete'));
+    $this->drupalPostForm(NULL, array(), t('Delete'));
+    $this->drupalGet('admin/tmgmt/job_items');
+    $this->assertNoText(t('Job type'));
+    $this->assertNoFieldByName('job_type');
   }
 
   /**

@@ -58,6 +58,17 @@ class JobViewsData extends EntityViewsData {
     $data['tmgmt_job']['translator']['filter']['id'] = 'in_operator';
     $data['tmgmt_job']['translator']['filter']['options callback'] = 'tmgmt_translator_labels';
 
+    $data['tmgmt_job']['job_type'] = array(
+      'title' => 'Job Type (Custom)',
+      'help' => 'Displays the job type filter.',
+      'field' => array(
+        'id' => 'tmgmt_job_type',
+      ),
+      'filter' => array(
+        'id' => 'tmgmt_job_type_filter',
+      ),
+    );
+
     $data['tmgmt_job']['state'] = array(
       'title' => 'States',
       'help' => 'Displays the state of the job.',

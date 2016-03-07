@@ -61,3 +61,15 @@ views.access.tmgmt_job:
 tmgmt.translator_base:
   type: mapping
   mapping: { }
+
+views.filter.tmgmt_job_type_filter:
+  type: views.filter.in_operator
+  label: 'Job type'
+  mapping:
+    expose:
+      type: mapping
+      label: 'Expose'
+      mapping:
+        hide_no_continuous:
+          type: boolean
+          label: 'Hide this filter if there are no continuous jobs.'

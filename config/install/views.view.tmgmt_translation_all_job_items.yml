@@ -904,6 +904,51 @@ display:
           entity_type: tmgmt_job
           entity_field: target_language
           plugin_id: language
+        job_type:
+          id: job_type
+          table: tmgmt_job
+          field: job_type
+          relationship: tjid
+          group_type: group
+          admin_label: ''
+          operator: '='
+          group: 1
+          exposed: true
+          expose:
+            operator_id: job_type_op
+            label: 'Job Type (Custom)'
+            description: null
+            use_operator: false
+            operator: job_type_op
+            identifier: job_type
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            hide_no_continuous: true
+          is_grouped: true
+          group_info:
+            label: 'Job type'
+            description: ''
+            identifier: job_type
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items:
+              1:
+                title: Normal
+                operator: '='
+                value: normal
+              2:
+                title: Continuous
+                operator: '='
+                value: continuous
+          entity_type: tmgmt_job
+          plugin_id: tmgmt_job_type_filter
       sorts: {  }
       title: 'Job Items'
       header: {  }
