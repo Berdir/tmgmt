@@ -11,6 +11,7 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\tmgmt\ContinuousManager;
 use Drupal\tmgmt\SourceManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Url;
@@ -28,13 +29,23 @@ class SourceOverviewForm extends FormBase {
   protected $sourceManager;
 
   /**
+   * The continuous manager.
+   *
+   * @var \Drupal\tmgmt\ContinuousManager
+   */
+  protected $continuousManager;
+
+  /**
    * Constructs a new SourceLocalTasks object.
    *
    * @param \Drupal\tmgmt\SourceManager $source_manager
    *   The source manager.
+   * @param \Drupal\tmgmt\ContinuousManager $continuous_manager
+   *   The continuous manager.
    */
-  public function __construct(SourceManager $source_manager) {
+  public function __construct(SourceManager $source_manager, ContinuousManager $continuous_manager) {
     $this->sourceManager = $source_manager;
+    $this->continuousManager = $continuous_manager;
   }
 
   /**
@@ -42,7 +53,8 @@ class SourceOverviewForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('plugin.manager.tmgmt.source')
+      $container->get('plugin.manager.tmgmt.source'),
+      $container->get('tmgmt.continuous')
     );
   }
 
@@ -121,7 +133,7 @@ class SourceOverviewForm extends FormBase {
       '#type' => 'submit',
       '#value' => t('Choose'),
       '#submit' => array(
-        '::sourceSelectSubmit'
+        '::sourceSelectSubmit',
       ),
       '#attributes' => array('class' => array('js-hide')),
     );
@@ -130,16 +142,30 @@ class SourceOverviewForm extends FormBase {
       '#type' => 'details',
       '#title' => t('Operations'),
       '#open' => TRUE,
-      '#attributes' => array('class' => array('tmgmt-source-operations-wrapper'))
+      '#attributes' => array('class' => array('tmgmt-source-operations-wrapper')),
     );
     $form['actions']['submit'] = array(
-        '#type' => 'submit',
-        '#button_type' => 'primary',
-        '#validate' => array('::validateItemsSelected'),
-        '#value' => t('Request translation'),
-        '#submit' => array('::submitForm'),
+      '#type' => 'submit',
+      '#button_type' => 'primary',
+      '#validate' => array('::validateItemsSelected'),
+      '#value' => t('Request translation'),
+      '#submit' => array('::submitForm'),
     );
     tmgmt_add_cart_form($form['actions'], $form_state, $plugin, $item_type);
+
+    if ($this->continuousManager->hasContinuousJobs()) {
+      $form['actions']['add_to_continuous_jobs'] = array(
+        '#type' => 'submit',
+        '#validate' => array('::validateItemsSelected'),
+        '#value' => t('Check for continuous jobs'),
+        '#submit' => array('::submitToContinuousJobs'),
+      );
+      $form['actions']['add_all_to_continuous_jobs'] = array(
+        '#type' => 'checkbox',
+        '#title' => 'All (continuous check only)',
+        '#default_value' => FALSE,
+      );
+    }
 
     $source_ui = $this->sourceManager->createUIInstance($plugin);
     $form_state->set('plugin', $plugin);
@@ -185,6 +211,22 @@ class SourceOverviewForm extends FormBase {
   }
 
   /**
+   * Submit method for Add to continuous jobs button.
+   *
+   * @param array $form
+   *   Drupal form array.
+   * @param FormStateInterface $form_state
+   *   Drupal form_state array.
+   */
+  public function submitToContinuousJobs(array &$form, FormStateInterface $form_state) {
+    $plugin = $form_state->get('plugin');
+    $item_type = $form_state->get('item_type');
+    // Execute the submit method on the source plugin controller.
+    $source_ui = $this->sourceManager->createUIInstance($plugin);
+    $source_ui->overviewSubmitToContinuousJobs($form_state, $item_type);
+  }
+
+  /**
    * AJAX callback to refresh form.
    *
    * @param array $form
@@ -221,6 +263,9 @@ class SourceOverviewForm extends FormBase {
    *   The current state of the form.
    */
   public function validateItemsSelected(array $form, FormStateInterface $form_state) {
+    if ($form_state->getTriggeringElement()['#submit'][0] == '::submitToContinuousJobs' && $form_state->getValue('add_all_to_continuous_jobs')) {
+      return;
+    }
     tmgmt_cart_source_overview_validate($form, $form_state);
   }
 

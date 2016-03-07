@@ -105,6 +105,9 @@ class ContinuousManager {
    *   The source item type.
    * @param string $item_id
    *   The source item id.
+   *
+   * @return \Drupal\tmgmt\Entity\JobItem
+   *   Continuous job item.
    */
   public function addItem(Job $job, $plugin, $item_type, $item_id) {
     // Check if a job item should be created.
@@ -116,12 +119,12 @@ class ContinuousManager {
         if ($most_recent_job_item->isInactive()) {
           $most_recent_job_item->resetData();
           $most_recent_job_item->addMessage('Updated source data.');
-          return;
+          return NULL;
         }
         // If the most recent job item is active do nothing.
         elseif (!$most_recent_job_item->isAborted() && !$most_recent_job_item->isAccepted()) {
           $most_recent_job_item->addMessage('Source was updated, changes were ignored as job item is still active.');
-          return;
+          return NULL;
         }
       }
       // If there are no job items or it's finished/aborted create new one.
@@ -133,7 +136,9 @@ class ContinuousManager {
         $translator = $job->getTranslatorPlugin();
         $translator->requestJobItemsTranslation([$job_item]);
       }
+      return $job_item;
     }
+    return NULL;
   }
 
 }

@@ -101,6 +101,10 @@ table.tmgmt-ui-review tbody th {
   clear: both;
 }
 
+.tmgmt-source-operations-wrapper .form-item-add-all-to-continuous-jobs {
+  display: inline-block;
+}
+
 .view-tmgmt-node-source-overview .view-filters, .tmgmt-sources-wrapper {
   margin-right: 310px;
 }

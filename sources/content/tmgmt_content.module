@@ -199,14 +199,17 @@ function tmgmt_content_entity_update(EntityInterface $entity) {
   }
 }
 
-
 /**
- * Creates continuous job items for content entities.
+ * Creates continuous job items for entity.
  *
  * @param \Drupal\Core\Entity\ContentEntityInterface $entity
  *   Entity to be inserted or updated.
+ *
+ * @return int
+ *   Number of created continuous job items.
  */
 function tmgmt_content_create_continuous_job_items(ContentEntityInterface $entity) {
+  $job_items_count = 0;
   $entity = $entity->getUntranslated();
   $source_langcode = $entity->language()->getId();
   $content_translation_manager = \Drupal::service('content_translation.manager');
@@ -214,9 +217,38 @@ function tmgmt_content_create_continuous_job_items(ContentEntityInterface $entit
     $continuous_manager = \Drupal::service('tmgmt.continuous');
     $jobs = $continuous_manager->getContinuousJobs($source_langcode);
     foreach ($jobs as $job) {
-      $continuous_manager->addItem($job, 'content', $entity->getEntityTypeId(), $entity->id());
+      if ($continuous_manager->addItem($job, 'content', $entity->getEntityTypeId(), $entity->id())) {
+        $job_items_count++;
+      }
     }
   }
+  return $job_items_count;
+}
+
+/**
+ * Creates continuous job items for entity.
+ *
+ * Batch callback function.
+ */
+function tmgmt_content_create_continuous_job_items_batch_finished($success, $results, $operations) {
+  if ($success) {
+    if ($results['job_items'] !== 0) {
+      drupal_set_message(\Drupal::translation()->formatPlural($results['job_items'], '1 continuous job item has been created.', '@count continuous job items have been created.'));
+    }
+    else {
+      drupal_set_message(t('None of the selected sources can be added to continuous jobs.'), 'warning');
+    }
+  }
+  else {
+    // An error occurred.
+    $error_operation = reset($operations);
+    $message = t('An error occurred while processing %error_operation with arguments: @arguments', array(
+      '%error_operation' => $error_operation[0],
+      '@arguments' => print_r($error_operation[1], TRUE),
+    ));
+    drupal_set_message($message, 'error');
+  }
+
 }
 
 /**

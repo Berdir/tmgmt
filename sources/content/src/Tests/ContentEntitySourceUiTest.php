@@ -567,4 +567,99 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->assertResponse(403);
   }
 
+  /**
+   * Test the handling existing content with continuous jobs.
+   */
+  public function testSourceOverview() {
+    // Create translatable node.
+    $node = $this->createTranslatableNode('article', 'en');
+
+    $this->drupalGet('admin/tmgmt/sources');
+    $this->assertText($node->getTitle());
+
+    // Test that there are no "Add to continuous jobs" button and checkbox.
+    $this->assertNoFieldById('edit-add-to-continuous-jobs', NULL, 'There is no Add to continuous jobs button.');
+    $this->assertNoFieldById('edit-add-all-to-continuous-jobs', NULL, 'There is no Add all to continuous jobs checkbox.');
+
+    // Create two additional nodes.
+    $this->createTranslatableNode('article', 'en');
+    $this->createTranslatableNode('article', 'en');
+
+    // Continuous settings configuration.
+    $continuous_settings = [
+      'content' => [
+        'node' => [
+          'enabled' => 1,
+          'bundles' => [
+            'article' => 1,
+            'page' => 0,
+          ],
+        ],
+      ],
+    ];
+
+    // Create continuous job.
+    $continuous_job = $this->createJob('en', 'de', 0, [
+      'label' => 'Continuous job',
+      'job_type' => 'continuous',
+      'continuous_settings' => $continuous_settings,
+      'translator' => $this->default_translator->id(),
+    ]);
+
+    // Test that there is now "Add to continuous jobs" button and checkbox.
+    $this->drupalGet('admin/tmgmt/sources');
+    $this->assertFieldById('edit-add-to-continuous-jobs', '', 'There is Add to continuous jobs button.');
+    $this->assertFieldById('edit-add-all-to-continuous-jobs', '', 'There is Add all to continuous jobs checkbox.');
+
+    // Select node for adding to continuous job.
+    $edit = [
+      'items[' . $node->id() . ']' => TRUE,
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Check for continuous jobs'));
+    $this->assertUniqueText(t("1 continuous job item has been created."));
+
+    // Test that continuous job item is created for selected node.
+    $continuous_job_items = $continuous_job->getItems();
+    $continuous_job_item = reset($continuous_job_items);
+    $this->assertEqual($node->label(), $continuous_job_item->label(), 'Continuous job item is created for selected node.');
+
+    // Create another translatable node.
+    $second_node = $this->createTranslatableNode('page', 'en');
+    $this->drupalGet('admin/tmgmt/sources');
+    $this->assertText($second_node->getTitle());
+
+    // Select second node for adding to continuous job.
+    $second_edit = [
+      'items[' . $second_node->id() . ']' => TRUE,
+    ];
+    $this->drupalPostForm(NULL, $second_edit, t('Check for continuous jobs'));
+    $this->assertUniqueText(t("None of the selected sources can be added to continuous jobs."));
+
+    // Test that no new job items are created.
+    $this->assertEqual(count($continuous_job->getItems()), 1, 'There are no new job items for selected node.');
+
+    $this->drupalGet('admin/tmgmt/sources');
+
+    // Select all nodes for adding to continuous job.
+    $add_all_edit = [
+      'add_all_to_continuous_jobs' => TRUE,
+    ];
+    $this->drupalPostForm(NULL, $add_all_edit, t('Check for continuous jobs'));
+    $this->assertUniqueText(t("2 continuous job items have been created."));
+
+    // Test that two new job items are created.
+    $this->assertEqual(count($continuous_job->getItems()), 3, 'There are two new job items for selected nodes.');
+
+    $this->drupalGet('admin/tmgmt/sources');
+    // Select all nodes for adding to continuous job.
+    $add_all_edit = [
+      'add_all_to_continuous_jobs' => TRUE,
+    ];
+    $this->drupalPostForm(NULL, $add_all_edit, t('Check for continuous jobs'));
+    $this->assertUniqueText(t("None of the selected sources can be added to continuous jobs."));
+
+    // Test that no new job items are created.
+    $this->assertEqual(count($continuous_job->getItems()), 3, 'There are no new job items for selected nodes.');
+  }
+
 }
