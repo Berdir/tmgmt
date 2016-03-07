@@ -111,7 +111,7 @@ table.tmgmt-ui-review tbody th {
 
 .tmgmt-status {
   font-weight: 700;
-  width: 100px;
+  float: right;
 }
 
 .tmgmt-ui-data-item-actions div {
@@ -177,4 +177,27 @@ td.views-field-loop-count, th.views-field-loop-count {
 
 .tmgmt-local-progress-completed {
   background-color: #71b350;
+}
+
+td.views-field-status {
+  text-align: center;
+  padding: 0;
+}
+
+td.views-field-state {
+  text-align: center;
+  padding: 0 0 0 8px;
+}
+
+th.views-field-status, th.views-field-state {
+  font-size: 0;
+  padding: 0;
+}
+
+td.views-field-state img, td.views-field-status img {
+  vertical-align: middle;
+}
+
+th.views-field-state a, td.views-field-status a {
+  width: 0;
 }
