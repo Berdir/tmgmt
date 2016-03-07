@@ -164,11 +164,11 @@ td.views-field-loop-count, th.views-field-loop-count {
 }
 
 .tmgmt-local-progress-untranslated {
-  background-color: #0074BD;
+  background-color: #E29700;
 }
 
 .tmgmt-local-progress-translated {
-  background-color: #E29700;
+  background-color: #0074BD;
 }
 
 .tmgmt-local-progress-completed {
