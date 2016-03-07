@@ -70,6 +70,9 @@ class ContentTranslationPreviewController extends ControllerBase {
       ->getViewBuilder($entity->getEntityTypeId())
       ->view($preview, $view_mode, $preview->language()->getId());
 
+    // The preview is not cacheable.
+    $page['#cache']['max-age'] = 0;
+
     return $page;
   }
 

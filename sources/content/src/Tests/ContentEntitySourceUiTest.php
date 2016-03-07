@@ -527,6 +527,16 @@ class ContentEntitySourceUiTest extends EntityTestBase {
       'accept translation jobs',
     ]);
 
+    // Test preview if we edit translation.
+    $this->drupalGet('admin/tmgmt/items/' . $job_item->id());
+    $edit = [
+      'title|0|value[translation]' => 'de(de-ch): Test title for preview translation from en to de.',
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalGet('admin/tmgmt/items/' . $job_item->id());
+    $this->clickLink(t('Preview'));
+    $this->assertText('de(de-ch): Test title for preview translation from en to de.');
+
     $items = $job->getItems();
     $item = reset($items);
     $item->acceptTranslation();
