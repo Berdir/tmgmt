@@ -185,11 +185,11 @@ function theme_tmgmt_translator_review_form_element($variables) {
 
   if (!empty($element['below'])) {
     $result .= '<tr' . new Attribute(array('class' => $element['#zebra'])) . '>';
-    $cell = array(
+    $cell = [
       'data' => \Drupal::service('renderer')->render($element['below']),
-      'colspan' => '4',
-    );
-    $result .= tmgmt_build_table_cell($cell);
+      'colspan' => '2',
+    ];
+    $result .= '<td></td>' . tmgmt_build_table_cell($cell);
     $result .= '</tr>';
   }
 
