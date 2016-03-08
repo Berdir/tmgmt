@@ -717,11 +717,9 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          operator: '='
+          operator: job_state
           value:
-            min: ''
-            max: ''
-            value: ''
+            value: open_jobs
           group: 1
           exposed: true
           expose:
@@ -738,69 +736,19 @@ display:
               authenticated: authenticated
               anonymous: '0'
               administrator: '0'
-          is_grouped: true
+          is_grouped: false
           group_info:
-            label: 'State'
+            label: ''
             description: ''
-            identifier: state
+            identifier: ''
             optional: true
             widget: select
             multiple: false
             remember: false
-            default_group: '1'
+            default_group: All
             default_group_multiple: {  }
-            group_items:
-              1:
-                title: '- Open Jobs -'
-                operator: between
-                value:
-                  value: 0|1|2|3
-                  min: '0'
-                  max: '3'
-              2:
-                title: Unprocessed
-                operator: '='
-                value:
-                  value: '0'
-                  min: ''
-                  max: ''
-              3:
-                title: Active
-                operator: '='
-                value:
-                  value: '1'
-                  min: ''
-                  max: ''
-              4:
-                title: Rejected
-                operator: '='
-                value:
-                  value: '2'
-                  min: ''
-                  max: ''
-              5:
-                title: Accepted
-                operator: '='
-                value:
-                  value: '3'
-                  min: ''
-                  max: ''
-              6:
-                title: Aborted
-                operator: '='
-                value:
-                  value: '4'
-                  min: ''
-                  max: ''
-              7:
-                title: Finished
-                operator: '='
-                value:
-                  value: '5'
-                  min: ''
-                  max: ''
+            group_items: {  }
           entity_type: tmgmt_job
-          entity_field: state
           plugin_id: numeric
         source_language:
           id: source_language

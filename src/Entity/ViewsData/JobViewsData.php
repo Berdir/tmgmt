@@ -76,7 +76,7 @@ class JobViewsData extends EntityViewsData {
         'id' => 'tmgmt_job_state',
       ),
       'filter' => array(
-        'id' => 'numeric',
+        'id' => 'tmgmt_job_state_filter',
       ),
     );
     $data['tmgmt_job']['footer'] = array(

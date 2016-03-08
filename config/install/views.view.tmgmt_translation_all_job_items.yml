@@ -782,7 +782,7 @@ display:
             widget: select
             multiple: false
             remember: false
-            default_group: '1'
+            default_group: '3'
             default_group_multiple: {  }
             group_items:
               1:
@@ -963,7 +963,18 @@ display:
           empty: true
           entity_type: tmgmt_job_item
           plugin_id: tmgmt_job_item_legend
-      empty: {  }
+      empty:
+        area_text_custom:
+          id: area_text_custom
+          table: views
+          field: area_text_custom
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: true
+          tokenize: false
+          content: 'No job items for the current selection.'
+          plugin_id: text_custom
       relationships:
         tjid:
           id: tjid
