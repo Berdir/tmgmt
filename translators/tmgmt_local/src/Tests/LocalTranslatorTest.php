@@ -752,7 +752,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Load the local translator.
     $translator = Translator::load('local');
     // Create assignee with the skills.
-    $assignee1 = $this->drupalCreateUser($this->localTranslatorPermissions);
+    $assignee1 = $this->drupalCreateUser($this->localManagerPermissions);
     $this->drupalLogin($assignee1);
     $edit = array(
       'tmgmt_translation_skills[0][language_from]' => 'en',
@@ -795,20 +795,43 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Login as assignee.
     $this->drupalLogin($assignee1);
+
+    // Check the task unassigned icon.
+    $this->drupalGet('/manage-translate');
+    $this->assertTaskStatusIcon(1, 'manage-translate-task', 'unassigned', 'Unassigned');
+    // Assign the task and check its icon.
+    $edit = array(
+      'action' => 'tmgmt_local_task_assign_to_me',
+      'tmgmt_local_task_bulk_form[0]' => 1,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Apply'));
+    $this->assertTaskStatusIcon(1, 'manage-translate-task', 'assigned', 'Needs action');
+    // Unassign it back.
+    $edit = array(
+      'action' => 'tmgmt_local_task_unassign_multiple',
+      'tmgmt_local_task_bulk_form[0]' => 1,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Apply'));
+    // Check its unassigned icon.
+    $this->drupalGet('/manage-translate');
+    $this->assertTaskStatusIcon(1, 'manage-translate-task', 'unassigned', 'Unassigned');
+
     $this->drupalGet('/translate');
 
     // Check the unassigned status.
-    $this->assertTaskStatusIcon(1, 'unassigned', 'Unassigned');
+    $this->assertTaskStatusIcon(1, 'task-overview', 'unassigned', 'Unassigned');
     $edit = array(
       'tmgmt_local_task_bulk_form[0]' => 1,
     );
     $this->drupalPostForm(NULL, $edit, t('Apply'));
     // Check the needs action status.
-    $this->assertTaskStatusIcon(1, 'my-tasks', 'Needs action');
+    $this->assertTaskStatusIcon(1, 'task-overview', 'my-tasks', 'Needs action');
+
     // Check if the task is displayed on pending overview.
     $this->drupalGet('/translate/pending');
-    $this->assertTaskStatusIcon(1, 'pending', 'Needs action');
-
+    $this->assertTaskStatusIcon(1, 'task-overview', 'pending', 'Needs action');
+    $this->drupalGet('/manage-translate/pending');
+    $this->assertTaskStatusIcon(1, 'manage-translate-task', 'pending', 'Needs action');
     // Check the icons of the task items.
     $this->drupalGet('/translate/1');
     $this->assertTaskItemStatusIcon(1, 'Untranslated');
@@ -819,7 +842,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Check the progress bar and status of the task.
     $this->drupalGet('/translate');
     $this->assertTaskProgress(1, 'my-tasks', 3, 0, 0);
-    $this->assertTaskStatusIcon(1, 'my-tasks', 'Needs action');
+    $this->assertTaskStatusIcon(1, 'task-overview', 'my-tasks', 'Needs action');
+    $this->drupalGet('/manage-translate');
+    $this->assertTaskStatusIcon(1, 'manage-translate-task', 'assigned', 'Needs action');
 
     // Set two items as translated.
     $this->drupalPostAjaxForm('/translate/items/1', [], 'finish-dummy|deep_nesting');
@@ -834,7 +859,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Check the progress bar and status of the task.
     $this->drupalGet('/translate');
     $this->assertTaskProgress(1, 'my-tasks', 1, 2, 0);
-    $this->assertTaskStatusIcon(1, 'my-tasks', 'Needs action');
+    $this->assertTaskStatusIcon(1, 'task-overview', 'my-tasks', 'Needs action');
+    $this->drupalGet('/manage-translate');
+    $this->assertTaskStatusIcon(1, 'manage-translate-task', 'assigned', 'Needs action');
 
     // Save the first item as completed and check item icons and progress.
     $this->drupalPostForm('/translate/items/1', NULL, t('Save as completed'));
@@ -845,13 +872,15 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Check the progress bar and status of the task.
     $this->drupalGet('/translate');
     $this->assertTaskProgress(1, 'my-tasks', 1, 1, 1);
-    $this->assertTaskStatusIcon(1, 'my-tasks', 'Needs action');
+    $this->assertTaskStatusIcon(1, 'task-overview', 'my-tasks', 'Needs action');
+    $this->drupalGet('/manage-translate');
+    $this->assertTaskStatusIcon(1, 'manage-translate-task', 'assigned', 'Needs action');
 
     // Save the second item as completed.
     $this->drupalPostForm('/translate/items/2', NULL, t('Save as completed'));
     // Check the icon a progress bar of the task.
     $this->assertTaskProgress(1, 'my-tasks', 0, 0, 3);
-    $this->assertTaskStatusIcon(1, 'my-tasks', 'In review');
+    $this->assertTaskStatusIcon(1, 'task-overview', 'my-tasks', 'In review');
     // Check the task items icons.
     $this->drupalGet('/translate/1');
     $this->assertTaskItemStatusIcon(1, 'Translated');
@@ -861,7 +890,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Check if the task is displayed on the completed overview.
     $this->drupalGet('/translate/completed');
-    $this->assertTaskStatusIcon(1, 'completed', 'In review');
+    $this->assertTaskStatusIcon(1, 'task-overview', 'completed', 'In review');
+    $this->drupalGet('/manage-translate/completed');
+    $this->assertTaskStatusIcon(1, 'manage-translate-task', 'completed', 'In review');
     // Accept translation of the job items.
     /** @var \Drupal\tmgmt\Entity\Job $job1 */
     $job1 = Job::load($job->id());
@@ -871,7 +902,9 @@ class LocalTranslatorTest extends TMGMTTestBase {
     }
     // Check if the task is displayed on the closed overview.
     $this->drupalGet('/translate/closed');
-    $this->assertTaskStatusIcon(1, 'closed', 'Closed');
+    $this->assertTaskStatusIcon(1, 'task-overview', 'closed', 'Closed');
+    $this->drupalGet('/manage-translate/closed');
+    $this->assertTaskStatusIcon(1, 'manage-translate-task', 'closed', 'Closed');
   }
 
   /**
@@ -879,13 +912,15 @@ class LocalTranslatorTest extends TMGMTTestBase {
    *
    * @param int $row
    *   The row of the item you want to check.
+   * @param $view
+   *   The view where we want to assert.
    * @param string $overview
    *   The overview table to check.
    * @param int $state
    *   The expected state.
    */
-  private function assertTaskStatusIcon($row, $overview, $state) {
-    $result = $this->xpath('//*[@id="views-form-tmgmt-local-task-overview-' . $overview . '"]/table/tbody/tr[' . $row . ']/td[2]/img')[0];
+  private function assertTaskStatusIcon($row, $view, $overview, $state) {
+    $result = $this->xpath('//*[@id="views-form-tmgmt-local-' . $view . '-' . $overview . '"]/table/tbody/tr[' . $row . ']/td[2]/img')[0];
     $this->assertEqual($result['title'], $state);
   }
 
