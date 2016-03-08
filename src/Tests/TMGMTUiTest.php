@@ -431,7 +431,7 @@ class TMGMTUiTest extends EntityTestBase {
     // Test review data item.
     $this->drupalGet('admin/tmgmt/items/' . $item->id());
     $this->drupalPostAjaxForm(NULL, [], 'reviewed-dummy|deep_nesting');
-    $this->assertRaw('icons/73b355/check.svg" alt="Reviewed"');
+    $this->assertRaw('icons/gray-check.svg" alt="Reviewed"');
 
     \Drupal::entityTypeManager()->getStorage('tmgmt_job')->resetCache();
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
@@ -1416,6 +1416,10 @@ class TMGMTUiTest extends EntityTestBase {
     // Check progress bar and icon.
     $this->assertJobProgress(1, 2, 0, 0, 2);
     $this->assertJobStateIcon(1, 'In progress');
+
+    // Assert the legend.
+    $this->drupalGet('admin/tmgmt/items/' . $item1->id());
+    $this->assertRaw('class="tmgmt-color-legend');
   }
 
   /**

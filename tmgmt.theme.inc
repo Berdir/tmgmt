@@ -126,7 +126,7 @@ function theme_tmgmt_translator_review_form_element_status($variables) {
       break;
     case TMGMT_DATA_ITEM_STATE_REVIEWED:
       $title = t('Reviewed');
-      $icon = 'core/misc/icons/73b355/check.svg';
+      $icon = drupal_get_path('module', 'tmgmt') . '/icons/gray-check.svg';
       break;
     case TMGMT_DATA_ITEM_STATE_TRANSLATED:
       $title = t('Translated');

@@ -66,6 +66,7 @@ class LocalTaskItemForm extends ContentEntityForm {
       $form['translation'][$key] = $this->formElement($flattened, $task_item, $zebra);
     }
 
+    $form['footer'] = tmgmt_color_local_review_legend();
     $form['#attached']['library'][] = 'tmgmt/admin';
     return $form;
   }

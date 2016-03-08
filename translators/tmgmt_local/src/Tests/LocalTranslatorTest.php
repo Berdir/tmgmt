@@ -771,7 +771,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Create a Job.
     $job = $this->createJob();
     $job->translator = $translator->id();
-    $job->addItem('test_source', 'test', '1');
+    $item1 = $job->addItem('test_source', 'test', '1');
     \Drupal::state()->set('tmgmt.test_source_data', array(
       'title' => array(
         'deep_nesting' => array(
@@ -905,6 +905,10 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertTaskStatusIcon(1, 'task-overview', 'closed', 'Closed');
     $this->drupalGet('/manage-translate/closed');
     $this->assertTaskStatusIcon(1, 'manage-translate-task', 'closed', 'Closed');
+
+    // Assert the legend.
+    $this->drupalGet('/translate/items/' . $item1->id());
+    $this->assertRaw('class="tmgmt-color-legend');
   }
 
   /**

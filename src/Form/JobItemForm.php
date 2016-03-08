@@ -137,7 +137,7 @@ class JobItemForm extends TmgmtFormBase {
       $plugin_ui = $this->translatorManager->createUIInstance($item->getTranslator()->getPluginId());
       $form = $plugin_ui->reviewForm($form, $form_state, $item);
     }
-
+    $form['footer'] = tmgmt_color_review_legend();
     return $form;
   }
 
