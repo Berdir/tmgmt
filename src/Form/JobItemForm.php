@@ -8,7 +8,6 @@
 namespace Drupal\tmgmt\Form;
 
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Xss;
 use Drupal\tmgmt\Entity\JobItem;
@@ -17,7 +16,6 @@ use Drupal\tmgmt\SourcePreviewInterface;
 use Drupal\tmgmt\TranslatorRejectDataInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
-use Symfony\Component\Validator\Constraints\Null;
 
 /**
  * Form controller for the job item edit forms.
@@ -92,11 +90,10 @@ class JobItemForm extends TmgmtFormBase {
 
     // Display selected translator for already submitted jobs.
     if (!$item->getJob()->isSubmittable()) {
-      $translators = tmgmt_translator_labels();
       $form['info']['translator'] = array(
         '#type' => 'item',
         '#title' => t('Provider'),
-        '#markup' => isset($translators[$item->getJob()->getTranslatorId()]) ? Html::escape($translators[$item->getJob()->getTranslatorId()]) : t('Missing provider'),
+        '#markup' => $job->getTranslatorLabel(),
         '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
         '#suffix' => '</div>',
       );

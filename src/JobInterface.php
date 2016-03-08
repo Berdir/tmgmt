@@ -8,8 +8,6 @@ namespace Drupal\tmgmt;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\tmgmt\Entity\JobItem;
-use Drupal\tmgmt\Entity\Translator;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -293,15 +291,24 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   /**
    * Returns the translator ID for this job.
    *
-   * @return int
+   * @return int|null
    *   The translator ID or NULL if there is none.
    */
   public function getTranslatorId();
 
   /**
+   * Returns the label of the translator for this job.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
+   *   The label of the translator, "(Missing)" in case the translator has
+   *   been deleted or "(Undefined)" in case the translator is not set.
+   */
+  public function getTranslatorLabel();
+
+  /**
    * Returns the translator for this job.
    *
-   * @return Translator
+   * @return \Drupal\tmgmt\Entity\Translator
    *   The translator entity.
    *
    * @throws \Drupal\tmgmt\TMGMTException

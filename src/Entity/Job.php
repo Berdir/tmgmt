@@ -461,6 +461,19 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
   /**
    * {@inheritdoc}
    */
+  public function getTranslatorLabel() {
+    if ($this->hasTranslator()) {
+      return $this->getTranslator()->label();
+    }
+    if ($this->getTranslatorId() == NULL) {
+      return t('(Undefined)');
+    }
+    return t('(Missing)');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getTranslator() {
     if ($this->hasTranslator()) {
       return $this->translator->entity;

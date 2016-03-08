@@ -20,9 +20,12 @@ class Translator extends FieldPluginBase {
   /**
    * {@inheritdoc}
    */
-  function render(ResultRow $values) {
+  public function render(ResultRow $values) {
+    /** @var \Drupal\tmgmt\JobInterface $job */
     if ($job = $values->_entity) {
-      return $job->hasTranslator() ? $job->getTranslator()->label() : t('Missing provider');
+      return $job->getTranslatorLabel();
     }
+    return NULL;
   }
+
 }

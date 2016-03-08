@@ -145,11 +145,10 @@ class JobForm extends TmgmtFormBase {
 
     // Display selected translator for already submitted jobs.
     if (!$job->isSubmittable() && !$job->isContinuous()) {
-      $translators = tmgmt_translator_labels();
       $form['info']['translator'] = array(
         '#type' => 'item',
         '#title' => t('Provider'),
-        '#markup' => isset($translators[$job->getTranslatorId()]) ? Html::escape($translators[$job->getTranslatorId()]) : t('Missing provider'),
+        '#markup' => $job->getTranslatorLabel(),
         '#prefix' => '<div class="tmgmt-ui-translator tmgmt-ui-info-item">',
         '#suffix' => '</div>',
         '#value' => $job->getTranslatorId(),

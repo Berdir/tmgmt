@@ -47,11 +47,14 @@ class TranslatorTest extends TMGMTTestBase {
 
     // Create job, attach to the translator and activate.
     $job = $this->createJob();
-    $job->translator = $translator;
     $job->settings = array();
     $job->save();
     $job->setState(Job::STATE_ACTIVE);
     $item = $job->addItem('test_source', 'test', 1);
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $this->assertText(t('(Undefined)'));
+    $job->translator = $translator;
+    $job->save();
 
     // Try to delete the translator, should fail because of active job.
     $delete_url = '/admin/tmgmt/translators/manage/' . $translator->id() . '/delete';
@@ -85,7 +88,7 @@ class TranslatorTest extends TMGMTTestBase {
 
     // Assert that also the job items are working.
     $this->drupalGet('admin/tmgmt/items/' . $item->id());
-    $this->assertText(t('Missing provider'));
+    $this->assertText(t('(Missing)'));
 
     // Testing the translators form with no installed translator plugins.
     // Uninstall the test module (which provides a translator).
