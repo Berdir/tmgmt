@@ -5,6 +5,7 @@
  * Main module file for the Translation Management module.
  */
 
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\tmgmt\ContinuousTranslatorInterface;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\Translator;
@@ -1275,5 +1276,17 @@ function tmgmt_page_attachments(array &$attachments) {
       $attachments['#attached']['library'][] = 'tmgmt/drupal.tmgmt.toolbar';
       break;
     }
+  }
+}
+
+/**
+ * Implements hook_help().
+ */
+function tmgmt_help($route_name, RouteMatchInterface $route_match){
+  switch ($route_name) {
+    case 'help.page.tmgmt':
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t("The Translation Management Tool (TMGMT) module provides a tool set for translating content from different sources. The translation can be done by people or translation services of all kinds. It builds on and uses existing language tools and data structures in Drupal and can be used in automated workflow scenarios. For more information, see the online handbook entry for the <a href=':tmgmt'>TMGMT module</a>.", array(':tmgmt' => 'https://drupal.org/project/tmgmt')) . '.</p>';
+      return $output;
   }
 }
