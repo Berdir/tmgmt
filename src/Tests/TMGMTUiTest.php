@@ -1278,6 +1278,7 @@ class TMGMTUiTest extends EntityTestBase {
     $this->assertEqual('_never', $settings->get('purge_finished'));
     $this->assertTrue($settings->get('word_count_exclude_tags'));
     $this->assertEqual(20, $settings->get('source_list_limit'));
+    $this->assertEqual(50, $settings->get('job_items_cron_limit'));
     $this->assertTrue($settings->get('respect_text_format'));
     $this->assertFalse($settings->get('submit_job_item_on_cron'));
 

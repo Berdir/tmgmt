@@ -639,6 +639,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     $this->config('tmgmt.settings')
       ->set('submit_job_item_on_cron', TRUE)
+      ->set('job_items_cron_limit', 3)
       ->save();
 
     $first_job = tmgmt_job_create('en', 'de', $account->id(), [
@@ -707,6 +708,23 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
       $this->assertEqual($job_item->getState(), JobItemInterface::STATE_INACTIVE, 'Job item is inactive before cron run');
     }
 
+    $third_job = tmgmt_job_create('cs', 'en', $account->id(), [
+      'job_type' => Job::TYPE_CONTINUOUS,
+      'translator' => $translator,
+      'continuous_settings' => $continuous_settings,
+    ]);
+    $third_job->save();
+    // Create 3 sample nodes.
+    for ($i = 0; $i < 3; $i++) {
+      $node = Node::create([
+        'title' => $this->randomMachineName(),
+        'uid' => $account->id(),
+        'type' => $type->id(),
+        'langcode' => 'cs',
+      ]);
+      $node->save();
+    }
+
     tmgmt_cron();
 
     // Assert that the translator was called twice, once with the item of the
@@ -729,6 +747,23 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     }
 
     foreach ($second_job->getItems() as $job_item) {
+      $this->assertEqual($job_item->getState(), JobItemInterface::STATE_REVIEW, 'Job item is active after cron run');
+    }
+
+    // Run cron again to process 3 remaining job items.
+    tmgmt_cron();
+
+    $third_items = array_values($third_job->getItems());
+    $expected_groups[] = [
+      ['item_id' => $third_items[0]->id(), 'job_id' => $third_items[0]->getJobId()],
+      ['item_id' => $third_items[1]->id(), 'job_id' => $third_items[1]->getJobId()],
+      ['item_id' => $third_items[2]->id(), 'job_id' => $third_items[2]->getJobId()],
+    ];
+    debug($expected_groups, 'exp');
+    debug(\Drupal::state()->get('job_item_groups'), 'st');
+    // Assert there are 3 new job items appeared from the third job.
+    $this->assertEqual(\Drupal::state()->get('job_item_groups'), $expected_groups, 'Job items groups are equal');
+    foreach ($third_job->getItems() as $job_item) {
       $this->assertEqual($job_item->getState(), JobItemInterface::STATE_REVIEW, 'Job item is active after cron run');
     }
   }

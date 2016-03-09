@@ -23,6 +23,9 @@ tmgmt.settings:
     submit_job_item_on_cron:
       type: boolean
       label: 'Submit job item on cron'
+    job_items_cron_limit:
+      type: integer
+      label: 'Number of job items to process on cron'
 
 tmgmt.translator.*:
   type: config_entity

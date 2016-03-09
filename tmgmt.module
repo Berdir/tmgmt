@@ -83,12 +83,14 @@ function tmgmt_cron() {
   }
 
   // Submit continuous job items.
-  if (\Drupal::config('tmgmt.settings')->get('submit_job_item_on_cron')) {
+  $tmgmt_settings = \Drupal::config('tmgmt.settings');
+  if ($tmgmt_settings->get('submit_job_item_on_cron')) {
 
     // Look for inactive job items of continuous jobs.
     $ids = \Drupal::entityQuery('tmgmt_job_item')
       ->condition('tjid.entity.job_type', JobInterface::TYPE_CONTINUOUS)
       ->condition('state', JobItemInterface::STATE_INACTIVE)
+      ->range(0, $tmgmt_settings->get('job_items_cron_limit'))
       ->execute();
 
     // First, group the job items by job.

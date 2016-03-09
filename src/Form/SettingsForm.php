@@ -81,6 +81,18 @@ class SettingsForm extends ConfigFormBase {
       '#description' => t('Enabling will force all continuous job items to be submitted on cron.'),
       '#default_value' => $config->get('submit_job_item_on_cron'),
     );
+    $form['performance']['job_items_cron_limit'] = array(
+      '#type' => 'number',
+      '#title' => t('Number of job items to process on cron'),
+      '#description' => t('The number of job items that should be processed in one cron run. Depending on the chosen translation provider, increasing the number of job items could make translation projects bigger and slower to process.'),
+      '#default_value' => $config->get('job_items_cron_limit'),
+      '#min' => 1,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="tmgmt_submit_job_item_on_cron"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
     $form['plaintext'] = array(
       '#type' => 'details',
       '#title' => t('Text settings'),
@@ -105,6 +117,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('anonymous_access', $form_state->getValue('tmgmt_anonymous_access'))
       ->set('respect_text_format', $form_state->getValue('respect_text_format'))
       ->set('submit_job_item_on_cron', $form_state->getValue('tmgmt_submit_job_item_on_cron'))
+      ->set('job_items_cron_limit', $form_state->getValue('job_items_cron_limit'))
       ->save();
 
     parent::submitForm($form, $form_state);
