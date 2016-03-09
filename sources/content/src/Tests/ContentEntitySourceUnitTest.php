@@ -133,28 +133,28 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     // Test the name property.
     $this->assertEqual($data['name']['#label'], 'Name');
-    $this->assertEqual($data['name'][0]['#label'], 'Delta #0');
-    $this->assertEqual((string) $data['name'][0]['value']['#label'], 'Text value');
+    $this->assertFalse(isset($data['name'][0]['#label']));
+    $this->assertFalse(isset($data['name'][0]['value']['#label']));
     $this->assertEqual($data['name'][0]['value']['#text'], $entity_test->name->value);
     $this->assertEqual($data['name'][0]['value']['#translate'], TRUE);
 
     // Test the test field.
     $this->assertEqual($data['field_test_text']['#label'], 'Test text-field');
     $this->assertEqual($data['field_test_text'][0]['#label'], 'Delta #0');
-    $this->assertEqual((string) $data['field_test_text'][0]['value']['#label'], 'Text');
+    $this->assertFalse(isset($data['field_test_text'][0]['value']['#label']));
     $this->assertEqual($data['field_test_text'][0]['value']['#text'], $entity_test->field_test_text->value);
     $this->assertEqual($data['field_test_text'][0]['value']['#translate'], TRUE);
-    $this->assertEqual((string) $data['field_test_text'][0]['format']['#label'], 'Text format');
+    $this->assertFalse(isset($data['field_test_text'][0]['format']['#label']));
     $this->assertEqual($data['field_test_text'][0]['value']['#format'], 'text_plain');
     $this->assertEqual($data['field_test_text'][0]['format']['#text'], $entity_test->field_test_text->format);
     $this->assertEqual($data['field_test_text'][0]['format']['#translate'], FALSE);
     $this->assertFalse(isset($data['field_test_text'][0]['processed']));
 
     $this->assertEqual($data['field_test_text'][1]['#label'], 'Delta #1');
-    $this->assertEqual((string) $data['field_test_text'][1]['value']['#label'], 'Text');
+    $this->assertFalse(isset($data['field_test_text'][1]['value']['#label']));
     $this->assertEqual($data['field_test_text'][1]['value']['#text'], $entity_test->field_test_text[1]->value);
     $this->assertEqual($data['field_test_text'][1]['value']['#translate'], TRUE);
-    $this->assertEqual((string) $data['field_test_text'][1]['format']['#label'], 'Text format');
+    $this->assertFalse(isset($data['field_test_text'][1]['format']['#label']));
     $this->assertEqual($data['field_test_text'][0]['value']['#format'], 'text_plain');
     $this->assertEqual($data['field_test_text'][1]['format']['#text'], $entity_test->field_test_text[1]->format);
     $this->assertEqual($data['field_test_text'][1]['format']['#translate'], FALSE);
@@ -163,7 +163,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
     // Test the image field.
     $image_item = $data['image_test'][0];
     $this->assertEqual($data['image_test']['#label'], $this->image_label);
-    $this->assertEqual($image_item['#label'], 'Delta #0');
+    $this->assertFalse(isset($image_item['#label']));
     $this->assertFalse($image_item['target_id']['#translate']);
     $this->assertFalse($image_item['width']['#translate']);
     $this->assertFalse($image_item['height']['#translate']);
@@ -228,8 +228,8 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     // Test the title property.
     $this->assertEqual($data['title']['#label'], 'Title');
-    $this->assertEqual($data['title'][0]['#label'], 'Delta #0');
-    $this->assertEqual((string) $data['title'][0]['value']['#label'], 'Text value');
+    $this->assertFalse(isset($data['title'][0]['#label']));
+    $this->assertFalse(isset($data['title'][0]['value']['#label']));
     $this->assertEqual($data['title'][0]['value']['#text'], $node->title->value);
     $this->assertEqual($data['title'][0]['value']['#translate'], TRUE);
 
@@ -463,7 +463,7 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
 
     // Ensure some labels and structure for field 1.
     $this->assertEqual($data['field1']['#label'], 'Field 1');
-    $this->assertEqual($data['field1'][0]['#label'], 'Delta #0');
+    $this->assertFalse(isset($data['field1'][0]['#label']));
     $this->assertEqual($data['field1'][0]['entity']['name']['#label'], 'Name');
     $this->assertEqual($data['field1'][0]['entity']['name'][0]['value']['#text'], $referenced_values['name']);
 

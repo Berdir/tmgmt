@@ -119,6 +119,7 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
       $field = $entity->get($key);
       foreach ($field as $index => $field_item) {
         $format = NULL;
+        $translatable_properties = 0;
         /* @var FieldItemInterface $field_item */
         foreach ($field_item->getProperties() as $property_key => $property) {
           // Ignore computed values.
@@ -136,13 +137,18 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
           // the UI because of no data.
           if ($translate == TRUE) {
             $data[$key]['#label'] = $field_definition->getLabel();
-            $data[$key][$index]['#label'] = t('Delta #@delta', array('@delta' => $index));
+            if (count($field) > 1) {
+              // More than one item, add a label for the delta.
+              $data[$key][$index]['#label'] = t('Delta #@delta', array('@delta' => $index));
+            }
           }
           $data[$key][$index][$property_key] = array(
             '#label' => $property_definition->getLabel(),
             '#text' => $property->getValue(),
             '#translate' => $translate,
           );
+
+          $translatable_properties += (int) $translate;
           if ($translate && ($field_item->getFieldDefinition()->getFieldStorageDefinition()->getSetting('max_length') != 0)) {
             $data[$key][$index][$property_key]['#max_length'] = $field_item->getFieldDefinition()->getFieldStorageDefinition()->getSetting('max_length');
           }
@@ -157,6 +163,12 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
             if (is_array($value) && isset($value['#translate']) && $value['#translate'] == TRUE) {
               $data[$key][$index][$name]['#format'] = $format;
             }
+          }
+        }
+        // If there is only one translatable property, remove the label for it.
+        if ($translatable_properties <= 1) {
+          foreach (Element::children($data[$key][$index]) as $property_key) {
+            unset($data[$key][$index][$property_key]['#label']);
           }
         }
       }
@@ -177,7 +189,10 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
             // All the labels are here, to make sure we don't have empty
             // labels in the UI because of no data.
             $data[$key]['#label'] = $field_definition->getLabel();
-            $data[$key][$index]['#label'] = t('Delta #@delta', array('@delta' => $index));
+            if (count($field) > 1) {
+              // More than one item, add a label for the delta.
+              $data[$key][$index]['#label'] = t('Delta #@delta', array('@delta' => $index));
+            }
             $data[$key][$index][$property_key] = $this->extractTranslatableData($property->getValue());
           }
         }
