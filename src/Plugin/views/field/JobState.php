@@ -63,6 +63,16 @@ class JobState extends NumericField {
         $icon = 'core/misc/icons/73b355/check.svg';
         break;
 
+      case JobInterface::STATE_CONTINUOUS:
+        $label = t('Continuous');
+        $icon = drupal_get_path('module', 'tmgmt') . '/icons/continuous.svg';
+        break;
+
+      case JobInterface::STATE_CONTINUOUS_INACTIVE:
+        $label = t('Continuous Inactive');
+        $icon = drupal_get_path('module', 'tmgmt') . '/icons/continuous_inactive.svg';
+        break;
+
       default:
         $label = t('Unprocessed');
         $icon = drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg';

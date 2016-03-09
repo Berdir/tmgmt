@@ -174,7 +174,7 @@ class JobForm extends TmgmtFormBase {
     }
 
     // Display created time only for jobs that are not new anymore.
-    if (!$job->isUnprocessed()) {
+    if (!$job->isUnprocessed() && !$job->isContinuousActive()) {
       $form['info']['created'] = array(
         '#type' => 'item',
         '#title' => t('Created'),

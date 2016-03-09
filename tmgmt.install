@@ -89,3 +89,14 @@ function tmgmt_update_8006() {
   \Drupal::entityDefinitionUpdateManager()
     ->installFieldStorageDefinition('continuous_settings', 'tmgmt_job', 'tmgmt', $storage_definition);
 }
+
+/**
+ * Updates the state to 'continuous' of all continuous translation jobs.
+ */
+function tmgmt_update_8007() {
+  $continuous_jobs = \Drupal::entityTypeManager()->getStorage('tmgmt_job')->loadByProperties(['job_type' => Job::TYPE_CONTINUOUS]);
+  /** @var \Drupal\tmgmt\JobInterface $continuous_job */
+  foreach ($continuous_jobs as $continuous_job) {
+    $continuous_job->setState(Job::STATE_CONTINUOUS);
+  }
+}

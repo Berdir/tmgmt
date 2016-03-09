@@ -33,13 +33,14 @@ class JobState extends ManyToOne {
    */
   public function getValueOptions() {
     return $this->valueOptions = array(
-      'open_jobs' => '- Open jobs -',
-      '0' => 'Unprocessed',
-      'in_progress' => 'In progress',
-      'needs_review' => 'Needs review',
-      '2' => 'Rejected',
-      '4' => 'Aborted',
-      '5' => 'Finished',
+      'open_jobs' => t('- Open jobs -'),
+      '0' => t('Unprocessed'),
+      'in_progress' => t('In progress'),
+      'needs_review' => t('Needs review'),
+      '2' => t('Rejected'),
+      '4' => t('Aborted'),
+      '5' => t('Finished'),
+      '6' => t('Continuous'),
     );
   }
 
@@ -93,7 +94,7 @@ class JobState extends ManyToOne {
         $this->query->addWhere($this->options['group'], "$table.$field", '1', '=');
         break;
       case 'open_jobs':
-        $this->query->addWhere($this->options['group'], "$table.$field", array(0, 1, 2, 3), 'IN');
+        $this->query->addWhere($this->options['group'], "$table.$field", array(0, 1, 2, 3, 6), 'IN');
         break;
       default:
         $this->query->addWhere($this->options['group'], "$table.$field", $key, '=');

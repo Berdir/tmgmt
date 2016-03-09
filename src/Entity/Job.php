@@ -575,6 +575,20 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
   /**
    * {@inheritdoc}
    */
+  public function isContinuousActive() {
+    return $this->isState(static::STATE_CONTINUOUS);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isContinuousInactive() {
+    return $this->isState(static::STATE_CONTINUOUS_INACTIVE);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function canRequestTranslation() {
     if ($translator = $this->getTranslator()) {
       return $translator->checkTranslatable($this);
@@ -683,12 +697,14 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    */
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
+    if ($this->isContinuous() && !$this->isContinuousInactive()) {
+      $this->state = Job::STATE_CONTINUOUS;
+    }
     if ($this->isActive() && $this->original->isUnprocessed()) {
       foreach ($this->getItems() as $item) {
         // The job was submitted, activate any inactive job item.
         if ($item->isInactive()) {
           $item->setState(JobItemInterface::STATE_ACTIVE);
-          $item->save();
         }
       }
     }
@@ -929,6 +945,8 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
       static::STATE_REJECTED => t('Rejected'),
       static::STATE_ABORTED => t('Aborted'),
       static::STATE_FINISHED => t('Finished'),
+      static::STATE_CONTINUOUS => t('Continuous'),
+      static::STATE_CONTINUOUS_INACTIVE => t('Continuous Inactive'),
     );
   }
 

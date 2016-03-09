@@ -481,8 +481,9 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
     }
     $return = $this->setState(static::STATE_ACCEPTED, $message, $variables, $type);
     // Check if this was the last unfinished job item in this job.
-    if (tmgmt_job_check_finished($this->getJobId()) && $job = $this->getJob()) {
-      // Mark the job as finished.
+    $job = $this->getJob();
+    if ($job && !$job->isContinuous() && tmgmt_job_check_finished($this->getJobId())) {
+      // Mark the job as finished in case it is a normal job.
       $job->finished();
     }
     return $return;

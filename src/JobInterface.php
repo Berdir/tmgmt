@@ -63,6 +63,20 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   const STATE_FINISHED = 5;
 
   /**
+   * A continuous translation job.
+   *
+   * A default state for all continuous jobs.
+   */
+  const STATE_CONTINUOUS = 6;
+
+  /**
+   * A continuous translation job has been inactivated.
+   *
+   * Inactive state for continuous translation jobs.
+   */
+  const STATE_CONTINUOUS_INACTIVE = 7;
+
+  /**
    * Maximum length of a job or job item label.
    */
   const LABEL_MAX_LENGTH = 128;
@@ -407,12 +421,28 @@ interface JobInterface extends ContentEntityInterface, EntityOwnerInterface {
   public function isRejected();
 
   /**
-   * Returns whether the state of this jon is 'finished'.
+   * Returns whether the state of this job is 'finished'.
    *
    * @return bool
    *   TRUE if the state is 'finished', FALSE otherwise.
    */
   public function isFinished();
+
+  /**
+   * Returns whether the state of this job is 'continuous'.
+   *
+   * @return bool
+   *   TRUE if the state is 'continuous', FALSE otherwise.
+   */
+  public function isContinuousActive();
+
+  /**
+   * Returns whether the state of this jon is 'continuous_inactive'.
+   *
+   * @return bool
+   *   TRUE if the state is 'continuous_inactive', FALSE otherwise.
+   */
+  public function isContinuousInactive();
 
   /**
    * Checks whether a job is translatable.
