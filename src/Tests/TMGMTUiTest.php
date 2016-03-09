@@ -711,6 +711,19 @@ class TMGMTUiTest extends EntityTestBase {
     $this->drupalPostForm(NULL, [], t('Save as completed'));
     $this->assertText(t('The field is empty.'));
 
+    // Test validation message for 'Validate' button.
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $translation_field = $this->randomString();
+    $edit = array(
+      'dummy|deep_nesting[translation]' => $translation_field,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Validate'));
+    $this->assertText(t('Validation completed successfully.'), 'Message is correctly displayed.');
+
+    // Test validation message for 'Validate HTML tags' button.
+    $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
+    $this->assertText(t('Validation completed successfully.'), 'Message is correctly displayed.');
+
     // Test that continuous jobs are not shown in the job overview.
     $this->container->get('module_installer')->install(['tmgmt_file'], TRUE);
     $non_continuous_translator = Translator::create([

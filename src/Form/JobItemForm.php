@@ -248,6 +248,9 @@ class JobItemForm extends TmgmtFormBase {
         $form_state->setError($form['review'][$parent_key][$key]['translation'], $this->t('The field is empty.'));
         continue;
       }
+      else {
+        drupal_set_message(t('Validation completed successfully.'));
+      }
     }
   }
 
@@ -577,6 +580,9 @@ class JobItemForm extends TmgmtFormBase {
     }
     if($field_count > 0){
       drupal_set_message(t('HTML tag validation failed for @count field(s).', array('@count' => $field_count)), 'error');
+    }
+    else {
+      drupal_set_message(t('Validation completed successfully.'));
     }
     $form_state->set('validation_messages', $validation_messages);
     $request = \Drupal::request();
