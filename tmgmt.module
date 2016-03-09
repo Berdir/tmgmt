@@ -559,6 +559,12 @@ function tmgmt_theme() {
         'width_accepted' => NULL,
       ),
     ),
+    'tmgmt_legend' => array(
+      'variables' => array(
+        'title' => NULL,
+        'items' => NULL,
+      ),
+    ),
   );
 }
 
@@ -898,52 +904,53 @@ function tmgmt_redirect_queue_dequeue() {
  *   Color legend render array.
  */
 function tmgmt_color_legend() {
-  $output = [
-    '#attached' => [
-      'library' => ['tmgmt/admin'],
-    ]
+  $items = [
+    [
+      'icon' => file_create_url('core/misc/icons/bebebe/house.svg'),
+      'legend' => t('Source language'),
+    ],
+    [
+      'icon' => file_create_url('core/misc/icons/bebebe/ex.svg'),
+      'legend' => t('Not translated'),
+    ],
+    [
+      'icon' => file_create_url('core/misc/icons/73b355/check.svg'),
+      'legend' => t('Translated'),
+    ],
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/outdated.svg'),
+      'legend' => t('Translation Outdated'),
+    ],
   ];
-  if (\Drupal::theme()->getActiveTheme()->getName() == 'seven') {
-    $output['#attached']['library'][] = 'tmgmt/admin.seven';
-  }
 
-  $legends_left = array();
-  $legends_left[] = array('legend' => t('Source Language'), 'icon' => 'core/misc/icons/bebebe/house.svg');
-  $legends_left[] = array('legend' => t('Not translated'), 'icon' => 'core/misc/icons/bebebe/ex.svg');
-  $legends_left[] = array('legend' => t('Translated'), 'icon' => 'core/misc/icons/73b355/check.svg');
-  $legends_left[] = array('legend' => t('Translation Outdated'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/outdated.svg');
-  $legends_right = array();
-  $legends_right[] = array('legend' => t('Needs review'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
-  $legends_right[] = array('legend' => t('In progress'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg');
+  $output[] = [
+    '#attached' => array('library' => ['tmgmt/admin.seven', 'tmgmt/admin']),
+    '#theme' => 'tmgmt_legend',
+    '#title' => t('Source status:'),
+    '#items' => $items,
+  ];
 
-  $source_status = 'Source status:';
-  $item_status = 'Item status:';
+  $items = [
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/ready.svg'),
+      'legend' => t('Needs review'),
+    ],
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg'),
+      'legend' => t('In progress'),
+    ],
+  ];
 
-  $output['legends']['#markup'] = '<div class="tmgmt-color-legend clearfix">';
+  $output[] = [
+    '#attached' => array('library' => ['tmgmt/admin.seven', 'tmgmt/admin']),
+    '#theme' => 'tmgmt_legend',
+    '#title' => t('Item status:'),
+    '#items' => $items,
+    '#prefix' => '<div class="clear"></div>',
+  ];
 
-  $output['legends']['#markup'] .= '<div class="tmgmt-source-status"><div class="tmgmt-status">' . $source_status . '</div>';
-
-  foreach ($legends_left as $legend) {
-    $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
-        <div class="tmgmt-legend-icon">
-            <img src="' . file_create_url($legend['icon']) . '"><span></span>
-        </div>
-        <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
-        </div>';
-  }
-
-  $output['legends']['#markup'] .= '</div><div class="clear"></div><div class="tmgmt-item-status"><div class="tmgmt-status">' . $item_status . '</div>';
-
-  foreach ($legends_right as $legend) {
-    $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
-        <div class="tmgmt-legend-icon">
-            <img src="' . file_create_url($legend['icon']) . '"><span></span>
-        </div>
-        <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
-        </div>';
-  }
-
-  $output['legends']['#markup'] .= '</div></div>';
+  $output['#prefix'] = '<div class="tmgmt-color-legend clearfix">';
+  $output['#suffix'] = '</div>';
 
   return $output;
 }
@@ -955,37 +962,33 @@ function tmgmt_color_legend() {
  *   Color legend render array.
  */
 function tmgmt_color_job_item_legend() {
-  $output = [
-    '#attached' => [
-      'library' => ['tmgmt/admin'],
-    ]
+  $items = [
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg'),
+      'legend' => t('In progress'),
+    ],
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/ready.svg'),
+      'legend' => t('Needs review'),
+    ],
+    [
+      'icon' => file_create_url('core/misc/icons/73b355/check.svg'),
+      'legend' => t('Accepted'),
+    ],
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/ex-red.svg'),
+      'legend' => t('Aborted'),
+    ],
   ];
-  if (\Drupal::theme()->getActiveTheme()->getName() == 'seven') {
-    $output['#attached']['library'][] = 'tmgmt/admin.seven';
-  }
 
-  $legends_left = array();
-  $legends_left[] = array('legend' => t('In progress'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg');
-  $legends_left[] = array('legend' => t('Needs review'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
-  $legends_left[] = array('legend' => t('Accepted'), 'icon' => 'core/misc/icons/73b355/check.svg');
-  $legends_left[] = array('legend' => t('Aborted'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ex-red.svg');
-
-  $item_status = 'Item state:';
-
-  $output['legends']['#markup'] = '<div class="tmgmt-color-legend clearfix">';
-
-  $output['legends']['#markup'] .= '<div class="tmgmt-source-status"><div class="tmgmt-status">' . $item_status . '</div>';
-
-  foreach ($legends_left as $legend) {
-    $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
-        <div class="tmgmt-legend-icon">
-            <img src="' . file_create_url($legend['icon']) . '"><span></span>
-        </div>
-        <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
-        </div>';
-  }
-
-  $output['legends']['#markup'] .= '</div></div>';
+  $output = [
+    '#attached' => array('library' => ['tmgmt/admin.seven', 'tmgmt/admin']),
+    '#theme' => 'tmgmt_legend',
+    '#title' => t('State:'),
+    '#items' => $items,
+    '#prefix' => '<div class="tmgmt-color-legend clearfix">',
+    '#suffix' => '</div>',
+  ];
 
   return $output;
 }
@@ -997,39 +1000,48 @@ function tmgmt_color_job_item_legend() {
  *   Color legend render array.
  */
 function tmgmt_color_job_legend() {
-  $output = [
-    '#attached' => [
-      'library' => ['tmgmt/admin'],
-    ]
+  $items = [
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/rejected.svg'),
+      'legend' => t('Unprocessed'),
+    ],
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg'),
+      'legend' => t('In progress'),
+    ],
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/ready.svg'),
+      'legend' => t('Needs review'),
+    ],
+    [
+      'icon' => file_create_url('core/misc/icons/787878/ex.svg'),
+      'legend' => t('Rejected'),
+    ],
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/ex-red.svg'),
+      'legend' => t('Aborted'),
+    ],
+    [
+      'icon' => file_create_url('core/misc/icons/73b355/check.svg'),
+      'legend' => t('Finished'),
+    ],
   ];
-  if (\Drupal::theme()->getActiveTheme()->getName() == 'seven') {
-    $output['#attached']['library'][] = 'tmgmt/admin.seven';
-  }
 
-  $legends_left = array();
-  $legends_left[] = array('legend' => t('Unprocessed'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/rejected.svg');
-  $legends_left[] = array('legend' => t('In progress'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg');
-  $legends_left[] = array('legend' => t('Needs review'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
-  $legends_left[] = array('legend' => t('Rejected'), 'icon' => 'core/misc/icons/787878/ex.svg');
-  $legends_left[] = array('legend' => t('Aborted'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ex-red.svg');
-  $legends_left[] = array('legend' => t('Finished'), 'icon' => 'core/misc/icons/73b355/check.svg');
+  if (\Drupal::service('tmgmt.continuous')->hasContinuousJobs()) {
+    $items[] = [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/continuous.svg'),
+      'legend' => t('Continuous'),
+    ];
+  };
 
-  $job_state = 'State:';
-
-  $output['legends']['#markup'] = '<div class="tmgmt-color-legend clearfix">';
-
-  $output['legends']['#markup'] .= '<div class="tmgmt-source-status"><div class="tmgmt-status">' . $job_state . '</div>';
-
-  foreach ($legends_left as $legend) {
-    $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
-        <div class="tmgmt-legend-icon">
-            <img src="' . file_create_url($legend['icon']) . '"><span></span>
-        </div>
-        <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
-        </div>';
-  }
-
-  $output['legends']['#markup'] .= '</div></div>';
+  $output = [
+    '#attached' => array('library' => ['tmgmt/admin.seven', 'tmgmt/admin']),
+    '#theme' => 'tmgmt_legend',
+    '#title' => t('State:'),
+    '#items' => $items,
+    '#prefix' => '<div class="tmgmt-color-legend clearfix">',
+    '#suffix' => '</div>',
+  ];
 
   return $output;
 }
@@ -1041,37 +1053,33 @@ function tmgmt_color_job_legend() {
  *   Color legend render array.
  */
 function tmgmt_color_review_legend() {
-  $output = [
-    '#attached' => [
-      'library' => ['tmgmt/admin'],
-    ]
+  $items = [
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg'),
+      'legend' => t('Pending'),
+    ],
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/ready.svg'),
+      'legend' => t('Translated'),
+    ],
+    [
+      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/gray-check.svg'),
+      'legend' => t('Reviewed'),
+    ],
+    [
+      'icon' => file_create_url('core/misc/icons/73b355/check.svg'),
+      'legend' => t('Accepted'),
+    ],
   ];
-  if (\Drupal::theme()->getActiveTheme()->getName() == 'seven') {
-    $output['#attached']['library'][] = 'tmgmt/admin.seven';
-  }
 
-  $legends_left = array();
-  $legends_left[] = array('legend' => t('Pending'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg');
-  $legends_left[] = array('legend' => t('Translated'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/ready.svg');
-  $legends_left[] = array('legend' => t('Reviewed'), 'icon' => drupal_get_path('module', 'tmgmt') . '/icons/gray-check.svg');
-  $legends_left[] = array('legend' => t('Accepted'), 'icon' => 'core/misc/icons/73b355/check.svg');
-
-  $job_state = 'State:';
-
-  $output['legends']['#markup'] = '<div class="tmgmt-color-legend clearfix">';
-
-  $output['legends']['#markup'] .= '<div class="tmgmt-source-status"><div class="tmgmt-status">' . $job_state . '</div>';
-
-  foreach ($legends_left as $legend) {
-    $output['legends']['#markup'] .= '<div class="tmgmt-legend-wrapper">
-        <div class="tmgmt-legend-icon">
-            <img src="' . file_create_url($legend['icon']) . '"><span></span>
-        </div>
-        <div class="tmgmt-legend-status">' . $legend['legend'] . '</div>
-        </div>';
-  }
-
-  $output['legends']['#markup'] .= '</div></div>';
+  $output = [
+    '#attached' => array('library' => ['tmgmt/admin.seven', 'tmgmt/admin']),
+    '#theme' => 'tmgmt_legend',
+    '#title' => t('State:'),
+    '#items' => $items,
+    '#prefix' => '<div class="tmgmt-color-legend clearfix">',
+    '#suffix' => '</div>',
+  ];
 
   return $output;
 }

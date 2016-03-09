@@ -78,7 +78,7 @@ table.tmgmt-ui-review tbody th {
   font-size: 23px;
 }
 
-.tmgmt-source-status div, .tmgmt-item-status div {
+.tmgmt-legend div {
   float: left;
 }
 
