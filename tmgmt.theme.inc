@@ -189,7 +189,7 @@ function theme_tmgmt_translator_review_form_element($variables) {
       'data' => \Drupal::service('renderer')->render($element['below']),
       'colspan' => '2',
     ];
-    $result .= '<td></td>' . tmgmt_build_table_cell($cell);
+    $result .= '<td></td>' . tmgmt_build_table_cell($cell) . '<td></td>';
     $result .= '</tr>';
   }
 
