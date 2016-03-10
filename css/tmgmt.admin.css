@@ -8,7 +8,28 @@
   margin-right: 80px;
 }
 
-.tmgmt-ui-job-items-suggestions fieldset {
+@media
+  screen and (min-width: 1180px) {
+  .state-unprocessed #tmgmt-ui-translator-wrapper {
+    width: 50%;
+    float: left;
+  }
+
+  .state-unprocessed #tmgmt-ui-job-checkout-details {
+    width: 50%;
+    float: right;
+  }
+
+  .state-unprocessed #tmgmt-ui-translator-wrapper details {
+    margin-right: 1em;
+  }
+
+  .state-unprocessed #tmgmt-ui-job-checkout-details details {
+    margin-left: 1em;
+  }
+}
+
+.tmgmt-ui-job-items-suggestions details {
   padding-top: 13px;
 }
 

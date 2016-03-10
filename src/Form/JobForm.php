@@ -184,14 +184,18 @@ class JobForm extends TmgmtFormBase {
         '#value' => $job->getCreatedTime(),
       );
     }
+    else {
+      // Indicate the state to the forms css classes.
+      $form['#attributes']['class'][] = 'state-unprocessed';
+    }
     if(!$job->isContinuous()) {
       if ($view = Views::getView('tmgmt_job_items')) {
         $form['job_items_wrapper'] = array(
           '#type' => 'details',
           '#title' => t('Job items'),
-          '#open' => $job->getState() == Job::STATE_ACTIVE,
+          '#open' => in_array($job->getState(), array(Job::STATE_ACTIVE, Job::STATE_UNPROCESSED)),
           '#weight' => 10,
-          '#prefix' => '<div class="tmgmt-ui-job-checkout-details">',
+          '#prefix' => '<div id="tmgmt-ui-job-checkout-details">',
           '#suffix' => '</div>',
         );
         $form['footer'] = tmgmt_color_job_item_legend();
@@ -268,7 +272,7 @@ class JobForm extends TmgmtFormBase {
             '#title' => t('Suggestions'),
             '#prefix' => '<div id="tmgmt-ui-job-items-suggestions">',
             '#suffix' => '</div>',
-            '#open' => FALSE,
+            '#open' => TRUE,
           ) + $suggestions_table;
       }
     }
@@ -297,11 +301,12 @@ class JobForm extends TmgmtFormBase {
     if ($job->isSubmittable() || $job->isContinuous()) {
 
       $form['translator_wrapper'] = array(
-        '#type' => 'fieldset',
+        '#type' => 'details',
         '#title' => t('Configure provider'),
         '#weight' => 20,
         '#prefix' => '<div id="tmgmt-ui-translator-wrapper">',
         '#suffix' => '</div>',
+        '#open' => TRUE,
       );
 
       // Show a list of translators tagged by availability for the selected source
