@@ -174,10 +174,7 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
       }
     }
 
-    $embeddable_field_names = \Drupal::config('tmgmt_content.settings')->get('embedded_fields');
-    $embeddable_fields = array_filter($field_definitions, function (FieldDefinitionInterface $field_definition) use ($embeddable_field_names) {
-      return !$field_definition->isTranslatable() && isset($embeddable_field_names[$field_definition->getTargetEntityTypeId()][$field_definition->getName()]);
-    });
+    $embeddable_fields = $this->getEmbeddableFields($entity);
     foreach ($embeddable_fields as $key => $field_definition) {
       $field = $entity->get($key);
       foreach ($field as $index => $field_item) {
@@ -200,6 +197,50 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
       }
     }
     return $data;
+  }
+
+  /**
+   * Returns fields that should be embedded into the data for the given entity.
+   *
+   * Includes explicitly enabled fields and composite entities that are
+   * implicitly included to the translatable data.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity to get the translatable data from.
+   *
+   * @return array $embeddable_fields
+   *   Translatable data.
+   */
+  public function getEmbeddableFields(ContentEntityInterface $entity) {
+    // Get the configurable embeddable references.
+    $field_definitions = $entity->getFieldDefinitions();
+    $embeddable_field_names = \Drupal::config('tmgmt_content.settings')->get('embedded_fields');
+    $embeddable_fields = array_filter($field_definitions, function (FieldDefinitionInterface $field_definition) use ($embeddable_field_names) {
+      return !$field_definition->isTranslatable() && isset($embeddable_field_names[$field_definition->getTargetEntityTypeId()][$field_definition->getName()]);
+    });
+
+    // Get always embedded references.
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    foreach ($field_definitions as $field_name => $field_definition) {
+      $storage_definition = $field_definition->getFieldStorageDefinition();
+
+      $property_definitions = $storage_definition->getPropertyDefinitions();
+      foreach ($property_definitions as $property_definition) {
+        // Look for entity_reference properties where the storage definition
+        // has a target type setting and that is enabled for content
+        // translation.
+        if (in_array($property_definition->getDataType(), ['entity_reference', 'entity_revision_reference']) && $storage_definition->getSetting('target_type') && $content_translation_manager->isEnabled($storage_definition->getSetting('target_type'))) {
+          // Include field if the target entity has the parent type field key
+          // set, which is defined by entity_reference_revisions.
+          $target_entity_type = \Drupal::entityTypeManager()->getDefinition($storage_definition->getSetting('target_type'));
+          if ($target_entity_type->get('entity_revision_parent_type_field')) {
+            $embeddable_fields[$field_name] = $field_definition;
+          }
+        }
+      }
+    }
+
+    return $embeddable_fields;
   }
 
   /**
@@ -229,6 +270,11 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
     $types = array();
     $content_translation_manager = \Drupal::service('content_translation.manager');
     foreach ($entity_types as $entity_type_name => $entity_type) {
+      // Entity types with this key set are considered composite entities and
+      // always embedded in others. Do not expose them as their own item type.
+      if ($entity_type->get('entity_revision_parent_type_field')) {
+        continue;
+      }
       if ($content_translation_manager->isEnabled($entity_type->id())) {
         $types[$entity_type_name] = $entity_type->getLabel();
       }

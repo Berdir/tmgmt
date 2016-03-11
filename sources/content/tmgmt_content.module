@@ -98,6 +98,7 @@ function tmgmt_content_form_tmgmt_settings_form_alter(array &$form, FormStateInt
 
   $content_translation_manager = \Drupal::service('content_translation.manager');
 
+  $always_embedded = [];
   foreach ($entity_types as $entity_type) {
     if ($content_translation_manager->isEnabled($entity_type->id())) {
       $field_options = array();
@@ -132,7 +133,17 @@ function tmgmt_content_form_tmgmt_settings_form_alter(array &$form, FormStateInt
           if (in_array($property_definition->getDataType(), ['entity_reference', 'entity_revision_reference']) && $storage_definition->getSetting('target_type') && $content_translation_manager->isEnabled($storage_definition->getSetting('target_type'))) {
             if ($storage_definition instanceof FieldStorageConfigInterface) {
               list($label) = views_entity_field_label($entity_type->id(), $storage_definition->getName());
-              $field_options[$storage_definition->getName()] = $label;
+              // Entity types with this key set are considered composite
+              // entities and always embedded in others. Do not expose them as
+              // their own item type.
+              $target_entity_type = \Drupal::entityTypeManager()->getDefinition($storage_definition->getSetting('target_type'));
+              if ($target_entity_type->get('entity_revision_parent_type_field')) {
+                $id = str_replace('.', '_', $storage_definition->id());
+                $always_embedded[$id] = $entity_type->getLabel() . ': ' . $label;
+              }
+              else {
+                $field_options[$storage_definition->getName()] = $label;
+              }
             }
             else {
               $field_options[$storage_definition->getName()] = $storage_definition->getLabel();
@@ -160,6 +171,18 @@ function tmgmt_content_form_tmgmt_settings_form_alter(array &$form, FormStateInt
 
       }
     }
+  }
+  if (!empty($always_embedded)) {
+    $form['content']['embedded_fields']['always_embedded'] = array(
+      '#type' => 'item',
+      '#title' => t('Always embedded'),
+      '#description' => t('These references are always embedded in the translatable data.'),
+      '#description_display' => 'after',
+      'list' => array(
+        '#theme' => 'item_list',
+        '#items' => $always_embedded,
+      ),
+    );
   }
 
   $form['#submit'][] = 'tmgmt_content_settings_submit';
