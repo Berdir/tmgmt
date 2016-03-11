@@ -10,7 +10,9 @@ namespace Drupal\tmgmt\Tests;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
+use Drupal\filter\Entity\FilterFormat;
 use Drupal\node\Entity\Node;
+use Drupal\tmgmt\Entity\JobItem;
 
 /**
  * Verifies the UI of the review form.
@@ -19,7 +21,7 @@ use Drupal\node\Entity\Node;
  */
 class TMGMTUiReviewTest extends EntityTestBase {
 
-  public static $modules = ['ckeditor', 'tmgmt_content', 'image', 'node'];
+  public static $modules = [ 'tmgmt_content', 'image', 'node'];
 
   /**
    * {@inheritdoc}
@@ -27,12 +29,21 @@ class TMGMTUiReviewTest extends EntityTestBase {
   function setUp() {
     parent::setUp();
 
+    $this->addLanguage('de');
+
+    $filtered_html_format = FilterFormat::create(array(
+      'format' => 'filtered_html',
+      'name' => 'Filtered HTML',
+    ));
+    $filtered_html_format->save();
+
     $this->drupalCreateContentType(array('type' => 'test_bundle'));
 
     $this->loginAsAdmin(array(
       'create translation jobs',
       'submit translation jobs',
       'create test_bundle content',
+      $filtered_html_format->getPermissionName(),
     ));
 
     file_unmanaged_copy(DRUPAL_ROOT . '/core/misc/druplicon.png', 'public://example.jpg');
@@ -40,6 +51,346 @@ class TMGMTUiReviewTest extends EntityTestBase {
       'uri' => 'public://example.jpg',
     ));
     $this->image->save();
+  }
+
+
+  /**
+   * Tests of the job item review process.
+   */
+  public function testReview() {
+    $job = $this->createJob();
+    $job->translator = $this->default_translator->id();
+    $job->settings = array();
+    $job->save();
+    $item = $job->addItem('test_source', 'test', 1);
+    // The test expects the item to be active.
+    $item->active();
+
+    $data = \Drupal::service('tmgmt.data')->flatten($item->getData());
+    $keys = array_keys($data);
+    $key = $keys[0];
+
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+
+    // Testing the title of the preview page.
+    $this->assertText(t('Job item @source_label', array('@source_label' => $job->label())));
+
+    // Testing the result of the
+    // TMGMTTranslatorUIControllerInterface::reviewDataItemElement()
+    $this->assertText(t('Testing output of review data item element @key from the testing provider.', array('@key' => $key)));
+
+    // Test the review tool source textarea.
+    $this->assertFieldByName('dummy|deep_nesting[source]', $data[$key]['#text']);
+
+    // Save translation.
+    $this->drupalPostForm(NULL, array('dummy|deep_nesting[translation]' => $data[$key]['#text'] . 'translated'), t('Save'));
+
+    // Test review data item.
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $this->drupalPostAjaxForm(NULL, [], 'reviewed-dummy|deep_nesting');
+    $this->assertRaw('icons/gray-check.svg" alt="Reviewed"');
+
+    \Drupal::entityTypeManager()->getStorage('tmgmt_job')->resetCache();
+    \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
+    /** @var JobItem $item */
+    $item = JobItem::load($item->id());
+    $this->assertEqual($item->getCountReviewed(), 1, 'Item reviewed correctly.');
+
+    // Check if translation has been saved.
+    $this->assertFieldByName('dummy|deep_nesting[translation]', $data[$key]['#text'] . 'translated');
+
+    // Tests for the minimum height of the textareas.
+    $rows = $this->xpath('//textarea[@name="dummy|deep_nesting[source]"]');
+    $this->assertEqual((string) $rows[0]['rows'], 3);
+
+    $rows2 = $this->xpath('//textarea[@name="dummy|deep_nesting[translation]"]');
+    $this->assertEqual((string) $rows2[0]['rows'], 3);
+
+    // Test for the dynamical height of the source textarea.
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'dummy' => array(
+        'deep_nesting' => array(
+          '#text' => str_repeat('Text for job item', 20),
+          '#label' => 'Label',
+        ),
+      ),
+    ));
+    $item2 = $job->addItem('test_source', 'test', 2);
+    $this->drupalGet('admin/tmgmt/items/' . $item2->id());
+
+    $rows3 = $this->xpath('//textarea[@name="dummy|deep_nesting[source]"]');
+    $this->assertEqual((string) $rows3[0]['rows'], 4);
+
+    // Test for the maximum height of the source textarea.
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'dummy' => array(
+        'deep_nesting' => array(
+          '#text' => str_repeat('Text for job item', 100),
+          '#label' => 'Label',
+        ),
+      ),
+    ));
+    $item3 = $job->addItem('test_source', 'test', 3);
+    $this->drupalGet('admin/tmgmt/items/' . $item3->id());
+
+    $rows4 = $this->xpath('//textarea[@name="dummy|deep_nesting[source]"]');
+    $this->assertEqual((string) $rows4[0]['rows'], 15);
+
+    // Tests the HTML tags validation.
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'title' => array(
+        'deep_nesting' => array(
+          '#text' => '<p><em><strong>Source text bold and Italic</strong></em></p>',
+          '#label' => 'Title',
+        ),
+      ),
+      'body' => array(
+        'deep_nesting' => array(
+          '#text' => '<p><em><strong>Source body bold and Italic</strong></em></p>',
+          '#label' => 'Body',
+        )
+      ),
+    ));
+    $item4 = $job->addItem('test_source', 'test', 4);
+    $this->drupalGet('admin/tmgmt/items/' . $item4->id());
+
+    // Drop <strong> tag in translated text.
+    $edit = array(
+      'title|deep_nesting[translation]' => '<em>Translated italic text missing paragraph</em>',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
+    $this->assertText(t('Expected tags @tags not found.', array('@tags' => '<p>,<strong>,</strong>,</p>')));
+    $this->assertText(t('@tag expected 1, found 0.', array('@tag' => '<p>')));
+    $this->assertText(t('@tag expected 1, found 0.', array('@tag' => '<strong>')));
+    $this->assertText(t('@tag expected 1, found 0.', array('@tag' => '</strong>')));
+    $this->assertText(t('@tag expected 1, found 0.', array('@tag' => '</p>')));
+    $this->assertText(t('HTML tag validation failed for 1 field(s).'));
+
+    // Change the order of HTML tags.
+    $edit = array(
+      'title|deep_nesting[translation]' => '<p><strong><em>Translated text Italic and bold</em></strong></p>',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
+    $this->assertText(t('Order of the HTML tags are incorrect.'));
+    $this->assertText(t('HTML tag validation failed for 1 field(s).'));
+
+    // Add multiple tags incorrectly.
+    $edit = array(
+      'title|deep_nesting[translation]' => '<p><p><p><p><strong><em><em>Translated text Italic and bold, many tags</em></strong></strong></strong></p>',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
+    $this->assertText(t('@tag expected 1, found 4.', array('@tag' => '<p>')));
+    $this->assertText(t('@tag expected 1, found 2.', array('@tag' => '<em>')));
+    $this->assertText(t('@tag expected 1, found 3.', array('@tag' => '</strong>')));
+    $this->assertText(t('HTML tag validation failed for 1 field(s).'));
+
+    // Check validation errors for two fields.
+    $edit = array(
+      'title|deep_nesting[translation]' => '<p><p><p><p><strong><em><em>Translated text Italic and bold, many tags</em></strong></strong></strong></p>',
+      'body|deep_nesting[translation]' => '<p>Source body bold and Italic</strong></em></p>',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
+    $this->assertText(t('HTML tag validation failed for 2 field(s).'));
+
+    // Tests that there is always a title.
+    $text = '<p><em><strong>Source text bold and Italic</strong></em></p>';
+    \Drupal::state()->set('tmgmt.test_source_data', [
+      'title' => [
+        [
+          'value' => [
+            '#text' => $text,
+            '#label' => 'Title',
+            '#translate' => TRUE,
+            '#format' => 'filtered_html',
+          ],
+        ],
+      ],
+      'body' => [
+        'deep_nesting' => [
+          '#text' => $text,
+          '#label' => 'Body',
+          '#translate' => TRUE,
+          '#format' => 'filtered_html',
+        ],
+      ],
+    ]);
+    $item5 = $job->addItem('test_source', 'test', 4);
+
+    $this->drupalPostForm('admin/tmgmt/items/' . $item5->id(), [], t('Validate'));
+    $this->assertText(t('The field is empty.'));
+
+    // Test review just one data item.
+    $edit = [
+      'title|0|value[translation][value]' => $text . 'translated',
+      'body|deep_nesting[translation][value]' => $text . 'no save',
+    ];
+    $this->drupalPostAjaxForm('admin/tmgmt/items/' . $item5->id(), $edit, 'reviewed-title|0|value');
+
+    // Check if translation has been saved.
+    $this->drupalGet('admin/tmgmt/items/' . $item5->id());
+    $this->assertFieldByName('title|0|value[translation][value]', $text . 'translated');
+    $this->assertNoFieldByName('body|deep_nesting[translation][value]', $text . 'no save');
+
+    // Tests field is less than max_length.
+    \Drupal::state()->set('tmgmt.test_source_data', [
+      'title' => [
+        [
+          'value' => [
+            '#text' => $text,
+            '#label' => 'Title',
+            '#translate' => TRUE,
+            '#max_length' => 10,
+          ],
+        ],
+      ],
+      'body' => [
+        'deep_nesting' => [
+          '#text' => $text,
+          '#label' => 'Body',
+          '#translate' => TRUE,
+          '#max_length' => 20,
+        ],
+      ],
+    ]);
+    $item5 = $job->addItem('test_source', 'test', 4);
+
+    $this->drupalPostForm('admin/tmgmt/items/' . $item5->id(), [
+      'title|0|value[translation]' => $text,
+      'body|deep_nesting[translation]' => $text,
+    ], t('Save'));
+    $this->assertText(t('The field has @size characters while the limit is @limit.', [
+      '@size' => strlen($text),
+      '@limit' => 10,
+    ]));
+    $this->assertText(t('The field has @size characters while the limit is @limit.', [
+      '@size' => strlen($text),
+      '@limit' => 20,
+    ]));
+
+    // Test if the validation is properly done.
+    $this->drupalPostAjaxForm(NULL, [], 'reviewed-body|deep_nesting');
+    $this->assertUniqueText(t('The field has @size characters while the limit is @limit.', [
+      '@size' => strlen($text),
+      '@limit' => 10,
+    ]));
+
+    // Test for the text with format set.
+    \Drupal::state()->set('tmgmt.test_source_data', array(
+      'dummy' => array(
+        'deep_nesting' => array(
+          '#text' => 'Text for job item',
+          '#label' => 'Label',
+          '#format' => 'filtered_html',
+        ),
+      ),
+    ));
+    $item5 = $job->addItem('test_source', 'test', 5);
+    $item5->active();
+
+    $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
+    $this->assertText('The translation of test_source:test:1 to German is finished and can now be reviewed.');
+    $this->clickLink(t('reviewed'));
+    $this->assertText('Needs review');
+    $this->assertText('Job item test_source:test:1');
+
+    $edit = array(
+      'target_language' => 'de',
+      'settings[action]' => 'submit',
+    );
+    $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), $edit, t('Submit to provider'));
+
+    $this->drupalGet('admin/tmgmt/items/' . $item5->id());
+    $xpath = $this->xpath('//*[@id="edit-dummydeep-nesting-translation-format-guidelines"]/div')[0];
+    $this->assertEqual($xpath[0]->h4[0], t('Filtered HTML'));
+    $rows5 = $this->xpath('//textarea[@name="dummy|deep_nesting[source][value]"]');
+    $this->assertEqual((string) $rows5[0]['rows'], 3);
+
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->assertNoText('has been saved successfully.');
+    $this->drupalGet('admin/tmgmt/items/' . $item5->id());
+    $this->assertText('In progress');
+    $edit = array(
+      'dummy|deep_nesting[translation][value]' => 'Translated text for job item',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertText('The translation for ' . trim($item5->label()) . ' has been saved successfully.');
+    $this->drupalGet('admin/tmgmt/items/' . $item5->id());
+    $this->assertText('Translated text for job item');
+    $this->drupalPostForm(NULL, $edit, t('Save as completed'));
+    $this->assertEqual(\Drupal::state()->get('tmgmt_test_saved_translation_' . $item5->getItemType() . '_' . $item5->getItemId())['dummy']['deep_nesting']['#translation']['#text'], 'Translated text for job item');
+
+    // Test if the icons are displayed.
+    $this->assertRaw('icons/73b355/check.svg" title="Accepted"');
+    $this->assertRaw('icons/ready.svg" title="Needs review"');
+    $this->loginAsAdmin();
+
+    // Create two translators.
+    $translator1 = $this->createTranslator();
+    $translator2 = $this->createTranslator();
+    $this->drupalGet('admin/tmgmt/jobs');
+
+    // Assert that translators are in dropdown list.
+    $this->assertOption('edit-translator', $translator1->id());
+    $this->assertOption('edit-translator', $translator2->id());
+
+    // Assign each job to a translator.
+    $job1 = $this->createJob();
+    $this->drupalGet('admin/tmgmt/jobs');
+    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[1]);
+
+    $job2 = $this->createJob();
+    $this->drupalGet('admin/tmgmt/jobs');
+    $this->assertTrue($label, trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[1]));
+    $job1->set('translator', $translator1->id())->save();
+    $job2->set('translator', $translator2->id())->save();
+
+    // Filter jobs by translator and assert values.
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('translator' => $translator1->id())));
+    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[4]);
+    $this->assertEqual($label, $translator1->label(), 'Found provider label in table');
+    $this->assertNotEqual($label, $translator2->label(), "Providers filtered in table");
+    $this->drupalGet('admin/tmgmt/jobs', array('query' => array('translator' => $translator2->id())));
+    $label = trim((string) $this->xpath('//table[@class="views-table views-view-table cols-10"]/tbody/tr')[0]->td[4]);
+    $this->assertEqual($label, $translator2->label(), 'Found provider label in table');
+    $this->assertNotEqual($label, $translator1->label(), "Providers filtered in table");
+
+    $edit = array(
+      'dummy|deep_nesting[translation]' => '',
+    );
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $this->drupalPostForm(NULL, $edit, t('Validate'));
+    $this->assertText(t('The field is empty.'));
+
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->assertNoText(t('The field is empty.'));
+
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $this->drupalPostForm(NULL, [], t('Save as completed'));
+    $this->assertText(t('The field is empty.'));
+
+    // Test validation message for 'Validate' button.
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $translation_field = $this->randomMachineName();
+    $edit = array(
+      'dummy|deep_nesting[translation]' => $translation_field,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Validate'));
+    $this->assertText(t('Validation completed successfully.'), 'Message is correctly displayed.');
+
+    // Test validation message for 'Validate HTML tags' button.
+    $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
+    $this->assertText(t('Validation completed successfully.'), 'Message is correctly displayed.');
+
+    // Test that normal job item are shown in job items overview.
+    $this->drupalGet('admin/tmgmt/job_items', array('query' => array('state' => 'All')));
+    $this->assertNoText($job1->label(), 'Normal job item is displayed on job items overview.');
+
+    // Test that the legend is being displayed.
+    $this->assertRaw('class="tmgmt-color-legend clearfix"');
+
+    // Test that progress bar is being displayed.
+    $this->assertRaw('class="tmgmt-progress-pending" style="width: 50%"');
+    $this->assertRaw('class="tmgmt-progress-translated" style="width: 100%"');
   }
 
   /**
