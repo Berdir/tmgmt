@@ -96,7 +96,7 @@ class TranslatorListBuilder extends DraggableListBuilder implements EntityListBu
     $operations['clone'] = array(
       'url' => $entity->urlInfo('clone-form'),
       'title' => t('Clone'),
-      'weight' => 10,
+      'weight' => 50,
     );
     return $operations;
   }

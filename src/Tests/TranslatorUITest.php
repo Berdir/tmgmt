@@ -62,5 +62,11 @@ class TranslatorUITest extends TMGMTTestBase {
     $this->assertText('Test translator changed');
     $this->assertLink(t('Edit'));
     $this->assertLink(t('Delete'));
+
+    // Check if the edit link is displayed before the clone link.
+    $content = $this->getRawContent();
+    $edit_position = strpos($content, '<li class="edit">');
+    $clone_position = strpos($content, '<li class="clone">');
+    $this->assertTrue($edit_position < $clone_position);
   }
 }
