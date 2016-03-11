@@ -38,6 +38,13 @@ class ContinuousManager {
   protected $configFactory;
 
   /**
+   * The translation manager.
+   *
+   * @var \Drupal\tmgmt\TranslatorManager
+   */
+  protected $translatorManager;
+
+  /**
    * Constructs a new ContinuousManager.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -46,11 +53,14 @@ class ContinuousManager {
    *   The source plugin manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
+   * @param \Drupal\tmgmt\TranslatorManager $translator_manager
+   *   The translation manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, SourceManager $source_plugin_manager, ConfigFactoryInterface $config_factory) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, SourceManager $source_plugin_manager, ConfigFactoryInterface $config_factory, TranslatorManager $translator_manager) {
     $this->entityTypeManager = $entity_type_manager;
     $this->sourcePluginManager = $source_plugin_manager;
     $this->configFactory = $config_factory;
+    $this->translatorManager = $translator_manager;
   }
 
   /**
@@ -139,6 +149,20 @@ class ContinuousManager {
       return $job_item;
     }
     return NULL;
+  }
+
+  /**
+   * Returns TRUE if there are translators that support continuous jobs.
+   */
+  public function checkIfContinuousTranslatorAvailable() {
+    $translator_plugins = $this->translatorManager->getDefinitions();
+    foreach ($translator_plugins as $type => $definition) {
+      $translator_type = $this->translatorManager->createInstance($type);
+      if ($translator_type instanceof ContinuousTranslatorInterface) {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
 }

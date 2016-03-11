@@ -27,6 +27,10 @@ class StatisticsBase extends FieldPluginBase {
     if ($this->getEntityType() == 'tmgmt_job') {
       $tjids = array();
       foreach ($values as $value) {
+        // Skip loading data for continuous jobs.
+        if ($this->getEntity($value)->isContinuous()) {
+          continue;
+        }
         $tjids[] = $this->getValue($value);
       }
       tmgmt_job_statistics_load($tjids);

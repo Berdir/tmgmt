@@ -724,7 +724,7 @@ class TMGMTUiTest extends EntityTestBase {
     $this->drupalPostForm(NULL, $edit, t('Validate HTML tags'));
     $this->assertText(t('Validation completed successfully.'), 'Message is correctly displayed.');
 
-    // Test that continuous jobs are not shown in the job overview.
+    // Test that continuous jobs are shown in the job overview.
     $this->container->get('module_installer')->install(['tmgmt_file'], TRUE);
     $non_continuous_translator = Translator::create([
       'name' => strtolower($this->randomMachineName()),
@@ -740,18 +740,14 @@ class TMGMTUiTest extends EntityTestBase {
       'job_type' => 'continuous',
     ]);
 
-    $this->drupalGet('admin/tmgmt/jobs');
-    $this->assertNoText($continuous_job->label(), 'Continuous job is not displayed on job overview page.');
+    $this->drupalGet('admin/tmgmt/jobs', ['query' => ['state' => '6']]);
+    $this->assertText($continuous_job->label(), 'Continuous job is displayed on job overview page with status filter on continuous jobs.');
 
-    // Test that continuous jobs are shown in the continuous job overview.
-    $this->drupalGet('admin/tmgmt/continuous_jobs');
-    $this->assertText($continuous_job->label(), 'Continuous job is displayed on continuous job overview page.');
-
-    // Test that normal jobs are not shown in the continuous job overview.
-    $this->assertNoText($job1->label(), 'Normal job is not displayed on continuous job overview page.');
+    $this->drupalGet('admin/tmgmt/jobs', ['query' => ['state' => 'in_progress']]);
+    $this->assertNoText($continuous_job->label(), 'Continuous job is not displayed on job overview page if status filter is on in progress jobs.');
 
     // Test that there are source items checkboxes on a continuous job form.
-    $this->clickLink('Manage');
+    $this->drupalGet('admin/tmgmt/jobs/' . $continuous_job->id());
     $this->assertText($continuous_job->label());
     $this->assertNoFieldChecked('edit-continuous-settings-content-node-enabled', 'There is content checkbox and it is not checked yet.');
     $this->assertNoFieldChecked('edit-continuous-settings-content-node-bundles-article', 'There is article checkbox and it is not checked yet.');
@@ -779,6 +775,11 @@ class TMGMTUiTest extends EntityTestBase {
     $this->assertNoFieldChecked('edit-continuous-settings-content-node-bundles-page', 'Page checkbox is not checked.');
 
     // Create continuous job through the form.
+    $this->loginAsTranslator([
+      'access administration pages',
+      'create translation jobs',
+      'submit translation jobs',
+    ], TRUE);
     $this->drupalGet('admin/tmgmt/continuous_jobs/continuous_add');
     $this->assertNoText($non_continuous_translator->label());
     $continuous_job_label = strtolower($this->randomMachineName());
@@ -791,11 +792,12 @@ class TMGMTUiTest extends EntityTestBase {
     $this->assertText($continuous_job_label, 'Continuous job was created.');
 
     // Test that previous created job is continuous job.
-    $this->drupalGet('admin/tmgmt/continuous_jobs');
-    $this->assertText($continuous_job_label, 'Created continuous job is displayed on continuous job overview page.');
-
-    // Test that continuous job overview page does not have Submit link.
-    $this->assertNoLink('Submit', 'There is no Submit link on continuous job overview.');
+    $this->drupalGet('admin/tmgmt/jobs');
+    $this->assertText($continuous_job_label, 'Created continuous job is displayed on job overview page.');
+    // Test that job overview page with status to continuous does not have
+    // Submit link.
+    $this->drupalGet('admin/tmgmt/jobs', ['query' => ['state' => Job::STATE_CONTINUOUS]]);
+    $this->assertNoLink('Submit', 'There is no Submit link on job overview with status to continuous.');
 
     // Test that all unnecessary fields and buttons do not exist on continuous
     // job edit form.
@@ -827,8 +829,9 @@ class TMGMTUiTest extends EntityTestBase {
     $this->assertEqual(count($this->xpath('//tbody/tr')), 0);
 
     // Remove continuous jobs and assert there is no filter displayed.
+    $this->loginAsAdmin();
     $continuous_job->delete();
-    $this->drupalGet('admin/tmgmt/continuous_jobs');
+    $this->drupalGet('admin/tmgmt/jobs');
     $this->clickLink(t('Delete'));
     $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->drupalGet('admin/tmgmt/job_items');
@@ -1550,4 +1553,30 @@ class TMGMTUiTest extends EntityTestBase {
     $this->assertText(t('Enabled page'));
     $this->assertNoText(t('Not enabled article'));
   }
+
+  /**
+   * Tests access to add continuous job link.
+   */
+  public function testAddContinuousLink() {
+    $this->drupalLogin($this->createUser(['administer tmgmt']));
+    $this->drupalGet('admin/tmgmt/jobs');
+    $this->assertResponse(200);
+    $this->assertNoText('Add continuous job', 'Link is not displayed if user doesn\'t have permission.');
+    $this->drupalLogin($this->createUser([
+      'administer tmgmt',
+      'create translation jobs',
+    ]));
+    $this->drupalGet('admin/tmgmt/jobs');
+    $this->assertText('Add continuous job', 'User has access to link with the right permission.');
+    \Drupal::service('module_installer')->uninstall(['tmgmt_test']);
+    $this->drupalGet('admin/tmgmt/jobs');
+    $this->assertNoText('Add continuous job', 'Link is not showing if there is no continuous translator.');
+    // The 'Add continuous job' is currently not showing up without clearing the
+    // cache after we add a continuous translator.
+    // @see https://www.drupal.org/node/2685445
+    // \Drupal::service('module_installer')->install(['tmgmt_test']);
+    // $this->drupalGet('admin/tmgmt/jobs');
+    // $this->assertText('Add continuous job', 'Link is showing if there is a continuous translator.');
+  }
+
 }

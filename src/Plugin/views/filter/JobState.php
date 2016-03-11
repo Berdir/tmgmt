@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt\Plugin\views\filter;
 
+use Drupal\tmgmt\ContinuousTranslatorInterface;
 use Drupal\views\Plugin\views\filter\ManyToOne;
 
 /**
@@ -32,7 +33,7 @@ class JobState extends ManyToOne {
    *   Returns options.
    */
   public function getValueOptions() {
-    return $this->valueOptions = array(
+    $this->valueOptions = array(
       'open_jobs' => t('- Open jobs -'),
       '0' => t('Unprocessed'),
       'in_progress' => t('In progress'),
@@ -40,8 +41,11 @@ class JobState extends ManyToOne {
       '2' => t('Rejected'),
       '4' => t('Aborted'),
       '5' => t('Finished'),
-      '6' => t('Continuous'),
     );
+    if (\Drupal::service('tmgmt.continuous')->checkIfContinuousTranslatorAvailable()) {
+      $this->valueOptions['6'] = t('Continuous');
+    }
+    return $this->valueOptions;
   }
 
   /**
@@ -101,4 +105,5 @@ class JobState extends ManyToOne {
         break;
     }
   }
+
 }

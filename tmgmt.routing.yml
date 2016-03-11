@@ -108,7 +108,7 @@ entity.tmgmt_job.continuous_add_form:
   defaults:
     _entity_form: tmgmt_job.continuous_add
   requirements:
-    _entity_create_access: tmgmt_job
+    _custom_access: '\Drupal\tmgmt\Form\ContinuousJobForm::access'
 
 tmgmt.source_overview_default:
   path: '/admin/tmgmt/sources'

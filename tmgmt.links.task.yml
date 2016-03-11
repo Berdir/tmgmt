@@ -1,19 +1,13 @@
-tmgmt.jobs:
-  route_name: view.tmgmt_job_overview.page_1
-  base_route: view.tmgmt_job_overview.page_1
-  title: Jobs
-  weight: 0
-
-tmgmt.continuous_jobs:
-  route_name: view.tmgmt_continuous_job_overview.page_1
-  base_route: view.tmgmt_job_overview.page_1
-  title: Continuous Jobs
-  weight: 5
-
 tmgmt.job_items:
   route_name: view.tmgmt_translation_all_job_items.page_1
   base_route: view.tmgmt_job_overview.page_1
   title: Job Items
+  weight: 5
+
+tmgmt.jobs:
+  route_name: view.tmgmt_job_overview.page_1
+  base_route: view.tmgmt_job_overview.page_1
+  title: Jobs
   weight: 10
 
 tmgmt.sources:

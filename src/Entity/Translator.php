@@ -465,4 +465,15 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
     return FALSE;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    parent::calculateDependencies();
+    if ($this->getPlugin()) {
+      $this->addDependency('module', $this->getPlugin()->getPluginDefinition()['provider']);
+    }
+    return $this;
+  }
+
 }

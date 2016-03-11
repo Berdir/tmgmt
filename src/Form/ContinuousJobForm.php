@@ -7,7 +7,10 @@
 
 namespace Drupal\tmgmt\Form;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\tmgmt\ContinuousTranslatorInterface;
 use Drupal\tmgmt\Entity\Job;
 
 /**
@@ -120,7 +123,25 @@ class ContinuousJobForm extends JobForm {
   public function save(array $form, FormStateInterface $form_state) {
     parent::save($form, $form_state);
     // Per default we want to redirect the user to the overview.
-    $form_state->setRedirect('view.tmgmt_continuous_job_overview.page_1');
+    $form_state->setRedirect('view.tmgmt_job_overview.page_1');
+  }
+
+  /**
+   * Custom access check for continuous job form.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   Run access checks for this account.
+   *
+   * @return \Drupal\Core\Access\AccessResult
+   *   Returns allowed if we have a translator with ContinuousSourceInterface
+   *   and the logged in user has permission to create translation jobs.
+   */
+  public function access(AccountInterface $account) {
+    if (\Drupal::service('tmgmt.continuous')->checkIfContinuousTranslatorAvailable()) {
+      return AccessResult::allowedIfHasPermissions($account, ['create translation jobs'])
+        ->addCacheTags(['config:tmgmt_translator_list']);
+    }
+    return AccessResult::forbidden()->addCacheTags(['config:tmgmt_translator_list']);
   }
 
 }

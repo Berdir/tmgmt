@@ -21,6 +21,9 @@ class WordCount extends StatisticsBase {
    */
   public function render(ResultRow $values) {
     $entity = $values->_entity;
+    if ($entity->getEntityTypeId() == 'tmgmt_job' && $entity->isContinuous()) {
+      return;
+    }
     return $entity->getWordCount();
   }
 }

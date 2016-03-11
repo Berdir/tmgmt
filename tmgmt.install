@@ -61,11 +61,11 @@ function tmgmt_update_8003() {
  * Add continuous job overview.
  */
 function tmgmt_update_8004() {
-  $overview = file_get_contents(drupal_get_path('module', 'tmgmt') . '/config/install/views.view.tmgmt_continuous_job_overview.yml');
-  $values = Yaml::decode($overview);
-  $storage_controller = \Drupal::entityTypeManager()->getStorage('view');
-  $storage_controller->create($values)->save();
+  // Since we are not creating a separate view for continuous jobs we are
+  // removing this code. It has been replaced with a single job overview for
+  // both continuous and normal translation jobs.
 }
+
 
 /**
  * Add job items overview.

@@ -21,6 +21,10 @@ class Progress extends StatisticsBase {
    */
   public function render(ResultRow $values) {
     $entity = $values->_entity;
+    // If job is continuous we don't show anything.
+    if ($entity->getEntityTypeId() == 'tmgmt_job' && $entity->isContinuous()) {
+      return;
+    }
     // If job has been aborted the status info is not applicable.
     if ($entity->isAborted()) {
       return t('N/A');
