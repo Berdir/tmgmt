@@ -61,6 +61,22 @@ class JobItemForm extends TmgmtFormBase {
       '#suffix' => '</div>',
     );
 
+    $form['info']['source_language'] = array(
+      '#type' => 'item',
+      '#title' => t('Source language'),
+      '#markup' => $item->getJob()->getSourceLanguage()->getName(),
+      '#prefix' => '<div class="tmgmt-ui-source-language tmgmt-ui-info-item">',
+      '#suffix' => '</div>',
+    );
+
+    $form['info']['target_language'] = array(
+      '#type' => 'item',
+      '#title' => t('Target language'),
+      '#markup' => $item->getJob()->getTargetLanguage()->getName(),
+      '#prefix' => '<div class="tmgmt-ui-target-language tmgmt-ui-info-item">',
+      '#suffix' => '</div>',
+    );
+
     $form['info']['changed'] = array(
       '#type' => 'item',
       '#title' => t('Last change'),

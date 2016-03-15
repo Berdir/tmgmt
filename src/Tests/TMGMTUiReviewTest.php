@@ -21,7 +21,7 @@ use Drupal\tmgmt\Entity\JobItem;
  */
 class TMGMTUiReviewTest extends EntityTestBase {
 
-  public static $modules = [ 'tmgmt_content', 'image', 'node'];
+  public static $modules = ['tmgmt_content', 'image', 'node'];
 
   /**
    * {@inheritdoc}
@@ -71,6 +71,10 @@ class TMGMTUiReviewTest extends EntityTestBase {
     $key = $keys[0];
 
     $this->drupalGet('admin/tmgmt/items/' . $item->id());
+
+    // Test that source and target languages are displayed.
+    $this->assertText($item->getJob()->getSourceLanguage()->getName());
+    $this->assertText($item->getJob()->getTargetLanguage()->getName());
 
     // Testing the title of the preview page.
     $this->assertText(t('Job item @source_label', array('@source_label' => $job->label())));
