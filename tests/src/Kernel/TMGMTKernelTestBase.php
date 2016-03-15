@@ -2,13 +2,13 @@
 
 /*
  * @file
- * Contains Drupal\tmgmt\Tests\TMGMTKernelTestBase.
+ * Contains Drupal\Tests\tmgmt\Kernel\TMGMTKernelTestBase.
  */
 
-namespace Drupal\tmgmt\Tests;
+namespace Drupal\Tests\tmgmt\Kernel;
 
 use Drupal\language\Entity\ConfigurableLanguage;
-use Drupal\simpletest\KernelTestBase;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\tmgmt\JobItemInterface;
 
 /**

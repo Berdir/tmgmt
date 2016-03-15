@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt\Tests\CrudTest.
+ * Contains Drupal\Tests\tmgmt\Kernel\CrudTest.
  */
 
-namespace Drupal\tmgmt\Tests;
+namespace Drupal\Tests\tmgmt\Kernel;
 
 use Drupal\tmgmt\ContinuousTranslatorInterface;
 use Drupal\tmgmt\Entity\Job;
@@ -551,7 +551,7 @@ class CrudTest extends TMGMTKernelTestBase {
   /**
    * Test crud operations of jobs.
    */
-  protected function testContinuousTranslators() {
+  public function testContinuousTranslators() {
     $translator = $this->createTranslator();
     $this->assertTrue($translator->getPlugin() instanceof ContinuousTranslatorInterface);
 
@@ -574,7 +574,7 @@ class CrudTest extends TMGMTKernelTestBase {
   /**
    * Tests that with the preliminary state the item does not change.
    */
-  protected function testPreliminaryState() {
+  public function testPreliminaryState() {
     $translator = $this->createTranslator();
     $job = $this->createJob();
     $job->translator = $translator->id();

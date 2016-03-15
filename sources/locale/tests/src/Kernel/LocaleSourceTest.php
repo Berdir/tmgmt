@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_locale\Tests\LocaleSourceTest.
+ * Contains \Drupal\Tests\tmgmt_locale\Kernel\LocaleSourceTest.
  */
 
-namespace Drupal\tmgmt_locale\Tests;
+namespace Drupal\Tests\tmgmt_locale\Kernel;
 
 use Drupal\locale\Gettext;
-use Drupal\tmgmt\Tests\TMGMTKernelTestBase;
+use Drupal\Tests\tmgmt\Kernel\TMGMTKernelTestBase;
 
 /**
  * Basic Locale Source tests.

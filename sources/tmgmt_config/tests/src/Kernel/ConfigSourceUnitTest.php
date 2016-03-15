@@ -2,14 +2,14 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt_config\Tests\ConfigSourceUnitTest.
+ * Contains Drupal\Tests\tmgmt_config\Kernel\ConfigSourceUnitTest.
  */
 
-namespace Drupal\tmgmt_config\Tests;
+namespace Drupal\Tests\tmgmt_config\Kernel;
 
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\NodeType;
-use Drupal\system\Tests\Entity\EntityUnitTestBase;
+use Drupal\Tests\tmgmt\Kernel\TMGMTKernelTestBase;
 use Drupal\views\Entity\View;
 
 /**
@@ -17,7 +17,7 @@ use Drupal\views\Entity\View;
  *
  * @group tmgmt
  */
-class ConfigSourceUnitTest extends EntityUnitTestBase {
+class ConfigSourceUnitTest extends TMGMTKernelTestBase {
 
   /**
    * Modules to enable.
@@ -34,7 +34,6 @@ class ConfigSourceUnitTest extends EntityUnitTestBase {
 
     // Add the languages.
     $this->installConfig(['language']);
-    ConfigurableLanguage::createFromLangcode('de')->save();
 
     $this->installEntitySchema('tmgmt_job');
     $this->installEntitySchema('tmgmt_job_item');

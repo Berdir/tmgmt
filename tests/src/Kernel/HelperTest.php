@@ -5,7 +5,8 @@
  * Contains Drupal\tmgmt\Tests\HelperTestCase.
  */
 
-namespace Drupal\tmgmt\Tests;
+namespace Drupal\Tests\tmgmt\Kernel;
+
 use Drupal\tmgmt\Entity\Job;
 
 /**

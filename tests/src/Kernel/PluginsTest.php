@@ -2,10 +2,11 @@
 
 /*
  * @file
- * Contains Drupal\tmgmt\Tests\PluginsTest.
+ * Contains Drupal\Tests\tmgmt\Kernel\PluginsTest.
  */
 
-namespace Drupal\tmgmt\Tests;
+namespace Drupal\Tests\tmgmt\Kernel;
+
 use Drupal\tmgmt\Entity\Job;
 
 /**

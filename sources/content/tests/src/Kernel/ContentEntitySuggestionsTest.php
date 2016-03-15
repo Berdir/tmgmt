@@ -2,17 +2,17 @@
 
 /**
  * @file
- * Contains \Drupal\tmgmt_content\Tests\ContentEntitySuggestionsTest.
+ * Contains \Drupal\Tests\tmgmt_content\Kernel\ContentEntitySuggestionsTest.
  */
 
-namespace Drupal\tmgmt_content\Tests;
+namespace Drupal\Tests\tmgmt_content\Kernel;
 
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\tmgmt\Tests\TMGMTKernelTestBase;
+use Drupal\Tests\tmgmt\Kernel\TMGMTKernelTestBase;
 
 /**
  * Basic Source-Suggestions tests.

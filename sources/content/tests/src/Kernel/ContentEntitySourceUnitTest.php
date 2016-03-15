@@ -2,18 +2,18 @@
 
 /**
  * @file
- * Contains Drupal\tmgmt_content\Tests\ContentEntitySourceUnitTest.php
+ * Contains Drupal\Tests\tmgmt_content\Kernel\ContentEntitySourceUnitTest.php
  */
 
-namespace Drupal\tmgmt_content\Tests;
+namespace Drupal\Tests\tmgmt_content\Kernel;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
-use Drupal\system\Tests\Entity\EntityUnitTestBase;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\Entity\Job;
@@ -23,7 +23,7 @@ use Drupal\tmgmt\Entity\Job;
  *
  * @group tmgmt
  */
-class ContentEntitySourceUnitTest extends EntityUnitTestBase {
+class ContentEntitySourceUnitTest extends EntityKernelTestBase {
 
   /**
    * Modules to enable.
@@ -759,8 +759,6 @@ class ContentEntitySourceUnitTest extends EntityUnitTestBase {
       ['item_id' => $third_items[1]->id(), 'job_id' => $third_items[1]->getJobId()],
       ['item_id' => $third_items[2]->id(), 'job_id' => $third_items[2]->getJobId()],
     ];
-    debug($expected_groups, 'exp');
-    debug(\Drupal::state()->get('job_item_groups'), 'st');
     // Assert there are 3 new job items appeared from the third job.
     $this->assertEqual(\Drupal::state()->get('job_item_groups'), $expected_groups, 'Job items groups are equal');
     foreach ($third_job->getItems() as $job_item) {
