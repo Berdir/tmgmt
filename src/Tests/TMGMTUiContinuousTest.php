@@ -95,16 +95,20 @@ class TMGMTUiContinuousTest extends EntityTestBase {
       'access administration pages',
       'create translation jobs',
       'submit translation jobs',
+      'access user profiles',
     ], TRUE);
+    $owner = $this->drupalCreateUser($this->translator_permissions);
     $this->drupalGet('admin/tmgmt/continuous_jobs/continuous_add');
     $this->assertResponse(403, 'Access denied');
     $this->loginAsAdmin();
     $this->drupalGet('admin/tmgmt/continuous_jobs/continuous_add');
     $this->assertNoText($non_continuous_translator->label());
     $continuous_job_label = strtolower($this->randomMachineName());
+
     $edit_job = [
       'label[0][value]' => $continuous_job_label,
       'target_language' => 'de',
+      'uid' => $owner->getDisplayName(),
       'translator' => $this->default_translator->id(),
     ];
     $this->drupalPostForm(NULL, $edit_job, t('Save job'));
@@ -120,7 +124,9 @@ class TMGMTUiContinuousTest extends EntityTestBase {
 
     // Test that all unnecessary fields and buttons do not exist on continuous
     // job edit form.
-    $this->clickLink('Manage', 1);
+    $this->clickLink('Manage', 0);
+    $this->assertText($continuous_job_label);
+    $this->assertFieldById('edit-uid', $owner->getDisplayName() . ' (' . $owner->id() . ')', 'Job owner set correctly');
     $this->assertNoRaw('<label for="edit-translator">Provider</label>', 'There is no Provider info field on continuous job edit form.');
     $this->assertNoRaw('<label for="edit-word-count">Total word count</label>', 'There is no Total word count info field on continuous job edit form.');
     $this->assertNoRaw('<label for="edit-tags-count">Total HTML tags count</label>', 'There is no Total HTML tags count info field on continuous job edit form.');

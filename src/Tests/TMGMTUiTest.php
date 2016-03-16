@@ -98,20 +98,29 @@ class TMGMTUiTest extends EntityTestBase {
     $this->assertText(t('@translator can not translate from @source to @target.', array('@translator' => 'Test provider', '@source' => 'English', '@target' => 'Greek')));
 
     // Job still needs to be in state new.
-    $job = entity_load_unchanged('tmgmt_job', $job->id());
+    /** @var \Drupal\tmgmt\JobInterface $job */
+    $job = \Drupal::entityTypeManager()->getStorage('tmgmt_job')->loadUnchanged($job->id());
     $this->assertTrue($job->isUnprocessed());
+
+    // The owner must be the one that submits the job.
+    $this->assertTrue($job->isAuthor());
+    $this->drupalLogin($this->translator_user);
+    $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
 
     $edit = array(
       'target_language' => 'es',
       'settings[action]' => 'translate',
     );
     $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
+    /** @var \Drupal\tmgmt\JobInterface $job */
+    $job = \Drupal::entityTypeManager()->getStorage('tmgmt_job')->loadUnchanged($job->id());
+    $this->assertTrue($job->isAuthor());
 
     // Job needs to be in state active.
-    $job = entity_load_unchanged('tmgmt_job', $job->id());
+    $job = \Drupal::entityTypeManager()->getStorage('tmgmt_job')->loadUnchanged($job->id());
     $this->assertTrue($job->isActive());
     foreach ($job->getItems() as $job_item) {
-      /* @var $job_item JobItemInterface */
+      /* @var $job_item \Drupal\tmgmt\JobItemInterface */
       $this->assertTrue($job_item->isNeedsReview());
     }
     $this->assertText(t('Test translation created'));

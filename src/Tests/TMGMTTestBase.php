@@ -34,7 +34,7 @@ abstract class TMGMTTestBase extends WebTestBase {
   /**
    * Drupal user object created by loginAsAdmin().
    *
-   * @var object
+   * @var \Drupal\user\UserInterface
    */
   protected $admin_user = NULL;
 
@@ -48,7 +48,7 @@ abstract class TMGMTTestBase extends WebTestBase {
   /**
    * Drupal user object created by loginAsTranslator().
    *
-   * @var object
+   * @var \Drupal\user\UserInterface
    */
   protected $translator_user = NULL;
 

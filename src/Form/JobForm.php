@@ -16,6 +16,7 @@ use Drupal\Core\Url;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\JobInterface;
+use Drupal\user\Entity\User;
 use Drupal\views\Views;
 use Drupal\tmgmt\ContinuousSourceInterface;
 
@@ -169,6 +170,40 @@ class JobForm extends TmgmtFormBase {
         '#title' => t('Total HTML tags'),
         '#markup' => number_format($job->getTagsCount()),
         '#prefix' => '<div class="tmgmt-ui-tags-count tmgmt-ui-info-item">',
+        '#suffix' => '</div>',
+      );
+    }
+    else {
+      $roles1 = user_roles(TRUE, 'administer tmgmt');
+      $roles2 = user_roles(TRUE, 'create translation jobs');
+      $roles3 = user_roles(TRUE, 'submit translation jobs');
+      $roles4 = user_roles(TRUE, 'accept translation jobs');
+      $duplicates = array_merge($roles1, $roles2, $roles3, $roles4);
+      $roles = array_unique($duplicates, SORT_REGULAR);
+      if (array_key_exists('authenticated', $roles)) {
+        $filter = [];
+      }
+      else {
+        $ids = array_keys($roles);
+        $roles = array_combine($ids, $ids);
+        $filter = [
+          'type' => 'role',
+          'role' => $roles,
+        ];
+      }
+      $form['info']['uid'] = array(
+        '#title' => t('Owner'),
+        '#type' => 'entity_autocomplete',
+        '#target_type' => 'user',
+        '#selection_settings' => [
+          'include_anonymous' => FALSE,
+          'filter' => $filter,
+          'field' => 'uid',
+        ],
+        '#process_default_value' => TRUE,
+        '#default_value' => $job->getOwnerId() == 0 ? User::load(\Drupal::currentUser()->id()) : $job->getOwner(),
+        '#required' => TRUE,
+        '#prefix' => '<div id="tmgmt-ui-owner" class="tmgmt-ui-owner tmgmt-ui-info-item">',
         '#suffix' => '</div>',
       );
     }

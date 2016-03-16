@@ -686,6 +686,9 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
     if (!$this->canRequestTranslation()->getSuccess()) {
       return FALSE;
     }
+    if (!$this->isContinuous()) {
+      $this->setOwnerId(\Drupal::currentUser()->id());
+    }
     // We don't know if the translator plugin already processed our
     // translation request after this point. That means that the plugin has to
     // set the 'submitted', 'needs review', etc. states on its own.
