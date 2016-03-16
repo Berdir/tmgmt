@@ -501,7 +501,7 @@ class JobForm extends TmgmtFormBase {
         // finished successfully.
         unset($_GET['destination']);
       }
-      else if ($redirect = tmgmt_redirect_queue_dequeue()) {
+      elseif ($redirect = tmgmt_redirect_queue_dequeue()) {
         // Proceed to the next redirect queue item, if there is one.
         $form_state->setRedirectUrl(Url::fromUri('base:' . $redirect));
       }

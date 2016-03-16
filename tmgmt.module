@@ -1282,11 +1282,14 @@ function tmgmt_page_attachments(array &$attachments) {
 /**
  * Implements hook_help().
  */
-function tmgmt_help($route_name, RouteMatchInterface $route_match){
+function tmgmt_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.tmgmt':
       $output = '<h3>' . t('About') . '</h3>';
       $output .= '<p>' . t("The Translation Management Tool (TMGMT) module provides a tool set for translating content from different sources. The translation can be done by people or translation services of all kinds. It builds on and uses existing language tools and data structures in Drupal and can be used in automated workflow scenarios. For more information, see the online handbook entry for the <a href=':tmgmt'>TMGMT module</a>.", array(':tmgmt' => 'https://drupal.org/project/tmgmt')) . '.</p>';
+      return $output;
+    case 'entity.tmgmt_job.continuous_add_form':
+      $output = '<p>' . t('Continuous jobs allow to automatically and continuously submit all new and updated content to the configured translator. Each job has a specific language pair, multiple jobs can be created to translate into and from different languages. Only sources that match the configuration are considered, not selecting anything means that nothing will be translated with that job.') . '</p>';
       return $output;
   }
 }
