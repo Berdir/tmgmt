@@ -671,6 +671,10 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     $this->drupalPostForm(NULL, $edit, t('Check for continuous jobs'));
     $this->assertUniqueText(t("1 continuous job item has been created."));
 
+    $items = $continuous_job->getItems();
+    $item = reset($items);
+    $this->assertLinkByHref('admin/tmgmt/items/' . $item->id());
+
     // Test that continuous job item is created for selected node.
     $continuous_job_items = $continuous_job->getItems();
     $continuous_job_item = reset($continuous_job_items);

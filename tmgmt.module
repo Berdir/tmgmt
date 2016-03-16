@@ -153,7 +153,7 @@ function tmgmt_job_item_load_latest($plugin, $item_type, $item_id, $source_langu
   $query->innerJoin('tmgmt_job', 'tj', 'tj.tjid = tji.tjid');
   $result = $query->condition('tj.source_language', $source_language)
     // Only query for jobs that are currently active.
-    ->condition('tj.state', array(Job::STATE_UNPROCESSED, Job::STATE_ACTIVE), 'IN')
+    ->condition('tj.state', [Job::STATE_UNPROCESSED, Job::STATE_ACTIVE, Job::STATE_CONTINUOUS], 'IN')
     // And only query for job items that are not yet finished.
     ->condition('tji.state', JobItem::STATE_ACCEPTED, '<>')
     ->condition('tji.plugin', $plugin)
@@ -440,7 +440,7 @@ function tmgmt_translator_load_available($job) {
  */
 function tmgmt_translator_busy($translator) {
   return (bool) \Drupal::entityQuery('tmgmt_job')
-    ->condition('state', Job::STATE_ACTIVE)
+    ->condition('state', [Job::STATE_ACTIVE, Job::STATE_CONTINUOUS], 'IN')
     ->condition('translator', $translator)
     ->range(0, 1)
     ->count()
