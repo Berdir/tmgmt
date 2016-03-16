@@ -1,5 +1,6 @@
 administer tmgmt:
   title: 'Administer translation management'
+  restrict access: true
 create translation jobs:
   title: 'Create translation jobs'
 submit translation jobs:

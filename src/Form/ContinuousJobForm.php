@@ -138,7 +138,7 @@ class ContinuousJobForm extends JobForm {
    */
   public function access(AccountInterface $account) {
     if (\Drupal::service('tmgmt.continuous')->checkIfContinuousTranslatorAvailable()) {
-      return AccessResult::allowedIfHasPermissions($account, ['create translation jobs'])
+      return AccessResult::allowedIfHasPermissions($account, ['administer tmgmt'])
         ->addCacheTags(['config:tmgmt_translator_list']);
     }
     return AccessResult::forbidden()->addCacheTags(['config:tmgmt_translator_list']);

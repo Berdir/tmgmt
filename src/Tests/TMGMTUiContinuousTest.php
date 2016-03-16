@@ -30,12 +30,6 @@ class TMGMTUiContinuousTest extends EntityTestBase {
     $this->addLanguage('de');
     $this->addLanguage('es');
 
-    // Login as translator only with limited permissions to run these tests.
-    $this->loginAsTranslator(array(
-      'access administration pages',
-      'create translation jobs',
-      'submit translation jobs',
-    ), TRUE);
     $this->drupalPlaceBlock('system_breadcrumb_block');
 
     $this->createNodeType('page', 'Page', TRUE);
@@ -102,6 +96,9 @@ class TMGMTUiContinuousTest extends EntityTestBase {
       'create translation jobs',
       'submit translation jobs',
     ], TRUE);
+    $this->drupalGet('admin/tmgmt/continuous_jobs/continuous_add');
+    $this->assertResponse(403, 'Access denied');
+    $this->loginAsAdmin();
     $this->drupalGet('admin/tmgmt/continuous_jobs/continuous_add');
     $this->assertNoText($non_continuous_translator->label());
     $continuous_job_label = strtolower($this->randomMachineName());
@@ -186,14 +183,11 @@ class TMGMTUiContinuousTest extends EntityTestBase {
    * Tests access to add continuous job link.
    */
   public function testAddContinuousLink() {
-    $this->drupalLogin($this->createUser(['administer tmgmt']));
+    $this->drupalLogin($this->createUser(['create translation jobs']));
     $this->drupalGet('admin/tmgmt/jobs');
     $this->assertResponse(200);
     $this->assertNoText('Add continuous job', 'Link is not displayed if user doesn\'t have permission.');
-    $this->drupalLogin($this->createUser([
-      'administer tmgmt',
-      'create translation jobs',
-    ]));
+    $this->drupalLogin($this->admin_user);
     $this->drupalGet('admin/tmgmt/jobs');
     $this->assertText('Add continuous job', 'User has access to link with the right permission.');
     \Drupal::service('module_installer')->uninstall(['tmgmt_test']);
