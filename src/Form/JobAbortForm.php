@@ -22,6 +22,9 @@ class JobAbortForm extends ContentEntityConfirmFormBase {
     return $this->t('Abort this job?', array('%title' => $this->entity->label()));
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getDescription() {
     return $this->t('This will send a request to the translator to abort the job. After the action the job translation process will be aborted and only remaining action will be resubmitting it.');
   }
@@ -30,7 +33,7 @@ class JobAbortForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return $this->entity->urlInfo();
+    return $this->entity->toUrl();
   }
 
   /**
@@ -40,7 +43,8 @@ class JobAbortForm extends ContentEntityConfirmFormBase {
     /** @var \Drupal\tmgmt\Entity\Job $entity */
     $entity = $this->entity;
     if (!$entity->abortTranslation()) {
-      // This is the case when a translator does not support the abort operation.
+      // This is the case when a translator does not support the abort
+      // operation.
       // It would make more sense to not display the button for the action,
       // however we do not know if the translator is able to abort a job until
       // we trigger the action.
@@ -56,7 +60,11 @@ class JobAbortForm extends ContentEntityConfirmFormBase {
         }
       }
     }
-    $form_state->setRedirectUrl($this->entity->urlInfo());
+    else {
+      $entity->addMessage('The user ordered aborting the Job through the UI.');
+    }
+    tmgmt_write_request_messages($entity);
+    $form_state->setRedirectUrl($this->entity->toUrl());
   }
 
 }

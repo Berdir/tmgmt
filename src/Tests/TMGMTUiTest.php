@@ -478,6 +478,8 @@ class TMGMTUiTest extends EntityTestBase {
     // Abort job.
     $this->drupalPostForm('admin/tmgmt/jobs/' . $job->id(), array(), t('Abort job'));
     $this->drupalPostForm(NULL, array(), t('Confirm'));
+    $this->assertText('The user ordered aborting the Job through the UI.');
+    $this->assertUrl('admin/tmgmt/jobs/' . $job->id());
     // Reload job and check its state.
     \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
     $job = Job::load($job->id());
