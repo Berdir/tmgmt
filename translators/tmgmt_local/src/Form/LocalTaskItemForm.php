@@ -159,7 +159,7 @@ class LocalTaskItemForm extends ContentEntityForm {
 
         $form[$target_key]['translation'] = [
           '#type' => 'textarea',
-          '#default_value' => $item->getData(\Drupal::service('tmgmt.data')->ensureArrayKey($key), '#text'),
+          '#default_value' => isset($data[$key]['#translation']['#text']) ? $data[$key]['#translation']['#text'] : NULL,
           '#title' => $target_language->getName(),
           '#disabled' => !$item->isPending(),
           '#rows' => $rows,
@@ -184,7 +184,7 @@ class LocalTaskItemForm extends ContentEntityForm {
             '#value' => '✗',
             '#attributes' => array('title' => t('Reject')),
             '#name' => 'reject-' . $target_key,
-            '#submit' => array('::submitStatus'),
+            '#submit' => ['::save', '::submitStatus'],
             '#ajax' => array(
               'callback' => '::ajaxReviewForm',
               'wrapper' => $form[$target_key]['#ajaxid'],
@@ -200,7 +200,7 @@ class LocalTaskItemForm extends ContentEntityForm {
             '#value' => '✓',
             '#attributes' => array('title' => t('Finish')),
             '#name' => 'finish-' . $target_key,
-            '#submit' => array('::submitStatus'),
+            '#submit' => ['::save', '::submitStatus'],
             '#ajax' => array(
               'callback' => '::ajaxReviewForm',
               'wrapper' => $form[$target_key]['#ajaxid'],
@@ -230,10 +230,10 @@ class LocalTaskItemForm extends ContentEntityForm {
         // it has changed. We have two different cases, the first is for nested
         // texts.
         if (is_array($value['translation'])) {
-          $update['#text'] = $value['translation']['value'];
+          $update['#translation']['#text'] = $value['translation']['value'];
         }
         else {
-          $update['#text'] = $value['translation'];
+          $update['#translation']['#text'] = $value['translation'];
         }
         $task_item->updateData($key, $update);
       }
@@ -243,7 +243,7 @@ class LocalTaskItemForm extends ContentEntityForm {
     if ($form_state->getTriggeringElement()['#value'] == $form['actions']['save']['#value']) {
       drupal_set_message(t('The translation for <a href=:task_item>@task_item_title</a> has been saved.', [
         ':task_item' => $task_item->urlInfo()->toString(),
-        '@task_item_title' => $task_item->label()
+        '@task_item_title' => $task_item->label(),
       ]));
     }
 
@@ -268,8 +268,9 @@ class LocalTaskItemForm extends ContentEntityForm {
 
     // Mark the task as completed if all assigned job items are at needs done.
     $all_done = TRUE;
+    /** @var \Drupal\tmgmt_local\Entity\LocalTaskItem $item */
     foreach ($task->getItems() as $item) {
-      if ($item->isPending()) {
+      if (!$item->isCompleted() && !$item->isClosed()) {
         $all_done = FALSE;
         break;
       }
@@ -289,10 +290,10 @@ class LocalTaskItemForm extends ContentEntityForm {
     $job_item = $this->entity->getJobItem();
 
     // Add the translations to the job item.
-    $job_item->addTranslatedData($task_item->getData());
+    $job_item->addTranslatedData($this->prepareData($task_item->getData()), [], TMGMT_DATA_ITEM_STATE_TRANSLATED);
     drupal_set_message(t('The translation for <a href=:task_item>@task_item_title</a> has been saved as completed.', [
       ':task_item' => $task_item->urlInfo()->toString(),
-      '@task_item_title' => $task_item->label()
+      '@task_item_title' => $task_item->label(),
     ]));
   }
 
@@ -336,13 +337,41 @@ class LocalTaskItemForm extends ContentEntityForm {
     // Write the translated data into the job item.
     if (isset($values[$key]) && is_array($values[$key]) && isset($values[$key]['translation'])) {
       $update['#status'] = $action == 'finish' ? TMGMT_DATA_ITEM_STATE_TRANSLATED : TMGMT_DATA_ITEM_STATE_UNTRANSLATED;
-      $update['#text'] = is_array($values[$key]['translation']) ? $values[$key]['translation']['value'] : $values[$key]['translation'];
       $item->updateData($key, $update);
       $item->save();
 
       // We need to rebuild form so we get updated action button state.
       $form_state->setRebuild();
     }
+  }
+
+  /**
+   * Prepare the date to be added to the JobItem.
+   *
+   * Right now JobItem looks for ['#text'] so if we send our structure it will
+   * add as translation text our original text, so we are replacing ['#text']
+   * with ['#translation']['#text']
+   *
+   * @param array $data
+   *   The data items.
+   *
+   * @return array
+   *   Returns the data items ready to be added to the JobItem.
+   */
+  protected function prepareData(array $data) {
+    if (isset($data['#text'])) {
+      if (isset($data['#translation']['#text'])) {
+        $data['#text'] = $data['#translation']['#text'];
+      }
+      else {
+        $data['#text'] = '';
+      }
+      return $data;
+    }
+    foreach (Element::children($data) as $key) {
+      $data[$key] = $this->prepareData($data[$key]);
+    }
+    return $data;
   }
 
 }

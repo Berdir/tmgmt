@@ -422,11 +422,21 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertRaw('tmgmt/icons/gray-check.svg" title="Translated"');
     $this->assertText('The translation for ' . $first_task_item->label() . ' has been saved as completed.');
 
+    // Check that the source has not being modified.
+    $this->clickLink(t('View'));
+    /** @var \Drupal\tmgmt\JobItemInterface $job_item */
+    $job_items = $job->getItems(['tjiid' => 1]);
+    $job_item = reset($job_items);
+    $source = $job_item->getData(['dummy', 'deep_nesting', '#text']);
+    $this->assertText($source);
+
     // Review and accept the first item.
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
     drupal_static_reset('tmgmt_local_task_statistics_load');
     /** @var \Drupal\tmgmt\JobItemInterface $item1 */
     $item1 = JobItem::load(1);
+    // The first item should be available for review.
+    $this->assertTrue($item1->isNeedsReview(), 'Job item 1 needs review.');
     $item1->acceptTranslation();
 
     // The first item should be accepted now, the second still in progress.
@@ -484,12 +494,13 @@ class LocalTranslatorTest extends TMGMTTestBase {
 
     // Check the job data.
     \Drupal::entityTypeManager()->getStorage('tmgmt_job_item')->resetCache();
+    /** @var \Drupal\tmgmt\JobInterface $job */
     $job = Job::load($job->id());
+    /** @var \Drupal\tmgmt\JobItemInterface $item2 */
     list($item1, $item2) = array_values($job->getItems());
-    // The text in the first item should be available for review, the
-    // translation of the second item not.
-    $this->assertEqual($item1->getData(array('dummy', 'deep_nesting', '#translation', '#text')), $translation1);
-    $this->assertEqual($item2->getData(array('dummy', 'deep_nesting', '#translation', '#text')), '');
+    $this->assertTrue($item1->isAccepted(), 'Job item 1 is accepted.');
+    // The first item should be active.
+    $this->assertTrue($item2->isActive(), 'Job item 2 is still active.');
 
     // Check the overview page, the task should still show in progress.
     $this->drupalGet('translate');
@@ -864,7 +875,10 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertTaskStatusIcon(1, 'manage-translate-task', 'assigned', 'Needs action');
 
     // Save the first item as completed and check item icons and progress.
-    $this->drupalPostForm('/translate/items/1', NULL, t('Save as completed'));
+    $edit = [
+      'dummy|deep_nesting[translation]' => 'German translation',
+    ];
+    $this->drupalPostForm('/translate/items/1', $edit, t('Save as completed'));
     $this->assertTaskItemStatusIcon(1, 'Translated');
     $this->assertTaskItemStatusIcon(2, 'Untranslated');
     $this->assertTaskItemProgress(1, 0, 0, 1);
@@ -877,7 +891,11 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertTaskStatusIcon(1, 'manage-translate-task', 'assigned', 'Needs action');
 
     // Save the second item as completed.
-    $this->drupalPostForm('/translate/items/2', NULL, t('Save as completed'));
+    $edit = [
+      'title|deep_nesting[translation]' => 'German translation of title',
+      'text|deep_nesting[translation]' => 'German translation of text',
+    ];
+    $this->drupalPostForm('/translate/items/2', $edit, t('Save as completed'));
     // Check the icon a progress bar of the task.
     $this->assertTaskProgress(1, 'my-tasks', 0, 0, 3);
     $this->assertTaskStatusIcon(1, 'task-overview', 'my-tasks', 'In review');
