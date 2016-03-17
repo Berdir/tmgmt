@@ -5,14 +5,14 @@ tmgmt_local.settings:
     use_admin_theme:
       type: boolean
       label: 'Use admin theme'
+    allow_all:
+      type: boolean
+      label: 'Allow all'
 
 tmgmt.translator.settings.local:
   type: tmgmt.translator_base
   label: 'Drupal user settings'
-  mapping:
-    allow_all:
-      type: boolean
-      label: 'Allow all'
+  mapping: {}
 
 action.configuration.tmgmt_local_task_assign_multiple:
   type: action_configuration_default

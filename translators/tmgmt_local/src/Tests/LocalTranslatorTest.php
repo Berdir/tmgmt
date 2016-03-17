@@ -578,8 +578,7 @@ class LocalTranslatorTest extends TMGMTTestBase {
     $this->assertFalse($job->requestTranslation(), 'Translation request was denied.');
 
     // Now enable the setting.
-    $translator->setSetting('allow_all', TRUE);
-    $translator->save();
+    $this->config('tmgmt_local.settings')->set('allow_all', TRUE)->save();
     /** @var Job $job */
     $job = entity_load('tmgmt_job', $job->id(), TRUE);
     $job->translator = $translator->id();

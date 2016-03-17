@@ -76,25 +76,4 @@ class LocalTranslatorUi extends TranslatorPluginUiBase {
     return $form;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form = parent::buildConfigurationForm($form, $form_state);
-
-    /** @var \Drupal\tmgmt\TranslatorInterface $translator */
-    $translator = $form_state->getFormObject()->getEntity();
-    $form['allow_all'] = array(
-      '#title' => t('Allow translations for enabled languages even if no user has the necessary abilities'),
-      '#type' => 'checkbox',
-      '#default_value' => $translator->getSetting('allow_all'),
-    );
-    $form['use_admin_theme'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use admin theme in local translator'),
-      '#default_value' => $translator->getSetting('use_admin_theme'),
-    );
-    return $form;
-  }
-
 }

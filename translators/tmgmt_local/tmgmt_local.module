@@ -149,6 +149,11 @@ function tmgmt_local_form_tmgmt_settings_form_alter(&$form, FormStateInterface $
     '#description' => t("Enabling this will apply the admin theme over the local translator views. This means that the users will need he the 'view the administration theme' and 'access toolbar' permissions to use the local translator."),
     '#default_value' => $config->get('use_admin_theme'),
   );
+  $form['local']['allow_all'] = array(
+    '#title' => t('Allow translations for enabled languages even if no user has the necessary abilities'),
+    '#type' => 'checkbox',
+    '#default_value' => $config->get('allow_all'),
+  );
   $form['#submit'][] = 'tmgmt_local_form_tmgmt_settings_form_submit';
 
 }
@@ -162,6 +167,7 @@ function tmgmt_local_form_tmgmt_settings_form_submit($form, FormStateInterface $
     $config->set('use_admin_theme', $form_state->getValue('use_admin_theme'))->save();
     \Drupal::service('router.builder')->rebuild();
   }
+  $config->set('allow_all', $form_state->getValue('allow_all'))->save();
 }
 
 /**

@@ -61,7 +61,7 @@ class LocalTranslator extends TranslatorPluginBase {
    */
   public function getSupportedTargetLanguages(TranslatorInterface $translator, $source_language) {
     $languages = tmgmt_local_supported_target_languages($source_language);
-    if ($translator->getSetting('allow_all')) {
+    if (\Drupal::config('tmgmt_local.settings')->get('allow_all')) {
       $languages += parent::getSupportedTargetLanguages($translator, $source_language);
     }
     return $languages;
