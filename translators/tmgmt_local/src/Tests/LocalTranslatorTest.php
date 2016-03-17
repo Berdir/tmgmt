@@ -11,7 +11,6 @@ use Drupal\filter\Entity\FilterFormat;
 use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Entity\JobItem;
 use Drupal\tmgmt\Entity\Translator;
-use Drupal\tmgmt\Tests\TMGMTTestBase;
 use Drupal\tmgmt_local\Entity\LocalTask;
 
 /**
@@ -19,48 +18,7 @@ use Drupal\tmgmt_local\Entity\LocalTask;
  *
  * @group tmgmt
  */
-class LocalTranslatorTest extends TMGMTTestBase {
-
-  /**
-   * Translator user.
-   *
-   * @var object
-   */
-  protected $assignee;
-
-  protected $localTranslatorPermissions = array(
-    'provide translation services',
-  );
-
-  protected $localManagerPermissions = [
-    'administer translation tasks',
-    'provide translation services',
-    'view the administration theme',
-    'administer themes',
-  ];
-
-  /**
-   * Modules to enable.
-   *
-   * @var array
-   */
-  public static $modules = [
-    'user',
-    'tmgmt',
-    'tmgmt_language_combination',
-    'tmgmt_local',
-    'ckeditor',
-  ];
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setUp() {
-    parent::setUp();
-    $this->loginAsAdmin();
-    $this->addLanguage('de');
-    $this->drupalPlaceBlock('system_breadcrumb_block');
-  }
+class LocalTranslatorTest extends LocalTranslatorTestBase {
 
   /**
    * Test assignee skills.
@@ -926,125 +884,6 @@ class LocalTranslatorTest extends TMGMTTestBase {
     // Assert the legend.
     $this->drupalGet('/translate/items/' . $item1->id());
     $this->assertRaw('class="tmgmt-color-legend');
-  }
-
-  /**
-   * Asserts task status icon.
-   *
-   * @param int $row
-   *   The row of the item you want to check.
-   * @param $view
-   *   The view where we want to assert.
-   * @param string $overview
-   *   The overview table to check.
-   * @param int $state
-   *   The expected state.
-   */
-  private function assertTaskStatusIcon($row, $view, $overview, $state) {
-    $result = $this->xpath('//*[@id="views-form-tmgmt-local-' . $view . '-' . $overview . '"]/table/tbody/tr[' . $row . ']/td[2]/img')[0];
-    $this->assertEqual($result['title'], $state);
-  }
-
-  /**
-   * Asserts task item status icon.
-   *
-   * @param int $row
-   *   The row of the item you want to check.
-   * @param int $state
-   *   The expected state.
-   *
-   */
-  private function assertTaskItemStatusIcon($row, $state) {
-    $result = $this->xpath('//*[@id="edit-items"]/div/div/table/tbody/tr[' . $row . ']/td[1]/img')[0];
-    $this->assertEqual($result['title'], $state);
-  }
-
-  /**
-   * Asserts the task progress bar.
-   *
-   * @param int $row
-   *   The row of the item you want to check.
-   * @param $overview
-   *   The overview to be checked.
-   * @param int $untranslated
-   *   The amount of untranslated items.
-   * @param int $translated
-   *   The amount of translated items.
-   * @param int $completed
-   *   The amount of completed items.
-   */
-  private function assertTaskProgress($row, $overview, $untranslated, $translated, $completed) {
-    $result = $this->xpath('//*[@id="views-form-tmgmt-local-task-overview-' . $overview . '"]/table/tbody/tr[' . $row . ']/td[3]')[0];
-    $div_number = 0;
-    if ($untranslated > 0) {
-      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-untranslated');
-      $div_number++;
-    }
-    else {
-      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-untranslated');
-    }
-    if ($translated > 0) {
-      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-translated');
-      $div_number++;
-    }
-    else {
-      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-translated');
-    }
-    if ($completed > 0) {
-      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-completed');
-    }
-    else {
-      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-completed');
-    }
-    $title = t('Untranslated: @untranslated, translated: @translated, completed: @completed.', array(
-      '@untranslated' => $untranslated,
-      '@translated' => $translated,
-      '@completed' => $completed,
-    ));
-    $this->assertEqual($result->div['title'], $title);
-  }
-
-  /**
-   * Asserts the task item progress bar.
-   *
-   * @param int $row
-   *   The row of the item you want to check.
-   * @param int $untranslated
-   *   The amount of untranslated items.
-   * @param int $translated
-   *   The amount of translated items.
-   * @param int $completed
-   *   The amount of completed items.
-   */
-  private function assertTaskItemProgress($row, $untranslated, $translated, $completed) {
-    $result = $this->xpath('//*[@id="edit-items"]/div/div/table/tbody/tr[' . $row . ']/td[2]')[0];
-    $div_number = 0;
-    if ($untranslated > 0) {
-      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-untranslated');
-      $div_number++;
-    }
-    else {
-      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-untranslated');
-    }
-    if ($translated > 0) {
-      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-translated');
-      $div_number++;
-    }
-    else {
-      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-translated');
-    }
-    if ($completed > 0) {
-      $this->assertEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-completed');
-    }
-    else {
-      $this->assertNotEqual($result->div->div[$div_number]['class'], 'tmgmt-local-progress-completed');
-    }
-    $title = t('Untranslated: @untranslated, translated: @translated, completed: @completed.', array(
-      '@untranslated' => $untranslated,
-      '@translated' => $translated,
-      '@completed' => $completed,
-    ));
-    $this->assertEqual($result->div['title'], $title);
   }
 
   /**

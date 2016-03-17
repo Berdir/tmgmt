@@ -13,6 +13,7 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\tmgmt\SourcePreviewInterface;
 use Drupal\tmgmt_local\Entity\LocalTaskItem;
 use Drupal\tmgmt_local\LocalTaskInterface;
 use Drupal\views\Views;
@@ -83,16 +84,27 @@ class LocalTaskItemForm extends ContentEntityForm {
       '#button_type' => 'primary',
       '#validate' => ['::validateSaveAsComplete'],
       '#submit' => ['::save', '::saveAsComplete'],
-      '#access' => \Drupal::currentUser()->hasPermission('provide translation services') && $task_item->isPending(),
+      '#access' => $task_item->isPending(),
       '#value' => t('Save as completed'),
     );
 
     $actions['save'] = array(
       '#type' => 'submit',
       '#submit' => ['::save'],
-      '#access' => \Drupal::currentUser()->hasPermission('provide translation services') && $task_item->isPending(),
+      '#access' => $task_item->isPending(),
       '#value' => t('Save'),
     );
+
+    $job_item = $task_item->getJobItem();
+    if ($job_item->getSourcePlugin() instanceof SourcePreviewInterface && $job_item->getSourcePlugin()->getPreviewUrl($job_item)) {
+      $actions['preview'] = [
+        '#type' => 'submit',
+        '#submit' => ['::save', '::preview'],
+        '#access' => $task_item->isPending(),
+        '#value' => t('Preview'),
+      ];
+    }
+
     return $actions;
   }
 
@@ -372,6 +384,20 @@ class LocalTaskItemForm extends ContentEntityForm {
       $data[$key] = $this->prepareData($data[$key]);
     }
     return $data;
+  }
+
+  /**
+   * Form submit callback for the preview button.
+   */
+  public function preview(array $form, FormStateInterface $form_state) {
+    $task_item = $this->entity;
+    $job_item = $task_item->getJobItem();
+
+    $job_item->addTranslatedData($this->prepareData($task_item->getData()), [], TMGMT_DATA_ITEM_STATE_PRELIMINARY);
+
+    /** @var \Drupal\Core\Url $url */
+    $url = $job_item->getSourcePlugin()->getPreviewUrl($job_item);
+    $form_state->setRedirectUrl($url);
   }
 
 }
