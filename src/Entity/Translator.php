@@ -28,7 +28,7 @@ use Drupal\tmgmt\TranslatorInterface;
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\TranslatorForm",
  *       "add" = "Drupal\tmgmt\Form\TranslatorForm",
- *       "delete" = "Drupal\tmgmt\Form\TranslatorDeleteForm",
+ *       "delete" = "\Drupal\Core\Entity\EntityDeleteForm",
  *       "clone" = "Drupal\tmgmt\Form\TranslatorForm",
  *     },
  *     "list_builder" = "Drupal\tmgmt\Entity\ListBuilder\TranslatorListBuilder",
@@ -246,10 +246,15 @@ class Translator extends ConfigEntityBase implements TranslatorInterface {
   public static function preDelete(EntityStorageInterface $storage, array $entities) {
     // We are never going to have many entities here, so we can risk a loop.
     foreach ($entities as $key => $name) {
-      if (tmgmt_translator_busy($key)) {
-        // The translator can't be deleted because it is currently busy. Remove
-        // it from the ids so it wont get deleted in the parent implementation.
-        unset($entities[$key]);
+      // Find active jobs associated with the translator that is being deleted.
+      $job_ids = \Drupal::entityQuery('tmgmt_job')
+        ->condition('state', [Job::STATE_ACTIVE, Job::STATE_CONTINUOUS, Job::STATE_UNPROCESSED], 'IN')
+        ->condition('translator', $key)
+        ->execute();
+      $jobs = Job::loadMultiple($job_ids);
+      /** @var \Drupal\tmgmt\JobInterface $job */
+      foreach ($jobs as $job) {
+        $job->aborted('Job has been aborted because the translation provider %provider was deleted.', ['%provider' => $job->getTranslatorLabel()]);
       }
     }
     parent::preDelete($storage, $entities);

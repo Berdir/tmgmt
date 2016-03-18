@@ -59,7 +59,8 @@ class TranslatorAccessControlHandler extends EntityAccessControlHandler implemen
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
-    if (!$entity->hasPlugin() && $operation != 'delete') {
+    // Don't allow delete access for busy translators.
+    if ((!$entity->hasPlugin() && $operation != 'delete') || ($operation == 'delete' && tmgmt_translator_busy($entity->id()))) {
       return AccessResult::forbidden();
     }
     return AccessResult::allowedIfHasPermission($account, 'administer tmgmt');

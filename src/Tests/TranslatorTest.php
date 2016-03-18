@@ -7,6 +7,7 @@
 
 namespace Drupal\tmgmt\Tests;
 use Drupal\tmgmt\Entity\Job;
+use Drupal\tmgmt\Entity\JobItem;
 
 /**
  * Verifies functionality of translator handling
@@ -59,14 +60,25 @@ class TranslatorTest extends TMGMTTestBase {
     // Try to delete the translator, should fail because of active job.
     $delete_url = '/admin/tmgmt/translators/manage/' . $translator->id() . '/delete';
     $this->drupalGet($delete_url);
-    $this->assertLink(t('Cancel'));
-    $this->drupalPostForm(NULL, array(), 'Delete');
+    $this->assertResponse(403);
 
-    $this->assertText(t('This provider cannot be deleted as long as there are active jobs using it.'));
+    // Delete a provider using an API call and assert that active job and its
+    // job item used by deleted translator were aborted.
+    $translator->delete();
+    /** @var \Drupal\tmgmt\JobInterface $job */
+    $job = Job::load($job->id());
+    $this->assertEqual($job->getState(), Job::STATE_ABORTED);
+    $item = $job->getMostRecentItem('test_source', 'test', 1);
+    $this->assertEqual($item->getState(), JobItem::STATE_ABORTED);
 
-    // Change job state, delete again.
+    // Delete a finished job.
+    $translator = parent::createTranslator();
+    $job = $this->createJob();
+    $job->translator = $translator;
+    $item = $job->addItem('test_source', 'test', 2);
     $job->setState(Job::STATE_FINISHED);
-    $this->drupalPostForm(NULL, array(), 'Delete');
+    $delete_url = '/admin/tmgmt/translators/manage/' . $translator->id() . '/delete';
+    $this->drupalPostForm($delete_url, array(), 'Delete');
     $this->assertText(t('Add provider'));
     // Check if the list of translators has 1 row.
     $this->assertEqual(count($this->xpath('//tbody/tr')), 1);
