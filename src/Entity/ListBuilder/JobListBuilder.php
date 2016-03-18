@@ -36,7 +36,7 @@ class JobListBuilder extends EntityListBuilder {
       );
     }
     if ($entity->isAbortable() && $entity->access('submit')) {
-      $operations['cancel'] = array(
+      $operations['abort'] = array(
         'url' => $entity->urlInfo('abort-form')->setOption('query', array('destination' => Url::fromRoute('<current>')->getInternalPath())),
         'title' => t('Abort'),
         'weight' => 10,

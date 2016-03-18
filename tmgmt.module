@@ -256,7 +256,7 @@ function tmgmt_job_match_item($source_language, $target_language, $account = NUL
 function tmgmt_job_check_finished($tjid) {
   return !\Drupal::entityQuery('tmgmt_job_item')
     ->condition('tjid', $tjid)
-    ->condition('state', JobItem::STATE_ACCEPTED, '<>')
+    ->condition('state', [JobItem::STATE_ACCEPTED, JobItem::STATE_ABORTED], 'NOT IN')
     ->range(0, 1)
     ->count()
     ->execute();
@@ -686,11 +686,11 @@ function tmgmt_job_request_translation(JobInterface $job) {
 /**
  * Print all messages that occurred since our request to the screen.
  *
- * @param $job
+ * @param \Drupal\tmgmt\JobInterface $job
  *    The translation job for which the message should be written.
  *
- * @return
- *   FALSE if there are message with severity error, TRUE otherwise.
+ * @return bool
+ *    FALSE if there are message with severity error, TRUE otherwise.
  */
 function tmgmt_write_request_messages(JobInterface $job) {
   $errors = FALSE;

@@ -161,6 +161,17 @@ interface JobItemInterface extends ContentEntityInterface {
   public function getTranslatorPlugin();
 
   /**
+   * Attempts to abort the translation job item.
+   *
+   * Already accepted job items can not be aborted. Always use this method if
+   * you want to abort a translation job item.
+   *
+   * @throws \Drupal\tmgmt\TMGMTException
+   *   If fails to abort the job item.
+   */
+  public function abortTranslation();
+
+  /**
    * Array of the data to be translated.
    *
    * The structure is similar to the form API in the way that it is a possibly

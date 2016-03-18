@@ -753,9 +753,8 @@ class TMGMTUiTest extends EntityTestBase {
   }
 
   /**
-   * Test the deletion of job item.
+   * Test the deletion and abortion of job item.
    *
-   * @todo This will in future check that delete is not allowed.
    * @todo There will be some overlap with Aborting items & testAbortJob.
    */
   function testJobItemDelete() {
@@ -772,21 +771,48 @@ class TMGMTUiTest extends EntityTestBase {
 
     // Add item to the job.
     $item = $job->addItem('test_source', 'test', 1);
+    $item->setState(JobItem::STATE_ACTIVE);
+
+    // Check that there is no delete link on item review form.
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $this->assertNoFieldById('edit-delete', NULL, 'There is no delete button.');
 
     $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
 
-    // Check for delete link.
-    $this->assertLink('Delete');
+    // Check that there is no delete link.
+    $this->assertNoLink('Delete');
 
-    $this->clickLink('Delete');
-    $this->assertText(t('Are you sure you want to delete the translation job item @label?', ['@label' => $item->getSourceLabel()]));
+    // Check for abort link.
+    $this->assertLink('Abort');
+
+    $this->clickLink('Abort');
+    $this->assertText(t('Are you sure you want to abort the job item test_source:test:1?'));
 
     // Check if cancel button is present or not.
     $this->assertLink('Cancel');
 
-    // Delete the job item.
-    $this->drupalPostForm(NULL, [], t('Delete'));
-    $this->assertText(t('The translation job item @label has been deleted', ['@label' => $item->getSourceLabel()]));
+    // Abort the job item.
+    $this->drupalPostForm(NULL, [], t('Confirm'));
+
+    // Reload job and check its state and state of its item.
+    \Drupal::entityManager()->getStorage('tmgmt_job')->resetCache();
+    $job = Job::load($job->id());
+    $this->assertTrue($job->isFinished());
+    $items = $job->getItems();
+    $item = reset($items);
+    $this->assertTrue($item->isAborted());
+
+    // Check that there is no delete button on item review form.
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $this->assertNoFieldById('edit-delete', NULL, 'There is delete button.');
+
+    // Check that there is no accept button on item review form.
+    $this->assertNoFieldById('edit-accept', NULL, 'There is no accept button.');
+
+    $this->drupalGet('admin/tmgmt/jobs/' . $job->id());
+
+    // Check that there is no delete link on job overview.
+    $this->assertNoLink('Delete');
   }
 
   /**

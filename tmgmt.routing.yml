@@ -96,6 +96,13 @@ entity.tmgmt_job_item.delete_form:
   requirements:
     _entity_access: tmgmt_job_item.delete
 
+entity.tmgmt_job_item.abort_form:
+  path: '/admin/tmgmt/items/{tmgmt_job_item}/abort'
+  defaults:
+    _entity_form: tmgmt_job_item.abort
+  requirements:
+    _entity_access: tmgmt_job_item.abort
+
 tmgmt.source_overview:
   path: '/admin/tmgmt/sources/{plugin}/{item_type}'
   defaults:

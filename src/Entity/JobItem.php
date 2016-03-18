@@ -31,6 +31,7 @@ use Drupal\Core\Render\Element;
  *     "access" = "Drupal\tmgmt\Entity\Controller\JobItemAccessControlHandler",
  *     "form" = {
  *       "edit" = "Drupal\tmgmt\Form\JobItemForm",
+ *       "abort" = "Drupal\tmgmt\Form\JobItemAbortForm",
  *       "delete" = "Drupal\tmgmt\Form\JobItemDeleteForm"
  *     },
  *     "list_builder" = "Drupal\tmgmt\Entity\ListBuilder\JobItemListBuilder",
@@ -44,6 +45,7 @@ use Drupal\Core\Render\Element;
  *   },
  *   links = {
  *     "canonical" = "/admin/tmgmt/items/{tmgmt_job_item}",
+ *     "abort-form" = "/admin/tmgmt/items/{tmgmt_job_item}/abort",
  *     "delete-form" = "/admin/tmgmt/items/{tmgmt_job_item}/delete",
  *   }
  * )
@@ -461,7 +463,7 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
     }
     $return = $this->setState(static::STATE_REVIEW, $message, $variables, $type);
     // Auto accept the translation if the translator is configured for it.
-    if ($this->getTranslator()->isAutoAccept()) {
+    if ($this->getTranslator()->isAutoAccept() && !$this->isAborted()) {
       $this->acceptTranslation();
     }
     return $return;
@@ -816,6 +818,22 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
     // to the 'accepted' state.
     $this->accepted();
     return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function abortTranslation() {
+    if (!$this->isActive() || !$this->getTranslatorPlugin()) {
+      throw new TMGMTException('Cannot abort job item.');
+    }
+    $this->setState(JobItemInterface::STATE_ABORTED);
+    // Check if this was the last unfinished job item in this job.
+    $job = $this->getJob();
+    if ($job && !$job->isContinuous() && tmgmt_job_check_finished($this->getJobId())) {
+      // Mark the job as finished in case it is a normal job.
+      $job->finished();
+    }
   }
 
   /**
