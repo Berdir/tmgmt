@@ -23,6 +23,13 @@ class LocalTaskItemAccessController extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
+    if ($operation == 'view' || $operation == 'update') {
+      if ($account->hasPermission('administer tmgmt') || $account->hasPermission('administer translation tasks')) {
+        // Administrators can do everything.
+        return AccessResult::allowed()->cachePerPermissions();
+      }
+      return AccessResult::allowedIf($entity->getTask()->tuid->target_id == $account->id() && $account->hasPermission('provide translation services'));
+    }
     return $entity->getTask()->access($operation, $account, TRUE);
   }
 

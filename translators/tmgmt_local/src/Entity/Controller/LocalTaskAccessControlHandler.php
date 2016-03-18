@@ -10,6 +10,8 @@ namespace Drupal\tmgmt_local\Entity\Controller;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
@@ -41,6 +43,16 @@ class LocalTaskAccessControlHandler extends EntityAccessControlHandler {
         return AccessResult::allowedIf($entity->tuid->target_id == $account->id() && $account->hasPermission('provide translation services'));
     }
     return AccessResult::neutral();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function checkFieldAccess($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
+    if ($operation == 'edit') {
+      return AccessResult::allowedIfHasPermissions($account, ['administer tmgmt', 'administer translation tasks']);
+    }
+    return parent::checkFieldAccess($operation, $field_definition, $account, $items);
   }
 
   /**

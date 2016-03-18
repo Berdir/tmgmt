@@ -323,22 +323,12 @@ class LocalTranslatorTest extends LocalTranslatorTestBase {
     $this->clickLink(t('Assign to me'));
     $this->assertText(t('The task has been assigned to you.'));
 
-    // Log in with the translator with the same abilities, make sure that he
-    // does not see the assigned task.
-    $this->drupalLogin($other_assignee_same);
-    $this->drupalGet('translate');
-    $this->assertNoText($job->label());
-
-    $this->drupalLogin($this->assignee);
-
-    // Translate the task.
+    // Assert created local task and task items.
     $this->drupalGet('translate/pending');
     $this->clickLink(t('View'));
-
-    // Assert created local task and task items.
     $this->assertTrue(preg_match('|translate/(\d+)|', $this->getUrl(), $matches), 'Task found');
     /** @var \Drupal\tmgmt_local\Entity\LocalTask $task */
-    $task = entity_load('tmgmt_local_task', $matches[1], TRUE);
+    $task = \Drupal::entityTypeManager()->getStorage('tmgmt_local_task')->load($matches[1]);
     $this->assertTrue($task->isPending());
 
     $items = $task->getItems();
@@ -346,6 +336,18 @@ class LocalTranslatorTest extends LocalTranslatorTestBase {
     $first_task_item = reset($items);
     $this->assertTrue($first_task_item->isPending());
 
+    // Log in with the translator with the same abilities, make sure that he
+    // does not see the assigned task.
+    $this->drupalLogin($other_assignee_same);
+    $this->drupalGet('translate');
+    $this->assertNoText($job->label());
+    $this->drupalGet('translate/items/' . $first_task_item->id());
+    $this->assertResponse(403);
+
+    $this->drupalLogin($this->assignee);
+
+    // Translate the task.
+    $this->drupalGet('translate/' . $task->id());
     $this->assertText('test_source:test:1');
     $this->assertText('test_source:test:2');
 
