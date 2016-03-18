@@ -99,6 +99,7 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
   public function overviewFormHeader($type) {
     $header = array(
       'title' => array('data' => $this->t('Title (in source language)')),
+      'config_id' => array('data' => $this->t('Configuration ID')),
     );
 
     $header += $this->getLanguageHeader();
@@ -124,13 +125,17 @@ class ConfigSourcePluginUi extends SourcePluginUiBase {
     // Get current job items for the entity to determine translation statuses.
     $source_lang = $entity->language()->getId();
     $current_job_items = tmgmt_job_item_load_latest('config', $entity->getEntityTypeId(), $entity->getConfigDependencyName(), $source_lang);
+    $row['id'] = $entity->id();
+    $definition = \Drupal::entityTypeManager()->getDefinition($entity->bundle());
+    $row['config_id'] = $definition->getConfigPrefix() . '.' . $entity->id();
 
-    $row = array(
-      'id' => $entity->id(),
-      // If the entity type is FieldConfig, we list the field of the fieldable
-      // entity type which doesn't have a link.
-      'title' => $entity->url('edit-form') ? $entity->link($label) : $label,
-    );
+    if ($entity->hasLinkTemplate('edit-form')) {
+      $row['title'] = $entity->toLink($label, 'edit-form');
+    }
+    else {
+      // If the entity doesn't have a link we display a label.
+      $row['title'] = $label;
+    }
 
     // Load entity translation specific data.
     foreach (\Drupal::languageManager()->getLanguages() as $langcode => $language) {

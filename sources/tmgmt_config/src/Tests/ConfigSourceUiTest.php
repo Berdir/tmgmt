@@ -275,6 +275,11 @@ class ConfigSourceUiTest extends EntityTestBase {
   function testFieldConfigTranslateTabSingleCheckout() {
     $this->loginAsAdmin(array('translate configuration'));
 
+    // Go to sources, field configuration list.
+    $this->drupalGet('admin/tmgmt/sources/config/field_config');
+    $this->assertText(t('Configuration ID'));
+    $this->assertText('field.field.node.article.body');
+
     // Go to the translate tab.
     $this->drupalGet('admin/structure/types/manage/article/fields/node.article.body/translate');
 
