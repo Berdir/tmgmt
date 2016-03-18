@@ -12,6 +12,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Render\Element;
 use Drupal\tmgmt\SourcePreviewInterface;
 use Drupal\tmgmt_local\Entity\LocalTaskItem;
@@ -41,7 +42,60 @@ class LocalTaskItemForm extends ContentEntityForm {
 
     $form['#title'] = $task_item->label();
 
-    $job = $task_item->getJobItem()->getJob();
+    $job_item = $task_item->getJobItem();
+    $job = $job_item->getJob();
+
+    $form['info'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('tmgmt-local-task-info', 'clearfix')),
+      '#weight' => 0,
+    );
+
+    $url = $job_item->getSourceUrl();
+    $form['info']['source'] = array(
+      '#type' => 'item',
+      '#title' => t('Source'),
+      '#markup' => $url ? Link::fromTextAndUrl($job_item->getSourceLabel(), $url)->toString() : $job_item->getSourceLabel(),
+      '#prefix' => '<div class="tmgmt-ui-source tmgmt-ui-info-item">',
+      '#suffix' => '</div>',
+    );
+
+    $form['info']['sourcetype'] = array(
+      '#type' => 'item',
+      '#title' => t('Source type'),
+      '#markup' => $job_item->getSourceType(),
+      '#prefix' => '<div class="tmgmt-ui-source-type tmgmt-ui-info-item">',
+      '#suffix' => '</div>',
+    );
+
+    $form['info']['changed'] = array(
+      '#type' => 'item',
+      '#title' => t('Last change'),
+      '#value' => $task_item->getChangedTime(),
+      '#markup' => \Drupal::service('date.formatter')->format($task_item->getChangedTime()),
+      '#prefix' => '<div class="tmgmt-ui-changed tmgmt-ui-info-item">',
+      '#suffix' => '</div>',
+    );
+
+    $statuses = LocalTaskItem::getStatuses();
+    $form['info']['status'] = array(
+      '#type' => 'item',
+      '#title' => t('Status'),
+      '#markup' => $statuses[$task_item->getStatus()],
+      '#prefix' => '<div class="tmgmt-ui-task-item-status tmgmt-ui-info-item">',
+      '#suffix' => '</div>',
+      '#value' => $task_item->getStatus(),
+    );
+
+    $task = $task_item->getTask();
+    $url = $task->toUrl();
+    $form['info']['task'] = array(
+      '#type' => 'item',
+      '#title' => t('Task'),
+      '#markup' => Link::fromTextAndUrl($task->label(), $url)->toString(),
+      '#prefix' => '<div class="tmgmt-ui-task tmgmt-ui-info-item">',
+      '#suffix' => '</div>',
+    );
 
     if ($job->getSetting('job_comment')) {
       $form['job_comment'] = array(

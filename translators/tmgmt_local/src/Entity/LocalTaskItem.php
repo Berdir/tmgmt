@@ -142,6 +142,13 @@ class LocalTaskItem extends ContentEntityBase implements LocalTaskItemInterface 
   /**
    * {@inheritdoc}
    */
+  public function getStatus() {
+    return $this->get('status')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function isPending() {
     return $this->get('status')->value == LocalTaskItemInterface::STATUS_PENDING;
   }

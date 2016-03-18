@@ -359,6 +359,13 @@ class LocalTranslatorTest extends LocalTranslatorTestBase {
     $this->assertLink(t('Local Tasks'));
     $this->assertText($job->label());
 
+    // Assert the header.
+    $this->assertLink($first_task_item->getJobItem()->getSourceLabel());
+    $this->assertText($first_task_item->getJobItem()->getSourceType());
+    $this->assertText(\Drupal::service('date.formatter')->format($first_task_item->getChangedTime()));
+    $this->assertText($first_task_item->getStatus());
+    $this->assertLink($first_task_item->getTask()->label());
+
     $this->assertText(t('Dummy'));
     // Check if Save as completed button is displayed.
     $elements = $this->xpath('//*[@id="edit-save-as-completed"]');

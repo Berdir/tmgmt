@@ -54,6 +54,16 @@ interface LocalTaskItemInterface extends ContentEntityInterface, EntityChangedIn
   public function getJobItem();
 
   /**
+   * Returns the status of the local task item.
+   *
+   * Can be one of the local task item status constants.
+   *
+   * @return int
+   *   The status of the local task item.
+   */
+  public function getStatus();
+
+  /**
    * Returns TRUE if the local task is pending.
    *
    * @return bool

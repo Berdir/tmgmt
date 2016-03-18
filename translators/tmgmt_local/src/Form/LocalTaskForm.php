@@ -58,7 +58,7 @@ class LocalTaskForm extends ContentEntityForm {
 
     $form['info'] = array(
       '#type' => 'container',
-      '#attributes' => array('class' => array('tmgmt-ui-localTask-info', 'clearfix')),
+      '#attributes' => array('class' => array('tmgmt-local-task-info', 'clearfix')),
       '#weight' => 0,
       '#tree' => TRUE,
     );

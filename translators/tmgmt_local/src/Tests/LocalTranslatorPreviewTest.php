@@ -27,6 +27,8 @@ class LocalTranslatorPreviewTest extends LocalTranslatorTestBase {
     // Create translatable node.
     $this->createNodeType('article', 'Article', TRUE);
     $node = $this->createTranslatableNode('article', 'en');
+    $node->setPublished(FALSE);
+    $node->save();
     $translator = Translator::load('local');
     $job = $this->createJob('en', 'de');
     $job->translator = $translator;
@@ -62,6 +64,17 @@ class LocalTranslatorPreviewTest extends LocalTranslatorTestBase {
     $this->assertResponse(200);
     $this->assertText($translation1);
     $this->assertText($translation2);
+
+    $this->drupalGet('translate');
+    $this->clickLink('View');
+    $this->clickLink('Translate');
+
+    // Assert source link
+    $this->assertLink($node->getTitle());
+
+    // Test that local translator can access an unpublished node.
+    $this->clickLink($node->getTitle());
+    $this->assertText($node->getTitle());
   }
 
 }
