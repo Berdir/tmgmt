@@ -12,6 +12,7 @@ use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\tmgmt\ContinuousManager;
+use Drupal\tmgmt\ContinuousSourceInterface;
 use Drupal\tmgmt\SourceManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Url;
@@ -153,7 +154,7 @@ class SourceOverviewForm extends FormBase {
     );
     tmgmt_add_cart_form($form['actions'], $form_state, $plugin, $item_type);
 
-    if ($this->continuousManager->hasContinuousJobs()) {
+    if ($source instanceof ContinuousSourceInterface && $this->continuousManager->hasContinuousJobs()) {
       $form['actions']['add_to_continuous_jobs'] = array(
         '#type' => 'submit',
         '#validate' => array('::validateItemsSelected'),

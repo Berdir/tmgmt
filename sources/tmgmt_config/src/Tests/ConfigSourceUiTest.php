@@ -8,6 +8,7 @@
 namespace Drupal\tmgmt_config\Tests;
 
 use Drupal\Core\Url;
+use Drupal\tmgmt\Entity\Job;
 use Drupal\tmgmt\Tests\EntityTestBase;
 use Drupal\views\Entity\View;
 
@@ -275,10 +276,18 @@ class ConfigSourceUiTest extends EntityTestBase {
   function testFieldConfigTranslateTabSingleCheckout() {
     $this->loginAsAdmin(array('translate configuration'));
 
+    // Add a continuous job.
+    $job = $this->createJob('en', 'de', 1, ['job_type' => Job::TYPE_CONTINUOUS]);
+    $job->save();
+
     // Go to sources, field configuration list.
     $this->drupalGet('admin/tmgmt/sources/config/field_config');
     $this->assertText(t('Configuration ID'));
     $this->assertText('field.field.node.article.body');
+
+    // Assert that we cannot add config entities into continuous jobs.
+    $this->assertNoText(t('Check for continuous jobs'));
+    $this->assertNoField('add_all_to_continuous_jobs');
 
     // Go to the translate tab.
     $this->drupalGet('admin/structure/types/manage/article/fields/node.article.body/translate');
