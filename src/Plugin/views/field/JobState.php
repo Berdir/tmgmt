@@ -48,21 +48,6 @@ class JobState extends NumericField {
         $icon = drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg';
         break;
 
-      case JobInterface::STATE_REJECTED:
-        $label = t('Rejected');
-        $icon = 'core/misc/icons/787878/ex.svg';
-        break;
-
-      case JobInterface::STATE_ABORTED:
-        $label = t('Aborted');
-        $icon = drupal_get_path('module', 'tmgmt') . '/icons/ex-red.svg';
-        break;
-
-      case JobInterface::STATE_FINISHED:
-        $label = t('Finished');
-        $icon = 'core/misc/icons/73b355/check.svg';
-        break;
-
       case JobInterface::STATE_CONTINUOUS:
         $label = t('Continuous');
         $icon = drupal_get_path('module', 'tmgmt') . '/icons/continuous.svg';
@@ -74,16 +59,16 @@ class JobState extends NumericField {
         break;
 
       default:
-        $label = t('Unprocessed');
-        $icon = drupal_get_path('module', 'tmgmt') . '/icons/hourglass.svg';
+        $icon = NULL;
+        $label = NULL;
     }
     $element = [
       '#type' => 'inline_template',
-      '#template' => '<img src="{{ icon }}" title="{{ label }}"><span></span></img>',
-      '#context' => array(
+      '#template' => '{% if label %}<img src="{{ icon }}" title="{{ label }}"><span></span></img>{% endif %}',
+      '#context' => [
         'icon' => file_create_url($icon),
         'label' => $label,
-      ),
+      ],
     ];
     return \Drupal::service('renderer')->render($element);
   }

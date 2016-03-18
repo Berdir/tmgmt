@@ -7,6 +7,8 @@
 
 namespace Drupal\tmgmt\Plugin\views\field;
 
+use Drupal\tmgmt\JobInterface;
+use Drupal\tmgmt\JobItemInterface;
 use Drupal\views\ResultRow;
 
 /**
@@ -21,13 +23,42 @@ class Progress extends StatisticsBase {
    */
   public function render(ResultRow $values) {
     $entity = $values->_entity;
+    if ($entity->getEntityTypeId() == 'tmgmt_job') {
+      switch ($entity->getState()) {
+        case JobInterface::STATE_UNPROCESSED:
+          return t('Unprocessed');
+          break;
+
+        case JobInterface::STATE_REJECTED:
+          return t('Rejected');
+          break;
+
+        case JobInterface::STATE_ABORTED:
+          return t('Aborted');
+          break;
+
+        case JobInterface::STATE_FINISHED:
+          return t('Finished');
+          break;
+      }
+    } elseif($entity->getEntityTypeId() == 'tmgmt_job_item') {
+      switch ($entity->getState()) {
+        case JobItemInterface::STATE_INACTIVE:
+          return t('Inactive');
+          break;
+
+        case JobItemInterface::STATE_ACCEPTED:
+          return t('Accepted');
+          break;
+
+        case JobItemInterface::STATE_ABORTED:
+          return t('Aborted');
+          break;
+      }
+    }
     // If job is continuous we don't show anything.
     if ($entity->getEntityTypeId() == 'tmgmt_job' && $entity->isContinuous()) {
       return;
-    }
-    // If job has been aborted the status info is not applicable.
-    if ($entity->isAborted()) {
-      return t('N/A');
     }
     $counts = array(
       '@pending' => $entity->getCountPending(),

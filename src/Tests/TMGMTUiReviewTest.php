@@ -324,7 +324,7 @@ class TMGMTUiReviewTest extends EntityTestBase {
     $this->assertEqual(\Drupal::state()->get('tmgmt_test_saved_translation_' . $item5->getItemType() . '_' . $item5->getItemId())['dummy']['deep_nesting']['#translation']['#text'], 'Translated text for job item');
 
     // Test if the icons are displayed.
-    $this->assertRaw('icons/73b355/check.svg" title="Accepted"');
+    $this->assertRaw('views-field-progress">Accepted');
     $this->assertRaw('icons/ready.svg" title="Needs review"');
     $this->loginAsAdmin();
 

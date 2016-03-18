@@ -539,7 +539,7 @@ class TMGMTUiTest extends EntityTestBase {
 
     // Assert that the progress is N/A since the job was aborted.
     $element = (array) $this->xpath('//div[@class="view-content"]/table[@class="views-table views-view-table cols-8"]/tbody//tr[1]')[0];
-    $this->assertEqual(trim((string) $element['td'][3]), t('N/A'));
+    $this->assertEqual(trim((string) $element['td'][3]), t('Aborted'));
     $this->assertRaw(t('Job has been duplicated as a new job <a href=":url">#@id</a>.',
       array(':url' => $resubmitted_job->url(), '@id' => $resubmitted_job->id())));
     $this->drupalPostForm(NULL, array(), t('Delete'));
@@ -574,7 +574,7 @@ class TMGMTUiTest extends EntityTestBase {
     )));
 
     // Check that job is aborted now.
-    $this->assertRaw('title="Aborted"');
+    $this->assertJobStateIcon(1, 'Aborted');
   }
 
   /**
@@ -1035,8 +1035,14 @@ class TMGMTUiTest extends EntityTestBase {
    *
    */
   private function assertJobStateIcon($row, $state) {
-    $result = $this->xpath('/html/body/div/main/div/div/div/div/div[2]/table/tbody/tr[' . $row . ']/td[1]/img')[0];
-    $this->assertEqual($result['title'], $state);
+    if ($state == 'Unprocessed' || $state == 'Rejected' || $state == 'Aborted' || $state == 'Finished') {
+      $result = $this->xpath('/html/body/div/main/div/div/div/div/div[2]/table/tbody/tr[' . $row . ']/td[6]')[0];
+      $this->assertEqual(trim((string) $result), $state);
+    }
+    else {
+      $result = $this->xpath('/html/body/div/main/div/div/div/div/div[2]/table/tbody/tr[' . $row . ']/td[1]/img')[0];
+      $this->assertEqual($result['title'], $state);
+    }
   }
 
   /**
@@ -1049,8 +1055,14 @@ class TMGMTUiTest extends EntityTestBase {
    *
    */
   private function assertJobItemStateIcon($row, $state) {
-    $result = $this->xpath('//*[@id="edit-job-items-wrapper"]/div/div/div/div/table/tbody/tr[' . $row . ']/td[1]/img')[0];
-    $this->assertEqual($result['title'], $state);
+    if ($state == 'Inactive' || $state == 'Aborted' || $state == 'Accepted') {
+      $result = $this->xpath('//*[@id="edit-job-items-wrapper"]/div/div/div/div/table/tbody/tr[' . $row . ']/td[4]')[0];
+      $this->assertEqual(trim((string) $result), $state);
+    }
+    else {
+      $result = $this->xpath('//*[@id="edit-job-items-wrapper"]/div/div/div/div/table/tbody/tr[' . $row . ']/td[1]/img')[0];
+      $this->assertEqual($result['title'], $state);
+    }
   }
 
 

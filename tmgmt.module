@@ -974,14 +974,6 @@ function tmgmt_color_job_item_legend() {
       'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/ready.svg'),
       'legend' => t('Needs review'),
     ],
-    [
-      'icon' => file_create_url('core/misc/icons/73b355/check.svg'),
-      'legend' => t('Accepted'),
-    ],
-    [
-      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/ex-red.svg'),
-      'legend' => t('Aborted'),
-    ],
   ];
 
   $output = [
@@ -1015,18 +1007,6 @@ function tmgmt_color_job_legend() {
     [
       'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/ready.svg'),
       'legend' => t('Needs review'),
-    ],
-    [
-      'icon' => file_create_url('core/misc/icons/787878/ex.svg'),
-      'legend' => t('Rejected'),
-    ],
-    [
-      'icon' => file_create_url(drupal_get_path('module', 'tmgmt') . '/icons/ex-red.svg'),
-      'legend' => t('Aborted'),
-    ],
-    [
-      'icon' => file_create_url('core/misc/icons/73b355/check.svg'),
-      'legend' => t('Finished'),
     ],
   ];
 

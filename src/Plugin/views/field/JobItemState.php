@@ -34,23 +34,13 @@ class JobItemState extends NumericField {
         $icon = drupal_get_path('module', 'tmgmt') . '/icons/ready.svg';
         break;
 
-      case JobItemInterface::STATE_ACCEPTED:
-        $label = t('Accepted');
-        $icon = 'core/misc/icons/73b355/check.svg';
-        break;
-
-      case JobItemInterface::STATE_ABORTED:
-        $label = t('Aborted');
-        $icon = drupal_get_path('module', 'tmgmt') . '/icons/ex-red.svg';
-        break;
-
       default:
-        $label = t('In progress');
-        $icon = drupal_get_path('module', 'tmgmt') . '/icons/ready.svg';
+        $icon = NULL;
+        $label = NULL;
     }
     $element = [
       '#type' => 'inline_template',
-      '#template' => '<img src="{{ icon }}" title="{{ label }}"><span></span></img>',
+      '#template' => '{% if label %}<img src="{{ icon }}" title="{{ label }}"><span></span></img>{% endif %}',
       '#context' => array(
         'icon' => file_create_url($icon),
         'label' => $label,
