@@ -217,7 +217,24 @@ function tmgmt_content_entity_insert(EntityInterface $entity) {
  * Implements hook_entity_update().
  */
 function tmgmt_content_entity_update(EntityInterface $entity) {
-  if ($entity instanceof ContentEntityInterface) {
+  if ($entity instanceof ContentEntityInterface && $entity->isTranslatable()) {
+    $entity = $entity->getUntranslated();
+    $source_langcode = $entity->language()->getId();
+    $current_job_items = tmgmt_job_item_load_latest('content', $entity->getEntityTypeId(), $entity->id(), $source_langcode);
+    if ($current_job_items) {
+      /** @var \Drupal\tmgmt\JobItemInterface $job_item */
+      foreach ($current_job_items as $job_item) {
+        // If the job item is not yet submitted update its data.
+        if ($job_item->getJob()->isSubmittable() || $job_item->isInactive()) {
+          $job_item->resetData();
+          $job_item->addMessage('Updated source data.');
+        }
+        elseif ($job_item->getJob()->isContinuous()) {
+          $continuous_manager = \Drupal::service('tmgmt.continuous');
+          $continuous_manager->addItem($job_item->getJob(), 'content', $entity->getEntityTypeId(), $entity->id());
+        }
+      }
+    }
     tmgmt_content_create_continuous_job_items($entity);
   }
 }

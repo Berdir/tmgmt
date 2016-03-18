@@ -36,14 +36,6 @@ class ContentEntitySourceUiTest extends EntityTestBase {
   function setUp() {
     parent::setUp();
 
-    $this->loginAsAdmin(array(
-      'create translation jobs',
-      'submit translation jobs',
-      'accept translation jobs',
-      'administer blocks',
-      'administer content translation',
-    ));
-
     $this->addLanguage('de');
     $this->addLanguage('fr');
     $this->addLanguage('es');
@@ -51,6 +43,15 @@ class ContentEntitySourceUiTest extends EntityTestBase {
 
     $this->createNodeType('page', 'Page', TRUE);
     $this->createNodeType('article', 'Article', TRUE);
+
+    $this->loginAsAdmin(array(
+      'create translation jobs',
+      'submit translation jobs',
+      'accept translation jobs',
+      'administer blocks',
+      'administer content translation',
+      'edit any article content',
+    ));
   }
 
   /**
@@ -717,6 +718,27 @@ class ContentEntitySourceUiTest extends EntityTestBase {
 
     // Test that no new job items are created.
     $this->assertEqual(count($continuous_job->getItems()), 3, 'There are no new job items for selected nodes.');
+  }
+
+  /**
+   * Test content entity source preview.
+   */
+  public function testSourceUpdate() {
+    // Create translatable node.
+    $node = $this->createTranslatableNode('article', 'en');
+
+    $job = $this->createJob('en', 'de');
+    $job->save();
+    $job_item = tmgmt_job_item_create('content', $node->getEntityTypeId(), $node->id(), array('tjid' => $job->id()));
+    $job_item->save();
+
+    $updated_body = 'New body';
+    $edit = [
+      'body[0][value]' => $updated_body,
+    ];
+    $this->drupalPostForm('node/' . $node->id() . '/edit', $edit, 'Save');
+    $this->drupalGet('admin/tmgmt/items/' . $job_item->id());
+    $this->assertText($updated_body, 'Source updated correctly.');
   }
 
 }

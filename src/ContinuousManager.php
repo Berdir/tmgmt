@@ -125,14 +125,8 @@ class ContinuousManager {
     $should_create_item = $this->sourcePluginManager->createInstance($plugin)->shouldCreateContinuousItem($job, $plugin, $item_type, $item_id);
     if ($should_create_item) {
       if ($most_recent_job_item) {
-        // If the most recent job item is not yet submitted update its data.
-        if ($most_recent_job_item->isInactive()) {
-          $most_recent_job_item->resetData();
-          $most_recent_job_item->addMessage('Updated source data.');
-          return NULL;
-        }
         // If the most recent job item is active do nothing.
-        elseif (!$most_recent_job_item->isAborted() && !$most_recent_job_item->isAccepted()) {
+        if (!$most_recent_job_item->isAborted() && !$most_recent_job_item->isAccepted()) {
           $most_recent_job_item->addMessage('Source was updated, changes were ignored as job item is still active.');
           return NULL;
         }
