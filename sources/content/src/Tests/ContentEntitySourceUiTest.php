@@ -519,6 +519,26 @@ class ContentEntitySourceUiTest extends EntityTestBase {
    * Test content entity source preview.
    */
   function testEntitySourcePreview() {
+    // Create a node and translation job.
+    $node = $this->createTranslatableNode('page', 'en');
+    $this->drupalPostForm('admin/tmgmt/sources', ['items[1]' => 1], t('Request translation'));
+    $this->drupalPostForm(NULL, ['target_language' => 'de', 'translator' => 'test_translator'], t('Submit to provider'));
+
+    // Delete the node.
+    $node->delete();
+
+    // Review the translation.
+    $this->clickLink(t('reviewed'));
+    $review_url = $this->url;
+
+    // Assert that preview page is not available for non-existing entities.
+    $this->clickLink(t('Preview'));
+    $this->assertResponse(404);
+
+    // Assert translation message for the non-existing translated entity.
+    $this->drupalPostForm($review_url, ['title|0|value[translation]' => 'test_translation'], t('Save'));
+    $this->assertText(t('The translation has been saved successfully.'));
+
     // Create translatable node.
     $node = $this->createTranslatableNode('page', 'en');
 

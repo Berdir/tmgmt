@@ -345,10 +345,16 @@ class JobItemForm extends TmgmtFormBase {
       }
     }
     if ($form_state->getTriggeringElement()['#value'] == $form['actions']['save']['#value'] && isset($data)) {
-      drupal_set_message(t('The translation for <a href=:job>@job_title</a> has been saved successfully.', [
-        ':job' => $item->getSourceUrl()->toString(),
-        '@job_title' => $item->label()
-      ]));
+      if ($item->getSourceUrl()) {
+        $message = t('The translation for <a href=:job>@job_title</a> has been saved successfully.', [
+          ':job' => $item->getSourceUrl()->toString(),
+          '@job_title' => $item->label(),
+        ]);
+      }
+      else {
+        $message = t('The translation has been saved successfully.');
+      }
+      drupal_set_message($message);
     }
     $item->save();
     $item->getJob()->isContinuous() ? $form_state->setRedirect('entity.tmgmt_job_item.canonical', ['tmgmt_job_item' => $item->id()]) : $form_state->setRedirectUrl($item->getJob()->urlInfo());

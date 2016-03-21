@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\Core\Render\Element;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Content preview translation controller.
@@ -61,6 +62,11 @@ class ContentTranslationPreviewController extends ControllerBase {
     $entity = $this->entityTypeManager
       ->getStorage($tmgmt_job_item->getItemType())
       ->load($tmgmt_job_item->getItemId());
+
+    // We cannot show the preview for non-existing entities.
+    if (!$entity) {
+      throw new NotFoundHttpException();
+    }
     $data = $tmgmt_job_item->getData();
     $target_langcode = $tmgmt_job_item->getJob()->getTargetLangcode();
     // Populate preview with target translation data.
