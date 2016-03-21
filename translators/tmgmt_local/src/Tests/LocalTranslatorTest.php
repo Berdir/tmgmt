@@ -362,6 +362,8 @@ class LocalTranslatorTest extends LocalTranslatorTestBase {
     // Assert the header.
     $this->assertLink($first_task_item->getJobItem()->getSourceLabel());
     $this->assertText($first_task_item->getJobItem()->getSourceType());
+    $this->assertText($first_task_item->getJobItem()->getJob()->getSourceLanguage()->getName());
+    $this->assertText($first_task_item->getJobItem()->getJob()->getTargetLanguage()->getName());
     $this->assertText(\Drupal::service('date.formatter')->format($first_task_item->getChangedTime()));
     $this->assertText($first_task_item->getStatus());
     $this->assertLink($first_task_item->getTask()->label());
