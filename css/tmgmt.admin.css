@@ -222,3 +222,11 @@ td.views-field-state img, td.views-field-status img {
 th.views-field-state a, td.views-field-status a {
   width: 0;
 }
+
+td.views-field-tjid a {
+  display: inline-block;
+  width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

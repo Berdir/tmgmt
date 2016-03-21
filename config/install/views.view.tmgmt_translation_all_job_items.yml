@@ -263,6 +263,13 @@ display:
           hide_alter_empty: true
           entity_type: tmgmt_job_item
           plugin_id: tmgmt_entity_label
+        tjid:
+          id: tjid
+          table: tmgmt_job_item
+          field: tjid
+          entity_type: tmgmt_job_item
+          entity_field: tjid
+          plugin_id: field
         type:
           id: type
           table: tmgmt_job_item
@@ -782,7 +789,7 @@ display:
             widget: select
             multiple: false
             remember: false
-            default_group: '3'
+            default_group: '4'
             default_group_multiple: {  }
             group_items:
               1:
@@ -790,30 +797,37 @@ display:
                 operator: between
                 value:
                   value: ''
-                  min: ''
+                  min: '0'
                   max: '2'
               2:
+                title: 'Inactive'
+                operator: '='
+                value:
+                  value: '0'
+                  min: ''
+                  max: ''
+              3:
                 title: 'In progress'
                 operator: '='
                 value:
                   value: '1'
                   min: ''
                   max: ''
-              3:
+              4:
                 title: 'Needs review'
                 operator: '='
                 value:
                   value: '2'
                   min: ''
                   max: ''
-              4:
+              5:
                 title: 'Accepted'
                 operator: '='
                 value:
                   value: '3'
                   min: ''
                   max: ''
-              5:
+              6:
                 title: 'Aborted'
                 operator: '='
                 value:
