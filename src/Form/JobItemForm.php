@@ -475,7 +475,7 @@ class JobItemForm extends TmgmtFormBase {
           $revisions = array();
 
           foreach ($data[$key]['#translation']['#text_revisions'] as $revision) {
-            $revisions[] = t('Origin: %origin, Created: %created</br>%text', array(
+            $revisions[] = t('Origin: %origin, Created: %created<br />%text', array(
               '%origin' => $revision['#origin'],
               '%created' => format_date($revision['#timestamp']),
               '%text' => Xss::filter($revision['#text']),
