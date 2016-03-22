@@ -700,7 +700,7 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
    */
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
-    if ($this->isContinuous() && !$this->isContinuousInactive()) {
+    if ($this->isContinuous() && !$this->isContinuousInactive() && !$this->isAborted()) {
       $this->state = Job::STATE_CONTINUOUS;
     }
     if ($this->isActive() && $this->original->isUnprocessed()) {

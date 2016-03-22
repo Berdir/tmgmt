@@ -91,6 +91,7 @@ class ContinuousManager {
     $ids = $this->entityTypeManager->getStorage('tmgmt_job')->getQuery()
       ->condition('source_language', $source_langcode)
       ->condition('job_type', Job::TYPE_CONTINUOUS)
+      ->condition('state', Job::STATE_CONTINUOUS)
       ->execute();
     if (!empty($ids)) {
       $jobs = Job::loadMultiple($ids);

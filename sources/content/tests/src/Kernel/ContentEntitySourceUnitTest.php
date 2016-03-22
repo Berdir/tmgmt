@@ -14,6 +14,8 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
+use Drupal\tmgmt\ContinuousTranslatorInterface;
 use Drupal\tmgmt\Entity\Translator;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\Entity\Job;
@@ -764,6 +766,58 @@ class ContentEntitySourceUnitTest extends EntityKernelTestBase {
     foreach ($third_job->getItems() as $job_item) {
       $this->assertEqual($job_item->getState(), JobItemInterface::STATE_REVIEW, 'Job item is active after cron run');
     }
+  }
+
+  /**
+   * Test abortion of continuous translators.
+   */
+  public function testContinuousTranslatorsAbortion() {
+    \Drupal::service('router.builder')->rebuild();
+    // Create a continuous translator.
+    $translator = Translator::load('test_translator');
+    $this->assertTrue($translator->getPlugin() instanceof ContinuousTranslatorInterface);
+
+    // Create a node type.
+    $type = NodeType::create(['type' => $this->randomMachineName()]);
+    $type->save();
+
+    // Enable the node type for translation.
+    $content_translation_manager = \Drupal::service('content_translation.manager');
+    $content_translation_manager->setEnabled('node', $type->id(), TRUE);
+
+    // Create a continuous job.
+    $continuous_job = tmgmt_job_create('en', 'de', 0, [
+      'job_type' => Job::TYPE_CONTINUOUS,
+      'continuous_settings' => [
+        'content' => [
+          'node' => [
+            'enabled' => TRUE,
+            'bundles' => [
+              $type->id() => TRUE,
+            ],
+          ],
+        ],
+      ],
+    ]);
+    $continuous_job->translator = $translator;
+    $continuous_job->save();
+
+    // Abort a continuous job.
+    $continuous_job->aborted();
+
+    // Create a node.
+    $node = Node::create(array(
+      'title' => $this->randomMachineName(),
+      'type' => $type->id(),
+      'language' => 'en',
+      'body' => $this->randomMachineName(),
+    ));
+    $node->save();
+
+    // Assert that node has not been captured.
+    $updated_continuous_job = Job::load($continuous_job->id());
+    $this->assertEqual($updated_continuous_job->getItems(), []);
+    $this->assertEqual($updated_continuous_job->getState(), Job::STATE_ABORTED);
   }
 
 }

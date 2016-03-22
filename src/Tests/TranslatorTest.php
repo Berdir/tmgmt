@@ -62,14 +62,21 @@ class TranslatorTest extends TMGMTTestBase {
     $this->drupalGet($delete_url);
     $this->assertResponse(403);
 
+    // Create a continuous job.
+    $continuous = $this->createJob('en', 'de', 1, ['label' => 'Continuous', 'job_type' => Job::TYPE_CONTINUOUS]);
+    $continuous->translator = $translator;
+    $continuous->save();
+
     // Delete a provider using an API call and assert that active job and its
     // job item used by deleted translator were aborted.
     $translator->delete();
     /** @var \Drupal\tmgmt\JobInterface $job */
     $job = Job::load($job->id());
+    $continuous = Job::load($continuous->id());
     $this->assertEqual($job->getState(), Job::STATE_ABORTED);
     $item = $job->getMostRecentItem('test_source', 'test', 1);
     $this->assertEqual($item->getState(), JobItem::STATE_ABORTED);
+    $this->assertEqual($continuous->getState(), Job::STATE_ABORTED);
 
     // Delete a finished job.
     $translator = parent::createTranslator();
