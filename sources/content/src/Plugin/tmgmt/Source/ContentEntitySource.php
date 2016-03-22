@@ -345,6 +345,8 @@ class ContentEntitySource extends SourcePluginBase implements SourcePreviewInter
     $embeded_fields = \Drupal::config('tmgmt_content.settings')->get('embedded_fields');
 
     $translation = $entity->getTranslation($target_langcode);
+    $manager = \Drupal::service('content_translation.manager');
+    $manager->getTranslationMetadata($translation)->setSource($entity->language()->getId());
 
     foreach ($data as $name => $field_data) {
       foreach (Element::children($field_data) as $delta) {

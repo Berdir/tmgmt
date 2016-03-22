@@ -56,6 +56,7 @@ class ContentEntitySourceUnitTest extends EntityKernelTestBase {
     $this->installEntitySchema('entity_test_rev');
     $this->installEntitySchema('entity_test_mulrev');
     $this->installEntitySchema('entity_test_mul');
+    $this->container->get('content_translation.manager')->setEnabled('entity_test_mul', 'entity_test_mul', TRUE);
     $this->installSchema('system', array('router'));
     $this->installSchema('node', array('node_access'));
     \Drupal::moduleHandler()->loadInclude('entity_test', 'install');
@@ -290,6 +291,7 @@ class ContentEntitySourceUnitTest extends EntityKernelTestBase {
   public function testAcceptTranslation() {
     $account = $this->createUser();
     $type = $this->drupalCreateContentType();
+    $this->container->get('content_translation.manager')->setEnabled('node', $type->id(), TRUE);
     /** @var Translator $translator */
     $translator = Translator::load('test_translator');
     $translator->setAutoAccept(TRUE)->save();
@@ -313,6 +315,11 @@ class ContentEntitySourceUnitTest extends EntityKernelTestBase {
     $item = reset($items);
     // As was set to auto_accept, should be accepted.
     $this->assertEqual($item->getState(), JobItemInterface::STATE_ACCEPTED);
+
+    // Test that the source language is set correctly.
+    $node = Node::load($node->id());
+    $manager = $this->container->get('content_translation.manager');
+    $this->assertEquals('en', $manager->getTranslationMetadata($node->getTranslation('de'))->getSource(), 'Source language is correct.');
   }
 
   /**
