@@ -56,7 +56,7 @@ class JobForm extends TmgmtFormBase {
 
     $source = $job->getSourceLanguage() ? $job->getSourceLanguage()->getName() : '?';
     if (!$job->getTargetLangcode() || $job->getTargetLangcode() == LanguageInterface::LANGCODE_NOT_SPECIFIED) {
-      $form_state->set('check_target_language', 'und');
+      $form_state->set('check_target_language', LanguageInterface::LANGCODE_NOT_SPECIFIED);
       $job->target_language = key($available['target_language']);
       $target = '?';
     }
@@ -214,7 +214,7 @@ class JobForm extends TmgmtFormBase {
 
     if(!$job->isContinuous()) {
       // Checkout whether given source already has items in translation.
-      $num_of_existing_items = count($this->checkoutExistingItems($form_state->get('check_target_language')));
+      $num_of_existing_items = count($job->checkoutExistingItems($form_state->get('check_target_language')));
       $form['message'] = array(
         '#type' => 'html_tag',
         '#tag' => 'div',
@@ -514,6 +514,17 @@ class JobForm extends TmgmtFormBase {
         $form_state->setErrorByName('translator', $translatable_status->getReason());
       }
     }
+
+    if (!$job->isContinuous() && isset($form['actions']['submit']) && $form_state->getTriggeringElement()['#value'] == $form['actions']['submit']['#value']) {
+      $existing_items_ids = $job->checkoutExistingItems($form_state->get('check_target_language'));
+      $form_state->set('existing_item_ids', $existing_items_ids);
+
+      // If the amount of existing items is the same as the total job item count
+      // then the job can not be submitted.
+      if (count($job->getItems()) == count($existing_items_ids)) {
+        $form_state->setErrorByName('target_language', $this->t('All job items are conflicting, the job can not be submitted.'));
+      }
+    }
   }
 
   /**
@@ -544,22 +555,20 @@ class JobForm extends TmgmtFormBase {
    * Overrides Drupal\Core\Entity\EntityForm::save().
    */
   public function save(array $form, FormStateInterface $form_state) {
-
-    $job = $this->entity;
-    if(!$job->isContinuous()) {
-      $existing_items_ids = $this->checkoutExistingItems($form_state->get('check_target_language'));
-      if ($existing_items_ids) {
-        entity_delete_multiple('tmgmt_job_item', $existing_items_ids);
-        $num_of_items = count($existing_items_ids);
-        drupal_set_message(\Drupal::translation()->formatPlural($num_of_items, '1 conflicting item has been dropped.', '@count conflicting items have been dropped.'));
-      }
-    }
-
     parent::save($form, $form_state);
 
     // Everything below this line is only invoked if the 'Submit to provider'
     // button was clicked.
     if (isset($form['actions']['submit']) && $form_state->getTriggeringElement()['#value'] == $form['actions']['submit']['#value']) {
+
+      // Delete conflicting items.
+      if ($existing_items_ids = $form_state->get('existing_item_ids')) {
+        $storage = \Drupal::entityTypeManager()->getStorage('tmgmt_job_item');
+        $storage->delete($storage->loadMultiple($existing_items_ids));
+        $num_of_items = count($existing_items_ids);
+        drupal_set_message(\Drupal::translation()->formatPlural($num_of_items, '1 conflicting item has been dropped.', '@count conflicting items have been dropped.'));
+      }
+
       if (!tmgmt_job_request_translation($this->entity)) {
         // Don't redirect the user if the translation request failed but retain
         // existing destination parameters so we can redirect once the request
@@ -637,7 +646,7 @@ class JobForm extends TmgmtFormBase {
    * target / source language dropdowns.
    */
   public function ajaxLanguageSelect(array $form, FormStateInterface $form_state) {
-    $number_of_existing_items = count($this->checkoutExistingItems($form_state->get('check_target_language')));
+    $number_of_existing_items = count($this->entity->checkoutExistingItems($form_state->get('check_target_language')));
     $replace = $form_state->getUserInput()['_triggering_element_name'] == 'source_language' ? 'target_language' : 'source_language';
     $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand('#tmgmt-ui-translator-wrapper', $form['translator_wrapper']));
@@ -657,37 +666,6 @@ class JobForm extends TmgmtFormBase {
    */
   public function ajaxTranslatorSelect(array $form, FormStateInterface $form_state) {
     return $form['translator_wrapper']['settings'];
-  }
-
-  /**
-   * Helper function for retrieving number of existing items.
-   */
-  function checkoutExistingItems($check_target_language) {
-    $job = $this->entity;
-    $items = $job->getItems();
-    $latest_items_of_chosen_source = array();
-    $existing_items_ids = array();
-    if ($check_target_language == FALSE || $check_target_language != $job->getTargetLangcode()) {
-      foreach ($items as $item) {
-        $latest_items_of_chosen_source[$item->id()] = tmgmt_job_item_load_latest($item->getPlugin(), $item->getItemType(), $item->getItemId(), $job->getSourceLangcode());
-      }
-      foreach ($latest_items_of_chosen_source as $key => $item) {
-        if ($item && array_key_exists($job->getTargetLangcode(), $item)) {
-          $existing_items_ids[] = $key;
-        }
-      }
-    }
-    else {
-      foreach ($items as $item) {
-        $latest_items_of_chosen_source[$item->id()] = tmgmt_job_item_load_penultimate($item->getPlugin(), $item->getItemType(), $item->getItemId(), $job->getSourceLangcode(), $job->getTargetLangcode());
-      }
-      foreach ($latest_items_of_chosen_source as $key => $item) {
-        if ($item && array_key_exists($job->getTargetLangcode(), $item)) {
-          $existing_items_ids[] = $key;
-        }
-      }
-    }
-    return $existing_items_ids;
   }
 
   /**

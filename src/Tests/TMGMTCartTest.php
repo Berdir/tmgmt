@@ -113,7 +113,7 @@ class TMGMTCartTest extends TMGMTTestBase {
     ), t('Request translation'));
     $this->assertText(t('1 item conflict with pending item and will be dropped on submission.'));
     $this->drupalPostForm(NULL, array(), t('Submit to provider'));
-    $this->assertText(t('1 conflicting item has been dropped.'));
+    $this->assertText(t('All job items are conflicting, the job can not be submitted.'));
   }
 
 }

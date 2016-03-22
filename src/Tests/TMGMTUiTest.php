@@ -135,6 +135,8 @@ class TMGMTUiTest extends EntityTestBase {
     $job->addItem('test_source', 'test', 1);
     $this->assertNotEqual($job->id(), $previous_tjid);
 
+    Job::load($previous_tjid)->delete();
+
     // Go to checkout form.
     $redirects = tmgmt_job_checkout_multiple(array($job));
     $this->drupalGet(reset($redirects));
@@ -151,6 +153,7 @@ class TMGMTUiTest extends EntityTestBase {
     $this->assertText(t('Test submit'));
     $job = entity_load_unchanged('tmgmt_job', $job->id());
     $this->assertTrue($job->isActive());
+    $job->delete();
 
     // Another job.
     $job = tmgmt_job_match_item('en', 'de');

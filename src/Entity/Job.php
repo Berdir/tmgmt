@@ -233,12 +233,14 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
   /**
    * {@inheritdoc}
    */
-  public static function postDelete(EntityStorageInterface $storage_controller, array $entities) {
+  public static function postDelete(EntityStorageInterface $storage, array $entities) {
+    parent::postDelete($storage, $entities);
     // Since we are deleting one or multiple jobs here we also need to delete
     // the attached job items and messages.
     $tjiids = \Drupal::entityQuery('tmgmt_job_item')
       ->condition('tjid', array_keys($entities), 'IN')
       ->execute();
+    debug($tjiids);
     if (!empty($tjiids)) {
       entity_delete_multiple('tmgmt_job_item', $tjiids);
     }
@@ -951,6 +953,36 @@ class Job extends ContentEntityBase implements EntityOwnerInterface, JobInterfac
       static::STATE_CONTINUOUS => t('Continuous'),
       static::STATE_CONTINUOUS_INACTIVE => t('Continuous Inactive'),
     );
+  }
+
+  /**
+   *
+   */
+  public function checkoutExistingItems($check_target_language) {
+    $items = $this->getItems();
+    $latest_items_of_chosen_source = array();
+    $existing_items_ids = array();
+    if ($check_target_language == FALSE || $check_target_language != $this->getTargetLangcode()) {
+      foreach ($items as $item) {
+        $latest_items_of_chosen_source[$item->id()] = tmgmt_job_item_load_latest($item->getPlugin(), $item->getItemType(), $item->getItemId(), $this->getSourceLangcode());
+      }
+      foreach ($latest_items_of_chosen_source as $key => $item) {
+        if ($item && array_key_exists($this->getTargetLangcode(), $item)) {
+          $existing_items_ids[] = $key;
+        }
+      }
+    }
+    else {
+      foreach ($items as $item) {
+        $latest_items_of_chosen_source[$item->id()] = tmgmt_job_item_load_penultimate($item->getPlugin(), $item->getItemType(), $item->getItemId(), $this->getSourceLangcode(), $this->getTargetLangcode());
+      }
+      foreach ($latest_items_of_chosen_source as $key => $item) {
+        if ($item && array_key_exists($this->getTargetLangcode(), $item)) {
+          $existing_items_ids[] = $key;
+        }
+      }
+    }
+    return $existing_items_ids;
   }
 
 }
