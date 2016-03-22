@@ -153,7 +153,7 @@ class TMGMTUiTest extends EntityTestBase {
     $this->assertTrue($job->isActive());
 
     // Another job.
-    $job = tmgmt_job_match_item('en', 'es');
+    $job = tmgmt_job_match_item('en', 'de');
     $job->addItem('test_source', 'test', 1);
 
     // Go to checkout form.
@@ -348,7 +348,7 @@ class TMGMTUiTest extends EntityTestBase {
     $start_rows = $this->xpath('//tbody/tr');
     $this->assertEqual(count($start_rows), 5);
     $this->drupalGet($job4->urlInfo('delete-form'));
-    $this->assertText('Are you sure you want to delete the translation job test_source:test:1 and 2 more?');
+    $this->assertText('Are you sure you want to delete the translation job From English to Spanish?');
     $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->drupalGet('admin/tmgmt/jobs', array('query' => array(
       'state' => 'All',

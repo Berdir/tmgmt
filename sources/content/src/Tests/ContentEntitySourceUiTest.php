@@ -189,6 +189,15 @@ class ContentEntitySourceUiTest extends EntityTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Request translation'));
     $this->drupalPostForm(NULL, array(), t('Submit to provider'));
+    $edit = array(
+      'languages[fr]' => TRUE,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Request translation'));
+    $edit = array(
+      'target_language' => 'de',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Submit to provider'));
+    $this->assertText(t('1 conflicting item has been dropped.'));
     $this->clickLink(t('Needs review'));
 
     // Delete the node and assert that the job can not be accepted.

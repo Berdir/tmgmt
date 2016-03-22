@@ -177,6 +177,50 @@ function tmgmt_job_item_load_latest($plugin, $item_type, $item_id, $source_langu
 }
 
 /**
+  * Loads penultimate active job entities that have a job item with the identifiers.
+  *
+  * @param $plugin
+  *   The source plugin.
+  * @param $item_type
+  *   The source item type.
+  * @param $item_id
+  *   The source item id.
+  * @param string $source_language
+  *   The source language of the item.
+  * @param string $target_language
+  *   The target language of the item.
+  *
+  * @return array
+  *   An array of job entities.
+  */
+function tmgmt_job_item_load_penultimate($plugin, $item_type, $item_id, $source_language, $target_language) {
+  $query = db_select('tmgmt_job_item', 'tji');
+  $query->innerJoin('tmgmt_job', 'tj', 'tj.tjid = tji.tjid');
+  $result = $query->condition('tj.source_language', $source_language)
+    ->condition('tj.target_language', $target_language)
+    // Only query for jobs that are currently active.
+    ->condition('tj.state', [Job::STATE_UNPROCESSED, Job::STATE_ACTIVE, Job::STATE_CONTINUOUS], 'IN')
+    // And only query for job items that are not yet finished.
+    ->condition('tji.state', JobItem::STATE_ACCEPTED, '<>')
+    ->condition('tji.plugin', $plugin)
+    ->condition('tji.item_type', $item_type)
+    ->condition('tji.item_id', $item_id)
+    ->fields('tji', array('tjiid'))
+    ->fields('tj', array('target_language'))
+    ->orderBy('tji.changed', 'DESC')
+    ->range(1, 1)
+    ->execute();
+  if ($items = $result->fetchAllKeyed()) {
+    $job_items = array();
+    foreach (JobItem::loadMultiple(array_keys($items)) as $key => $item) {
+      $job_items[$items[$key]] = $item;
+    }
+    return $job_items;
+  }
+  return FALSE;
+}
+
+/**
  * Loads all latest job entities that have a job item with the identifiers.
  *
  * @param $plugin
