@@ -590,15 +590,15 @@ class JobItem extends ContentEntityBase implements JobItemInterface {
    *   (Optional) The data item status that will be set. Defaults to NULL,
    *   which means that it will be set to translated unless it was previously
    *   set to preliminary, then it will keep that state.
-   *   Explicitly pass TMGMT_DATA_ITEM_STATE_TRANSLATED or
-   *   TMGMT_DATA_ITEM_STATE_PRELIMINARY to set it to that value.
-   *   Other statuses are not supported.
+   *   Explicitly pass TMGMT_DATA_ITEM_STATE_TRANSLATED,
+   *   TMGMT_DATA_ITEM_STATE_PRELIMINARY or TMGMT_DATA_ITEM_STATE_REVIEWED to
+   *   set it to that value. Other statuses are not supported.
    *
    * @throws \Drupal\tmgmt\TMGMTException
    *   If is given an unsupported status.
    */
   protected function addTranslatedDataRecursive(array $translation, $key = array(), $status = NULL) {
-    if ($status != NULL && $status != TMGMT_DATA_ITEM_STATE_PRELIMINARY && $status != TMGMT_DATA_ITEM_STATE_TRANSLATED) {
+    if ($status != NULL && !in_array($status, [TMGMT_DATA_ITEM_STATE_PRELIMINARY, TMGMT_DATA_ITEM_STATE_TRANSLATED, TMGMT_DATA_ITEM_STATE_REVIEWED])) {
       new TMGMTException('Unsupported status given.');
     }
     if (isset($translation['#text'])) {

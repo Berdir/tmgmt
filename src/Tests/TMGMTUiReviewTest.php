@@ -110,6 +110,18 @@ class TMGMTUiReviewTest extends EntityTestBase {
     $rows2 = $this->xpath('//textarea[@name="dummy|deep_nesting[translation]"]');
     $this->assertEqual((string) $rows2[0]['rows'], 3);
 
+    // Test data item status when content changes.
+    $this->drupalPostForm(NULL, array(), t('Save'));
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $this->assertRaw('icons/gray-check.svg" alt="Reviewed"');
+    $edit = [
+      'dummy|deep_nesting[translation]' => 'New text for job item',
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalGet('admin/tmgmt/items/' . $item->id());
+    $this->assertRaw('icons/gray-check.svg" alt="Reviewed"');
+    $this->assertFieldByName('dummy|deep_nesting[translation]', 'New text for job item');
+
     // Test for the dynamical height of the source textarea.
     \Drupal::state()->set('tmgmt.test_source_data', array(
       'dummy' => array(
@@ -394,7 +406,7 @@ class TMGMTUiReviewTest extends EntityTestBase {
 
     // Test that progress bar is being displayed.
     $this->assertRaw('class="tmgmt-progress-pending" style="width: 50%"');
-    $this->assertRaw('class="tmgmt-progress-translated" style="width: 100%"');
+    $this->assertRaw('class="tmgmt-progress-reviewed" style="width: 100%"');
   }
 
   /**

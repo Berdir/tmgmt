@@ -326,7 +326,10 @@ class JobItemForm extends TmgmtFormBase {
           continue;
         }
 
-        $item->addTranslatedData($data, $key);
+        $data_service = \Drupal::service('tmgmt.data');
+        $current_data_status = $item->getData($data_service->ensureArrayKey($key))['#status'];
+
+        $item->addTranslatedData($data, $key, $current_data_status);
       }
     }
     // Check if the user clicked on 'Accept', 'Submit' or 'Reject'.
@@ -473,7 +476,6 @@ class JobItemForm extends TmgmtFormBase {
                 'wrapper' => $form['#ajaxid'],
               ),
             );
-            $form[$target_key]['actions']['unreviewed']['#attributes'] = array('class' => array('reviewed-below'));
             $form[$target_key]['actions']['reviewed']['#attributes'] = array('class' => array('reviewed-below'));
           }
         }
